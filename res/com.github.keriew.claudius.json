@@ -1,9 +1,9 @@
 {
-    "id" : "com.github.keriew.augustus",
+    "id" : "com.github.keriew.claudius",
     "runtime" : "org.freedesktop.Platform",
     "runtime-version" : "23.08",
     "sdk" : "org.freedesktop.Sdk",
-    "command" : "augustus",
+    "command" : "claudius",
     "finish-args" : [
         "--share=ipc",
         "--device=dri",
@@ -13,7 +13,7 @@
     ],
     "modules" : [
         {
-            "name" : "augustus",
+            "name" : "claudius",
             "buildsystem" : "cmake-ninja",
             "sources" : [
                 {

@@ -1,2 +1,2 @@
-include ':augustus'
+include ':claudius'
 include ':SDL2'

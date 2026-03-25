@@ -103,7 +103,7 @@ elif [ "$BUILD_TARGET" == "flatpak" ]
 then
   sudo apt-get update && sudo apt-get -y install flatpak-builder
   sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  sudo flatpak-builder repo res/com.github.keriew.augustus.json --install-deps-from=flathub --install-deps-only --delete-build-dirs
+  sudo flatpak-builder repo res/com.github.keriew.claudius.json --install-deps-from=flathub --install-deps-only --delete-build-dirs
   sudo rm -R .flatpak-builder
 elif [ ! -z "$SDL_VERSION" ] && [ ! -z "$SDL_MIXER_VERSION" ]
 then
@@ -113,7 +113,7 @@ then
     install_sdl_macos "SDL2_mixer" $SDL_MIXER_VERSION
   elif [ "$BUILD_TARGET" == "android" ]
   then
-  	if [ ! -f "android/augustus.keystore" ]
+  	if [ ! -f "android/claudius.keystore" ]
     then
       BUILDTYPE=debug
     else
@@ -124,8 +124,8 @@ then
       install_sdl_android "SDL2" $SDL_VERSION
       install_sdl_android "SDL2_mixer" $SDL_MIXER_VERSION
     else
-      mkdir android/augustus/libs
-      cp deps/SDL2-$BUILDTYPE.aar android/augustus/libs/SDL2-$BUILDTYPE.aar
+      mkdir android/claudius/libs
+      cp deps/SDL2-$BUILDTYPE.aar android/claudius/libs/SDL2-$BUILDTYPE.aar
     fi
   elif [ "$BUILD_TARGET" == "ios" ]
   then

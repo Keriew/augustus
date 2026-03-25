@@ -10,6 +10,6 @@ chmod +x linuxdeploy*.AppImage
 
 ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
 
-mv Augustus*.AppImage augustus.AppImage
+mv Claudius*.AppImage claudius.AppImage
 
 cd ..

@@ -1,4 +1,4 @@
-package com.github.Keriew.augustus;
+package com.github.Keriew.claudius;
 
 import android.content.Context;
 import android.content.Intent;

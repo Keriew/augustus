@@ -15,7 +15,7 @@
 #define HOTKEY_CONFIG_ZOOM 1
 #define HOTKEY_CURRENT_VERSION HOTKEY_CONFIG_ZOOM
 
-static const char *INI_FILENAME = "augustus-hotkeys.ini";
+static const char *INI_FILENAME = "claudius-hotkeys.ini";
 
 // Keep this in the same order as the actions in hotkey_config.h
 static const char *ini_keys[] = {

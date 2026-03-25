@@ -1003,7 +1003,7 @@ static int load_multibyte_font(multibyte_font_type type)
         if (!data_size) {
             free_font_memory();
             free(tmp_data);
-            log_error("Augustus requires extra files for the characters:", font_info->file_v2, 0);
+            log_error("Claudius requires extra files for the characters:", font_info->file_v2, 0);
             return 0;
         }
     }

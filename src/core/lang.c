@@ -152,7 +152,7 @@ static void set_message_parameters(lang_message *m, int title, int text, int urg
 }
 
 
-void load_augustus_messages(void)
+void load_claudius_messages(void)
 {
     int i = 321;
     while (i < MAX_MESSAGE_ENTRIES) {
@@ -373,7 +373,7 @@ const uint8_t *lang_get_string(int group, int index)
     if (group == CUSTOM_TRANSLATION) {
         return translation_for(index);
     }
-    //Augustus overrrides of original strings
+    //Claudius overrrides of original strings
     if (group == 92 && !index) {
         return translation_for(TR_BUILDING_SMALL_TEMPLE_CERES_NAME);
     }

@@ -24,11 +24,11 @@ static translation_string all_strings[] = {
         "Bitte überprüfe das Protokoll auf Fehler."},
     /* System - Spielstand */
     {TR_SAVEGAME_LARGER_VERSION_TITLE, "Inkompatible Speicherstand-Version"},
-    {TR_SAVEGAME_LARGER_VERSION_MESSAGE, "Der Speicherstand, den Sie zu laden versuchen, ist für eine neuere Version von Augustus.\n Bitte aktualisieren Sie Augustus auf die neueste Version."},
+    {TR_SAVEGAME_LARGER_VERSION_MESSAGE, "Der Speicherstand, den Sie zu laden versuchen, ist für eine neuere Version von Claudius.\n Bitte aktualisieren Sie Claudius auf die neueste Version."},
     {TR_SAVEGAME_NOT_ABLE_TO_SAVE_TITLE, "Spiel kann nicht gespeichert werden"},
     {TR_SAVEGAME_NOT_ABLE_TO_SAVE_MESSAGE, "Es war nicht möglich, das Spiel zu speichern.\n"
         "Es könnte daran liegen, dass der Ordner, in dem Caesar 3 die Spielstände speichert, Administratorrechte erfordert.\n"
-        "Bitte verschieben Sie entweder den Caesar-3-Ordner an einen Ort, der keinen Administrator-Zugang erfordert, oder führen Sie Augustus als Administrator aus (nicht empfohlen)."},
+        "Bitte verschieben Sie entweder den Caesar-3-Ordner an einen Ort, der keinen Administrator-Zugang erfordert, oder führen Sie Claudius als Administrator aus (nicht empfohlen)."},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE, "Datei nicht vorhanden."},
     {TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, "Die ausgewählte Datei ist nicht vorhanden.\nBitte wählen Sie eine andere Datei aus."},
     {TR_SAVE_DIALOG_INVALID_FILE, "Ungültige Datei"},
@@ -168,7 +168,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SIDEBAR_INFO, "Zusätzliche Informationen am rechten Bildschirmrand anzeigen"},
     {TR_CONFIG_SMOOTH_SCROLLING, "Sanftes Scrollen aktivieren"},
     {TR_CONFIG_SPEECH, "Sprache einschalten"},
-    {TR_CONFIG_TITLE, "Augustus Einstellungen"},
+    {TR_CONFIG_TITLE, "Claudius Einstellungen"},
     {TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, "Wachtürme brauchen keine Straßenverbindung zu einer Kaserne"},
     {TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, "Rotationsschaltflächen immer anzeigen"},
     {TR_CONFIG_UI_INVERSE_MAP_DRAG, "Invertiertes Ziehen der Karte mit der rechten Maustaste"},
@@ -317,7 +317,7 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SHOW_OVERLAY_TAX_INCOME, "Steuernkarte"},
     {TR_HOTKEY_SHOW_OVERLAY_WATER, "Wasserkarte"},
     {TR_HOTKEY_SPECIAL_ORDERS, "Öffne Besondere Befehle" },
-    {TR_HOTKEY_TITLE, "Augustus Schnelltasten"},
+    {TR_HOTKEY_TITLE, "Claudius Schnelltasten"},
     {TR_HOTKEY_TOGGLE_FULLSCREEN, "Vollbild ein-/ausschalten"},
     {TR_HOTKEY_TOGGLE_OVERLAY, "Akt. Spezialkarte umschalten"},
     {TR_HOTKEY_TOGGLE_PAUSE, "Spiel pausieren"},
@@ -386,7 +386,7 @@ static translation_string all_strings[] = {
     /* Asset-Warnung */
 	{TR_NO_EXTRA_ASSETS_TITLE, " Extra Assets wurden nicht geladen"},
     {TR_NO_EXTRA_ASSETS_MESSAGE,
-        "Extra Augustus Assets wurden nicht geladen.\n"
+        "Extra Claudius Assets wurden nicht geladen.\n"
         "Das kann durch ein fehlendes oder veraltetes Assetverzeichnis passieren.\n"
         "Bitte stellen Sie sicher, dass die das aktuellste Assetverzeichnis haben, welches durch Github bereitgestellt wird."},
 	/* Stadt-Nachrichten */
@@ -1247,9 +1247,9 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ORIGINAL_CAMPAIGN_NAME, "Original-Kampagne" },
     {TR_WINDOW_ORIGINAL_CAMPAIGN_DESC, "Die ursprüngliche Kampagne in ihrer ganzen 25 Jahre alten Pracht."},
     {TR_WINDOW_INVALID_CAMPAIGN_TITLE, "Ungültige Kampagnendatei" },
-    {TR_WINDOW_INVALID_CAMPAIGN_TEXT, "Die bereitgestellte Kampagnendatei ist ungültig.\nBitte prüfen Sie augustus-log.txt in Ihrem Augustus-Verzeichnis für Details."},
+    {TR_WINDOW_INVALID_CAMPAIGN_TEXT, "Die bereitgestellte Kampagnendatei ist ungültig.\nBitte prüfen Sie claudius-log.txt in Ihrem Claudius-Verzeichnis für Details."},
     {TR_WINDOW_CAMPAIGN_MISSION_FAILED_TO_LOAD_TITLE, "Mission kann nicht geöffnet werden"},
-    {TR_WINDOW_CAMPAIGN_MISSION_FAILED_TO_LOAD_TEXT, "Die angeforderte Mission konnte nicht geöffnet werden.\nBitte prüfen Sie augustus-log.txt in Ihrem Augustus-Verzeichnis für Details."},
+    {TR_WINDOW_CAMPAIGN_MISSION_FAILED_TO_LOAD_TEXT, "Die angeforderte Mission konnte nicht geöffnet werden.\nBitte prüfen Sie claudius-log.txt in Ihrem Claudius-Verzeichnis für Details."},
     {TR_WINDOW_CAMPAIGN_BUTTON_BEGIN_CAMPAIGN, "Kampagne starten"},
     {TR_WINDOW_CAMPAIGN_BUTTON_MISSION_LIST, "Aufgaben-Auswahl"},
     {TR_WINDOW_CAMPAIGN_CURRENT_MISSION, "Aktuelle Aufgabe:"},
@@ -1322,7 +1322,7 @@ static translation_string all_strings[] = {
 	/* Missions-Editor - Editor*/
     {TR_EDITOR_ALLOWED_BUILDINGS_MONUMENTS, "Monumente"},
     {TR_EDITOR_CAESAR_SALARY, "Cäsars Lohn"},
-    {TR_EDITOR_CHECK_LOG_MESSAGE, "Bitte prüfen Sie die Datei augustus-log.txt in Ihrem Augustus-Verzeichnis für Details."},
+    {TR_EDITOR_CHECK_LOG_MESSAGE, "Bitte prüfen Sie die Datei claudius-log.txt in Ihrem Claudius-Verzeichnis für Details."},
     {TR_EDITOR_CHOOSE_CUSTOM_EMPIRE, "Benutzerdefiniertes Imperium wählen"},
     {TR_EDITOR_EMPIRE_TOOL, "Aktuelles Werkzeug: " },
     {TR_EDITOR_CURRENT_COORDS, "Aktuelle Koordinaten: " },
@@ -1395,7 +1395,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SHORT_ROUTE_TEXT, "rt"},
     {TR_EDITOR_TOGGLE_INVASIONS, "Invasionen anzeigen" },
     {TR_EDITOR_UNABLE_TO_LOAD_CUSTOM_MESSAGES_TITLE, "Unfähig benutzerdefinierte Nachrichten zu laden"},
-    {TR_EDITOR_UNABLE_TO_LOAD_EMPIRE_MESSAGE, "Bitte kontrolliere augustus-log.txt in deinem Augustus Verzeichnis für Details."},
+    {TR_EDITOR_UNABLE_TO_LOAD_EMPIRE_MESSAGE, "Bitte kontrolliere claudius-log.txt in deinem Claudius Verzeichnis für Details."},
     {TR_EDITOR_UNABLE_TO_LOAD_EMPIRE_TITLE, "Benutzerdefiniertes Imperium kann nicht geladen werden"},
     {TR_EDITOR_UNABLE_TO_LOAD_EVENTS_TITLE, "Szenario-Ereignisse können nicht geladen werden."},
     {TR_EDITOR_UNABLE_TO_SAVE_EVENTS_TITLE, "Szenario-Ereignisse können nicht gespeichert werden."},

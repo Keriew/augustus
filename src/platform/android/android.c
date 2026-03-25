@@ -34,7 +34,7 @@ static const char *get_c3_path(void)
 const char *android_show_c3_path_dialog(int again)
 {
     jni_function_handler handler;
-    if (jni_get_method_handler(CLASS_AUGUSTUS_ACTIVITY, "showDirectorySelection", "(Z)V", &handler)) {
+    if (jni_get_method_handler(CLASS_CLAUDIUS_ACTIVITY, "showDirectorySelection", "(Z)V", &handler)) {
         (*handler.env)->CallVoidMethod(handler.env, handler.activity, handler.method,
             again ? JNI_TRUE : JNI_FALSE);
     }
@@ -53,7 +53,7 @@ float android_get_screen_density(void)
 {
     jni_function_handler handler;
     float result = 1.0f;
-    if (jni_get_method_handler(CLASS_AUGUSTUS_ACTIVITY, "getScreenDensity", "()F", &handler)) {
+    if (jni_get_method_handler(CLASS_CLAUDIUS_ACTIVITY, "getScreenDensity", "()F", &handler)) {
         result = (float) (*handler.env)->CallFloatMethod(handler.env, handler.activity, handler.method);
     }
     jni_destroy_function_handler(&handler);
@@ -65,7 +65,7 @@ int android_get_file_descriptor(const char *filename, const char *mode)
     int result = 0;
     jni_function_handler handler;
     if (!jni_get_static_method_handler(CLASS_FILE_MANAGER, "openFileDescriptor",
-        "(L" CLASS_AUGUSTUS_ACTIVITY ";Ljava/lang/String;Ljava/lang/String;)I", &handler)) {
+        "(L" CLASS_CLAUDIUS_ACTIVITY ";Ljava/lang/String;Ljava/lang/String;)I", &handler)) {
         jni_destroy_function_handler(&handler);
         return 0;
     }
@@ -111,7 +111,7 @@ int android_get_directory_contents(const char *dir, int type, const char *extens
     jni_function_handler get_last_modified_time;
 
     if (!jni_get_static_method_handler(CLASS_FILE_MANAGER, "getDirectoryFileList",
-        "(L" CLASS_AUGUSTUS_ACTIVITY ";Ljava/lang/String;ILjava/lang/String;)[L" CLASS_FILE_MANAGER "$FileInfo;",
+        "(L" CLASS_CLAUDIUS_ACTIVITY ";Ljava/lang/String;ILjava/lang/String;)[L" CLASS_FILE_MANAGER "$FileInfo;",
         &handler)) {
         jni_destroy_function_handler(&handler);
         return LIST_ERROR;
@@ -162,7 +162,7 @@ int android_create_directory(const char *name)
     int result = 0;
     jni_function_handler handler;
     if (!jni_get_static_method_handler(CLASS_FILE_MANAGER, "createFolder",
-        "(L" CLASS_AUGUSTUS_ACTIVITY ";Ljava/lang/String;)I", &handler)) {
+        "(L" CLASS_CLAUDIUS_ACTIVITY ";Ljava/lang/String;)I", &handler)) {
         jni_destroy_function_handler(&handler);
         return 0;
     }
@@ -180,7 +180,7 @@ int android_remove_file(const char *filename)
     int result = 0;
     jni_function_handler handler;
     if (!jni_get_static_method_handler(CLASS_FILE_MANAGER, "deleteFile",
-        "(L" CLASS_AUGUSTUS_ACTIVITY ";Ljava/lang/String;)Z", &handler)) {
+        "(L" CLASS_CLAUDIUS_ACTIVITY ";Ljava/lang/String;)Z", &handler)) {
         jni_destroy_function_handler(&handler);
         return 0;
     }
@@ -193,7 +193,7 @@ int android_remove_file(const char *filename)
     return result;
 }
 
-JNIEXPORT void JNICALL Java_com_github_Keriew_augustus_AugustusMainActivity_gotDirectory(JNIEnv *env, jobject thiz)
+JNIEXPORT void JNICALL Java_com_github_Keriew_claudius_ClaudiusMainActivity_gotDirectory(JNIEnv *env, jobject thiz)
 {
     has_directory = 1;
 }

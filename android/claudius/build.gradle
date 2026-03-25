@@ -70,7 +70,7 @@ android {
 
     defaultConfig {
         compileSdk 35
-        applicationId "com.github.Keriew.augustus"
+        applicationId "com.github.Keriew.claudius"
         minSdkVersion 21
         targetSdkVersion 35
 
@@ -104,9 +104,9 @@ android {
         release {
             def isCI = System.getenv("CI") == "true"
             if (isCI) {
-                storeFile file("../augustus.keystore")
+                storeFile file("../claudius.keystore")
                 storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                keyAlias "augustus"
+                keyAlias "claudius"
                 keyPassword System.getenv("ANDROID_KEYSTORE_KEY_PASSWORD")
             }
         }
@@ -140,7 +140,7 @@ android {
             path "../../CMakeLists.txt"
         }
     }
-    namespace 'com.github.Keriew.augustus'
+    namespace 'com.github.Keriew.claudius'
 }
 
 /** play {

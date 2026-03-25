@@ -189,10 +189,10 @@ static const char *ASSET_DIRS[MAX_ASSET_DIRS] = {
     "***RELATIVE_APPIMG_PATH***",
     "***EXEC_PATH***",
     "***RELATIVE_EXEC_PATH***",
-    "~/.local/share/augustus-game",
-    "/usr/share/augustus-game",
-    "/usr/local/share/augustus-game",
-    "/opt/augustus-game",
+    "~/.local/share/claudius-game",
+    "/usr/share/claudius-game",
+    "/usr/local/share/claudius-game",
+    "/opt/claudius-game",
 #endif
     CUSTOM_ASSETS_DIR
 };
@@ -287,7 +287,7 @@ static void set_assets_directory(void)
             if (!parent) {
                 continue;
             }
-            snprintf(parent, FILE_NAME_MAX - (parent - assets_directory), "/share/augustus-game");
+            snprintf(parent, FILE_NAME_MAX - (parent - assets_directory), "/share/claudius-game");
 #endif
         } else if (strcmp(ASSET_DIRS[i], "***EXEC_PATH***") == 0) {
 #if defined(_WIN32) || defined(__vita__) || defined(__SWITCH__) || defined(__APPLE__)
@@ -319,7 +319,7 @@ static void set_assets_directory(void)
                 }
             }
             dirname(arg0_dir);
-            if (snprintf(assets_directory, FILE_NAME_MAX, "%s/../share/augustus-game", arg0_dir) > FILE_NAME_MAX) {
+            if (snprintf(assets_directory, FILE_NAME_MAX, "%s/../share/claudius-game", arg0_dir) > FILE_NAME_MAX) {
                 log_error("Path too long", arg0_dir, 0);
                 continue;
             }
@@ -501,7 +501,7 @@ int platform_file_manager_compare_filename_prefix(const char *filename, const ch
 int platform_file_manager_set_base_path(const char *path)
 {
     if (!path) {
-        log_error("set_base_path: path was not set. Augustus will probably crash.", 0, 0);
+        log_error("set_base_path: path was not set. Claudius will probably crash.", 0, 0);
         return 0;
     }
 #ifdef __ANDROID__

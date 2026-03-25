@@ -59,7 +59,7 @@ static int parse_decimal_as_percentage(const char *str)
     return percentage;
 }
 
-int platform_parse_arguments(int argc, char **argv, augustus_args *output_args)
+int platform_parse_arguments(int argc, char **argv, claudius_args *output_args)
 {
     int ok = 1;
     int add_blank_line = 1;

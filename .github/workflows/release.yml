@@ -1,0 +1,435 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  SDL_VERSION: 2.32.8
+  SDL_MIXER_VERSION: 2.8.1
+
+jobs:
+  # ──────────────────────────────────────────────────────────────
+  # Stage 1: Build all platforms in parallel
+  # ──────────────────────────────────────────────────────────────
+  build-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64
+            BUILD_TARGET: linux
+            DEPLOY: linux
+            artifact: linux-x64
+            os: ubuntu-24.04
+          - name: Linux Flatpak
+            BUILD_TARGET: flatpak
+            DEPLOY: flatpak
+            artifact: linux-flatpak
+            os: ubuntu-22.04
+          - name: Linux AppImage
+            BUILD_TARGET: appimage
+            DEPLOY: appimage
+            artifact: linux-appimage
+            os: ubuntu-22.04
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    env:
+      BUILD_TARGET: ${{ matrix.BUILD_TARGET }}
+      DEPLOY: ${{ matrix.DEPLOY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: release-${{ matrix.artifact }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+
+      - name: Set up environment
+        env:
+          FILE_ENCRYPTION_IV: ${{ secrets.FILE_ENCRYPTION_IV }}
+          FILE_ENCRYPTION_KEY: ${{ secrets.FILE_ENCRYPTION_KEY }}
+        run: |
+          ./.ci_scripts/setup_environment.sh
+          ./.ci_scripts/install_dependencies.sh
+
+      - name: Build
+        run: |
+          ./.ci_scripts/pack_assets.sh
+          ./.ci_scripts/run_cmake.sh
+          ./.ci_scripts/run_build.sh
+
+      - name: Package artifacts
+        run: ./.ci_scripts/build_upload.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.artifact }}
+          path: deploy/
+          retention-days: 5
+
+  build-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            BUILD_TARGET: mac
+            DEPLOY: mac
+            artifact: macos
+    name: ${{ matrix.name }}
+    runs-on: macos-latest
+    env:
+      BUILD_TARGET: ${{ matrix.BUILD_TARGET }}
+      DEPLOY: ${{ matrix.DEPLOY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: release-macos-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+
+      - name: Set up environment
+        env:
+          FILE_ENCRYPTION_IV: ${{ secrets.FILE_ENCRYPTION_IV }}
+          FILE_ENCRYPTION_KEY: ${{ secrets.FILE_ENCRYPTION_KEY }}
+        run: |
+          ./.ci_scripts/setup_environment.sh
+          ./.ci_scripts/install_dependencies.sh
+
+      - name: Build
+        run: |
+          ./.ci_scripts/pack_assets.sh
+          ./.ci_scripts/run_cmake.sh
+          ./.ci_scripts/run_build.sh
+
+      - name: Package artifacts
+        run: ./.ci_scripts/build_upload.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.artifact }}
+          path: deploy/
+          retention-days: 5
+
+  build-windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows MinGW x86
+            COMPILER: mingw-32
+            artifact: windows-x86
+          - name: Windows MinGW x64
+            COMPILER: mingw-64
+            artifact: windows-x64
+          - name: Windows MSVC x64
+            COMPILER: msvc
+            artifact: windows-msvc-x64
+          - name: Windows MSVC ARM64
+            COMPILER: msvc-arm64
+            artifact: windows-arm64
+    name: ${{ matrix.name }}
+    runs-on: windows-latest
+    env:
+      COMPILER: ${{ matrix.COMPILER }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: release-${{ matrix.artifact }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
+
+      - name: Set up MSYS2
+        if: matrix.COMPILER == 'mingw-32'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw32
+          location: D:\
+          install: mingw-w64-i686-gcc
+          update: true
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+
+      - name: Install cv2pdb
+        if: matrix.COMPILER == 'mingw-32' || matrix.COMPILER == 'mingw-64'
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "rainers/cv2pdb"
+          tag: "v0.53"
+          fileName: "cv2pdb-0.53.zip"
+          out-file-path: "build"
+          extract: true
+
+      - name: Set up environment
+        run: ./.ci_scripts/install_sdl.ps1
+
+      - name: Setup MSVC for ARM64
+        if: matrix.COMPILER == 'msvc-arm64'
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+        with:
+          arch: amd64_arm64
+
+      - name: Build
+        run: ./.ci_scripts/run_build.ps1
+
+      - name: Package artifacts
+        run: ./.ci_scripts/build_upload.ps1
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.artifact }}
+          path: deploy\
+          retention-days: 5
+
+  build-console:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Nintendo Switch
+            BUILD_TARGET: switch
+            DEPLOY: switch
+            artifact: switch
+            os: ubuntu-24.04
+          - name: PS Vita
+            BUILD_TARGET: vita
+            DEPLOY: vita
+            artifact: vita
+            os: ubuntu-22.04
+          - name: Android
+            BUILD_TARGET: android
+            DEPLOY: android
+            artifact: android
+            os: ubuntu-24.04
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    env:
+      BUILD_TARGET: ${{ matrix.BUILD_TARGET }}
+      DEPLOY: ${{ matrix.DEPLOY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        if: matrix.BUILD_TARGET == 'android'
+        with:
+          path: deps
+          key: release-${{ matrix.artifact }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
+
+      - name: Setup JDK 17
+        if: matrix.BUILD_TARGET == 'android'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+
+      - name: Set up environment
+        env:
+          FILE_ENCRYPTION_IV: ${{ secrets.FILE_ENCRYPTION_IV }}
+          FILE_ENCRYPTION_KEY: ${{ secrets.FILE_ENCRYPTION_KEY }}
+        run: |
+          ./.ci_scripts/setup_environment.sh
+          ./.ci_scripts/install_dependencies.sh
+
+      - name: Build
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEYSTORE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_KEY_PASSWORD }}
+        run: |
+          ./.ci_scripts/pack_assets.sh
+          ./.ci_scripts/run_cmake.sh
+          ./.ci_scripts/run_build.sh
+
+      - name: Package artifacts
+        run: ./.ci_scripts/build_upload.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.artifact }}
+          path: deploy/
+          retention-days: 5
+
+  # ──────────────────────────────────────────────────────────────
+  # Stage 2: Collect all artifacts and create the GitHub Release
+  # ──────────────────────────────────────────────────────────────
+  create-release:
+    name: Create Release
+    needs: [build-linux, build-macos, build-windows, build-console]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # Determine if this is a pre-release (contains - like v1.0.0-rc1)
+          if [[ "$VERSION" == *"-"* ]] || [ "${{ inputs.prerelease }}" = "true" ]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          pattern: release-*
+
+      - name: Collect release files
+        run: |
+          mkdir -p release-files
+          # Flatten all artifacts into a single directory
+          find artifacts/ -type f \( \
+            -name "*.zip" -o -name "*.dmg" -o -name "*.AppImage" \
+            -o -name "*.flatpak" -o -name "*.nro" -o -name "*.vpk" \
+            -o -name "*.apk" -o -name "*.html" -o -name "*.exe" \
+          \) -exec cp {} release-files/ \;
+
+          echo "=== Release files ==="
+          ls -lh release-files/
+
+      - name: Generate checksums
+        run: |
+          cd release-files
+          sha256sum * > SHA256SUMS.txt
+          echo "=== SHA256 Checksums ==="
+          cat SHA256SUMS.txt
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          CURRENT_TAG="${{ steps.version.outputs.tag }}"
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | head -2 | tail -1)
+
+          if [ -z "$PREVIOUS_TAG" ] || [ "$PREVIOUS_TAG" = "$CURRENT_TAG" ]; then
+            # First release or single tag — use full log
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
+            RANGE="$PREVIOUS_TAG..HEAD"
+          else
+            RANGE="$PREVIOUS_TAG..$CURRENT_TAG"
+          fi
+
+          echo "Generating changelog for range: $RANGE"
+
+          {
+            echo "## What's Changed"
+            echo ""
+
+            # Group commits by conventional-commit prefix
+            for prefix in feat fix perf refactor docs test chore build ci; do
+              COMMITS=$(git log "$RANGE" --pretty=format:"- %s (%h)" --grep="^${prefix}" 2>/dev/null || true)
+              if [ -n "$COMMITS" ]; then
+                case $prefix in
+                  feat)     LABEL="Features" ;;
+                  fix)      LABEL="Bug Fixes" ;;
+                  perf)     LABEL="Performance" ;;
+                  refactor) LABEL="Refactoring" ;;
+                  docs)     LABEL="Documentation" ;;
+                  test)     LABEL="Tests" ;;
+                  chore)    LABEL="Chores" ;;
+                  build)    LABEL="Build System" ;;
+                  ci)       LABEL="CI/CD" ;;
+                esac
+                echo "### $LABEL"
+                echo "$COMMITS"
+                echo ""
+              fi
+            done
+
+            # Uncategorized commits
+            UNCATEGORIZED=$(git log "$RANGE" --pretty=format:"- %s (%h)" \
+              --invert-grep \
+              --grep="^feat" --grep="^fix" --grep="^perf" --grep="^refactor" \
+              --grep="^docs" --grep="^test" --grep="^chore" --grep="^build" --grep="^ci" \
+              2>/dev/null || true)
+            if [ -n "$UNCATEGORIZED" ]; then
+              echo "### Other Changes"
+              echo "$UNCATEGORIZED"
+              echo ""
+            fi
+
+            echo "---"
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${CURRENT_TAG}"
+          } > /tmp/changelog.md
+
+          cat /tmp/changelog.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Claudius ${{ steps.version.outputs.version }}
+          body_path: /tmp/changelog.md
+          draft: false
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          files: |
+            release-files/*
+          fail_on_unmatched_files: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

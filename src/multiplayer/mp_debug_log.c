@@ -66,14 +66,14 @@ void mp_debug_log_init(void)
 #ifdef _WIN32
     SYSTEMTIME st;
     GetLocalTime(&st);
-    fprintf(log_file, "=== Augustus Multiplayer Debug Log - %04d-%02d-%02d %02d:%02d:%02d ===\n",
+    fprintf(log_file, "=== Claudius Multiplayer Debug Log - %04d-%02d-%02d %02d:%02d:%02d ===\n",
             st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 #else
     time_t now = time(NULL);
     struct tm *tm_info = localtime(&now);
     char time_buf[64];
     strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", tm_info);
-    fprintf(log_file, "=== Augustus Multiplayer Debug Log - %s ===\n", time_buf);
+    fprintf(log_file, "=== Claudius Multiplayer Debug Log - %s ===\n", time_buf);
 #endif
 
     fprintf(log_file, "================================================================\n");

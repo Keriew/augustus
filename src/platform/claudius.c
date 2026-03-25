@@ -74,8 +74,8 @@ static void write_to_output(FILE *output, const char *message)
 }
 
 #ifdef __IPHONEOS__
-static augustus_args args;
-static void setup(const augustus_args *args);
+static claudius_args args;
+static void setup(const claudius_args *args);
 #endif
 
 static void write_log(void *userdata, int category, SDL_LogPriority priority, const char *message)
@@ -102,8 +102,8 @@ static void backup_log(const char *filename, const char *filename_old)
 
 static void setup_logging(void)
 {
-    const char *filename = "augustus-log.txt";
-    const char *backup_filename = "augustus-log-backup.txt";
+    const char *filename = "claudius-log.txt";
+    const char *backup_filename = "claudius-log-backup.txt";
     char log_file[FILE_NAME_MAX];
     char log_file_old[FILE_NAME_MAX];
     char *pref_dir = platform_get_logging_path();
@@ -560,7 +560,7 @@ static int pre_init(const char *custom_data_dir)
             SDL_Log("%s: directory not found", custom_data_dir);
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                 "Error",
-                "Augustus requires the original files from Caesar 3.\n\n"
+                "Claudius requires the original files from Caesar 3.\n\n"
                 "Please enter the proper directory or copy the files to the selected directory.",
                 NULL);
             return 0;
@@ -620,22 +620,22 @@ static int pre_init(const char *custom_data_dir)
     }
 #else
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-        "Augustus requires the original files from Caesar 3 to run.",
-        "Move the Augustus executable to the directory containing an existing "
-        "Caesar 3 installation, or run:\naugustus path-to-c3-directory",
+        "Claudius requires the original files from Caesar 3 to run.",
+        "Move the Claudius executable to the directory containing an existing "
+        "Caesar 3 installation, or run:\nclaudius path-to-c3-directory",
         NULL);
 #endif
 
     return 0;
 }
 
-static void setup(const augustus_args *args)
+static void setup(const claudius_args *args)
 {
     system_setup_crash_handler();
     setup_logging();
 
     if (data.log_file) {
-        SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
+        SDL_Log("Claudius version %s, %s build", system_version(), system_architecture());
         SDL_Log("Running on: %s", system_OS());
     }
 
@@ -660,7 +660,7 @@ static void setup(const augustus_args *args)
     if (!data.log_file) {
         setup_logging();
         // We always want this info
-        SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
+        SDL_Log("Claudius version %s, %s build", system_version(), system_architecture());
         SDL_Log("Running on: %s", system_OS());
     }
 
@@ -716,7 +716,7 @@ static void setup(const augustus_args *args)
 
 int main(int argc, char **argv)
 {
-    augustus_args args;
+    claudius_args args;
     if (!platform_parse_arguments(argc, argv, &args)) {
 #if !defined(_WIN32) && !defined(__vita__) && !defined(__SWITCH__) && !defined(__ANDROID__) && !defined(__APPLE__)
         // Only exit on Linux platforms where we know the system will not throw any weird arguments our way

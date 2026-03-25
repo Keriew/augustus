@@ -1,4 +1,4 @@
-name: Build Augustus
+name: Build Claudius
 on: 
   push:
     paths-ignore:

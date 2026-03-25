@@ -9,7 +9,7 @@
 
 #define MAX_LINE 100
 
-static const char *INI_FILENAME = "augustus.ini";
+static const char *INI_FILENAME = "claudius.ini";
 static int needs_user_directory_setup;
 
 // Keep this in the same order as the config_keys in config.h

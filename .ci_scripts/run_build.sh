@@ -16,21 +16,21 @@ case "$BUILD_TARGET" in
 	make -j4
 	make install
 	echo "Creating disk image"
-	hdiutil create -volname Augustus -srcfolder augustus.app -ov -format UDZO augustus.dmg
+	hdiutil create -volname Claudius -srcfolder claudius.app -ov -format UDZO claudius.dmg
 	if [[ "$GITHUB_REF" =~ ^refs/tags/v ]]
 	then
-		zip -r augustus.zip augustus.dmg maps manual
+		zip -r claudius.zip claudius.dmg maps manual
 	else
-		zip -r augustus.zip augustus.dmg 	
+		zip -r claudius.zip claudius.dmg 	
 	fi
 	;;
 "ios")
 	cd build
-	xcodebuild clean build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -scheme augustus
+	xcodebuild clean build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -scheme claudius
 	;;
 "flatpak")
-	flatpak-builder repo res/com.github.keriew.augustus.json --install-deps-from=flathub --keep-build-dirs
-	cp .flatpak-builder/build/augustus/res/version.txt res/version.txt
+	flatpak-builder repo res/com.github.keriew.claudius.json --install-deps-from=flathub --keep-build-dirs
+	cp .flatpak-builder/build/claudius/res/version.txt res/version.txt
 	;;
 "appimage")
 	cp -r res/maps ./build	
@@ -42,9 +42,9 @@ case "$BUILD_TARGET" in
 	./.ci_scripts/package_appimage.sh
 	if [[ "$GITHUB_REF" =~ ^refs/tags/v ]]	
 	then
-		zip -r augustus.zip . -i augustus.AppImage maps manual
+		zip -r claudius.zip . -i claudius.AppImage maps manual
 	else
-		zip -r augustus.zip . -i augustus.AppImage	
+		zip -r claudius.zip . -i claudius.AppImage	
 	fi
 	;;
 "linux")
@@ -59,14 +59,14 @@ case "$BUILD_TARGET" in
 	cd build && make -j4
 	if [[ "$GITHUB_REF" =~ ^refs/tags/v ]]
 	then
-		zip -r augustus.zip augustus assets maps manual
+		zip -r claudius.zip claudius assets maps manual
 	else
-		zip -r augustus.zip augustus
+		zip -r claudius.zip claudius
 	fi
 	;;
 "android")
 	cd android
-	if [ ! -f augustus.keystore ]
+	if [ ! -f claudius.keystore ]
 	then
 		COMMAND=assembleDebug
 		BUILDTYPE=debug
@@ -76,9 +76,9 @@ case "$BUILD_TARGET" in
 	fi
 	echo "Running ./gradlew $COMMAND"
 	TERM=dumb ./gradlew $COMMAND
-	if [ -f augustus/build/outputs/apk/release/augustus-release.apk ]
+	if [ -f claudius/build/outputs/apk/release/claudius-release.apk ]
 	then
-		cp augustus/build/outputs/apk/release/augustus-release.apk ../build/augustus.apk
+		cp claudius/build/outputs/apk/release/claudius-release.apk ../build/claudius.apk
 	fi
 	cd ..
 	if [ ! -f "deps/SDL2-$BUILDTYPE.aar" ]

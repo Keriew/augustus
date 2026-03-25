@@ -48,7 +48,7 @@
         The next image is a custom asset image.@L
         @G[UI:Happy God Icon]
         The next image is a custom image from a file. To see it, place a PNG file on "community/image" and rename it.@L
-        @G[augustus_48.png]
+        @G[claudius_48.png]
         </text>
         <!-- For sound files, it will look for the file in the following directories (in order):
 	        <current campaign>/audio/

@@ -1,11 +1,11 @@
-package com.github.Keriew.augustus;
+package com.github.Keriew.claudius;
 
 import android.content.Intent;
 import android.net.Uri;
 
 import org.libsdl.app.SDLActivity;
 
-public class AugustusMainActivity extends SDLActivity {
+public class ClaudiusMainActivity extends SDLActivity {
     private static final int GET_FOLDER_RESULT = 500;
 
     @Override
@@ -20,7 +20,7 @@ public class AugustusMainActivity extends SDLActivity {
         return new String[]{
                 "SDL2",
                 "SDL2_mixer",
-                "augustus"
+                "claudius"
         };
     }
 

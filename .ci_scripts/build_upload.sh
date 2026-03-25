@@ -25,50 +25,50 @@ DEPLOY_FILE=
 case "$DEPLOY" in
 "linux")
   PACKAGE=linux
-  DEPLOY_FILE=augustus-$VERSION-linux-x86_64.zip
-  cp "${build_dir}/augustus.zip" "deploy/$DEPLOY_FILE"
+  DEPLOY_FILE=claudius-$VERSION-linux-x86_64.zip
+  cp "${build_dir}/claudius.zip" "deploy/$DEPLOY_FILE"
   ;;
 "flatpak")
   PACKAGE=linux-flatpak
-  DEPLOY_FILE=augustus-$VERSION-linux.flatpak
+  DEPLOY_FILE=claudius-$VERSION-linux.flatpak
   flatpak build-export export repo
-  flatpak build-bundle export augustus.flatpak com.github.keriew.augustus --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
-  cp augustus.flatpak "deploy/$DEPLOY_FILE"
+  flatpak build-bundle export claudius.flatpak com.github.keriew.claudius --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+  cp claudius.flatpak "deploy/$DEPLOY_FILE"
   ;;
 "vita")
   PACKAGE=vita
-  DEPLOY_FILE=augustus-$VERSION-vita.vpk
-  cp "${build_dir}/augustus.vpk" "deploy/$DEPLOY_FILE"
+  DEPLOY_FILE=claudius-$VERSION-vita.vpk
+  cp "${build_dir}/claudius.vpk" "deploy/$DEPLOY_FILE"
   ;;
 "switch")
   PACKAGE=switch
-  DEPLOY_FILE=augustus-$VERSION-switch.nro
-  cp "${build_dir}/augustus.nro" "deploy/$DEPLOY_FILE"
+  DEPLOY_FILE=claudius-$VERSION-switch.nro
+  cp "${build_dir}/claudius.nro" "deploy/$DEPLOY_FILE"
   ;;
 "appimage")
   PACKAGE=linux-appimage
-  DEPLOY_FILE=augustus-$VERSION-linux.AppImage
-  cp "${build_dir}/augustus.AppImage" "deploy/$DEPLOY_FILE"
+  DEPLOY_FILE=claudius-$VERSION-linux.AppImage
+  cp "${build_dir}/claudius.AppImage" "deploy/$DEPLOY_FILE"
   ;;
 "mac")
   PACKAGE=mac
-  DEPLOY_FILE=augustus-$VERSION-mac.dmg
-  cp "${build_dir}/augustus.dmg" "deploy/$DEPLOY_FILE"
+  DEPLOY_FILE=claudius-$VERSION-mac.dmg
+  cp "${build_dir}/claudius.dmg" "deploy/$DEPLOY_FILE"
   ;;
 "android")
   PACKAGE=android
-  if [ -f "${build_dir}/augustus.apk" ]
+  if [ -f "${build_dir}/claudius.apk" ]
   then
-    DEPLOY_FILE=augustus-$VERSION-android.apk
-    cp "${build_dir}/augustus.apk" "deploy/$DEPLOY_FILE"
+    DEPLOY_FILE=claudius-$VERSION-android.apk
+    cp "${build_dir}/claudius.apk" "deploy/$DEPLOY_FILE"
   fi
   ;;
 "emscripten")
   PACKAGE=emscripten
-  if [ -f "${build_dir}/augustus.html" ]
+  if [ -f "${build_dir}/claudius.html" ]
   then
-    DEPLOY_FILE=augustus-$VERSION-emscripten.html
-    cp "${build_dir}/augustus.html" "deploy/$DEPLOY_FILE"
+    DEPLOY_FILE=claudius-$VERSION-emscripten.html
+    cp "${build_dir}/claudius.html" "deploy/$DEPLOY_FILE"
   fi
   ;;
 *)

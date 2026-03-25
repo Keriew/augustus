@@ -10,7 +10,7 @@
  */
 
 /**
- * Gets the version of Augustus
+ * Gets the version of Claudius
  * @return Version number
  */
 const char *system_version(void);

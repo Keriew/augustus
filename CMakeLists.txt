@@ -69,8 +69,8 @@ if (POLICY CMP0141)
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
 endif()
 
-set(SHORT_NAME augustus)
-set(USER_FRIENDLY_NAME Augustus)
+set(SHORT_NAME claudius)
+set(USER_FRIENDLY_NAME Claudius)
 project(${SHORT_NAME} C)
 
 if (NINTENDO_SWITCH)
@@ -79,7 +79,7 @@ endif()
 
 if (${TARGET_PLATFORM} STREQUAL "vita")
     include("${VITASDK}/share/vita.cmake" REQUIRED)
-    set(VITA_TITLEID  "AUGUSTUS1")
+    set(VITA_TITLEID  "CLAUDIUS1")
 endif()
 
 if (AV1_VIDEO_SUPPORT)
@@ -238,7 +238,7 @@ set(ZIP_FILES
 
 set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/arguments.c
-    ${PROJECT_SOURCE_DIR}/src/platform/augustus.c
+    ${PROJECT_SOURCE_DIR}/src/platform/claudius.c
     ${PROJECT_SOURCE_DIR}/src/platform/crash_handler.c
     ${PROJECT_SOURCE_DIR}/src/platform/cursor.c
     ${PROJECT_SOURCE_DIR}/src/platform/file_manager.c
@@ -825,7 +825,7 @@ endif()
 
 if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     set(MACOSX_FILES
-        ${PROJECT_SOURCE_DIR}/res/augustus.icns
+        ${PROJECT_SOURCE_DIR}/res/claudius.icns
         ${ASSET_SOURCES}
     )
 endif()
@@ -871,7 +871,7 @@ set(SOURCE_FILES
     ${SPNG_FILES}
     ${SXML_FILES}
     ${ZIP_FILES}
-    ${PROJECT_SOURCE_DIR}/res/augustus.rc
+    ${PROJECT_SOURCE_DIR}/res/claudius.rc
     ${MACOSX_FILES}
     ${IOS_FILES}
     ${EMSCRIPTEN_FILES}
@@ -944,7 +944,7 @@ if(MSVC)
     string(REGEX REPLACE "/W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     set_source_files_properties(${EXPAT_FILES} PROPERTIES COMPILE_FLAGS "/W3")
     set_source_files_properties(${SOURCE_FILES} PROPERTIES COMPILE_FLAGS "/W4")
-    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.rc PROPERTIES COMPILE_FLAGS "")
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/claudius.rc PROPERTIES COMPILE_FLAGS "")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244 /we4013")
 endif()
 
@@ -959,27 +959,27 @@ endif()
 
 if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     # generating a macOS icns file (see https://stackoverflow.com/a/20703594)
-    add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/res/augustus.icns
-        COMMAND mkdir -p augustus.iconset
-        COMMAND sips -z 16 16    augustus_256.png --out augustus.iconset/icon_16x16.png
-        COMMAND sips -z 32 32    augustus_256.png --out augustus.iconset/icon_16x16@2x.png
-        COMMAND sips -z 32 32    augustus_256.png --out augustus.iconset/icon_32x32.png
-        COMMAND sips -z 64 64    augustus_256.png --out augustus.iconset/icon_32x32@2x.png
-        COMMAND sips -z 128 128  augustus_256.png --out augustus.iconset/icon_128x128.png
-        COMMAND sips -z 256 256  augustus_256.png --out augustus.iconset/icon_128x128@2x.png
-        COMMAND sips -z 256 256  augustus_256.png --out augustus.iconset/icon_256x256.png
-        COMMAND sips -z 512 512  augustus_512.png --out augustus.iconset/icon_256x256@2x.png
-        COMMAND iconutil -c icns augustus.iconset
-        COMMAND rm -R augustus.iconset
+    add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/res/claudius.icns
+        COMMAND mkdir -p claudius.iconset
+        COMMAND sips -z 16 16    claudius_256.png --out claudius.iconset/icon_16x16.png
+        COMMAND sips -z 32 32    claudius_256.png --out claudius.iconset/icon_16x16@2x.png
+        COMMAND sips -z 32 32    claudius_256.png --out claudius.iconset/icon_32x32.png
+        COMMAND sips -z 64 64    claudius_256.png --out claudius.iconset/icon_32x32@2x.png
+        COMMAND sips -z 128 128  claudius_256.png --out claudius.iconset/icon_128x128.png
+        COMMAND sips -z 256 256  claudius_256.png --out claudius.iconset/icon_128x128@2x.png
+        COMMAND sips -z 256 256  claudius_256.png --out claudius.iconset/icon_256x256.png
+        COMMAND sips -z 512 512  claudius_512.png --out claudius.iconset/icon_256x256@2x.png
+        COMMAND iconutil -c icns claudius.iconset
+        COMMAND rm -R claudius.iconset
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/res)
-    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/augustus.icns PROPERTIES
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/claudius.icns PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources")
 
     # setting variables that will populate Info.plist
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "pl.Keriew.augustus")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "pl.Keriew.claudius")
     set(MACOSX_BUNDLE_BUNDLE_NAME ${USER_FRIENDLY_NAME})
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version" FORCE)
-    set(MACOSX_BUNDLE_ICON_FILE "augustus.icns")
+    set(MACOSX_BUNDLE_ICON_FILE "claudius.icns")
     set(MACOSX_BUNDLE_BUNDLE_VERSION
         "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING ${MACOSX_BUNDLE_BUNDLE_VERSION})
@@ -1030,14 +1030,14 @@ if(${TARGET_PLATFORM} STREQUAL "ios")
 
         MACOSX_BUNDLE_BUNDLE_NAME  ${USER_FRIENDLY_NAME}
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.keriew.augustus"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.keriew.claudius"
         MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/ios/Info.plist"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
         MACOSX_BUNDLE_UI_LAUNCH_STORYBOARD_NAME "LaunchScreen"
         OUTPUT_NAME "${PROJECT_NAME}"
         XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY 1,2
-        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.github.keriew.augustus"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.github.keriew.claudius"
     )
     set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X deployment version" FORCE)
     set_source_files_properties(${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets PROPERTIES
@@ -1123,7 +1123,7 @@ elseif(NINTENDO_SWITCH)
     target_link_libraries(${SHORT_NAME} PkgConfig::SDL2 ${EASYAV1_LIBRARY})
 
 nx_generate_nacp (${PROJECT_NAME}.nacp
-    NAME   "Augustus"
+    NAME   "Claudius"
     AUTHOR "Keriew"
 )
 
@@ -1172,13 +1172,13 @@ else()
     endif()
 
     if(UNIX AND NOT APPLE)
-        install(FILES "res/augustus.desktop" DESTINATION "share/applications" RENAME "com.github.keriew.augustus.desktop")
-        install(FILES "res/augustus.metainfo.xml" DESTINATION "share/metainfo" RENAME "com.github.keriew.augustus.metainfo.xml")
-        install(FILES "res/augustus_32.png" DESTINATION "share/icons/hicolor/32x32/apps" RENAME "com.github.keriew.augustus.png")
-        install(FILES "res/augustus_48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "com.github.keriew.augustus.png")
-        install(FILES "res/augustus_256.png" DESTINATION "share/icons/hicolor/256x256/apps" RENAME "com.github.keriew.augustus.png")
-        install(FILES "res/augustus_512.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "com.github.keriew.augustus.png")
-        install(DIRECTORY "${ASSETS_DIR}/" DESTINATION "share/augustus-game/assets")
+        install(FILES "res/claudius.desktop" DESTINATION "share/applications" RENAME "com.github.keriew.claudius.desktop")
+        install(FILES "res/claudius.metainfo.xml" DESTINATION "share/metainfo" RENAME "com.github.keriew.claudius.metainfo.xml")
+        install(FILES "res/claudius_32.png" DESTINATION "share/icons/hicolor/32x32/apps" RENAME "com.github.keriew.claudius.png")
+        install(FILES "res/claudius_48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "com.github.keriew.claudius.png")
+        install(FILES "res/claudius_256.png" DESTINATION "share/icons/hicolor/256x256/apps" RENAME "com.github.keriew.claudius.png")
+        install(FILES "res/claudius_512.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "com.github.keriew.claudius.png")
+        install(DIRECTORY "${ASSETS_DIR}/" DESTINATION "share/claudius-game/assets")
     endif()
 
 endif()

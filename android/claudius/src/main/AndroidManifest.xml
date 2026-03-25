@@ -21,11 +21,11 @@
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"
-        android:icon="@mipmap/augustus"
+        android:icon="@mipmap/claudius"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <activity
-            android:name=".AugustusMainActivity"
+            android:name=".ClaudiusMainActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|uiMode|density|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
             android:launchMode="singleInstance"
