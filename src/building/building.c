@@ -421,7 +421,7 @@ int building_can_repair(building *b)
 
 int building_repair_cost_at(int grid_offset)
 {
-    building *b = building_get(map_building_at(grid_offset));
+    building *b = building_get(map_building_rubble_building_id(grid_offset));
     int og_grid_offset = 0, og_size = 0, og_type = 0;
     if (!b || !building_can_repair(b)) {
         return 0;
@@ -553,7 +553,7 @@ static int warehouse_repair(building *b)
 
 int building_repair_at(int grid_offset)
 {
-    building *b = building_get(map_building_at(grid_offset));
+    building *b = building_get(map_building_rubble_building_id(grid_offset));
 
     if (!b) {
         return 0;
