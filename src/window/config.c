@@ -109,7 +109,8 @@ enum {
     RANGE_SANDSTORM_INTENSITY,
     RANGE_SANDSTORM_SPEED,
     RANGE_SANDSTORM_SIZE,
-    RANGE_SNOWFLAKE_SIZE
+    RANGE_SNOWFLAKE_SIZE,
+    RANGE_WEATHER_DURATION
 };
 
 enum {
@@ -185,6 +186,7 @@ static const uint8_t *display_text_sandstorm_intensity(void);
 static const uint8_t *display_text_sandstorm_speed(void);
 static const uint8_t *display_text_sandstorm_size(void);
 static const uint8_t *display_text_snowflake_size(void);
+static const uint8_t *display_text_weather_duration(void);
 
 // page-related helpers
 static int get_widget_count_for(unsigned int page);
@@ -301,6 +303,8 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
     {
         {TYPE_CHECKBOX, CONFIG_UI_DRAW_CLOUD_SHADOWS, TR_CONFIG_DRAW_CLOUD_SHADOWS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_DRAW_WEATHER, TR_CONFIG_DRAW_WEATHER, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_NUMERICAL_DESC, RANGE_WEATHER_DURATION, TR_CONFIG_WT_WEATHER_DURATION, NULL, 0, 1, ITEM_BASE_H, 10},
+        {TYPE_NUMERICAL_RANGE, RANGE_WEATHER_DURATION, 0, display_text_weather_duration, 0, 1, ITEM_BASE_H, 2},
         {TYPE_HEADER, 0, TR_CONFIG_HEADER_RAIN, NULL, 0, 1, ITEM_BASE_H, 14},
         {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_RAIN, TR_CONFIG_UI_WT_PREVIEW_RAIN, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, TR_CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
@@ -505,6 +509,7 @@ static numerical_range_widget ranges[] = {
     { 82, 14,   0,   4,  1, 0},   //  sandstorm particle speed (index 0-4)
     { 82, 14,   0,   4,  1, 0},   //  sandstorm particle size (index 0-4)
     { 82, 14,   0,   4,  1, 0},   //  snowflake size (index 0-4)
+    { 82, 14,   0,   2,  1, 0},   //  weather max duration (0=short,1=regular,2=long)
 };
 
 //  Bottom buttons & page tabs
@@ -1030,6 +1035,17 @@ static const uint8_t *display_text_snowflake_size(void)
     return translation_for(size_labels[idx]);
 }
 
+static const uint8_t *display_text_weather_duration(void)
+{
+    static const translation_key duration_labels[] = {
+        TR_CONFIG_WT_DURATION_SHORT, TR_CONFIG_WT_DURATION_REGULAR, TR_CONFIG_WT_DURATION_LONG
+    };
+    int idx = data.config_values[CONFIG_UI_WT_WEATHER_DURATION].new_value;
+    if (idx < 0) idx = 0;
+    if (idx > 2) idx = 2;
+    return translation_for(duration_labels[idx]);
+}
+
 //    Range value binding, custom change-action table, init
 
 static void set_range_values(void)
@@ -1058,6 +1074,7 @@ static void set_range_values(void)
     ranges[RANGE_SANDSTORM_SPEED].value = &data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value;
     ranges[RANGE_SANDSTORM_SIZE].value = &data.config_values[CONFIG_UI_WT_SANDSTORM_SIZE].new_value;
     ranges[RANGE_SNOWFLAKE_SIZE].value = &data.config_values[CONFIG_UI_WT_SNOWFLAKE_SIZE].new_value;
+    ranges[RANGE_WEATHER_DURATION].value = &data.config_values[CONFIG_UI_WT_WEATHER_DURATION].new_value;
 }
 
 static void set_custom_config_changes(void)

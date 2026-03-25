@@ -22,23 +22,16 @@
 #define DRIFT_DIRECTION_RIGHT 1
 #define DRIFT_DIRECTION_LEFT -1
 
-typedef struct {
-    int min;
-    int max;
-} weather_length;
 
-static const weather_length WEATHER_MINMAX_DURATION[] = { //expressed in months, doesn't apply to thunderstorms
-    {1, 3},
-    {3, 6},
-    {6, 12}
-};
+
+
 static const int PARTICLE_SIZES_RAIN[] = { 1, 8, 15, 23, 30 }; //sets of arbitrary values for a noticeable difference
 static const int PARTICLE_SIZES_SAND[] = { 1, 6, 10, 15, 20 }; //denoted as: minmum, small, regular, large, maximum
 static const int PARTICLE_SIZES_SNOW[] = { 2, 3, 4, 6, 8 };
 static const int PARTICLE_SPEEDS_RAIN[] = { 1, 4, 8, 13, 20 }; //sets of arbitrary values for a noticeable difference
 static const int PARTICLE_SPEEDS_SNOW[] = { 1, 2, 4, 6, 10 };  //denoted as: minimum, slow, regular, fast, maximum
 static const int PARTICLE_SPEEDS_SAND[] = { 1, 3, 5, 8, 12 };
-
+static const int WEATHER_MAX_DURATION[] = {1, 3, 6}; // expressed in months, doesn't apply to thunderstorms
 
 static int get_particle_size(const int *table, int idx)
 {
@@ -540,8 +533,7 @@ void city_weather_update(int month)
             type = WEATHER_NONE;
         } else {
             int duration_setting = config_get(CONFIG_UI_WT_WEATHER_DURATION);
-            data.weather_duration_left = random_between_from_stdlib(WEATHER_MINMAX_DURATION[duration_setting].min,
-                     WEATHER_MINMAX_DURATION[duration_setting].max);
+            data.weather_duration_left = random_between_from_stdlib(1, WEATHER_MAX_DURATION[duration_setting]);
             // Play sounds only if weather is enabled
             if (config_get(CONFIG_UI_DRAW_WEATHER)) {
                 if (WEATHER_RAIN == type) {
