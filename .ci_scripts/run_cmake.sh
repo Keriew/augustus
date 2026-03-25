@@ -10,9 +10,6 @@ case "$BUILD_TARGET" in
 "mac")
 	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DENABLE_MULTIPLAYER=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ..
 	;;
-"ios")
-	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DTARGET_PLATFORM=ios -G Xcode ..
-	;;
 "flatpak")
 	;;
 "appimage")
@@ -20,9 +17,6 @@ case "$BUILD_TARGET" in
 	;;
 "linux")
 	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DENABLE_MULTIPLAYER=ON -DCMAKE_BUILD_TYPE=Release ..
-	;;
-"android")
-	mkdir build
 	;;
 "emscripten")
 	export EMSDK=${PWD}/emsdk

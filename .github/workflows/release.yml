@@ -239,11 +239,6 @@ jobs:
             DEPLOY: vita
             artifact: vita
             os: ubuntu-22.04
-          - name: Android
-            BUILD_TARGET: android
-            DEPLOY: android
-            artifact: android
-            os: ubuntu-24.04
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     env:
@@ -255,20 +250,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        if: matrix.BUILD_TARGET == 'android'
-        with:
-          path: deps
-          key: release-${{ matrix.artifact }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
-
-      - name: Setup JDK 17
-        if: matrix.BUILD_TARGET == 'android'
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
 
       - name: Setup NASM
         uses: ilammy/setup-nasm@v1
@@ -282,9 +263,6 @@ jobs:
           ./.ci_scripts/install_dependencies.sh
 
       - name: Build
-        env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEYSTORE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_KEY_PASSWORD }}
         run: |
           ./.ci_scripts/pack_assets.sh
           ./.ci_scripts/run_cmake.sh
@@ -338,15 +316,27 @@ jobs:
           path: artifacts/
           pattern: release-*
 
-      - name: Collect release files
+      - name: Package release archives
         run: |
           mkdir -p release-files
-          # Flatten all artifacts into a single directory
-          find artifacts/ -type f \( \
-            -name "*.zip" -o -name "*.dmg" -o -name "*.AppImage" \
-            -o -name "*.flatpak" -o -name "*.nro" -o -name "*.vpk" \
-            -o -name "*.apk" -o -name "*.html" -o -name "*.exe" \
-          \) -exec cp {} release-files/ \;
+          for dir in artifacts/release-*/; do
+            artifact_name=$(basename "$dir")
+            platform="${artifact_name#release-}"
+
+            # Single-file artifacts don't need zipping
+            shopt -s nullglob
+            singles=("$dir"*.flatpak "$dir"*.vpk "$dir"*.nro "$dir"*.html "$dir"*.apk)
+            shopt -u nullglob
+
+            if [ ${#singles[@]} -gt 0 ]; then
+              cp "$dir"* release-files/ 2>/dev/null || true
+            else
+              # Multi-file artifacts get zipped
+              cd "$dir"
+              zip -r "../../release-files/claudius-${platform}.zip" .
+              cd ../..
+            fi
+          done
 
           echo "=== Release files ==="
           ls -lh release-files/

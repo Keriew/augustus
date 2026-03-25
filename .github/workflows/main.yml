@@ -51,13 +51,6 @@ jobs:
             SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: mac
             DEPLOY: mac
-          - name: iOS
-            os: macos-latest
-            cache-key: ios
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
-            BUILD_TARGET: ios
-            DEPLOY: ios
           - name: Nintendo Switch
             os: ubuntu-24.04
             BUILD_TARGET: switch
@@ -66,13 +59,6 @@ jobs:
             os: ubuntu-22.04
             BUILD_TARGET: vita
             DEPLOY: vita
-          - name: Android
-            os: ubuntu-24.04
-            cache-key: android
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
-            BUILD_TARGET: android
-            DEPLOY: android
           - name: Emscripten
             os: ubuntu-24.04
             cache-key: emscripten
@@ -98,12 +84,6 @@ jobs:
         with:
           path: deps
           key: ${{ matrix.cache-key }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
-      - name: Setup JDK 17
-        if: matrix.BUILD_TARGET == 'android'
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
       - name: Setup NASM
         uses: ilammy/setup-nasm@v1
       - name: Set up environment
@@ -114,9 +94,6 @@ jobs:
           ./.ci_scripts/setup_environment.sh
           ./.ci_scripts/install_dependencies.sh
       - name: Build and test
-        env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEYSTORE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_KEY_PASSWORD }}
         run: |
           ./.ci_scripts/pack_assets.sh
           ./.ci_scripts/run_cmake.sh

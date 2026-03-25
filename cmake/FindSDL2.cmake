@@ -67,13 +67,7 @@
 
 GET_SDL_EXT_DIR(SDL_EXT_DIR "")
 
-IF(${TARGET_PLATFORM} STREQUAL "android")
-    find_package(SDL2 REQUIRED CONFIG)
-    STRING(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
-    SET(SDL2_LIBRARY SDL2::SDL2)
-    SET(SDL2_ANDROID_HOOK ${SDL_EXT_DIR}/src/main/android/SDL_android_main.c)
-ELSE()
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(SDL2_ARCH_64 TRUE)
         set(SDL2_PROCESSOR_ARCH "x64")
     else()
@@ -167,7 +161,6 @@ ELSE()
             )
         ENDIF(NOT ${SDL2_INCLUDE_DIR} MATCHES ".framework")
     ENDIF(NOT SDL2_BUILDING_LIBRARY)
-ENDIF()
 
 # SDL2 may require threads on your system.
 # The Apple build may not need an explicit flag because one of the

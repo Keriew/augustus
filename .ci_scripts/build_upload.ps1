@@ -53,44 +53,38 @@ if ("${env:COMPILER}" -eq "msvc") {
     throw "Unknown compiler: ${env:COMPILER}"
 }
 
-$deploy_file = "claudius-$version-$suffix.zip"
-
+# Pack the assets
+echo "Packing the assets"
 $packed_assets = $false
 
-if ($repo -eq "release") {
-    echo "Packing the assets"
+cd .\res\asset_packer
+mkdir build
+cd build
 
-    cd .\res\asset_packer
-    mkdir build
-    cd build
-
-    cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc.exe -D CMAKE_MAKE_PROGRAM=mingw32-make.exe ..
-    cmake --build . -j 4 --config Release
+cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc.exe -D CMAKE_MAKE_PROGRAM=mingw32-make.exe ..
+cmake --build . -j 4 --config Release
+if ($?) {
+    .\asset_packer.exe ..\..\
     if ($?) {
-        .\asset_packer.exe ..\..\
-        if ($?) {
-            Move-Item -Path ..\..\packed_assets -Destination ..\..\..\assets
-            $packed_assets = $true
-        }
-    }
-    if (!$packed_assets) {
-        echo "Unable to pack the assets. Using the original folder"
-        Move-Item -Path ..\..\assets -Destination ..\..\..\
+        Move-Item -Path ..\..\packed_assets -Destination ..\..\..\assets
         $packed_assets = $true
     }
-
-    cd ..\..\..
-
-    xcopy /ei res\maps .\maps
-    xcopy /ei res\manual .\manual
-    7z a "deploy\$deploy_file" claudius.exe claudius.pdb SDL2.dll SDL2_mixer.dll assets maps manual
-} else {
-    7z a "deploy\$deploy_file" claudius.exe claudius.pdb SDL2.dll SDL2_mixer.dll
+}
+if (!$packed_assets) {
+    echo "Unable to pack the assets. Using the original folder"
+    Move-Item -Path ..\..\assets -Destination ..\..\..\
 }
 
-if (!$?) {
-    throw "Unable to create $deploy_file"
-}
+cd ..\..\..
+
+# Copy all files directly to deploy/ (no zip)
+CopyFile claudius.exe deploy\claudius.exe
+CopyFile claudius.pdb deploy\claudius.pdb
+CopyFile SDL2.dll deploy\SDL2.dll
+CopyFile SDL2_mixer.dll deploy\SDL2_mixer.dll
+xcopy /ei assets deploy\assets
+xcopy /ei res\maps deploy\maps
+xcopy /ei res\manual deploy\manual
 
 if ($env:SKIP_UPLOAD) {
     echo "Build is configured to skip deploy - skipping upload"
@@ -107,47 +101,11 @@ if (!$env:UPLOAD_TOKEN) {
     exit
 }
 
+$deploy_file = "claudius-$version-$suffix.zip"
 echo "Uploading $deploy_file to $repo/$suffix/$version"
-curl -u "$env:UPLOAD_TOKEN" -T "deploy/$deploy_file" "https://claudius.datan.com.br/upload/$repo/$suffix/$version/${deploy_file}"
+7z a "$deploy_file" deploy\*
+curl -u "$env:UPLOAD_TOKEN" -T "$deploy_file" "https://claudius.datan.com.br/upload/$repo/$suffix/$version/${deploy_file}"
 if (!$?) {
     throw "Unable to upload"
 }
 echo "Uploaded. URL: https://claudius.datan.com.br/$repo.html"
-
-if ($suffix -ne "windows") {
-    exit
-}
-
-if (!$packed_assets) {
-    echo "Packing the assets"
-
-    cd .\res\asset_packer
-    mkdir build
-    cd build
-
-    cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -D CMAKE_C_COMPILER=x86_64-w64-mingw32-gcc.exe -D CMAKE_MAKE_PROGRAM=mingw32-make.exe ..
-    cmake --build . -j 4 --config Release
-    if ($?) {
-        .\asset_packer.exe ..\..\
-        if ($?) {
-            Move-Item -Path ..\..\packed_assets -Destination ..\..\..\assets
-            $packed_assets = $true
-        }
-    }
-    if (!$packed_assets) {
-        echo "Unable to pack the assets. Using the original folder"
-        Move-Item -Path ..\..\assets -Destination ..\..\..\
-    }
-
-    cd ..\..\..
-}
-
-$assets_file = "assets-$version-$repo.zip"
-7z a "$assets_file" assets
-
-echo "Uploading $assets_file to $repo/windows/$version"
-curl -u "$env:UPLOAD_TOKEN" -T "$assets_file" "https://claudius.datan.com.br/upload/$repo/assets/$version/${assets_file}"
-if (!$?) {
-    throw "Unable to upload assets"
-}
-echo "Assets uploaded"

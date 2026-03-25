@@ -25,8 +25,11 @@ DEPLOY_FILE=
 case "$DEPLOY" in
 "linux")
   PACKAGE=linux
-  DEPLOY_FILE=claudius-$VERSION-linux-x86_64.zip
-  cp "${build_dir}/claudius.zip" "deploy/$DEPLOY_FILE"
+  DEPLOY_FILE=claudius-$VERSION-linux-x86_64
+  cp "${build_dir}/claudius" "deploy/claudius"
+  cp -r "${build_dir}/assets" "deploy/assets"
+  cp -r "${build_dir}/maps" "deploy/maps"
+  cp -r "${build_dir}/manual" "deploy/manual"
   ;;
 "flatpak")
   PACKAGE=linux-flatpak
@@ -48,20 +51,16 @@ case "$DEPLOY" in
 "appimage")
   PACKAGE=linux-appimage
   DEPLOY_FILE=claudius-$VERSION-linux.AppImage
-  cp "${build_dir}/claudius.AppImage" "deploy/$DEPLOY_FILE"
+  cp "${build_dir}/claudius.AppImage" "deploy/claudius.AppImage"
+  cp -r "${build_dir}/maps" "deploy/maps"
+  cp -r "${build_dir}/manual" "deploy/manual"
   ;;
 "mac")
   PACKAGE=mac
   DEPLOY_FILE=claudius-$VERSION-mac.dmg
-  cp "${build_dir}/claudius.dmg" "deploy/$DEPLOY_FILE"
-  ;;
-"android")
-  PACKAGE=android
-  if [ -f "${build_dir}/claudius.apk" ]
-  then
-    DEPLOY_FILE=claudius-$VERSION-android.apk
-    cp "${build_dir}/claudius.apk" "deploy/$DEPLOY_FILE"
-  fi
+  cp "${build_dir}/claudius.dmg" "deploy/claudius.dmg"
+  cp -r "${build_dir}/maps" "deploy/maps"
+  cp -r "${build_dir}/manual" "deploy/manual"
   ;;
 "emscripten")
   PACKAGE=emscripten

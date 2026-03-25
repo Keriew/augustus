@@ -12,14 +12,6 @@ case "$BUILD_TARGET" in
 	# As for Vita above, make sure that it compiles correctly and runs on a Switch prior to pushing the change
 	docker run -d --name switchdev --workdir /build/git -v "${PWD}:/build/git" devkitpro/devkita64:20260219 tail -f /dev/null
 	;;
-"android")
-	# Decrypt the key files
-	if [ "$FILE_ENCRYPTION_KEY" ]
-	then
-        openssl aes-256-cbc -K $FILE_ENCRYPTION_KEY -iv $FILE_ENCRYPTION_IV -in android/claudius.keystore.enc -out android/claudius.keystore -d;
-        # openssl aes-256-cbc -K $FILE_ENCRYPTION_KEY -iv $FILE_ENCRYPTION_IV -in android/play-publisher.json.enc -out android/play-publisher.json -d;
-	fi
-	;;
 "emscripten")
 	# Get EMSDK
 	git clone https://github.com/emscripten-core/emsdk.git

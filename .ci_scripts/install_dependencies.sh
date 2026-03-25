@@ -111,26 +111,6 @@ then
   then
     install_sdl_macos "SDL2" $SDL_VERSION
     install_sdl_macos "SDL2_mixer" $SDL_MIXER_VERSION
-  elif [ "$BUILD_TARGET" == "android" ]
-  then
-  	if [ ! -f "android/claudius.keystore" ]
-    then
-      BUILDTYPE=debug
-    else
-      BUILDTYPE=release
-    fi
-    if [ ! -f "deps/SDL2-$BUILDTYPE.aar" ]
-    then
-      install_sdl_android "SDL2" $SDL_VERSION
-      install_sdl_android "SDL2_mixer" $SDL_MIXER_VERSION
-    else
-      mkdir android/claudius/libs
-      cp deps/SDL2-$BUILDTYPE.aar android/claudius/libs/SDL2-$BUILDTYPE.aar
-    fi
-  elif [ "$BUILD_TARGET" == "ios" ]
-  then
-    install_sdl_ios "SDL2" $SDL_VERSION
-    install_sdl_ios "SDL2_mixer" $SDL_MIXER_VERSION
   else
     if [ "$BUILD_TARGET" == "emscripten" ]
     then
