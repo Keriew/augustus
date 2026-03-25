@@ -201,12 +201,17 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
 
 void building_destroy_by_collapse(building *b)
 {
+    if (building_properties_for_type(b->type)->shared) {
+        return;
+    }
     game_undo_disable();
     b->state = BUILDING_STATE_RUBBLE;
     if (b->type == BUILDING_TOWER) {
         figure_kill_tower_sentries_in_building(b);
     }
     set_rubble_grid_info_for_all_parts(b);
+    map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
+    figure_create_explosion_cloud(b->x, b->y, b->size, 0);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
 }
 
