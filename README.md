@@ -19,7 +19,6 @@ Download Julius and Claudius scenarios, create your own and share with others!
 | Mac | [![Download](https://claudius.datan.com.br/badge/release/mac.svg)](https://claudius.datan.com.br/download/latest/release/mac) | [![Download](https://claudius.datan.com.br/badge/development/mac.svg)](https://claudius.datan.com.br/download/latest/development/mac) |
 | PS Vita | [![Download](https://claudius.datan.com.br/badge/release/vita.svg)](https://claudius.datan.com.br/download/latest/release/vita)| [![Download](https://claudius.datan.com.br/badge/development/vita.svg)](https://claudius.datan.com.br/download/latest/development/vita) |
 | Switch |  [![Download](https://claudius.datan.com.br/badge/release/switch.svg)](https://claudius.datan.com.br/download/latest/release/switch) | [![Download](https://claudius.datan.com.br/badge/development/switch.svg)](https://claudius.datan.com.br/download/latest/development/switch) |
-| Android APK |  [![Download](https://claudius.datan.com.br/badge/release/android.svg)](https://claudius.datan.com.br/download/latest/release/android) | [![Download](https://claudius.datan.com.br/badge/development/android.svg)](https://claudius.datan.com.br/download/latest/development/android) |
 
 
 Alternatively, you can [**try Claudius in your browser**](https://claudius.datan.com.br/play/). Note that you'll still need to provide a valid Caesar 3 installation folder.
