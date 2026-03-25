@@ -9,7 +9,6 @@
 #include "graphics/graphics.h"
 #include "graphics/menu.h"
 #include "graphics/screen.h"
-#include "platform/android/android.h"
 #include "platform/icon.h"
 #include "platform/renderer.h"
 #include "platform/switch/switch.h"

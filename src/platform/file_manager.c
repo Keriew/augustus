@@ -6,7 +6,6 @@
 #include "core/log.h"
 #include "core/random.h"
 #include "core/string.h"
-#include "platform/android/android.h"
 #include "platform/emscripten/emscripten.h"
 #include "platform/file_manager_cache.h"
 #include "platform/platform.h"
