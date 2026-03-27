@@ -149,7 +149,7 @@ void city_culture_update_coverage(void)
         ORACLE_COVERAGE * small_mausoleums +
         LARGE_ORACLE_COVERAGE * nymphaeums +
         LARGE_ORACLE_COVERAGE * large_mausoleums +
-        SHRINE_COVERAGE * building_count_active(BUILDING_SHRINE_CERES) +
+        SHRINE_COVERAGE * building_count_total(BUILDING_SHRINE_CERES) +
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_CERES) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_CERES) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
@@ -161,7 +161,7 @@ void city_culture_update_coverage(void)
         ORACLE_COVERAGE * small_mausoleums +
         LARGE_ORACLE_COVERAGE * nymphaeums +
         LARGE_ORACLE_COVERAGE * large_mausoleums +
-        SHRINE_COVERAGE * building_count_active(BUILDING_SHRINE_NEPTUNE) +
+        SHRINE_COVERAGE * building_count_total(BUILDING_SHRINE_NEPTUNE) +
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_NEPTUNE) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_NEPTUNE) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
@@ -173,7 +173,7 @@ void city_culture_update_coverage(void)
         ORACLE_COVERAGE * small_mausoleums +
         LARGE_ORACLE_COVERAGE * nymphaeums +
         LARGE_ORACLE_COVERAGE * large_mausoleums +
-        SHRINE_COVERAGE * building_count_active(BUILDING_SHRINE_MERCURY) +
+        SHRINE_COVERAGE * building_count_total(BUILDING_SHRINE_MERCURY) +
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_MERCURY) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_MERCURY) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
@@ -185,7 +185,7 @@ void city_culture_update_coverage(void)
         ORACLE_COVERAGE * small_mausoleums +
         LARGE_ORACLE_COVERAGE * nymphaeums +
         LARGE_ORACLE_COVERAGE * large_mausoleums +
-        SHRINE_COVERAGE * building_count_active(BUILDING_SHRINE_MARS) +
+        SHRINE_COVERAGE * building_count_total(BUILDING_SHRINE_MARS) +
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_MARS) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_MARS) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
@@ -197,7 +197,7 @@ void city_culture_update_coverage(void)
         ORACLE_COVERAGE * small_mausoleums +
         LARGE_ORACLE_COVERAGE * nymphaeums +
         LARGE_ORACLE_COVERAGE * large_mausoleums +
-        SHRINE_COVERAGE * building_count_active(BUILDING_SHRINE_VENUS) +
+        SHRINE_COVERAGE * building_count_total(BUILDING_SHRINE_VENUS) +
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_VENUS) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_VENUS) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
