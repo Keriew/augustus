@@ -968,6 +968,38 @@ static void button_delete_event(const generic_button *button)
     window_go_back();
 }
 
+static void copy_formulas_action(scenario_action_t *action, int **params, int index)
+{
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
+        action->type, index, NULL, NULL);
+    if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
+        scenario_formula_t *formula = scenario_formula_get(*param_value);
+        if (!formula) {
+            return;
+        }
+        unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
+            formula->min_evaluation, formula->max_evaluation);
+        *param_value = id;
+    }
+}
+
+static void copy_formulas_condition(scenario_condition_t *condition, int **params, int index)
+{
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
+        condition->type, index, NULL, NULL);
+    if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
+        scenario_formula_t *formula = scenario_formula_get(*param_value);
+        if (!formula) {
+            return;
+        }
+        unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
+            formula->min_evaluation, formula->max_evaluation);
+        *param_value = id;
+    }
+}
+
 static void button_copy_selected(const generic_button *button)
 {
     array_init(data.copied_actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.event->actions.constructor,
@@ -982,30 +1014,9 @@ static void button_copy_selected(const generic_button *button)
         array_new_item(data.copied_actions, action);
         *action = *array_item(data.event->actions, i);
 
-        // copy formulas correctly
-        parameter_type p_type;
-        int *params[] = {    // Collect addresses of the fields
-            &action->parameter1,
-            &action->parameter2,
-            &action->parameter3,
-            &action->parameter4,
-            &action->parameter5
-        };
-        for (int j = 1; j <= 5; ++j) {
-            int *param_value = params[j - 1];
-            p_type = scenario_events_parameter_data_get_action_parameter_type(action->type, j, NULL, NULL);
-            if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
-                scenario_formula_t *formula = scenario_formula_get(*param_value);
-                if (!formula) {
-                    break;
-                }
-                unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
-                    formula->min_evaluation, formula->max_evaluation);
-                *param_value = id;
-            }
-        }
+        scenario_parameters_foreach_in_action(action, copy_formulas_action);
     }
-    
+
     for (unsigned int i = 0; i < data.event->condition_groups.size; i++) {
         scenario_condition_group_t *group;
         array_new_item(data.copied_event.condition_groups, group);
@@ -1018,30 +1029,8 @@ static void button_copy_selected(const generic_button *button)
             array_new_item(group->conditions, condition);
             *condition = *array_item(original_group->conditions, j);
 
-            // copy formulas correctly
-            parameter_type p_type;
-            int *params[] = {    // Collect addresses of the fields
-                &condition->parameter1,
-                &condition->parameter2,
-                &condition->parameter3,
-                &condition->parameter4,
-                &condition->parameter5
-            };
-            for (int k = 1; k <= 5; ++k) {
-                int *param_value = params[k - 1];
-                p_type = scenario_events_parameter_data_get_condition_parameter_type(condition->type, k, NULL, NULL);
-                if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
-                    scenario_formula_t *formula = scenario_formula_get(*param_value);
-                    if (!formula) {
-                        break;
-                    }
-                    unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
-                        formula->min_evaluation, formula->max_evaluation);
-                    *param_value = id;
-                }
-            }
+            scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
         }
-        
     }
     data.did_copy_event = 1;
 }
@@ -1070,30 +1059,9 @@ static void button_copy_event(const generic_button *button)
         array_new_item(data.copied_event.actions, action);
         *action = *array_item(data.event->actions, i);
 
-        // copy formulas correctly
-        parameter_type p_type;
-        int *params[] = {    // Collect addresses of the fields
-            &action->parameter1,
-            &action->parameter2,
-            &action->parameter3,
-            &action->parameter4,
-            &action->parameter5
-        };
-        for (int j = 1; j <= 5; ++j) {
-            int *param_value = params[j - 1];
-            p_type = scenario_events_parameter_data_get_action_parameter_type(action->type, j, NULL, NULL);
-            if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
-                scenario_formula_t *formula = scenario_formula_get(*param_value);
-                if (!formula) {
-                    break;
-                }
-                unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
-                    formula->min_evaluation, formula->max_evaluation);
-                *param_value = id;
-            }
-        }
+        scenario_parameters_foreach_in_action(action, copy_formulas_action);
     }
-    
+
     for (unsigned int i = 0; i < data.event->condition_groups.size; i++) {
         scenario_condition_group_t *group;
         array_new_item(data.copied_event.condition_groups, group);
@@ -1106,30 +1074,8 @@ static void button_copy_event(const generic_button *button)
             array_new_item(group->conditions, condition);
             *condition = *array_item(original_group->conditions, j);
 
-            // copy formulas correctly
-            parameter_type p_type;
-            int *params[] = {    // Collect addresses of the fields
-                &condition->parameter1,
-                &condition->parameter2,
-                &condition->parameter3,
-                &condition->parameter4,
-                &condition->parameter5
-            };
-            for (int k = 1; k <= 5; ++k) {
-                int *param_value = params[k - 1];
-                p_type = scenario_events_parameter_data_get_condition_parameter_type(condition->type, k, NULL, NULL);
-                if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
-                    scenario_formula_t *formula = scenario_formula_get(*param_value);
-                    if (!formula) {
-                        break;
-                    }
-                    unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
-                        formula->min_evaluation, formula->max_evaluation);
-                    *param_value = id;
-                }
-            }
+            scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
         }
-        
     }
     data.did_copy_event = 1;
 }
