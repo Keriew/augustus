@@ -946,8 +946,19 @@ void figure_trade_ship_action(figure *f)
                     f->action_state = FIGURE_ACTION_115_TRADE_SHIP_LEAVING;
                     f->wait_ticks = 0;
                     map_point river_entry = scenario_map_river_entry();
-                    f->destination_x = river_entry.x;
-                    f->destination_y = river_entry.y;
+                    map_point river_spot;
+                    if (scenario_map_has_river_exit()) {
+                        map_point river_exit = scenario_map_river_exit();
+                        int exit_grid_offset = map_grid_offset(river_exit.x, river_exit.y);
+                        int exit_distance = map_grid_chess_distance(f->grid_offset, exit_grid_offset);
+                        int entrance_grid_offset = map_grid_offset(river_entry.x, river_entry.y);
+                        int entrance_distance = map_grid_chess_distance(f->grid_offset, entrance_grid_offset);
+                        river_spot = exit_distance < entrance_distance ? river_exit : river_entry;
+                    } else {
+                        river_spot = river_entry;
+                    }
+                    f->destination_x = river_spot.x;
+                    f->destination_y = river_spot.y;
                     building *dst = building_get(f->destination_building_id);
                     dst->data.dock.queued_docker_id = 0;
                     dst->data.dock.num_ships = 0;

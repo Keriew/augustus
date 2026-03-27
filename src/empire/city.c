@@ -337,6 +337,7 @@ void empire_city_set_trade_route_cost(int route_id, int new_cost)
     array_foreach(cities, city) {
         if (city->in_use && city->route_id == route_id) {
             city->cost_to_open = new_cost;
+            empire_object_get_full(city->empire_object_id)->trade_route_cost = new_cost;
             return;
         }
     }

@@ -1014,7 +1014,7 @@ static void refresh_empire(void)
         return;
     }
     const char *filename = dir_get_file_at_location(scenario.empire.custom_name, PATH_LOCATION_EDITOR_CUSTOM_EMPIRES);
-    if (!filename) {
+    if (!filename || !*scenario.empire.custom_name) {
         return;
     }
     empire_xml_parse_file(filename, 0);
@@ -1477,7 +1477,7 @@ static void button_route_type(const generic_button *button)
 
 static void set_opening_cost(int value)
 {
-    empire_city_get(data.selected_city)->cost_to_open = value;
+    empire_city_set_trade_route_cost(empire_city_get(data.selected_city)->route_id, value);
 }
 
 static void button_route_cost(const generic_button *button)

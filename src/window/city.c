@@ -30,6 +30,7 @@
 #include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
+#include "graphics/weather.h"
 #include "graphics/window.h"
 #include "map/bookmark.h"
 #include "map/building.h"
@@ -61,6 +62,20 @@ static int time_left_label_shown;
 
 
 static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font, color_t color_ver);
+
+int window_city_simulated_weather(weather_type weather)
+{
+    switch (weather) {
+        case WEATHER_RAIN:
+            return config_get(CONFIG_UI_WT_PREVIEW_RAIN) || config_get(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN);
+        case WEATHER_SNOW:
+            return config_get(CONFIG_UI_WT_ENABLE_SNOW_CENTRAL);
+        case WEATHER_SAND:
+            return config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM);
+        default:
+            return 0;
+    }
+}
 
 int window_city_is_window_cityview(void)
 {

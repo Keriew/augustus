@@ -157,6 +157,9 @@ static void add_city(const default_city *city)
     full->obj.empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
     full->empire_city_icon = EMPIRE_CITY_ICON_ROMAN_CITY;
     full->obj.image_id = empire_city_get_icon_image_id(EMPIRE_CITY_ICON_ROMAN_CITY);
+    const image *img = image_get(full->obj.image_id);
+    full->obj.width = img->width;
+    full->obj.height = img->height;
     full->city_name_id = city->name_id;
     empire_object_add_to_cities(full);
 }

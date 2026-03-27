@@ -178,9 +178,13 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                     //rubble state handling:
 
                     if (map_building_rubble_building_id(grid_offset)) {
+
                         int rubble_id = map_building_rubble_building_id(grid_offset);
-                        building *rubble_building = building_get(map_building_rubble_building_id(grid_offset));
                         if (rubble_id) {
+                            
+                            building *rubble_building = building_get(rubble_id);
+                            map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
+
                             if (rubble_building->state == BUILDING_STATE_RUBBLE ||
                                     rubble_building->type == BUILDING_BURNING_RUIN) {
                                 int ruins_left = map_building_ruins_left(rubble_id);
@@ -194,7 +198,6 @@ static int clear_land_confirmed(int measure_only, int x_start, int y_start, int 
                                 rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
                             }
                         }
-                        map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
                     }
                 }
                 map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
