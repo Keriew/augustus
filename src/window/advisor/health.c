@@ -11,7 +11,7 @@
 #include "graphics/panel.h"
 #include "graphics/text.h"
 
-#define ADVISOR_HEIGHT 26
+#define ADVISOR_HEIGHT 28
 
 static int get_health_advice(void)
 {
