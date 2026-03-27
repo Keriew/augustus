@@ -302,15 +302,20 @@ void city_emperor_change_rank(int change)
     } else {
         new_rank = old_rank + change;
     }
-    city_emperor_set_salary_rank(new_rank);
-    if (new_rank != old_rank) {
-        city_message_post(1, MESSAGE_GOVERNOR_RANK_CHANGE, old_rank, new_rank);
-    }
+    new_rank = calc_bound(new_rank, 0, RANKS - 1);
+    city_emperor_set_rank(new_rank);
 }
 
 void city_emperor_set_rank(int new_rank)
 {
+    if (new_rank < 0 || new_rank >= RANKS) {
+        return;
+    }
     int old_rank = city_data.emperor.player_rank;
+    if (new_rank == old_rank) {
+        return;
+    }
+    city_data.emperor.player_rank = new_rank;
     city_emperor_set_salary_rank(new_rank);
     city_message_post(1, MESSAGE_GOVERNOR_RANK_CHANGE, old_rank, new_rank);
 }
