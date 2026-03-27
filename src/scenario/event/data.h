@@ -10,7 +10,6 @@
 #define CONDITION_GROUP_STRUCT_SIZE (2 * sizeof(uint32_t) + 1 * sizeof(uint16_t) + 1 * sizeof(uint8_t))
 #define CONDITION_STRUCT_SIZE (5 * sizeof(int32_t) + 1 * sizeof(int16_t))
 #define MAX_FORMULA_LENGTH 100
-#define MAX_FORMULAS 1000
 
 typedef enum {
     EVENT_STATE_UNDEFINED = 0,

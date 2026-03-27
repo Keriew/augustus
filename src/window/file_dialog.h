@@ -13,7 +13,8 @@ typedef enum {
     FILE_TYPE_EMPIRE = 2,
     FILE_TYPE_SCENARIO_EVENTS = 3,
     FILE_TYPE_CUSTOM_MESSAGES = 4,
-    FILE_TYPE_MODEL_DATA = 5
+    FILE_TYPE_MODEL_DATA = 5,
+    FILE_TYPE_EMPIRE_IMAGE = 6
 } file_type;
 
 void window_file_dialog_show(file_type type, file_dialog_type dialog_type);

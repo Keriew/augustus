@@ -306,10 +306,10 @@ static int get_least_filled_quota_resource(building *b, int city_id, signed char
             }
         }
 
-        int limit = trade_route_limit(route_id, r);
+        int limit = trade_route_limit(route_id, r, trader_buying);
         if (limit <= 0) continue;
 
-        int traded = trade_route_traded(route_id, r);
+        int traded = trade_route_traded(route_id, r, trader_buying);
         int fill_percent = (traded * 100) / limit;
 
         if (fill_percent < lowest_percent) {
@@ -335,17 +335,16 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
         signed char resource_sell = empire_can_import_resource_from_city(city_id, r) ? 1 : 0;
         signed char resource_buy = empire_can_export_resource_to_city(city_id, r) ? 1 : 0;
         if (resource_sell || resource_buy) {
-            int remaining = trade_route_limit(route_id, r) - trade_route_traded(route_id, r);
+            int remaining_sell = trade_route_limit(route_id, r, 0) - trade_route_traded(route_id, r, 0);
+            int remaining_buy = trade_route_limit(route_id, r, 1) - trade_route_traded(route_id, r, 1);
             if (route_id == 0 && f->type == FIGURE_NATIVE_TRADER) { // no limits for native traders
-                remaining = figure_trade_land_trade_units();
+                remaining_buy = figure_trade_land_trade_units();
             }
-            if (remaining > 0) {
-                if (resource_sell) {
-                    sellable[r] = remaining;
-                }
-                if (resource_buy) {
-                    buyable[r] = remaining;
-                }
+            if (resource_sell && remaining_sell > 0) {
+                sellable[r] = remaining_sell;
+            }
+            if (resource_buy && remaining_buy > 0) {
+                buyable[r] = remaining_buy;
             }
         }
     }
@@ -514,7 +513,7 @@ void figure_trade_caravan_action(figure *f)
                 if (figure_trade_caravan_can_buy(f, f->destination_building_id, f->empire_city_id)) {
                     int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
-                        trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource);
+                        trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 1);
                         trader_record_bought_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->trader_amount_bought++;
@@ -527,7 +526,7 @@ void figure_trade_caravan_action(figure *f)
                 if (figure_trade_caravan_can_sell(f, f->destination_building_id, f->empire_city_id)) {
                     int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
-                        trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource);
+                        trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 0);
                         trader_record_sold_resource(f->trader_id, resource);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->loads_sold_or_carrying++;
@@ -947,8 +946,19 @@ void figure_trade_ship_action(figure *f)
                     f->action_state = FIGURE_ACTION_115_TRADE_SHIP_LEAVING;
                     f->wait_ticks = 0;
                     map_point river_entry = scenario_map_river_entry();
-                    f->destination_x = river_entry.x;
-                    f->destination_y = river_entry.y;
+                    map_point river_spot;
+                    if (scenario_map_has_river_exit()) {
+                        map_point river_exit = scenario_map_river_exit();
+                        int exit_grid_offset = map_grid_offset(river_exit.x, river_exit.y);
+                        int exit_distance = map_grid_chess_distance(f->grid_offset, exit_grid_offset);
+                        int entrance_grid_offset = map_grid_offset(river_entry.x, river_entry.y);
+                        int entrance_distance = map_grid_chess_distance(f->grid_offset, entrance_grid_offset);
+                        river_spot = exit_distance < entrance_distance ? river_exit : river_entry;
+                    } else {
+                        river_spot = river_entry;
+                    }
+                    f->destination_x = river_spot.x;
+                    f->destination_y = river_spot.y;
                     building *dst = building_get(f->destination_building_id);
                     dst->data.dock.queued_docker_id = 0;
                     dst->data.dock.num_ships = 0;

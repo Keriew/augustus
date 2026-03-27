@@ -115,8 +115,24 @@ static void draw_foreground(void)
     }
 
     if (resource_is_storable(data.resource)) {
-        int width = lang_text_draw_amount(8, 10, city_resource_count_warehouses_amount(data.resource), 66, 192, FONT_NORMAL_BLACK);
-        lang_text_draw(54, 15, 66 + width, 192, FONT_NORMAL_BLACK);
+        int warehouse_amount = city_resource_count_warehouses_amount(data.resource);
+        int in_granaries = city_resource_count_food_on_granaries(data.resource) / 100; // food is counted in 100s
+        lang_fragment storage_seq[6];
+        int seq_len = 0;
+        storage_seq[seq_len++] = (lang_fragment) { .type = LANG_FRAG_AMOUNT,
+            .text_group = 8, .text_id = 10, .number = warehouse_amount };
+        storage_seq[seq_len++] = (lang_fragment) { .type = LANG_FRAG_LABEL, .text_group = 54, .text_id = 15 };
+        if (in_granaries > 0) {
+            int remove_space = -font_definition_for(FONT_NORMAL_BLACK)->space_width;
+            storage_seq[seq_len++] = (lang_fragment) { .type = LANG_FRAG_SPACE, .space_width = remove_space };
+            storage_seq[seq_len++] = (lang_fragment) { .type = LANG_FRAG_TEXT, .text = (const uint8_t *) ", " };
+            storage_seq[seq_len++] = (lang_fragment) { .type = LANG_FRAG_NUMBER, .number = in_granaries };
+            storage_seq[seq_len++] = (lang_fragment) { .type = LANG_FRAG_LABEL,
+                .text_group = CUSTOM_TRANSLATION, .text_id = TR_RESOURCE_SETTINGS_IN_GRANARIES
+            };
+        }
+        lang_text_draw_sequence(storage_seq, seq_len, 66, 192, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+        int width = 0;
 
         int can_import_potentially = empire_can_import_resource_potentially(data.resource);
         int can_export_potentially = empire_can_export_resource_potentially(data.resource);

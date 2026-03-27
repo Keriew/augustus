@@ -41,6 +41,9 @@ static struct {
 
 int city_resource_count_food_on_granaries(resource_type food)
 {
+    if (!resource_is_food(food)) {
+        return 0;
+    }
     return city_data.resource.granary_food_stored[food];
 }
 
