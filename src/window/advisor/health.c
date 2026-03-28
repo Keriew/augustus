@@ -64,7 +64,8 @@ static void print_water_building_info(int y_offset, building_type type, int popu
     lang_text_draw(group, index, 40 + desc_offset_x, y_offset, FONT_NORMAL_WHITE);
 
     // working
-    text_draw_number_centered(building_count_active(type), 180, y_offset, 100, FONT_NORMAL_WHITE);
+    text_draw_number_centered(type == BUILDING_WELL ? total_count : building_count_active(type),
+        180, y_offset, 100, FONT_NORMAL_WHITE);
 
     // care for
     int width = text_draw_number(population_served, '@', " ", 305, y_offset, FONT_NORMAL_WHITE, 0);

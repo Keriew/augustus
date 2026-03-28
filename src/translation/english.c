@@ -2049,7 +2049,12 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_HEALTH_HEALTH_COVERAGE, "Health"},
     {TR_BUILDING_FOUNTAINS, "Fountains"},
     {TR_BUILDING_WELLS, "Wells"},
-    {TR_BUILDING_LATRINE, "Latrine"}
+    {TR_BUILDING_LATRINE, "Latrine"},
+    {TR_ADVISOR_CHIEF_WATER_COVERAGE, "Water coverage"},
+    {TR_ADVISOR_CHIEF_CLEAN_WATER, "A Majority of your population has access to clean fountain water."},
+    {TR_ADVISOR_CHIEF_LATRINE_AND_WELL, "A Majority of your population has access to well water and a latrine."},
+    {TR_ADVISOR_CHIEF_WELL_WATER, "Most of your people have to recieve their water from wells."},
+    {TR_ADVISOR_CHIEF_NO_WATER, "Most of your people don't have any access to a proper water supply."}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
