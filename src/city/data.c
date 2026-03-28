@@ -866,7 +866,7 @@ static void load_main_data(buffer *main, int version)
     city_data.health.population_access.clinic = buffer_read_i32(main);
     city_data.health.population_access.baths = buffer_read_i32(main);
     city_data.health.population_access.barber = buffer_read_i32(main);
-    if (version > SAVE_GAME_LAST_NO_WATER_IN_ADVISORS){
+    if (version > SAVE_GAME_LAST_NO_WATER_IN_ADVISORS) {
         city_data.health.population_access.wells = buffer_read_i32(main);
         city_data.health.population_access.latrines = buffer_read_i32(main);
         city_data.health.population_access.fountains = buffer_read_i32(main);
