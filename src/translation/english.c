@@ -2046,7 +2046,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_WT_DURATION_REGULAR, "Regular"},
     {TR_CONFIG_WT_DURATION_LONG, "Long"},
     {TR_ADVISOR_HEALTH_WATER_COVERAGE, "Water"},
-    {TR_ADVISOR_HEALTH_HEALTH_COVERAGE, "Health"}
+    {TR_ADVISOR_HEALTH_HEALTH_COVERAGE, "Health"},
+    {TR_BUILDING_FOUNTAINS, "Fountains"},
+    {TR_BUILDING_WELLS, "Wells"},
+    {TR_BUILDING_LATRINE, "Latrine"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

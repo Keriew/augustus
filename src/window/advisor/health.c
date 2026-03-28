@@ -45,14 +45,41 @@ static int get_health_advice(void)
 
 static void print_water_building_info(int y_offset, building_type type, int population_served)
 {
-    
+    // total amount & building name
+    int total_count = building_count_total(type);
+    int group = 28;
+    int index = type;
+    if (total_count != 1 && type != BUILDING_LATRINES) {
+        group = CUSTOM_TRANSLATION;
+        if (type == BUILDING_LATRINES) {
+            index = TR_BUILDING_LATRINE;
+        } else if (type == BUILDING_FOUNTAIN) {
+            index = TR_BUILDING_FOUNTAINS;
+        } else {
+            index = TR_BUILDING_WELLS;
+        }
+    }
+
+    int desc_offset_x = text_draw_number(total_count, ' ', " ", 40, y_offset, FONT_NORMAL_WHITE, 0);
+    lang_text_draw(group, index, 40 + desc_offset_x, y_offset, FONT_NORMAL_WHITE);
+
+    // working
+    text_draw_number_centered(building_count_active(type), 180, y_offset, 100, FONT_NORMAL_WHITE);
+
+    // care for
+    int width = text_draw_number(population_served, '@', " ", 305, y_offset, FONT_NORMAL_WHITE, 0);
+    lang_text_draw(58, 5, 305 + width, y_offset, FONT_NORMAL_WHITE);
+
+    // city coverage
+    text_draw_percentage_centered(calc_percentage(population_served, city_population()),
+        440, y_offset, 160, FONT_NORMAL_WHITE);
 }
 
 static void print_health_building_info(int y_offset, building_type type, int population_served, int coverage)
 {
     // total amount & building name
     static const int BUILDING_ID_TO_STRING_ID[] = { 28, 30, 24, 26 };
-
+    
     lang_text_draw_amount(8, BUILDING_ID_TO_STRING_ID[type - BUILDING_DOCTOR],
         building_count_total(type), 40, y_offset, FONT_NORMAL_WHITE);
     // working
@@ -113,7 +140,14 @@ static int draw_background(void)
 
     int population = city_population();
     if (display_water_coverage) {
-        
+        int people_covered = city_health_get_population_with_well_access();
+        print_water_building_info(128, BUILDING_WELL, people_covered);
+
+        people_covered = city_health_get_population_with_latrines_access();
+        print_water_building_info(148, BUILDING_LATRINES, people_covered);
+
+        people_covered = city_health_get_population_with_water_access();
+        print_water_building_info(168, BUILDING_FOUNTAIN, people_covered);
     } else {
         int people_covered = city_health_get_population_with_baths_access();
         print_health_building_info(128, BUILDING_BATHHOUSE, people_covered, calc_percentage(people_covered, population));

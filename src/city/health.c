@@ -365,10 +365,11 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
 
 void city_health_update(void)
 {
+    int only_gather_stats = 0;
     if (city_data.population.population < 200 || scenario_is_tutorial_1() || scenario_is_tutorial_2()) {
         city_data.health.value = 50;
         city_data.health.target_value = 50;
-        return;
+        only_gather_stats = 1;
     }
     int total_population = 0;
     int healthy_population = 0;
@@ -393,9 +394,14 @@ void city_health_update(void)
             int house_health = city_health_get_house_health_level(b, 1);
 
             total_population += b->house_population;
-            healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
-            adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
+            if (!only_gather_stats) {
+                healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
+                adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
+            }
         }
+    }
+    if (only_gather_stats) {
+        return;
     }
     city_data.health.target_value = calc_percentage(healthy_population, total_population);
     if (city_data.health.value < city_data.health.target_value) {
@@ -487,4 +493,19 @@ int city_health_get_population_with_barber_access(void)
 int city_health_get_population_with_baths_access(void)
 {
     return city_data.health.population_access.baths;
+}
+
+int city_health_get_population_with_well_access(void)
+{
+    return city_data.health.population_access.wells;
+}
+
+int city_health_get_population_with_latrines_access(void)
+{
+    return city_data.health.population_access.latrines;
+}
+
+int city_health_get_population_with_water_access(void)
+{
+    return city_data.health.population_access.fountains;
 }

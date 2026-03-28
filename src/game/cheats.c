@@ -85,7 +85,7 @@ static const char *commands[] = {
     "startinvasion",            // syntax: startinvasion <invasion_type> <size> <invasion_point>
     "nextyear",
     "blessing",                 // syntax: blessing <god_id>
-    "showtooltip",              // syntax: showtooltip <enabled>
+    "showtooltip",              // syntax: showtooltip <type/dsiabled>
     "killall",
     "finishmonuments",
     "monumentphase",            // syntax: monumentphase <phase>
@@ -272,7 +272,7 @@ static void game_cheat_change_climate(uint8_t *args)
 
 static void game_cheat_show_tooltip(uint8_t *args)
 {
-    // correct syntax = showtooltip <enabled>
+    // correct syntax = showtooltip <type/disabled>
     parse_integer(args, &data.tooltip_enabled);
     show_warning(TR_CHEAT_TOGGLE_TOOLTIPS);
 }
