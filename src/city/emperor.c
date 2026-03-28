@@ -300,7 +300,7 @@ void city_emperor_change_rank(int change)
     } else if (change == 12) { // -1 demotion
         new_rank = old_rank - 1;
     } else {
-        new_rank = old_rank + change;
+        new_rank = change;
     }
     new_rank = calc_bound(new_rank, 0, RANKS - 1);
     city_emperor_set_rank(new_rank);
