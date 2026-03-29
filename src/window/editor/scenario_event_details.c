@@ -1085,9 +1085,42 @@ static void button_paste_event(const generic_button *button)
     if (!data.did_copy_event) {
         return;
     }
-    data.did_copy_event = 0;
     int event_id = data.event->id;
-    *data.event = data.copied_event;
+    data.event->state = data.copied_event.state;
+    data.event->repeat_days_min = data.copied_event.repeat_days_min;
+    data.event->repeat_days_max = data.copied_event.repeat_days_max;
+    data.event->repeat_interval = data.copied_event.repeat_interval;
+    data.event->max_number_of_repeats = data.copied_event.max_number_of_repeats;
+    data.event->execution_count = data.copied_event.execution_count;
+    data.event->days_until_active = data.copied_event.days_until_active;
+    string_copy(data.copied_event.name, data.event->name, EVENT_NAME_LENGTH);
+    array_init(data.event->actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.copied_event.actions.constructor,
+        data.copied_event.actions.in_use);
+    array_init(data.event->condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
+        data.copied_event.condition_groups.constructor, data.copied_event.condition_groups.in_use);
+    for (unsigned int i = 0; i < data.copied_event.actions.size; i++) {
+        scenario_action_t *action;
+        array_new_item(data.event->actions, action);
+        *action = *array_item(data.copied_event.actions, i);
+
+        scenario_parameters_foreach_in_action(action, copy_formulas_action);
+    }
+
+    for (unsigned int i = 0; i < data.copied_event.condition_groups.size; i++) {
+        scenario_condition_group_t *group;
+        array_new_item(data.event->condition_groups, group);
+        scenario_condition_group_t *original_group = array_item(data.copied_event.condition_groups, i);
+        group->type = original_group->type;
+        array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
+            original_group->conditions.in_use);
+        for (unsigned int j = 0; j < original_group->conditions.size; j++) {
+            scenario_condition_t *condition;
+            array_new_item(group->conditions, condition);
+            *condition = *array_item(original_group->conditions, j);
+
+            scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+        }
+    }
     data.event->id = event_id;
     scenario_events_assign_parent_single_event_ids(data.event);
     update_groups();
