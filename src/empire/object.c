@@ -168,7 +168,11 @@ void empire_object_load(buffer *buf, int version)
         full->city_name_id = buffer_read_u8(buf);
         obj->trade_route_id = buffer_read_u8(buf);
         full->trade_route_open = buffer_read_u8(buf);
-        full->trade_route_cost = buffer_read_i16(buf);
+        if (version > SCENARIO_LAST_LIMITED_ROUTE_COST) {
+            full->trade_route_cost = buffer_read_i32(buf);
+        } else {
+            full->trade_route_cost = buffer_read_i16(buf);
+        }
         int old_sells_resource[10];
         int old_buys_resource[8];
         if (version <= SCENARIO_LAST_UNVERSIONED) {
@@ -279,7 +283,7 @@ void empire_object_save(buffer *buf)
         return;
     }
     int size_per_obj = 85; // +2 bytes for empire_city_icon fields
-    int size_per_city = 145 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
+    int size_per_city = 147 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
     int total_size = 0;
 
     full_empire_object *full;
@@ -318,7 +322,7 @@ void empire_object_save(buffer *buf)
         buffer_write_u8(buf, full->city_name_id);
         buffer_write_u8(buf, obj->trade_route_id);
         buffer_write_u8(buf, full->trade_route_open);
-        buffer_write_i16(buf, full->trade_route_cost);
+        buffer_write_i32(buf, full->trade_route_cost);
         if (obj->type == EMPIRE_OBJECT_CITY) {
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 buffer_write_i16(buf, full->city_sells_resource[r]);
