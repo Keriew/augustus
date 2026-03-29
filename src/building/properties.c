@@ -72,6 +72,7 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_group = 19,
         .image_offset = 2,
         .fire_proof = 1,
+        .shared = 1,
         .event_data.attr = "aqueduct",
         .building_model_data = {.cost = 8, .desirability_value = -2, .desirability_step = 1,
             .desirability_step_size = 1, .desirability_range = 2, .laborers = 0}

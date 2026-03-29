@@ -616,7 +616,7 @@ void map_terrain_migrate_old_bridges(void)
     }
 }
 
-void map_terrain_migrate_old_walls(void)
+void map_terrain_migrate_shared_buildings(void)
 {
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++) {
@@ -624,10 +624,16 @@ void map_terrain_migrate_old_walls(void)
             if (!map_grid_is_valid_offset(grid_offset)) {
                 continue;
             }
+
+            building *shared_building = 0;
             if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
-                building *wall = building_create(BUILDING_WALL, 0, 0);
-                wall->subtype.instances++;
-                map_building_set(grid_offset, wall->id);
+                shared_building = building_create(BUILDING_WALL, 0, 0);
+            } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+                shared_building = building_create(BUILDING_AQUEDUCT, 0, 0);
+            }
+            if (shared_building) {
+                shared_building->subtype.instances++;
+                map_building_set(grid_offset, shared_building->id);
                 map_terrain_add(grid_offset, TERRAIN_BUILDING);
                 map_property_clear_multi_tile_xy(grid_offset);
             }
