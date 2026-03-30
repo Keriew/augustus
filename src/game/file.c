@@ -511,7 +511,7 @@ void game_file_write_mission_saved_game(void)
         if (locale_translate_rank_autosaves()) {
             encoding_to_utf8(lang_get_string(32, rank), localized_filename, FILE_NAME_MAX,
                 encoding_system_uses_decomposed());
-            strncat(localized_filename, ".svx", FILE_NAME_MAX - strlen(localized_filename) - 1);
+            strncat_s(localized_filename, FILE_NAME_MAX, ".svx", _TRUNCATE);
             filename = localized_filename;
         }
     } else {
