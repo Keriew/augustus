@@ -5,6 +5,10 @@
 
 #include "SDL.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int platform_renderer_init(SDL_Window *window);
 
 int platform_renderer_create_render_texture(int width, int height);
@@ -25,5 +29,9 @@ void platform_renderer_pause(void);
 void platform_renderer_resume(void);
 
 void platform_renderer_destroy(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // PLATFORM_RENDERER_H

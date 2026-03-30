@@ -108,6 +108,8 @@ static int center_in_city(int element_width_pixels)
 {
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
+    x = screen_pixel_to_ui(x);
+    width = screen_pixel_to_ui(width);
     int margin = (width - element_width_pixels) / 2;
     return x + margin;
 }
@@ -300,7 +302,9 @@ static void draw_foreground(void)
             draw_paused_banner();
         }
     }
+    screen_set_pixel_render_scale();
     widget_city_draw_construction_cost_and_size();
+    screen_set_ui_render_scale();
     if (window_is(WINDOW_CITY)) {
         city_message_process_queue();
     }
@@ -846,6 +850,7 @@ static void handle_hotkeys(const hotkeys *h)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
+    const mouse *m_pixel = mouse_get_pixel();
     handle_hotkeys(h);
     if (!building_construction_in_progress()) {
         if (widget_top_menu_handle_input(m, h)) {
@@ -855,11 +860,12 @@ static void handle_input(const mouse *m, const hotkeys *h)
             return;
         }
     }
-    widget_city_handle_input(m, h);
+    widget_city_handle_input(m_pixel, h);
 }
 
 static void handle_input_military(const mouse *m, const hotkeys *h)
 {
+    const mouse *m_pixel = mouse_get_pixel();
     handle_hotkeys(h);
     if (widget_top_menu_handle_input(m, h)) {
         return;
@@ -867,7 +873,7 @@ static void handle_input_military(const mouse *m, const hotkeys *h)
     if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && widget_sidebar_military_handle_input(m)) {
         return;
     }
-    widget_city_handle_input_military(m, h, formation_get_selected());
+    widget_city_handle_input_military(m_pixel, h, formation_get_selected());
 }
 
 static void get_tooltip(tooltip_context *c)
@@ -885,7 +891,14 @@ static void get_tooltip(tooltip_context *c)
         c->text_id = text_id;
         return;
     }
+    const mouse *m_pixel = mouse_get_pixel();
+    c->mouse_x = m_pixel->x;
+    c->mouse_y = m_pixel->y;
+    screen_set_pixel_render_scale();
     widget_city_get_tooltip(c);
+    if (c->type == TOOLTIP_NONE) {
+        screen_set_ui_render_scale();
+    }
 }
 
 int window_city_military_is_cursor_in_menu(void)
@@ -893,7 +906,7 @@ int window_city_military_is_cursor_in_menu(void)
     if (!config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) || !window_is(WINDOW_CITY_MILITARY)) {
         return 0;
     }
-    const mouse *m = mouse_get();
+    const mouse *m = mouse_get_pixel();
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
     y += 24;
@@ -903,6 +916,7 @@ int window_city_military_is_cursor_in_menu(void)
 
 void window_city_draw_all(void)
 {
+    screen_set_ui_render_scale();
     if (formation_get_selected() && config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR)) {
         draw_background_military();
         draw_foreground_military();
@@ -914,6 +928,7 @@ void window_city_draw_all(void)
 
 void window_city_draw_panels(void)
 {
+    screen_set_ui_render_scale();
     if (formation_get_selected() && config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR)) {
         draw_background_military();
     } else {
@@ -923,7 +938,9 @@ void window_city_draw_panels(void)
 
 void window_city_draw(void)
 {
+    screen_set_pixel_render_scale();
     widget_city_draw();
+    screen_set_ui_render_scale();
 }
 
 void window_city_show(void)

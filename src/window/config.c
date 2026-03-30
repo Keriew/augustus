@@ -176,6 +176,7 @@ static const uint8_t *display_text_scroll_speed(void);
 static const uint8_t *display_text_difficulty(void);
 static const uint8_t *display_text_max_grand_temples(void);
 static const uint8_t *display_text_autosave_slots(void);
+static const uint8_t *display_text_yearly_autosave(void);
 static const uint8_t *display_text_default_game_speed(void);
 static const uint8_t *display_text_rain_intensity(void);
 static const uint8_t *display_text_rain_speed(void);
@@ -215,7 +216,7 @@ static config_widget page_general[] = {
 
     {TYPE_NUMERICAL_DESC, RANGE_MAX_AUTOSAVE_SLOTS, TR_CONFIG_MAX_AUTOSAVE_SLOTS, NULL, 0, 1, ITEM_BASE_H, 10},
     {TYPE_NUMERICAL_RANGE, RANGE_MAX_AUTOSAVE_SLOTS, 0, display_text_autosave_slots, 0, 1, ITEM_BASE_H, 2},
-    {TYPE_CHECKBOX, CONFIG_GP_CH_YEARLY_AUTOSAVE, TR_BUTTON_YEARLY_AUTOSAVE_ON, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    {TYPE_CHECKBOX, CONFIG_GP_CH_YEARLY_AUTOSAVE, TR_BUTTON_YEARLY_AUTOSAVE_ON, display_text_yearly_autosave, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
 
     {TYPE_HEADER, 0, TR_CONFIG_VIDEO, NULL, 0, 1, ITEM_BASE_H, 14},
     {TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN, TR_CONFIG_FULLSCREEN, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
@@ -669,7 +670,7 @@ static int config_change_fullscreen(int key)
     if (!system_is_fullscreen_only()) {
         system_set_fullscreen(data.config_values[key].new_value);
         if (data.config_values[key].new_value) {
-            setting_set_display(1, screen_width(), screen_height());
+            setting_set_display(1, screen_pixel_width(), screen_pixel_height());
         }
         config_change_basic(key);
     }
@@ -971,6 +972,12 @@ static const uint8_t *display_text_autosave_slots(void)
     string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value, 0);
     return data.display_text;
 }
+static const uint8_t *display_text_yearly_autosave(void)
+{
+    translation_key key = data.config_values[CONFIG_GP_CH_YEARLY_AUTOSAVE].new_value ?
+        TR_BUTTON_YEARLY_AUTOSAVE_ON : TR_BUTTON_YEARLY_AUTOSAVE_OFF;
+    return translation_for(key);
+}
 static const uint8_t *display_text_default_game_speed(void)
 {
     return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value));
@@ -1223,8 +1230,8 @@ static void calculate_available_resolutions_and_fullscreen(void)
     static int old_height;
     static int old_fullscreen = -1;
 
-    int width = screen_width();
-    int height = screen_height();
+    int width = screen_pixel_width();
+    int height = screen_pixel_height();
 
     for (size_t i = 0; i < sizeof(resolutions) / sizeof(resolution); i++) {
         if (resolutions[i].width == width && resolutions[i].height == height) {
@@ -1430,9 +1437,18 @@ static int checkbox_text_height(const uint8_t *txt, int w)
     int lines = text_measure_multiline(txt, w, FONT_NORMAL_BLACK, &largest);
     return lines * one_line_ml_height(FONT_NORMAL_BLACK);
 }
+
+static const uint8_t *checkbox_text(const config_widget *w)
+{
+    if (w->get_display_text) {
+        return w->get_display_text();
+    }
+    return translation_for(w->description);
+}
+
 static void op_measure_checkbox(const config_widget *w, int avail_text_w, int *out_h)
 {
-    const uint8_t *txt = translation_for(w->description);
+    const uint8_t *txt = checkbox_text(w);
     int h = checkbox_text_height(txt, avail_text_w) + 8; //  4+4 padding
 
     if (h < ITEM_BASE_H) {
@@ -1442,7 +1458,7 @@ static void op_measure_checkbox(const config_widget *w, int avail_text_w, int *o
 }
 static void op_draw_bg_checkbox(const config_widget *w, int x, int y, int avail_text_w)
 {
-    const uint8_t *txt = translation_for(w->description);
+    const uint8_t *txt = checkbox_text(w);
     int text_h = text_draw_multiline(txt, x + 30, y + 3, avail_text_w, 0, FONT_NORMAL_BLACK, 0);
     int text_center_y = y + (text_h / 2);
     int box_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
@@ -1456,7 +1472,7 @@ static void op_draw_fg_checkbox(const config_widget *w, int x, int y, int avail_
     if (!focused) {
         return;
     }
-    const uint8_t *txt = translation_for(w->description);
+    const uint8_t *txt = checkbox_text(w);
     int text_h = checkbox_text_height(txt, avail_text_w);
     int text_center_y = y + (text_h / 2);
     int box_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);

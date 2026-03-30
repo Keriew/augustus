@@ -7,8 +7,10 @@
 #include "editor/editor.h"
 #include "graphics/menu.h"
 #include "graphics/renderer.h"
+#include "graphics/screen.h"
 #include "map/grid.h"
 #include "map/image.h"
+#include "widget/sidebar/common.h"
 #include "widget/minimap.h"
 
 #define TILE_WIDTH_PIXELS 60
@@ -592,12 +594,16 @@ static void set_viewport(int x_offset, int y_offset, int width, int height)
 
 static void set_viewport_with_sidebar(void)
 {
-    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 160, data.screen_height - TOP_MENU_HEIGHT);
+    int top_menu_height = screen_ui_to_pixel(TOP_MENU_HEIGHT);
+    int sidebar_x = screen_ui_to_pixel(sidebar_common_get_x_offset_expanded());
+    set_viewport(0, top_menu_height, sidebar_x, data.screen_height - top_menu_height);
 }
 
 static void set_viewport_without_sidebar(void)
 {
-    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 40, data.screen_height - TOP_MENU_HEIGHT);
+    int top_menu_height = screen_ui_to_pixel(TOP_MENU_HEIGHT);
+    int sidebar_x = screen_ui_to_pixel(sidebar_common_get_x_offset_collapsed());
+    set_viewport(0, top_menu_height, sidebar_x, data.screen_height - top_menu_height);
 }
 
 void city_view_set_scale(int scale)

@@ -290,7 +290,7 @@ static void handle_mouse_direct(void)
     int x = first->current_point.x;
     int y = first->current_point.y;
     system_set_mouse_position(&x, &y);
-    mouse_set_position(x, y);
+    mouse_set_logical_position(x, y);
 }
 
 int touch_to_mouse(void)

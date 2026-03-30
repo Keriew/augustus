@@ -446,7 +446,7 @@
     <ClCompile Include="src\map\tiles.c" />
     <ClCompile Include="src\map\water.c" />
     <ClCompile Include="src\map\water_supply.c" />
-    <ClCompile Include="src\platform\augustus.c" />
+    <ClCompile Include="src\platform\augustus.cpp" />
     <ClCompile Include="src\platform\crash_handler.c" />
     <ClCompile Include="src\platform\cursor.c" />
     <ClCompile Include="src\platform\file_manager.c" />
@@ -458,8 +458,8 @@
     <ClCompile Include="src\platform\mouse.c" />
     <ClCompile Include="src\platform\platform.c" />
     <ClCompile Include="src\platform\prefs.c" />
-    <ClCompile Include="src\platform\renderer.c" />
-    <ClCompile Include="src\platform\screen.c" />
+    <ClCompile Include="src\platform\renderer.cpp" />
+    <ClCompile Include="src\platform\screen.cpp" />
     <ClCompile Include="src\platform\sound_device.c" />
     <ClCompile Include="src\platform\touch.c" />
     <ClCompile Include="src\platform\user_path.c" />

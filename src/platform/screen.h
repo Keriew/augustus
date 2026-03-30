@@ -1,6 +1,10 @@
 #ifndef PLATFORM_SCREEN_H
 #define PLATFORM_SCREEN_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int platform_screen_get_scale(void);
 int platform_screen_create(const char *title, int dispay_scale_percentage, int display_id);
 void platform_screen_destroy(void);
@@ -12,7 +16,7 @@ int platform_screen_get_scale(void);
 
 void platform_screen_set_fullscreen(void);
 void platform_screen_set_windowed(void);
-void platform_screen_set_window_size(int logical_width, int logical_height);
+void platform_screen_set_window_size(int pixel_width, int pixel_height);
 void platform_screen_center_window(void);
 void platform_screen_update_window_grab(void);
 
@@ -23,5 +27,9 @@ void platform_screen_recreate_texture(void);
 int platform_screen_get_scale(void);
 
 void platform_screen_show_error_message_box(const char *title, const char *message);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // PLATFORM_SCREEN_H

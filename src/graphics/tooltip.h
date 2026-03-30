@@ -21,8 +21,8 @@ typedef enum {
 } tooltip_extra_text_type;
 
 typedef struct {
-    const int mouse_x;
-    const int mouse_y;
+    int mouse_x;
+    int mouse_y;
     tooltip_type type;
     int high_priority;
     int text_group;

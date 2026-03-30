@@ -52,6 +52,7 @@ typedef struct {
     void (*draw_line)(int x_start, int x_end, int y_start, int y_end, color_t color);
     void (*draw_rect)(int x_start, int x_end, int y_start, int y_end, color_t color);
     void (*fill_rect)(int x_start, int x_end, int y_start, int y_end, color_t color);
+    void (*set_output_scale)(float scale);
 
     void (*draw_image)(const image *img, int x, int y, color_t color, float scale);
     void (*draw_image_advanced)(const image *img, float x, float y, color_t color,

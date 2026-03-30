@@ -104,8 +104,8 @@ static struct {
 
 void init_weather_element(weather_element *e, int type)
 {
-    e->x = random_from_stdlib() % screen_width();
-    e->y = random_from_stdlib() % screen_height();
+    e->x = random_from_stdlib() % screen_pixel_width();
+    e->y = random_from_stdlib() % screen_pixel_height();
 
     switch (type) {
         case WEATHER_RAIN:
@@ -169,7 +169,7 @@ static void update_lightning(void)
 
     if (data.lightning_timer > 0) {
         color_t white_flash = apply_alpha(COLOR_WHITE, 128);
-        graphics_fill_rect(0, 0, screen_width(), screen_height(), white_flash);
+        graphics_fill_rect(0, 0, screen_pixel_width(), screen_pixel_height(), white_flash);
         data.lightning_timer--;
     }
 
@@ -255,7 +255,7 @@ static void render_weather_overlay(void)
         data.overlay_color = COLOR_WEATHER_SAND;
     }
 
-    graphics_fill_rect(0, 0, screen_width(), screen_height(),
+    graphics_fill_rect(0, 0, screen_pixel_width(), screen_pixel_height(),
         apply_alpha(data.overlay_color, alpha));
 }
 
@@ -294,7 +294,8 @@ static void draw_snow(void)
             data.elements[i].y + sf_size,
             COLOR_WEATHER_SNOWFLAKE);
 
-        if (data.elements[i].y >= screen_height() || data.elements[i].x <= 0 || data.elements[i].x >= screen_width()) {
+        if (data.elements[i].y >= screen_pixel_height() ||
+            data.elements[i].x <= 0 || data.elements[i].x >= screen_pixel_width()) {
             init_weather_element(&data.elements[i], data.weather_config.type);
             data.elements[i].y = -(int) (random_from_stdlib() % 30);
         }
@@ -327,7 +328,7 @@ static void draw_sandstorm(void)
             data.elements[i].y + sd_size,
             COLOR_WEATHER_SAND_PARTICLE);
 
-        if (data.elements[i].x > screen_width()) {
+        if (data.elements[i].x > screen_pixel_width()) {
             init_weather_element(&data.elements[i], data.weather_config.type);
             data.elements[i].x = 0;
         }
@@ -376,7 +377,8 @@ static void draw_rain(void)
             data.elements[i].y += dy;
         }
 
-        if (data.elements[i].y >= screen_height() || data.elements[i].x <= 0 || data.elements[i].x >= screen_width()) {
+        if (data.elements[i].y >= screen_pixel_height() ||
+            data.elements[i].x <= 0 || data.elements[i].x >= screen_pixel_width()) {
             init_weather_element(&data.elements[i], data.weather_config.type);
             data.elements[i].y = 0;
         }
