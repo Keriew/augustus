@@ -101,7 +101,7 @@ static int compare_case(const char *filename, long unused)
 {
     if (platform_file_manager_compare_filename(filename, data.cased_filename) == 0) {
         // We are copying anyway because the comparison is case insensitive, so we can't use the original filename
-        strcpy(data.cased_filename, filename);
+        strcpy_s(data.cased_filename, FILE_NAME_MAX, filename);
         return LIST_MATCH;
     }
     return LIST_NO_MATCH;
