@@ -460,6 +460,10 @@
     <ClCompile Include="src\platform\version.c" />
     <ClCompile Include="src\platform\virtual_keyboard.c" />
     <ClCompile Include="src\platform\arguments.c" />
+    <ClCompile Include="ext\spng\spng.c" />
+    <ClCompile Include="ext\sxml\sxml.c" />
+    <ClCompile Include="ext\tinyfiledialogs\tinyfiledialogs.c" />
+    <ClCompile Include="ext\zip\zip.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\scenario\allowed_building.h" />

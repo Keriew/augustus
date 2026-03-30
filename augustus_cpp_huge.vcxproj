@@ -1014,6 +1014,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)ext;$(ProjectDir)ext\dirent;$(ProjectDir)vendor\SDL2-2.32.10\include;$(ProjectDir)vendor\SDL2_mixer-2.8.1\include;$(ProjectDir)ext\easyav1_dummy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
