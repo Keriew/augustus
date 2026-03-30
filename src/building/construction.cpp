@@ -72,6 +72,8 @@ static struct {
     building_type selected_type;
     building_type compatibility_alias_type;
     int in_progress;
+    map_tile raw_start;
+    map_tile raw_end;
     map_tile start;
     map_tile end;
     int cost_preview;
@@ -153,6 +155,45 @@ static void set_required_terrain(building_type type)
     }
 }
 
+static void set_tile(map_tile *tile, int x, int y)
+{
+    tile->x = x;
+    tile->y = y;
+    tile->grid_offset = map_grid_offset(x, y);
+}
+
+static void sync_drag_points(void)
+{
+    if (!data.raw_start.grid_offset) {
+        return;
+    }
+
+    int raw_end_x = data.raw_end.grid_offset ? data.raw_end.x : data.raw_start.x;
+    int raw_end_y = data.raw_end.grid_offset ? data.raw_end.y : data.raw_start.y;
+    int start_x = data.raw_start.x;
+    int start_y = data.raw_start.y;
+    int end_x = raw_end_x;
+    int end_y = raw_end_y;
+
+    if (data.selected_type && building_tool_mode_handles_selection(data.selected_type)) {
+        building_tool_mode_resolve_drag_points(
+            data.selected_type,
+            data.compatibility_alias_type,
+            hotkey_get_modifiers(),
+            data.raw_start.x,
+            data.raw_start.y,
+            raw_end_x,
+            raw_end_y,
+            &start_x,
+            &start_y,
+            &end_x,
+            &end_y);
+    }
+
+    set_tile(&data.start, start_x, start_y);
+    set_tile(&data.end, end_x, end_y);
+}
+
 static building_type resolve_construction_type(void)
 {
     if (!data.selected_type) {
@@ -178,6 +219,7 @@ static void sync_construction_type(void)
     }
     data.type = resolved_type;
     set_required_terrain(data.type);
+    sync_drag_points();
     data.cost_preview = 0;
     if (data.in_progress) {
         game_undo_set_build_type(data.type);
@@ -662,8 +704,15 @@ void building_construction_set_type(building_type type, int setup_rotation)
     data.compatibility_alias_type = type;
     data.type = resolved_type;
     data.in_progress = 0;
+    data.raw_start.x = 0;
+    data.raw_start.y = 0;
+    data.raw_start.grid_offset = 0;
+    data.raw_end.x = 0;
+    data.raw_end.y = 0;
+    data.raw_end.grid_offset = 0;
     data.start.x = 0;
     data.start.y = 0;
+    data.end.grid_offset = 0;
     data.end.x = 0;
     data.end.y = 0;
     data.start.grid_offset = 0;
@@ -684,6 +733,18 @@ void building_construction_clear_type(void)
     data.selected_type = BUILDING_NONE;
     data.compatibility_alias_type = BUILDING_NONE;
     data.in_progress = 0;
+    data.raw_start.x = 0;
+    data.raw_start.y = 0;
+    data.raw_start.grid_offset = 0;
+    data.raw_end.x = 0;
+    data.raw_end.y = 0;
+    data.raw_end.grid_offset = 0;
+    data.start.x = 0;
+    data.start.y = 0;
+    data.start.grid_offset = 0;
+    data.end.x = 0;
+    data.end.y = 0;
+    data.end.grid_offset = 0;
     building_rotation_remove_rotation();
 }
 
@@ -735,13 +796,11 @@ int building_construction_in_progress(void)
 
 void building_construction_start(int x, int y, int grid_offset)
 {
-    if (data.type == BUILDING_HIGHWAY) {
-        building_construction_offset_start_from_orientation(&x, &y, 2);
-        grid_offset = map_grid_offset(x, y);
-    }
-    data.start.grid_offset = grid_offset;
-    data.start.x = data.end.x = x;
-    data.start.y = data.end.y = y;
+    data.raw_start.grid_offset = grid_offset;
+    data.raw_start.x = x;
+    data.raw_start.y = y;
+    data.raw_end = data.raw_start;
+    sync_drag_points();
 
     if (game_undo_start_build(data.type)) {
         data.in_progress = 1;
@@ -778,6 +837,11 @@ void building_construction_start(int x, int y, int grid_offset)
 
 int building_construction_is_updatable(void)
 {
+    if (data.selected_type && building_tool_mode_handles_selection(data.selected_type) &&
+        building_tool_mode_is_drag_tool(data.selected_type)) {
+        return 1;
+    }
+
     switch (data.type) {
         case BUILDING_CLEAR_LAND:
         case BUILDING_CLEAR_TREES:
@@ -862,18 +926,18 @@ void building_construction_update(int x, int y, int grid_offset)
 {
     building_type type = building_construction_type();
     if (grid_offset) {
-        if (type == BUILDING_HIGHWAY) {
-            building_construction_offset_start_from_orientation(&x, &y, 2);
-            grid_offset = map_grid_offset(x, y);
-        }
-        data.end.x = x;
-        data.end.y = y;
-        data.end.grid_offset = grid_offset;
+        data.raw_end.x = x;
+        data.raw_end.y = y;
+        data.raw_end.grid_offset = grid_offset;
     } else {
-        x = data.end.x;
-        y = data.end.y;
-        grid_offset = data.end.grid_offset;
+        x = data.raw_end.grid_offset ? data.raw_end.x : data.raw_start.x;
+        y = data.raw_end.grid_offset ? data.raw_end.y : data.raw_start.y;
+        grid_offset = data.raw_end.grid_offset ? data.raw_end.grid_offset : data.raw_start.grid_offset;
     }
+    sync_drag_points();
+    x = data.end.x;
+    y = data.end.y;
+    grid_offset = data.end.grid_offset;
     if (!type || city_finance_out_of_money()) {
         data.cost_preview = 0;
         return;
