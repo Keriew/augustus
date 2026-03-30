@@ -480,7 +480,7 @@ static void draw_foreground(void)
                 image_draw(data.preview_image_id, centered_x, centered_y, COLOR_MASK_NONE, SCALE_NONE);
             } else {
                 // Image is larger than box, scale it down to fit
-                image_draw(data.preview_image_id, 352 * scale, 80 * scale, COLOR_MASK_NONE, scale);
+                image_draw(data.preview_image_id, (int) (352 * scale), (int) (80 * scale), COLOR_MASK_NONE, scale);
             }
         } else {
             text_draw_centered(translation_for(TR_SAVE_DIALOG_SELECT_FILE), 362, 246, 246, FONT_NORMAL_BLACK, 0);

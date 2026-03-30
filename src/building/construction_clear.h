@@ -2,6 +2,10 @@
 #define BUILDING_CONSTRUCTION_CLEAR_H
 
 #include "graphics/color.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * Clears land
  * @param measure_only Whether to measure only
@@ -13,8 +17,14 @@
  */
 int building_construction_clear_land(int measure_only, int x_start, int y_start, int x_end, int y_end);
 
+int building_construction_clear_trees(int measure_only, int x_start, int y_start, int x_end, int y_end);
+
 color_t building_construction_clear_color(void);
 
 int building_construction_repair_land(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // BUILDING_CONSTRUCTION_CLEAR_H

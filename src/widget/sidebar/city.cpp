@@ -1,11 +1,15 @@
+extern "C" {
 #include "city.h"
 
+#include "building/construction.h"
 #include "building/menu.h"
+#include "building/tool_mode.h"
 #include "city/message.h"
 #include "city/view.h"
 #include "city/warning.h"
 #include "core/config.h"
 #include "core/direction.h"
+#include "core/lang.h"
 #include "game/campaign.h"
 #include "game/orientation.h"
 #include "game/state.h"
@@ -17,6 +21,7 @@
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "input/hotkey.h"
 #include "map/orientation.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
@@ -33,8 +38,10 @@
 #include "window/message_list.h"
 #include "window/mission_briefing.h"
 #include "window/overlay_menu.h"
+}
 
 #define MINIMAP_Y_OFFSET 59
+#define TOOLTIP_CLEAR_BUTTON 21
 
 static void button_overlay(int param1, int param2);
 static void button_collapse_expand(int param1, int param2);
@@ -131,7 +138,14 @@ static void draw_sidebar_remainder(int x_offset, int is_collapsed)
 static void draw_number_of_messages(int x_offset)
 {
     int messages = city_message_count();
-    int show_messages = game_campaign_is_original() || messages > 0 || scenario_intro_message();
+    int show_messages = 0;
+    if (game_campaign_is_original() != 0) {
+        show_messages = 1;
+    } else if (messages > 0) {
+        show_messages = 1;
+    } else if (scenario_intro_message() != 0) {
+        show_messages = 1;
+    }
     buttons_build_expanded[13].enabled = show_messages;
     buttons_build_expanded[14].enabled = city_message_problem_area_count();
     if (show_messages) {
@@ -285,6 +299,18 @@ int widget_sidebar_city_get_tooltip_text(tooltip_context *c)
             c->translation_key = TR_TOGGLE_GRID;
             return 0;
         }
+        if (data.focus_button_for_tooltip == TOOLTIP_CLEAR_BUTTON) {
+            building_type clear_mode = building_tool_mode_resolve(
+                BUILDING_CLEAR_LAND,
+                BUILDING_CLEAR_LAND,
+                hotkey_get_modifiers());
+            if (building_construction_selection_type() == BUILDING_CLEAR_LAND) {
+                clear_mode = building_construction_type();
+            }
+            c->precomposed_text = lang_get_building_type_string(clear_mode);
+            c->type = TOOLTIP_BUTTON;
+            return 0;
+        }
         return data.focus_button_for_tooltip;
     }
     return sidebar_extra_get_tooltip(c);
@@ -304,12 +330,23 @@ static void button_overlay(int param1, int param2)
 static void button_collapse_expand(int param1, int param2)
 {
     city_view_start_sidebar_toggle();
-    sidebar_slide(!city_view_is_sidebar_collapsed(),
-        draw_collapsed_background, draw_expanded_background, slide_finished);
+    if (city_view_is_sidebar_collapsed()) {
+        sidebar_slide(SLIDE_DIRECTION_IN, draw_collapsed_background, draw_expanded_background, slide_finished);
+    } else {
+        sidebar_slide(SLIDE_DIRECTION_OUT, draw_collapsed_background, draw_expanded_background, slide_finished);
+    }
 }
 
 static void button_build(int submenu, int param2)
 {
+    if (submenu == BUILD_MENU_CLEAR_LAND) {
+        window_build_menu_hide();
+        widget_city_clear_current_tile();
+        building_construction_cancel();
+        building_construction_set_type(BUILDING_CLEAR_LAND, 0);
+        window_request_refresh();
+        return;
+    }
     window_build_menu_show(submenu);
 }
 

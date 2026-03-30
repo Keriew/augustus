@@ -391,7 +391,7 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
     button_width = MAX(button_width, 38); // Minimum 38px
     button_width = MIN(button_width, 52); // Maximum 52px
 
-    int raw_scaling_factor = (button_width / 52.0f) * 100.0f;
+    int raw_scaling_factor = (button_width * 100) / 52;
     raw_scaling_factor = raw_scaling_factor == 90 ? 91 : raw_scaling_factor; // Avoid 90% scaling due to visual issues
     float original_scaling_factor = raw_scaling_factor / 100.0f;
 
@@ -426,8 +426,8 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
             graphics_reset_clip_rectangle();
         }
 
-        image_offset_x = is_sea_trade_route ? 12 * original_scaling_factor : 7 * original_scaling_factor;
-        image_offset_y = is_sea_trade_route ? 16 * original_scaling_factor : 7 * original_scaling_factor;
+        image_offset_x = (int) (is_sea_trade_route ? 12 * original_scaling_factor : 7 * original_scaling_factor);
+        image_offset_y = (int) (is_sea_trade_route ? 16 * original_scaling_factor : 7 * original_scaling_factor);
         int scale = (int) (original_scaling_factor * 100);
 
         image_draw_scaled_centered(get_storage_permission_image(permission),
@@ -435,7 +435,7 @@ static void draw_permissions_buttons(int x, int y, building_info_context *c)
 
         if (!permission_state) {
             image_draw_scaled_centered(assets_get_image_id("UI", "Large_Widget_Cross"),
-            x + 15 * original_scaling_factor, y + 15 * original_scaling_factor, COLOR_MASK_NONE, scale);
+            x + (int) (15 * original_scaling_factor), y + (int) (15 * original_scaling_factor), COLOR_MASK_NONE, scale);
         }
 
         button_border_draw(x, y, button_width, button_width,

@@ -1,9 +1,11 @@
+extern "C" {
 #include "cursor.h"
 
 #include "building/construction.h"
 #include "game/system.h"
 #include "window/city.h"
 #include "window/empire.h"
+}
 
 #define CURSOR_PATH_NAME "Cursors/Color_Cursors"
 
@@ -408,8 +410,7 @@ void input_cursor_update(window_id window)
 {
     if (window == WINDOW_CITY_MILITARY && !window_city_military_is_cursor_in_menu()) {
         system_set_cursor(CURSOR_SWORD);
-    } else if ((window == WINDOW_CITY && building_construction_type() == BUILDING_CLEAR_LAND) ||
-            building_construction_type() == BUILDING_REPAIR_LAND) {
+    } else if (window == WINDOW_CITY && building_construction_is_land_work_type(building_construction_type())) {
         system_set_cursor(CURSOR_SHOVEL);
 
     } else if (window == WINDOW_EMPIRE) {

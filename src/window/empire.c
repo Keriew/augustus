@@ -302,7 +302,7 @@ static struct {
             int is_hovered;
         } border_btn;
     } sidebar;
-    int trade_route_anim_start;
+    time_millis trade_route_anim_start;
 } data = { 0, 1 , 0 };
 
 // -------------------------------------------------------------------------------------------------------
@@ -455,7 +455,7 @@ static open_trade_button_style get_open_trade_button_style(int x, int y, trade_s
     open_trade_button_style style = {
         .button_x_min = (is_sidebar ? x + 15 : (data.panel.x_min + data.panel.x_max - 500) / 2) + 30, //15px offset somewhere got lost, * 2 for 30
         .button_y_min = y + (is_sidebar ? 0 : -9),
-        .button_width = is_sidebar ? get_usable_width(&sidebar_grid_box) * 0.75 : 440,  // restored fixed widths // sidebar: main bar
+        .button_width = is_sidebar ? (get_usable_width(&sidebar_grid_box) * 3) / 4 : 440,  // restored fixed widths // sidebar: main bar
         .button_height = 26,
         .y_offset_icon = is_sidebar ? 2 : 2, //separated in case of resolution considerations - wait for feedback before simplifying
         .y_offset_text = is_sidebar ? 10 : 10, //separated in case of resolution considerations - wait for feedback before simplifying
@@ -1629,7 +1629,7 @@ static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t 
     float scaled_x = (((x) +img->width / 2.0f) - (img->width / obj_draw_scale) / 2.0f) * obj_draw_scale;
     float scaled_y = (((y) +img->height / 2.0f) - (img->height / obj_draw_scale) / 2.0f) * obj_draw_scale;
 
-    image_draw_silhouette(image_id, scaled_x, scaled_y, color, obj_draw_scale);
+    image_draw_silhouette(image_id, (int) scaled_x, (int) scaled_y, color, obj_draw_scale);
 }
 
 static void draw_invasion_warning(int x, int y, int image_id)
@@ -1745,7 +1745,7 @@ static void draw_trade_button_highlights(void)
             time_millis elapsed = time_get_millis() - data.trade_route_anim_start;
             float time_seconds = elapsed / 1000.0f; // Convert to seconds
             float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
-            int alpha = 96 + (int) (pulse * 64); // Range: 32–160
+            int alpha = 96 + (int) (pulse * 64); // Range: 32â€“160
             graphics_tint_rect(btn->x, btn->y, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
                 COLOR_MASK_DARK_PINK, alpha);
         }
@@ -1971,7 +1971,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         empire_scroll_map(position.x, position.y);
     }
 
-    // Only let the grid‐box process clicks if the sidebar is actually expanded:
+    // Only let the gridâ€box process clicks if the sidebar is actually expanded:
     if (!data.sidebar.border_btn.is_collapsed) {
         if (window_empire_sidebar_sort_handle_expanding_buttons_input(m)) {
             return; //block other input handling if the expanding buttons are active

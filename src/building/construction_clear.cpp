@@ -1,3 +1,4 @@
+extern "C" {
 #include "construction_clear.h"
 
 #include "building/building.h"
@@ -23,6 +24,7 @@
 #include "map/tiles.h"
 #include "translation/translation.h"
 #include "window/popup_dialog.h"
+}
 
 #include <string.h>
 
@@ -38,7 +40,11 @@ static struct {
     int repair_cost;
     int repairable_buildings[1000];
 } confirm;
+
+#define TREE_CLEAR_TERRAIN_MASK TERRAIN_TREE
+
 static int repair_land_confirmed(int measure_only, int x_start, int y_start, int x_end, int y_end, int *buildings_count);
+static int clear_trees_confirmed(int measure_only, int x_start, int y_start, int x_end, int y_end);
 static building *get_deletable_building(int grid_offset)
 {
     int building_id = map_building_at(grid_offset);
@@ -342,10 +348,53 @@ color_t building_construction_clear_color(void)
 {
     if (building_construction_type() == BUILDING_CLEAR_LAND) {
         return COLOR_MASK_RED;
+    } else if (building_construction_type() == BUILDING_CLEAR_TREES) {
+        return COLOR_MASK_YELLOW_RANGE;
     } else if (building_construction_type() == BUILDING_REPAIR_LAND) {
         return COLOR_MASK_GREEN;
     }
     return COLOR_MASK_NONE;
+}
+
+static int clear_trees_confirmed(int measure_only, int x_start, int y_start, int x_end, int y_end)
+{
+    game_undo_restore_building_state();
+    game_undo_restore_map(0);
+
+    int x_min, x_max, y_min, y_max;
+    map_grid_start_end_to_area(x_start, y_start, x_end, y_end, &x_min, &y_min, &x_max, &y_max);
+
+    int items_cleared = 0;
+    for (int y = y_min; y <= y_max; y++) {
+        for (int x = x_min; x <= x_max; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (measure_only) {
+                map_property_mark_deleted(grid_offset);
+            }
+            if (!map_terrain_is(grid_offset, TREE_CLEAR_TERRAIN_MASK)) {
+                continue;
+            }
+            if (!measure_only) {
+                map_terrain_remove(grid_offset, TREE_CLEAR_TERRAIN_MASK);
+            }
+            items_cleared++;
+        }
+    }
+
+    if (!measure_only && items_cleared) {
+        map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
+        map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
+        map_routing_update_land();
+        figure_roamer_preview_reset(BUILDING_CLEAR_TREES);
+        window_invalidate();
+    }
+
+    return items_cleared;
+}
+
+int building_construction_clear_trees(int measure_only, int x_start, int y_start, int x_end, int y_end)
+{
+    return clear_trees_confirmed(measure_only, x_start, y_start, x_end, y_end);
 }
 
 static int was_building_counted(int building_id, int count_of_processed)

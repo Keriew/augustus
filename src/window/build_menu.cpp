@@ -1,3 +1,4 @@
+extern "C" {
 #include "build_menu.h"
 
 #include "assets/assets.h"
@@ -25,6 +26,7 @@
 #include "widget/city.h"
 #include "widget/sidebar/city.h"
 #include "window/city.h"
+}
 
 #define MENU_X_OFFSET 298
 #define MENU_Y_OFFSET 110
@@ -109,7 +111,7 @@ static int init(build_menu_group submenu)
 
 int window_build_menu_image(void)
 {
-    building_type type = building_construction_type();
+    building_type type = building_construction_selection_type();
     int image_base = image_group(GROUP_PANEL_WINDOWS);
     if (type == BUILDING_NONE) {
         return image_base + 12;
@@ -206,7 +208,7 @@ static void draw_resource_icon_scaled(int image_id, int x, int y, int max_size)
     if (img->height < 20) {
         scale_percent = 100;
     } else {
-        scale_percent = (20.0f / img->height) * 100.0f;
+        scale_percent = (20 * 100) / img->height;
     }
     switch (image_id) {
         case 1192://meat
@@ -235,7 +237,7 @@ static void draw_menu_buttons(void)
         item_index = building_menu_next_index(data.selected_submenu, item_index);
         label_draw(item_x_align, data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i, 18,
             data.focus_button_id == i + 1 ? 1 : 2);
-        int type = building_menu_type(data.selected_submenu, item_index);
+        building_type type = building_menu_type(data.selected_submenu, item_index);
 
         int menu_index = 0;
         if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && i < 10) {
@@ -375,7 +377,7 @@ static void button_menu_index(const generic_button *button)
 static int set_submenu_for_type(building_type type)
 {
     build_menu_group current_menu = data.selected_submenu;
-    build_menu_group new_menu = building_menu_get_submenu_for_type(type);
+    build_menu_group new_menu = static_cast<build_menu_group>(building_menu_get_submenu_for_type(type));
     if (!new_menu) {
         return 0;
     }
@@ -424,7 +426,8 @@ static void generate_tooltip_text_for_monument(building_type monument)
 
     int has_listed_resource = 0;
 
-    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+    for (int i = RESOURCE_MIN; i < RESOURCE_MAX; ++i) {
+        resource_type r = static_cast<resource_type>(i);
         int amount = 0;
         for (int phase = 1; phase <= phases; phase++) {
             amount += building_monument_resources_needed_for_monument_type(monument, r, phase);
@@ -464,7 +467,7 @@ void window_build_menu_show(int submenu)
         window_build_menu_hide();
         return;
     }
-    if (init(submenu)) {
+    if (init(static_cast<build_menu_group>(submenu))) {
         window_type window = {
             WINDOW_BUILD_MENU,
             draw_background,

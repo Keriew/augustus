@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -36,14 +36,14 @@
     <ClCompile Include="src\scenario\event\event.c" />
     <ClCompile Include="src\scenario\event\export_xml.c" />
     <ClCompile Include="src\scenario\event\formula.c" />
-    <ClCompile Include="src\scenario\event\import_xml.c" />
+    <ClCompile Include="src\scenario\event\import_xml.cpp" />
     <ClCompile Include="src\scenario\event\parameter_city.c" />
     <ClCompile Include="src\scenario\event\parameter_data.c" />
     <ClCompile Include="src\scenario\gladiator_revolt.c" />
     <ClCompile Include="src\scenario\invasion.c" />
     <ClCompile Include="src\scenario\map.c" />
     <ClCompile Include="src\scenario\message_media_text_blob.c" />
-    <ClCompile Include="src\scenario\model_xml.c" />
+    <ClCompile Include="src\scenario\model_xml.cpp" />
     <ClCompile Include="src\scenario\price_change.c" />
     <ClCompile Include="src\scenario\property.c" />
     <ClCompile Include="src\scenario\random_event.c" />
@@ -73,7 +73,7 @@
     <ClCompile Include="src\translation\ukrainian.c" />
     <ClCompile Include="src\widget\city.c" />
     <ClCompile Include="src\widget\city_bridge.c" />
-    <ClCompile Include="src\widget\city_building_ghost.c" />
+    <ClCompile Include="src\widget\city_building_ghost.cpp" />
     <ClCompile Include="src\widget\city_draw_highway.c" />
     <ClCompile Include="src\widget\city_figure.c" />
     <ClCompile Include="src\widget\city_overlay_education.c" />
@@ -92,7 +92,7 @@
     <ClCompile Include="src\widget\map_editor_pause_menu.c" />
     <ClCompile Include="src\widget\map_editor_tool.c" />
     <ClCompile Include="src\widget\minimap.c" />
-    <ClCompile Include="src\widget\sidebar\city.c" />
+    <ClCompile Include="src\widget\sidebar\city.cpp" />
     <ClCompile Include="src\widget\sidebar\common.c" />
     <ClCompile Include="src\widget\sidebar\editor.c" />
     <ClCompile Include="src\widget\sidebar\extra.c" />
@@ -127,7 +127,7 @@
     <ClCompile Include="src\window\building\terrain.c" />
     <ClCompile Include="src\window\building\utility.c" />
     <ClCompile Include="src\window\building_info.c" />
-    <ClCompile Include="src\window\build_menu.c" />
+    <ClCompile Include="src\window\build_menu.cpp" />
     <ClCompile Include="src\window\cck_selection.c" />
     <ClCompile Include="src\window\city.c" />
     <ClCompile Include="src\window\config.c" />
@@ -147,7 +147,7 @@
     <ClCompile Include="src\window\editor\empire_properties.c" />
     <ClCompile Include="src\window\editor\invasions.c" />
     <ClCompile Include="src\window\editor\map.c" />
-    <ClCompile Include="src\window\editor\model_data.c" />
+    <ClCompile Include="src\window\editor\model_data.cpp" />
     <ClCompile Include="src\window\editor\price_changes.c" />
     <ClCompile Include="src\window\editor\requests.c" />
     <ClCompile Include="src\window\editor\scenario_action_edit.c" />
@@ -212,9 +212,9 @@
     <ClCompile Include="src\building\caravanserai.c" />
     <ClCompile Include="src\building\clone.c" />
     <ClCompile Include="src\building\connectable.c" />
-    <ClCompile Include="src\building\construction.c" />
+    <ClCompile Include="src\building\construction.cpp" />
     <ClCompile Include="src\building\construction_building.c" />
-    <ClCompile Include="src\building\construction_clear.c" />
+    <ClCompile Include="src\building\construction_clear.cpp" />
     <ClCompile Include="src\building\construction_routed.c" />
     <ClCompile Include="src\building\construction_warning.c" />
     <ClCompile Include="src\building\count.c" />
@@ -240,6 +240,7 @@
     <ClCompile Include="src\building\mess_hall.c" />
     <ClCompile Include="src\building\monument.c" />
     <ClCompile Include="src\building\properties.c" />
+    <ClCompile Include="src\building\tool_mode.cpp" />
     <ClCompile Include="src\building\roadblock.c" />
     <ClCompile Include="src\building\rotation.c" />
     <ClCompile Include="src\building\state.c" />
@@ -294,7 +295,7 @@
     <ClCompile Include="src\core\image.c" />
     <ClCompile Include="src\core\image_packer.c" />
     <ClCompile Include="src\core\io.c" />
-    <ClCompile Include="src\core\lang.c" />
+    <ClCompile Include="src\core\lang.cpp" />
     <ClCompile Include="src\core\locale.c" />
     <ClCompile Include="src\core\memory_block.c" />
     <ClCompile Include="src\core\png_read.c" />
@@ -379,7 +380,7 @@
     <ClCompile Include="src\game\tick.c" />
     <ClCompile Include="src\game\time.c" />
     <ClCompile Include="src\game\tutorial.c" />
-    <ClCompile Include="src\game\undo.c" />
+    <ClCompile Include="src\game\undo.cpp" />
     <ClCompile Include="src\graphics\arrow_button.c" />
     <ClCompile Include="src\graphics\button.c" />
     <ClCompile Include="src\graphics\clouds.c" />
@@ -405,7 +406,7 @@
     <ClCompile Include="src\graphics\warning.c" />
     <ClCompile Include="src\graphics\weather.c" />
     <ClCompile Include="src\graphics\window.c" />
-    <ClCompile Include="src\input\cursor.c" />
+    <ClCompile Include="src\input\cursor.cpp" />
     <ClCompile Include="src\input\hotkey.c" />
     <ClCompile Include="src\input\input.c" />
     <ClCompile Include="src\input\joystick.c" />
@@ -664,6 +665,7 @@
     <ClInclude Include="src\building\construction.h" />
     <ClInclude Include="src\building\construction_building.h" />
     <ClInclude Include="src\building\construction_clear.h" />
+    <ClInclude Include="src\building\tool_mode.h" />
     <ClInclude Include="src\building\construction_routed.h" />
     <ClInclude Include="src\building\construction_warning.h" />
     <ClInclude Include="src\building\count.h" />

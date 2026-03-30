@@ -298,7 +298,7 @@ static void set_rubble_grid_info_for_all_parts(building *b)
         part->data.rubble.og_type = b->type;
         part->data.rubble.og_grid_offset = b->grid_offset;
         part->data.rubble.og_size = b->type == BUILDING_WAREHOUSE ? 3 : b->size;
-        part->data.rubble.og_orientation = b->subtype.orientation;
+        part->data.rubble.og_orientation = (unsigned char) b->subtype.orientation;
         part = next_part;
     }
 }

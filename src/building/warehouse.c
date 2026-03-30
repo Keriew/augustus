@@ -485,7 +485,7 @@ int building_warehouse_maximum_receptible_amount(building *warehouse, int resour
     unsigned char remaining_allowed = (max_allowed > current_amount) ? (max_allowed - current_amount) : 0;
 
     unsigned char resource_space_limit = building_warehouse_max_space_for_resource(warehouse, resource); // max by tile layout
-    unsigned char free_space_overall = warehouse->resources[RESOURCE_NONE]; // total free space
+    unsigned char free_space_overall = (unsigned char) warehouse->resources[RESOURCE_NONE]; // total free space
 
     unsigned char available_space = MIN(free_space_overall, resource_space_limit); // tile storage and free space
     unsigned char max_receptible = MIN(remaining_allowed, available_space);

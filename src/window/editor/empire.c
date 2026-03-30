@@ -152,7 +152,7 @@ static struct {
     int show_edges;
     unsigned int preview_button_focused;
     unsigned int button_is_preview;
-    int resource_pulse_start;
+    time_millis resource_pulse_start;
     int object_coords_x;
     struct {
         int x;
@@ -626,7 +626,7 @@ static int draw_resource(resource_type resource, int trade_max, int x_offset, in
         time_millis elapsed = time_get_millis() - data.resource_pulse_start;
         float time_seconds = elapsed / 1000.0f; // Convert to seconds
         float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
-        int alpha = 96 + (int) (pulse * 64); // Range: 32–160
+        int alpha = 96 + (int) (pulse * 64); // Range: 32â€“160
         graphics_tint_rect(x_offset, y_offset, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
             COLOR_MASK_DARK_PINK, alpha);
     }
@@ -786,13 +786,13 @@ static void draw_city_info(const empire_city *city)
                 int image_id = empire_city_get_icon_image_id(obj->future_trade_after_icon);
                 if (image_id > 0) {
                     float scale = obj->width > obj->height ? obj->width : obj->height / 24.0f;
-                    image_draw(image_id, (data.panel.x_max - 500 + trade_city_buttons[2].x) * scale,
-                        (data.y_max - 93) * scale, COLOR_MASK_NONE, scale);
+                    image_draw(image_id, (int) ((data.panel.x_max - 500 + trade_city_buttons[2].x) * scale),
+                        (int) ((data.y_max - 93) * scale), COLOR_MASK_NONE, scale);
                     const image *img = image_get(image_id);
                     if (img->animation && img->animation->speed_id) {
                         image_draw(image_id + obj->animation_index,
-                        (data.panel.x_max - 500 + trade_city_buttons[2].x + img->animation->sprite_offset_x / 2) * scale,
-                        (data.y_max - 93 + img->animation->sprite_offset_y / 2) * scale, COLOR_MASK_NONE, scale);
+                        (int) ((data.panel.x_max - 500 + trade_city_buttons[2].x + img->animation->sprite_offset_x / 2) * scale),
+                        (int) ((data.y_max - 93 + img->animation->sprite_offset_y / 2) * scale), COLOR_MASK_NONE, scale);
                     }
                 }
             }

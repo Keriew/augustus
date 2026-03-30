@@ -23,6 +23,8 @@ void game_undo_restore_map(int include_properties);
 
 int game_undo_start_build(building_type type);
 
+void game_undo_set_build_type(building_type type);
+
 void game_undo_finish_build(int cost);
 
 void game_undo_perform(void);
