@@ -45,12 +45,16 @@ typedef struct {
  */
 const mouse *mouse_get(void);
 
+const mouse *mouse_get_pixel(void);
+
 /**
  * Sets the mouse position
  * @param x X
  * @param y Y
  */
 void mouse_set_position(int x, int y);
+
+void mouse_set_logical_position(int x, int y);
 
 void mouse_set_left_down(int down);
 

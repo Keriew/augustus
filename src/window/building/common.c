@@ -28,7 +28,7 @@ void window_building_set_possible_position(int *x_offset, int *y_offset, int wid
     int stub;
     int width;
     city_view_get_viewport(&stub, &stub, &width, &stub);
-    width -= MARGIN_POSITION;
+    width = screen_pixel_to_ui(width) - MARGIN_POSITION;
 
     if (*y_offset + dialog_height > screen_height() - MARGIN_POSITION) {
         *y_offset -= dialog_height;

@@ -1,3 +1,4 @@
+extern "C" {
 #include "platform/screen.h"
 
 #include "city/view.h"
@@ -14,6 +15,7 @@
 #include "platform/renderer.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
+}
 
 #include "SDL.h"
 
@@ -40,14 +42,31 @@ static struct {
     float screen_density;
 } scale = { 100, 100, 1 };
 
-static int scale_logical_to_pixels(int logical_value)
+static void get_window_pixel_size(int *width, int *height)
 {
-    return (int) (logical_value * scale.percentage / 100 / scale.screen_density);
+    if (!width || !height) {
+        return;
+    }
+    if (!SDL.window) {
+        *width = 0;
+        *height = 0;
+        return;
+    }
+#if SDL_VERSION_ATLEAST(2, 26, 0)
+    SDL_GetWindowSizeInPixels(SDL.window, width, height);
+#else
+    SDL_GetWindowSize(SDL.window, width, height);
+#endif
 }
 
-static int scale_pixels_to_logical(int pixel_value)
+static int normalize_display_id(int display_id)
 {
-    return (int) (pixel_value * 100 / scale.percentage / scale.screen_density);
+    int num_displays = SDL_GetNumVideoDisplays();
+    if (display_id < 0 || display_id >= num_displays) {
+        SDL_Log("Defaulting to display 0 instead of %d (num displays: %d)", display_id, num_displays);
+        return 0;
+    }
+    return display_id;
 }
 
 static int get_max_scale_percentage(int pixel_width, int pixel_height)
@@ -99,8 +118,7 @@ static void set_scale_percentage(int new_scale, int pixel_width, int pixel_heigh
 
     apply_max_scale(pixel_width, pixel_height);
 
-    SDL_SetWindowMinimumSize(SDL.window,
-        scale_logical_to_pixels(MINIMUM.WIDTH), scale_logical_to_pixels(MINIMUM.HEIGHT));
+    SDL_SetWindowMinimumSize(SDL.window, MINIMUM.WIDTH, MINIMUM.HEIGHT);
 }
 
 #if !defined(_WIN32) && !defined(__APPLE__)
@@ -122,18 +140,17 @@ int platform_screen_create(const char *title, int display_scale_percentage, int 
     scale.screen_density = android_get_screen_density();
 #endif
     set_scale_percentage(display_scale_percentage, 0, 0);
+    display_id = normalize_display_id(display_id);
 
     int width, height;
     int fullscreen = system_is_fullscreen_only() ? 1 : setting_fullscreen();
     if (fullscreen) {
         SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(0, &mode);
+        SDL_GetDesktopDisplayMode(display_id, &mode);
         width = mode.w;
         height = mode.h;
     } else {
         setting_window(&width, &height);
-        width = scale_logical_to_pixels(width);
-        height = scale_logical_to_pixels(height);
     }
 
     platform_screen_destroy();
@@ -145,15 +162,11 @@ int platform_screen_create(const char *title, int display_scale_percentage, int 
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 #endif
 
-    if (display_id < 0 || display_id >= SDL_GetNumVideoDisplays()) {
-        SDL_Log("Defaulting to display 0 instead of %d (num displays: %d)", display_id, SDL_GetNumVideoDisplays());
-        display_id = 0;
-    }
     SDL_Log("Creating screen %d x %d on display %d, %s, driver: %s", width, height, display_id,
         fullscreen ? "fullscreen" : "windowed", SDL_GetCurrentVideoDriver());
     Uint32 flags = SDL_WINDOW_RESIZABLE;
 
-#if SDL_VERSION_ATLEAST(2, 0, 1)
+#if defined(__APPLE__) && SDL_VERSION_ATLEAST(2, 0, 1)
     flags |= SDL_WINDOW_ALLOW_HIGHDPI;
 #endif
 
@@ -175,14 +188,11 @@ int platform_screen_create(const char *title, int display_scale_percentage, int 
     set_window_icon();
 #endif
 
-    if (system_is_fullscreen_only()) {
-        SDL_GetWindowSize(SDL.window, &width, &height);
-    }
-
     if (!platform_renderer_init(SDL.window)) {
         return 0;
     }
 
+    get_window_pixel_size(&width, &height);
     update_window_grab();
     set_scale_percentage(display_scale_percentage, width, height);
     return platform_screen_resize(width, height, 1);
@@ -199,17 +209,20 @@ void platform_screen_destroy(void)
 
 int platform_screen_resize(int pixel_width, int pixel_height, int save)
 {
+    if (!pixel_width || !pixel_height) {
+        get_window_pixel_size(&pixel_width, &pixel_height);
+    }
+    if (!pixel_width || !pixel_height) {
+        return 0;
+    }
     apply_max_scale(pixel_width, pixel_height);
 
-    int logical_width = scale_pixels_to_logical(pixel_width);
-    int logical_height = scale_pixels_to_logical(pixel_height);
-
     if (save) {
-        setting_set_display(setting_fullscreen(), logical_width, logical_height);
+        setting_set_display(setting_fullscreen(), pixel_width, pixel_height);
     }
 
-    if (platform_renderer_create_render_texture(logical_width, logical_height)) {
-        screen_set_resolution(logical_width, logical_height);
+    if (platform_renderer_create_render_texture(pixel_width, pixel_height)) {
+        screen_set_resolution(pixel_width, pixel_height, scale.percentage);
         return 1;
     } else {
         return 0;
@@ -219,7 +232,7 @@ int platform_screen_resize(int pixel_width, int pixel_height, int save)
 int system_scale_display(int display_scale_percentage)
 {
     int width, height;
-    SDL_GetWindowSize(SDL.window, &width, &height);
+    get_window_pixel_size(&width, &height);
     set_scale_percentage(display_scale_percentage, width, height);
     platform_screen_resize(width, height, 1);
     return scale.percentage;
@@ -233,7 +246,7 @@ int system_can_scale_display(int *min_scale, int *max_scale)
     }
 #endif
     int width, height;
-    SDL_GetWindowSize(SDL.window, &width, &height);
+    get_window_pixel_size(&width, &height);
 #ifdef __ANDROID__
     int max_scale_current_orientation = get_max_scale_percentage(width, height);
     int max_scale_alternative_orientation = get_max_scale_percentage(height, width);
@@ -281,6 +294,7 @@ void platform_screen_set_fullscreen(void)
 
     update_window_grab();
     setting_set_display(1, mode.w, mode.h);
+    platform_screen_resize(mode.w, mode.h, 0);
 }
 
 void platform_screen_set_windowed(void)
@@ -288,10 +302,8 @@ void platform_screen_set_windowed(void)
     if (system_is_fullscreen_only()) {
         return;
     }
-    int logical_width, logical_height;
-    setting_window(&logical_width, &logical_height);
-    int pixel_width = scale_logical_to_pixels(logical_width);
-    int pixel_height = scale_logical_to_pixels(logical_height);
+    int pixel_width, pixel_height;
+    setting_window(&pixel_width, &pixel_height);
     int display = SDL_GetWindowDisplayIndex(SDL.window);
     SDL_Log("User to windowed %d x %d on display %d", pixel_width, pixel_height, display);
     SDL_SetWindowFullscreen(SDL.window, 0);
@@ -301,15 +313,14 @@ void platform_screen_set_windowed(void)
     }
     update_window_grab();
     setting_set_display(0, pixel_width, pixel_height);
+    platform_screen_resize(pixel_width, pixel_height, 0);
 }
 
-void platform_screen_set_window_size(int logical_width, int logical_height)
+void platform_screen_set_window_size(int pixel_width, int pixel_height)
 {
     if (system_is_fullscreen_only()) {
         return;
     }
-    int pixel_width = scale_logical_to_pixels(logical_width);
-    int pixel_height = scale_logical_to_pixels(logical_height);
     int display = SDL_GetWindowDisplayIndex(SDL.window);
     if (setting_fullscreen()) {
         SDL_SetWindowFullscreen(SDL.window, 0);
@@ -328,6 +339,7 @@ void platform_screen_set_window_size(int logical_width, int logical_height)
         SDL_SetWindowGrab(SDL.window, SDL_FALSE);
     }
     setting_set_display(0, pixel_width, pixel_height);
+    platform_screen_resize(pixel_width, pixel_height, 0);
 }
 
 void platform_screen_center_window(void)
@@ -345,10 +357,7 @@ void platform_screen_recreate_texture(void)
     // after restoring the window, preventing the texture from being recreated. This forces an attempt to recreate the
     // texture every frame to bypass that issue.
     if (setting_fullscreen() && platform_renderer_lost_render_texture()) {
-        SDL_DisplayMode mode;
-        SDL_GetWindowDisplayMode(SDL.window, &mode);
-        screen_set_resolution(scale_pixels_to_logical(mode.w), scale_pixels_to_logical(mode.h));
-        platform_renderer_create_render_texture(screen_width(), screen_height());
+        platform_screen_resize(0, 0, 0);
     }
 }
 #endif
@@ -362,7 +371,7 @@ void system_set_mouse_position(int *x, int *y)
 {
     *x = calc_bound(*x, 0, screen_width() - 1);
     *y = calc_bound(*y, 0, screen_height() - 1);
-    SDL_WarpMouseInWindow(SDL.window, scale_logical_to_pixels(*x), scale_logical_to_pixels(*y));
+    SDL_WarpMouseInWindow(SDL.window, screen_ui_to_pixel(*x), screen_ui_to_pixel(*y));
 }
 
 void system_change_window_title(const char *title)
@@ -384,6 +393,6 @@ void system_get_max_resolution(int *width, int *height)
     SDL_DisplayMode mode;
     int index = SDL_GetWindowDisplayIndex(SDL.window);
     SDL_GetCurrentDisplayMode(index, &mode);
-    *width = scale_pixels_to_logical(mode.w);
-    *height = scale_pixels_to_logical(mode.h);
+    *width = mode.w;
+    *height = mode.h;
 }

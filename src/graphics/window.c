@@ -2,6 +2,7 @@
 
 #include "game/system.h"
 #include "graphics/graphics.h"
+#include "graphics/screen.h"
 #include "graphics/warning.h"
 #include "input/cursor.h"
 #include "input/hotkey.h"
@@ -131,6 +132,7 @@ static void update_input_after(void)
 void window_draw(int force)
 {
     update_input_before();
+    screen_set_ui_render_scale();
     window_type *w = data.current_window;
     if (force || data.refresh_on_draw) {
         data.refresh_on_draw = 0;
@@ -151,12 +153,16 @@ void window_draw(int force)
 void window_draw_underlying_window(void)
 {
     if (data.underlying_windows_redrawing < MAX_QUEUE) {
+        screen_set_ui_render_scale();
         ++data.underlying_windows_redrawing;
         decrease_queue_index();
         window_type *window_behind = &data.window_queue[data.queue_index];
         window_behind->draw_background();
         window_behind->draw_foreground();
         increase_queue_index();
+        screen_set_ui_render_scale();
+        graphics_reset_dialog();
+        graphics_reset_clip_rectangle();
         --data.underlying_windows_redrawing;
     }
 }

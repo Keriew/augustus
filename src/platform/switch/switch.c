@@ -30,7 +30,7 @@ static void center_mouse_cursor(void)
     int x = screen_width() / 2;
     int y = screen_height() / 2;
     system_set_mouse_position(&x, &y);
-    mouse_set_position(x, y);
+    mouse_set_logical_position(x, y);
 }
 
 static void change_display_size(void)

@@ -19,6 +19,7 @@ void graphics_in_dialog(void)
 
 void graphics_in_dialog_with_size(int width, int height)
 {
+    screen_set_ui_render_scale();
     set_translation((screen_width() - width) / 2, (screen_height() - height) / 2);
     screen_set_dialog_offset(width, height);
 }

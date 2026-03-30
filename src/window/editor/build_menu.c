@@ -5,6 +5,7 @@
 #include "graphics/generic_button.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/window.h"
 #include "input/input.h"
 #include "translation/translation.h"
@@ -89,7 +90,7 @@ static int get_sidebar_x_offset(void)
 {
     int view_x, view_y, view_width, view_height;
     city_view_get_viewport(&view_x, &view_y, &view_width, &view_height);
-    return view_x + view_width;
+    return screen_pixel_to_ui(view_x + view_width);
 }
 
 static void draw_menu_buttons(void)

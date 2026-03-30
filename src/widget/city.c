@@ -22,6 +22,7 @@
 #include "graphics/menu.h"
 #include "graphics/image.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/video.h"
 #include "graphics/window.h"
@@ -183,6 +184,7 @@ static void draw_construction_buttons(void)
     int x, y, width, height;
 
     city_view_get_viewport(&x, &y, &width, &height);
+    width = screen_pixel_to_ui(width);
     int x_offset = width - 4 * BLOCK_SIZE;
     int y_offset = 40;
     if (((sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) || !mouse_get()->is_touch) && width < 680)
@@ -233,6 +235,8 @@ void widget_city_draw_construction_buttons(void)
 
 static int is_pause_button(int x, int y)
 {
+    x = screen_pixel_to_ui(x);
+    y = screen_pixel_to_ui(y);
     return !sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) &&
         x < 4 * BLOCK_SIZE + 4 && y >= 24 && y < 56 + 4 * BLOCK_SIZE;
 }
@@ -241,6 +245,9 @@ static int is_cancel_construction_button(int x, int y)
 {
     int city_x, city_y, width, height;
     city_view_get_viewport(&city_x, &city_y, &width, &height);
+    x = screen_pixel_to_ui(x);
+    y = screen_pixel_to_ui(y);
+    width = screen_pixel_to_ui(width);
 
     int touch_width = 5 * BLOCK_SIZE;
     int touch_height = 22 + 4 * BLOCK_SIZE;
@@ -255,6 +262,9 @@ static int is_rotate_backward_button(int x, int y)
 {
     int city_x, city_y, width, height;
     city_view_get_viewport(&city_x, &city_y, &width, &height);
+    x = screen_pixel_to_ui(x);
+    y = screen_pixel_to_ui(y);
+    width = screen_pixel_to_ui(width);
 
     int sidebar_pause_button = sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
     int x_offset = sidebar_pause_button ? 16 : 4 * BLOCK_SIZE + 4;
@@ -267,6 +277,9 @@ static int is_rotate_forward_button(int x, int y)
 {
     int city_x, city_y, width, height;
     city_view_get_viewport(&city_x, &city_y, &width, &height);
+    x = screen_pixel_to_ui(x);
+    y = screen_pixel_to_ui(y);
+    width = screen_pixel_to_ui(width);
 
     int sidebar_pause_button = sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED);
     int x_offset = sidebar_pause_button ? 4 * BLOCK_SIZE + 4 : 7 * BLOCK_SIZE + 4;

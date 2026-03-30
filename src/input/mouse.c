@@ -15,9 +15,18 @@ enum {
 
 static mouse data;
 static mouse dialog;
+static mouse logical_data;
 static time_millis last_click;
 
 const mouse *mouse_get(void)
+{
+    logical_data = data;
+    logical_data.x = screen_pixel_to_ui(data.x);
+    logical_data.y = screen_pixel_to_ui(data.y);
+    return &logical_data;
+}
+
+const mouse *mouse_get_pixel(void)
 {
     return &data;
 }
@@ -73,6 +82,11 @@ void mouse_set_position(int x, int y)
     data.y = y;
     data.is_touch = 0;
     data.is_inside_window = 1;
+}
+
+void mouse_set_logical_position(int x, int y)
+{
+    mouse_set_position(screen_ui_to_pixel(x), screen_ui_to_pixel(y));
 }
 
 void mouse_set_left_down(int down)

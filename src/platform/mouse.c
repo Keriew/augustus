@@ -32,7 +32,7 @@ void system_mouse_set_relative_mode(int enabled)
     } else {
         SDL_SetRelativeMouseMode(SDL_FALSE);
         system_set_mouse_position(&data.x, &data.y);
-        mouse_set_position(data.x, data.y);
+        mouse_set_logical_position(data.x, data.y);
     }
     data.enabled = enabled;
 }
@@ -43,5 +43,5 @@ void system_move_mouse_cursor(int delta_x, int delta_y)
     int x = mouse_get()->x + delta_x;
     int y = mouse_get()->y + delta_y;
     system_set_mouse_position(&x, &y);
-    mouse_set_position(x, y);
+    mouse_set_logical_position(x, y);
 }

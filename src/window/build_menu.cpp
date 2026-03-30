@@ -18,6 +18,7 @@ extern "C" {
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
@@ -176,7 +177,7 @@ static int get_sidebar_x_offset(void)
 {
     int view_x, view_y, view_width, view_height;
     city_view_get_viewport(&view_x, &view_y, &view_width, &view_height);
-    return view_x + view_width;
+    return screen_pixel_to_ui(view_x + view_width);
 }
 
 static int is_auto_cycle_button(building_type type)

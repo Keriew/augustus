@@ -325,6 +325,8 @@ static int center_in_city(int element_width_pixels)
 {
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
+    x = screen_pixel_to_ui(x);
+    width = screen_pixel_to_ui(width);
     int margin = (width - element_width_pixels) / 2;
     return x + margin;
 }

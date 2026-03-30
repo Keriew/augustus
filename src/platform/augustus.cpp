@@ -1,5 +1,4 @@
-#include "SDL.h"
-
+extern "C" {
 #include "core/config.h"
 #include "core/encoding.h"
 #include "core/file.h"
@@ -30,6 +29,9 @@
 #include "platform/touch.h"
 #include "platform/vita/vita.h"
 #include "window/asset_previewer.h"
+}
+
+#include "SDL.h"
 
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
@@ -264,7 +266,7 @@ static void handle_window_event(SDL_WindowEvent *event, int *window_active)
             break;
         case SDL_WINDOWEVENT_SIZE_CHANGED:
             SDL_Log("Window resized to %d x %d", (int) event->data1, (int) event->data2);
-            platform_screen_resize(event->data1, event->data2, 1);
+            platform_screen_resize(0, 0, 1);
             break;
         case SDL_WINDOWEVENT_RESIZED:
             SDL_Log("System resize to %d x %d", (int) event->data1, (int) event->data2);
@@ -473,6 +475,10 @@ static int init_sdl(int enable_joysticks)
     // This hint must be set before initializing SDL, otherwise it won't work
 #if SDL_VERSION_ATLEAST(2, 0, 2)
     SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+#endif
+#ifdef _WIN32
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "0");
 #endif
 
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {

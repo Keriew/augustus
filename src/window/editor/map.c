@@ -10,6 +10,7 @@
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/event/controller.h"
@@ -39,6 +40,7 @@ static void draw_cancel_construction(void)
     }
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
+    width = screen_pixel_to_ui(width);
     width -= 4 * BLOCK_SIZE;
     inner_panel_draw(width - 4, 40, 3, 2);
     image_draw(image_group(GROUP_OK_CANCEL_SCROLL_BUTTONS) + 4, width, 44, COLOR_MASK_NONE, SCALE_NONE);
@@ -47,7 +49,9 @@ static void draw_cancel_construction(void)
 static void draw_foreground(void)
 {
     widget_sidebar_editor_draw_foreground();
+    screen_set_pixel_render_scale();
     widget_map_editor_draw();
+    screen_set_ui_render_scale();
     widget_top_menu_editor_draw_panels();
     if (window_is(WINDOW_EDITOR_MAP)) {
         draw_cancel_construction();
@@ -66,6 +70,7 @@ static void handle_hotkeys(const hotkeys *h)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
+    const mouse *m_pixel = mouse_get_pixel();
     handle_hotkeys(h);
     if (widget_top_menu_editor_handle_input(m, h)) {
         return;
@@ -73,28 +78,39 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (widget_sidebar_editor_handle_mouse(m)) {
         return;
     }
-    widget_map_editor_handle_input(m, h);
+    widget_map_editor_handle_input(m_pixel, h);
 }
 
 static void get_tooltip(tooltip_context *c)
 {
+    const mouse *m_pixel = mouse_get_pixel();
+    c->mouse_x = m_pixel->x;
+    c->mouse_y = m_pixel->y;
+    screen_set_pixel_render_scale();
     widget_map_editor_get_tooltip(c);
+    if (c->type == TOOLTIP_NONE) {
+        screen_set_ui_render_scale();
+    }
 }
 
 void window_editor_map_draw_all(void)
 {
+    screen_set_ui_render_scale();
     draw_background();
     draw_foreground();
 }
 
 void window_editor_map_draw_panels(void)
 {
+    screen_set_ui_render_scale();
     draw_background();
 }
 
 void window_editor_map_draw(void)
 {
+    screen_set_pixel_render_scale();
     widget_map_editor_draw();
+    screen_set_ui_render_scale();
 }
 
 void window_editor_map_show(void)
