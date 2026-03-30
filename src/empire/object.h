@@ -37,7 +37,7 @@ typedef struct {
     int city_name_id;
     uint8_t city_custom_name[50];
     int trade_route_open;
-    int trade_route_cost;
+    unsigned int trade_route_cost;
     int city_sells_resource[RESOURCE_MAX];
     int city_buys_resource[RESOURCE_MAX];
     empire_object obj;
