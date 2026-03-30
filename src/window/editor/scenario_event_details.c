@@ -1032,11 +1032,22 @@ static void button_copy_selected(const generic_button *button)
             scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
         }
     }
-    data.did_copy_event = 1;
+    data.did_copy_selected = 1;
 }
 
 static void button_paste_selected(const generic_button *button)
 {
+    if (!data.did_copy_selected) {
+        return;
+    }
+
+    for (unsigned int i = 0; i < data.copied_actions.size; i++) {
+        scenario_action_t *action;
+        array_new_item(data.event->actions, action);
+        *action = *array_item(data.copied_actions, i);
+
+        scenario_parameters_foreach_in_action(action, copy_formulas_action);
+    }
     
 }
 
