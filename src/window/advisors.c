@@ -125,9 +125,23 @@ static advisor_type current_advisor = ADVISOR_NONE;
 static unsigned int focus_button_id;
 static int advisor_height;
 
+static int is_valid_sub_advisor_index(int advisor)
+{
+    return advisor >= 0 && advisor < (int) (sizeof(sub_advisors) / sizeof(sub_advisors[0]));
+}
+
+static int message_text_for_advisor(advisor_type advisor)
+{
+    int advisor_index = (int) advisor;
+    if (advisor_index < 0 || advisor_index >= (int) (sizeof(ADVISOR_TO_MESSAGE_TEXT) / sizeof(ADVISOR_TO_MESSAGE_TEXT[0]))) {
+        return MESSAGE_DIALOG_ABOUT;
+    }
+    return ADVISOR_TO_MESSAGE_TEXT[advisor_index];
+}
+
 static void set_advisor_window(void)
 {
-    if (sub_advisors[current_advisor]) {
+    if (is_valid_sub_advisor_index(current_advisor) && sub_advisors[current_advisor]) {
         current_advisor_window = sub_advisors[current_advisor]();
     } else {
         current_advisor_window = 0;
@@ -266,7 +280,7 @@ static void button_change_advisor(const generic_button *button)
 static void button_help(int param1, int param2)
 {
     if (current_advisor > 0) {
-        window_message_dialog_show(ADVISOR_TO_MESSAGE_TEXT[current_advisor], 0);
+        window_message_dialog_show(message_text_for_advisor(current_advisor), 0);
     }
 }
 

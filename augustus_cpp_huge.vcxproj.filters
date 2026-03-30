@@ -7,6 +7,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="res\augustus.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\scenario\allowed_building.c" />
     <ClCompile Include="src\scenario\criteria.c" />
     <ClCompile Include="src\scenario\custom_media.c" />
@@ -93,7 +98,7 @@
     <ClCompile Include="src\widget\sidebar\extra.c" />
     <ClCompile Include="src\widget\sidebar\military.c" />
     <ClCompile Include="src\widget\sidebar\slide.c" />
-    <ClCompile Include="src\widget\top_menu.c" />
+    <ClCompile Include="src\widget\top_menu.cpp" />
     <ClCompile Include="src\widget\top_menu_editor.c" />
     <ClCompile Include="src\window\advisor\chief.c" />
     <ClCompile Include="src\window\advisor\education.c" />
