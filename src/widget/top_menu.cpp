@@ -1,3 +1,4 @@
+extern "C" {
 #include "top_menu.h"
 
 #include "assets/assets.h"
@@ -42,6 +43,7 @@
 #include "window/mission_selection.h"
 #include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
+}
 
 enum {
     INFO_NONE = 0,
@@ -143,6 +145,11 @@ typedef struct {
     int start;
     int end;
 }top_menu_tooltip_range;
+
+static advisor_type to_advisor_type(int advisor)
+{
+    return static_cast<advisor_type>(advisor);
+}
 
 static struct {
     top_menu_tooltip_range funds;
@@ -560,7 +567,7 @@ static char get_cosmetic_day_of_month(void)
     return cosmetic_day;
 }
 
-void widget_top_menu_draw(int force)
+extern "C" void widget_top_menu_draw(int force)
 {
     // Skip redraw if nothing changed
     if (!force &&
@@ -797,7 +804,7 @@ static int handle_mouse_menu(const mouse *m)
     return 0;
 }
 
-int widget_top_menu_handle_input(const mouse *m, const hotkeys *h)
+extern "C" int widget_top_menu_handle_input(const mouse *m, const hotkeys *h)
 {
     if (widget_city_has_input()) {
         return 0;
@@ -809,7 +816,7 @@ int widget_top_menu_handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
-int widget_top_menu_get_tooltip_text(tooltip_context *c)
+extern "C" int widget_top_menu_get_tooltip_text(tooltip_context *c)
 {
     if (data.focus_menu_id) {
         return 49 + data.focus_menu_id;
@@ -1004,7 +1011,8 @@ static void menu_options_monthly_autosave(int param)
 
 static void menu_options_yearly_autosave(int param)
 {
-    config_set(CONFIG_GP_CH_YEARLY_AUTOSAVE, !config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE));
+    int yearly_autosave_enabled = config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE);
+    config_set(CONFIG_GP_CH_YEARLY_AUTOSAVE, yearly_autosave_enabled ? 0 : 1);
     config_save();
     set_text_for_yearly_autosave();
 }
@@ -1039,10 +1047,10 @@ static void menu_advisors_go_to(int advisor)
 {
     clear_state();
     window_go_back();
-    window_advisors_show_advisor(advisor);
+    window_advisors_show_advisor(to_advisor_type(advisor));
 }
 static void ratings_advisors_go_to(int advisor)
 {
     clear_state();
-    window_advisors_show_advisor(advisor);
+    window_advisors_show_advisor(to_advisor_type(advisor));
 }
