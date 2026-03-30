@@ -257,7 +257,7 @@ static void handle_element_text(const sxmltok_t *token)
         int length = token->endpos - token->startpos;
         while (length) {
             char *end = memchr(text, '\n', length);
-            int line_length = end ? end - text + 1: length;
+            int line_length = end ? (int) (end - text + 1) : length;
             length -= line_length;
             // Remove whitespace at beginning
             while (*text == ' ' && line_length > 0) {

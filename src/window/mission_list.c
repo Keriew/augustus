@@ -222,7 +222,7 @@ static void draw_scenario_selection_button(const campaign_scenario *camp_scenari
     }
 
     image_draw(image_group(GROUP_SELECT_MISSION_BUTTON),
-        x_offset * scale + camp_scenario->x, y_offset * scale + camp_scenario->y, COLOR_MASK_NONE, scale);
+        (int) (x_offset * scale) + camp_scenario->x, (int) (y_offset * scale) + camp_scenario->y, COLOR_MASK_NONE, scale);
 }
 
 static int draw_mission_selection_map(void)
@@ -244,9 +244,9 @@ static int draw_mission_selection_map(void)
     float scale = scale_w > scale_h ? scale_w : scale_h;
     scale *= extra_scale;
 
-    int x_offset = SELECTED_ITEM_INFO_X_OFFSET + ((MISSION_MAP_MAX_WIDTH - img->original.width / scale) / 2);
+    int x_offset = SELECTED_ITEM_INFO_X_OFFSET + (int) ((MISSION_MAP_MAX_WIDTH - img->original.width / scale) / 2);
 
-    image_draw(image_id, x_offset * scale, MISSION_LIST_Y_POSITION * scale,
+    image_draw(image_id, (int) (x_offset * scale), (int) (MISSION_LIST_Y_POSITION * scale),
         COLOR_MASK_NONE, scale);
 
     for (int i = 1; i <= data.selected_item->mission.total_scenarios; i++) {
@@ -254,7 +254,7 @@ static int draw_mission_selection_map(void)
             x_offset, MISSION_LIST_Y_POSITION, scale / extra_scale);
     }
 
-    return img->original.height / scale;
+    return (int) (img->original.height / scale);
 }
 
 static void draw_scenario_map(void)

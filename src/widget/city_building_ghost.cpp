@@ -1,3 +1,4 @@
+extern "C" {
 #include "city_building_ghost.h"
 
 #include "assets/assets.h"
@@ -46,6 +47,7 @@
 #include "widget/city.h"
 #include "widget/city_bridge.h"
 #include "widget/city_water_ghost.h"
+}
 
 #include <stdlib.h>
 
@@ -298,7 +300,7 @@ static void draw_regular_building(building_type type, int image_id, int x, int y
         } else {
             image_draw(image_id + 1, x - 33, y - 56, color, data.scale);
         }
-    } else if (type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND) {
+    } else if (!building_construction_is_land_work_type(type)) {
         draw_building(image_id, x, y, color);
     }
     draw_building_tiles(x, y, num_tiles, blocked_tiles);
@@ -508,7 +510,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
     int orientation_index = city_view_orientation() / 2;
 
     if (building_connectable_gate_type(type) && map_terrain_get(grid_offset) & TERRAIN_ROAD) {
-        type = building_connectable_gate_type(type);
+        type = static_cast<building_type>(building_connectable_gate_type(type));
     }
 
     int check_figure = ((type != BUILDING_PLAZA && type != BUILDING_ROADBLOCK) || props->size != 1) ? 1 : 0;
@@ -927,7 +929,7 @@ static void draw_bathhouse(const map_tile *tile, int x, int y)
     set_roamer_path(BUILDING_BATHHOUSE, building_size, tile, has_blocked_tiles(num_tiles, blocked_tiles));
 }
 
-static void draw_pond(const map_tile *tile, int x, int y, int type)
+static void draw_pond(const map_tile *tile, int x, int y, building_type type)
 {
     int grid_offset = tile->grid_offset;
     int building_size = (type == BUILDING_LARGE_POND) ? 3 : 2;
@@ -1394,9 +1396,8 @@ static void draw_concrete_maker(const map_tile *tile, int x, int y)
 
 int city_building_ghost_mark_deleting(const map_tile *tile)
 {
-    int construction_type = building_construction_type();
-    int is_land_work = (construction_type == BUILDING_CLEAR_LAND || construction_type == BUILDING_REPAIR_LAND);
-    if (!is_land_work) {    // bail out early if not a land-work type
+    building_type construction_type = building_construction_type();
+    if (!building_construction_is_land_work_type(construction_type)) {
         return 0;
     }
     if (!tile->grid_offset || building_construction_draw_as_constructing() || scroll_in_progress()) {
@@ -1534,7 +1535,7 @@ void city_building_ghost_draw(const map_tile *tile)
     building_type type = building_construction_type();
     data.ghost_building.type = type;
     if (building_construction_draw_as_constructing() || type == BUILDING_NONE
-        || type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND) {
+        || building_construction_is_land_work_type(type)) {
         return;
     }
     create_tile_offsets();

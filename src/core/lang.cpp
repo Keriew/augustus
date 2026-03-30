@@ -1,5 +1,5 @@
-#include "core/lang.h"
-
+extern "C" {
+#include "lang.h"
 #include "building/building.h"
 #include "core/buffer.h"
 #include "core/file.h"
@@ -7,6 +7,7 @@
 #include "core/log.h"
 #include "core/string.h"
 #include "translation/translation.h"
+}
 
 #include <stdlib.h>
 #include <string.h>
@@ -104,8 +105,8 @@ static void parse_message(buffer *buf)
     buffer_skip(buf, 24); // header
     for (int i = 0; i < MAX_MESSAGE_ENTRIES; i++) {
         lang_message *m = &data.message_entries[i];
-        m->type = buffer_read_i16(buf);
-        m->message_type = buffer_read_i16(buf);
+        m->type = static_cast<lang_type>(buffer_read_i16(buf));
+        m->message_type = static_cast<lang_message_type>(buffer_read_i16(buf));
         buffer_skip(buf, 2);
         m->x = buffer_read_i16(buf);
         m->y = buffer_read_i16(buf);
@@ -135,7 +136,12 @@ static void parse_message(buffer *buf)
 }
 
 
-static void set_message_parameters(lang_message *m, int title, int text, int urgent, int message_type)
+static void set_message_parameters(
+    lang_message *m,
+    int title,
+    int text,
+    int urgent,
+    lang_message_type message_type)
 {
     m->type = TYPE_MESSAGE;
     m->message_type = message_type;
@@ -147,8 +153,8 @@ static void set_message_parameters(lang_message *m, int title, int text, int urg
     m->title.y = 0;
     m->urgent = urgent;
 
-    m->title.text = translation_for(title);
-    m->content.text = translation_for(text);
+    m->title.text = translation_for(static_cast<translation_key>(title));
+    m->content.text = translation_for(static_cast<translation_key>(text));
 }
 
 
@@ -339,7 +345,8 @@ static int load_files(const char *text_filename, const char *message_filename, i
     if (!buf) {
         return 0;
     }
-    int success = load_text(text_filename, localizable, buf) && load_message(message_filename, localizable, buf);
+    int success = (load_text(text_filename, localizable, buf) != 0) &&
+        (load_message(message_filename, localizable, buf) != 0);
     free(buf);
     return success;
 }
@@ -348,15 +355,15 @@ int lang_load(int is_editor)
 {
     if (is_editor) {
         return
-            load_files(FILE_EDITOR_TEXT_RUS, FILE_EDITOR_MM_RUS, MAY_BE_LOCALIZED) ||
-            load_files(FILE_EDITOR_TEXT_ENG, FILE_EDITOR_MM_ENG, MAY_BE_LOCALIZED);
+            (load_files(FILE_EDITOR_TEXT_RUS, FILE_EDITOR_MM_RUS, MAY_BE_LOCALIZED) != 0) ||
+            (load_files(FILE_EDITOR_TEXT_ENG, FILE_EDITOR_MM_ENG, MAY_BE_LOCALIZED) != 0);
     }
     // Prefer language files from localized dir, fall back to main dir
     return
-        load_files(FILE_TEXT_ENG, FILE_MM_ENG, MUST_BE_LOCALIZED) ||
-        load_files(FILE_TEXT_RUS, FILE_MM_RUS, MUST_BE_LOCALIZED) ||
-        load_files(FILE_TEXT_ENG, FILE_MM_ENG, NOT_LOCALIZED) ||
-        load_files(FILE_TEXT_RUS, FILE_MM_RUS, NOT_LOCALIZED);
+        (load_files(FILE_TEXT_ENG, FILE_MM_ENG, MUST_BE_LOCALIZED) != 0) ||
+        (load_files(FILE_TEXT_RUS, FILE_MM_RUS, MUST_BE_LOCALIZED) != 0) ||
+        (load_files(FILE_TEXT_ENG, FILE_MM_ENG, NOT_LOCALIZED) != 0) ||
+        (load_files(FILE_TEXT_RUS, FILE_MM_RUS, NOT_LOCALIZED) != 0);
 }
 
 const uint8_t *lang_get_string(int group, int index)
@@ -371,7 +378,7 @@ const uint8_t *lang_get_string(int group, int index)
     }
     //Custom translations
     if (group == CUSTOM_TRANSLATION) {
-        return translation_for(index);
+        return translation_for(static_cast<translation_key>(index));
     }
     //Augustus overrrides of original strings
     if (group == 92 && !index) {
@@ -614,6 +621,8 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_NATIVE_WATCHTOWER);
             case BUILDING_REPAIR_LAND:
                 return translation_for(TR_BUILDING_LAND_REPAIR);
+            case BUILDING_CLEAR_TREES:
+                return translation_for(TR_BUILDING_MENU_TREES);
             case BUILDING_CLEAR_LAND:
                 return translation_for(TR_BUILDING_LAND_CLEAR);
 
@@ -665,7 +674,7 @@ const uint8_t *lang_get_string(int group, int index)
 
 const uint8_t *lang_get_building_type_string(int type)
 {
-    if (building_is_house(type) || type == BUILDING_NATIVE_MEETING ||
+    if (building_is_house(static_cast<building_type>(type)) || type == BUILDING_NATIVE_MEETING ||
         type == BUILDING_NATIVE_HUT || type == BUILDING_NATIVE_HUT_ALT ||
         type == BUILDING_NATIVE_CROPS) {
         return lang_get_string(41, type);

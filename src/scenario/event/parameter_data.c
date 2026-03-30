@@ -885,7 +885,10 @@ static void generate_model_mappings(void)
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
         const building_properties *props = building_properties_for_type(type);
-        if (((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND) ||
+        if (((!props->size || !props->event_data.attr)
+                && type != BUILDING_CLEAR_LAND
+                && type != BUILDING_REPAIR_LAND
+                && type != BUILDING_CLEAR_TREES) ||
             (type == BUILDING_GRAND_GARDEN || type == BUILDING_DOLPHIN_FOUNTAIN)) {
             continue;
         }
@@ -1189,6 +1192,9 @@ static const uint8_t *get_allowed_building_name(building_type type)
     }
     if (type == BUILDING_REPAIR_LAND) {
         return lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_LAND_REPAIR);
+    }
+    if (type == BUILDING_CLEAR_TREES) {
+        return translation_for(TR_BUILDING_MENU_TREES);
     }
     return lang_get_building_type_string(type);
 }

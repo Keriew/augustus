@@ -92,7 +92,7 @@ static const uint8_t *get_path_text(void)
             path_text = translation_for(TR_CONFIG_USER_PATH_WITH_SUBDIRECTORIES);
         } else if (platform_user_path_recommend() && strcmp(data.user_path, platform_user_path_recommend()) == 0) {
             uint8_t *cursor = string_copy(translation_for(TR_CONFIG_USER_PATH_RECOMMENDED), text, FILE_NAME_MAX);
-            cursor += encode_path(cursor, data.user_path, FILE_NAME_MAX - (cursor - text));
+            cursor += encode_path(cursor, data.user_path, FILE_NAME_MAX - (int) (cursor - text));
             string_copy(string_from_ascii(")"), cursor, FILE_NAME_MAX - (cursor - text));
             path_text = text;
         } else {
@@ -214,7 +214,7 @@ static void button_pick_option(const generic_button *button)
             texts[total_options++] = recommended_text;
             uint8_t *cursor = string_copy(translation_for(TR_CONFIG_USER_PATH_RECOMMENDED),
                 recommended_text, FILE_NAME_MAX);
-            cursor += encode_path(cursor, recommended, FILE_NAME_MAX - (cursor - recommended_text));
+            cursor += encode_path(cursor, recommended, FILE_NAME_MAX - (int) (cursor - recommended_text));
             string_copy(string_from_ascii(")"), cursor, FILE_NAME_MAX - (cursor - recommended_text));
         }
         if (system_supports_select_folder_dialog()) {

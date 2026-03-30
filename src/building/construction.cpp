@@ -1,3 +1,4 @@
+extern "C" {
 #include "construction.h"
 
 #include "assets/assets.h"
@@ -14,6 +15,7 @@
 #include "building/rotation.h"
 #include "building/variant.h"
 #include "building/warehouse.h"
+#include "building/tool_mode.h"
 #include "city/buildings.h"
 #include "city/finance.h"
 #include "city/resource.h"
@@ -25,6 +27,7 @@
 #include "figure/formation.h"
 #include "game/undo.h"
 #include "graphics/window.h"
+#include "input/hotkey.h"
 #include "map/aqueduct.h"
 #include "map/bridge.h"
 #include "map/building.h"
@@ -41,6 +44,7 @@
 #include "map/water.h"
 #include "map/water_supply.h"
 #include "scenario/allowed_building.h"
+}
 
 #define MAX_CYCLE_SIZE 10
 
@@ -65,6 +69,8 @@ enum {
 
 static struct {
     building_type type;
+    building_type selected_type;
+    building_type compatibility_alias_type;
     int in_progress;
     map_tile start;
     map_tile end;
@@ -104,6 +110,84 @@ static const struct cycle building_cycles[] = {
 };
 
 #define BUILDING_CYCLES (sizeof(building_cycles) / sizeof(struct cycle))
+
+static void set_required_terrain(building_type type)
+{
+    data.required_terrain.wall = 0;
+    data.required_terrain.water = 0;
+    data.required_terrain.tree = 0;
+    data.required_terrain.rock = 0;
+    data.required_terrain.meadow = 0;
+    data.required_terrain.distant_water = 0;
+
+    switch (type) {
+        case BUILDING_WHEAT_FARM:
+        case BUILDING_VEGETABLE_FARM:
+        case BUILDING_FRUIT_FARM:
+        case BUILDING_OLIVE_FARM:
+        case BUILDING_VINES_FARM:
+        case BUILDING_PIG_FARM:
+            data.required_terrain.meadow = 1;
+            break;
+        case BUILDING_MARBLE_QUARRY:
+        case BUILDING_IRON_MINE:
+        case BUILDING_GOLD_MINE:
+        case BUILDING_STONE_QUARRY:
+            data.required_terrain.rock = 1;
+            break;
+        case BUILDING_TIMBER_YARD:
+            data.required_terrain.tree = 1;
+            break;
+        case BUILDING_CLAY_PIT:
+            data.required_terrain.water = 1;
+            break;
+        case BUILDING_TOWER:
+            data.required_terrain.wall = 1;
+            break;
+        case BUILDING_LIGHTHOUSE:
+        case BUILDING_SAND_PIT:
+            data.required_terrain.distant_water = 1;
+            [[fallthrough]];
+        default:
+            break;
+    }
+}
+
+static building_type resolve_construction_type(void)
+{
+    if (!data.selected_type) {
+        return data.type;
+    }
+    if (!building_tool_mode_handles_selection(data.selected_type)) {
+        return data.selected_type;
+    }
+    return building_tool_mode_resolve(
+        data.selected_type,
+        data.compatibility_alias_type,
+        hotkey_get_modifiers());
+}
+
+static void sync_construction_type(void)
+{
+    building_type resolved_type = resolve_construction_type();
+    if (resolved_type == data.type) {
+        return;
+    }
+    if (resolved_type != data.type) {
+        building_rotation_remove_rotation();
+    }
+    data.type = resolved_type;
+    set_required_terrain(data.type);
+    data.cost_preview = 0;
+    if (data.in_progress) {
+        game_undo_set_build_type(data.type);
+    }
+}
+
+int building_construction_is_land_work_type(building_type type)
+{
+    return type == BUILDING_CLEAR_LAND || type == BUILDING_CLEAR_TREES || type == BUILDING_REPAIR_LAND;
+}
 
 static unsigned int count_enabled_buildings_for_cycling(unsigned int cycle_index)
 {
@@ -170,7 +254,7 @@ int building_construction_cycle_forward(void)
                     return 0;
                 }
                 data.cycle_step = 0;
-                int new_type;
+                building_type new_type;
                 do {
                     if (j + 1 >= size) { // If last element of the list, the next one is the first one
                         j = 0;
@@ -206,7 +290,7 @@ int building_construction_cycle_back(void)
                     return 0;
                 }
                 data.cycle_step = building_cycles[i].rotations_to_next - 1;
-                int new_type;
+                building_type new_type;
                 do {
                     if (j - 1 < 0) { // If first element of the list, pick the last element
                         j = size - 1;
@@ -413,7 +497,7 @@ static int place_draggable_building(int x_start, int y_start, int x_end, int y_e
 
     int items_placed = 0;
     int gates_placed = 0;
-    int gate_type = building_connectable_gate_type(type);
+    building_type gate_type = static_cast<building_type>(building_connectable_gate_type(type));
 
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
@@ -569,56 +653,24 @@ int building_construction_can_rotate(void)
 
 void building_construction_set_type(building_type type, int setup_rotation)
 {
-    if (type != data.type) {
+    building_type selected_type = building_tool_mode_selection_type(type);
+    building_type resolved_type = building_tool_mode_resolve(selected_type, type, hotkey_get_modifiers());
+    if (resolved_type != data.type) {
         building_rotation_remove_rotation();
     }
-    data.type = type;
+    data.selected_type = selected_type;
+    data.compatibility_alias_type = type;
+    data.type = resolved_type;
     data.in_progress = 0;
     data.start.x = 0;
     data.start.y = 0;
     data.end.x = 0;
     data.end.y = 0;
+    data.start.grid_offset = 0;
     data.cost_preview = 0;
 
-    if (type != BUILDING_NONE) {
-        data.required_terrain.wall = 0;
-        data.required_terrain.water = 0;
-        data.required_terrain.tree = 0;
-        data.required_terrain.rock = 0;
-        data.required_terrain.meadow = 0;
-        data.required_terrain.distant_water = 0;
-        data.start.grid_offset = 0;
-
-        switch (type) {
-            case BUILDING_WHEAT_FARM:
-            case BUILDING_VEGETABLE_FARM:
-            case BUILDING_FRUIT_FARM:
-            case BUILDING_OLIVE_FARM:
-            case BUILDING_VINES_FARM:
-            case BUILDING_PIG_FARM:
-                data.required_terrain.meadow = 1;
-                break;
-            case BUILDING_MARBLE_QUARRY:
-            case BUILDING_IRON_MINE:
-            case BUILDING_GOLD_MINE:
-            case BUILDING_STONE_QUARRY:
-                data.required_terrain.rock = 1;
-                break;
-            case BUILDING_TIMBER_YARD:
-                data.required_terrain.tree = 1;
-                break;
-            case BUILDING_CLAY_PIT:
-                data.required_terrain.water = 1;
-                break;
-            case BUILDING_TOWER:
-                data.required_terrain.wall = 1;
-                break;
-            case BUILDING_LIGHTHOUSE:
-            case BUILDING_SAND_PIT:
-                data.required_terrain.distant_water = 1;
-            default:
-                break;
-        }
+    if (data.type != BUILDING_NONE) {
+        set_required_terrain(data.type);
     }
     if (building_construction_can_rotate()) {
         building_rotation_setup_rotation(setup_rotation);
@@ -629,12 +681,23 @@ void building_construction_clear_type(void)
 {
     data.cost_preview = 0;
     data.type = BUILDING_NONE;
+    data.selected_type = BUILDING_NONE;
+    data.compatibility_alias_type = BUILDING_NONE;
     data.in_progress = 0;
     building_rotation_remove_rotation();
 }
 
 building_type building_construction_type(void)
 {
+    sync_construction_type();
+    return data.type;
+}
+
+building_type building_construction_selection_type(void)
+{
+    if (data.selected_type) {
+        return data.selected_type;
+    }
     return data.type;
 }
 
@@ -647,7 +710,7 @@ int building_construction_size(int *x, int *y)
 {
     if (!config_get(CONFIG_UI_SHOW_CONSTRUCTION_SIZE) ||
         !building_construction_is_updatable() || !data.in_progress ||
-        ((data.type != BUILDING_CLEAR_LAND && data.type != BUILDING_REPAIR_LAND) && !data.cost_preview)) {
+        (!building_construction_is_land_work_type(data.type) && !data.cost_preview)) {
         return 0;
     }
     int size_x = data.end.x - data.start.x;
@@ -703,6 +766,7 @@ void building_construction_start(int x, int y, int grid_offset)
             case BUILDING_HIGHWAY:
                 can_start = map_routing_calculate_distances_for_building(
                     ROUTED_BUILDING_HIGHWAY, data.start.x, data.start.y);
+                [[fallthrough]];
             default:
                 break;
         }
@@ -716,6 +780,7 @@ int building_construction_is_updatable(void)
 {
     switch (data.type) {
         case BUILDING_CLEAR_LAND:
+        case BUILDING_CLEAR_TREES:
         case BUILDING_REPAIR_LAND:
         case BUILDING_ROAD:
         case BUILDING_AQUEDUCT:
@@ -819,6 +884,11 @@ void building_construction_update(int x, int y, int grid_offset)
     int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
         int items_placed = last_items_cleared = building_construction_clear_land(1, data.start.x, data.start.y, x, y);
+        if (items_placed >= 0) {
+            current_cost *= items_placed;
+        }
+    } else if (type == BUILDING_CLEAR_TREES) {
+        int items_placed = building_construction_clear_trees(1, data.start.x, data.start.y, x, y);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
@@ -1007,7 +1077,7 @@ figure_type building_construction_nearby_enemy_type(grid_slice *slice)
             int dy = (f->y > tile_y) ? (f->y - tile_y) : (tile_y - f->y);
 
             if (dx <= distance && dy <= distance) {
-                return f->type;
+                return static_cast<figure_type>(f->type);
             }
         }
     }
@@ -1052,7 +1122,7 @@ void building_construction_place(void)
 
     figure_type enemy_figure_type = building_construction_nearby_enemy_type(slice);
 
-    if (type != BUILDING_CLEAR_LAND && enemy_figure_type != FIGURE_NONE) {
+    if (type != BUILDING_CLEAR_LAND && type != BUILDING_CLEAR_TREES && enemy_figure_type != FIGURE_NONE) {
         if (type == BUILDING_WALL || type == BUILDING_ROAD || type == BUILDING_AQUEDUCT || type == BUILDING_HIGHWAY) {
             game_undo_restore_map(0);
         } else if (type == BUILDING_PLAZA || type == BUILDING_GARDENS ||
@@ -1078,6 +1148,10 @@ void building_construction_place(void)
         if (items_placed < 0) {
             items_placed = last_items_cleared;
         }
+        placement_cost *= items_placed;
+        map_property_clear_constructing_and_deleted();
+    } else if (type == BUILDING_CLEAR_TREES) {
+        int items_placed = building_construction_clear_trees(0, x_start, y_start, x_end, y_end);
         placement_cost *= items_placed;
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_REPAIR_LAND) {

@@ -871,6 +871,25 @@ rewinddir(
 /*
  * Scan directory for entries.
  */
+static void
+dirent_free_scandir_entries(
+    struct dirent **files,
+    size_t size)
+{
+    struct dirent **base = files;
+    if (files == NULL) {
+        return;
+    }
+#if defined(_MSC_VER)
+    __analysis_assume(files != NULL);
+#endif
+    while (size-- > 0) {
+        free(*files);
+        files++;
+    }
+    free(base);
+}
+
 static int
 scandir(
     const char *dirname,
@@ -885,7 +904,6 @@ scandir(
     DIR *dir = NULL;
     struct dirent *entry;
     struct dirent *tmp = NULL;
-    size_t i;
     int result = 0;
 
     /* Open directory stream */
@@ -950,6 +968,10 @@ scandir(
                     }
 
                     if (pass) {
+                        if (files == NULL) {
+                            result = -1;
+                            break;
+                        }
                         /* Store the temporary entry to pointer table */
                         files[size++] = tmp;
                         tmp = NULL;
@@ -964,7 +986,9 @@ scandir(
                      * End of directory stream reached => sort entries and
                      * exit.
                      */
-                    qsort (files, size, sizeof (void*), compare);
+                    if (files != NULL && size > 0) {
+                        qsort (files, size, sizeof (void*), compare);
+                    }
                     break;
 
                 }
@@ -989,11 +1013,9 @@ scandir(
 
     /* Release allocated memory on error */
     if (result < 0) {
-        for (i = 0; i < size; i++) {
-            free (files[i]);
-        }
-        free (files);
+        struct dirent **files_to_free = files;
         files = NULL;
+        dirent_free_scandir_entries(files_to_free, size);
     }
 
     /* Close directory stream */

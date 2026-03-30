@@ -1,3 +1,4 @@
+extern "C" {
 #include "undo.h"
 
 #include "building/connectable.h"
@@ -28,6 +29,7 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "scenario/earthquake.h"
+}
 
 #include <string.h>
 
@@ -177,6 +179,11 @@ int game_undo_start_build(building_type type)
     return 1;
 }
 
+void game_undo_set_build_type(building_type type)
+{
+    data.type = type;
+}
+
 void game_undo_restore_building_state(void)
 {
     for (int i = 0; i < data.num_buildings; i++) {
@@ -252,7 +259,7 @@ void game_undo_perform(void)
     }
     data.available = 0;
     city_finance_process_construction(-data.building_cost);
-    if (data.type == BUILDING_CLEAR_LAND) {
+    if (data.type == BUILDING_CLEAR_LAND || data.type == BUILDING_CLEAR_TREES) {
         for (int i = 0; i < data.num_buildings; i++) {
             if (data.buildings[i].id) {
                 building *b = building_restore_from_undo(&data.buildings[i]);
@@ -338,6 +345,7 @@ void game_undo_reduce_time_available(void)
     data.timeout_ticks--;
     switch (data.type) {
         case BUILDING_CLEAR_LAND:
+        case BUILDING_CLEAR_TREES:
         case BUILDING_AQUEDUCT:
         case BUILDING_ROAD:
         case BUILDING_HIGHWAY:

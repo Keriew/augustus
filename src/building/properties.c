@@ -42,6 +42,12 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .building_model_data = {.cost = 3, .desirability_value = 0, .desirability_step = 0,
             .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
     },
+    [BUILDING_CLEAR_TREES] = {
+        .event_data.attr = "clear_trees",
+        .event_data.cannot_count = 1,
+        .building_model_data = {.cost = 2, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
+    },
     [BUILDING_ROAD] = {
         .size = 1,
         .image_group = 112,
@@ -2236,7 +2242,7 @@ void model_reset(void)
         const building_properties *props = &properties[type];
         if (((props->size && props->event_data.attr) &&
             (type != BUILDING_GRAND_GARDEN && type != BUILDING_DOLPHIN_FOUNTAIN)) ||
-            type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND) {
+            type == BUILDING_CLEAR_LAND || type == BUILDING_REPAIR_LAND || type == BUILDING_CLEAR_TREES) {
             buildings[type] = props->building_model_data;
         } else {
             buildings[type] = NOTHING;

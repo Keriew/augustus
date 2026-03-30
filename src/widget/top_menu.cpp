@@ -338,7 +338,7 @@ static widget_layout_case_t widget_top_menu_measure_layout(int available_width, 
     int w_savings = get_black_panel_total_width_for_text_id(6, 0, 9999, font); //4 digit city treasury as base
     int w_population = get_black_panel_total_width_for_text_id(6, 1, 99999, font); //5 digit city pop as base
     int w_date = DATE_FIELD_WIDTH + BLACK_PANEL_BLOCK_WIDTH; // returned block is longer
-    int w_rating = get_black_panel_actual_width(rating_one_block_w * 4.5f);
+    int w_rating = get_black_panel_actual_width((rating_one_block_w * 9) / 2);
     // half block for health, one extra block to ensure everything fits in edge cases
 
     int min_basic = w_funds + w_population + w_date;

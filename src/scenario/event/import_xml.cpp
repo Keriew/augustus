@@ -1,3 +1,4 @@
+extern "C" {
 #include "import_xml.h"
 
 #include "core/encoding.h"
@@ -17,6 +18,7 @@
 #include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
 #include "window/editor/select_city_trade_route.h"
+}
 
 #include <math.h>
 #include <stdio.h>
@@ -288,7 +290,7 @@ static int xml_import_start_group(void)
         const char *values[2] = { "all", "any" };
         int result = xml_parser_get_attribute_enum("fulfillment_type", values, 2, 0);
         if (result != -1) {
-            type = result;
+            type = static_cast<fulfillment_type>(result);
         }
     }
     // Only group 0 has fulfillment type all
@@ -307,10 +309,11 @@ static void xml_import_end_group(void)
 
 static condition_types get_condition_type_from_element_name(const char *name)
 {
-    for (condition_types i = CONDITION_TYPE_MIN; i < CONDITION_TYPE_MAX; i++) {
-        const char *condition_name = scenario_events_parameter_data_get_conditions_xml_attributes(i)->xml_attr.name;
+    for (int i = CONDITION_TYPE_MIN; i < CONDITION_TYPE_MAX; i++) {
+        condition_types type = static_cast<condition_types>(i);
+        const char *condition_name = scenario_events_parameter_data_get_conditions_xml_attributes(type)->xml_attr.name;
         if (condition_name && xml_parser_compare_multiple(condition_name, name)) {
-            return i;
+            return type;
         }
     }
     return CONDITION_TYPE_UNDEFINED;
@@ -348,10 +351,11 @@ static int xml_import_create_condition(void)
 
 static action_types get_action_type_from_element_name(const char *name)
 {
-    for (action_types i = ACTION_TYPE_MIN; i < ACTION_TYPE_MAX; i++) {
-        const char *action_name = scenario_events_parameter_data_get_actions_xml_attributes(i)->xml_attr.name;
+    for (int i = ACTION_TYPE_MIN; i < ACTION_TYPE_MAX; i++) {
+        action_types type = static_cast<action_types>(i);
+        const char *action_name = scenario_events_parameter_data_get_actions_xml_attributes(type)->xml_attr.name;
         if (xml_parser_compare_multiple(action_name, name)) {
-            return i;
+            return type;
         }
     }
     return ACTION_TYPE_UNDEFINED;
@@ -370,7 +374,7 @@ static int action_populate_parameters(scenario_action_t *action)
     // Note: parameter2 must be parsed first as it contains the city_property that determines the flexible types
     if (action_data->xml_parm3.type == PARAMETER_TYPE_FLEXIBLE) {
         parameter_type type3 = scenario_events_parameter_data_resolve_flexible_type(action, 3);
-        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        city_property_info_t info = city_property_get_param_info(static_cast<city_property_t>(action->parameter2));
         if (type3 != PARAMETER_TYPE_UNDEFINED && info.count >= 1) {
             xml_data_attribute_t resolved_attr = action_data->xml_parm3;
             resolved_attr.type = type3;
@@ -383,7 +387,7 @@ static int action_populate_parameters(scenario_action_t *action)
 
     if (action_data->xml_parm4.type == PARAMETER_TYPE_FLEXIBLE) {
         parameter_type type4 = scenario_events_parameter_data_resolve_flexible_type(action, 4);
-        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        city_property_info_t info = city_property_get_param_info(static_cast<city_property_t>(action->parameter2));
         if (type4 != PARAMETER_TYPE_UNDEFINED && info.count >= 2) {
             xml_data_attribute_t resolved_attr = action_data->xml_parm4;
             resolved_attr.type = type4;
@@ -396,7 +400,7 @@ static int action_populate_parameters(scenario_action_t *action)
 
     if (action_data->xml_parm5.type == PARAMETER_TYPE_FLEXIBLE) {
         parameter_type type5 = scenario_events_parameter_data_resolve_flexible_type(action, 5);
-        city_property_info_t info = city_property_get_param_info(action->parameter2);
+        city_property_info_t info = city_property_get_param_info(static_cast<city_property_t>(action->parameter2));
         if (type5 != PARAMETER_TYPE_UNDEFINED && info.count >= 3) {
             xml_data_attribute_t resolved_attr = action_data->xml_parm5;
             resolved_attr.type = type5;
@@ -574,6 +578,7 @@ static int xml_import_special_parse_building_counting(xml_data_attribute_t *attr
     switch (found->value) {
         case BUILDING_CLEAR_LAND:
         case BUILDING_REPAIR_LAND:
+        case BUILDING_CLEAR_TREES:
         case BUILDING_DISTRIBUTION_CENTER_UNUSED:
         case BUILDING_BURNING_RUIN:
             xml_import_log_error("I cannot count that.");
@@ -629,10 +634,11 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
     }
 
     const char *value = xml_parser_get_attribute_string(attr->name);
-    for (resource_type i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
-        const char *resource_name = resource_get_data(i)->xml_attr_name;
+    for (int i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
+        resource_type type = static_cast<resource_type>(i);
+        const char *resource_name = resource_get_data(type)->xml_attr_name;
         if (xml_parser_compare_multiple(resource_name, value)) {
-            *target = (int) i;
+            *target = (int) type;
             return 1;
         }
     }
@@ -842,7 +848,7 @@ static char *file_to_buffer(const char *filename, int *output_length)
     int size = ftell(file);
     rewind(file);
 
-    char *buf = malloc(size);
+    char *buf = (char *) malloc(size);
     if (!buf) {
         log_error("Error opening event file", filename, 0);
         file_close(file);

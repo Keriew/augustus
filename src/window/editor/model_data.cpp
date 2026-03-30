@@ -1,3 +1,4 @@
+extern "C" {
 #include "model_data.h"
 
 #include "building/industry.h"
@@ -20,6 +21,7 @@
 #include "window/editor/map.h"
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
+}
 
 #include <stdio.h>
 
@@ -76,11 +78,10 @@ static grid_box_type model_buttons = {
     .width = 40 * BLOCK_SIZE ,
     .height = 20 * BLOCK_SIZE,
     .item_height = 28,
-    .item_margin.horizontal = 8,
-    .item_margin.vertical = 2,
+    .item_margin = {8, 2},
     .extend_to_hidden_scrollbar = 1,
-    .on_click = model_item_click,
     .draw_item = draw_model_item,
+    .on_click = model_item_click,
     .handle_tooltip = building_tooltip
 };
 
@@ -95,11 +96,12 @@ static void populate_list(void)
 {
     data.total_items = 0;
     for (int i = 0; i < BUILDING_TYPE_MAX; i++) {
-        const building_properties *props = building_properties_for_type(i);
+        building_type type = static_cast<building_type>(i);
+        const building_properties *props = building_properties_for_type(type);
         if (((props->size && props->event_data.attr) &&
             (i != BUILDING_GRAND_GARDEN && i != BUILDING_DOLPHIN_FOUNTAIN)) ||
-            i == BUILDING_CLEAR_LAND || i == BUILDING_REPAIR_LAND) {
-            data.items[data.total_items++] = i;
+            i == BUILDING_CLEAR_LAND || i == BUILDING_REPAIR_LAND || i == BUILDING_CLEAR_TREES) {
+            data.items[data.total_items++] = type;
         }
     }
 }
@@ -240,7 +242,7 @@ static void get_building_translation(building_type b_type, uint8_t *buffer, int 
 static void draw_model_item(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, 0);
-    int b_type = data.items[item->index];
+    building_type b_type = data.items[item->index];
     uint8_t b_string[128];
 
     get_building_translation(b_type, b_string, sizeof(b_string));
@@ -355,7 +357,7 @@ static int desirability_tooltip(tooltip_context *c)
     const mouse *m = mouse_in_dialog(m_global);
 
     for (int i = 0; i < 4; i++) {
-        const uint8_t *text = translation_for(TR_EDITOR_MODEL_DATA_DES_VALUE + i);
+        const uint8_t *text = translation_for(static_cast<translation_key>(TR_EDITOR_MODEL_DATA_DES_VALUE + i));
         int width = text_get_width(text, FONT_SMALL_PLAIN);
         int x;
 
@@ -378,7 +380,7 @@ static int desirability_tooltip(tooltip_context *c)
         if (x <= m->x && x + width > m->x &&
             75 <= m->y && 75 + 10 > m->y) {
             c->text_group = CUSTOM_TRANSLATION;
-            c->text_id = TR_EDITOR_DESIRABILITY_VALUE + i;
+            c->text_id = static_cast<translation_key>(TR_EDITOR_DESIRABILITY_VALUE + i);
             c->type = TOOLTIP_BUTTON;
             return 1;
         }

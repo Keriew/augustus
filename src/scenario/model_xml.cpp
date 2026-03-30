@@ -1,3 +1,4 @@
+extern "C" {
 #include "model_xml.h"
 
 #include "building/industry.h"
@@ -12,6 +13,7 @@
 #include "game/resource.h"
 #include "scenario/event/parameter_data.h"
 #include "window/plain_message_dialog.h"
+}
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,13 +37,17 @@ static void export_model_data(buffer *buf)
 
     int edited_models = 0;
 
-    for (building_type type = BUILDING_ANY + 1; type < BUILDING_TYPE_MAX; ++type) {
+    for (int i = BUILDING_ANY + 1; i < BUILDING_TYPE_MAX; ++i) {
+        building_type type = static_cast<building_type>(i);
         const building_properties *props = building_properties_for_type(type);
         if (!props) {
             continue;
         }
 
-        if (((!props->size || !props->event_data.attr) && type != BUILDING_CLEAR_LAND && type != BUILDING_REPAIR_LAND)
+        if (((!props->size || !props->event_data.attr)
+                && type != BUILDING_CLEAR_LAND
+                && type != BUILDING_REPAIR_LAND
+                && type != BUILDING_CLEAR_TREES)
              || type == BUILDING_GRAND_GARDEN
              || type == BUILDING_DOLPHIN_FOUNTAIN) {
             continue;
@@ -94,7 +100,7 @@ int scenario_model_export_to_xml(const char *filename)
 {
     buffer buf;
     int buf_size = XML_EXPORT_MAX_SIZE;
-    uint8_t *buf_data = malloc(buf_size);
+    uint8_t *buf_data = static_cast<uint8_t *>(malloc(buf_size));
     if (!buf_data) {
         log_error("Unable to allocate buffer to export model data XML", 0, 0);
         free(buf_data);
@@ -139,7 +145,7 @@ static int start_building_model(void)
         xml_import_log_error("Could not resolve the given value. Invalid building_type");
         return 0;
     }
-    building_type type = found->value;
+    building_type type = static_cast<building_type>(found->value);
 
     if (!xml_parser_has_attribute("cost")) {
         xml_import_log_error("Attribute missing. 'cost' not given");
@@ -213,7 +219,7 @@ static char *file_to_buffer(const char *filename, int *output_length)
     int size = ftell(file);
     rewind(file);
 
-    char *buf = malloc(size);
+    char *buf = static_cast<char *>(malloc(size));
     if (!buf) {
         log_error("Error allocating memory to buffer", filename, 0);
         file_close(file);
