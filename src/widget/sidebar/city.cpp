@@ -42,6 +42,7 @@ extern "C" {
 
 #define MINIMAP_Y_OFFSET 59
 #define TOOLTIP_CLEAR_BUTTON 21
+#define TOOLTIP_ROAD_BUTTON 22
 
 static void button_overlay(int param1, int param2);
 static void button_collapse_expand(int param1, int param2);
@@ -311,6 +312,18 @@ int widget_sidebar_city_get_tooltip_text(tooltip_context *c)
             c->type = TOOLTIP_BUTTON;
             return 0;
         }
+        if (data.focus_button_for_tooltip == TOOLTIP_ROAD_BUTTON) {
+            building_type road_mode = building_tool_mode_resolve(
+                BUILDING_ROAD,
+                BUILDING_ROAD,
+                hotkey_get_modifiers());
+            if (building_construction_selection_type() == BUILDING_ROAD) {
+                road_mode = building_construction_type();
+            }
+            c->precomposed_text = lang_get_building_type_string(road_mode);
+            c->type = TOOLTIP_BUTTON;
+            return 0;
+        }
         return data.focus_button_for_tooltip;
     }
     return sidebar_extra_get_tooltip(c);
@@ -339,11 +352,12 @@ static void button_collapse_expand(int param1, int param2)
 
 static void button_build(int submenu, int param2)
 {
-    if (submenu == BUILD_MENU_CLEAR_LAND) {
+    if (submenu == BUILD_MENU_CLEAR_LAND || submenu == BUILD_MENU_ROAD) {
         window_build_menu_hide();
         widget_city_clear_current_tile();
         building_construction_cancel();
-        building_construction_set_type(BUILDING_CLEAR_LAND, 0);
+        building_type type = submenu == BUILD_MENU_CLEAR_LAND ? BUILDING_CLEAR_LAND : BUILDING_ROAD;
+        building_construction_set_type(type, 0);
         window_request_refresh();
         return;
     }
