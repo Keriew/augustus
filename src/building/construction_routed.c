@@ -66,6 +66,14 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
                 break;
             case ROUTED_BUILDING_AQUEDUCT:
                 *items += map_building_tiles_add_aqueduct(x_end, y_end);
+                if (!measure_only) {
+                    building *aqueduct = building_create(BUILDING_AQUEDUCT, x_end, y_end);
+                    map_building_set(grid_offset, aqueduct->id);
+                    map_terrain_add(grid_offset, TERRAIN_BUILDING);
+                    map_property_clear_multi_tile_xy(grid_offset);
+                    game_undo_add_building(aqueduct);
+                    aqueduct->subtype.instances++;
+                }
                 break;
             case ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC:
                 *items += 1;
@@ -160,7 +168,7 @@ int building_construction_place_highway(int measure_only, int x_start, int y_sta
     return items_placed;
 }
 
-int building_construction_place_aqueduct(int x_start, int y_start, int x_end, int y_end, int *cost)
+int building_construction_place_aqueduct(int measure_only, int x_start, int y_start, int x_end, int y_end, int *cost)
 {
     game_undo_restore_map(0);
 
@@ -197,14 +205,14 @@ int building_construction_place_aqueduct(int x_start, int y_start, int x_end, in
         return 0;
     }
     int num_items;
-    place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_AQUEDUCT, &num_items, 0);
+    place_routed_building(x_start, y_start, x_end, y_end, ROUTED_BUILDING_AQUEDUCT, &num_items, measure_only);
     *cost = item_cost * num_items;
     return 1;
 }
 
 int building_construction_place_aqueduct_for_reservoir(
-    int measure_only, int x_start, int y_start, int x_end, int y_end, int *items)
+    int measure_only, int should_draw, int x_start, int y_start, int x_end, int y_end, int *items)
 {
-    routed_building_type type = measure_only ? ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC : ROUTED_BUILDING_AQUEDUCT;
+    routed_building_type type = should_draw ? ROUTED_BUILDING_AQUEDUCT : ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC;
     return place_routed_building(x_start, y_start, x_end, y_end, type, items, measure_only);
 }

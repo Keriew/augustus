@@ -68,9 +68,9 @@ building *building_get(unsigned int id)
 
 int building_can_repair_type(building_type type)
 {
-    if (building_monument_is_limited(type) || type == BUILDING_AQUEDUCT || building_is_fort(type)) {
-        return 0; // limited monuments and aqueducts cannot be repaired at the moment, aqueducts require a rework,
-    }   //and limited monuments are too complex to easily repair, and arent a common occurrence
+    if (building_monument_is_limited(type) || building_is_fort(type)) {
+        return 0; // limited monuments cannot be repaired at the moment, 
+    }   // as they are too complex to easily repair, and arent a common occurrence
     // forts have the complexity of holding formations, so are also currently excluded
     building_type repair_type = building_clone_type_from_building_type(type);
     if (repair_type == BUILDING_NONE) {
@@ -565,8 +565,6 @@ int building_repair_at(int grid_offset)
     if (!building_can_repair_type(b->type) && !building_can_repair_type(b->data.rubble.og_type)) {
         if (building_monument_is_limited(b->type) || building_monument_is_limited(b->data.rubble.og_type)) {
             city_warning_show(WARNING_REPAIR_MONUMENT, NEW_WARNING_SLOT);
-        } else if (b->type == BUILDING_AQUEDUCT || b->data.rubble.og_type == BUILDING_AQUEDUCT) {
-            city_warning_show(WARNING_REPAIR_AQUEDUCT, NEW_WARNING_SLOT);
         } else {
             city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         }

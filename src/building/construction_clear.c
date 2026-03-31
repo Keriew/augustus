@@ -409,8 +409,6 @@ static int repair_land_confirmed(int measure_only, int x_start, int y_start, int
             } else {
                 if (building_monument_is_limited(b->type)) {
                     city_warning_show(WARNING_REPAIR_MONUMENT, NEW_WARNING_SLOT);
-                } else if (b->type == BUILDING_AQUEDUCT) {
-                    city_warning_show(WARNING_REPAIR_AQUEDUCT, NEW_WARNING_SLOT);
                 } else {
                     city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
                 }
