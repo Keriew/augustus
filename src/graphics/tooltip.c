@@ -1,5 +1,6 @@
 #include "tooltip.h"
 
+#include "building/building.h"
 #include "city/labor.h"
 #include "city/ratings.h"
 #include "city/view.h"
@@ -438,7 +439,7 @@ static void draw_tile_tooltip(tooltip_context *c)
                 height = 61;
                 break;
             case 3: // terrain flags and other info included
-                width = 160;
+                width = 160 + (b_id_at ? 60 : 0);
                 height = 61 + (b_id_at ? 14 : 0) + (rubble_id_at ? 14 : 0) + (num_flags * 14);
                 break;
             case 2:
@@ -490,7 +491,9 @@ static void draw_tile_tooltip(tooltip_context *c)
             if (b_id_at) {
                 int drawn_width = text_draw_label_and_number(string_from_ascii("b_grid: "), b_id_at,
                 "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-                text_draw_label_and_number(string_from_ascii(" (type: "), map_building_type_at(grid_offset),
+                drawn_width += text_draw_label_and_number(string_from_ascii(" (type: "), map_building_type_at(grid_offset),
+                    ")", 2 + drawn_width, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                text_draw_label_and_number(string_from_ascii(" (state: "), building_get(b_id_at)->state,
                     ")", 2 + drawn_width, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
                 y_offset += 14;
             }

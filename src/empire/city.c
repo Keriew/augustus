@@ -36,7 +36,7 @@
 
 #define NOT_SELLING 0
 
-#define EMPIRE_CITY_CURRENT_BUF_SIZE (18 + 2 * RESOURCE_MAX)
+#define EMPIRE_CITY_CURRENT_BUF_SIZE (20 + 2 * RESOURCE_MAX)
 
 static array(empire_city) cities;
 
@@ -583,7 +583,7 @@ void empire_city_save_state(buffer *buf)
         for (int r = 0; r < RESOURCE_MAX; r++) {
             buffer_write_u8(buf, city->sells_resource[r]);
         }
-        buffer_write_i16(buf, city->cost_to_open);
+        buffer_write_u32(buf, city->cost_to_open);
         buffer_write_i16(buf, city->trader_entry_delay);
         buffer_write_i16(buf, city->empire_object_id);
         buffer_write_u8(buf, city->is_sea_trade);
@@ -727,7 +727,11 @@ void empire_city_load_state(buffer *buf, int version)
         for (int r = 0; r < resource_total_mapped(); r++) {
             city->sells_resource[resource_remap(r)] = buffer_read_u8(buf);
         }
-        city->cost_to_open = buffer_read_i16(buf);
+        if (version > SAVE_GAME_LAST_LIMITED_ROUTE_COST) {
+            city->cost_to_open = buffer_read_u32(buf);
+        } else {
+            city->cost_to_open = buffer_read_u16(buf);
+        }
         if (version <= SAVE_GAME_LAST_STATIC_SCENARIO_OBJECTS) {
             buffer_skip(buf, 2);
         }

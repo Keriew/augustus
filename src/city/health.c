@@ -248,35 +248,6 @@ static void cause_plague(int total_people)
     }
 }
 
-static void adjust_sickness_level_in_house(building *b, int health, int population_health_offset, int hospital_bonus)
-{
-    if (!b->has_plague && b->sickness_level) {
-        int delta;
-        // Case-specific health reduction when health is perfect and pop is high enough
-        if (population_health_offset == 10 && health == 100) {
-            delta = -1;
-        } else {
-            delta = 10 - (health / 10) * 2;
-            delta += population_health_offset;
-        }
-
-        // Neptune GT reduces the delta by 5
-        if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
-            delta -= 5;
-        }
-
-        // If delta is positive, it is reduced depending on house health, global health and hospital access
-        if (delta > 0) {
-            int delta_decrease_percentage = city_health();
-            delta_decrease_percentage -= calc_adjust_with_percentage(city_health(), delta * 5);
-            delta_decrease_percentage += calc_adjust_with_percentage(city_health(), hospital_bonus);
-            delta -= calc_adjust_with_percentage(delta, delta_decrease_percentage);
-        }
-
-        b->sickness_level = calc_bound(b->sickness_level + delta, 0, MAX_SICKNESS_LEVEL);
-    }
-}
-
 static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonus)
 {
     for (size_t i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
@@ -305,7 +276,7 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
     if (building_is_house(b->type)) {
         // House Level: What is the level of the house?
         house_health = calc_bound(b->subtype.house_level, 0, 10);
-        
+
         // Healthcare: Do they have access to a Clinic and/or Hospital?
         if (b->data.house.clinic && b->data.house.hospital) {
             house_health += 50; // Hospital + Clinic is best
@@ -354,6 +325,15 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
             if (b->data.house.bathhouse) {
                 city_data.health.population_access.baths += b->house_population;
             }
+            if (b->has_well_access) {
+                city_data.health.population_access.wells += b->house_population;
+            }
+            if (b->has_latrines_access) {
+                city_data.health.population_access.latrines += b->house_population;
+            }
+            if (b->has_water_access) {
+                city_data.health.population_access.fountains += b->house_population;
+            }
         }
     }
     return house_health;
@@ -361,10 +341,11 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
 
 void city_health_update(void)
 {
+    int only_gather_stats = 0;
     if (city_data.population.population < 200 || scenario_is_tutorial_1() || scenario_is_tutorial_2()) {
         city_data.health.value = 50;
         city_data.health.target_value = 50;
-        return;
+        only_gather_stats = 1;
     }
     int total_population = 0;
     int healthy_population = 0;
@@ -373,6 +354,9 @@ void city_health_update(void)
     city_data.health.population_access.clinic = 0;
     city_data.health.population_access.barber = 0;
     city_data.health.population_access.baths = 0;
+    city_data.health.population_access.wells = 0;
+    city_data.health.population_access.latrines = 0;
+    city_data.health.population_access.fountains = 0;
 
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -386,9 +370,14 @@ void city_health_update(void)
             int house_health = city_health_get_house_health_level(b, 1);
 
             total_population += b->house_population;
-            healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
-            adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
+            if (!only_gather_stats) {
+                healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
+                adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
+            }
         }
+    }
+    if (only_gather_stats) {
+        return;
     }
     city_data.health.target_value = calc_percentage(healthy_population, total_population);
     if (city_data.health.value < city_data.health.target_value) {
@@ -480,4 +469,19 @@ int city_health_get_population_with_barber_access(void)
 int city_health_get_population_with_baths_access(void)
 {
     return city_data.health.population_access.baths;
+}
+
+int city_health_get_population_with_well_access(void)
+{
+    return city_data.health.population_access.wells;
+}
+
+int city_health_get_population_with_latrines_access(void)
+{
+    return city_data.health.population_access.latrines;
+}
+
+int city_health_get_population_with_water_access(void)
+{
+    return city_data.health.population_access.fountains;
 }
