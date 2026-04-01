@@ -1658,7 +1658,13 @@ void building_figure_generate(void)
     int patrician_generated = 0;
     calculate_houses_needed_per_beggar();
     for (int i = 1; i < building_count(); i++) {
-        building *b = building_get(static_cast<unsigned int>(i));
+        building_runtime_impl::Building *runtime_building =
+            building_runtime_impl::get_city_building(static_cast<unsigned int>(i));
+        if (!runtime_building) {
+            continue;
+        }
+
+        building *b = &runtime_building->data;
         if (b->state != BUILDING_STATE_IN_USE) {
             b->show_on_problem_overlay = 1;
             continue;
@@ -1714,14 +1720,8 @@ void building_figure_generate(void)
                 case BUILDING_DOCTOR:
                 case BUILDING_HOSPITAL:
                 case BUILDING_WORKCAMP:
-                {
-                    // Only migrated building types need the runtime object; untouched legacy branches stay on raw saved data.
-                    building_runtime_impl::Building *runtime_building = building_runtime_impl::get_city_building(b);
-                    if (runtime_building) {
-                        runtime_building->spawn_figure();
-                    }
+                    runtime_building->spawn_figure();
                     break;
-                }
                 case BUILDING_LION_HOUSE:
                     spawn_figure_lion_house(b);
                     break;

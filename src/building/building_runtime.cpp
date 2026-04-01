@@ -298,11 +298,9 @@ BuildingInstance *get_or_create_instance(::building *building_data)
         g_runtime_instances.resize(building_data->id + 1);
     }
 
+    // Every live building gets a runtime object, even before that type has migrated to XML-driven behavior.
     const building_type_registry_impl::BuildingType *definition =
         building_type_registry_impl::g_building_types[building_data->type].get();
-    if (!definition) {
-        return nullptr;
-    }
 
     std::unique_ptr<BuildingInstance> &slot = g_runtime_instances[building_data->id];
     if (!slot || slot->building() != building_data || slot->definition() != definition) {
