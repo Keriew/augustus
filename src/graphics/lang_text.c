@@ -530,5 +530,5 @@ int lang_text_concatenate_sequence(const lang_fragment *seq, int count, uint8_t 
     }
 
     *cursor = 0; // Null terminate
-    return cursor - dst; // Return length of concatenated string
+    return (int) (cursor - dst); // Return length of concatenated string
 }

@@ -55,4 +55,6 @@ int game_file_delete_saved_game(const char *filename);
  */
 void game_file_write_mission_saved_game(void);
 
+void game_file_show_loaded_save_mod_mismatch_warning(void);
+
 #endif // GAME_FILE_H

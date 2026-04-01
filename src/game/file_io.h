@@ -55,4 +55,10 @@ int game_file_io_write_saved_game(const char *filename);
 
 int game_file_io_delete_saved_game(const char *filename);
 
+int game_file_io_last_loaded_save_has_mod_mismatch(void);
+
+const char *game_file_io_last_loaded_save_mod_name(void);
+
+const char *game_file_io_last_loaded_active_mod_name(void);
+
 #endif // GAME_FILE_IO_H

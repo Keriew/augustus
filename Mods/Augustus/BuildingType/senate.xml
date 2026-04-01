@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="senate">
+    <graphic threshold="30" operator="gt" />
+</building>

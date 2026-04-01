@@ -1,8 +1,10 @@
+extern "C" {
 #include "building/figure.h"
 
 #include "assets/assets.h"
 #include "building/armoury.h"
 #include "building/barracks.h"
+#include "building/building_type_registry.h"
 #include "building/caravanserai.h"
 #include "building/granary.h"
 #include "building/image.h"
@@ -36,6 +38,7 @@
 #include "map/terrain.h"
 #include "map/water.h"
 #include "scenario/scenario.h"
+}
 
 
 
@@ -116,7 +119,7 @@ static int has_figure_of_types(building *b, figure_type type1, figure_type type2
 
 static int has_figure_of_type(building *b, figure_type type)
 {
-    return has_figure_of_types(b, type, 0);
+    return has_figure_of_types(b, type, static_cast<figure_type>(0));
 }
 
 static int default_spawn_delay(building *b)
@@ -466,15 +469,6 @@ static void spawn_figure_chariot_maker(building *b)
     }
 }
 
-static void set_amphitheater_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 45;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
 static void spawn_figure_amphitheater(building *b)
 {
     check_labor_problem(b);
@@ -504,7 +498,7 @@ static void spawn_figure_amphitheater(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            set_amphitheater_graphic(b);
+            building_type_registry_apply_graphic(b);
             figure *f;
             if (b->data.entertainment.days1 > 0) {
                 f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_0_TOP);
@@ -517,15 +511,6 @@ static void spawn_figure_amphitheater(building *b)
             figure_movement_init_roaming(f);
         }
     }
-}
-
-static void set_theater_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 45;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
 }
 
 static void spawn_figure_theater(building *b)
@@ -545,7 +530,7 @@ static void spawn_figure_theater(building *b)
         }
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
-            set_theater_graphic(b);
+            building_type_registry_apply_graphic(b);
             b->figure_spawn_delay = 0;
             figure *f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_0_TOP);
             f->action_state = FIGURE_ACTION_94_ENTERTAINER_ROAMING;
@@ -625,16 +610,6 @@ static void spawn_figure_hippodrome(building *b)
     }
 }
 
-static void set_arena_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 45;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
-
 static void spawn_figure_colosseum(building *b)
 {
     check_labor_problem(b);
@@ -666,7 +641,7 @@ static void spawn_figure_colosseum(building *b)
             b->figure_spawn_delay = 0;
 
             if (b->type == BUILDING_ARENA) {
-                set_arena_graphic(b);
+                building_type_registry_apply_graphic(b);
             }
 
             figure *f;
@@ -693,15 +668,6 @@ static void spawn_figure_colosseum(building *b)
             }
         }
     }
-}
-
-static void set_market_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 30;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
 }
 
 static void send_supplier_to_destination(figure *f, int dst_building_id)
@@ -837,7 +803,7 @@ static void spawn_market_supplier(building *b, int x, int y)
 
 static void spawn_figure_market(building *b)
 {
-    set_market_graphic(b);
+    building_type_registry_apply_graphic(b);
     check_labor_problem(b);
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
@@ -913,19 +879,9 @@ static void spawn_lighthouse_supplier(building *b, int x, int y)
     send_supplier_to_destination(f, dst_building_id);
 }
 
-static void set_bathhouse_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->has_water_access = map_terrain_exists_tile_in_area_with_type(b->x, b->y, b->size, TERRAIN_RESERVOIR_RANGE);
-    b->upgrade_level = b->desirability > 30;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
 static void spawn_figure_bathhouse(building *b)
 {
-    set_bathhouse_graphic(b);
+    building_type_registry_apply_graphic(b);
     check_labor_problem(b);
     if (!b->has_water_access) {
         b->show_on_problem_overlay = 2;
@@ -948,15 +904,6 @@ static void spawn_figure_bathhouse(building *b)
     }
 }
 
-static void set_school_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 40;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
 static void spawn_figure_school(building *b)
 {
     check_labor_problem(b);
@@ -973,7 +920,7 @@ static void spawn_figure_school(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            set_school_graphic(b);
+            building_type_registry_apply_graphic(b);
 
             figure *child1 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_0_TOP);
             child1->action_state = FIGURE_ACTION_125_ROAMING;
@@ -999,15 +946,6 @@ static void spawn_figure_school(building *b)
     }
 }
 
-static void set_library_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 50;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
 static void spawn_figure_library(building *b)
 {
     check_labor_problem(b);
@@ -1016,7 +954,7 @@ static void spawn_figure_library(building *b)
     }
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        set_library_graphic(b);
+        building_type_registry_apply_graphic(b);
         spawn_labor_seeker(b, road.x, road.y, 50);
         int spawn_delay = default_spawn_delay(b);
         if (!spawn_delay) {
@@ -1030,15 +968,6 @@ static void spawn_figure_library(building *b)
     }
 }
 
-static void set_academy_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability >= 60;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
 static void spawn_figure_academy(building *b)
 {
     check_labor_problem(b);
@@ -1047,7 +976,7 @@ static void spawn_figure_academy(building *b)
     }
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        set_academy_graphic(b);
+        building_type_registry_apply_graphic(b);
         spawn_labor_seeker(b, road.x, road.y, 50);
         int spawn_delay = default_spawn_delay(b);
         if (!spawn_delay) {
@@ -1187,16 +1116,6 @@ static void spawn_figure_grand_temple_mars(building *b)
     }
 }
 
-static void set_tavern_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 45;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
-
 static void spawn_figure_tavern(building *b)
 {
     check_labor_problem(b);
@@ -1212,7 +1131,7 @@ static void spawn_figure_tavern(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            set_tavern_graphic(b);
+            building_type_registry_apply_graphic(b);
             if (!has_figure_of_type(b, FIGURE_BARKEEP) && b->resources[RESOURCE_WINE] >= 20) {
                 b->resources[RESOURCE_WINE] -= 20;
                 int resource_decay = b->resources[RESOURCE_MEAT] && b->resources[RESOURCE_FISH] ? 20 : 40;
@@ -1309,31 +1228,13 @@ static void spawn_figure_temple(building *b)
     }
 }
 
-static void set_senate_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 30;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
-static void set_forum_graphic(building *b)
-{
-    if (b->state != BUILDING_STATE_IN_USE) {
-        return;
-    }
-    b->upgrade_level = b->desirability > 30;
-    map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-}
-
 static void spawn_figure_senate_forum(building *b)
 {
     if (b->type == BUILDING_SENATE) {
-        set_senate_graphic(b);
+        building_type_registry_apply_graphic(b);
     }
     if (b->type == BUILDING_FORUM) {
-        set_forum_graphic(b);
+        building_type_registry_apply_graphic(b);
     }
     check_labor_problem(b);
     if (has_figure_of_type(b, FIGURE_TAX_COLLECTOR)) {
@@ -1709,7 +1610,7 @@ static void spawn_figure_fort_supplier(building *fort)
 
     int total_food_in_mess_hall = 0;
 
-    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+    for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
         total_food_in_mess_hall += supply_post->resources[r];
     }
 

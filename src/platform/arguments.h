@@ -3,6 +3,7 @@
 
 typedef struct {
     const char *data_directory;
+    const char *mod_name;
     int display_scale_percentage;
     int cursor_scale_percentage;
     int force_windowed;

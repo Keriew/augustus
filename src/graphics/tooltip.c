@@ -78,8 +78,9 @@ static int tooltip_is_visible(tooltip_context *c)
         reset_timer();
         return 0;
     }
-    if (time_get_millis() - last_update < TOOLTIP_FADE_IN_MILLIS) { // fade in tooltip
-        int opacity = calc_percentage(time_get_millis() - last_update, TOOLTIP_FADE_IN_MILLIS);
+    time_millis elapsed = time_get_millis() - last_update;
+    if (elapsed < TOOLTIP_FADE_IN_MILLIS) { // fade in tooltip
+        int opacity = calc_percentage((int) elapsed, (int) TOOLTIP_FADE_IN_MILLIS);
         graphics_renderer()->set_tooltip_opacity(calc_bound(opacity, 0, 100));
         return opacity > 0;
     }

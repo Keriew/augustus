@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="school">
+    <graphic threshold="40" operator="gt" />
+</building>

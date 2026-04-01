@@ -115,7 +115,7 @@ static void advance_month(void)
     city_gods_update_blessings();
     tutorial_on_month_tick();
     if (setting_monthly_autosave()) {
-        game_file_write_saved_game(dir_append_location("autosave.svx", PATH_LOCATION_SAVEGAME));
+        game_file_write_saved_game(dir_append_location("autosave.savf", PATH_LOCATION_SAVEGAME));
     }
 
     city_weather_update(game_time_month());

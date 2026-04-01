@@ -8,6 +8,7 @@
 #define DISPLAY_SCALE_ERROR_MESSAGE "Option --display-scale must be followed by a scale value between 0.5 and 5"
 #define WINDOWED_AND_FULLSCREEN_ERROR_MESSAGE "Option --windowed and --fullscreen cannot both be specified"
 #define DISPLAY_ID_ERROR_MESSAGE "Option --display must be followed by a number indicating the display, starting from 0"
+#define MOD_NAME_ERROR_MESSAGE "Option --mod must be followed by a mod name"
 #define UNKNOWN_OPTION_ERROR_MESSAGE "Option %s not recognized"
 
 static void print_log(const char *message)
@@ -66,6 +67,7 @@ int platform_parse_arguments(int argc, char **argv, augustus_args *output_args)
 
     // Set sensible defaults
     output_args->data_directory = 0;
+    output_args->mod_name = "Vespasian";
     output_args->display_scale_percentage = 0;
     output_args->cursor_scale_percentage = 0;
     output_args->force_windowed = 0;
@@ -118,6 +120,14 @@ int platform_parse_arguments(int argc, char **argv, augustus_args *output_args)
                 print_log(DISPLAY_ID_ERROR_MESSAGE);
                 ok = 0;
             }
+        } else if (SDL_strcmp(argv[i], "--mod") == 0) {
+            if (i + 1 < argc) {
+                output_args->mod_name = argv[i + 1];
+                i++;
+            } else {
+                print_log(MOD_NAME_ERROR_MESSAGE);
+                ok = 0;
+            }
         } else if (SDL_strcmp(argv[i], "--windowed") == 0) {
             output_args->force_windowed = 1;
         } else if (SDL_strcmp(argv[i], "--asset-previewer") == 0) {
@@ -147,7 +157,7 @@ int platform_parse_arguments(int argc, char **argv, augustus_args *output_args)
         if (add_blank_line) {
             print_log("");
         }
-        print_log("Usage: julius [ARGS] [DATA_DIR]");
+        print_log("Usage: Vespasian [ARGS] [DATA_DIR]");
         print_log("ARGS may be:");
         print_log("--display-scale NUMBER");
         print_log("          Scales the display by a factor of NUMBER. Number can be between 0.5 and 5");
@@ -159,6 +169,8 @@ int platform_parse_arguments(int argc, char **argv, augustus_args *output_args)
         print_log("          Forces the game to start fullscreen");
         print_log("--display ID");
         print_log("          Forces the game to start on the specified display, numbered from 0");
+        print_log("--mod NAME");
+        print_log("          Loads data from Mods/NAME, relative to the active Caesar 3 directory");
         print_log("--asset-previewer");
         print_log("          Runs the extra asset previewer instead of the game");
         print_log("--enable-joysticks");
