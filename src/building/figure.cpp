@@ -355,44 +355,12 @@ static void spawn_figure_prefecture(building *b)
 
 static void spawn_figure_actor_colony(building *b)
 {
-    check_labor_problem(b);
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED;
-            f->building_id = b->id;
-            b->figure_id = f->id;
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_gladiator_school(building *b)
 {
-    check_labor_problem(b);
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED;
-            f->building_id = b->id;
-            b->figure_id = f->id;
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_lion_house(building *b)
@@ -515,30 +483,7 @@ static void spawn_figure_amphitheater(building *b)
 
 static void spawn_figure_theater(building *b)
 {
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_ACTOR)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        if (b->houses_covered <= 50) {
-            generate_labor_seeker(b, road.x, road.y);
-        }
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            building_type_registry_apply_graphic(b);
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_ACTOR, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_94_ENTERTAINER_ROAMING;
-            f->building_id = b->id;
-            b->figure_id = f->id;
-            figure_movement_init_roaming(f);
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_hippodrome(building *b)
@@ -881,27 +826,7 @@ static void spawn_lighthouse_supplier(building *b, int x, int y)
 
 static void spawn_figure_bathhouse(building *b)
 {
-    building_type_registry_apply_graphic(b);
-    check_labor_problem(b);
-    if (!b->has_water_access) {
-        b->show_on_problem_overlay = 2;
-    }
-    if (has_figure_of_type(b, FIGURE_BATHHOUSE_WORKER)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road) && b->has_water_access) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            create_roaming_figure(b, road.x, road.y, FIGURE_BATHHOUSE_WORKER);
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_school(building *b)
@@ -948,109 +873,27 @@ static void spawn_figure_school(building *b)
 
 static void spawn_figure_library(building *b)
 {
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_LIBRARIAN)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        building_type_registry_apply_graphic(b);
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            create_roaming_figure(b, road.x, road.y, FIGURE_LIBRARIAN);
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_academy(building *b)
 {
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_TEACHER)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        building_type_registry_apply_graphic(b);
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            create_roaming_figure(b, road.x, road.y, FIGURE_TEACHER);
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_barber(building *b)
 {
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_BARBER)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            create_roaming_figure(b, road.x, road.y, FIGURE_BARBER);
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_doctor(building *b)
 {
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_DOCTOR)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            create_roaming_figure(b, road.x, road.y, FIGURE_DOCTOR);
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_hospital(building *b)
 {
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_SURGEON)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            create_roaming_figure(b, road.x, road.y, FIGURE_SURGEON);
-        }
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_grand_temple_mars(building *b)
@@ -1547,27 +1390,7 @@ static void spawn_figure_military_academy(building *b)
 
 static void spawn_figure_work_camp(building *b)
 {
-    check_labor_problem(b);
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 100);
-        if (has_figure_of_type(b, FIGURE_WORK_CAMP_WORKER)) {
-            return;
-        }
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_WORK_CAMP_WORKER, road.x, road.y, DIR_4_BOTTOM);
-            f->action_state = FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED;
-            b->figure_id = f->id;
-            f->building_id = b->id;
-        }
-
-    }
+    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_architect_guild(building *b)

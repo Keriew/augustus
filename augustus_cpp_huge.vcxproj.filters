@@ -210,6 +210,7 @@
     <ClCompile Include="src\building\barracks.c" />
     <ClCompile Include="src\building\building.c" />
     <ClCompile Include="src\building\building_type_registry.cpp" />
+    <ClCompile Include="src\building\building_type_registry_xml.cpp" />
     <ClCompile Include="src\building\caravanserai.c" />
     <ClCompile Include="src\building\clone.c" />
     <ClCompile Include="src\building\connectable.c" />
@@ -373,6 +374,7 @@
     <ClCompile Include="src\game\file_io.c" />
     <ClCompile Include="src\game\game.c" />
     <ClCompile Include="src\game\mission.c" />
+    <ClCompile Include="src\game\mod_manager.cpp" />
     <ClCompile Include="src\game\orientation.c" />
     <ClCompile Include="src\game\resource.c" />
     <ClCompile Include="src\game\settings.c" />
@@ -661,6 +663,7 @@
     <ClInclude Include="src\building\barracks.h" />
     <ClInclude Include="src\building\building.h" />
     <ClInclude Include="src\building\building_type_registry.h" />
+    <ClInclude Include="src\building\building_type_registry_internal.h" />
     <ClInclude Include="src\building\caravanserai.h" />
     <ClInclude Include="src\building\clone.h" />
     <ClInclude Include="src\building\connectable.h" />
@@ -830,6 +833,7 @@
     <ClInclude Include="src\game\file.h" />
     <ClInclude Include="src\game\file_editor.h" />
     <ClInclude Include="src\game\file_io.h" />
+    <ClInclude Include="src\game\mod_manager.h" />
     <ClInclude Include="src\game\game.h" />
     <ClInclude Include="src\game\mission.h" />
     <ClInclude Include="src\game\orientation.h" />
@@ -927,6 +931,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mods\Augustus\BuildingType\*.xml" />
+    <Content Include="Mods\Augustus\BuildingType\*.md" />
+    <Content Include="Mods\Augustus\BuildingType\*.example" />
     <Content Include="Mods\Vespasian\BuildingType\*.xml" />
+    <Content Include="Mods\Vespasian\BuildingType\*.md" />
+    <Content Include="Mods\Vespasian\BuildingType\*.example" />
   </ItemGroup>
 </Project>

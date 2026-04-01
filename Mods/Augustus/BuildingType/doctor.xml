@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="doctor">
+    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="50"
+        delay_profile="default" existing_figure="doctor" spawn_figure="doctor"
+        action_state="roaming" direction="top" figure_slot="primary" init_roaming="true" />
+</building>
