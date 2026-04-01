@@ -1,6 +1,7 @@
 #include "building/building_type_registry_internal.h"
 
 extern "C" {
+#include "building/building_runtime.h"
 #include "building/properties.h"
 #include "core/dir.h"
 #include "core/file.h"
@@ -524,6 +525,6 @@ extern "C" int building_type_registry_load(void)
         }
     }
 
-    building_type_registry_reset_runtime_instances();
+    building_runtime_reset();
     return 1;
 }

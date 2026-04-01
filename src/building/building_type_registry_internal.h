@@ -160,47 +160,6 @@ private:
     std::vector<SpawnPolicy> spawn_policies_;
 };
 
-class BuildingInstance {
-public:
-    BuildingInstance(::building *building, const BuildingType *definition)
-        : building_(building)
-        , definition_(definition)
-    {
-    }
-
-    void set_building_graphic();
-    void spawn_figure();
-
-    const ::building *building() const
-    {
-        return building_;
-    }
-
-    const BuildingType *definition() const
-    {
-        return definition_;
-    }
-
-private:
-    int worker_percentage() const;
-    void check_labor_problem();
-    void generate_labor_seeker(int x, int y);
-    void spawn_labor_seeker(int x, int y, int min_houses);
-    int has_figure_of_type(figure_type type);
-    int has_figure_of_any(const std::vector<figure_type> &types);
-    int resolve_road_access(RoadAccessMode mode, map_point *road) const;
-    int evaluate_delay(DelayProfile profile) const;
-    unsigned char get_spawn_delay_counter(size_t policy_index) const;
-    void set_spawn_delay_counter(size_t policy_index, unsigned char value);
-    void assign_figure_slot(FigureSlot slot, unsigned int figure_id);
-    void create_spawned_figure(const SpawnPolicy &policy, const map_point &road);
-    void spawn_service_roamer(const SpawnPolicy &policy, size_t policy_index);
-
-    ::building *building_;
-    const BuildingType *definition_;
-    std::vector<unsigned char> spawn_delay_counters_;
-};
-
 struct ParseState {
     std::unique_ptr<BuildingType> definition;
     int saw_graphic = 0;
@@ -210,12 +169,10 @@ struct ParseState {
 
 extern std::string g_building_type_path;
 extern std::array<std::unique_ptr<BuildingType>, BUILDING_TYPE_MAX> g_building_types;
-extern std::vector<std::unique_ptr<BuildingInstance>> g_runtime_instances;
 extern ParseState g_parse_state;
 
 int directory_exists(const char *path);
 void refresh_building_type_path();
-BuildingInstance *get_or_create_instance(::building *building_data);
 
 }
 
