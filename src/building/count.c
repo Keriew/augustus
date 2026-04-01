@@ -140,7 +140,8 @@ int building_count_total(building_type type)
     }
     int total = 0;
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
-        if ((b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED) && b == building_main(b)) {
+        if ((b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED ||
+            b->state == BUILDING_STATE_MOTHBALLED) && b == building_main(b)) {
             total++;
         }
     }
@@ -158,7 +159,8 @@ int building_count_any_total(int active_only)
                     total++;
                 }
             } else {
-                if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED) {
+                if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_CREATED ||
+                    b->state == BUILDING_STATE_MOTHBALLED) {
                     total++;
                 }
             }

@@ -169,9 +169,9 @@ void empire_object_load(buffer *buf, int version)
         obj->trade_route_id = buffer_read_u8(buf);
         full->trade_route_open = buffer_read_u8(buf);
         if (version > SCENARIO_LAST_LIMITED_ROUTE_COST) {
-            full->trade_route_cost = buffer_read_i32(buf);
+            full->trade_route_cost = buffer_read_u32(buf);
         } else {
-            full->trade_route_cost = buffer_read_i16(buf);
+            full->trade_route_cost = buffer_read_u16(buf);
         }
         int old_sells_resource[10];
         int old_buys_resource[8];
