@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="workcamp">
-    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="100"
-        delay_profile="default" existing_figure="work_camp_worker" spawn_figure="work_camp_worker"
-        action_state="work_camp_worker_created" direction="bottom" figure_slot="primary"
-        guard_timing="after_labor_seeker" init_roaming="false" />
+    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="100" />
+    <spawn_group road_access="normal" delay_profile="default" existing_figure="work_camp_worker"
+        guard_timing="after_labor_seeker">
+        <spawn mode="service_roamer" spawn_figure="work_camp_worker"
+            action_state="work_camp_worker_created" direction="bottom" figure_slot="primary"
+            init_roaming="false" />
+    </spawn_group>
 </building>

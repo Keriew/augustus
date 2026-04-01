@@ -73,9 +73,11 @@ static figure_type parse_figure_type_name(const char *name)
         { "doctor", FIGURE_DOCTOR },
         { "gladiator", FIGURE_GLADIATOR },
         { "librarian", FIGURE_LIBRARIAN },
+        { "lion_tamer", FIGURE_LION_TAMER },
         { "school_child", FIGURE_SCHOOL_CHILD },
         { "surgeon", FIGURE_SURGEON },
         { "teacher", FIGURE_TEACHER },
+        { "tax_collector", FIGURE_TAX_COLLECTOR },
         { "work_camp_architect", FIGURE_WORK_CAMP_ARCHITECT },
         { "work_camp_worker", FIGURE_WORK_CAMP_WORKER }
     };
@@ -96,6 +98,7 @@ static int parse_action_state_name(const char *name)
     };
     static const named_action_state action_names[] = {
         { "roaming", FIGURE_ACTION_125_ROAMING },
+        { "tax_collector_created", FIGURE_ACTION_40_TAX_COLLECTOR_CREATED },
         { "entertainer_roaming", FIGURE_ACTION_94_ENTERTAINER_ROAMING },
         { "entertainer_school_created", FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED },
         { "work_camp_worker_created", FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED },
@@ -160,11 +163,17 @@ static DelayProfile parse_delay_profile(const char *value)
     if (value && strcmp(value, "default") == 0) {
         return DelayProfile::Default;
     }
+    if (value && strcmp(value, "arena") == 0) {
+        return DelayProfile::Arena;
+    }
     return DelayProfile::None;
 }
 
 static GraphicTiming parse_graphic_timing(const char *value)
 {
+    if (value && strcmp(value, "on_spawn_entry") == 0) {
+        return GraphicTiming::OnSpawnEntry;
+    }
     if (value && strcmp(value, "before_delay_check") == 0) {
         return GraphicTiming::BeforeDelayCheck;
     }
@@ -197,6 +206,26 @@ static GuardTiming parse_guard_timing(const char *value)
         return GuardTiming::AfterLaborSeeker;
     }
     return GuardTiming::BeforeRoadAccess;
+}
+
+static SpawnCondition parse_spawn_condition(const char *value)
+{
+    if (!value || strcmp(value, "always") == 0) {
+        return SpawnCondition::Always;
+    }
+    if (strcmp(value, "days1_positive") == 0) {
+        return SpawnCondition::Days1Positive;
+    }
+    if (strcmp(value, "days1_not_positive") == 0) {
+        return SpawnCondition::Days1NotPositive;
+    }
+    if (strcmp(value, "days2_positive") == 0) {
+        return SpawnCondition::Days2Positive;
+    }
+    if (strcmp(value, "days1_or_days2_positive") == 0) {
+        return SpawnCondition::Days1OrDays2Positive;
+    }
+    return SpawnCondition::Always;
 }
 
 static int parse_spawn_direction(const char *value)
@@ -275,13 +304,105 @@ static int parse_graphic()
     return 1;
 }
 
-static int parse_spawn()
+static int parse_labor()
 {
     if (!g_parse_state.definition) {
-        log_error("Encountered spawn definition before building root", 0, 0);
+        log_error("Encountered labor definition before building root", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
+    if (!xml_parser_has_attribute("labor_seeker_mode")) {
+        log_error("BuildingType labor is missing required attribute 'labor_seeker_mode'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    LaborPolicy labor_policy;
+    const char *labor_mode_text = xml_parser_get_attribute_string("labor_seeker_mode");
+    labor_policy.labor_seeker_mode = parse_labor_seeker_mode(labor_mode_text);
+    if (labor_policy.labor_seeker_mode == LaborSeekerMode::None && strcmp(labor_mode_text, "none") != 0) {
+        log_error("Unsupported BuildingType labor labor_seeker_mode", labor_mode_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    if (xml_parser_has_attribute("labor_min_houses")) {
+        labor_policy.labor_min_houses = xml_parser_get_attribute_int("labor_min_houses");
+    }
+
+    g_parse_state.definition->set_labor_policy(labor_policy);
+    return 1;
+}
+
+static int parse_spawn_group()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered spawn_group definition before building root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("road_access")) {
+        log_error("BuildingType spawn_group is missing required attribute 'road_access'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("delay_profile")) {
+        log_error("BuildingType spawn_group is missing required attribute 'delay_profile'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    SpawnDelayGroup group;
+    const char *road_access_text = xml_parser_get_attribute_string("road_access");
+    group.road_access_mode = parse_road_access_mode(road_access_text);
+    if (group.road_access_mode == RoadAccessMode::None) {
+        log_error("Unsupported BuildingType spawn_group road_access", road_access_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    const char *delay_profile_text = xml_parser_get_attribute_string("delay_profile");
+    group.delay_profile = parse_delay_profile(delay_profile_text);
+    if (group.delay_profile == DelayProfile::None) {
+        log_error("Unsupported BuildingType spawn_group delay_profile", delay_profile_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    if (xml_parser_has_attribute("existing_figure")) {
+        const char *existing_figure_text = xml_parser_get_attribute_string("existing_figure");
+        if (!parse_figure_list_attribute(existing_figure_text, group.existing_figures)) {
+            log_error("Unsupported BuildingType spawn_group existing_figure", existing_figure_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+    }
+
+    if (xml_parser_has_attribute("guard_timing")) {
+        const char *guard_timing_text = xml_parser_get_attribute_string("guard_timing");
+        group.guard_timing = parse_guard_timing(guard_timing_text);
+        if (strcmp(guard_timing_text, "before_road_access") != 0 &&
+            strcmp(guard_timing_text, "after_labor_seeker") != 0) {
+            log_error("Unsupported BuildingType spawn_group guard_timing", guard_timing_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+    }
+
+    g_parse_state.definition->add_spawn_group(std::move(group));
+    g_parse_state.current_spawn_group_index = g_parse_state.definition->spawn_groups().size() - 1;
+    g_parse_state.has_current_spawn_group = 1;
+    return 1;
+}
+
+static int parse_spawn()
+{
+    if (!g_parse_state.definition || !g_parse_state.has_current_spawn_group) {
+        log_error("Encountered spawn definition before spawn_group", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
     if (!xml_parser_has_attribute("mode")) {
         log_error("BuildingType spawn is missing required attribute 'mode'", 0, 0);
         g_parse_state.error = 1;
@@ -298,24 +419,6 @@ static int parse_spawn()
         return 0;
     }
 
-    const char *road_access_text = xml_parser_has_attribute("road_access") ?
-        xml_parser_get_attribute_string("road_access") : "normal";
-    policy.road_access_mode = parse_road_access_mode(road_access_text);
-    if (policy.road_access_mode == RoadAccessMode::None) {
-        log_error("Unsupported BuildingType spawn road_access", road_access_text, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-
-    const char *delay_profile_text = xml_parser_has_attribute("delay_profile") ?
-        xml_parser_get_attribute_string("delay_profile") : "default";
-    policy.delay_profile = parse_delay_profile(delay_profile_text);
-    if (policy.delay_profile == DelayProfile::None) {
-        log_error("Unsupported BuildingType spawn delay_profile", delay_profile_text, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-
     const char *graphic_timing_text = xml_parser_has_attribute("graphic_timing") ?
         xml_parser_get_attribute_string("graphic_timing") : "none";
     policy.graphic_timing = parse_graphic_timing(graphic_timing_text);
@@ -323,29 +426,6 @@ static int parse_spawn()
         log_error("Unsupported BuildingType spawn graphic_timing", graphic_timing_text, 0);
         g_parse_state.error = 1;
         return 0;
-    }
-
-    if (xml_parser_has_attribute("labor_seeker_mode")) {
-        const char *labor_mode_text = xml_parser_get_attribute_string("labor_seeker_mode");
-        policy.labor_seeker_mode = parse_labor_seeker_mode(labor_mode_text);
-        if (policy.labor_seeker_mode == LaborSeekerMode::None && strcmp(labor_mode_text, "none") != 0) {
-            log_error("Unsupported BuildingType spawn labor_seeker_mode", labor_mode_text, 0);
-            g_parse_state.error = 1;
-            return 0;
-        }
-    }
-
-    if (xml_parser_has_attribute("labor_min_houses")) {
-        policy.labor_min_houses = xml_parser_get_attribute_int("labor_min_houses");
-    }
-
-    if (xml_parser_has_attribute("existing_figure")) {
-        const char *existing_figure_text = xml_parser_get_attribute_string("existing_figure");
-        if (!parse_figure_list_attribute(existing_figure_text, policy.existing_figures)) {
-            log_error("Unsupported BuildingType spawn existing_figure", existing_figure_text, 0);
-            g_parse_state.error = 1;
-            return 0;
-        }
     }
 
     if (!xml_parser_has_attribute("spawn_figure")) {
@@ -393,17 +473,6 @@ static int parse_spawn()
         }
     }
 
-    if (xml_parser_has_attribute("guard_timing")) {
-        const char *guard_timing_text = xml_parser_get_attribute_string("guard_timing");
-        policy.guard_timing = parse_guard_timing(guard_timing_text);
-        if (strcmp(guard_timing_text, "before_road_access") != 0 &&
-            strcmp(guard_timing_text, "after_labor_seeker") != 0) {
-            log_error("Unsupported BuildingType spawn guard_timing", guard_timing_text, 0);
-            g_parse_state.error = 1;
-            return 0;
-        }
-    }
-
     if (xml_parser_has_attribute("init_roaming")) {
         if (!parse_bool_value(xml_parser_get_attribute_string("init_roaming"), &policy.init_roaming)) {
             log_error("Unsupported BuildingType spawn init_roaming", xml_parser_get_attribute_string("init_roaming"), 0);
@@ -428,7 +497,44 @@ static int parse_spawn()
         }
     }
 
-    g_parse_state.definition->add_spawn_policy(std::move(policy));
+    if (xml_parser_has_attribute("spawn_count")) {
+        policy.spawn_count = xml_parser_get_attribute_int("spawn_count");
+        if (policy.spawn_count <= 0) {
+            log_error("Unsupported BuildingType spawn spawn_count", xml_parser_get_attribute_string("spawn_count"), 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+    }
+
+    if (xml_parser_has_attribute("condition")) {
+        const char *condition_text = xml_parser_get_attribute_string("condition");
+        policy.condition = parse_spawn_condition(condition_text);
+        if (strcmp(condition_text, "always") != 0 &&
+            strcmp(condition_text, "days1_positive") != 0 &&
+            strcmp(condition_text, "days1_not_positive") != 0 &&
+            strcmp(condition_text, "days2_positive") != 0 &&
+            strcmp(condition_text, "days1_or_days2_positive") != 0) {
+            log_error("Unsupported BuildingType spawn condition", condition_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+    }
+
+    if (xml_parser_has_attribute("block_on_success")) {
+        if (!parse_bool_value(xml_parser_get_attribute_string("block_on_success"), &policy.block_on_success)) {
+            log_error("Unsupported BuildingType spawn block_on_success", xml_parser_get_attribute_string("block_on_success"), 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+    }
+
+    SpawnDelayGroup *group = g_parse_state.definition->last_spawn_group();
+    if (!group) {
+        log_error("BuildingType spawn has no active spawn_group", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    group->policies.push_back(std::move(policy));
     g_parse_state.saw_spawn = 1;
     return 1;
 }
@@ -436,7 +542,9 @@ static int parse_spawn()
 static const xml_parser_element XML_ELEMENTS[] = {
     { "building", parse_building_root, nullptr, nullptr, nullptr },
     { "graphic", parse_graphic, nullptr, "building", nullptr },
-    { "spawn", parse_spawn, nullptr, "building", nullptr }
+    { "labor", parse_labor, nullptr, "building", nullptr },
+    { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },
+    { "spawn", parse_spawn, nullptr, "spawn_group", nullptr }
 };
 
 static int load_file_to_buffer(const char *filename, std::vector<char> &buffer)

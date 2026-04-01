@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="library">
     <graphic threshold="50" operator="gt" />
-    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="50"
-        delay_profile="default" existing_figure="librarian" spawn_figure="librarian"
-        action_state="roaming" direction="top" figure_slot="primary" init_roaming="true"
-        graphic_timing="before_delay_check" />
+    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
+    <spawn_group road_access="normal" delay_profile="default" existing_figure="librarian">
+        <spawn mode="service_roamer" spawn_figure="librarian"
+            action_state="roaming" direction="top" figure_slot="primary" init_roaming="true"
+            graphic_timing="before_delay_check" />
+    </spawn_group>
 </building>

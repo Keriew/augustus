@@ -48,11 +48,13 @@ enum class LaborSeekerMode {
 
 enum class DelayProfile {
     None,
-    Default
+    Default,
+    Arena
 };
 
 enum class GraphicTiming {
     None,
+    OnSpawnEntry,
     BeforeDelayCheck,
     BeforeSuccessfulSpawn
 };
@@ -69,22 +71,40 @@ enum class GuardTiming {
     AfterLaborSeeker
 };
 
+enum class SpawnCondition {
+    Always,
+    Days1Positive,
+    Days1NotPositive,
+    Days2Positive,
+    Days1OrDays2Positive
+};
+
+struct LaborPolicy {
+    LaborSeekerMode labor_seeker_mode = LaborSeekerMode::None;
+    int labor_min_houses = 0;
+};
+
 struct SpawnPolicy {
     SpawnMode mode = SpawnMode::None;
-    RoadAccessMode road_access_mode = RoadAccessMode::None;
-    LaborSeekerMode labor_seeker_mode = LaborSeekerMode::None;
-    DelayProfile delay_profile = DelayProfile::None;
     GraphicTiming graphic_timing = GraphicTiming::None;
     FigureSlot figure_slot = FigureSlot::Primary;
-    GuardTiming guard_timing = GuardTiming::BeforeRoadAccess;
-    std::vector<figure_type> existing_figures;
     figure_type spawn_figure = FIGURE_NONE;
     int action_state = 0;
     int spawn_direction = 0;
-    int labor_min_houses = 0;
+    int spawn_count = 1;
     int init_roaming = 0;
     int require_water_access = 0;
     int mark_problem_if_no_water = 0;
+    int block_on_success = 0;
+    SpawnCondition condition = SpawnCondition::Always;
+};
+
+struct SpawnDelayGroup {
+    RoadAccessMode road_access_mode = RoadAccessMode::None;
+    DelayProfile delay_profile = DelayProfile::None;
+    GuardTiming guard_timing = GuardTiming::BeforeRoadAccess;
+    std::vector<figure_type> existing_figures;
+    std::vector<SpawnPolicy> policies;
 };
 
 class BuildingType {
@@ -109,7 +129,29 @@ public:
 
     void add_spawn_policy(SpawnPolicy policy)
     {
-        spawn_policies_.push_back(std::move(policy));
+        if (spawn_groups_.empty()) {
+            spawn_groups_.emplace_back();
+        }
+        spawn_groups_.back().policies.push_back(std::move(policy));
+    }
+
+    void set_labor_policy(LaborPolicy policy)
+    {
+        labor_policy_ = policy;
+        has_labor_policy_ = 1;
+    }
+
+    void add_spawn_group(SpawnDelayGroup group)
+    {
+        spawn_groups_.push_back(std::move(group));
+    }
+
+    SpawnDelayGroup *last_spawn_group()
+    {
+        if (spawn_groups_.empty()) {
+            return nullptr;
+        }
+        return &spawn_groups_.back();
     }
 
     building_type type() const
@@ -132,9 +174,19 @@ public:
         return has_graphic_;
     }
 
-    const std::vector<SpawnPolicy> &spawn_policies() const
+    int has_labor_policy() const
     {
-        return spawn_policies_;
+        return has_labor_policy_;
+    }
+
+    const LaborPolicy &labor_policy() const
+    {
+        return labor_policy_;
+    }
+
+    const std::vector<SpawnDelayGroup> &spawn_groups() const
+    {
+        return spawn_groups_;
     }
 
     unsigned char upgrade_level_for(const ::building &building) const
@@ -157,11 +209,15 @@ private:
     int threshold_ = 0;
     GraphicComparison comparison_ = GraphicComparison::None;
     WaterAccessMode water_access_mode_ = WaterAccessMode::None;
-    std::vector<SpawnPolicy> spawn_policies_;
+    int has_labor_policy_ = 0;
+    LaborPolicy labor_policy_;
+    std::vector<SpawnDelayGroup> spawn_groups_;
 };
 
 struct ParseState {
     std::unique_ptr<BuildingType> definition;
+    size_t current_spawn_group_index = 0;
+    int has_current_spawn_group = 0;
     int saw_graphic = 0;
     int saw_spawn = 0;
     int error = 0;
