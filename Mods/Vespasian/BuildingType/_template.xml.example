@@ -3,9 +3,15 @@
     <!-- Optional graphic rule -->
     <graphic threshold="50" operator="gt" />
 
-    <!-- Optional spawn rule -->
-    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="50"
-        delay_profile="default" existing_figure="librarian" spawn_figure="librarian"
-        action_state="roaming" direction="top" figure_slot="primary" guard_timing="before_road_access" init_roaming="true"
-        graphic_timing="before_delay_check" require_water_access="false" mark_problem_if_no_water="false" />
+    <!-- Optional labor phase -->
+    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
+
+    <!-- Optional shared-delay spawn group -->
+    <spawn_group road_access="normal" delay_profile="default" existing_figure="librarian"
+        guard_timing="before_road_access">
+        <spawn mode="service_roamer" spawn_figure="librarian"
+            action_state="roaming" direction="top" figure_slot="primary" spawn_count="1" init_roaming="true"
+            graphic_timing="before_delay_check" require_water_access="false" mark_problem_if_no_water="false"
+            condition="always" block_on_success="true" />
+    </spawn_group>
 </building>

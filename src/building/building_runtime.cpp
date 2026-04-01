@@ -1,7 +1,7 @@
 #include "building/building_runtime_internal.h"
 
 extern "C" {
-#include "building/building_runtime.h"
+#include "building/building_runtime_api.h"
 #include "building/image.h"
 #include "building/properties.h"
 #include "city/population.h"
@@ -17,9 +17,9 @@ extern "C" {
 
 namespace building_runtime_impl {
 
-std::vector<std::unique_ptr<BuildingInstance>> g_runtime_instances;
+std::vector<std::unique_ptr<building_runtime>> g_runtime_instances;
 
-Building *get_city_building(unsigned int id)
+building_runtime *get_city_building(unsigned int id)
 {
     if (!id) {
         return nullptr;
@@ -27,12 +27,36 @@ Building *get_city_building(unsigned int id)
     return get_or_create_instance(building_get(id));
 }
 
-Building *get_city_building(::building *building_data)
+building_runtime *get_city_building(::building *building_data)
 {
     return get_or_create_instance(building_data);
 }
 
-void BuildingInstance::set_building_graphic()
+building_runtime *get_or_create_instance(::building *building_data)
+{
+    if (!building_data || !building_data->id) {
+        return nullptr;
+    }
+
+    // For now runtime wrappers are materialized lazily, but they are owned here rather than by the type registry.
+    if (g_runtime_instances.size() <= building_data->id) {
+        g_runtime_instances.resize(building_data->id + 1);
+    }
+
+    // Every live building gets a runtime object, even before that type has migrated to XML-driven behavior.
+    const building_type_registry_impl::BuildingType *definition =
+        building_type_registry_impl::g_building_types[building_data->type].get();
+
+    std::unique_ptr<building_runtime> &slot = g_runtime_instances[building_data->id];
+    if (!slot || slot->building() != building_data || slot->definition() != definition) {
+        slot = std::make_unique<building_runtime>(building_data, definition);
+    }
+    return slot.get();
+}
+
+}
+
+void building_runtime::set_building_graphic()
 {
     if (!building_ || !definition_ || !definition_->has_graphic() || building_->state != BUILDING_STATE_IN_USE) {
         return;
@@ -47,19 +71,19 @@ void BuildingInstance::set_building_graphic()
     map_building_tiles_add(building_->id, building_->x, building_->y, building_->size, building_image_get(building_), TERRAIN_BUILDING);
 }
 
-int BuildingInstance::worker_percentage() const
+int building_runtime::worker_percentage() const
 {
     return calc_percentage(building_->num_workers, model_get_building(building_->type)->laborers);
 }
 
-void BuildingInstance::check_labor_problem()
+void building_runtime::check_labor_problem()
 {
     if (building_->houses_covered <= 0) {
         building_->show_on_problem_overlay = 2;
     }
 }
 
-void BuildingInstance::generate_labor_seeker(int x, int y)
+void building_runtime::generate_labor_seeker(int x, int y)
 {
     if (city_population() <= 0) {
         return;
@@ -87,7 +111,7 @@ void BuildingInstance::generate_labor_seeker(int x, int y)
     figure_movement_init_roaming(labor_seeker);
 }
 
-void BuildingInstance::spawn_labor_seeker(int x, int y, int min_houses)
+void building_runtime::spawn_labor_seeker(int x, int y, int min_houses)
 {
     if (config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
         if (building_->distance_from_entry) {
@@ -100,7 +124,24 @@ void BuildingInstance::spawn_labor_seeker(int x, int y, int min_houses)
     }
 }
 
-int BuildingInstance::has_figure_of_type(figure_type type)
+void building_runtime::run_labor_phase(const building_type_registry_impl::LaborPolicy &labor_policy, const map_point &road)
+{
+    switch (labor_policy.labor_seeker_mode) {
+        case building_type_registry_impl::LaborSeekerMode::SpawnIfBelow:
+            spawn_labor_seeker(road.x, road.y, labor_policy.labor_min_houses);
+            break;
+        case building_type_registry_impl::LaborSeekerMode::GenerateIfBelow:
+            if (building_->houses_covered <= labor_policy.labor_min_houses) {
+                generate_labor_seeker(road.x, road.y);
+            }
+            break;
+        case building_type_registry_impl::LaborSeekerMode::None:
+        default:
+            break;
+    }
+}
+
+int building_runtime::has_figure_of_type(figure_type type)
 {
     if (building_->figure_id <= 0) {
         return 0;
@@ -113,7 +154,7 @@ int BuildingInstance::has_figure_of_type(figure_type type)
     return 0;
 }
 
-int BuildingInstance::has_figure_of_any(const std::vector<figure_type> &types)
+int building_runtime::has_figure_of_any(const std::vector<figure_type> &types)
 {
     for (figure_type type : types) {
         if (has_figure_of_type(type)) {
@@ -123,7 +164,7 @@ int BuildingInstance::has_figure_of_any(const std::vector<figure_type> &types)
     return 0;
 }
 
-int BuildingInstance::resolve_road_access(building_type_registry_impl::RoadAccessMode mode, map_point *road) const
+int building_runtime::resolve_road_access(building_type_registry_impl::RoadAccessMode mode, map_point *road) const
 {
     switch (mode) {
         case building_type_registry_impl::RoadAccessMode::Normal:
@@ -134,29 +175,48 @@ int BuildingInstance::resolve_road_access(building_type_registry_impl::RoadAcces
     }
 }
 
-int BuildingInstance::evaluate_delay(building_type_registry_impl::DelayProfile profile) const
+int building_runtime::evaluate_delay(const std::vector<building_type_registry_impl::DelayBand> &delay_bands) const
 {
-    if (profile != building_type_registry_impl::DelayProfile::Default) {
-        return 0;
-    }
-
     int pct_workers = worker_percentage();
-    if (pct_workers >= 100) {
-        return 3;
-    } else if (pct_workers >= 75) {
-        return 7;
-    } else if (pct_workers >= 50) {
-        return 15;
-    } else if (pct_workers >= 25) {
-        return 29;
-    } else if (pct_workers >= 1) {
-        return 44;
-    } else {
-        return 0;
+    for (const building_type_registry_impl::DelayBand &delay_band : delay_bands) {
+        if (pct_workers >= delay_band.min_worker_percentage) {
+            return delay_band.delay;
+        }
+    }
+    return 0;
+}
+
+int building_runtime::evaluate_condition(building_type_registry_impl::SpawnCondition condition) const
+{
+    switch (condition) {
+        case building_type_registry_impl::SpawnCondition::Always:
+            return 1;
+        case building_type_registry_impl::SpawnCondition::Days1Positive:
+            return building_->data.entertainment.days1 > 0;
+        case building_type_registry_impl::SpawnCondition::Days1NotPositive:
+            return building_->data.entertainment.days1 <= 0;
+        case building_type_registry_impl::SpawnCondition::Days2Positive:
+            return building_->data.entertainment.days2 > 0;
+        case building_type_registry_impl::SpawnCondition::Days1OrDays2Positive:
+            return building_->data.entertainment.days1 > 0 || building_->data.entertainment.days2 > 0;
+        default:
+            return 0;
     }
 }
 
-unsigned char BuildingInstance::get_spawn_delay_counter(size_t policy_index) const
+int building_runtime::should_apply_graphic_for_timing(
+    const building_type_registry_impl::SpawnDelayGroup &group,
+    building_type_registry_impl::GraphicTiming timing) const
+{
+    for (const building_type_registry_impl::SpawnPolicy &policy : group.policies) {
+        if (policy.graphic_timing == timing && evaluate_condition(policy.condition)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+unsigned char building_runtime::get_spawn_delay_counter(size_t policy_index) const
 {
     if (policy_index == 0) {
         return building_->figure_spawn_delay;
@@ -167,7 +227,7 @@ unsigned char BuildingInstance::get_spawn_delay_counter(size_t policy_index) con
     return spawn_delay_counters_[policy_index];
 }
 
-void BuildingInstance::set_spawn_delay_counter(size_t policy_index, unsigned char value)
+void building_runtime::set_spawn_delay_counter(size_t policy_index, unsigned char value)
 {
     if (policy_index == 0) {
         building_->figure_spawn_delay = value;
@@ -179,7 +239,7 @@ void BuildingInstance::set_spawn_delay_counter(size_t policy_index, unsigned cha
     spawn_delay_counters_[policy_index] = value;
 }
 
-void BuildingInstance::assign_figure_slot(building_type_registry_impl::FigureSlot slot, unsigned int figure_id)
+void building_runtime::assign_figure_slot(building_type_registry_impl::FigureSlot slot, unsigned int figure_id)
 {
     switch (slot) {
         case building_type_registry_impl::FigureSlot::Primary:
@@ -197,32 +257,33 @@ void BuildingInstance::assign_figure_slot(building_type_registry_impl::FigureSlo
     }
 }
 
-void BuildingInstance::create_spawned_figure(const building_type_registry_impl::SpawnPolicy &policy, const map_point &road)
+int building_runtime::create_spawned_figure(const building_type_registry_impl::SpawnPolicy &policy, const map_point &road)
 {
-    figure *spawned = figure_create(policy.spawn_figure, road.x, road.y, static_cast<direction_type>(policy.spawn_direction));
-    spawned->action_state = policy.action_state;
-    spawned->building_id = building_->id;
-    assign_figure_slot(policy.figure_slot, spawned->id);
-    if (policy.init_roaming) {
-        figure_movement_init_roaming(spawned);
+    int spawned_any = 0;
+    int spawn_count = policy.spawn_count > 0 ? policy.spawn_count : 1;
+    for (int i = 0; i < spawn_count; i++) {
+        figure *spawned = figure_create(policy.spawn_figure, road.x, road.y, static_cast<direction_type>(policy.spawn_direction));
+        if (!spawned) {
+            continue;
+        }
+        spawned->action_state = policy.action_state;
+        spawned->building_id = building_->id;
+        // A multi-spawn policy still only owns one legacy tracked slot today; later spawns remain untracked for now.
+        if (!spawned_any) {
+            assign_figure_slot(policy.figure_slot, spawned->id);
+        }
+        if (policy.init_roaming) {
+            figure_movement_init_roaming(spawned);
+        }
+        spawned_any = 1;
     }
+    return spawned_any;
 }
 
-void BuildingInstance::spawn_service_roamer(const building_type_registry_impl::SpawnPolicy &policy, size_t policy_index)
+int building_runtime::try_spawn_policy(const building_type_registry_impl::SpawnPolicy &policy, const map_point &road)
 {
-    check_labor_problem();
-    if (policy.guard_timing == building_type_registry_impl::GuardTiming::BeforeRoadAccess &&
-        !policy.existing_figures.empty() && has_figure_of_any(policy.existing_figures)) {
-        return;
-    }
-
-    map_point road;
-    if (!resolve_road_access(policy.road_access_mode, &road)) {
-        return;
-    }
-
-    if (policy.graphic_timing == building_type_registry_impl::GraphicTiming::BeforeDelayCheck) {
-        set_building_graphic();
+    if (!evaluate_condition(policy.condition)) {
+        return 0;
     }
 
     if (policy.mark_problem_if_no_water && !building_->has_water_access) {
@@ -230,87 +291,82 @@ void BuildingInstance::spawn_service_roamer(const building_type_registry_impl::S
     }
 
     if (policy.require_water_access && !building_->has_water_access) {
+        return 0;
+    }
+
+    if (policy.graphic_timing == building_type_registry_impl::GraphicTiming::BeforeSuccessfulSpawn) {
+        set_building_graphic();
+    }
+    return create_spawned_figure(policy, road);
+}
+
+void building_runtime::spawn_service_roamer_group(const building_type_registry_impl::SpawnDelayGroup &group, size_t group_index)
+{
+    check_labor_problem();
+    if (should_apply_graphic_for_timing(group, building_type_registry_impl::GraphicTiming::OnSpawnEntry)) {
+        set_building_graphic();
+    }
+
+    if (group.guard_timing == building_type_registry_impl::GuardTiming::BeforeRoadAccess &&
+        !group.existing_figures.empty() && has_figure_of_any(group.existing_figures)) {
         return;
     }
 
-    switch (policy.labor_seeker_mode) {
-        case building_type_registry_impl::LaborSeekerMode::SpawnIfBelow:
-            spawn_labor_seeker(road.x, road.y, policy.labor_min_houses);
-            break;
-        case building_type_registry_impl::LaborSeekerMode::GenerateIfBelow:
-            if (building_->houses_covered <= policy.labor_min_houses) {
-                generate_labor_seeker(road.x, road.y);
-            }
-            break;
-        case building_type_registry_impl::LaborSeekerMode::None:
-        default:
-            break;
-    }
-
-    if (policy.guard_timing == building_type_registry_impl::GuardTiming::AfterLaborSeeker &&
-        !policy.existing_figures.empty() && has_figure_of_any(policy.existing_figures)) {
+    map_point road;
+    if (!resolve_road_access(group.road_access_mode, &road)) {
         return;
     }
 
-    int spawn_delay = evaluate_delay(policy.delay_profile);
+    if (definition_ && definition_->has_labor_policy()) {
+        run_labor_phase(definition_->labor_policy(), road);
+    }
+
+    if (group.guard_timing == building_type_registry_impl::GuardTiming::AfterLaborSeeker &&
+        !group.existing_figures.empty() && has_figure_of_any(group.existing_figures)) {
+        return;
+    }
+
+    if (should_apply_graphic_for_timing(group, building_type_registry_impl::GraphicTiming::BeforeDelayCheck)) {
+        set_building_graphic();
+    }
+
+    int spawn_delay = evaluate_delay(group.delay_bands);
     if (!spawn_delay) {
         return;
     }
 
-    unsigned char delay_counter = get_spawn_delay_counter(policy_index);
+    unsigned char delay_counter = get_spawn_delay_counter(group_index);
     delay_counter++;
     if (delay_counter <= spawn_delay) {
-        set_spawn_delay_counter(policy_index, delay_counter);
+        set_spawn_delay_counter(group_index, delay_counter);
         return;
     }
 
-    set_spawn_delay_counter(policy_index, 0);
-    if (policy.graphic_timing == building_type_registry_impl::GraphicTiming::BeforeSuccessfulSpawn) {
-        set_building_graphic();
+    set_spawn_delay_counter(group_index, 0);
+    for (const building_type_registry_impl::SpawnPolicy &policy : group.policies) {
+        if (policy.mode != building_type_registry_impl::SpawnMode::ServiceRoamer) {
+            continue;
+        }
+        if (try_spawn_policy(policy, road) && policy.block_on_success) {
+            break;
+        }
     }
-    create_spawned_figure(policy, road);
 }
 
-void BuildingInstance::spawn_figure()
+void building_runtime::spawn_figure()
 {
     if (!building_ || !definition_ || building_->state != BUILDING_STATE_IN_USE) {
         return;
     }
 
-    const std::vector<building_type_registry_impl::SpawnPolicy> &spawn_policies = definition_->spawn_policies();
-    // Multiple policies are supported so the XML shape can grow into multi-spawn buildings later.
-    for (size_t i = 0; i < spawn_policies.size(); i++) {
-        const building_type_registry_impl::SpawnPolicy &policy = spawn_policies[i];
-        if (policy.mode == building_type_registry_impl::SpawnMode::ServiceRoamer) {
-            spawn_service_roamer(policy, i);
+    const std::vector<building_type_registry_impl::SpawnDelayGroup> &spawn_groups = definition_->spawn_groups();
+    // Groups own the shared delay/guard phase, then policies inside them can either cooperate or block one another.
+    for (size_t i = 0; i < spawn_groups.size(); i++) {
+        const building_type_registry_impl::SpawnDelayGroup &group = spawn_groups[i];
+        if (!group.policies.empty() && group.policies.front().mode == building_type_registry_impl::SpawnMode::ServiceRoamer) {
+            spawn_service_roamer_group(group, i);
         }
     }
-}
-
-BuildingInstance *get_or_create_instance(::building *building_data)
-{
-    if (!building_data || !building_data->id) {
-        return nullptr;
-    }
-
-    // For now runtime wrappers are materialized lazily, but they are owned here rather than by the type registry.
-    if (g_runtime_instances.size() <= building_data->id) {
-        g_runtime_instances.resize(building_data->id + 1);
-    }
-
-    const building_type_registry_impl::BuildingType *definition =
-        building_type_registry_impl::g_building_types[building_data->type].get();
-    if (!definition) {
-        return nullptr;
-    }
-
-    std::unique_ptr<BuildingInstance> &slot = g_runtime_instances[building_data->id];
-    if (!slot || slot->building() != building_data || slot->definition() != definition) {
-        slot = std::make_unique<BuildingInstance>(building_data, definition);
-    }
-    return slot.get();
-}
-
 }
 
 extern "C" void building_runtime_reset(void)
@@ -320,14 +376,14 @@ extern "C" void building_runtime_reset(void)
 
 extern "C" void building_runtime_apply_graphic(building *b)
 {
-    if (building_runtime_impl::BuildingInstance *instance = building_runtime_impl::get_or_create_instance(b)) {
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         instance->set_building_graphic();
     }
 }
 
 extern "C" void building_runtime_spawn_figure(building *b)
 {
-    if (building_runtime_impl::BuildingInstance *instance = building_runtime_impl::get_or_create_instance(b)) {
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         instance->spawn_figure();
     }
 }

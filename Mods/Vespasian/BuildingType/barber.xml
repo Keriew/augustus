@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="barber">
-    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="50"
-        delay_profile="default" existing_figure="barber" spawn_figure="barber"
-        action_state="roaming" direction="top" figure_slot="primary" init_roaming="true" />
+    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
+    <spawn_group road_access="normal" delay_profile="default" existing_figure="barber">
+        <spawn mode="service_roamer" spawn_figure="barber"
+            action_state="roaming" direction="top" figure_slot="primary" init_roaming="true" />
+    </spawn_group>
 </building>

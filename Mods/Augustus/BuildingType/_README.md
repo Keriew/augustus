@@ -5,7 +5,21 @@ The loader reads every `*.xml` file in this folder at startup. Keep templates/ex
 Current supported nodes:
 
 - `<graphic threshold="N" operator="gt|gte" [water_access="reservoir_range"] />`
+- `<labor labor_seeker_mode="..." labor_min_houses="N" />`
+- `<spawn_group ...>`
 - `<spawn ... />`
+
+Current supported `<labor>` attributes:
+
+- `labor_seeker_mode="none|spawn_if_below|generate_if_below"`
+- `labor_min_houses="N"`
+
+Current supported `<spawn_group>` attributes:
+
+- `road_access="normal"`
+- `delay_profile="default|arena"`
+- `existing_figure="actor|barber|bathhouse_worker|doctor|gladiator|librarian|lion_tamer|school_child|surgeon|tax_collector|teacher|work_camp_architect|work_camp_worker"`
+- `guard_timing="before_road_access|after_labor_seeker"`
 
 Current supported `<spawn>` mode:
 
@@ -13,24 +27,26 @@ Current supported `<spawn>` mode:
 
 Current supported `<spawn>` attributes:
 
-- `road_access="normal"`
-- `labor_seeker_mode="none|spawn_if_below|generate_if_below"`
-- `labor_min_houses="N"`
-- `delay_profile="default"`
-- `existing_figure="actor|barber|bathhouse_worker|doctor|gladiator|librarian|school_child|surgeon|teacher|work_camp_architect|work_camp_worker"`
 - `spawn_figure="..."` using the same identifiers
-- `action_state="roaming|entertainer_roaming|entertainer_school_created|work_camp_worker_created|work_camp_architect_created"`
+- `action_state="roaming|tax_collector_created|entertainer_roaming|entertainer_school_created|work_camp_worker_created|work_camp_architect_created"`
 - `direction="top|bottom"`
 - `figure_slot="primary|secondary|quaternary|none"`
-- `guard_timing="before_road_access|after_labor_seeker"`
+- `spawn_count="N"` for one policy spawning the same figure several times on one trigger
 - `init_roaming="true|false"`
-- `graphic_timing="none|before_delay_check|before_successful_spawn"`
+- `graphic_timing="none|on_spawn_entry|before_delay_check|before_successful_spawn"`
 - `require_water_access="true|false"`
 - `mark_problem_if_no_water="true|false"`
+- `condition="always|days1_positive|days1_not_positive|days2_positive|days1_or_days2_positive"`
+- `block_on_success="true|false"`
 
 Current engine behavior:
 
 - Only the migrated building families use `<spawn>` so far.
+- A `spawn_group` owns the shared delay/guard phase, then runs its child `<spawn>` policies in order.
+- Ordered policies can coordinate: a policy that succeeds with `block_on_success="true"` stops later sibling policies in the same group.
+- Use `block_on_success="true"` when a building should spawn either A or B on the same trigger.
+- Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
+- Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
 - The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
 
 See `_template.xml.example` for a copy/paste starter.

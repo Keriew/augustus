@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="academy">
     <graphic threshold="60" operator="gte" />
-    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="50"
-        delay_profile="default" existing_figure="teacher" spawn_figure="teacher"
-        action_state="roaming" direction="top" figure_slot="primary" init_roaming="true"
-        graphic_timing="before_delay_check" />
+    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
+    <spawn_group road_access="normal" delay_profile="default" existing_figure="teacher">
+        <spawn mode="service_roamer" spawn_figure="teacher"
+            action_state="roaming" direction="top" figure_slot="primary" init_roaming="true"
+            graphic_timing="before_delay_check" />
+    </spawn_group>
 </building>
