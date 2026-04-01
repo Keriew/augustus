@@ -6,6 +6,7 @@ extern "C" {
 #include "core/log.h"
 #include "core/time.h"
 #include "game/game.h"
+#include "game/mod_manager.h"
 #include "game/settings.h"
 #include "game/system.h"
 #include "graphics/screen.h"
@@ -662,7 +663,7 @@ static void setup(const augustus_args *args)
         exit_with_status(1);
     }
 
-    building_type_registry_set_mod_name(args->mod_name);
+    mod_manager_set_mod_name(args->mod_name);
     if (!building_type_registry_validate_mod()) {
         char message[512];
         snprintf(message, sizeof(message),

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="workcamp">
+    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="100"
+        delay_profile="default" existing_figure="work_camp_worker" spawn_figure="work_camp_worker"
+        action_state="work_camp_worker_created" direction="bottom" figure_slot="primary"
+        guard_timing="after_labor_seeker" init_roaming="false" />
+</building>

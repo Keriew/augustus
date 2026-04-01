@@ -1,141 +1,23 @@
-#include "building/building_type_registry.h"
+#include "building/building_type_registry_internal.h"
 
 extern "C" {
-#include "building/building.h"
 #include "building/image.h"
 #include "building/properties.h"
-#include "core/dir.h"
-#include "core/file.h"
-#include "core/log.h"
-#include "core/xml_parser.h"
+#include "city/population.h"
+#include "core/calc.h"
+#include "core/config.h"
+#include "figure/action.h"
+#include "figure/figure.h"
+#include "figure/movement.h"
 #include "map/building_tiles.h"
+#include "map/road_access.h"
 #include "map/terrain.h"
 #include "platform/file_manager.h"
 }
 
-#include <array>
-#include <cstdio>
-#include <cstring>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
+namespace building_type_registry_impl {
 
-namespace {
-
-enum class GraphicComparison {
-    None,
-    GreaterThan,
-    GreaterThanOrEqual
-};
-
-enum class WaterAccessMode {
-    None,
-    ReservoirRange
-};
-
-class BuildingType {
-public:
-    BuildingType(building_type type, std::string attr)
-        : type_(type)
-        , attr_(std::move(attr))
-    {
-    }
-
-    void set_threshold(int threshold, GraphicComparison comparison)
-    {
-        threshold_ = threshold;
-        comparison_ = comparison;
-    }
-
-    void set_water_access_mode(WaterAccessMode mode)
-    {
-        water_access_mode_ = mode;
-    }
-
-    building_type type() const
-    {
-        return type_;
-    }
-
-    const char *attr() const
-    {
-        return attr_.c_str();
-    }
-
-    WaterAccessMode water_access_mode() const
-    {
-        return water_access_mode_;
-    }
-
-    unsigned char upgrade_level_for(const ::building &building) const
-    {
-        switch (comparison_) {
-            case GraphicComparison::GreaterThan:
-                return building.desirability > threshold_;
-            case GraphicComparison::GreaterThanOrEqual:
-                return building.desirability >= threshold_;
-            case GraphicComparison::None:
-            default:
-                return 0;
-        }
-    }
-
-private:
-    building_type type_;
-    std::string attr_;
-    int threshold_ = 0;
-    GraphicComparison comparison_ = GraphicComparison::None;
-    WaterAccessMode water_access_mode_ = WaterAccessMode::None;
-};
-
-class BuildingInstance {
-public:
-    BuildingInstance(::building *building, const BuildingType *definition)
-        : building_(building)
-        , definition_(definition)
-    {
-    }
-
-    void set_building_graphic()
-    {
-        if (!building_ || !definition_ || building_->state != BUILDING_STATE_IN_USE) {
-            return;
-        }
-
-        if (definition_->water_access_mode() == WaterAccessMode::ReservoirRange) {
-            building_->has_water_access =
-                map_terrain_exists_tile_in_area_with_type(building_->x, building_->y, building_->size, TERRAIN_RESERVOIR_RANGE);
-        }
-
-        building_->upgrade_level = definition_->upgrade_level_for(*building_);
-        map_building_tiles_add(building_->id, building_->x, building_->y, building_->size, building_image_get(building_), TERRAIN_BUILDING);
-    }
-
-    const ::building *building() const
-    {
-        return building_;
-    }
-
-    const BuildingType *definition() const
-    {
-        return definition_;
-    }
-
-private:
-    ::building *building_;
-    const BuildingType *definition_;
-};
-
-struct ParseState {
-    std::unique_ptr<BuildingType> definition;
-    int saw_graphic = 0;
-    int error = 0;
-};
-
-std::string g_mod_name = "Vespasian";
-std::string g_mod_path = "Mods/Vespasian/";
-std::string g_building_type_path = "Mods/Vespasian/BuildingType/";
+std::string g_building_type_path;
 std::array<std::unique_ptr<BuildingType>, BUILDING_TYPE_MAX> g_building_types;
 std::vector<std::unique_ptr<BuildingInstance>> g_runtime_instances;
 ParseState g_parse_state;
@@ -145,163 +27,272 @@ static int stop_on_first_entry(const char *name, long unused)
     return LIST_MATCH;
 }
 
-static void rebuild_mod_paths()
-{
-    g_mod_path = "Mods/" + g_mod_name + "/";
-    g_building_type_path = g_mod_path + "BuildingType/";
-}
-
-static int directory_exists(const char *path)
+int directory_exists(const char *path)
 {
     return platform_file_manager_list_directory_contents(path, TYPE_DIR | TYPE_FILE, 0, stop_on_first_entry) != LIST_ERROR;
 }
 
-static building_type find_building_type_by_attr(const char *type_attr)
+void refresh_building_type_path()
 {
-    for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type = static_cast<building_type>(type + 1)) {
-        const building_properties *properties = building_properties_for_type(type);
-        if (!properties->event_data.attr) {
-            continue;
-        }
-        if (xml_parser_compare_multiple(properties->event_data.attr, type_attr)) {
-            return type;
-        }
-    }
-    return BUILDING_NONE;
+    g_building_type_path = std::string(mod_manager_get_mod_path()) + "BuildingType/";
 }
 
-static int parse_building_root()
+void BuildingInstance::set_building_graphic()
 {
-    if (!xml_parser_has_attribute("type")) {
-        log_error("BuildingType xml is missing required attribute 'type'", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
+    if (!building_ || !definition_ || !definition_->has_graphic() || building_->state != BUILDING_STATE_IN_USE) {
+        return;
     }
 
-    const char *type_attr = xml_parser_get_attribute_string("type");
-    building_type type = find_building_type_by_attr(type_attr);
-    if (type == BUILDING_NONE) {
-        log_error("Unknown BuildingType xml type", type_attr, 0);
-        g_parse_state.error = 1;
-        return 0;
+    if (definition_->water_access_mode() == WaterAccessMode::ReservoirRange) {
+        building_->has_water_access =
+            map_terrain_exists_tile_in_area_with_type(building_->x, building_->y, building_->size, TERRAIN_RESERVOIR_RANGE);
     }
 
-    g_parse_state.definition = std::make_unique<BuildingType>(type, type_attr);
-    return 1;
+    building_->upgrade_level = definition_->upgrade_level_for(*building_);
+    map_building_tiles_add(building_->id, building_->x, building_->y, building_->size, building_image_get(building_), TERRAIN_BUILDING);
 }
 
-static int parse_graphic()
+int BuildingInstance::worker_percentage() const
 {
-    if (!g_parse_state.definition) {
-        log_error("Encountered graphic definition before building root", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
+    return calc_percentage(building_->num_workers, model_get_building(building_->type)->laborers);
+}
 
-    if (!xml_parser_has_attribute("threshold")) {
-        log_error("BuildingType graphic is missing required attribute 'threshold'", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
+void BuildingInstance::check_labor_problem()
+{
+    if (building_->houses_covered <= 0) {
+        building_->show_on_problem_overlay = 2;
     }
-    if (!xml_parser_has_attribute("operator")) {
-        log_error("BuildingType graphic is missing required attribute 'operator'", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
+}
+
+void BuildingInstance::generate_labor_seeker(int x, int y)
+{
+    if (city_population() <= 0) {
+        return;
     }
-
-    const char *comparison_text = xml_parser_get_attribute_string("operator");
-    GraphicComparison comparison = GraphicComparison::None;
-    if (comparison_text && strcmp(comparison_text, "gt") == 0) {
-        comparison = GraphicComparison::GreaterThan;
-    } else if (comparison_text && strcmp(comparison_text, "gte") == 0) {
-        comparison = GraphicComparison::GreaterThanOrEqual;
-    } else {
-        log_error("Unsupported BuildingType graphic operator", comparison_text, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-
-    g_parse_state.definition->set_threshold(xml_parser_get_attribute_int("threshold"), comparison);
-
-    if (xml_parser_has_attribute("water_access")) {
-        const char *water_access = xml_parser_get_attribute_string("water_access");
-        if (water_access && strcmp(water_access, "reservoir_range") == 0) {
-            g_parse_state.definition->set_water_access_mode(WaterAccessMode::ReservoirRange);
+    if (config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
+        if (building_->distance_from_entry) {
+            building_->houses_covered = 100;
         } else {
-            log_error("Unsupported BuildingType graphic water_access", water_access, 0);
-            g_parse_state.error = 1;
+            building_->houses_covered = 0;
+        }
+        return;
+    }
+    if (building_->figure_id2) {
+        figure *existing = figure_get(building_->figure_id2);
+        if (!existing->state || existing->type != FIGURE_LABOR_SEEKER || existing->building_id != building_->id) {
+            building_->figure_id2 = 0;
+        }
+        return;
+    }
+
+    figure *labor_seeker = figure_create(FIGURE_LABOR_SEEKER, x, y, DIR_0_TOP);
+    labor_seeker->action_state = FIGURE_ACTION_125_ROAMING;
+    labor_seeker->building_id = building_->id;
+    building_->figure_id2 = labor_seeker->id;
+    figure_movement_init_roaming(labor_seeker);
+}
+
+void BuildingInstance::spawn_labor_seeker(int x, int y, int min_houses)
+{
+    if (config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
+        if (building_->distance_from_entry) {
+            building_->houses_covered = 2 * min_houses;
+        } else {
+            building_->houses_covered = 0;
+        }
+    } else if (building_->houses_covered <= min_houses) {
+        generate_labor_seeker(x, y);
+    }
+}
+
+int BuildingInstance::has_figure_of_type(figure_type type)
+{
+    if (building_->figure_id <= 0) {
+        return 0;
+    }
+    figure *existing = figure_get(building_->figure_id);
+    if (existing->state && existing->building_id == building_->id && existing->type == type) {
+        return 1;
+    }
+    building_->figure_id = 0;
+    return 0;
+}
+
+int BuildingInstance::has_figure_of_any(const std::vector<figure_type> &types)
+{
+    for (figure_type type : types) {
+        if (has_figure_of_type(type)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int BuildingInstance::resolve_road_access(RoadAccessMode mode, map_point *road) const
+{
+    switch (mode) {
+        case RoadAccessMode::Normal:
+            return map_has_road_access(building_->x, building_->y, building_->size, road);
+        case RoadAccessMode::None:
+        default:
             return 0;
+    }
+}
+
+int BuildingInstance::evaluate_delay(DelayProfile profile) const
+{
+    if (profile != DelayProfile::Default) {
+        return 0;
+    }
+
+    int pct_workers = worker_percentage();
+    if (pct_workers >= 100) {
+        return 3;
+    } else if (pct_workers >= 75) {
+        return 7;
+    } else if (pct_workers >= 50) {
+        return 15;
+    } else if (pct_workers >= 25) {
+        return 29;
+    } else if (pct_workers >= 1) {
+        return 44;
+    } else {
+        return 0;
+    }
+}
+
+unsigned char BuildingInstance::get_spawn_delay_counter(size_t policy_index) const
+{
+    if (policy_index == 0) {
+        return building_->figure_spawn_delay;
+    }
+    if (spawn_delay_counters_.size() <= policy_index) {
+        return 0;
+    }
+    return spawn_delay_counters_[policy_index];
+}
+
+void BuildingInstance::set_spawn_delay_counter(size_t policy_index, unsigned char value)
+{
+    if (policy_index == 0) {
+        building_->figure_spawn_delay = value;
+        return;
+    }
+    if (spawn_delay_counters_.size() <= policy_index) {
+        spawn_delay_counters_.resize(policy_index + 1, 0);
+    }
+    spawn_delay_counters_[policy_index] = value;
+}
+
+void BuildingInstance::assign_figure_slot(FigureSlot slot, unsigned int figure_id)
+{
+    switch (slot) {
+        case FigureSlot::Primary:
+            building_->figure_id = figure_id;
+            break;
+        case FigureSlot::Secondary:
+            building_->figure_id2 = figure_id;
+            break;
+        case FigureSlot::Quaternary:
+            building_->figure_id4 = figure_id;
+            break;
+        case FigureSlot::None:
+        default:
+            break;
+    }
+}
+
+void BuildingInstance::create_spawned_figure(const SpawnPolicy &policy, const map_point &road)
+{
+    figure *spawned = figure_create(policy.spawn_figure, road.x, road.y, static_cast<direction_type>(policy.spawn_direction));
+    spawned->action_state = policy.action_state;
+    spawned->building_id = building_->id;
+    assign_figure_slot(policy.figure_slot, spawned->id);
+    if (policy.init_roaming) {
+        figure_movement_init_roaming(spawned);
+    }
+}
+
+void BuildingInstance::spawn_service_roamer(const SpawnPolicy &policy, size_t policy_index)
+{
+    check_labor_problem();
+    if (policy.guard_timing == GuardTiming::BeforeRoadAccess &&
+        !policy.existing_figures.empty() && has_figure_of_any(policy.existing_figures)) {
+        return;
+    }
+
+    map_point road;
+    if (!resolve_road_access(policy.road_access_mode, &road)) {
+        return;
+    }
+
+    if (policy.graphic_timing == GraphicTiming::BeforeDelayCheck) {
+        set_building_graphic();
+    }
+
+    if (policy.mark_problem_if_no_water && !building_->has_water_access) {
+        building_->show_on_problem_overlay = 2;
+    }
+
+    if (policy.require_water_access && !building_->has_water_access) {
+        return;
+    }
+
+    switch (policy.labor_seeker_mode) {
+        case LaborSeekerMode::SpawnIfBelow:
+            spawn_labor_seeker(road.x, road.y, policy.labor_min_houses);
+            break;
+        case LaborSeekerMode::GenerateIfBelow:
+            if (building_->houses_covered <= policy.labor_min_houses) {
+                generate_labor_seeker(road.x, road.y);
+            }
+            break;
+        case LaborSeekerMode::None:
+        default:
+            break;
+    }
+
+    if (policy.guard_timing == GuardTiming::AfterLaborSeeker &&
+        !policy.existing_figures.empty() && has_figure_of_any(policy.existing_figures)) {
+        return;
+    }
+
+    int spawn_delay = evaluate_delay(policy.delay_profile);
+    if (!spawn_delay) {
+        return;
+    }
+
+    unsigned char delay_counter = get_spawn_delay_counter(policy_index);
+    delay_counter++;
+    if (delay_counter <= spawn_delay) {
+        set_spawn_delay_counter(policy_index, delay_counter);
+        return;
+    }
+
+    set_spawn_delay_counter(policy_index, 0);
+    if (policy.graphic_timing == GraphicTiming::BeforeSuccessfulSpawn) {
+        set_building_graphic();
+    }
+    create_spawned_figure(policy, road);
+}
+
+void BuildingInstance::spawn_figure()
+{
+    if (!building_ || !definition_ || building_->state != BUILDING_STATE_IN_USE) {
+        return;
+    }
+
+    const std::vector<SpawnPolicy> &spawn_policies = definition_->spawn_policies();
+    // Multiple policies are supported so the XML shape can grow into multi-spawn buildings later.
+    for (size_t i = 0; i < spawn_policies.size(); i++) {
+        const SpawnPolicy &policy = spawn_policies[i];
+        if (policy.mode == SpawnMode::ServiceRoamer) {
+            spawn_service_roamer(policy, i);
         }
     }
-
-    g_parse_state.saw_graphic = 1;
-    return 1;
 }
 
-static const xml_parser_element XML_ELEMENTS[] = {
-    { "building", parse_building_root, nullptr, nullptr, nullptr },
-    { "graphic", parse_graphic, nullptr, "building", nullptr }
-};
-
-static int load_file_to_buffer(const char *filename, std::vector<char> &buffer)
-{
-    FILE *fp = file_open(filename, "rb");
-    if (!fp) {
-        log_error("Unable to open BuildingType xml", filename, 0);
-        return 0;
-    }
-
-    if (fseek(fp, 0, SEEK_END) != 0) {
-        file_close(fp);
-        log_error("Unable to seek BuildingType xml", filename, 0);
-        return 0;
-    }
-
-    long size = ftell(fp);
-    if (size < 0) {
-        file_close(fp);
-        log_error("Unable to size BuildingType xml", filename, 0);
-        return 0;
-    }
-    rewind(fp);
-
-    buffer.resize(static_cast<size_t>(size));
-    size_t read = fread(buffer.data(), 1, buffer.size(), fp);
-    file_close(fp);
-    if (read != buffer.size()) {
-        log_error("Unable to read BuildingType xml", filename, 0);
-        return 0;
-    }
-    return 1;
-}
-
-static int parse_definition_file(const char *filename)
-{
-    std::vector<char> buffer;
-    if (!load_file_to_buffer(filename, buffer)) {
-        return 0;
-    }
-
-    g_parse_state = {};
-    if (!xml_parser_init(XML_ELEMENTS, static_cast<int>(sizeof(XML_ELEMENTS) / sizeof(XML_ELEMENTS[0])), 1)) {
-        log_error("Unable to initialize BuildingType xml parser", filename, 0);
-        return 0;
-    }
-
-    int parsed = xml_parser_parse(buffer.data(), static_cast<unsigned int>(buffer.size()), 1);
-    xml_parser_free();
-    if (!parsed || g_parse_state.error || !g_parse_state.definition || !g_parse_state.saw_graphic) {
-        if (!g_parse_state.saw_graphic) {
-            log_error("BuildingType xml is missing a graphic node", filename, 0);
-        }
-        return 0;
-    }
-
-    g_building_types[g_parse_state.definition->type()] = std::move(g_parse_state.definition);
-    return 1;
-}
-
-static BuildingInstance *get_or_create_instance(::building *building_data)
+BuildingInstance *get_or_create_instance(::building *building_data)
 {
     if (!building_data || !building_data->id) {
         return nullptr;
@@ -325,69 +316,36 @@ static BuildingInstance *get_or_create_instance(::building *building_data)
 
 }
 
-extern "C" void building_type_registry_set_mod_name(const char *mod_name)
-{
-    if (mod_name && *mod_name) {
-        g_mod_name = mod_name;
-    } else {
-        g_mod_name = "Vespasian";
-    }
-    rebuild_mod_paths();
-}
-
-extern "C" const char *building_type_registry_get_mod_name(void)
-{
-    return g_mod_name.c_str();
-}
-
-extern "C" const char *building_type_registry_get_mod_path(void)
-{
-    return g_mod_path.c_str();
-}
-
 extern "C" const char *building_type_registry_get_building_type_path(void)
 {
-    return g_building_type_path.c_str();
+    building_type_registry_impl::refresh_building_type_path();
+    return building_type_registry_impl::g_building_type_path.c_str();
 }
 
 extern "C" int building_type_registry_validate_mod(void)
 {
-    return directory_exists(g_mod_path.c_str()) && directory_exists(g_building_type_path.c_str());
-}
-
-extern "C" int building_type_registry_load(void)
-{
-    for (std::unique_ptr<BuildingType> &definition : g_building_types) {
-        definition.reset();
-    }
-
-    const dir_listing *files = dir_find_files_with_extension(g_building_type_path.c_str(), "xml");
-    if (!files || files->num_files <= 0) {
-        log_error("No BuildingType xml files found in", g_building_type_path.c_str(), 0);
-        return 0;
-    }
-
-    for (int i = 0; i < files->num_files; i++) {
-        char full_path[FILE_NAME_MAX];
-        snprintf(full_path, FILE_NAME_MAX, "%s%s", g_building_type_path.c_str(), files->files[i].name);
-        if (!parse_definition_file(full_path)) {
-            log_error("Unable to parse BuildingType xml", full_path, 0);
-            return 0;
-        }
-    }
-
-    building_type_registry_reset_runtime_instances();
-    return 1;
+    using namespace building_type_registry_impl;
+    refresh_building_type_path();
+    return static_cast<int>(
+        static_cast<bool>(mod_manager_validate_mod_path()) &&
+        static_cast<bool>(directory_exists(g_building_type_path.c_str())));
 }
 
 extern "C" void building_type_registry_reset_runtime_instances(void)
 {
-    g_runtime_instances.clear();
+    building_type_registry_impl::g_runtime_instances.clear();
 }
 
 extern "C" void building_type_registry_apply_graphic(building *b)
 {
-    if (BuildingInstance *instance = get_or_create_instance(b)) {
+    if (building_type_registry_impl::BuildingInstance *instance = building_type_registry_impl::get_or_create_instance(b)) {
         instance->set_building_graphic();
+    }
+}
+
+extern "C" void building_type_registry_spawn_figure(building *b)
+{
+    if (building_type_registry_impl::BuildingInstance *instance = building_type_registry_impl::get_or_create_instance(b)) {
+        instance->spawn_figure();
     }
 }

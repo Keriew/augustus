@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="actor_colony">
+    <spawn mode="service_roamer" road_access="normal" labor_seeker_mode="spawn_if_below" labor_min_houses="50"
+        delay_profile="default" spawn_figure="actor" action_state="entertainer_school_created"
+        direction="top" figure_slot="primary" init_roaming="false" />
+</building>

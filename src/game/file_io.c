@@ -1,6 +1,5 @@
 #include "file_io.h"
 
-#include "building/building_type_registry.h"
 #include "building/barracks.h"
 #include "building/count.h"
 #include "building/granary.h"
@@ -32,6 +31,7 @@
 #include "figure/trader.h"
 #include "figure/visited_buildings.h"
 #include "game/file.h"
+#include "game/mod_manager.h"
 #include "game/save_version.h"
 #include "game/time.h"
 #include "game/tutorial.h"
@@ -381,7 +381,7 @@ static void savegame_mod_metadata_save_state(buffer *buf)
     if (!buf) {
         return;
     }
-    const char *mod_name = building_type_registry_get_mod_name();
+    const char *mod_name = mod_manager_get_mod_name();
     size_t mod_name_length = mod_name ? strlen(mod_name) + 1 : 1;
     buffer_init_dynamic(buf, sizeof(int32_t) + mod_name_length);
     buffer_write_i32(buf, SAVEGAME_MOD_METADATA_VERSION);
@@ -418,7 +418,7 @@ static void update_loaded_save_mod_metadata(const savegame_state *state, savegam
 
     loaded_save_mod_metadata.has_mod_name = 1;
     snprintf(loaded_save_mod_metadata.active_mod_name, sizeof(loaded_save_mod_metadata.active_mod_name), "%s",
-        building_type_registry_get_mod_name());
+        mod_manager_get_mod_name());
     loaded_save_mod_metadata.has_mismatch =
         strcmp(loaded_save_mod_metadata.save_mod_name, loaded_save_mod_metadata.active_mod_name) != 0;
 }
