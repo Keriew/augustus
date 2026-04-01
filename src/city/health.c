@@ -248,35 +248,6 @@ static void cause_plague(int total_people)
     }
 }
 
-static void adjust_sickness_level_in_house(building *b, int health, int population_health_offset, int hospital_bonus)
-{
-    if (!b->has_plague && b->sickness_level) {
-        int delta;
-        // Case-specific health reduction when health is perfect and pop is high enough
-        if (population_health_offset == 10 && health == 100) {
-            delta = -1;
-        } else {
-            delta = 10 - (health / 10) * 2;
-            delta += population_health_offset;
-        }
-
-        // Neptune GT reduces the delta by 5
-        if (building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
-            delta -= 5;
-        }
-
-        // If delta is positive, it is reduced depending on house health, global health and hospital access
-        if (delta > 0) {
-            int delta_decrease_percentage = city_health();
-            delta_decrease_percentage -= calc_adjust_with_percentage(city_health(), delta * 5);
-            delta_decrease_percentage += calc_adjust_with_percentage(city_health(), hospital_bonus);
-            delta -= calc_adjust_with_percentage(delta, delta_decrease_percentage);
-        }
-
-        b->sickness_level = calc_bound(b->sickness_level + delta, 0, MAX_SICKNESS_LEVEL);
-    }
-}
-
 static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonus)
 {
     for (size_t i = 0; i < NUM_PLAGUE_BUILDINGS; i++) {
@@ -298,12 +269,14 @@ static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonu
 // House Health Calculation
 int city_health_get_house_health_level(const building *b, int update_city_data)
 {
+    // Define house health to be 0 as a starting point
     int house_health = 0;
 
+    // Check if the building is a house
     if (building_is_house(b->type)) {
         // House Level: What is the level of the house?
         house_health = calc_bound(b->subtype.house_level, 0, 10);
-        
+
         // Healthcare: Do they have access to a Clinic and/or Hospital?
         if (b->data.house.clinic && b->data.house.hospital) {
             house_health += 50; // Hospital + Clinic is best
@@ -313,10 +286,12 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
             house_health += 30; // Clinics are better than nothing
         }
 
+        // Bathhouse: Do they have access to a bathhouse?
         if (b->data.house.bathhouse) {
             house_health += 15;
         }
 
+        // Barber: Do they have access to a barber?
         if (b->data.house.barber) {
             house_health += 10;
         }
@@ -326,6 +301,7 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
             house_health += 10;
         }
 
+        // Mausoleum: Are they in range of a Mausoleum so they may bury their dead?
         int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM) * 2;
         mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 5;
         // Sums the combined health from all Mausoleums and clamps it between 0 and 10
