@@ -1,7 +1,7 @@
 #include "building/building_type_registry_internal.h"
 
 extern "C" {
-#include "building/building_runtime.h"
+#include "building/building_runtime_api.h"
 #include "building/properties.h"
 #include "core/dir.h"
 #include "core/file.h"
@@ -158,15 +158,29 @@ static LaborSeekerMode parse_labor_seeker_mode(const char *value)
     return LaborSeekerMode::None;
 }
 
-static DelayProfile parse_delay_profile(const char *value)
+static void assign_delay_profile(SpawnDelayGroup &group, const char *value)
 {
     if (value && strcmp(value, "default") == 0) {
-        return DelayProfile::Default;
+        group.delay_bands = {
+            { 100, 3 },
+            { 75, 7 },
+            { 50, 15 },
+            { 25, 29 },
+            { 1, 44 }
+        };
+        return;
     }
     if (value && strcmp(value, "arena") == 0) {
-        return DelayProfile::Arena;
+        group.delay_bands = {
+            { 100, 6 },
+            { 75, 12 },
+            { 50, 20 },
+            { 25, 40 },
+            { 1, 70 }
+        };
+        return;
     }
-    return DelayProfile::None;
+    group.delay_bands.clear();
 }
 
 static GraphicTiming parse_graphic_timing(const char *value)
@@ -362,8 +376,8 @@ static int parse_spawn_group()
     }
 
     const char *delay_profile_text = xml_parser_get_attribute_string("delay_profile");
-    group.delay_profile = parse_delay_profile(delay_profile_text);
-    if (group.delay_profile == DelayProfile::None) {
+    assign_delay_profile(group, delay_profile_text);
+    if (group.delay_bands.empty()) {
         log_error("Unsupported BuildingType spawn_group delay_profile", delay_profile_text, 0);
         g_parse_state.error = 1;
         return 0;

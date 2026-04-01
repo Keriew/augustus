@@ -46,12 +46,6 @@ enum class LaborSeekerMode {
     GenerateIfBelow
 };
 
-enum class DelayProfile {
-    None,
-    Default,
-    Arena
-};
-
 enum class GraphicTiming {
     None,
     OnSpawnEntry,
@@ -84,6 +78,11 @@ struct LaborPolicy {
     int labor_min_houses = 0;
 };
 
+struct DelayBand {
+    int min_worker_percentage = 0;
+    int delay = 0;
+};
+
 struct SpawnPolicy {
     SpawnMode mode = SpawnMode::None;
     GraphicTiming graphic_timing = GraphicTiming::None;
@@ -101,7 +100,7 @@ struct SpawnPolicy {
 
 struct SpawnDelayGroup {
     RoadAccessMode road_access_mode = RoadAccessMode::None;
-    DelayProfile delay_profile = DelayProfile::None;
+    std::vector<DelayBand> delay_bands;
     GuardTiming guard_timing = GuardTiming::BeforeRoadAccess;
     std::vector<figure_type> existing_figures;
     std::vector<SpawnPolicy> policies;

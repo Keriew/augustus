@@ -6,7 +6,7 @@ extern "C" {
 #include "assets/assets.h"
 #include "building/armoury.h"
 #include "building/barracks.h"
-#include "building/building_runtime.h"
+#include "building/building_runtime_api.h"
 #include "building/caravanserai.h"
 #include "building/granary.h"
 #include "building/image.h"
@@ -1568,7 +1568,7 @@ void building_figure_generate(void)
     int patrician_generated = 0;
     calculate_houses_needed_per_beggar();
     for (int i = 1; i < building_count(); i++) {
-        building_runtime_impl::Building *runtime_building =
+        building_runtime *runtime_building =
             building_runtime_impl::get_city_building(static_cast<unsigned int>(i));
         if (!runtime_building) {
             continue;
