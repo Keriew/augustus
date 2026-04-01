@@ -17,9 +17,15 @@ Current supported `<labor>` attributes:
 Current supported `<spawn_group>` attributes:
 
 - `road_access="normal"`
-- `delay_profile="default|arena"`
+- `delay_bands="100:3,75:7,50:15,25:29,1:44"` as a comma-separated list of `worker_percentage:delay` pairs
 - `existing_figure="actor|barber|bathhouse_worker|doctor|gladiator|librarian|lion_tamer|school_child|surgeon|tax_collector|teacher|work_camp_architect|work_camp_worker"`
 - `guard_timing="before_road_access|after_labor_seeker"`
+
+`delay_bands` sanity rules:
+
+- worker percentage must be an integer from `1` to `100`
+- delay must be a positive integer
+- pairs must be written in strictly descending worker-percentage order
 
 Current supported `<spawn>` mode:
 
@@ -43,6 +49,7 @@ Current engine behavior:
 
 - Only the migrated building families use `<spawn>` so far.
 - A `spawn_group` owns the shared delay/guard phase, then runs its child `<spawn>` policies in order.
+- Delay evaluation now uses the explicit `delay_bands` data from XML rather than a hardcoded named profile.
 - Ordered policies can coordinate: a policy that succeeds with `block_on_success="true"` stops later sibling policies in the same group.
 - Use `block_on_success="true"` when a building should spawn either A or B on the same trigger.
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.

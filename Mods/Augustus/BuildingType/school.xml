@@ -2,7 +2,7 @@
 <building type="school">
     <graphic threshold="40" operator="gt" />
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
-    <spawn_group road_access="normal" delay_profile="default" existing_figure="school_child">
+    <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="school_child">
         <spawn mode="service_roamer" spawn_figure="school_child"
             action_state="roaming" direction="top" figure_slot="primary" spawn_count="4" init_roaming="true"
             graphic_timing="before_successful_spawn" condition="always" block_on_success="true" />

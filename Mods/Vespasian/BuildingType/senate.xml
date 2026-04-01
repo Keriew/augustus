@@ -2,7 +2,7 @@
 <building type="senate">
     <graphic threshold="30" operator="gt" />
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
-    <spawn_group road_access="normal" delay_profile="default" existing_figure="tax_collector">
+    <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="tax_collector">
         <spawn mode="service_roamer" spawn_figure="tax_collector"
             action_state="tax_collector_created" direction="top" figure_slot="primary" spawn_count="1"
             graphic_timing="on_spawn_entry" condition="always" block_on_success="true" />

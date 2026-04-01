@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="workcamp">
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="100" />
-    <spawn_group road_access="normal" delay_profile="default" existing_figure="work_camp_worker"
+    <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="work_camp_worker"
         guard_timing="after_labor_seeker">
         <spawn mode="service_roamer" spawn_figure="work_camp_worker"
             action_state="work_camp_worker_created" direction="bottom" figure_slot="primary"
