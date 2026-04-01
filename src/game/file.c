@@ -1,6 +1,7 @@
 #include "file.h"
 
 #include "building/construction.h"
+#include "building/building_type_registry.h"
 #include "building/granary.h"
 #include "building/maintenance.h"
 #include "building/menu.h"
@@ -79,23 +80,40 @@
 #include "scenario/scenario.h"
 #include "sound/city.h"
 #include "sound/music.h"
+#include "window/plain_message_dialog.h"
 
 #include <string.h>
 
 static const char MISSION_SAVED_GAMES[][32] = {
-    "Citizen.sav",
-    "Clerk.sav",
-    "Engineer.sav",
-    "Architect.sav",
-    "Quaestor.sav",
-    "Procurator.sav",
-    "Aedile.sav",
-    "Praetor.sav",
-    "Consul.sav",
-    "Proconsul.sav",
-    "Caesar.sav",
-    "Caesar2.sav"
+    "Citizen.savf",
+    "Clerk.savf",
+    "Engineer.savf",
+    "Architect.savf",
+    "Quaestor.savf",
+    "Procurator.savf",
+    "Aedile.savf",
+    "Praetor.savf",
+    "Consul.savf",
+    "Proconsul.savf",
+    "Caesar.savf",
+    "Caesar2.savf"
 };
+
+void game_file_show_loaded_save_mod_mismatch_warning(void)
+{
+    if (!game_file_io_last_loaded_save_has_mod_mismatch()) {
+        return;
+    }
+
+    static char save_mod_name[FILE_NAME_MAX + 16];
+    static char active_mod_name[FILE_NAME_MAX + 16];
+
+    snprintf(save_mod_name, sizeof(save_mod_name), "Save mod: %s", game_file_io_last_loaded_save_mod_name());
+    snprintf(active_mod_name, sizeof(active_mod_name), "Active mod: %s", game_file_io_last_loaded_active_mod_name());
+
+    window_plain_message_dialog_show_with_extra(TR_SAVEGAME_MOD_MISMATCH_TITLE,
+        TR_SAVEGAME_MOD_MISMATCH_MESSAGE, (const uint8_t *) save_mod_name, (const uint8_t *) active_mod_name);
+}
 
 static void clear_scenario_data(void)
 {
@@ -138,6 +156,7 @@ static void clear_scenario_data(void)
 
     map_image_context_init();
     map_random_init();
+    building_type_registry_reset_runtime_instances();
 }
 
 static void initialize_scenario_data(const uint8_t *scenario_name)
@@ -206,6 +225,7 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     game_state_unpause();
 
     weather_reset();
+    building_type_registry_reset_runtime_instances();
 }
 
 static void load_empire_data(int is_custom_scenario, int empire_id)
@@ -311,6 +331,7 @@ static void initialize_saved_game(void)
     game_state_unpause();
 
     weather_reset();
+    building_type_registry_reset_runtime_instances();
 }
 
 static int start_scenario(const uint8_t *scenario_name, const char *scenario_file)
@@ -452,7 +473,6 @@ int game_file_load_saved_game(const char *filename)
     check_backward_compatibility();
     initialize_saved_game();
     building_storage_reset_building_ids();
-
     sound_music_update(1);
     return 1;
 }
@@ -473,10 +493,10 @@ int game_file_make_yearly_autosave(void)
     char backup_save_name[FILE_NAME_MAX];
 
     snprintf(current_save_name, FILE_NAME_MAX, "%s%s",
-        platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year.svx");
+        platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year.savf");
     snprintf(backup_save_name, FILE_NAME_MAX, "%s%s%d%s",
         platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year-bak-",
-        next_autosave_slot, ".svx");
+        next_autosave_slot, ".savf");
 
     platform_file_manager_copy_file(current_save_name, backup_save_name);
     int result = game_file_write_saved_game(current_save_name);
@@ -511,7 +531,7 @@ void game_file_write_mission_saved_game(void)
         if (locale_translate_rank_autosaves()) {
             encoding_to_utf8(lang_get_string(32, rank), localized_filename, FILE_NAME_MAX,
                 encoding_system_uses_decomposed());
-            strncat_s(localized_filename, FILE_NAME_MAX, ".svx", _TRUNCATE);
+            strncat_s(localized_filename, FILE_NAME_MAX, ".savf", _TRUNCATE);
             filename = localized_filename;
         }
     } else {
@@ -522,7 +542,7 @@ void game_file_write_mission_saved_game(void)
         cursor = string_copy(string_from_ascii(" - "), cursor, FILE_NAME_MAX - (cursor - encoded_filename));
         cursor = string_copy(game_campaign_get_scenario(scenario_campaign_mission())->name, cursor,
             FILE_NAME_MAX - (cursor - encoded_filename));
-        string_copy(string_from_ascii(".svx"), cursor, FILE_NAME_MAX - (cursor - encoded_filename));
+        string_copy(string_from_ascii(".savf"), cursor, FILE_NAME_MAX - (cursor - encoded_filename));
         encoding_to_utf8(encoded_filename, localized_filename, FILE_NAME_MAX, encoding_system_uses_decomposed());
         filename = localized_filename;
     }

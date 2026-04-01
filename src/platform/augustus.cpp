@@ -29,6 +29,7 @@ extern "C" {
 #include "platform/touch.h"
 #include "platform/vita/vita.h"
 #include "window/asset_previewer.h"
+#include "building/building_type_registry.h"
 }
 
 #include "SDL.h"
@@ -64,7 +65,7 @@ static struct {
     struct {
         int frame_count;
         int last_fps;
-        Uint32 last_update_time;
+        uint64_t last_update_time;
     } fps;
     FILE *log_file;
 } data = { 1 };
@@ -213,7 +214,7 @@ static void run_and_draw(void)
 
     game_run();
     game_draw();
-    Uint32 time_after_draw = system_get_ticks();
+    uint64_t time_after_draw = system_get_ticks();
 
     data.fps.frame_count++;
     if (time_after_draw - data.fps.last_update_time > 1000) {
@@ -566,7 +567,7 @@ static int pre_init(const char *custom_data_dir)
             SDL_Log("%s: directory not found", custom_data_dir);
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                 "Error",
-                "Augustus requires the original files from Caesar 3.\n\n"
+                "Vespasian requires the original files from Caesar 3.\n\n"
                 "Please enter the proper directory or copy the files to the selected directory.",
                 NULL);
             return 0;
@@ -626,9 +627,9 @@ static int pre_init(const char *custom_data_dir)
     }
 #else
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-        "Augustus requires the original files from Caesar 3 to run.",
-        "Move the Augustus executable to the directory containing an existing "
-        "Caesar 3 installation, or run:\naugustus path-to-c3-directory",
+        "Vespasian requires the original files from Caesar 3 to run.",
+        "Move the Vespasian executable to the directory containing an existing "
+        "Caesar 3 installation, or run:\nVespasian path-to-c3-directory",
         NULL);
 #endif
 
@@ -641,7 +642,7 @@ static void setup(const augustus_args *args)
     setup_logging();
 
     if (data.log_file) {
-        SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
+        SDL_Log("Vespasian version %s, %s build", system_version(), system_architecture());
         SDL_Log("Running on: %s", system_OS());
     }
 
@@ -661,12 +662,23 @@ static void setup(const augustus_args *args)
         exit_with_status(1);
     }
 
+    building_type_registry_set_mod_name(args->mod_name);
+    if (!building_type_registry_validate_mod()) {
+        char message[512];
+        snprintf(message, sizeof(message),
+            "Unable to find the selected mod data.\n\nExpected folder:\n%s",
+            building_type_registry_get_building_type_path());
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Missing mod", message, NULL);
+        SDL_Log("Missing mod directory: %s", building_type_registry_get_building_type_path());
+        exit_with_status(3);
+    }
+
     // If starting the log file failed (because, for example, the executable path isn't writable)
     // try again, placing the log file on the C3 path
     if (!data.log_file) {
         setup_logging();
         // We always want this info
-        SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
+        SDL_Log("Vespasian version %s, %s build", system_version(), system_architecture());
         SDL_Log("Running on: %s", system_OS());
     }
 

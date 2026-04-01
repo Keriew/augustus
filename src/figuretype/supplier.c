@@ -26,7 +26,7 @@ int figure_supplier_max_stocked_mess_hall_adjusted(void)
     if (city_data.military.total_legions < 10) {
         max_stock = MAX_FOOD_STOCKED_MESS_HALL;
     } else if (city_data.military.total_legions == 10) {
-        max_stock = MAX_FOOD_STOCKED_MESS_HALL * 1.5f; //increase by 50% if max legions
+        max_stock = (MAX_FOOD_STOCKED_MESS_HALL * 3) / 2; //increase by 50% if max legions
     } else {   //cheat code activated
         max_stock = MAX_FOOD_STOCKED_MESS_HALL * 2; // double the possible stock
     }

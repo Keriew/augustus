@@ -266,6 +266,11 @@ static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonu
     }
 }
 
+static void adjust_sickness_level_in_house(building *b, int house_health, int population_health_offset,
+    int hospital_coverage_bonus)
+{
+}
+
 // House Health Calculation
 int city_health_get_house_health_level(const building *b, int update_city_data)
 {

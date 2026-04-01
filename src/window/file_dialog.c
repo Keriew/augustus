@@ -135,6 +135,7 @@ static const int MISSION_ID_TO_CITY_ID[] = {
 
 static file_type_data saved_game_data = { "sav", PATH_LOCATION_SAVEGAME };
 static file_type_data saved_game_data_expanded = { "svx", PATH_LOCATION_SAVEGAME };
+static file_type_data saved_game_data_vespasian = { "savf", PATH_LOCATION_SAVEGAME };
 static file_type_data scenario_data = { "map", PATH_LOCATION_SCENARIO };
 static file_type_data scenario_data_expanded = { "mapx", PATH_LOCATION_SCENARIO };
 static file_type_data empire_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EMPIRES };
@@ -232,7 +233,7 @@ static void init(file_type type, file_dialog_type dialog_type)
     } else if (type == FILE_TYPE_EMPIRE_IMAGE) {
         data.file_data = &image_data;
     } else {
-        data.file_data = &saved_game_data_expanded;
+        data.file_data = &saved_game_data_vespasian;
     }
     data.dialog_type = dialog_type;
 
@@ -273,6 +274,7 @@ static void init(file_type type, file_dialog_type dialog_type)
         } else {
             data.file_list = dir_find_files_with_extension_at_location(saved_game_data.location, saved_game_data.extension);
             data.file_list = dir_append_files_with_extension(saved_game_data_expanded.extension);
+            data.file_list = dir_append_files_with_extension(saved_game_data_vespasian.extension);
         }
     } else {
         data.file_list = dir_find_files_with_extension_at_location(data.file_data->location, data.file_data->extension);
@@ -687,6 +689,7 @@ static void button_ok_cancel(int is_ok, int param2)
             int result = game_file_load_saved_game(filename);
             if (result == FILE_LOAD_SUCCESS) {
                 window_city_show();
+                game_file_show_loaded_save_mod_mismatch_warning();
             } else if (result == FILE_LOAD_DOES_NOT_EXIST) {
                 window_plain_message_dialog_show(TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE,
                     TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, 1);
@@ -772,6 +775,7 @@ static void button_ok_cancel(int is_ok, int param2)
         if (game_file_delete_saved_game(filename)) {
             data.file_list = dir_find_files_with_extension_at_location(saved_game_data.location, saved_game_data.extension);
             dir_append_files_with_extension(saved_game_data_expanded.extension);
+            dir_append_files_with_extension(saved_game_data_vespasian.extension);
 
             init_filtered_file_list();
             list_box_update_total_items(&list_box, data.filtered_file_list.num_files);

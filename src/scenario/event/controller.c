@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
 #define SCENARIO_FORMULAS_SIZE_STEP 500
@@ -382,9 +383,13 @@ static void formulas_save_state(buffer *buf)
 static void formulas_load_state(buffer *buf)
 {
     size_t array_size = buffer_load_dynamic_array(buf);
+    if (array_size > UINT_MAX) {
+        log_error("Scenario formula array is too large to load.", 0, 0);
+        return;
+    }
 
     if (!array_init(scenario_formulas, SCENARIO_FORMULAS_SIZE_STEP, new_formula, 0) ||
-        !array_expand(scenario_formulas, array_size)) {
+        !array_expand(scenario_formulas, (unsigned int) array_size)) {
         log_error("Unable to allocate enough memory for the scenario formulas array. The game will now crash.", 0, 0);
     }
 

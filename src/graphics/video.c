@@ -115,7 +115,7 @@ static int load_av1(const char *filename)
     // We cannot use file_change_extension here because it can only replace 3 characters
     filename = strrchr(av1_filename, '.');
     if (filename) {
-        position = filename - av1_filename; // Get the position of the last dot
+        position = (int) (filename - av1_filename); // Get the position of the last dot
     }
 
     snprintf(av1_filename + position, FILE_NAME_MAX - position, ".webm");
@@ -378,7 +378,8 @@ static void get_next_frame(void)
     time_millis now_millis = system_get_ticks();
 
     if (data.type == VIDEO_TYPE_SMK) {
-        int frame_no = (now_millis - data.video.start_render_millis) * 1000 / data.video.micros_per_frame;
+        int frame_no = data.video.micros_per_frame > 0 ?
+            (int) (((now_millis - data.video.start_render_millis) * 1000) / data.video.micros_per_frame) : 0;
         data.video.draw_frame = data.video.current_frame == 0;
         while (frame_no > data.video.current_frame) {
             if (smacker_next_frame(data.s) != SMACKER_FRAME_OK) {

@@ -1,5 +1,6 @@
 #include "file_io.h"
 
+#include "building/building_type_registry.h"
 #include "building/barracks.h"
 #include "building/count.h"
 #include "building/granary.h"
@@ -77,6 +78,7 @@
 #define GRID_SIZE_BUF_U8 GRID_SIZE * GRID_SIZE
 #define GRID_SIZE_BUF_U16 GRID_SIZE * GRID_SIZE * 2
 #define GRID_SIZE_BUF_U32 GRID_SIZE * GRID_SIZE * 4
+#define SAVEGAME_MOD_METADATA_VERSION 1
 
 typedef struct {
     buffer buf;
@@ -225,6 +227,7 @@ typedef struct {
     buffer *tutorial_part3;
     buffer *city_entry_exit_grid_offset;
     buffer *campaign_name;
+    buffer *mod_metadata;
     buffer *end_marker;
     buffer *deliveries;
     buffer *custom_empire;
@@ -292,6 +295,7 @@ typedef struct {
         int custom_model_data;
         int rubble_grid;
         int custom_production_rates;
+        int mod_metadata;
     } features;
 } savegame_version_data;
 
@@ -309,6 +313,13 @@ static struct {
     unsigned int caravanserai_id;
     scenario_climate climate;
 } minimap_data;
+
+static struct {
+    int has_mod_name;
+    int has_mismatch;
+    char save_mod_name[FILE_NAME_MAX];
+    char active_mod_name[FILE_NAME_MAX];
+} loaded_save_mod_metadata;
 
 static void init_file_piece(file_piece *piece, int size, int compressed)
 {
@@ -355,6 +366,61 @@ static void clear_scenario_pieces(void)
         free(scenario_data.pieces[i].buf.data);
     }
     scenario_data.num_pieces = 0;
+}
+
+static void clear_loaded_save_mod_metadata(void)
+{
+    loaded_save_mod_metadata.has_mod_name = 0;
+    loaded_save_mod_metadata.has_mismatch = 0;
+    loaded_save_mod_metadata.save_mod_name[0] = '\0';
+    loaded_save_mod_metadata.active_mod_name[0] = '\0';
+}
+
+static void savegame_mod_metadata_save_state(buffer *buf)
+{
+    if (!buf) {
+        return;
+    }
+    const char *mod_name = building_type_registry_get_mod_name();
+    size_t mod_name_length = mod_name ? strlen(mod_name) + 1 : 1;
+    buffer_init_dynamic(buf, sizeof(int32_t) + mod_name_length);
+    buffer_write_i32(buf, SAVEGAME_MOD_METADATA_VERSION);
+    if (mod_name && *mod_name) {
+        buffer_write_raw(buf, mod_name, mod_name_length);
+    } else {
+        buffer_write_u8(buf, 0);
+    }
+}
+
+static void update_loaded_save_mod_metadata(const savegame_state *state, savegame_version_t version)
+{
+    clear_loaded_save_mod_metadata();
+
+    if (version <= SAVE_GAME_LAST_NO_MOD_METADATA || !state->mod_metadata || !state->mod_metadata->size) {
+        return;
+    }
+
+    buffer metadata = *state->mod_metadata;
+    if (buffer_load_dynamic(&metadata) < sizeof(int32_t)) {
+        return;
+    }
+
+    int metadata_version = buffer_read_i32(&metadata);
+    if (metadata_version != SAVEGAME_MOD_METADATA_VERSION || buffer_at_end(&metadata)) {
+        return;
+    }
+
+    buffer_read_raw(&metadata, loaded_save_mod_metadata.save_mod_name, sizeof(loaded_save_mod_metadata.save_mod_name));
+    loaded_save_mod_metadata.save_mod_name[sizeof(loaded_save_mod_metadata.save_mod_name) - 1] = '\0';
+    if (!loaded_save_mod_metadata.save_mod_name[0]) {
+        return;
+    }
+
+    loaded_save_mod_metadata.has_mod_name = 1;
+    snprintf(loaded_save_mod_metadata.active_mod_name, sizeof(loaded_save_mod_metadata.active_mod_name), "%s",
+        building_type_registry_get_mod_name());
+    loaded_save_mod_metadata.has_mismatch =
+        strcmp(loaded_save_mod_metadata.save_mod_name, loaded_save_mod_metadata.active_mod_name) != 0;
 }
 
 static void init_scenario_data(scenario_version_t version)
@@ -536,6 +602,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
     version_data->features.custom_production_rates = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
+    version_data->features.mod_metadata = version > SAVE_GAME_LAST_NO_MOD_METADATA;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -546,6 +613,7 @@ static void init_savegame_data(savegame_version_t version)
     get_version_data(&version_data, version);
 
     savegame_state *state = &savegame_data.state;
+    memset(state, 0, sizeof(*state));
     state->scenario_campaign_mission = create_savegame_piece(4, 0);
     state->file_version = create_savegame_piece(4, 0);
     if (version_data.features.resource_version) {
@@ -696,6 +764,9 @@ static void init_savegame_data(savegame_version_t version)
     state->city_entry_exit_grid_offset = create_savegame_piece(8, 0);
     if (version_data.features.custom_campaigns) {
         state->campaign_name = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
+    }
+    if (version_data.features.mod_metadata) {
+        state->mod_metadata = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
     }
     state->end_marker = create_savegame_piece(284, 0); // 71x 4-bytes emptiness
     if (version_data.features.monument_deliveries) {
@@ -1000,6 +1071,7 @@ static void savegame_save_to_state(savegame_state *state)
         state->player_name,
         state->scenario_name,
         state->campaign_name);
+    savegame_mod_metadata_save_state(state->mod_metadata);
 
     map_building_save_state(state->building_grid, state->building_damage_grid, state->rubble_grid);
     map_terrain_save_state(state->terrain_grid);
@@ -1606,6 +1678,7 @@ static int get_savegame_versions(FILE *fp, savegame_version_t *save_version, res
 
 int game_file_io_read_save_game_from_buffer(buffer *buf)
 {
+    clear_loaded_save_mod_metadata();
     int result = 0;
     savegame_version_t save_version;
     resource_version_t resource_version;
@@ -1623,6 +1696,7 @@ int game_file_io_read_save_game_from_buffer(buffer *buf)
         log_error("Unable to load game, incompatible savefile.", 0, 0);
         return FILE_LOAD_WRONG_FILE_FORMAT;
     }
+    update_loaded_save_mod_metadata(&savegame_data.state, save_version);
     savegame_load_from_state(&savegame_data.state, save_version);
     clear_savegame_pieces();
     return FILE_LOAD_SUCCESS;
@@ -1630,6 +1704,7 @@ int game_file_io_read_save_game_from_buffer(buffer *buf)
 
 int game_file_io_read_saved_game(const char *filename, int offset)
 {
+    clear_loaded_save_mod_metadata();
     log_info("Loading saved game", filename, 0);
     FILE *fp = file_open(filename, "rb");
     if (!fp) {
@@ -1658,6 +1733,7 @@ int game_file_io_read_saved_game(const char *filename, int offset)
         log_error("Unable to load game, incompatible savefile.", 0, 0);
         return FILE_LOAD_WRONG_FILE_FORMAT;
     }
+    update_loaded_save_mod_metadata(&savegame_data.state, save_version);
     savegame_load_from_state(&savegame_data.state, save_version);
     clear_savegame_pieces();
     return 1;
@@ -1884,4 +1960,19 @@ int game_file_io_delete_saved_game(const char *filename)
         log_error("Unable to delete game", 0, 0);
     }
     return result;
+}
+
+int game_file_io_last_loaded_save_has_mod_mismatch(void)
+{
+    return loaded_save_mod_metadata.has_mismatch;
+}
+
+const char *game_file_io_last_loaded_save_mod_name(void)
+{
+    return loaded_save_mod_metadata.save_mod_name;
+}
+
+const char *game_file_io_last_loaded_active_mod_name(void)
+{
+    return loaded_save_mod_metadata.active_mod_name;
 }
