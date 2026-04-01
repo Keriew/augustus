@@ -1,7 +1,7 @@
 #include "file.h"
 
 #include "building/construction.h"
-#include "building/building_type_registry.h"
+#include "building/building_runtime.h"
 #include "building/granary.h"
 #include "building/maintenance.h"
 #include "building/menu.h"
@@ -156,7 +156,7 @@ static void clear_scenario_data(void)
 
     map_image_context_init();
     map_random_init();
-    building_type_registry_reset_runtime_instances();
+    building_runtime_reset();
 }
 
 static void initialize_scenario_data(const uint8_t *scenario_name)
@@ -225,7 +225,7 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     game_state_unpause();
 
     weather_reset();
-    building_type_registry_reset_runtime_instances();
+    building_runtime_reset();
 }
 
 static void load_empire_data(int is_custom_scenario, int empire_id)
@@ -331,7 +331,7 @@ static void initialize_saved_game(void)
     game_state_unpause();
 
     weather_reset();
-    building_type_registry_reset_runtime_instances();
+    building_runtime_reset();
 }
 
 static int start_scenario(const uint8_t *scenario_name, const char *scenario_file)

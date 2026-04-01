@@ -1,10 +1,12 @@
+#include "building/building_runtime_internal.h"
+
 extern "C" {
 #include "building/figure.h"
 
 #include "assets/assets.h"
 #include "building/armoury.h"
 #include "building/barracks.h"
-#include "building/building_type_registry.h"
+#include "building/building_runtime.h"
 #include "building/caravanserai.h"
 #include "building/granary.h"
 #include "building/image.h"
@@ -353,16 +355,6 @@ static void spawn_figure_prefecture(building *b)
     }
 }
 
-static void spawn_figure_actor_colony(building *b)
-{
-    building_type_registry_spawn_figure(b);
-}
-
-static void spawn_figure_gladiator_school(building *b)
-{
-    building_type_registry_spawn_figure(b);
-}
-
 static void spawn_figure_lion_house(building *b)
 {
     check_labor_problem(b);
@@ -466,7 +458,7 @@ static void spawn_figure_amphitheater(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            building_type_registry_apply_graphic(b);
+            building_runtime_apply_graphic(b);
             figure *f;
             if (b->data.entertainment.days1 > 0) {
                 f = figure_create(FIGURE_GLADIATOR, road.x, road.y, DIR_0_TOP);
@@ -479,11 +471,6 @@ static void spawn_figure_amphitheater(building *b)
             figure_movement_init_roaming(f);
         }
     }
-}
-
-static void spawn_figure_theater(building *b)
-{
-    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_hippodrome(building *b)
@@ -586,7 +573,7 @@ static void spawn_figure_colosseum(building *b)
             b->figure_spawn_delay = 0;
 
             if (b->type == BUILDING_ARENA) {
-                building_type_registry_apply_graphic(b);
+                building_runtime_apply_graphic(b);
             }
 
             figure *f;
@@ -748,7 +735,7 @@ static void spawn_market_supplier(building *b, int x, int y)
 
 static void spawn_figure_market(building *b)
 {
-    building_type_registry_apply_graphic(b);
+    building_runtime_apply_graphic(b);
     check_labor_problem(b);
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
@@ -824,11 +811,6 @@ static void spawn_lighthouse_supplier(building *b, int x, int y)
     send_supplier_to_destination(f, dst_building_id);
 }
 
-static void spawn_figure_bathhouse(building *b)
-{
-    building_type_registry_spawn_figure(b);
-}
-
 static void spawn_figure_school(building *b)
 {
     check_labor_problem(b);
@@ -845,7 +827,7 @@ static void spawn_figure_school(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            building_type_registry_apply_graphic(b);
+            building_runtime_apply_graphic(b);
 
             figure *child1 = figure_create(FIGURE_SCHOOL_CHILD, road.x, road.y, DIR_0_TOP);
             child1->action_state = FIGURE_ACTION_125_ROAMING;
@@ -869,31 +851,6 @@ static void spawn_figure_school(building *b)
             figure_movement_init_roaming(child4);
         }
     }
-}
-
-static void spawn_figure_library(building *b)
-{
-    building_type_registry_spawn_figure(b);
-}
-
-static void spawn_figure_academy(building *b)
-{
-    building_type_registry_spawn_figure(b);
-}
-
-static void spawn_figure_barber(building *b)
-{
-    building_type_registry_spawn_figure(b);
-}
-
-static void spawn_figure_doctor(building *b)
-{
-    building_type_registry_spawn_figure(b);
-}
-
-static void spawn_figure_hospital(building *b)
-{
-    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_grand_temple_mars(building *b)
@@ -974,7 +931,7 @@ static void spawn_figure_tavern(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            building_type_registry_apply_graphic(b);
+            building_runtime_apply_graphic(b);
             if (!has_figure_of_type(b, FIGURE_BARKEEP) && b->resources[RESOURCE_WINE] >= 20) {
                 b->resources[RESOURCE_WINE] -= 20;
                 int resource_decay = b->resources[RESOURCE_MEAT] && b->resources[RESOURCE_FISH] ? 20 : 40;
@@ -1074,10 +1031,10 @@ static void spawn_figure_temple(building *b)
 static void spawn_figure_senate_forum(building *b)
 {
     if (b->type == BUILDING_SENATE) {
-        building_type_registry_apply_graphic(b);
+        building_runtime_apply_graphic(b);
     }
     if (b->type == BUILDING_FORUM) {
-        building_type_registry_apply_graphic(b);
+        building_runtime_apply_graphic(b);
     }
     check_labor_problem(b);
     if (has_figure_of_type(b, FIGURE_TAX_COLLECTOR)) {
@@ -1386,11 +1343,6 @@ static void spawn_figure_military_academy(building *b)
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 100);
     }
-}
-
-static void spawn_figure_work_camp(building *b)
-{
-    building_type_registry_spawn_figure(b);
 }
 
 static void spawn_figure_architect_guild(building *b)
@@ -1706,7 +1658,7 @@ void building_figure_generate(void)
     int patrician_generated = 0;
     calculate_houses_needed_per_beggar();
     for (int i = 1; i < building_count(); i++) {
-        building *b = building_get(i);
+        building *b = building_get(static_cast<unsigned int>(i));
         if (b->state != BUILDING_STATE_IN_USE) {
             b->show_on_problem_overlay = 1;
             continue;
@@ -1753,11 +1705,23 @@ void building_figure_generate(void)
                     spawn_figure_prefecture(b);
                     break;
                 case BUILDING_ACTOR_COLONY:
-                    spawn_figure_actor_colony(b);
-                    break;
                 case BUILDING_GLADIATOR_SCHOOL:
-                    spawn_figure_gladiator_school(b);
+                case BUILDING_THEATER:
+                case BUILDING_BATHHOUSE:
+                case BUILDING_LIBRARY:
+                case BUILDING_ACADEMY:
+                case BUILDING_BARBER:
+                case BUILDING_DOCTOR:
+                case BUILDING_HOSPITAL:
+                case BUILDING_WORKCAMP:
+                {
+                    // Only migrated building types need the runtime object; untouched legacy branches stay on raw saved data.
+                    building_runtime_impl::Building *runtime_building = building_runtime_impl::get_city_building(b);
+                    if (runtime_building) {
+                        runtime_building->spawn_figure();
+                    }
                     break;
+                }
                 case BUILDING_LION_HOUSE:
                     spawn_figure_lion_house(b);
                     break;
@@ -1766,9 +1730,6 @@ void building_figure_generate(void)
                     break;
                 case BUILDING_AMPHITHEATER:
                     spawn_figure_amphitheater(b);
-                    break;
-                case BUILDING_THEATER:
-                    spawn_figure_theater(b);
                     break;
                 case BUILDING_HIPPODROME:
                     spawn_figure_hippodrome(b);
@@ -1782,26 +1743,8 @@ void building_figure_generate(void)
                 case BUILDING_MARKET:
                     spawn_figure_market(b);
                     break;
-                case BUILDING_BATHHOUSE:
-                    spawn_figure_bathhouse(b);
-                    break;
                 case BUILDING_SCHOOL:
                     spawn_figure_school(b);
-                    break;
-                case BUILDING_LIBRARY:
-                    spawn_figure_library(b);
-                    break;
-                case BUILDING_ACADEMY:
-                    spawn_figure_academy(b);
-                    break;
-                case BUILDING_BARBER:
-                    spawn_figure_barber(b);
-                    break;
-                case BUILDING_DOCTOR:
-                    spawn_figure_doctor(b);
-                    break;
-                case BUILDING_HOSPITAL:
-                    spawn_figure_hospital(b);
                     break;
                 case BUILDING_MISSION_POST:
                     spawn_figure_mission_post(b);
@@ -1838,9 +1781,6 @@ void building_figure_generate(void)
                     break;
                 case BUILDING_MILITARY_ACADEMY:
                     spawn_figure_military_academy(b);
-                    break;
-                case BUILDING_WORKCAMP:
-                    spawn_figure_work_camp(b);
                     break;
                 case BUILDING_ARCHITECT_GUILD:
                     spawn_figure_architect_guild(b);

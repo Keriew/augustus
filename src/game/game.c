@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/properties.h"
+#include "building/building_runtime.h"
 #include "building/building_type_registry.h"
 #include "city/view.h"
 #include "core/config.h"
@@ -111,7 +112,7 @@ int game_init(void)
         errlog("unable to load BuildingType xml definitions");
         return 0;
     }
-    building_type_registry_reset_runtime_instances();
+    building_runtime_reset();
     load_augustus_messages();
     sound_system_init();
     game_state_init();
