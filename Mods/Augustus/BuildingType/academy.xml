@@ -2,7 +2,7 @@
 <building type="academy">
     <graphic threshold="60" operator="gte" />
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
-    <spawn_group road_access="normal" delay_profile="default" existing_figure="teacher">
+    <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="teacher">
         <spawn mode="service_roamer" spawn_figure="teacher"
             action_state="roaming" direction="top" figure_slot="primary" init_roaming="true"
             graphic_timing="before_delay_check" />

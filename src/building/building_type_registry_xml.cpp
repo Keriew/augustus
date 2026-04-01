@@ -10,6 +10,7 @@ extern "C" {
 #include "figure/action.h"
 }
 
+#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 
@@ -158,29 +159,64 @@ static LaborSeekerMode parse_labor_seeker_mode(const char *value)
     return LaborSeekerMode::None;
 }
 
-static void assign_delay_profile(SpawnDelayGroup &group, const char *value)
+static int parse_int_strict(const std::string &text, int *out_value)
 {
-    if (value && strcmp(value, "default") == 0) {
-        group.delay_bands = {
-            { 100, 3 },
-            { 75, 7 },
-            { 50, 15 },
-            { 25, 29 },
-            { 1, 44 }
-        };
-        return;
+    if (!out_value) {
+        return 0;
     }
-    if (value && strcmp(value, "arena") == 0) {
-        group.delay_bands = {
-            { 100, 6 },
-            { 75, 12 },
-            { 50, 20 },
-            { 25, 40 },
-            { 1, 70 }
-        };
-        return;
+
+    char *end = nullptr;
+    long parsed = strtol(text.c_str(), &end, 10);
+    if (!end || *end != '\0') {
+        return 0;
     }
-    group.delay_bands.clear();
+    *out_value = static_cast<int>(parsed);
+    return 1;
+}
+
+static int parse_delay_bands_attribute(const char *value, std::vector<DelayBand> &out_delay_bands)
+{
+    if (!value || !*value) {
+        return 0;
+    }
+
+    std::string list = value;
+    size_t start = 0;
+    int previous_percentage = 101;
+    while (start <= list.size()) {
+        size_t end = list.find(',', start);
+        std::string token = trim_copy(list.substr(start, end == std::string::npos ? std::string::npos : end - start));
+        if (!token.empty()) {
+            size_t separator = token.find(':');
+            if (separator == std::string::npos) {
+                return 0;
+            }
+
+            std::string percentage_text = trim_copy(token.substr(0, separator));
+            std::string delay_text = trim_copy(token.substr(separator + 1));
+            int percentage = 0;
+            int delay = 0;
+            if (!parse_int_strict(percentage_text, &percentage) || !parse_int_strict(delay_text, &delay)) {
+                return 0;
+            }
+            if (percentage < 1 || percentage > 100 || delay <= 0) {
+                return 0;
+            }
+            if (percentage >= previous_percentage) {
+                return 0;
+            }
+
+            out_delay_bands.push_back({ percentage, delay });
+            previous_percentage = percentage;
+        }
+
+        if (end == std::string::npos) {
+            break;
+        }
+        start = end + 1;
+    }
+
+    return !out_delay_bands.empty();
 }
 
 static GraphicTiming parse_graphic_timing(const char *value)
@@ -360,8 +396,8 @@ static int parse_spawn_group()
         g_parse_state.error = 1;
         return 0;
     }
-    if (!xml_parser_has_attribute("delay_profile")) {
-        log_error("BuildingType spawn_group is missing required attribute 'delay_profile'", 0, 0);
+    if (!xml_parser_has_attribute("delay_bands")) {
+        log_error("BuildingType spawn_group is missing required attribute 'delay_bands'", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
@@ -375,10 +411,9 @@ static int parse_spawn_group()
         return 0;
     }
 
-    const char *delay_profile_text = xml_parser_get_attribute_string("delay_profile");
-    assign_delay_profile(group, delay_profile_text);
-    if (group.delay_bands.empty()) {
-        log_error("Unsupported BuildingType spawn_group delay_profile", delay_profile_text, 0);
+    const char *delay_bands_text = xml_parser_get_attribute_string("delay_bands");
+    if (!parse_delay_bands_attribute(delay_bands_text, group.delay_bands)) {
+        log_error("Unsupported BuildingType spawn_group delay_bands", delay_bands_text, 0);
         g_parse_state.error = 1;
         return 0;
     }
