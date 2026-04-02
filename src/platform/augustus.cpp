@@ -1,4 +1,5 @@
 extern "C" {
+#include "assets/assets.h"
 #include "core/config.h"
 #include "core/encoding.h"
 #include "core/file.h"
@@ -71,10 +72,102 @@ static struct {
     FILE *log_file;
 } data = { 1 };
 
+static const char *AUGUSTUS_GRAPHICS_BOOTSTRAP_STAMP = "renderer_resource_bootstrap_v1";
+
 static void write_to_output(FILE *output, const char *message)
 {
     fwrite(message, sizeof(char), strlen(message), output);
     fflush(output);
+}
+
+static int read_stamp_file(const char *path, char *buffer, size_t buffer_size)
+{
+    if (!buffer || buffer_size == 0) {
+        return 0;
+    }
+    FILE *file = file_open(path, "rt");
+    if (!file) {
+        buffer[0] = '\0';
+        return 0;
+    }
+    size_t bytes_read = fread(buffer, 1, buffer_size - 1, file);
+    buffer[bytes_read] = '\0';
+    file_close(file);
+    return 1;
+}
+
+static int write_stamp_file(const char *path, const char *stamp)
+{
+    FILE *file = file_open(path, "wt");
+    if (!file) {
+        return 0;
+    }
+    fwrite(stamp, sizeof(char), strlen(stamp), file);
+    file_close(file);
+    return 1;
+}
+
+static void ensure_graphics_directory(const char *path)
+{
+    if (!path || !*path) {
+        return;
+    }
+    platform_file_manager_create_directory(path, 0, 1);
+}
+
+static int stop_on_first_graphics_entry(const char *name, long modified_time)
+{
+    (void) name;
+    (void) modified_time;
+    return LIST_MATCH;
+}
+
+static void bootstrap_augustus_graphics_directory(void)
+{
+    const char *augustus_graphics_path = mod_manager_get_augustus_graphics_path();
+    char stamp_path[FILE_NAME_MAX];
+    snprintf(stamp_path, FILE_NAME_MAX, "Mods/Augustus/.graphics_bootstrap_stamp");
+
+    char stamp_contents[128];
+    const int has_current_stamp = read_stamp_file(stamp_path, stamp_contents, sizeof(stamp_contents)) &&
+        strcmp(stamp_contents, AUGUSTUS_GRAPHICS_BOOTSTRAP_STAMP) == 0;
+    if (has_current_stamp &&
+        platform_file_manager_list_directory_contents(
+            augustus_graphics_path, TYPE_DIR | TYPE_FILE, 0, stop_on_first_graphics_entry) == LIST_MATCH) {
+        return;
+    }
+
+    platform_file_manager_remove_directory(augustus_graphics_path);
+    ensure_graphics_directory("Mods");
+    ensure_graphics_directory("Mods/Augustus");
+    ensure_graphics_directory(augustus_graphics_path);
+
+    if (!platform_file_manager_copy_directory(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH, augustus_graphics_path, 1)) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to bootstrap Augustus graphics fallback directory");
+        return;
+    }
+    if (!write_stamp_file(stamp_path, AUGUSTUS_GRAPHICS_BOOTSTRAP_STAMP)) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to write Augustus graphics bootstrap stamp");
+    }
+}
+
+static void bootstrap_julius_graphics_directory(void)
+{
+    ensure_graphics_directory("Mods");
+    ensure_graphics_directory("Mods/Julius");
+    ensure_graphics_directory(mod_manager_get_julius_graphics_path());
+}
+
+static void bootstrap_canonical_graphics_sources(void)
+{
+    bootstrap_augustus_graphics_directory();
+    bootstrap_julius_graphics_directory();
+}
+
+static int pre_init_with_current_base_path(void)
+{
+    bootstrap_canonical_graphics_sources();
+    return game_pre_init();
 }
 
 #ifdef __IPHONEOS__
@@ -573,11 +666,11 @@ static int pre_init(const char *custom_data_dir)
                 NULL);
             return 0;
         }
-        return game_pre_init();
+        return pre_init_with_current_base_path();
     }
 
     SDL_Log("Loading game from working directory");
-    if (game_pre_init()) {
+    if (pre_init_with_current_base_path()) {
         return 1;
     }
 
@@ -591,7 +684,7 @@ static int pre_init(const char *custom_data_dir)
         if (base_path) {
             if (platform_file_manager_set_base_path(base_path)) {
                 SDL_Log("Loading game from base path %s", base_path);
-                if (game_pre_init()) {
+                if (pre_init_with_current_base_path()) {
 #ifndef __IPHONEOS__
                     SDL_free(base_path);
 #endif
@@ -609,7 +702,7 @@ static int pre_init(const char *custom_data_dir)
     const char *user_dir = pref_data_dir();
     if (*user_dir) {
         SDL_Log("Loading game from user pref %s", user_dir);
-        if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
+        if (platform_file_manager_set_base_path(user_dir) && pre_init_with_current_base_path()) {
             return 1;
         }
     }
@@ -617,7 +710,7 @@ static int pre_init(const char *custom_data_dir)
     user_dir = ask_for_data_dir(0);
     while (user_dir) {
         SDL_Log("Loading game from user-selected dir %s", user_dir);
-        if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
+        if (platform_file_manager_set_base_path(user_dir) && pre_init_with_current_base_path()) {
             pref_save_data_dir(user_dir);
 #ifdef __ANDROID__
             SDL_AndroidShowToast("C3 files found. Path saved.", 0, 0, 0, 0);

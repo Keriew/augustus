@@ -18,6 +18,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #if SDL_VERSION_ATLEAST(2, 0, 1)
 #define USE_YUV_TEXTURES
@@ -73,6 +74,12 @@ typedef struct silhouette_texture {
     SDL_Texture *texture;
     struct silhouette_texture *next;
 } silhouette_texture;
+
+typedef struct managed_image_resource {
+    SDL_Texture *texture;
+    int width;
+    int height;
+} managed_image_resource;
 
 typedef struct render_state {
     SDL_Texture *target;
@@ -131,6 +138,7 @@ static struct {
         time_millis last_used;
         SDL_Texture *texture;
     } unpacked_images[MAX_UNPACKED_IMAGES];
+    std::vector<managed_image_resource> image_resources;
     graphics_renderer_interface renderer_interface;
     int supports_yuv_textures;
     float city_scale;
@@ -374,6 +382,83 @@ static void free_silhouettes(void)
     data.silhouettes = 0;
 }
 
+static void free_managed_image_resources(void)
+{
+    for (managed_image_resource &resource : data.image_resources) {
+        if (resource.texture) {
+            SDL_DestroyTexture(resource.texture);
+            resource.texture = 0;
+        }
+        resource.width = 0;
+        resource.height = 0;
+    }
+    data.image_resources.clear();
+}
+
+static image_handle reserve_managed_image_resource_slot(void)
+{
+    if (data.image_resources.empty()) {
+        data.image_resources.resize(1);
+    }
+    for (size_t i = 1; i < data.image_resources.size(); ++i) {
+        if (!data.image_resources[i].texture) {
+            return static_cast<image_handle>(i);
+        }
+    }
+    data.image_resources.push_back({});
+    return static_cast<image_handle>(data.image_resources.size() - 1);
+}
+
+static SDL_Texture *create_texture_from_pixels(const color_t *pixels, int width, int height)
+{
+    if (!pixels || width <= 0 || height <= 0) {
+        return 0;
+    }
+    SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *) pixels,
+        width,
+        height,
+        32,
+        width * sizeof(color_t),
+        COLOR_CHANNEL_RED,
+        COLOR_CHANNEL_GREEN,
+        COLOR_CHANNEL_BLUE,
+        COLOR_CHANNEL_ALPHA);
+    if (!surface) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create image resource surface. Reason: %s", SDL_GetError());
+        return 0;
+    }
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(data.renderer, surface);
+    SDL_FreeSurface(surface);
+    if (!texture) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create image resource texture. Reason: %s", SDL_GetError());
+        return 0;
+    }
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+    return texture;
+}
+
+static SDL_Texture *get_managed_texture(image_handle handle)
+{
+    if (handle <= 0 || handle >= static_cast<image_handle>(data.image_resources.size())) {
+        return 0;
+    }
+    return data.image_resources[handle].texture;
+}
+
+static image_handle request_image_handle(const render_2d_request *request)
+{
+    if (!request) {
+        return 0;
+    }
+    if (request->handle > 0) {
+        return request->handle;
+    }
+    if (request->img && request->img->resource_handle > 0) {
+        return request->img->resource_handle;
+    }
+    return 0;
+}
+
 static void free_unpacked_assets(void)
 {
     for (int i = 0; i < MAX_UNPACKED_IMAGES; i++) {
@@ -574,6 +659,7 @@ static void free_all_textures(void)
     }
 
     free_silhouettes();
+    free_managed_image_resources();
 
     if (data.tooltip.texture) {
         SDL_DestroyTexture(data.tooltip.texture);
@@ -675,15 +761,17 @@ static void draw_texture_request(const render_2d_request *request, SDL_Texture *
     int use_linear_filter = g_render_2d_pipeline.should_use_linear_filter(
         *request, *img, data.city_scale, data.disable_linear_filter);
     set_texture_color_and_filter(texture, request->color, use_linear_filter);
+    const image_handle handle = request_image_handle(request);
+    const int uses_managed_texture = handle > 0 && get_managed_texture(handle) == texture;
 
     float x = request->x + (img->x_offset / source_scale_x);
     float y = request->y + (img->y_offset / source_scale_y);
     int is_city_scale = fabsf(source_scale_x - data.city_scale) < 0.001f && fabsf(source_scale_y - data.city_scale) < 0.001f;
-    int src_correction = is_city_scale && data.should_correct_texture_offset ? 1 : 0;
+    int src_correction = uses_managed_texture ? 0 : is_city_scale && data.should_correct_texture_offset ? 1 : 0;
 
     SDL_Rect src_coords = {
-        (use_atlas_coords ? img->atlas.x_offset : 0) + src_correction,
-        (use_atlas_coords ? img->atlas.y_offset : 0) + src_correction,
+        (use_atlas_coords && !uses_managed_texture ? img->atlas.x_offset : 0) + src_correction,
+        (use_atlas_coords && !uses_managed_texture ? img->atlas.y_offset : 0) + src_correction,
         img->width - src_correction, img->height - src_correction
     };
 
@@ -729,7 +817,15 @@ static void draw_image_request(const render_2d_request *request)
         return;
     }
 
-    SDL_Texture *texture = request->use_silhouette ? get_silhouette_texture(request->img) : get_texture(request->img->atlas.id);
+    SDL_Texture *texture = 0;
+    if (request->use_silhouette) {
+        texture = get_silhouette_texture(request->img);
+    } else {
+        texture = get_managed_texture(request_image_handle(request));
+        if (!texture) {
+            texture = get_texture(request->img->atlas.id);
+        }
+    }
     if (!texture) {
         return;
     }
@@ -741,6 +837,7 @@ static void draw_texture_advanced(const image *img, float x, float y, color_t co
 {
     render_2d_request request = {};
     request.img = img;
+    request.handle = img ? img->resource_handle : 0;
     request.x = x;
     request.y = y;
     request.logical_width = scale_x ? img->width / scale_x : (float) img->width;
@@ -757,6 +854,7 @@ static void draw_texture(const image *img, int x, int y, color_t color, float sc
 {
     render_2d_request request = {};
     request.img = img;
+    request.handle = img ? img->resource_handle : 0;
     request.x = scale ? x / scale : (float) x;
     request.y = scale ? y / scale : (float) y;
     request.logical_width = scale ? img->width / scale : (float) img->width;
@@ -1130,7 +1228,10 @@ static void create_blend_texture(custom_image_type type)
         return;
     }
     const image *img = image_get(image_group(GROUP_TERRAIN_FLAT_TILE));
-    SDL_Texture *flat_tile = get_texture(img->atlas.id);
+    SDL_Texture *flat_tile = get_managed_texture(img ? img->resource_handle : 0);
+    if (!flat_tile) {
+        flat_tile = get_texture(img->atlas.id);
+    }
     render_state current_state;
     save_render_state(&current_state);
 
@@ -1149,7 +1250,8 @@ static void create_blend_texture(custom_image_type type)
         (color & COLOR_CHANNEL_GREEN) >> COLOR_BITSHIFT_GREEN,
         (color & COLOR_CHANNEL_BLUE) >> COLOR_BITSHIFT_BLUE);
     SDL_SetTextureAlphaMod(flat_tile, 0xff);
-    SDL_Rect src_coords = { img->atlas.x_offset, img->atlas.y_offset, img->width, img->height };
+    SDL_Rect src_coords = { img && img->resource_handle ? 0 : img->atlas.x_offset,
+        img && img->resource_handle ? 0 : img->atlas.y_offset, img->width, img->height };
     SDL_RenderCopy(data.renderer, flat_tile, &src_coords, 0);
 
     restore_render_state(&current_state);
@@ -1183,7 +1285,10 @@ static SDL_Texture *get_silhouette_texture(const image *img)
         return 0;
     }
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-    SDL_Texture *original_texture = get_texture(img->atlas.id);
+    SDL_Texture *original_texture = get_managed_texture(img ? img->resource_handle : 0);
+    if (!original_texture) {
+        original_texture = get_texture(img->atlas.id);
+    }
     render_state current_state;
     save_render_state(&current_state);
 
@@ -1196,7 +1301,8 @@ static SDL_Texture *get_silhouette_texture(const image *img)
     SDL_SetRenderDrawColor(data.renderer, 0, 0, 0, 0);
     SDL_RenderClear(data.renderer);
 
-    SDL_Rect src_coords = { img->atlas.x_offset, img->atlas.y_offset, img->width, img->height };
+    SDL_Rect src_coords = { img && img->resource_handle ? 0 : img->atlas.x_offset,
+        img && img->resource_handle ? 0 : img->atlas.y_offset, img->width, img->height };
 
     set_texture_color_and_filter(original_texture, 0, 0);
 
@@ -1256,6 +1362,7 @@ static void draw_silhouetted_texture(const image *img, int x, int y, color_t col
 {
     render_2d_request request = {};
     request.img = img;
+    request.handle = img ? img->resource_handle : 0;
     request.x = scale ? x / scale : (float) x;
     request.y = scale ? y / scale : (float) y;
     request.logical_width = scale ? img->width / scale : (float) img->width;
@@ -1280,6 +1387,44 @@ static void draw_custom_texture(custom_image_type type, int x, int y, float scal
     data.disable_linear_filter = disable_filtering;
     draw_texture(&data.custom_textures[type].img, x, y, 0, scale);
     data.disable_linear_filter = 0;
+}
+
+static void release_image_resource(image *img)
+{
+    if (!img || img->resource_handle <= 0) {
+        return;
+    }
+    if (img->resource_handle < static_cast<image_handle>(data.image_resources.size())) {
+        managed_image_resource &resource = data.image_resources[img->resource_handle];
+        if (resource.texture) {
+            SDL_DestroyTexture(resource.texture);
+            resource.texture = 0;
+        }
+        resource.width = 0;
+        resource.height = 0;
+    }
+    img->resource_handle = 0;
+}
+
+static void upload_image_resource(image *img, const color_t *pixels, int width, int height)
+{
+    if (!img) {
+        return;
+    }
+    release_image_resource(img);
+    if (data.paused || !pixels || width <= 0 || height <= 0) {
+        return;
+    }
+    SDL_Texture *texture = create_texture_from_pixels(pixels, width, height);
+    if (!texture) {
+        return;
+    }
+    image_handle handle = reserve_managed_image_resource_slot();
+    managed_image_resource &resource = data.image_resources[handle];
+    resource.texture = texture;
+    resource.width = width;
+    resource.height = height;
+    img->resource_handle = handle;
 }
 
 static int has_custom_texture(custom_image_type type)
@@ -1435,6 +1580,8 @@ static void create_renderer_interface(void)
     data.renderer_interface.free_image_atlas = free_texture_atlas_and_data;
     data.renderer_interface.load_unpacked_image = load_unpacked_image;
     data.renderer_interface.free_unpacked_image = free_unpacked_image;
+    data.renderer_interface.upload_image_resource = upload_image_resource;
+    data.renderer_interface.release_image_resource = release_image_resource;
     data.renderer_interface.should_pack_image = should_pack_image;
     data.renderer_interface.update_scale = update_scale;
 

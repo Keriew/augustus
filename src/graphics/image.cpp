@@ -15,6 +15,7 @@ static render_2d_request make_legacy_request(const image *img, int x, int y, col
         || domain == RENDER_DOMAIN_SNAPSHOT_PIXEL;
     render_2d_request request = {};
     request.img = img;
+    request.handle = img ? img->resource_handle : 0;
     request.x = scale ? x / scale : (float) x;
     request.y = scale ? y / scale : (float) y;
     request.logical_width = scale ? img->width / scale : (float) img->width;

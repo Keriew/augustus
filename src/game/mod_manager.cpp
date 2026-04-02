@@ -13,6 +13,8 @@ namespace {
 std::string g_mod_name = "Vespasian";
 std::string g_mod_path = "Mods/Vespasian/";
 std::string g_graphics_path = "Mods/Vespasian/Graphics/";
+std::string g_augustus_graphics_path = "Mods/Augustus/Graphics/";
+std::string g_julius_graphics_path = "Mods/Julius/Graphics/";
 
 static int stop_on_first_entry(const char *name, long unused)
 {
@@ -58,6 +60,16 @@ extern "C" const char *mod_manager_get_graphics_path(void)
     return g_graphics_path.c_str();
 }
 
+extern "C" const char *mod_manager_get_augustus_graphics_path(void)
+{
+    return g_augustus_graphics_path.c_str();
+}
+
+extern "C" const char *mod_manager_get_julius_graphics_path(void)
+{
+    return g_julius_graphics_path.c_str();
+}
+
 extern "C" int mod_manager_validate_mod_path(void)
 {
     return validate_directory_path(g_mod_path.c_str());
@@ -66,6 +78,8 @@ extern "C" int mod_manager_validate_mod_path(void)
 extern "C" int mod_manager_validate_graphics_path(void)
 {
     const int has_mod_graphics = validate_directory_path(g_graphics_path.c_str()) != 0;
+    const int has_augustus_graphics = validate_directory_path(g_augustus_graphics_path.c_str()) != 0;
+    const int has_julius_graphics = validate_directory_path(g_julius_graphics_path.c_str()) != 0;
     const int has_root_graphics = validate_directory_path(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH) != 0;
-    return has_mod_graphics || has_root_graphics;
+    return has_mod_graphics || has_augustus_graphics || has_julius_graphics || has_root_graphics;
 }

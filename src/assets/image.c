@@ -79,6 +79,7 @@ static void translate_reference_position(asset_image *img)
         img->img.y_offset = referenced->img.y_offset;
         img->img.atlas.x_offset = referenced->img.atlas.x_offset;
         img->img.atlas.y_offset = referenced->img.atlas.y_offset;
+        img->img.resource_handle = referenced->img.resource_handle;
         img->img.top = referenced->img.top;
         width = referenced->img.width;
         height = referenced->img.height;
@@ -89,6 +90,7 @@ static void translate_reference_position(asset_image *img)
         img->img.y_offset = referenced->y_offset;
         img->img.atlas.x_offset = referenced->atlas.x_offset;
         img->img.atlas.y_offset = referenced->atlas.y_offset;
+        img->img.resource_handle = referenced->resource_handle;
         img->img.top = referenced->top;
         width = referenced->width;
         height = referenced->height;
@@ -452,11 +454,18 @@ asset_image *asset_image_get_from_id(unsigned int image_id)
 
 void asset_image_unload(asset_image *img)
 {
+    const graphics_renderer_interface *renderer = graphics_renderer();
     unload_image_layers(img);
     free((char *) img->id);
     free((color_t *) img->data); // Freeing a const pointer - ugly but necessary
     if (!img->is_reference) {
+        if (img->img.top && renderer && renderer->release_image_resource) {
+            renderer->release_image_resource(img->img.top);
+        }
         free(img->img.top);
+    }
+    if (renderer && renderer->release_image_resource) {
+        renderer->release_image_resource(&img->img);
     }
     free(img->img.animation);
     img->id = 0;
@@ -474,6 +483,61 @@ static void new_image(asset_image *img, unsigned int index)
 static int is_image_active(const asset_image *img)
 {
     return img->active;
+}
+
+static int upload_cropped_image_resource(
+    image *img,
+    const color_t *pixels,
+    int source_width,
+    int source_height,
+    int source_x,
+    int source_y)
+{
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (!img) {
+        return 0;
+    }
+    if (!renderer || !renderer->release_image_resource || !renderer->upload_image_resource) {
+        return 0;
+    }
+    renderer->release_image_resource(img);
+    if (!pixels || img->width <= 0 || img->height <= 0 ||
+        source_width <= 0 || source_height <= 0 ||
+        source_x < 0 || source_y < 0 ||
+        source_x + img->width > source_width ||
+        source_y + img->height > source_height) {
+        return 0;
+    }
+
+    color_t *cropped = malloc(sizeof(color_t) * img->width * img->height);
+    if (!cropped) {
+        return 0;
+    }
+    for (int y = 0; y < img->height; y++) {
+        memcpy(&cropped[y * img->width],
+            &pixels[(source_y + y) * source_width + source_x],
+            sizeof(color_t) * img->width);
+    }
+    renderer->upload_image_resource(img, cropped, img->width, img->height);
+    free(cropped);
+    return img->resource_handle != 0;
+}
+
+static int upload_atlas_image_resource(image *img, const image_atlas_data *atlas_data)
+{
+    if (!img || !atlas_data) {
+        return 0;
+    }
+    int atlas_index = img->atlas.id & IMAGE_ATLAS_BIT_MASK;
+    if (atlas_index < 0 || atlas_index >= atlas_data->num_images) {
+        return 0;
+    }
+    return upload_cropped_image_resource(img,
+        atlas_data->buffers[atlas_index],
+        atlas_data->image_widths[atlas_index],
+        atlas_data->image_heights[atlas_index],
+        img->atlas.x_offset,
+        img->atlas.y_offset);
 }
 
 int asset_image_init_array(void)
@@ -622,6 +686,11 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
                 image_copy(&copy);
             }
 
+            upload_atlas_image_resource(&current_image->img, atlas_data);
+            if (current_image->img.top) {
+                upload_atlas_image_resource(current_image->img.top, atlas_data);
+            }
+
             free((color_t *) current_image->data); // Freeing a const pointer - ugly but necessary
 
             current_image->data = 0;
@@ -630,6 +699,22 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
             current_image->img.atlas.id += total_unpacked_assets;
             if (current_image->img.top) {
                 current_image->img.top->atlas.id += total_unpacked_assets;
+            }
+            upload_cropped_image_resource(
+                &current_image->img,
+                current_image->data,
+                current_image->img.original.width,
+                current_image->img.original.height + top_height,
+                current_image->img.x_offset,
+                current_image->img.y_offset + current_image->img.atlas.y_offset);
+            if (current_image->img.top) {
+                upload_cropped_image_resource(
+                    current_image->img.top,
+                    current_image->data,
+                    current_image->img.top->original.width,
+                    current_image->img.top->original.height,
+                    current_image->img.top->x_offset,
+                    current_image->img.top->y_offset);
             }
             total_unpacked_assets++;
         }
@@ -717,6 +802,10 @@ const asset_image *asset_image_create_external(const char *filename)
     img->id = id;
     img->img.atlas.id = ATLAS_UNPACKED_EXTRA_ASSET << IMAGE_ATLAS_BIT_OFFSET;
     img->img.atlas.id += img->index;
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (renderer && renderer->upload_image_resource) {
+        renderer->upload_image_resource(&img->img, pixels, img->img.width, img->img.height);
+    }
     return img;
 #else
     return 0;

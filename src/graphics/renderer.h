@@ -1,5 +1,4 @@
-#ifndef GRAPHICS_RENDERER_H
-#define GRAPHICS_RENDERER_H
+#pragma once
 
 #include "core/image.h"
 
@@ -53,6 +52,7 @@ typedef enum {
 
 typedef struct {
     const image *img;
+    image_handle handle;
     float x;
     float y;
     float logical_width;
@@ -133,6 +133,8 @@ typedef struct {
 
     void (*load_unpacked_image)(const image *img, const color_t *pixels);
     void (*free_unpacked_image)(const image *img);
+    void (*upload_image_resource)(image *img, const color_t *pixels, int width, int height);
+    void (*release_image_resource)(image *img);
 
     int (*should_pack_image)(int width, int height);
 
@@ -147,4 +149,3 @@ void graphics_renderer_set_interface(const graphics_renderer_interface *new_rend
 }
 #endif
 
-#endif // GRAPHICS_RENDERER_H

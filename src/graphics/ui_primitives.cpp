@@ -15,6 +15,7 @@ render_2d_request make_request(
 {
     render_2d_request request = {};
     request.img = img;
+    request.handle = img ? img->resource_handle : 0;
     request.x = x;
     request.y = y;
     request.logical_width = static_cast<float>(logical_width);

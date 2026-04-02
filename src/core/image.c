@@ -239,6 +239,7 @@ static struct {
     image main[IMAGE_MAIN_ENTRIES];
     image enemy[ENEMY_ENTRIES];
     image *font;
+    int font_entries;
     image_draw_data *external_draw_data;
 
     int external_image_id;
@@ -613,6 +614,93 @@ static void free_draw_data(image_draw_data *draw_datas, int entries)
     free(draw_datas);
 }
 
+static void release_image_resource_tree(image *img)
+{
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (!img) {
+        return;
+    }
+    if (!renderer || !renderer->release_image_resource) {
+        return;
+    }
+    if (img->top) {
+        renderer->release_image_resource(img->top);
+    }
+    renderer->release_image_resource(img);
+}
+
+static int upload_cropped_image_resource(
+    image *img,
+    const color_t *pixels,
+    int source_width,
+    int source_height,
+    int source_x,
+    int source_y)
+{
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (!img) {
+        return 0;
+    }
+    if (!renderer || !renderer->release_image_resource || !renderer->upload_image_resource) {
+        return 0;
+    }
+    renderer->release_image_resource(img);
+    if (!pixels || img->width <= 0 || img->height <= 0 ||
+        source_width <= 0 || source_height <= 0 ||
+        source_x < 0 || source_y < 0 ||
+        source_x + img->width > source_width ||
+        source_y + img->height > source_height) {
+        return 0;
+    }
+
+    color_t *cropped = malloc(sizeof(color_t) * img->width * img->height);
+    if (!cropped) {
+        return 0;
+    }
+    for (int y = 0; y < img->height; y++) {
+        memcpy(&cropped[y * img->width],
+            &pixels[(source_y + y) * source_width + source_x],
+            sizeof(color_t) * img->width);
+    }
+    renderer->upload_image_resource(img, cropped, img->width, img->height);
+    free(cropped);
+    return img->resource_handle != 0;
+}
+
+static int upload_atlas_image_resource(image *img, const image_atlas_data *atlas_data)
+{
+    if (!img || !atlas_data) {
+        return 0;
+    }
+    int atlas_index = img->atlas.id & IMAGE_ATLAS_BIT_MASK;
+    if (atlas_index < 0 || atlas_index >= atlas_data->num_images) {
+        return 0;
+    }
+    return upload_cropped_image_resource(img,
+        atlas_data->buffers[atlas_index],
+        atlas_data->image_widths[atlas_index],
+        atlas_data->image_heights[atlas_index],
+        img->atlas.x_offset,
+        img->atlas.y_offset);
+}
+
+static void upload_atlas_image_resources(image *images, int size, const image_atlas_data *atlas_data, atlas_type type)
+{
+    for (int i = 0; i < size; i++) {
+        image *img = &images[i];
+        if (image_is_external(img)) {
+            continue;
+        }
+        if (type == ATLAS_MAIN && i >= 6145 && i <= 6192) {
+            continue;
+        }
+        upload_atlas_image_resource(img, atlas_data);
+        if (img->top) {
+            upload_atlas_image_resource(img->top, atlas_data);
+        }
+    }
+}
+
 static void release_external_buffers(void)
 {
     for (int i = 0; i < data.total_external_images; i++) {
@@ -672,6 +760,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     graphics_renderer()->get_max_image_size(&data.max_image_width, &data.max_image_height);
 
     for (int i = 0; i < IMAGE_MAIN_ENTRIES; i++) {
+        release_image_resource_tree(&data.main[i]);
         free(data.main[i].top);
         free(data.main[i].animation);
     }
@@ -741,6 +830,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     free_draw_data(draw_data, IMAGE_MAIN_ENTRIES);
     free(tmp_data);
     make_plain_fonts_white(data.main, atlas_data, image_group(GROUP_FONT));
+    upload_atlas_image_resources(data.main, IMAGE_MAIN_ENTRIES, atlas_data, ATLAS_MAIN);
     if (!keep_atlas_buffers) {
         if (!assets_init(data.is_editor != is_editor, atlas_data->buffers, atlas_data->image_widths)) {
             image_packer_free(&data.packer);
@@ -775,8 +865,14 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
 static void free_font_memory(void)
 {
     graphics_renderer()->free_image_atlas(ATLAS_FONT);
+    if (data.font) {
+        for (int i = 0; i < data.font_entries; i++) {
+            release_image_resource_tree(&data.font[i]);
+        }
+    }
     free(data.font);
     data.font = 0;
+    data.font_entries = 0;
     data.fonts_enabled = NO_EXTRA_FONT;
 }
 
@@ -788,6 +884,7 @@ static int alloc_font_memory(int font_entries)
         return 0;
     }
     memset(data.font, 0, font_entries * sizeof(image));
+    data.font_entries = font_entries;
     return 1;
 }
 
@@ -848,6 +945,7 @@ static int load_external_fonts(int base_offset)
     free(tmp_data);
     free_draw_data(draw_data, EXTERNAL_FONT_ENTRIES);
     make_plain_fonts_white(data.font, atlas_data, base_offset);
+    upload_atlas_image_resources(data.font, EXTERNAL_FONT_ENTRIES, atlas_data, ATLAS_FONT);
     graphics_renderer()->create_image_atlas(atlas_data, 1);
     image_packer_free(&data.packer);
 
@@ -1092,6 +1190,7 @@ static int load_multibyte_font(multibyte_font_type type)
         }
     }
 
+    upload_atlas_image_resources(data.font, entries, atlas_data, ATLAS_FONT);
     graphics_renderer()->create_image_atlas(atlas_data, 1);
 
     log_info("Done parsing font", font_info->name, 0);
@@ -1138,6 +1237,7 @@ int image_load_enemy(int enemy_id)
     const char *filename_idx = ENEMY_GRAPHICS_SG2[enemy_id];
 
     for (int i = 0; i < ENEMY_ENTRIES; i++) {
+        release_image_resource_tree(&data.enemy[i]);
         free(data.enemy[i].top);
         free(data.enemy[i].animation);
     }
@@ -1190,6 +1290,7 @@ int image_load_enemy(int enemy_id)
     free(tmp_data);
     free_draw_data(draw_data, ENEMY_ENTRIES);
     data.current_enemy = enemy_id;
+    upload_atlas_image_resources(data.enemy, ENEMY_ENTRIES, atlas_data, ATLAS_ENEMY);
     graphics_renderer()->create_image_atlas(atlas_data, 1);
     image_packer_free(&data.packer);
 
