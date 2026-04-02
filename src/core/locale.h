@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Language type
  */
@@ -65,5 +69,9 @@ int locale_paragraph_indent(void);
  * @return Boolean true if the filenames should be translated, false if we should use English
  */
 int locale_translate_rank_autosaves(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_LOCALE_H

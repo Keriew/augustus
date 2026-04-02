@@ -5,6 +5,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     FONT_NORMAL_PLAIN,
     FONT_NORMAL_BLACK,
@@ -23,6 +27,7 @@ typedef struct {
     font_t font;
     int image_offset;
     int multibyte_image_offset;
+    int metric_scale_percentage;
     int space_width;
     int letter_spacing;
     int line_height;
@@ -65,5 +70,11 @@ int font_can_display(const uint8_t *character);
  * @return Letter ID to feed into image_letter(), or -1 if c is no letter
  */
 int font_letter_id(const font_definition *def, const uint8_t *str, int *num_bytes);
+int font_image_width_for_letter(const font_definition *def, int letter_id);
+int font_image_height_for_letter(const font_definition *def, int letter_id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_FONT_H

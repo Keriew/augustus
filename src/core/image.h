@@ -5,6 +5,10 @@
 #include "core/image_group.h"
 #include "graphics/color.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define IMAGE_MAIN_ENTRIES 10000
 #define IMAGE_MAX_GROUPS 300
 
@@ -189,5 +193,9 @@ void image_copy(const image_copy_info *copy);
  * @param copy The copy information
  */
 void image_copy_isometric_footprint(const image_copy_info *copy);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_IMAGE_H

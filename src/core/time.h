@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file
  * Time tracking functions.
@@ -24,5 +28,9 @@ time_millis time_get_millis(void);
  * @param millis Current milliseconds
  */
 void time_set_millis(time_millis millis);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_TIME_H

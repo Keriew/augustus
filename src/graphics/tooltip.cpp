@@ -1,5 +1,6 @@
 #include "tooltip.h"
 
+extern "C" {
 #include "building/building.h"
 #include "city/labor.h"
 #include "city/ratings.h"
@@ -27,6 +28,7 @@
 #include "scenario/property.h"
 #include "translation/translation.h"
 #include "window/advisors.h"
+}
 
 #include <stdlib.h>
 
@@ -102,7 +104,8 @@ static const uint8_t *get_tooltip_text(const tooltip_context *c)
         return c->precomposed_text;
     }
     if (c->translation_key) {
-        text = translation_for(c->translation_key);
+        const translation_key key = static_cast<translation_key>(c->translation_key);
+        text = translation_for(key);
     } else {
         text = lang_get_string(c->text_group, c->text_id);
     }
@@ -145,7 +148,7 @@ static void save_tooltip_text(const uint8_t *text)
         return;
     }
     int length = string_length(text);
-    last_tooltip_text = malloc(length + 1);
+    last_tooltip_text = static_cast<uint8_t *>(malloc(length + 1));
     if (!last_tooltip_text) {
         return;
     }
@@ -230,7 +233,7 @@ static void draw_button_tooltip(tooltip_context *c)
         height = screen_height() - 20;
     }
 
-    graphics_renderer()->set_tooltip_position(x, y);
+    graphics_renderer()->set_tooltip_position_for_domain(c->domain, x, y);
 
     senate_data.active = 0;
     tile_data.active = 0;
@@ -239,7 +242,7 @@ static void draw_button_tooltip(tooltip_context *c)
         return;
     }
 
-    if (!graphics_renderer()->start_tooltip_creation(width, height)) {
+    if (!graphics_renderer()->start_tooltip_creation_for_domain(c->domain, width, height)) {
         save_tooltip_text(0);
         return;
     }
@@ -253,6 +256,7 @@ static void draw_button_tooltip(tooltip_context *c)
 
 static void draw_overlay_tooltip(tooltip_context *c)
 {
+    const render_domain domain = RENDER_DOMAIN_PIXEL;
     const uint8_t *text = get_tooltip_text(c);
     int width = 200;
     int largest_width;
@@ -280,7 +284,7 @@ static void draw_overlay_tooltip(tooltip_context *c)
         y = c->mouse_y - 72;
     }
 
-    graphics_renderer()->set_tooltip_position(x, y);
+    graphics_renderer()->set_tooltip_position_for_domain(domain, x, y);
 
     senate_data.active = 0;
     tile_data.active = 0;
@@ -289,7 +293,7 @@ static void draw_overlay_tooltip(tooltip_context *c)
         return;
     }
 
-    if (!graphics_renderer()->start_tooltip_creation(width, height)) {
+    if (!graphics_renderer()->start_tooltip_creation_for_domain(domain, width, height)) {
         save_tooltip_text(0);
         return;
     }
@@ -338,6 +342,7 @@ static int update_senate_data(void)
 
 static void draw_senate_tooltip(tooltip_context *c)
 {
+    const render_domain domain = RENDER_DOMAIN_PIXEL;
     int x, y;
     int width = 220;
     int height = 80;
@@ -354,7 +359,7 @@ static void draw_senate_tooltip(tooltip_context *c)
         y = c->mouse_y - 32;
     }
 
-    graphics_renderer()->set_tooltip_position(x, y);
+    graphics_renderer()->set_tooltip_position_for_domain(domain, x, y);
 
     save_tooltip_text(0);
     tile_data.active = 0;
@@ -363,7 +368,7 @@ static void draw_senate_tooltip(tooltip_context *c)
         return;
     }
 
-    if (!graphics_renderer()->start_tooltip_creation(width, height)) {
+    if (!graphics_renderer()->start_tooltip_creation_for_domain(domain, width, height)) {
         save_tooltip_text(0);
         return;
     }
@@ -420,6 +425,7 @@ static int terrain_info_string(int grid_offset, const char **out_flags, int max_
 
 static void draw_tile_tooltip(tooltip_context *c)
 {
+    const render_domain domain = RENDER_DOMAIN_PIXEL;
     view_tile view;
 
     int debug_tooltip_type = game_cheat_tooltip_enabled();
@@ -466,7 +472,7 @@ static void draw_tile_tooltip(tooltip_context *c)
             y = c->mouse_y - 32;
         }
 
-        graphics_renderer()->set_tooltip_position(x, y);
+        graphics_renderer()->set_tooltip_position_for_domain(domain, x, y);
 
         save_tooltip_text(0);
         senate_data.active = 0;
@@ -475,7 +481,7 @@ static void draw_tile_tooltip(tooltip_context *c)
             return;
         }
 
-        if (!graphics_renderer()->start_tooltip_creation(width, height)) {
+        if (!graphics_renderer()->start_tooltip_creation_for_domain(domain, width, height)) {
             return;
         }
 
@@ -550,6 +556,7 @@ void tooltip_handle(const mouse *m, void (*func)(tooltip_context *))
         return;
     }
     tooltip_context context = { m->x, m->y };
+    context.domain = RENDER_DOMAIN_UI;
     context.text_group = DEFAULT_TEXT_GROUP;
     if (setting_tooltips() && func) {
         func(&context);

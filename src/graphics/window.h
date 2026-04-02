@@ -5,6 +5,10 @@
 #include "input/hotkey.h"
 #include "input/mouse.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     WINDOW_LOGO,
     WINDOW_MAIN_MENU,
@@ -136,5 +140,9 @@ void window_show(const window_type *window);
 window_id window_get_id(void);
 
 void window_go_back(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_WINDOW_H

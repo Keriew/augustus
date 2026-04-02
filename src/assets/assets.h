@@ -3,6 +3,10 @@
 
 #include "core/image.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ASSETS_IMAGE_PATH "Graphics"
 
 #define ASSET_EXTERNAL_FILE_LIST "***EXTERNAL_FILES***"
@@ -52,7 +56,7 @@ typedef enum {
 	ASSET_FONT_MAX_KEY
 } asset_font_id;
 
-void assets_init(int force_reload, color_t **main_images, int *main_image_widths);
+int assets_init(int force_reload, color_t **main_images, int *main_image_widths);
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths);
 
@@ -69,5 +73,10 @@ const image *assets_get_image(int image_id);
 const image *assets_get_font_image(int letter_id);
 
 void assets_load_unpacked_asset(int image_id);
+const char *assets_get_failure_reason(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ASSETS_H

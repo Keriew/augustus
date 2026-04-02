@@ -5,6 +5,10 @@
 #include "graphics/color.h"
 #include "graphics/renderer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     INVERT_NONE = 0,
     INVERT_HORIZONTAL = 1,
@@ -63,5 +67,9 @@ const color_t *layer_get_color_for_image_position(const layer *l, int x, int y);
 int layer_add_from_image_path(layer *l, const char *path, int src_x, int src_y,
     int offset_x, int offset_y, int width, int height);
 int layer_add_from_image_id(layer *l, const char *group_id, const char *image_id, int offset_x, int offset_y);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ASSETS_LAYER_H

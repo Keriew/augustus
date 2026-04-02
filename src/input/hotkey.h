@@ -4,6 +4,10 @@
 #include "core/hotkey_config.h"
 #include "input/keys.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     // fixed keys with multiple functions
     int enter_pressed;
@@ -62,5 +66,9 @@ void hotkey_set_value_for_action(hotkey_action action, int value);
 void hotkey_handle_escape(void);
 
 void hotkey_handle_global_keys(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // INPUT_HOTKEY_H

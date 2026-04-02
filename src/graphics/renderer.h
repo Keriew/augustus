@@ -3,6 +3,10 @@
 
 #include "core/image.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     ATLAS_FIRST,
     ATLAS_MAIN = ATLAS_FIRST,
@@ -32,6 +36,35 @@ typedef enum {
     IMAGE_FILTER_LINEAR = 1
 } image_filter;
 
+typedef enum {
+    RENDER_DOMAIN_UI = 0,
+    RENDER_DOMAIN_PIXEL = 1,
+    RENDER_DOMAIN_TOOLTIP_UI = 2,
+    RENDER_DOMAIN_TOOLTIP_PIXEL = 3,
+    RENDER_DOMAIN_SNAPSHOT_UI = 4,
+    RENDER_DOMAIN_SNAPSHOT_PIXEL = 5
+} render_domain;
+
+typedef enum {
+    RENDER_SCALING_POLICY_AUTO = 0,
+    RENDER_SCALING_POLICY_PIXEL_ART = 1,
+    RENDER_SCALING_POLICY_HIGH_QUALITY = 2
+} render_scaling_policy;
+
+typedef struct {
+    const image *img;
+    float x;
+    float y;
+    float logical_width;
+    float logical_height;
+    color_t color;
+    render_domain domain;
+    render_scaling_policy scaling_policy;
+    double angle;
+    int disable_coord_scaling;
+    int use_silhouette;
+} render_2d_request;
+
 typedef struct {
     atlas_type type;
     int num_images;
@@ -53,8 +86,11 @@ typedef struct {
     void (*draw_rect)(int x_start, int x_end, int y_start, int y_end, color_t color);
     void (*fill_rect)(int x_start, int x_end, int y_start, int y_end, color_t color);
     void (*set_output_scale)(float scale);
+    void (*set_render_domain)(render_domain domain);
+    render_domain (*get_render_domain)(void);
 
     void (*draw_image)(const image *img, int x, int y, color_t color, float scale);
+    void (*draw_image_request)(const render_2d_request *request);
     void (*draw_image_advanced)(const image *img, float x, float y, color_t color,
         float scale_x, float scale_y, double angle, int disable_coord_scaling);
     void (*draw_silhouette)(const image *img, int x, int y, color_t color, float scale);
@@ -72,13 +108,17 @@ typedef struct {
     int (*supports_yuv_image_format)(void);
 
     int (*start_tooltip_creation)(int width, int height);
+    int (*start_tooltip_creation_for_domain)(render_domain domain, int width, int height);
     void (*finish_tooltip_creation)(void);
     int (*has_tooltip)(void);
     void (*set_tooltip_position)(int x, int y);
+    void (*set_tooltip_position_for_domain)(render_domain domain, int x, int y);
     void (*set_tooltip_opacity)(int opacity);
 
     int (*save_image_from_screen)(int image_id, int x, int y, int width, int height);
+    int (*save_image_from_screen_for_domain)(render_domain domain, int image_id, int x, int y, int width, int height);
     void (*draw_image_to_screen)(int image_id, int x, int y);
+    void (*draw_image_to_screen_for_domain)(render_domain domain, int image_id, int x, int y);
     int (*save_screen_buffer)(color_t *pixels, int x, int y, int width, int height, int row_width);
 
     void (*get_max_image_size)(int *width, int *height);
@@ -100,5 +140,9 @@ typedef struct {
 const graphics_renderer_interface *graphics_renderer(void);
 
 void graphics_renderer_set_interface(const graphics_renderer_interface *new_renderer);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_RENDERER_H

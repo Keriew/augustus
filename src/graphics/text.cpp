@@ -1,5 +1,6 @@
 #include "text.h"
 
+extern "C" {
 #include "core/config.h"
 #include "core/lang.h"
 #include "core/locale.h"
@@ -7,6 +8,7 @@
 #include "core/time.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+}
 
 #include <string.h>
 
@@ -99,7 +101,7 @@ int text_get_width(const uint8_t *str, font_t font)
         } else {
             int letter_id = font_letter_id(def, str, &num_bytes);
             if (letter_id >= 0) {
-                width += def->letter_spacing + image_letter(letter_id)->original.width;
+                width += def->letter_spacing + font_image_width_for_letter(def, letter_id);
             }
         }
         str += num_bytes;
@@ -115,7 +117,7 @@ int text_get_number_width(int value, char prefix, const char *postfix, font_t fo
     int width = 0;
 
     if (prefix) {
-        uint8_t prefix_str[2] = { prefix, 0 };
+        uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
         width += text_get_width(prefix_str, font);
     }
 
@@ -133,8 +135,7 @@ int text_get_number_width(int value, char prefix, const char *postfix, font_t fo
             if (*str == ' ' || *str == '_' || letter_id < 0) {
                 width += def->space_width;
             } else {
-                const image *img = image_letter(letter_id);
-                width += def->letter_spacing + img->original.width;
+                width += def->letter_spacing + font_image_width_for_letter(def, letter_id);
             }
             if (length == 4 || length == 7) {
                 width += separator_pixels;
@@ -161,7 +162,7 @@ static int get_letter_width(const uint8_t *str, const font_definition *def, int 
     }
     int letter_id = font_letter_id(def, str, num_bytes);
     if (letter_id >= 0) {
-        return def->letter_spacing + image_letter(letter_id)->original.width;
+        return def->letter_spacing + font_image_width_for_letter(def, letter_id);
     } else {
         return 0;
     }
@@ -224,7 +225,7 @@ void text_ellipsize(uint8_t *str, font_t font, int requested_width)
         } else {
             int letter_id = font_letter_id(def, str, &num_bytes);
             if (letter_id >= 0) {
-                width += def->letter_spacing + image_letter(letter_id)->original.width;
+                width += def->letter_spacing + font_image_width_for_letter(def, letter_id);
             }
         }
         if (ellipsis_width + width <= requested_width) {
@@ -266,7 +267,7 @@ static int get_word_width(const uint8_t *str, font_t font, int *out_num_chars, i
             // normal char
             int letter_id = font_letter_id(def, str, &num_bytes);
             if (letter_id >= 0) {
-                int letter_width = image_letter(letter_id)->original.width + def->letter_spacing;
+                int letter_width = font_image_width_for_letter(def, letter_id) + def->letter_spacing;
                 if (max_width && width + letter_width >= max_width) {
                     break;
                 }
@@ -349,10 +350,9 @@ int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t colo
             if (*str == ' ' || *str == '_' || letter_id < 0) {
                 width = def->space_width;
             } else {
-                const image *img = image_letter(letter_id);
-                int height = def->image_y_offset(*str, img->height + img->y_offset, def->line_height);
+                int height = def->image_y_offset(*str, font_image_height_for_letter(def, letter_id), def->line_height);
                 image_draw_letter(def->font, letter_id, current_x, y - height, color, scale);
-                width = def->letter_spacing + img->original.width;
+                width = def->letter_spacing + font_image_width_for_letter(def, letter_id);
             }
             if (input_cursor.capture && input_cursor.position == input_cursor.cursor_position) {
                 if (!input_cursor.seen) {
@@ -404,7 +404,7 @@ int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
     int current_x = x;
 
     if (prefix) {
-        uint8_t prefix_str[2] = { prefix, 0 };
+        uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
         current_x += text_draw_scaled(prefix_str, current_x, y, font, color, scale) - def->space_width;
     }
 
@@ -423,10 +423,9 @@ int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
             if (*str == ' ' || *str == '_' || letter_id < 0) {
                 width = def->space_width;
             } else {
-                const image *img = image_letter(letter_id);
-                int height = def->image_y_offset(*str, img->height + img->y_offset, def->line_height);
+                int height = def->image_y_offset(*str, font_image_height_for_letter(def, letter_id), def->line_height);
                 image_draw_letter(def->font, letter_id, current_x, y - height, color, scale);
-                width = def->letter_spacing + img->original.width;
+                width = def->letter_spacing + font_image_width_for_letter(def, letter_id);
             }
 
             current_x += width + ((length == 4 || length == 7) ? separator_pixels : 0);
@@ -473,9 +472,9 @@ void text_draw_number_finances(int value, int x, int y, font_t font, color_t col
                 if (*str != '-') {
                     current_x -= !(inverted_length % 3) ? separator_pixels : 0;
                 }
-                const image *img = image_letter(letter_id);
-                int height = def->image_y_offset(*str, img->height + img->y_offset, def->line_height);
-                image_draw_letter(def->font, letter_id, current_x + (number_width - img->width) / 2, y - height, color, SCALE_NONE);
+                int logical_width = font_image_width_for_letter(def, letter_id);
+                int height = def->image_y_offset(*str, font_image_height_for_letter(def, letter_id), def->line_height);
+                image_draw_letter(def->font, letter_id, current_x + (number_width - logical_width) / 2, y - height, color, SCALE_NONE);
             }
             current_x -= number_width;
         }
