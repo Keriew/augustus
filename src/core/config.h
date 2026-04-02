@@ -3,6 +3,10 @@
 
 #define CONFIG_STRING_VALUE_MAX 65
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     CONFIG_GENERAL_ENABLE_AUDIO,
     CONFIG_GENERAL_MASTER_VOLUME,
@@ -115,8 +119,15 @@ typedef enum {
     CONFIG_UI_WT_SANDSTORM_SIZE,
     CONFIG_UI_WT_SNOWFLAKE_SIZE,
     CONFIG_UI_WT_WEATHER_DURATION,
+    CONFIG_UI_SCALE_FILTER,
     CONFIG_MAX_ENTRIES
 } config_key;
+
+typedef enum {
+    CONFIG_UI_SCALE_FILTER_AUTO = 0,
+    CONFIG_UI_SCALE_FILTER_NEAREST = 1,
+    CONFIG_UI_SCALE_FILTER_LINEAR = 2
+} config_ui_scale_filter;
 
 typedef enum {
     CONFIG_STRING_UI_LANGUAGE_DIR,
@@ -181,5 +192,9 @@ int config_must_configure_user_directory(void);
  * Save config to file
  */
 void config_save(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_CONFIG_H

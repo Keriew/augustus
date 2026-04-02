@@ -3,6 +3,10 @@
 
 #include "graphics/color.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void graphics_in_dialog(void);
 void graphics_in_dialog_with_size(int width, int height);
 void graphics_reset_dialog(void);
@@ -23,5 +27,9 @@ void graphics_tint_rect(int x, int y, int width, int height, color_t rgb, int al
 
 int graphics_save_to_image(int image_id, int x, int y, int width, int height);
 void graphics_draw_from_image(int image_id, int x, int y);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_GRAPHICS_H

@@ -3,6 +3,10 @@
 
 #include "graphics/color.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void screen_set_dialog_offset(int width, int height);
 
 void screen_set_resolution(int pixel_width, int pixel_height, int scale_percentage);
@@ -30,5 +34,9 @@ void screen_set_pixel_render_scale(void);
 int screen_dialog_offset_x(void);
 
 int screen_dialog_offset_y(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_SCREEN_H

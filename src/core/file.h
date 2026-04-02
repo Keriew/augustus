@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file
  * File-related functions.
@@ -92,5 +96,9 @@ int file_exists(const char *filename, int localizable);
  * @return boolean true if the file removal was successful, false otherwise
  */
 int file_remove(const char *filename);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_FILE_H

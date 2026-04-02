@@ -5,6 +5,10 @@
 #include "graphics/color.h"
 #include "graphics/font.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SCALE_NONE 1.0f
 
 void image_draw(int image_id, int x, int y, color_t color, float scale);
@@ -28,5 +32,9 @@ void image_blend_footprint_color(int x, int y, color_t color, float scale);
 void image_draw_isometric_top(int image_id, int x, int y, color_t color_mask, float scale);
 void image_draw_isometric_top_from_draw_tile(int image_id, int x, int y, color_t color_mask, float scale);
 void image_draw_set_isometric_top_from_draw_tile(int image_id, int x, int y, color_t color_mask, float scale);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_IMAGE_H

@@ -1,6 +1,8 @@
 #include "game/mod_manager.h"
 
 extern "C" {
+#include "assets/assets.h"
+#include "core/dir.h"
 #include "platform/file_manager.h"
 }
 
@@ -10,15 +12,23 @@ namespace {
 
 std::string g_mod_name = "Vespasian";
 std::string g_mod_path = "Mods/Vespasian/";
+std::string g_graphics_path = "Mods/Vespasian/Graphics/";
 
 static int stop_on_first_entry(const char *name, long unused)
 {
     return LIST_MATCH;
 }
 
+static int validate_directory_path(const char *path)
+{
+    return static_cast<int>(static_cast<bool>(
+        platform_file_manager_list_directory_contents(path, TYPE_DIR | TYPE_FILE, 0, stop_on_first_entry) != LIST_ERROR));
+}
+
 static void rebuild_mod_path()
 {
     g_mod_path = "Mods/" + g_mod_name + "/";
+    g_graphics_path = g_mod_path + "Graphics/";
 }
 
 }
@@ -43,8 +53,18 @@ extern "C" const char *mod_manager_get_mod_path(void)
     return g_mod_path.c_str();
 }
 
+extern "C" const char *mod_manager_get_graphics_path(void)
+{
+    return g_graphics_path.c_str();
+}
+
 extern "C" int mod_manager_validate_mod_path(void)
 {
-    return static_cast<int>(static_cast<bool>(
-        platform_file_manager_list_directory_contents(g_mod_path.c_str(), TYPE_DIR | TYPE_FILE, 0, stop_on_first_entry) != LIST_ERROR));
+    return validate_directory_path(g_mod_path.c_str());
+}
+
+extern "C" int mod_manager_validate_graphics_path(void)
+{
+    return validate_directory_path(g_graphics_path.c_str())
+        || validate_directory_path(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH);
 }

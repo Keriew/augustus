@@ -1,9 +1,11 @@
 #include "font.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "core/encoding_japanese.h"
 #include "core/encoding_trad_chinese.h"
 #include "core/image.h"
+}
 
 static int image_y_offset_none(uint8_t c, int image_height, int line_height);
 static int image_y_offset_default(uint8_t c, int image_height, int line_height);
@@ -136,107 +138,107 @@ static const int CHAR_TO_FONT_IMAGE_GREEK[] = {
 };
 
 static const font_definition DEFINITIONS_DEFAULT[] = {
-    {FONT_NORMAL_PLAIN,   0,  0, 6, 1, 11, image_y_offset_default},
-    {FONT_NORMAL_BLACK, 134,  0, 6, 0, 11, image_y_offset_default},
-    {FONT_NORMAL_WHITE, 268,  0, 6, 0, 11, image_y_offset_default},
-    {FONT_NORMAL_RED,   402,  0, 6, 0, 11, image_y_offset_default},
-    {FONT_LARGE_PLAIN,  536,  0, 8, 1, 23, image_y_offset_default},
-    {FONT_LARGE_BLACK,  670,  0, 8, 0, 23, image_y_offset_default},
-    {FONT_LARGE_BROWN,  804,  0, 8, 0, 24, image_y_offset_default},
-    {FONT_SMALL_PLAIN,  938,  0, 4, 1, 9,  image_y_offset_default},
-    {FONT_NORMAL_GREEN, 1072, 0, 6, 0, 11, image_y_offset_default},
-    {FONT_NORMAL_BROWN, 1206, 0, 6, 0, 11, image_y_offset_default}
+    {FONT_NORMAL_PLAIN,   0,  0, 100, 6, 1, 11, image_y_offset_default},
+    {FONT_NORMAL_BLACK, 134,  0, 100, 6, 0, 11, image_y_offset_default},
+    {FONT_NORMAL_WHITE, 268,  0, 100, 6, 0, 11, image_y_offset_default},
+    {FONT_NORMAL_RED,   402,  0, 100, 6, 0, 11, image_y_offset_default},
+    {FONT_LARGE_PLAIN,  536,  0, 100, 8, 1, 23, image_y_offset_default},
+    {FONT_LARGE_BLACK,  670,  0, 100, 8, 0, 23, image_y_offset_default},
+    {FONT_LARGE_BROWN,  804,  0, 100, 8, 0, 24, image_y_offset_default},
+    {FONT_SMALL_PLAIN,  938,  0, 100, 4, 1, 9,  image_y_offset_default},
+    {FONT_NORMAL_GREEN, 1072, 0, 100, 6, 0, 11, image_y_offset_default},
+    {FONT_NORMAL_BROWN, 1206, 0, 100, 6, 0, 11, image_y_offset_default}
 };
 
 static const font_definition DEFINITIONS_EASTERN[] = {
-    {FONT_NORMAL_PLAIN,   0,  0, 6, 1, 11, image_y_offset_eastern},
-    {FONT_NORMAL_BLACK, 134,  0, 6, 0, 11, image_y_offset_eastern},
-    {FONT_NORMAL_WHITE, 268,  0, 6, 0, 11, image_y_offset_eastern},
-    {FONT_NORMAL_RED,   402,  0, 6, 0, 11, image_y_offset_eastern},
-    {FONT_LARGE_PLAIN,  536,  0, 8, 1, 23, image_y_offset_eastern},
-    {FONT_LARGE_BLACK,  670,  0, 8, 0, 23, image_y_offset_eastern},
-    {FONT_LARGE_BROWN,  804,  0, 8, 0, 24, image_y_offset_eastern},
-    {FONT_SMALL_PLAIN,  938,  0, 4, 1, 9,  image_y_offset_eastern},
-    {FONT_NORMAL_GREEN, 1072, 0, 6, 0, 11, image_y_offset_eastern},
-    {FONT_NORMAL_BROWN, 1206, 0, 6, 0, 11, image_y_offset_eastern}
+    {FONT_NORMAL_PLAIN,   0,  0, 100, 6, 1, 11, image_y_offset_eastern},
+    {FONT_NORMAL_BLACK, 134,  0, 100, 6, 0, 11, image_y_offset_eastern},
+    {FONT_NORMAL_WHITE, 268,  0, 100, 6, 0, 11, image_y_offset_eastern},
+    {FONT_NORMAL_RED,   402,  0, 100, 6, 0, 11, image_y_offset_eastern},
+    {FONT_LARGE_PLAIN,  536,  0, 100, 8, 1, 23, image_y_offset_eastern},
+    {FONT_LARGE_BLACK,  670,  0, 100, 8, 0, 23, image_y_offset_eastern},
+    {FONT_LARGE_BROWN,  804,  0, 100, 8, 0, 24, image_y_offset_eastern},
+    {FONT_SMALL_PLAIN,  938,  0, 100, 4, 1, 9,  image_y_offset_eastern},
+    {FONT_NORMAL_GREEN, 1072, 0, 100, 6, 0, 11, image_y_offset_eastern},
+    {FONT_NORMAL_BROWN, 1206, 0, 100, 6, 0, 11, image_y_offset_eastern}
 };
 
 static const font_definition DEFINITIONS_CYRILLIC[] = {
-    {FONT_NORMAL_PLAIN,   0, 0, 6, 1, 11, image_y_offset_cyrillic_normal_small_plain},
-    {FONT_NORMAL_BLACK, 158, 0, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
-    {FONT_NORMAL_WHITE, 316, 0, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
-    {FONT_NORMAL_RED,   474, 0, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
-    {FONT_LARGE_PLAIN,  632, 0, 8, 1, 23, image_y_offset_cyrillic_large_plain},
-    {FONT_LARGE_BLACK,  790, 0, 8, 0, 23, image_y_offset_cyrillic_large_black},
-    {FONT_LARGE_BROWN,  948, 0, 8, 0, 24, image_y_offset_cyrillic_large_brown},
-    {FONT_SMALL_PLAIN, 1106, 0, 4, 1, 9, image_y_offset_cyrillic_normal_small_plain},
-    {FONT_NORMAL_GREEN, 1264, 0, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
-    {FONT_NORMAL_BROWN, 1422, 0, 6, 0, 11, image_y_offset_cyrillic_normal_brown}
+    {FONT_NORMAL_PLAIN,   0, 0, 100, 6, 1, 11, image_y_offset_cyrillic_normal_small_plain},
+    {FONT_NORMAL_BLACK, 158, 0, 100, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
+    {FONT_NORMAL_WHITE, 316, 0, 100, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
+    {FONT_NORMAL_RED,   474, 0, 100, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
+    {FONT_LARGE_PLAIN,  632, 0, 100, 8, 1, 23, image_y_offset_cyrillic_large_plain},
+    {FONT_LARGE_BLACK,  790, 0, 100, 8, 0, 23, image_y_offset_cyrillic_large_black},
+    {FONT_LARGE_BROWN,  948, 0, 100, 8, 0, 24, image_y_offset_cyrillic_large_brown},
+    {FONT_SMALL_PLAIN, 1106, 0, 100, 4, 1, 9, image_y_offset_cyrillic_normal_small_plain},
+    {FONT_NORMAL_GREEN, 1264, 0, 100, 6, 0, 11, image_y_offset_cyrillic_normal_colored},
+    {FONT_NORMAL_BROWN, 1422, 0, 100, 6, 0, 11, image_y_offset_cyrillic_normal_brown}
 };
 
 static const font_definition DEFINITIONS_GREEK[] = {
-    {FONT_NORMAL_PLAIN,   0,  0, 6, 1, 11, image_y_offset_greek},
-    {FONT_NORMAL_BLACK, 149,  0, 6, 0, 11, image_y_offset_greek},
-    {FONT_NORMAL_WHITE, 298,  0, 6, 0, 11, image_y_offset_greek},
-    {FONT_NORMAL_RED,   447,  0, 6, 0, 11, image_y_offset_greek},
-    {FONT_LARGE_PLAIN,  596,  0, 8, 1, 23, image_y_offset_greek},
-    {FONT_LARGE_BLACK,  745,  0, 8, 0, 23, image_y_offset_greek},
-    {FONT_LARGE_BROWN,  894,  0, 8, 0, 24, image_y_offset_greek},
-    {FONT_SMALL_PLAIN,  1043, 0, 4, 1, 9,  image_y_offset_greek},
-    {FONT_NORMAL_GREEN, 1192, 0, 6, 0, 11, image_y_offset_greek},
-    {FONT_NORMAL_BROWN, 1341, 0, 6, 0, 11, image_y_offset_greek}
+    {FONT_NORMAL_PLAIN,   0,  0, 100, 6, 1, 11, image_y_offset_greek},
+    {FONT_NORMAL_BLACK, 149,  0, 100, 6, 0, 11, image_y_offset_greek},
+    {FONT_NORMAL_WHITE, 298,  0, 100, 6, 0, 11, image_y_offset_greek},
+    {FONT_NORMAL_RED,   447,  0, 100, 6, 0, 11, image_y_offset_greek},
+    {FONT_LARGE_PLAIN,  596,  0, 100, 8, 1, 23, image_y_offset_greek},
+    {FONT_LARGE_BLACK,  745,  0, 100, 8, 0, 23, image_y_offset_greek},
+    {FONT_LARGE_BROWN,  894,  0, 100, 8, 0, 24, image_y_offset_greek},
+    {FONT_SMALL_PLAIN,  1043, 0, 100, 4, 1, 9,  image_y_offset_greek},
+    {FONT_NORMAL_GREEN, 1192, 0, 100, 6, 0, 11, image_y_offset_greek},
+    {FONT_NORMAL_BROWN, 1341, 0, 100, 6, 0, 11, image_y_offset_greek}
 };
 
 static const font_definition DEFINITIONS_TRADITIONAL_CHINESE[] = {
-    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 6, 1, 15, image_y_offset_chinese},
-    {FONT_NORMAL_BLACK, 134, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_NORMAL_WHITE, 268, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_NORMAL_RED, 402, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS * 2, 8, 1, 23, image_y_offset_chinese},
-    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS * 2, 8, 0, 23, image_y_offset_chinese},
-    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS * 2, 8, 0, 24, image_y_offset_chinese},
-    {FONT_SMALL_PLAIN, 938, 0, 4, 1, 9, image_y_offset_chinese},
-    {FONT_NORMAL_GREEN, 1072, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_NORMAL_BROWN, 1206, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese}
+    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 100, 6, 1, 15, image_y_offset_chinese},
+    {FONT_NORMAL_BLACK, 134, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_NORMAL_WHITE, 268, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_NORMAL_RED, 402, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS * 2, 100, 8, 1, 23, image_y_offset_chinese},
+    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS * 2, 100, 8, 0, 23, image_y_offset_chinese},
+    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS * 2, 100, 8, 0, 24, image_y_offset_chinese},
+    {FONT_SMALL_PLAIN, 938, 0, 100, 4, 1, 9, image_y_offset_chinese},
+    {FONT_NORMAL_GREEN, 1072, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_NORMAL_BROWN, 1206, IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese}
 };
 
 static const font_definition DEFINITIONS_SIMPLIFIED_CHINESE[] = {
-    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 6, 1, 15, image_y_offset_chinese},
-    {FONT_NORMAL_BLACK, 134, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_NORMAL_WHITE, 268, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_NORMAL_RED, 402, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS * 2, 8, 1, 23, image_y_offset_chinese},
-    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS * 2, 8, 0, 23, image_y_offset_chinese},
-    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS * 2, 8, 0, 24, image_y_offset_chinese},
-    {FONT_SMALL_PLAIN, 938, 0, 4, 1, 9, image_y_offset_none},
-    {FONT_NORMAL_GREEN, 1072, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese},
-    {FONT_NORMAL_BROWN, 1206, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 6, 0, 15, image_y_offset_chinese}
+    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 100, 6, 1, 15, image_y_offset_chinese},
+    {FONT_NORMAL_BLACK, 134, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_NORMAL_WHITE, 268, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_NORMAL_RED, 402, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS * 2, 100, 8, 1, 23, image_y_offset_chinese},
+    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS * 2, 100, 8, 0, 23, image_y_offset_chinese},
+    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS * 2, 100, 8, 0, 24, image_y_offset_chinese},
+    {FONT_SMALL_PLAIN, 938, 0, 100, 4, 1, 9, image_y_offset_none},
+    {FONT_NORMAL_GREEN, 1072, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese},
+    {FONT_NORMAL_BROWN, 1206, IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS, 100, 6, 0, 15, image_y_offset_chinese}
 };
 
 static const font_definition DEFINITIONS_KOREAN[] = {
-    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 1, 6, 1, 15, image_y_offset_korean},
-    {FONT_NORMAL_BLACK, 134, 0, 6, 0, 11, image_y_offset_korean},
-    {FONT_NORMAL_WHITE, 268, 0, 6, 0, 11, image_y_offset_korean},
-    {FONT_NORMAL_RED, 402, 0, 6, 0, 11, image_y_offset_korean},
-    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 2, 8, 1, 23, image_y_offset_korean},
-    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 2, 8, 0, 23, image_y_offset_korean},
-    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 2, 8, 0, 24, image_y_offset_korean},
-    {FONT_SMALL_PLAIN, 938, 0, 4, 1, 9, image_y_offset_korean},
-    {FONT_NORMAL_GREEN, 1072, 0, 6, 0, 11, image_y_offset_korean},
-    {FONT_NORMAL_BROWN, 1206, 0, 6, 0, 11, image_y_offset_korean}
+    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 1, 100, 6, 1, 15, image_y_offset_korean},
+    {FONT_NORMAL_BLACK, 134, 0, 100, 6, 0, 11, image_y_offset_korean},
+    {FONT_NORMAL_WHITE, 268, 0, 100, 6, 0, 11, image_y_offset_korean},
+    {FONT_NORMAL_RED, 402, 0, 100, 6, 0, 11, image_y_offset_korean},
+    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 2, 100, 8, 1, 23, image_y_offset_korean},
+    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 2, 100, 8, 0, 23, image_y_offset_korean},
+    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS * 2, 100, 8, 0, 24, image_y_offset_korean},
+    {FONT_SMALL_PLAIN, 938, 0, 100, 4, 1, 9, image_y_offset_korean},
+    {FONT_NORMAL_GREEN, 1072, 0, 100, 6, 0, 11, image_y_offset_korean},
+    {FONT_NORMAL_BROWN, 1206, 0, 100, 6, 0, 11, image_y_offset_korean}
 };
 
 static const font_definition DEFINITIONS_JAPANESE[] = {
-    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 1, 6, 0, 15, image_y_offset_japanese},
-    {FONT_NORMAL_BLACK, 134, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 6, 0, 11, image_y_offset_japanese},
-    {FONT_NORMAL_WHITE, 268, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 6, 0, 11, image_y_offset_japanese},
-    {FONT_NORMAL_RED, 402, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 6, 0, 11, image_y_offset_japanese},
-    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 2, 8, 1, 23, image_y_offset_japanese},
-    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 2, 8, 0, 23, image_y_offset_japanese},
-    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 2, 8, 0, 24, image_y_offset_japanese},
-    {FONT_SMALL_PLAIN, 938, 0, 4, 1, 9, image_y_offset_japanese},
-    {FONT_NORMAL_GREEN, 1072, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 6, 0, 11, image_y_offset_japanese},
-    {FONT_NORMAL_BROWN, 1206, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 6, 0, 11, image_y_offset_japanese}
+    {FONT_NORMAL_PLAIN, 0, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 1, 100, 6, 0, 15, image_y_offset_japanese},
+    {FONT_NORMAL_BLACK, 134, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 100, 6, 0, 11, image_y_offset_japanese},
+    {FONT_NORMAL_WHITE, 268, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 100, 6, 0, 11, image_y_offset_japanese},
+    {FONT_NORMAL_RED, 402, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 100, 6, 0, 11, image_y_offset_japanese},
+    {FONT_LARGE_PLAIN, 536, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 2, 100, 8, 1, 23, image_y_offset_japanese},
+    {FONT_LARGE_BLACK, 670, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 2, 100, 8, 0, 23, image_y_offset_japanese},
+    {FONT_LARGE_BROWN, 804, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS * 2, 100, 8, 0, 24, image_y_offset_japanese},
+    {FONT_SMALL_PLAIN, 938, 0, 100, 4, 1, 9, image_y_offset_japanese},
+    {FONT_NORMAL_GREEN, 1072, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 100, 6, 0, 11, image_y_offset_japanese},
+    {FONT_NORMAL_BROWN, 1206, IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS, 100, 6, 0, 11, image_y_offset_japanese}
 };
 
 enum {
@@ -622,4 +624,18 @@ int font_letter_id(const font_definition *def, const uint8_t *str, int *num_byte
         }
         return data.font_mapping[*str] + def->image_offset - 1;
     }
+}
+
+int font_image_width_for_letter(const font_definition *def, int letter_id)
+{
+    const image *img = image_letter(letter_id);
+    int scale = def->metric_scale_percentage > 0 ? def->metric_scale_percentage : 100;
+    return (img->original.width * 100) / scale;
+}
+
+int font_image_height_for_letter(const font_definition *def, int letter_id)
+{
+    const image *img = image_letter(letter_id);
+    int scale = def->metric_scale_percentage > 0 ? def->metric_scale_percentage : 100;
+    return ((img->height + img->y_offset) * 100) / scale;
 }

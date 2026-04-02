@@ -4,6 +4,7 @@
 int game_pre_init(void);
 
 int game_init(void);
+const char *game_get_init_failure_message(void);
 
 int game_init_editor(void);
 

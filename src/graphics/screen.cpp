@@ -1,10 +1,12 @@
 #include "screen.h"
 
+extern "C" {
 #include "city/view.h"
-#include "core/calc.h"
 #include "city/warning.h"
+#include "core/calc.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
+}
 
 static struct {
     int width;
@@ -84,12 +86,12 @@ int screen_scale_percentage(void)
 
 void screen_set_ui_render_scale(void)
 {
-    graphics_renderer()->set_output_scale(screen_scale_percentage() / 100.0f);
+    graphics_renderer()->set_render_domain(RENDER_DOMAIN_UI);
 }
 
 void screen_set_pixel_render_scale(void)
 {
-    graphics_renderer()->set_output_scale(1.0f);
+    graphics_renderer()->set_render_domain(RENDER_DOMAIN_PIXEL);
 }
 
 int screen_dialog_offset_x(void)

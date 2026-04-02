@@ -1,9 +1,30 @@
 #include "image.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "core/image.h"
 #include "graphics/renderer.h"
 #include "graphics/screen.h"
+}
+
+static render_2d_request make_legacy_request(const image *img, int x, int y, color_t color, float scale, int silhouette)
+{
+    render_domain domain = graphics_renderer()->get_render_domain();
+    int is_pixel_domain = domain == RENDER_DOMAIN_PIXEL
+        || domain == RENDER_DOMAIN_TOOLTIP_PIXEL
+        || domain == RENDER_DOMAIN_SNAPSHOT_PIXEL;
+    render_2d_request request = {};
+    request.img = img;
+    request.x = (float) x;
+    request.y = (float) y;
+    request.logical_width = scale ? img->width / scale : (float) img->width;
+    request.logical_height = scale ? img->height / scale : (float) img->height;
+    request.color = color;
+    request.domain = domain;
+    request.scaling_policy = is_pixel_domain ? RENDER_SCALING_POLICY_PIXEL_ART : RENDER_SCALING_POLICY_AUTO;
+    request.use_silhouette = silhouette;
+    return request;
+}
 
 void image_draw(int image_id, int x, int y, color_t color, float scale)
 {
@@ -13,7 +34,8 @@ void image_draw(int image_id, int x, int y, color_t color, float scale)
     } else if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
-    graphics_renderer()->draw_image(img, x, y, color, scale);
+    render_2d_request request = make_legacy_request(img, x, y, color, scale, 0);
+    graphics_renderer()->draw_image_request(&request);
 }
 
 void image_draw_silhouette(int image_id, int x, int y, color_t color, float scale)
@@ -24,7 +46,8 @@ void image_draw_silhouette(int image_id, int x, int y, color_t color, float scal
     } else if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
-    graphics_renderer()->draw_silhouette(img, x, y, color, scale);
+    render_2d_request request = make_legacy_request(img, x, y, color, scale, 1);
+    graphics_renderer()->draw_image_request(&request);
 
 }
 
@@ -36,7 +59,7 @@ void image_draw_scaled_centered(int image_id, int x, int y, color_t color, int d
     float scaled_x = (((x) +img->width / 2.0f) - (img->width / obj_draw_scale) / 2.0f) * obj_draw_scale;
     float scaled_y = (((y) +img->height / 2.0f) - (img->height / obj_draw_scale) / 2.0f) * obj_draw_scale;
 
-    image_draw(image_id, scaled_x, scaled_y, color, obj_draw_scale);
+    image_draw(image_id, static_cast<int>(scaled_x), static_cast<int>(scaled_y), color, obj_draw_scale);
 }
 
 void image_draw_enemy(int image_id, int x, int y, float scale)
@@ -67,40 +90,69 @@ static color_t base_color_for_font(font_t font)
 
 static void draw_multibyte_letter(font_t font, const image *img, int x, int y, color_t color, float scale)
 {
+    const font_definition *def = font_definition_for(font);
+    int metric_scale = def->metric_scale_percentage > 0 ? def->metric_scale_percentage : 100;
+    float base_scale = 100.0f / metric_scale;
+
     switch (font) {
         case FONT_NORMAL_WHITE:
-            graphics_renderer()->draw_image(img, x + 1, y + 1, 0xff311c10, scale);
-            graphics_renderer()->draw_image(img, x, y, COLOR_WHITE, scale);
+        {
+            render_2d_request shadow = make_legacy_request(img, x + 1, y + 1, 0xff311c10, base_scale * scale, 0);
+            render_2d_request main = make_legacy_request(img, x, y, COLOR_WHITE, base_scale * scale, 0);
+            graphics_renderer()->draw_image_request(&shadow);
+            graphics_renderer()->draw_image_request(&main);
             break;
+        }
         case FONT_NORMAL_RED:
-            graphics_renderer()->draw_image(img, x + 1, y + 1, 0xffe7cfad, scale);
-            graphics_renderer()->draw_image(img, x, y, 0xff731408, scale);
+        {
+            render_2d_request shadow = make_legacy_request(img, x + 1, y + 1, 0xffe7cfad, base_scale * scale, 0);
+            render_2d_request main = make_legacy_request(img, x, y, 0xff731408, base_scale * scale, 0);
+            graphics_renderer()->draw_image_request(&shadow);
+            graphics_renderer()->draw_image_request(&main);
             break;
+        }
         case FONT_NORMAL_GREEN:
-            graphics_renderer()->draw_image(img, x + 1, y + 1, 0xffe7cfad, scale);
-            graphics_renderer()->draw_image(img, x, y, 0xff180800, scale);
+        {
+            render_2d_request shadow = make_legacy_request(img, x + 1, y + 1, 0xffe7cfad, base_scale * scale, 0);
+            render_2d_request main = make_legacy_request(img, x, y, 0xff180800, base_scale * scale, 0);
+            graphics_renderer()->draw_image_request(&shadow);
+            graphics_renderer()->draw_image_request(&main);
             break;
+        }
         case FONT_NORMAL_BLACK:
         case FONT_LARGE_BLACK:
-            graphics_renderer()->draw_image(img, x + 1, y + 1, 0xffcead9c, scale);
-            graphics_renderer()->draw_image(img, x, y, COLOR_BLACK, scale);
+        {
+            render_2d_request shadow = make_legacy_request(img, x + 1, y + 1, 0xffcead9c, base_scale * scale, 0);
+            render_2d_request main = make_legacy_request(img, x, y, COLOR_BLACK, base_scale * scale, 0);
+            graphics_renderer()->draw_image_request(&shadow);
+            graphics_renderer()->draw_image_request(&main);
             break;
+        }
         case FONT_NORMAL_BROWN:
         case FONT_LARGE_BROWN:
-            graphics_renderer()->draw_image(img, x, y, COLOR_FONT_PLAIN, scale);
+        {
+            render_2d_request request = make_legacy_request(img, x, y, COLOR_FONT_PLAIN, base_scale * scale, 0);
+            graphics_renderer()->draw_image_request(&request);
             break;
+        }
         default: // Plain + brown
             if (!color) {
                 color = base_color_for_font(font);
             }
-            graphics_renderer()->draw_image(img, x, y, ALPHA_OPAQUE | color, scale);
+        {
+            render_2d_request request = make_legacy_request(img, x, y, ALPHA_OPAQUE | color, base_scale * scale, 0);
+            graphics_renderer()->draw_image_request(&request);
             break;
+        }
     }
 }
 
 void image_draw_letter(font_t font, int letter_id, int x, int y, color_t color, float scale)
 {
     const image *img = image_letter(letter_id);
+    const font_definition *def = font_definition_for(font);
+    int metric_scale = def->metric_scale_percentage > 0 ? def->metric_scale_percentage : 100;
+    float effective_scale = (100.0f / metric_scale) * scale;
     if (letter_id >= IMAGE_FONT_MULTIBYTE_OFFSET) {
         draw_multibyte_letter(font, img, x, y, color, scale);
         return;
@@ -108,7 +160,8 @@ void image_draw_letter(font_t font, int letter_id, int x, int y, color_t color, 
     if (!color) {
         color = base_color_for_font(font);
     }
-    graphics_renderer()->draw_image(img, x, y, color, scale);
+    render_2d_request request = make_legacy_request(img, x, y, color, effective_scale, 0);
+    graphics_renderer()->draw_image_request(&request);
 }
 
 static inline void draw_fullscreen_background(int image_id, int x, int y, color_t alpha)

@@ -742,7 +742,10 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     free(tmp_data);
     make_plain_fonts_white(data.main, atlas_data, image_group(GROUP_FONT));
     if (!keep_atlas_buffers) {
-        assets_init(data.is_editor != is_editor, atlas_data->buffers, atlas_data->image_widths);
+        if (!assets_init(data.is_editor != is_editor, atlas_data->buffers, atlas_data->image_widths)) {
+            image_packer_free(&data.packer);
+            return 0;
+        }
     }
     graphics_renderer()->create_image_atlas(atlas_data, !keep_atlas_buffers);
     image_packer_free(&data.packer);

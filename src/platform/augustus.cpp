@@ -725,6 +725,10 @@ static void setup(const augustus_args *args)
     int result = args->launch_asset_previewer ? window_asset_previewer_show() : game_init();
 
     if (!result) {
+        const char *failure_message = game_get_init_failure_message();
+        if (failure_message && *failure_message) {
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Startup error", failure_message, NULL);
+        }
         SDL_Log("Exiting: game init failed");
         exit_with_status(2);
     }

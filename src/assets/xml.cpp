@@ -1,5 +1,6 @@
 #include "xml.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "assets/group.h"
 #include "assets/image.h"
@@ -10,7 +11,9 @@
 #include "core/png_read.h"
 #include "core/string.h"
 #include "core/xml_parser.h"
+#include "game/mod_manager.h"
 #include "graphics/renderer.h"
+}
 
 #include <string.h>
 
@@ -28,6 +31,7 @@ static void xml_end_animation_element(void);
 
 static struct {
     char base_path[FILE_NAME_MAX];
+    xml_asset_source current_source;
     int finished;
     int in_animation;
     image_groups *current_group;
@@ -46,9 +50,47 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
 static const char *INVERT_VALUES[3] = { "horizontal", "vertical", "both" };
 static const char *ROTATE_VALUES[3] = { "90", "180", "270" };
 
+static int append_root_graphics_path(char *full_path, const char *relative_path)
+{
+    return snprintf(full_path, FILE_NAME_MAX, ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH "/%s", relative_path) < FILE_NAME_MAX;
+}
+
+static int append_mod_graphics_path(char *full_path, const char *relative_path)
+{
+    return snprintf(full_path, FILE_NAME_MAX, "%s%s", mod_manager_get_graphics_path(), relative_path) < FILE_NAME_MAX;
+}
+
+static int resolve_graphics_path(char *full_path, const char *relative_path, xml_asset_source source)
+{
+    if (!relative_path || !*relative_path) {
+        return 0;
+    }
+
+    if (source == XML_ASSET_SOURCE_MOD || source == XML_ASSET_SOURCE_AUTO) {
+        char mod_path[FILE_NAME_MAX];
+        if (append_mod_graphics_path(mod_path, relative_path) && file_exists(mod_path, NOT_LOCALIZED)) {
+            snprintf(full_path, FILE_NAME_MAX, "%s", mod_path);
+            return 1;
+        }
+    }
+
+    if (source == XML_ASSET_SOURCE_ROOT || source == XML_ASSET_SOURCE_AUTO || source == XML_ASSET_SOURCE_MOD) {
+        char root_path[FILE_NAME_MAX];
+        if (append_root_graphics_path(root_path, relative_path) && file_exists(root_path, NOT_LOCALIZED)) {
+            snprintf(full_path, FILE_NAME_MAX, "%s", root_path);
+            return 1;
+        }
+    }
+
+    if (source == XML_ASSET_SOURCE_MOD) {
+        return append_mod_graphics_path(full_path, relative_path);
+    }
+    return append_root_graphics_path(full_path, relative_path);
+}
+
 static void set_asset_image_base_path(const char *name)
 {
-    snprintf(data.base_path, FILE_NAME_MAX, "%s/%s", ASSETS_IMAGE_PATH, name);
+    snprintf(data.base_path, FILE_NAME_MAX, "%s", name);
 }
 
 static int xml_start_assetlist_element(void)
@@ -96,7 +138,9 @@ static int xml_start_image_element(void)
 
     img->last_layer = &img->first_layer;
     if (path || group) {
-        asset_image_add_layer(img, path, group, image_id, 0, 0, 0, 0, 0, 0, INVERT_NONE, ROTATE_NONE, PART_BOTH, 0);
+        asset_image_add_layer(img, path, group, image_id,
+            0, 0, 0, 0, 0, 0,
+            INVERT_NONE, ROTATE_NONE, PART_BOTH, LAYER_MASK_NONE);
     }
     return 1;
 }
@@ -116,13 +160,18 @@ static int xml_start_layer_element(void)
     int offset_y = xml_parser_get_attribute_int("y");
     int width = xml_parser_get_attribute_int("width");
     int height = xml_parser_get_attribute_int("height");
-    layer_invert_type invert = xml_parser_get_attribute_enum("invert", INVERT_VALUES, 3, INVERT_HORIZONTAL);
-    layer_rotate_type rotate = xml_parser_get_attribute_enum("rotate", ROTATE_VALUES, 3, ROTATE_90_DEGREES);
-    layer_isometric_part part = xml_parser_get_attribute_enum("part", part_values, 2, PART_FOOTPRINT);
-    layer_mask mask = xml_parser_get_attribute_enum("mask", mask_values, 2, LAYER_MASK_GRAYSCALE);
+    layer_invert_type invert = static_cast<layer_invert_type>(
+        xml_parser_get_attribute_enum("invert", INVERT_VALUES, 3, INVERT_HORIZONTAL));
+    layer_rotate_type rotate = static_cast<layer_rotate_type>(
+        xml_parser_get_attribute_enum("rotate", ROTATE_VALUES, 3, ROTATE_90_DEGREES));
+    layer_isometric_part part = static_cast<layer_isometric_part>(
+        xml_parser_get_attribute_enum("part", part_values, 2, PART_FOOTPRINT));
+    layer_mask mask = static_cast<layer_mask>(
+        xml_parser_get_attribute_enum("mask", mask_values, 2, LAYER_MASK_GRAYSCALE));
 
     if (!asset_image_add_layer(img, path, group, image_id, src_x, src_y,
-        offset_x, offset_y, width, height, invert, rotate, part == PART_NONE ? PART_BOTH : part, mask)) {
+        offset_x, offset_y, width, height, invert, rotate,
+        part == PART_NONE ? PART_BOTH : part, mask)) {
         log_info("Invalid layer for image", img->id, 0);
     }
     return 1;
@@ -134,7 +183,7 @@ static int xml_start_animation_element(void)
     if (img->img.animation) {
         return 1;
     }
-    img->img.animation = malloc(sizeof(image_animation));
+    img->img.animation = static_cast<image_animation *>(malloc(sizeof(image_animation)));
     if (!img->img.animation) {
         return 0;
     }
@@ -171,12 +220,14 @@ static int xml_start_frame_element(void)
     int offset_y = xml_parser_get_attribute_int("y");
     int width = xml_parser_get_attribute_int("width");
     int height = xml_parser_get_attribute_int("height");
-    layer_invert_type invert = xml_parser_get_attribute_enum("invert", INVERT_VALUES, 3, INVERT_HORIZONTAL);
-    layer_rotate_type rotate = xml_parser_get_attribute_enum("rotate", ROTATE_VALUES, 3, ROTATE_90_DEGREES);
+    layer_invert_type invert = static_cast<layer_invert_type>(
+        xml_parser_get_attribute_enum("invert", INVERT_VALUES, 3, INVERT_HORIZONTAL));
+    layer_rotate_type rotate = static_cast<layer_rotate_type>(
+        xml_parser_get_attribute_enum("rotate", ROTATE_VALUES, 3, ROTATE_90_DEGREES));
 
     img->last_layer = &img->first_layer;
     if (!asset_image_add_layer(img, path, group, image_id, src_x, src_y,
-        offset_x, offset_y, width, height, invert, rotate, PART_BOTH, 0)) {
+        offset_x, offset_y, width, height, invert, rotate, PART_BOTH, LAYER_MASK_NONE)) {
         img->active = 0;
         return 1;
     }
@@ -234,14 +285,17 @@ void xml_init(void)
     }
 }
 
-int xml_process_assetlist_file(const char *xml_file_name)
+int xml_process_assetlist_file_from_source(const char *xml_file_name, xml_asset_source source)
 {
     log_info("Loading assetlist file", xml_file_name, 0);
 
     char full_path[FILE_NAME_MAX];
-    snprintf(full_path, FILE_NAME_MAX, "%s/%s", ASSETS_IMAGE_PATH, xml_file_name);
+    if (!resolve_graphics_path(full_path, xml_file_name, source)) {
+        log_error("Unable to resolve assetlist file", xml_file_name, 0);
+        return 0;
+    }
 
-    FILE *xml_file = file_open_asset(full_path, "r");
+    FILE *xml_file = file_open(full_path, "r");
 
     if (!xml_file) {
         log_error("Error opening assetlist file", xml_file_name, 0);
@@ -253,6 +307,7 @@ int xml_process_assetlist_file(const char *xml_file_name)
     int error = 0;
 
     xml_parser_reset();
+    data.current_source = source;
 
     do {
         size_t bytes_read = fread(buffer, 1, XML_BUFFER_SIZE, xml_file);
@@ -270,7 +325,7 @@ int xml_process_assetlist_file(const char *xml_file_name)
 #ifdef BUILDING_ASSET_PACKER
     else {
         size_t buf_size = sizeof(char *) * (strlen(xml_file_name) + 1);
-        char *path = malloc(buf_size);
+        char *path = static_cast<char *>(malloc(buf_size));
         if (!path) {
             error = 1;
             group_unload_current();
@@ -285,7 +340,12 @@ int xml_process_assetlist_file(const char *xml_file_name)
 
     file_close(xml_file);
 
-    return !error;
+    return error == 0;
+}
+
+int xml_process_assetlist_file(const char *xml_file_name)
+{
+    return xml_process_assetlist_file_from_source(xml_file_name, XML_ASSET_SOURCE_AUTO);
 }
 
 void xml_finish(void)
@@ -296,7 +356,24 @@ void xml_finish(void)
 
 void xml_get_full_image_path(char *full_path, const char *image_file_name)
 {
-    if (snprintf(full_path, FILE_NAME_MAX, "%s/%s.png", data.base_path, image_file_name) > FILE_NAME_MAX) {
+    char relative_path[FILE_NAME_MAX];
+    if (snprintf(relative_path, FILE_NAME_MAX, "%s/%s.png", data.base_path, image_file_name) >= FILE_NAME_MAX) {
         log_error("Image path too long", image_file_name, 0);
+        return;
+    }
+    if (!resolve_graphics_path(full_path, relative_path, data.current_source)) {
+        log_error("Unable to resolve image path", image_file_name, 0);
+    }
+}
+
+void xml_get_full_group_image_path(char *full_path, const char *group_name)
+{
+    char relative_path[FILE_NAME_MAX];
+    if (snprintf(relative_path, FILE_NAME_MAX, "%s.png", group_name) >= FILE_NAME_MAX) {
+        log_error("Group image path too long", group_name, 0);
+        return;
+    }
+    if (!resolve_graphics_path(full_path, relative_path, data.current_source)) {
+        log_error("Unable to resolve group image path", group_name, 0);
     }
 }

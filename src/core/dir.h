@@ -6,6 +6,10 @@
 #define CAMPAIGNS_DIR_NAME "campaigns"
 #define CAMPAIGNS_DIRECTORY "***" CAMPAIGNS_DIR_NAME "***"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file
  * Directory-related functions.
@@ -110,5 +114,9 @@ const char *dir_get_file_at_location(const char *filepath, int location);
  * @return Filename with location appended
  */
 const char *dir_append_location(const char *filename, int location);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_DIR_H

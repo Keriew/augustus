@@ -249,7 +249,7 @@ static void print_stacktrace(LPEXCEPTION_POINTERS e)
         } else {
             DWORD64 mod_base = SymGetModuleBase64(GetCurrentProcess(), stackframe.AddrPC.Offset);
             if (mod_base) {
-                GetModuleFileName((HINSTANCE) mod_base, modname, MAX_PATH);
+                GetModuleFileNameA((HINSTANCE) mod_base, modname, MAX_PATH);
             } else {
                 snprintf(modname, MAX_PATH, "Unknown");
             }

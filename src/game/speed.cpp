@@ -1,11 +1,13 @@
 #include "game/speed.h"
 
+extern "C" {
 #include "building/construction.h"
 #include "core/time.h"
 #include "game/settings.h"
 #include "game/state.h"
 #include "graphics/window.h"
 #include "input/scroll.h"
+}
 
 #define MAX_TICKS_PER_FRAME 20
 
@@ -25,14 +27,14 @@ static struct {
 int game_speed_get_index(int speed)
 {
     int index = 0;
-    while (index < sizeof(game_speeds) / sizeof(int)) {
+    while (index < static_cast<int>(sizeof(game_speeds) / sizeof(int))) {
         if (game_speeds[index] >= speed) {
             break;
         }
         index++;
     }
-    if (index >= sizeof(game_speeds) / sizeof(int)) {
-        index = (sizeof(game_speeds) / sizeof(int)) - 1;
+    if (index >= static_cast<int>(sizeof(game_speeds) / sizeof(int))) {
+        index = static_cast<int>(sizeof(game_speeds) / sizeof(int)) - 1;
     }
     return index;
 }
@@ -52,7 +54,8 @@ int game_speed_get_elapsed_ticks(void)
     if (game_state_is_paused()) {
         return 0;
     }
-    int millis_per_tick = 1;
+
+    time_millis millis_per_tick = 1;
     switch (window_get_id()) {
         default:
             return 0;
@@ -80,6 +83,7 @@ int game_speed_get_elapsed_ticks(void)
             millis_per_tick = MILLIS_PER_TICK_PER_SPEED[7]; // 70%, nice speed for flag animations
             break;
     }
+
     if (building_construction_in_progress()) {
         return 0;
     }
@@ -87,15 +91,16 @@ int game_speed_get_elapsed_ticks(void)
         return 0;
     }
 
-    time_millis now = time_get_millis();
-    time_millis diff = now - data.last_update;
+    const time_millis now = time_get_millis();
+    const time_millis diff = now - data.last_update;
     data.last_check_was_valid = 1;
     if (!last_check_was_valid) {
         // returning to map from another window or pause: always force a tick
         data.last_update = now;
         return 1;
     }
-    int ticks = diff / millis_per_tick;
+
+    const int ticks = static_cast<int>(diff / millis_per_tick);
     if (!ticks) {
         return 0;
     } else if (ticks <= MAX_TICKS_PER_FRAME) {

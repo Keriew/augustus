@@ -1,6 +1,10 @@
 #ifndef CORE_DEBUG_H
 #define CORE_DEBUG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file
  * Logging
@@ -26,5 +30,9 @@ void log_error(const char *msg, const char *param_str, int param_int);
  * Logs the repeated messages, saying how many times it was repeated
  */
 void log_repeated_messages(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_DEBUG_H

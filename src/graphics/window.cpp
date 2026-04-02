@@ -1,5 +1,6 @@
 #include "window.h"
 
+extern "C" {
 #include "game/system.h"
 #include "graphics/graphics.h"
 #include "graphics/screen.h"
@@ -10,6 +11,7 @@
 #include "input/scroll.h"
 #include "input/touch.h"
 #include "window/city.h"
+}
 
 #define MAX_QUEUE 5
 
@@ -146,6 +148,7 @@ void window_draw(int force)
     const hotkeys *h = hotkey_state();
     w->handle_input(m, h);
     tooltip_handle(m, w->get_tooltip);
+    screen_set_ui_render_scale();
     warning_draw();
     update_input_after();
 }

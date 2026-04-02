@@ -1,14 +1,19 @@
 #include "assets.h"
 
+extern "C" {
 #include "assets/group.h"
 #include "assets/image.h"
 #include "assets/xml.h"
 #include "core/dir.h"
+#include "core/file.h"
 #include "core/log.h"
-#include "graphics/renderer.h"
 #include "core/png_read.h"
+#include "game/mod_manager.h"
+#include "graphics/renderer.h"
+}
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 static struct {
@@ -16,32 +21,69 @@ static struct {
     asset_image *roadblock_image;
     int asset_lookup[ASSET_MAX_KEY];
     int font_lookup[ASSET_FONT_MAX_KEY];
+    char failure_reason[512];
 } data;
 
-void assets_init(int force_reload, color_t **main_images, int *main_image_widths)
+static void set_failure_reason(const char *reason, const char *detail)
 {
+    if (detail && *detail) {
+        snprintf(data.failure_reason, sizeof(data.failure_reason), "%s\n\n%s", reason, detail);
+    } else {
+        snprintf(data.failure_reason, sizeof(data.failure_reason), "%s", reason);
+    }
+}
+
+static int load_assetlists_from_source(const char *path, xml_asset_source source)
+{
+    const dir_listing *xml_files = dir_find_files_with_extension(path, "xml");
+    for (int i = 0; i < xml_files->num_files; ++i) {
+        if (!xml_process_assetlist_file_from_source(xml_files->files[i].name, source)) {
+            char detail[FILE_NAME_MAX + 64];
+            snprintf(detail, sizeof(detail), "Asset list: %s", xml_files->files[i].name);
+            set_failure_reason("Failed to parse or load an asset list.", detail);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int assets_init(int force_reload, color_t **main_images, int *main_image_widths)
+{
+    data.failure_reason[0] = '\0';
+
     if (graphics_renderer()->has_image_atlas(ATLAS_EXTRA_ASSET) && !force_reload) {
         asset_image_reload_climate();
-        return;
+        return 1;
     }
 
     graphics_renderer()->free_image_atlas(ATLAS_EXTRA_ASSET);
 
-    const dir_listing *xml_files = dir_find_files_with_extension(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH, "xml");
+    const dir_listing *root_xml_files = dir_find_files_with_extension(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH, "xml");
+    int total_xml_files = root_xml_files->num_files;
+    const dir_listing *mod_xml_files = dir_find_files_with_extension(mod_manager_get_graphics_path(), "xml");
+    total_xml_files += mod_xml_files->num_files;
 
-    if (!group_create_all(xml_files->num_files) || !asset_image_init_array()) {
+    if (!group_create_all(total_xml_files) || !asset_image_init_array()) {
         log_error("Not enough memory to initialize extra assets. The game will probably crash.", 0, 0);
+        set_failure_reason("Not enough memory to initialize extra assets.", 0);
+        return 0;
     }
 
     xml_init();
 
-    for (int i = 0; i < xml_files->num_files; ++i) {
-        xml_process_assetlist_file(xml_files->files[i].name);
+    if (!load_assetlists_from_source(mod_manager_get_graphics_path(), XML_ASSET_SOURCE_MOD)) {
+        return 0;
+    }
+    if (!load_assetlists_from_source(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH, XML_ASSET_SOURCE_ROOT)) {
+        return 0;
     }
 
     xml_finish();
 
-    asset_image_load_all(main_images, main_image_widths);
+    if (!asset_image_load_all(main_images, main_image_widths)) {
+        set_failure_reason("Failed to build or upload extra asset graphics.", 0);
+        return 0;
+    }
 
     group_set_for_external_files();
 
@@ -86,17 +128,30 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.font_lookup[ASSET_FONT_CRLY_BRACKET_LEFT] = assets_get_image_id("UI", "curlybracket_white_left");
     data.font_lookup[ASSET_FONT_CRLY_BRACKET_RIGHT] = assets_get_image_id("UI", "curlybracket_white_right");
 
+    return 1;
 }
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths)
 {
+    data.failure_reason[0] = '\0';
     if (!group_create_all(1) || !asset_image_init_array()) {
         log_error("Not enough memory to initialize extra assets. The game will probably crash.", 0, 0);
+        set_failure_reason("Not enough memory to initialize extra assets.", 0);
         return 0;
     }
     xml_init();
     graphics_renderer()->free_image_atlas(ATLAS_EXTRA_ASSET);
-    return xml_process_assetlist_file(file_name) && asset_image_load_all(main_images, main_image_widths);
+    if (!xml_process_assetlist_file(file_name)) {
+        char detail[FILE_NAME_MAX + 64];
+        snprintf(detail, sizeof(detail), "Asset list: %s", file_name);
+        set_failure_reason("Failed to parse or load an asset list.", detail);
+        return 0;
+    }
+    if (!asset_image_load_all(main_images, main_image_widths)) {
+        set_failure_reason("Failed to build or upload extra asset graphics.", 0);
+        return 0;
+    }
+    return 1;
 }
 
 int assets_get_group_id(const char *assetlist_name)
@@ -203,4 +258,9 @@ void assets_load_unpacked_asset(int image_id)
         pixels = img->data;
     }
     graphics_renderer()->load_unpacked_image(&img->img, pixels);
+}
+
+const char *assets_get_failure_reason(void)
+{
+    return data.failure_reason;
 }
