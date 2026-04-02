@@ -13,6 +13,7 @@ extern "C" {
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -21,6 +22,7 @@ namespace {
 using GroupPayloadMap = std::unordered_map<std::string, std::unique_ptr<ImageGroupPayload>>;
 
 GroupPayloadMap g_group_payloads;
+std::unordered_set<std::string> g_failed_group_payloads;
 
 struct PendingImage {
     std::string id;
@@ -387,6 +389,10 @@ xml_asset_source ImageGroupPayload::source() const
 
 void ImageGroupPayload::set_image(const std::string &image_id, const std::string &image_key, const std::string &top_image_key)
 {
+    if (default_image_id_.empty()) {
+        default_image_id_ = image_id;
+    }
+
     auto it = images_.find(image_id);
     if (it != images_.end()) {
         if (!it->second.image_key().empty()) {
@@ -429,6 +435,14 @@ const image *ImageGroupPayload::legacy_image_for(const char *image_id) const
     return it == images_.end() ? nullptr : it->second.legacy_image();
 }
 
+const image *ImageGroupPayload::default_legacy_image() const
+{
+    if (default_image_id_.empty()) {
+        return nullptr;
+    }
+    return legacy_image_for(default_image_id_.c_str());
+}
+
 const ImageGroupPayload *image_group_payload_get(const char *path_key)
 {
     return find_group_payload(path_key);
@@ -443,19 +457,25 @@ extern "C" int image_group_payload_load(const char *path_key)
     if (find_group_payload(normalized_key.c_str())) {
         return 1;
     }
+    if (g_failed_group_payloads.find(normalized_key) != g_failed_group_payloads.end()) {
+        return 0;
+    }
 
     char xml_path[FILE_NAME_MAX] = { 0 };
     xml_asset_source resolved_source = XML_ASSET_SOURCE_AUTO;
     if (!xml_resolve_assetlist_path(xml_path, normalized_key.c_str(), XML_ASSET_SOURCE_AUTO, &resolved_source)) {
         log_error("Unable to resolve image group xml", normalized_key.c_str(), 0);
+        g_failed_group_payloads.insert(normalized_key);
         return 0;
     }
 
     std::unique_ptr<ImageGroupPayload> payload = parse_group_file(xml_path, normalized_key, resolved_source);
     if (!payload) {
+        g_failed_group_payloads.insert(normalized_key);
         return 0;
     }
 
+    g_failed_group_payloads.erase(normalized_key);
     g_group_payloads.emplace(normalized_key, std::move(payload));
     return 1;
 }
@@ -468,6 +488,16 @@ extern "C" const image *image_group_payload_get_image(const char *path_key, cons
     }
     payload = find_group_payload(path_key);
     return payload ? payload->legacy_image_for(image_id) : nullptr;
+}
+
+extern "C" const image *image_group_payload_get_default_image(const char *path_key)
+{
+    const ImageGroupPayload *payload = find_group_payload(path_key);
+    if (!payload && !image_group_payload_load(path_key)) {
+        return nullptr;
+    }
+    payload = find_group_payload(path_key);
+    return payload ? payload->default_legacy_image() : nullptr;
 }
 
 extern "C" const char *image_group_payload_get_image_key(const char *path_key, const char *image_id)
@@ -483,4 +513,5 @@ extern "C" const char *image_group_payload_get_image_key(const char *path_key, c
 extern "C" void image_group_payload_clear_all(void)
 {
     g_group_payloads.clear();
+    g_failed_group_payloads.clear();
 }

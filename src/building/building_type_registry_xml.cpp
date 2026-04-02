@@ -286,6 +286,107 @@ static int parse_spawn_direction(const char *value)
     return DIR_0_TOP;
 }
 
+static int equals_ignore_case_ascii(char left, char right)
+{
+    if (left >= 'A' && left <= 'Z') {
+        left = static_cast<char>(left - 'A' + 'a');
+    }
+    if (right >= 'A' && right <= 'Z') {
+        right = static_cast<char>(right - 'A' + 'a');
+    }
+    return left == right;
+}
+
+static int starts_with_ignore_case_ascii(const std::string &value, const char *prefix)
+{
+    if (!prefix) {
+        return 0;
+    }
+
+    size_t prefix_length = strlen(prefix);
+    if (value.size() < prefix_length) {
+        return 0;
+    }
+
+    for (size_t i = 0; i < prefix_length; i++) {
+        if (!equals_ignore_case_ascii(value[i], prefix[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int ends_with_ignore_case_ascii(const std::string &value, const char *suffix)
+{
+    if (!suffix) {
+        return 0;
+    }
+
+    size_t suffix_length = strlen(suffix);
+    if (value.size() < suffix_length) {
+        return 0;
+    }
+
+    size_t start = value.size() - suffix_length;
+    for (size_t i = 0; i < suffix_length; i++) {
+        if (!equals_ignore_case_ascii(value[start + i], suffix[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static std::string normalize_graphics_path(const char *value)
+{
+    std::string normalized = trim_copy(value ? value : "");
+    if (normalized.empty()) {
+        return std::string();
+    }
+
+    for (char &ch : normalized) {
+        if (ch == '/') {
+            ch = '\\';
+        }
+    }
+
+    std::string collapsed;
+    collapsed.reserve(normalized.size());
+    char previous = '\0';
+    for (char ch : normalized) {
+        if (ch == '\\' && previous == '\\') {
+            continue;
+        }
+        collapsed.push_back(ch);
+        previous = ch;
+    }
+    normalized = collapsed;
+
+    if (starts_with_ignore_case_ascii(normalized, "graphics\\") ||
+        starts_with_ignore_case_ascii(normalized, "\\") ||
+        ends_with_ignore_case_ascii(normalized, ".xml") ||
+        normalized.back() == '\\') {
+        return std::string();
+    }
+
+    return normalized;
+}
+
+static int parse_graphics_comparison(const char *comparison_text, GraphicComparison *out_comparison)
+{
+    if (!out_comparison) {
+        return 0;
+    }
+    if (comparison_text && strcmp(comparison_text, "gt") == 0) {
+        *out_comparison = GraphicComparison::GreaterThan;
+        return 1;
+    }
+    if (comparison_text && strcmp(comparison_text, "gte") == 0) {
+        *out_comparison = GraphicComparison::GreaterThanOrEqual;
+        return 1;
+    }
+    return 0;
+}
+
 static int parse_building_root()
 {
     if (!xml_parser_has_attribute("type")) {
@@ -306,51 +407,114 @@ static int parse_building_root()
     return 1;
 }
 
-static int parse_graphic()
+static int parse_graphics()
 {
     if (!g_parse_state.definition) {
-        log_error("Encountered graphic definition before building root", 0, 0);
+        log_error("Encountered graphics definition before building root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.definition->has_graphic()) {
+        log_error("BuildingType xml contains duplicate graphics nodes", g_parse_state.definition->attr(), 0);
         g_parse_state.error = 1;
         return 0;
     }
 
+    g_parse_state.saw_graphic = 1;
+    g_parse_state.parsing_graphics = 1;
+    g_parse_state.current_graphics_has_path = 0;
+    return 1;
+}
+
+static void finish_graphics()
+{
+    if (!g_parse_state.parsing_graphics) {
+        return;
+    }
+    if (!g_parse_state.current_graphics_has_path) {
+        log_error("BuildingType graphics is missing required child node 'path'", 0, 0);
+        g_parse_state.error = 1;
+    }
+    g_parse_state.parsing_graphics = 0;
+    g_parse_state.current_graphics_has_path = 0;
+}
+
+static int parse_graphics_path()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics path outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("value")) {
+        log_error("BuildingType graphics path is missing required attribute 'value'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    std::string normalized_path = normalize_graphics_path(xml_parser_get_attribute_string("value"));
+    if (normalized_path.empty()) {
+        log_error("Unsupported BuildingType graphics path", xml_parser_get_attribute_string("value"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->set_graphics_path(std::move(normalized_path));
+    g_parse_state.current_graphics_has_path = 1;
+    return 1;
+}
+
+static int parse_graphics_upgrade()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics upgrade outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
     if (!xml_parser_has_attribute("threshold")) {
-        log_error("BuildingType graphic is missing required attribute 'threshold'", 0, 0);
+        log_error("BuildingType graphics upgrade is missing required attribute 'threshold'", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
     if (!xml_parser_has_attribute("operator")) {
-        log_error("BuildingType graphic is missing required attribute 'operator'", 0, 0);
+        log_error("BuildingType graphics upgrade is missing required attribute 'operator'", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
 
-    const char *comparison_text = xml_parser_get_attribute_string("operator");
     GraphicComparison comparison = GraphicComparison::None;
-    if (comparison_text && strcmp(comparison_text, "gt") == 0) {
-        comparison = GraphicComparison::GreaterThan;
-    } else if (comparison_text && strcmp(comparison_text, "gte") == 0) {
-        comparison = GraphicComparison::GreaterThanOrEqual;
-    } else {
-        log_error("Unsupported BuildingType graphic operator", comparison_text, 0);
+    const char *comparison_text = xml_parser_get_attribute_string("operator");
+    if (!parse_graphics_comparison(comparison_text, &comparison)) {
+        log_error("Unsupported BuildingType graphics upgrade operator", comparison_text, 0);
         g_parse_state.error = 1;
         return 0;
     }
 
-    g_parse_state.definition->set_threshold(xml_parser_get_attribute_int("threshold"), comparison);
+    g_parse_state.definition->set_upgrade_rule(xml_parser_get_attribute_int("threshold"), comparison);
+    return 1;
+}
 
-    if (xml_parser_has_attribute("water_access")) {
-        const char *water_access = xml_parser_get_attribute_string("water_access");
-        if (water_access && strcmp(water_access, "reservoir_range") == 0) {
-            g_parse_state.definition->set_water_access_mode(WaterAccessMode::ReservoirRange);
-        } else {
-            log_error("Unsupported BuildingType graphic water_access", water_access, 0);
-            g_parse_state.error = 1;
-            return 0;
-        }
+static int parse_graphics_water_access()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics water_access outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("mode")) {
+        log_error("BuildingType graphics water_access is missing required attribute 'mode'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
     }
 
-    g_parse_state.saw_graphic = 1;
+    const char *mode_text = xml_parser_get_attribute_string("mode");
+    if (!mode_text || strcmp(mode_text, "reservoir_range") != 0) {
+        log_error("Unsupported BuildingType graphics water_access mode", mode_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->set_graphics_water_access_mode(WaterAccessMode::ReservoirRange);
     return 1;
 }
 
@@ -590,7 +754,10 @@ static int parse_spawn()
 
 static const xml_parser_element XML_ELEMENTS[] = {
     { "building", parse_building_root, nullptr, nullptr, nullptr },
-    { "graphic", parse_graphic, nullptr, "building", nullptr },
+    { "graphics", parse_graphics, finish_graphics, "building", nullptr },
+    { "path", parse_graphics_path, nullptr, "graphics", nullptr },
+    { "upgrade", parse_graphics_upgrade, nullptr, "graphics", nullptr },
+    { "water_access", parse_graphics_water_access, nullptr, "graphics", nullptr },
     { "labor", parse_labor, nullptr, "building", nullptr },
     { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },
     { "spawn", parse_spawn, nullptr, "spawn_group", nullptr }

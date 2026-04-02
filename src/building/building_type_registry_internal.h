@@ -106,6 +106,66 @@ struct SpawnDelayGroup {
     std::vector<SpawnPolicy> policies;
 };
 
+struct GraphicsDefinition {
+    void set_path(std::string path)
+    {
+        path_ = std::move(path);
+    }
+
+    void set_upgrade_rule(int threshold, GraphicComparison comparison)
+    {
+        has_upgrade_rule_ = 1;
+        upgrade_threshold_ = threshold;
+        upgrade_comparison_ = comparison;
+    }
+
+    void set_water_access_mode(WaterAccessMode mode)
+    {
+        has_water_access_rule_ = 1;
+        water_access_mode_ = mode;
+    }
+
+    int has_path() const
+    {
+        return !path_.empty();
+    }
+
+    const char *path() const
+    {
+        return path_.c_str();
+    }
+
+    WaterAccessMode water_access_mode() const
+    {
+        return has_water_access_rule_ ? water_access_mode_ : WaterAccessMode::None;
+    }
+
+    unsigned char upgrade_level_for(const ::building &building) const
+    {
+        if (!has_upgrade_rule_) {
+            return 0;
+        }
+
+        switch (upgrade_comparison_) {
+            case GraphicComparison::GreaterThan:
+                return building.desirability > upgrade_threshold_;
+            case GraphicComparison::GreaterThanOrEqual:
+                return building.desirability >= upgrade_threshold_;
+            case GraphicComparison::None:
+            default:
+                return 0;
+        }
+    }
+
+private:
+    std::string path_;
+    int has_upgrade_rule_ = 0;
+    int upgrade_threshold_ = 0;
+    GraphicComparison upgrade_comparison_ = GraphicComparison::None;
+    int has_water_access_rule_ = 0;
+    WaterAccessMode water_access_mode_ = WaterAccessMode::None;
+};
+
 class BuildingType {
 public:
     BuildingType(building_type type, std::string attr)
@@ -114,16 +174,19 @@ public:
     {
     }
 
-    void set_threshold(int threshold, GraphicComparison comparison)
+    void set_graphics_path(std::string path)
     {
-        has_graphic_ = 1;
-        threshold_ = threshold;
-        comparison_ = comparison;
+        graphics_.set_path(std::move(path));
     }
 
-    void set_water_access_mode(WaterAccessMode mode)
+    void set_upgrade_rule(int threshold, GraphicComparison comparison)
     {
-        water_access_mode_ = mode;
+        graphics_.set_upgrade_rule(threshold, comparison);
+    }
+
+    void set_graphics_water_access_mode(WaterAccessMode mode)
+    {
+        graphics_.set_water_access_mode(mode);
     }
 
     void add_spawn_policy(SpawnPolicy policy)
@@ -163,14 +226,24 @@ public:
         return attr_.c_str();
     }
 
+    const GraphicsDefinition &graphics() const
+    {
+        return graphics_;
+    }
+
+    const char *graphics_path() const
+    {
+        return graphics_.path();
+    }
+
     WaterAccessMode water_access_mode() const
     {
-        return water_access_mode_;
+        return graphics_.water_access_mode();
     }
 
     int has_graphic() const
     {
-        return has_graphic_;
+        return graphics_.has_path();
     }
 
     int has_labor_policy() const
@@ -190,24 +263,13 @@ public:
 
     unsigned char upgrade_level_for(const ::building &building) const
     {
-        switch (comparison_) {
-            case GraphicComparison::GreaterThan:
-                return building.desirability > threshold_;
-            case GraphicComparison::GreaterThanOrEqual:
-                return building.desirability >= threshold_;
-            case GraphicComparison::None:
-            default:
-                return 0;
-        }
+        return graphics_.upgrade_level_for(building);
     }
 
 private:
     building_type type_;
     std::string attr_;
-    int has_graphic_ = 0;
-    int threshold_ = 0;
-    GraphicComparison comparison_ = GraphicComparison::None;
-    WaterAccessMode water_access_mode_ = WaterAccessMode::None;
+    GraphicsDefinition graphics_;
     int has_labor_policy_ = 0;
     LaborPolicy labor_policy_;
     std::vector<SpawnDelayGroup> spawn_groups_;
@@ -218,6 +280,8 @@ struct ParseState {
     size_t current_spawn_group_index = 0;
     int has_current_spawn_group = 0;
     int saw_graphic = 0;
+    int parsing_graphics = 0;
+    int current_graphics_has_path = 0;
     int saw_spawn = 0;
     int error = 0;
 };

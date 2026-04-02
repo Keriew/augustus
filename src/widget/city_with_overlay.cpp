@@ -1,7 +1,9 @@
 #include "city_with_overlay.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "building/animation.h"
+#include "building/building_runtime_api.h"
 #include "building/construction.h"
 #include "building/construction_clear.h"
 #include "building/granary.h"
@@ -42,6 +44,7 @@
 #include "widget/city_overlay_risks.h"
 #include "widget/city_without_overlay.h"
 #include "widget/city_draw_highway.h"
+}
 
 static const city_overlay *overlay = 0;
 static float scale = SCALE_NONE;
@@ -244,6 +247,35 @@ static int is_building_selected(building *b)
         return 0;
     }
 
+}
+
+static const image *get_runtime_graphic_image(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    b = building_main(b);
+    return b ? building_runtime_get_graphic_image(b) : 0;
+}
+
+static int draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask)
+{
+    const image *img = get_runtime_graphic_image(b);
+    if (!img) {
+        return 0;
+    }
+    image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, scale);
+    return 1;
+}
+
+static int draw_runtime_building_top(building *b, int x, int y, color_t color_mask)
+{
+    const image *img = get_runtime_graphic_image(b);
+    if (!img) {
+        return 0;
+    }
+    image_draw_isometric_top_from_draw_tile_image(img, x, y, color_mask, scale);
+    return 1;
 }
 
 static int is_drawable_farmhouse(int grid_offset, int map_orientation)
@@ -452,7 +484,9 @@ void city_with_overlay_draw_building_footprint(int x, int y, int grid_offset, in
                 image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
             }
         } else {
-            image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
+            if (!draw_runtime_building_footprint(b, x, y, color_mask)) {
+                image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
+            }
         }
     } else {
         int draw = 1;
@@ -714,7 +748,9 @@ static void draw_building_top(int grid_offset, building *b, int x, int y)
         draw_depot_resource(b, x, y, color_mask);
     }
 
-    image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
+    if (!draw_runtime_building_top(b, x, y, color_mask)) {
+        image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
+    }
 }
 
 void city_with_overlay_draw_building_top(int x, int y, int grid_offset)

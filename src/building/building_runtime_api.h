@@ -1,6 +1,8 @@
 #ifndef BUILDING_BUILDING_RUNTIME_API_H
 #define BUILDING_BUILDING_RUNTIME_API_H
 
+#include "core/image.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,6 +13,7 @@ typedef struct building building;
 void building_runtime_reset(void);
 void building_runtime_apply_graphic(building *b);
 void building_runtime_spawn_figure(building *b);
+const image *building_runtime_get_graphic_image(building *b);
 
 #ifdef __cplusplus
 }

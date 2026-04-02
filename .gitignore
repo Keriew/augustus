@@ -62,6 +62,7 @@ res/augustus.icns
 /codex_augustus_repo_map_memory.md
 /codex_augustus_handoff.md
 /_codex_renderer_resource_working_memory.md
+/_codex_building_graphics_runtime_working_memory.md
 /tree_clear_known_bug.md
 /tool_mode_state_known_bug.md
 /graphics_upscale_pipeline_notes.md

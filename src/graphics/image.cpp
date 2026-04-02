@@ -270,14 +270,32 @@ void image_draw_border(int base_image_id, int x, int y, color_t color)
         color, SCALE_NONE);
 }
 
+void image_draw_isometric_footprint_image(const image *img, int x, int y, color_t color_mask, float scale)
+{
+    if (!img) {
+        return;
+    }
+    int num_tiles = (img->width + 2) / (FOOTPRINT_WIDTH + 2);
+    x -= 30 * (num_tiles - 1);
+    graphics_renderer()->draw_image(img, x, y, color_mask, scale);
+}
+
 void image_draw_isometric_footprint(int image_id, int x, int y, color_t color_mask, float scale)
 {
     const image *img = image_get(image_id);
     if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
+    image_draw_isometric_footprint_image(img, x, y, color_mask, scale);
+}
+
+void image_draw_isometric_footprint_from_draw_tile_image(const image *img, int x, int y, color_t color_mask, float scale)
+{
+    if (!img) {
+        return;
+    }
     int num_tiles = (img->width + 2) / (FOOTPRINT_WIDTH + 2);
-    x -= 30 * (num_tiles - 1);
+    y -= FOOTPRINT_HALF_HEIGHT * (num_tiles - 1);
     graphics_renderer()->draw_image(img, x, y, color_mask, scale);
 }
 
@@ -287,9 +305,18 @@ void image_draw_isometric_footprint_from_draw_tile(int image_id, int x, int y, c
     if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
+    image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, scale);
+}
+
+void image_draw_isometric_top_image(const image *img, int x, int y, color_t color_mask, float scale)
+{
+    if (!img || !img->top) {
+        return;
+    }
     int num_tiles = (img->width + 2) / (FOOTPRINT_WIDTH + 2);
-    y -= FOOTPRINT_HALF_HEIGHT * (num_tiles - 1);
-    graphics_renderer()->draw_image(img, x, y, color_mask, scale);
+    x -= 30 * (num_tiles - 1);
+    y -= img->top->original.height - FOOTPRINT_HALF_HEIGHT * num_tiles;
+    graphics_renderer()->draw_image(img->top, x, y, color_mask, scale);
 }
 
 void image_draw_isometric_top(int image_id, int x, int y, color_t color_mask, float scale)
@@ -301,9 +328,15 @@ void image_draw_isometric_top(int image_id, int x, int y, color_t color_mask, fl
     if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
-    int num_tiles = (img->width + 2) / (FOOTPRINT_WIDTH + 2);
-    x -= 30 * (num_tiles - 1);
-    y -= img->top->original.height - FOOTPRINT_HALF_HEIGHT * num_tiles;
+    image_draw_isometric_top_image(img, x, y, color_mask, scale);
+}
+
+void image_draw_isometric_top_from_draw_tile_image(const image *img, int x, int y, color_t color_mask, float scale)
+{
+    if (!img || !img->top) {
+        return;
+    }
+    y -= img->top->original.height - FOOTPRINT_HALF_HEIGHT;
     graphics_renderer()->draw_image(img->top, x, y, color_mask, scale);
 }
 
@@ -316,8 +349,7 @@ void image_draw_isometric_top_from_draw_tile(int image_id, int x, int y, color_t
     if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
-    y -= img->top->original.height - FOOTPRINT_HALF_HEIGHT;
-    graphics_renderer()->draw_image(img->top, x, y, color_mask, scale);
+    image_draw_isometric_top_from_draw_tile_image(img, x, y, color_mask, scale);
 }
 
 void image_draw_set_isometric_top_from_draw_tile(int image_id, int x, int y, color_t color_mask, float scale)

@@ -1,5 +1,9 @@
 #include "building/building_type_registry_internal.h"
 
+extern "C" {
+#include "core/image.h"
+}
+
 class building_runtime {
 public:
     building_runtime(::building *building, const building_type_registry_impl::BuildingType *definition)
@@ -14,6 +18,7 @@ public:
 
     void set_building_graphic();
     void spawn_figure();
+    const image *resolve_graphic_image();
 
     const ::building *building() const
     {
@@ -26,6 +31,12 @@ public:
     }
 
 private:
+    void refresh_graphic_state();
+    int uses_new_graphics() const;
+    const image *resolve_named_group_image(const char *image_id) const;
+    const image *resolve_candidate_graphic_image(const char *const *image_ids, size_t image_id_count) const;
+    const image *resolve_default_group_image() const;
+    const image *resolve_type_specific_graphic_image() const;
     int worker_percentage() const;
     void check_labor_problem();
     void generate_labor_seeker(int x, int y);

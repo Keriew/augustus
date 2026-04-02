@@ -1,5 +1,7 @@
 #include "building/building_runtime_internal.h"
 
+#include "assets/image_group_payload.h"
+
 extern "C" {
 #include "building/building_runtime_api.h"
 #include "building/image.h"
@@ -13,6 +15,28 @@ extern "C" {
 #include "map/building_tiles.h"
 #include "map/road_access.h"
 #include "map/terrain.h"
+}
+
+namespace {
+
+const image *resolve_group_image_candidates(const char *group_key, const char *const *image_ids, size_t image_id_count)
+{
+    if (!group_key || !*group_key || !image_ids) {
+        return nullptr;
+    }
+
+    for (size_t i = 0; i < image_id_count; i++) {
+        const char *image_id = image_ids[i];
+        if (!image_id || !*image_id) {
+            continue;
+        }
+        if (const image *img = image_group_payload_get_image(group_key, image_id)) {
+            return img;
+        }
+    }
+    return nullptr;
+}
+
 }
 
 namespace building_runtime_impl {
@@ -56,9 +80,9 @@ building_runtime *get_or_create_instance(::building *building_data)
 
 }
 
-void building_runtime::set_building_graphic()
+void building_runtime::refresh_graphic_state()
 {
-    if (!building_ || !definition_ || !definition_->has_graphic() || building_->state != BUILDING_STATE_IN_USE) {
+    if (!building_ || !definition_ || !definition_->has_graphic()) {
         return;
     }
 
@@ -68,6 +92,145 @@ void building_runtime::set_building_graphic()
     }
 
     building_->upgrade_level = definition_->upgrade_level_for(*building_);
+}
+
+int building_runtime::uses_new_graphics() const
+{
+    return building_ && definition_ && definition_->has_graphic() && definition_->graphics_path() && *definition_->graphics_path();
+}
+
+const image *building_runtime::resolve_named_group_image(const char *image_id) const
+{
+    if (!uses_new_graphics() || !image_id || !*image_id) {
+        return nullptr;
+    }
+    return image_group_payload_get_image(definition_->graphics_path(), image_id);
+}
+
+const image *building_runtime::resolve_candidate_graphic_image(const char *const *image_ids, size_t image_id_count) const
+{
+    if (!uses_new_graphics()) {
+        return nullptr;
+    }
+    return resolve_group_image_candidates(definition_->graphics_path(), image_ids, image_id_count);
+}
+
+const image *building_runtime::resolve_default_group_image() const
+{
+    static const char *default_image_ids[] = {
+        "main",
+        "Main",
+        "default",
+        "Default",
+        "Image_0000",
+        "0"
+    };
+
+    if (const image *img = resolve_candidate_graphic_image(default_image_ids, sizeof(default_image_ids) / sizeof(default_image_ids[0]))) {
+        return img;
+    }
+    return uses_new_graphics() ? image_group_payload_get_default_image(definition_->graphics_path()) : nullptr;
+}
+
+const image *building_runtime::resolve_type_specific_graphic_image() const
+{
+    if (!uses_new_graphics()) {
+        return nullptr;
+    }
+
+    switch (building_->type) {
+        case BUILDING_THEATER:
+        {
+            static const char *base_image_ids[] = { "Theatre ON", "Theater ON", "Theatre", "Theater", "ON" };
+            static const char *upgrade_image_ids[] = { "Theatre Upgrade ON", "Theater Upgrade ON", "Upgrade ON" };
+            return building_->upgrade_level ?
+                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+        }
+        case BUILDING_AMPHITHEATER:
+        {
+            static const char *base_image_ids[] = { "Amphitheatre ON", "Amphitheater ON", "Amphitheatre", "Amphitheater", "ON" };
+            static const char *upgrade_image_ids[] = { "Amphitheatre Upgrade ON", "Amphitheater Upgrade ON", "Upgrade ON" };
+            return building_->upgrade_level ?
+                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+        }
+        case BUILDING_ARENA:
+        {
+            static const char *base_image_ids[] = { "Arena ON", "Arena", "ON" };
+            static const char *upgrade_image_ids[] = { "Arena Upgrade ON", "Upgrade ON" };
+            return building_->upgrade_level ?
+                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+        }
+        case BUILDING_SCHOOL:
+        {
+            static const char *upgrade_image_ids[] = { "Upgraded_School", "School Upgrade ON", "Upgrade ON" };
+            if (building_->upgrade_level) {
+                return resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]));
+            }
+            return resolve_default_group_image();
+        }
+        case BUILDING_ACADEMY:
+        {
+            static const char *base_image_ids[] = { "Academy_Fix", "Academy OFF", "Academy", "OFF" };
+            static const char *upgrade_image_ids[] = { "Upgraded_Academy", "Academy Upgrade ON", "Upgrade ON" };
+            const image *img = building_->upgrade_level ?
+                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+            return img ? img : resolve_default_group_image();
+        }
+        case BUILDING_LIBRARY:
+        {
+            static const char *base_image_ids[] = { "Downgraded_Library", "Library OFF", "Library", "OFF" };
+            static const char *upgrade_image_ids[] = { "Library ON", "Upgraded_Library", "ON" };
+            const image *img = building_->upgrade_level ?
+                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+            return img ? img : resolve_default_group_image();
+        }
+        case BUILDING_FORUM:
+        {
+            static const char *upgrade_image_ids[] = { "Upgraded_Forum", "Forum Upgrade ON", "Upgrade ON" };
+            if (building_->upgrade_level) {
+                if (const image *img = resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]))) {
+                    return img;
+                }
+            }
+            return resolve_default_group_image();
+        }
+        case BUILDING_ACTOR_COLONY:
+        case BUILDING_GLADIATOR_SCHOOL:
+        case BUILDING_DOCTOR:
+        case BUILDING_HOSPITAL:
+        case BUILDING_BARBER:
+        case BUILDING_WORKCAMP:
+            return resolve_default_group_image();
+        default:
+            return nullptr;
+    }
+}
+
+const image *building_runtime::resolve_graphic_image()
+{
+    if (!uses_new_graphics()) {
+        return nullptr;
+    }
+
+    refresh_graphic_state();
+    if (const image *img = resolve_type_specific_graphic_image()) {
+        return img;
+    }
+    return resolve_default_group_image();
+}
+
+void building_runtime::set_building_graphic()
+{
+    if (!building_ || !definition_ || !definition_->has_graphic() || building_->state != BUILDING_STATE_IN_USE) {
+        return;
+    }
+
+    refresh_graphic_state();
     map_building_tiles_add(building_->id, building_->x, building_->y, building_->size, building_image_get(building_), TERRAIN_BUILDING);
 }
 
@@ -386,4 +549,12 @@ extern "C" void building_runtime_spawn_figure(building *b)
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         instance->spawn_figure();
     }
+}
+
+extern "C" const image *building_runtime_get_graphic_image(building *b)
+{
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
+        return instance->resolve_graphic_image();
+    }
+    return nullptr;
 }

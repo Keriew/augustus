@@ -7,10 +7,24 @@ Templates and examples are maintained only in `Mods\Vespasian\BuildingType`.
 
 Current supported nodes:
 
-- `<graphic threshold="N" operator="gt|gte" [water_access="reservoir_range"] />`
+- `<graphics> ... </graphics>`
 - `<labor labor_seeker_mode="..." labor_min_houses="N" />`
 - `<spawn_group ...>`
 - `<spawn ... />`
+
+Current supported `<graphics>` child nodes:
+
+- `<path value="Health_Culture\Theatre" />`
+- `<upgrade threshold="N" operator="gt|gte" />`
+- `<water_access mode="reservoir_range" />`
+
+`<path value="...">` rules:
+
+- path is relative to the winning `Graphics` folder
+- use backslash-delimited logical keys
+- do not include the `Graphics\` prefix
+- do not include the `.xml` suffix
+- example: `Mods\Augustus\Graphics\Health_Culture\Theatre.xml` becomes `Health_Culture\Theatre`
 
 Current supported `<labor>` attributes:
 
@@ -51,12 +65,14 @@ Current supported `<spawn>` attributes:
 Current engine behavior:
 
 - Only the migrated building families use `<spawn>` so far.
+- The old `<graphic .../>` node is no longer part of the supported format; migrate to `<graphics>...</graphics>`.
 - A `spawn_group` owns the shared delay/guard phase, then runs its child `<spawn>` policies in order.
 - Delay evaluation now uses the explicit `delay_bands` data from XML rather than a hardcoded named profile.
 - Ordered policies can coordinate: a policy that succeeds with `block_on_success="true"` stops later sibling policies in the same group.
 - Use `block_on_success="true"` when a building should spawn either A or B on the same trigger.
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
+- Buildings with a runtime `BuildingType` and a non-empty graphics path now try the new image-group payload path during live city rendering and fall back to legacy rendering when content is missing or unsupported in this phase.
 - The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
 
 See `_template.xml.example` here in `Mods\Vespasian\BuildingType` for a copy/paste starter.

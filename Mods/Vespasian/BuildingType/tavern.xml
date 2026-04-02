@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="tavern">
-    <graphic threshold="45" operator="gt" />
+    <graphics>
+        <path value="Health_Culture\Tavern" />
+        <upgrade threshold="45" operator="gt" />
+    </graphics>
 </building>

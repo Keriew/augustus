@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="market">
-    <graphic threshold="30" operator="gt" />
+    <graphics>
+        <path value="Admin_Logistics\Market" />
+        <upgrade threshold="30" operator="gt" />
+    </graphics>
 </building>

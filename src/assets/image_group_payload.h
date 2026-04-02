@@ -21,12 +21,14 @@ public:
     const char *image_key_for(const char *image_id) const;
     const char *top_image_key_for(const char *image_id) const;
     const image *legacy_image_for(const char *image_id) const;
+    const image *default_legacy_image() const;
 
 private:
     std::string key_;
     std::string xml_path_;
     xml_asset_source source_ = XML_ASSET_SOURCE_AUTO;
     std::unordered_map<std::string, ImageGroupEntry> images_;
+    std::string default_image_id_;
 };
 
 const ImageGroupPayload *image_group_payload_get(const char *path_key);
@@ -38,6 +40,7 @@ extern "C" {
 
 int image_group_payload_load(const char *path_key);
 const image *image_group_payload_get_image(const char *path_key, const char *image_id);
+const image *image_group_payload_get_default_image(const char *path_key);
 const char *image_group_payload_get_image_key(const char *path_key, const char *image_id);
 void image_group_payload_clear_all(void);
 

@@ -1,7 +1,9 @@
 #include "city_without_overlay.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "building/animation.h"
+#include "building/building_runtime_api.h"
 #include "building/connectable.h"
 #include "building/construction.h"
 #include "building/construction_clear.h"
@@ -48,6 +50,7 @@
 #include "widget/city_building_ghost.h"
 #include "widget/city_figure.h"
 #include "widget/city_draw_highway.h"
+}
 
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
@@ -207,6 +210,35 @@ static int is_building_hovered(building *b)
     return (b->id == draw_context.hovered_building_id || main_part_id == draw_context.hovered_building_id);
 }
 
+static const image *get_runtime_graphic_image(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    b = building_main(b);
+    return b ? building_runtime_get_graphic_image(b) : 0;
+}
+
+static int draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask)
+{
+    const image *img = get_runtime_graphic_image(b);
+    if (!img) {
+        return 0;
+    }
+    image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, draw_context.scale);
+    return 1;
+}
+
+static int draw_runtime_building_top(building *b, int x, int y, color_t color_mask)
+{
+    const image *img = get_runtime_graphic_image(b);
+    if (!img) {
+        return 0;
+    }
+    image_draw_isometric_top_from_draw_tile_image(img, x, y, color_mask, draw_context.scale);
+    return 1;
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -274,6 +306,8 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, draw_context.scale, grid_offset, color_mask);
+    } else if (building_id && draw_runtime_building_footprint(building_get(building_id), x, y, color_mask)) {
+        // Runtime-managed buildings draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
     } else {
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     }
@@ -531,7 +565,9 @@ static void draw_top(int x, int y, int grid_offset)
         color_mask = COLOR_MASK_HOVER;
     }
 
-    image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    if (!draw_runtime_building_top(b, x, y, color_mask)) {
+        image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    }
     // specific buildings
     if (b->id > 0) { //dont draw or calculate for non-buildings
         draw_senate_rating_flags(b, x, y, color_mask);
@@ -1016,9 +1052,9 @@ static void draw_connectable_construction_ghost(int x, int y, int grid_offset)
         return;
     }
     static building b;
-    b.type = building_construction_type();
+    b.type = static_cast<building_type>(building_construction_type());
     if (building_connectable_gate_type(b.type) && map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-        b.type = building_connectable_gate_type(b.type);
+        b.type = static_cast<building_type>(building_connectable_gate_type(b.type));
     }
     b.grid_offset = grid_offset;
     if (building_properties_for_type(b.type)->rotation_offset) {

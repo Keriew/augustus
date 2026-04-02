@@ -381,8 +381,8 @@
     <ClCompile Include="src\widget\city_overlay_risks.c" />
     <ClCompile Include="src\widget\city_pause_menu.c" />
     <ClCompile Include="src\widget\city_water_ghost.c" />
-    <ClCompile Include="src\widget\city_without_overlay.c" />
-    <ClCompile Include="src\widget\city_with_overlay.c" />
+    <ClCompile Include="src\widget\city_without_overlay.cpp" />
+    <ClCompile Include="src\widget\city_with_overlay.cpp" />
     <ClCompile Include="src\widget\dropdown_button.c" />
     <ClCompile Include="src\widget\input_box.c" />
     <ClCompile Include="src\widget\map_editor.c" />

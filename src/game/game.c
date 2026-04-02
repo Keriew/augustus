@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include "assets/assets.h"
+#include "assets/image_group_payload.h"
 #include "building/properties.h"
 #include "building/building_runtime_api.h"
 #include "building/building_type_registry.h"
@@ -8,6 +9,7 @@
 #include "core/config.h"
 #include "core/hotkey_config.h"
 #include "core/image.h"
+#include "core/image_payload.h"
 #include "core/lang.h"
 #include "core/locale.h"
 #include "core/log.h"
@@ -271,6 +273,12 @@ void game_display_fps(int fps)
 
 void game_exit(void)
 {
+    // Tear down runtime-managed image groups before payload storage so shutdown does not
+    // depend on C++ static destruction order between the two caches.
+    building_runtime_reset();
+    image_group_payload_clear_all();
+    image_payload_clear_all();
+
     video_shutdown();
     settings_save();
     config_save();
