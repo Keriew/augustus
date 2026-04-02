@@ -24,6 +24,7 @@
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/rich_text.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "scenario/property.h"
@@ -743,11 +744,13 @@ void window_building_prepare_figure_list(building_info_context *c)
 {
     if (c->figure.count > 0) {
         pixel_coordinate coord = { 0, 0 };
+        screen_set_pixel_render_scale();
         for (int i = 0; i < c->figure.count; i++) {
             draw_figure_in_city(c->figure.figure_ids[i], &coord);
             data.figure_images[i] = graphics_save_to_image(data.figure_images[i], coord.x, coord.y, 48, 48);
         }
         widget_city_draw();
+        screen_set_ui_render_scale();
     }
 }
 

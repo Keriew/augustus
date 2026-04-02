@@ -199,8 +199,42 @@ Current implementation direction:
   remains the large or multi-row frame primitive
 - one-row controls may use a dedicated strip-style frame primitive instead of
   reusing the large-frame tiler
+- compact one-row controls should stretch their middle strip segments
+  horizontally rather than visibly repeating seamful edge tiles across the full
+  control width
 - config tabs, selects, checkbox frames, category highlights, and footer
   buttons are the first deliberate users of that split
+
+## Saved Region And Offscreen Rules
+
+Snapshot-style redraw and first-time offscreen texture creation are part of the
+same contract problem. The following rules now apply:
+
+- any renderer operation that temporarily changes render target, viewport,
+  clipping, blend mode, or output scale must save and restore the full renderer
+  state
+- offscreen texture creation must render at neutral target scale (`1x`) and
+  only then restore the previous render domain and SDL scale
+- first-use helpers like silhouette generation or footprint-blend texture
+  creation are not allowed to hand-roll partial restore logic
+- underlying-window redraw must be wrapped in a full renderer-state push/pop,
+  not rebuilt by scattered cleanup calls after the fact
+- any saved-region capture must happen in the domain that matches the content
+  being captured
+  - UI strips captured for dialogs/tabs use UI domain
+  - city/empire/world snapshots use pixel domain if the source content is world
+    scaled
+
+## Figure Preview Rule
+
+Figure previews embedded in UI windows are a mixed-domain flow:
+
+- render the city preview in pixel domain
+- capture the preview from pixel-domain screen content
+- restore UI domain before drawing the preview into the window chrome
+
+That conversion belongs at the preview-preparation seam, not in the generic
+saved-region primitive.
 
 ## Text Rules For This Slice
 
@@ -249,3 +283,41 @@ Before changing code in this slice, check the change against these rules:
 
 If a proposed fix violates one of those rules, stop and redesign the seam
 instead of adding another local exception.
+
+## Pinned Debt For The Next Cleanup Pass
+
+The current checkpoint work still contains intentional containment fixes around
+renderer state restoration. They are acceptable only as temporary debt.
+
+Important pinned debt:
+
+- add a renderer-side scoped domain/target helper
+  - callers should enter a UI, world, tooltip, snapshot, or offscreen target
+    scope explicitly
+  - the helper should restore the full renderer state automatically
+  - callers should not manually bounce scale/domain state around
+- make render-domain state private enough that accidental direct mutation is
+  hard or impossible
+  - prefer getters/setters or scoped helpers over open mutation
+  - if that breaks many call sites, that is useful signal about where hidden
+    coupling still exists
+- UI scale should be globally owned by config / reload flow only
+- city/world zoom should be globally owned by zoom/game-state flow only
+- neither system should rely on an ambient shared "current scale" that can
+  drift between unrelated passes
+
+## Config Menu Composition Note
+
+The config menu tab row is not the same primitive contract as a generic small
+framed control.
+
+For this slice, treat the config tabs as:
+
+- top edge
+- left edge
+- right edge
+- open bottom
+
+The open bottom is not "missing art". It is resolved by restoring the parchment
+background strip that exists behind the selected tab before the main dialog
+frame border is drawn.

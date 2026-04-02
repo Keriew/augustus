@@ -3,6 +3,7 @@
 extern "C" {
 #include "game/system.h"
 #include "graphics/graphics.h"
+#include "graphics/renderer.h"
 #include "graphics/screen.h"
 #include "graphics/warning.h"
 #include "input/cursor.h"
@@ -156,6 +157,7 @@ void window_draw(int force)
 void window_draw_underlying_window(void)
 {
     if (data.underlying_windows_redrawing < MAX_QUEUE) {
+        graphics_renderer()->push_state();
         screen_set_ui_render_scale();
         ++data.underlying_windows_redrawing;
         decrease_queue_index();
@@ -163,9 +165,7 @@ void window_draw_underlying_window(void)
         window_behind->draw_background();
         window_behind->draw_foreground();
         increase_queue_index();
-        screen_set_ui_render_scale();
-        graphics_reset_dialog();
-        graphics_reset_clip_rectangle();
         --data.underlying_windows_redrawing;
+        graphics_renderer()->pop_state();
     }
 }

@@ -88,6 +88,8 @@ typedef struct {
     void (*set_output_scale)(float scale);
     void (*set_render_domain)(render_domain domain);
     render_domain (*get_render_domain)(void);
+    void (*push_state)(void);
+    void (*pop_state)(void);
 
     void (*draw_image)(const image *img, int x, int y, color_t color, float scale);
     void (*draw_image_request)(const render_2d_request *request);

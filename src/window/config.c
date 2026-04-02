@@ -1875,7 +1875,12 @@ static void draw_background(void)
         }
         page_buttons[i].x = page_x_offset - 10;
         page_buttons[i].width = w + 15;
-        data.graphics_behind_tab[i] = graphics_save_to_image(data.graphics_behind_tab[i], page_buttons[i].x, 75, page_buttons[i].width, 3);
+        data.graphics_behind_tab[i] = graphics_save_to_image(
+            data.graphics_behind_tab[i],
+            page_buttons[i].x,
+            75,
+            page_buttons[i].width,
+            3);
         page_x_offset += w;
     }
 

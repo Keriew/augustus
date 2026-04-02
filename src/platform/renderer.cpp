@@ -143,6 +143,8 @@ static struct {
 
 static render_state tooltip_render_state;
 static int tooltip_render_state_valid;
+static render_state render_state_stack[16];
+static int render_state_stack_depth;
 
 static void save_render_state(render_state *state)
 {
@@ -177,6 +179,24 @@ static void restore_render_state(const render_state *state)
         SDL_RenderSetClipRect(data.renderer, NULL);
     }
     SDL_SetRenderDrawBlendMode(data.renderer, state->blend_mode);
+}
+
+static void push_render_state(void)
+{
+    if (data.paused || render_state_stack_depth >= 16) {
+        return;
+    }
+    save_render_state(&render_state_stack[render_state_stack_depth]);
+    ++render_state_stack_depth;
+}
+
+static void pop_render_state(void)
+{
+    if (data.paused || render_state_stack_depth <= 0) {
+        return;
+    }
+    --render_state_stack_depth;
+    restore_render_state(&render_state_stack[render_state_stack_depth]);
 }
 
 static int save_screen_buffer(color_t *pixels, int x, int y, int width, int height, int row_width)
@@ -1113,14 +1133,12 @@ static void create_blend_texture(custom_image_type type)
     }
     const image *img = image_get(image_group(GROUP_TERRAIN_FLAT_TILE));
     SDL_Texture *flat_tile = get_texture(img->atlas.id);
-    SDL_Texture *former_target = SDL_GetRenderTarget(data.renderer);
-    SDL_Rect former_viewport;
-    SDL_Rect former_clip;
-    SDL_RenderGetViewport(data.renderer, &former_viewport);
-    SDL_RenderGetClipRect(data.renderer, &former_clip);
+    render_state current_state;
+    save_render_state(&current_state);
 
     SDL_SetRenderTarget(data.renderer, texture);
     SDL_Rect rect = { 0, 0, 58, 30 };
+    SDL_RenderSetScale(data.renderer, 1.0f, 1.0f);
     SDL_RenderSetClipRect(data.renderer, &rect);
     SDL_RenderSetViewport(data.renderer, &rect);
     SDL_SetRenderDrawColor(data.renderer, 0xff, 0xff, 0xff, 0xff);
@@ -1136,9 +1154,7 @@ static void create_blend_texture(custom_image_type type)
     SDL_Rect src_coords = { img->atlas.x_offset, img->atlas.y_offset, img->width, img->height };
     SDL_RenderCopy(data.renderer, flat_tile, &src_coords, 0);
 
-    SDL_SetRenderTarget(data.renderer, former_target);
-    SDL_RenderSetViewport(data.renderer, &former_viewport);
-    SDL_RenderSetClipRect(data.renderer, &former_clip);
+    restore_render_state(&current_state);
 
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_MOD);
 
@@ -1170,16 +1186,12 @@ static SDL_Texture *get_silhouette_texture(const image *img)
     }
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
     SDL_Texture *original_texture = get_texture(img->atlas.id);
-    SDL_Texture *former_target = SDL_GetRenderTarget(data.renderer);
-    SDL_Rect former_viewport;
-    SDL_Rect former_clip;
-    SDL_BlendMode former_blend_mode;
-    SDL_RenderGetViewport(data.renderer, &former_viewport);
-    SDL_RenderGetClipRect(data.renderer, &former_clip);
-    SDL_GetRenderDrawBlendMode(data.renderer, &former_blend_mode);
+    render_state current_state;
+    save_render_state(&current_state);
 
     SDL_SetRenderTarget(data.renderer, texture);
     SDL_Rect rect = { 0, 0, img->width, img->height };
+    SDL_RenderSetScale(data.renderer, 1.0f, 1.0f);
     SDL_RenderSetClipRect(data.renderer, &rect);
     SDL_RenderSetViewport(data.renderer, &rect);
     SDL_SetRenderDrawBlendMode(data.renderer, SDL_BLENDMODE_BLEND);
@@ -1207,15 +1219,13 @@ static SDL_Texture *get_silhouette_texture(const image *img)
     SDL_Surface *surface = SDL_CreateRGBSurface(0, img->width, img->height, 32,
         0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
     if (!surface) {
+        restore_render_state(&current_state);
         SDL_DestroyTexture(texture);
         return 0;
     }
     SDL_RenderReadPixels(data.renderer, 0, 0, surface->pixels, surface->pitch);
 
-    SDL_SetRenderTarget(data.renderer, former_target);
-    SDL_RenderSetViewport(data.renderer, &former_viewport);
-    SDL_RenderSetClipRect(data.renderer, &former_clip);
-    SDL_SetRenderDrawBlendMode(data.renderer, former_blend_mode);
+    restore_render_state(&current_state);
 
     SDL_Texture *final_texture = SDL_CreateTextureFromSurface(data.renderer, surface);
     SDL_FreeSurface(surface);
@@ -1392,6 +1402,8 @@ static void create_renderer_interface(void)
     data.renderer_interface.set_output_scale = set_output_scale;
     data.renderer_interface.set_render_domain = set_render_domain;
     data.renderer_interface.get_render_domain = get_render_domain;
+    data.renderer_interface.push_state = push_render_state;
+    data.renderer_interface.pop_state = pop_render_state;
     data.renderer_interface.draw_image = draw_texture;
     data.renderer_interface.draw_image_request = draw_image_request;
     data.renderer_interface.draw_image_advanced = draw_texture_advanced;
