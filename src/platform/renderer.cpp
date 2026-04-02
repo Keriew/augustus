@@ -624,6 +624,16 @@ static void set_texture_color_and_filter(SDL_Texture *texture, color_t color, in
 #endif
 }
 
+static float request_logical_width(const render_2d_request *request, const image *img)
+{
+    return request->logical_width > 0.0f ? request->logical_width : (float) img->width;
+}
+
+static float request_logical_height(const render_2d_request *request, const image *img)
+{
+    return request->logical_height > 0.0f ? request->logical_height : (float) img->height;
+}
+
 static void draw_texture_request(const render_2d_request *request, SDL_Texture *texture, int use_atlas_coords)
 {
     if (data.paused || !request || !request->img || !texture) {
@@ -642,12 +652,14 @@ static void draw_texture_request(const render_2d_request *request, SDL_Texture *
 
     float source_scale_x = g_render_2d_pipeline.source_scale_x(*request, *img);
     float source_scale_y = g_render_2d_pipeline.source_scale_y(*request, *img);
+    float logical_width = request_logical_width(request, img);
+    float logical_height = request_logical_height(request, img);
     int use_linear_filter = g_render_2d_pipeline.should_use_linear_filter(
         *request, *img, data.city_scale, data.disable_linear_filter);
     set_texture_color_and_filter(texture, request->color, use_linear_filter);
 
-    float x = request->x + img->x_offset;
-    float y = request->y + img->y_offset;
+    float x = request->x + (img->x_offset / source_scale_x);
+    float y = request->y + (img->y_offset / source_scale_y);
     int is_city_scale = fabsf(source_scale_x - data.city_scale) < 0.001f && fabsf(source_scale_y - data.city_scale) < 0.001f;
     int src_correction = is_city_scale && data.should_correct_texture_offset ? 1 : 0;
 
@@ -661,27 +673,28 @@ static void draw_texture_request(const render_2d_request *request, SDL_Texture *
     // which ends up simulating a grid without any performance penalty
     int grid_correction = (img->is_isometric && config_get(CONFIG_UI_SHOW_GRID) && data.city_scale > 2.0f) ?
         2 : -src_correction;
-
-    float coord_scale_x = request->disable_coord_scaling ? 1.0f : source_scale_x;
-    float coord_scale_y = request->disable_coord_scaling ? 1.0f : source_scale_y;
+    float grid_correction_x = grid_correction / source_scale_x;
+    float grid_correction_y = grid_correction / source_scale_y;
+    float dst_width = logical_width - grid_correction_x;
+    float dst_height = logical_height - grid_correction_y;
 
 #ifdef USE_RENDERCOPYF
     if (HAS_RENDERCOPYF) {
         SDL_FRect dst_coords = {
-            (x + grid_correction) / coord_scale_x,
-            (y + grid_correction) / coord_scale_y,
-            (img->width - grid_correction) / source_scale_x,
-            (img->height - grid_correction) / source_scale_y
+            x + grid_correction_x,
+            y + grid_correction_y,
+            dst_width,
+            dst_height
         };
         SDL_RenderCopyExF(data.renderer, texture, &src_coords, &dst_coords, request->angle, NULL, SDL_FLIP_NONE);
     } else
 #endif
     {
         SDL_Rect dst_coords = {
-            (int) round((x + grid_correction) / coord_scale_x),
-            (int) round((y + grid_correction) / coord_scale_y),
-            (int) round((img->width - grid_correction) / source_scale_x),
-            (int) round((img->height - grid_correction) / source_scale_y)
+            (int) round(x + grid_correction_x),
+            (int) round(y + grid_correction_y),
+            (int) round(dst_width),
+            (int) round(dst_height)
         };
         SDL_RenderCopyEx(data.renderer, texture, &src_coords, &dst_coords, request->angle, NULL, SDL_FLIP_NONE);
     }
@@ -724,7 +737,16 @@ static void draw_texture_advanced(const image *img, float x, float y, color_t co
 
 static void draw_texture(const image *img, int x, int y, color_t color, float scale)
 {
-    draw_texture_advanced(img, (float) x, (float) y, color, scale, scale, 0.0, 0);
+    render_2d_request request = {};
+    request.img = img;
+    request.x = scale ? x / scale : (float) x;
+    request.y = scale ? y / scale : (float) y;
+    request.logical_width = scale ? img->width / scale : (float) img->width;
+    request.logical_height = scale ? img->height / scale : (float) img->height;
+    request.color = color;
+    request.domain = data.active_render_domain;
+    request.scaling_policy = is_pixel_domain(request.domain) ? RENDER_SCALING_POLICY_PIXEL_ART : RENDER_SCALING_POLICY_AUTO;
+    draw_image_request(&request);
 }
 
 static void create_custom_texture(custom_image_type type, int width, int height, int is_yuv)
@@ -1226,8 +1248,8 @@ static void draw_silhouetted_texture(const image *img, int x, int y, color_t col
 {
     render_2d_request request = {};
     request.img = img;
-    request.x = (float) x;
-    request.y = (float) y;
+    request.x = scale ? x / scale : (float) x;
+    request.y = scale ? y / scale : (float) y;
     request.logical_width = scale ? img->width / scale : (float) img->width;
     request.logical_height = scale ? img->height / scale : (float) img->height;
     request.color = color;

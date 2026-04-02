@@ -16,6 +16,13 @@ public:
         int height_pixels,
         int has_focus,
         color_t color);
+    void draw_one_row_button_border(
+        int x,
+        int y,
+        int width_pixels,
+        int height_pixels,
+        int has_focus,
+        color_t color);
 
     void draw_outer_panel(int x, int y, int width_blocks, int height_blocks);
     void draw_unbordered_panel(int x, int y, int width_blocks, int height_blocks, color_t color);
@@ -26,6 +33,7 @@ public:
 
     void draw_image_button(int x, int y, const image_button &button);
     void draw_scrollbar_dot(const scrollbar_type &scrollbar);
+    void draw_slider(int x, int y, int width_pixels, int min_value, int max_value, int current_value);
 
     int save_region(int image_id, int x, int y, int width, int height);
     void draw_saved_region(int image_id, int x, int y);

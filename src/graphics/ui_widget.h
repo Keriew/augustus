@@ -1,7 +1,7 @@
 #ifndef GRAPHICS_UI_WIDGET_H
 #define GRAPHICS_UI_WIDGET_H
 
-#include "graphics/ui_primitives.h"
+#include "graphics/ui_primitive.h"
 
 class UiWidget {
 public:

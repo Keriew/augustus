@@ -6,14 +6,6 @@ extern "C" {
 
 namespace {
 
-float request_space_coord(float logical_coord, int native_size, int logical_size)
-{
-    if (logical_size <= 0 || native_size <= 0 || logical_size == native_size) {
-        return logical_coord;
-    }
-    return logical_coord * (native_size / static_cast<float>(logical_size));
-}
-
 render_2d_request make_request(
     const image *img,
     float x,
@@ -80,8 +72,8 @@ void UiPrimitives::draw_image(
 
     render_2d_request request = make_request(
         img,
-        request_space_coord(x, img->width, effective_logical_width),
-        request_space_coord(y, img->height, effective_logical_height),
+        x,
+        y,
         effective_logical_width,
         effective_logical_height,
         color,

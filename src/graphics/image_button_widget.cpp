@@ -1,5 +1,7 @@
 #include "graphics/image_button_widget.h"
 
+#include "graphics/ui_sprite_primitive.h"
+
 extern "C" {
 #include "core/image_group.h"
 }
@@ -49,11 +51,11 @@ void ImageButtonWidget::draw() const
         }
     }
 
-    primitives_.draw_image_rect(
+    UiSpritePrimitive(
+        primitives_,
         image_id,
         x_ + button_.x_offset,
         y_ + button_.y_offset,
-        0,
-        0,
-        COLOR_MASK_NONE);
+        COLOR_MASK_NONE)
+        .draw();
 }

@@ -1,5 +1,7 @@
 #include "graphics/scrollbar_widget.h"
 
+#include "graphics/ui_sprite_primitive.h"
+
 extern "C" {
 #include "core/calc.h"
 #include "core/image_group.h"
@@ -38,11 +40,12 @@ void ScrollbarWidget::draw() const
         offset = scrollbar_.scrollbar_dot_drag_offset;
     }
 
-    primitives_.draw_image_rect(
+    UiSpritePrimitive dot(
+        primitives_,
         image_group(GROUP_PANEL_BUTTON) + 39,
         scrollbar_.x + (scroll_button_width - scroll_dot_size) / 2,
         scrollbar_.y + offset + scroll_button_height + scrollbar_.dot_padding,
-        scroll_dot_size,
-        scroll_dot_size,
         COLOR_MASK_NONE);
+    dot.set_logical_size(scroll_dot_size, scroll_dot_size);
+    dot.draw();
 }

@@ -1,5 +1,7 @@
 #include "graphics/label_widget.h"
 
+#include "graphics/ui_tiled_strip_primitive.h"
+
 extern "C" {
 #include "core/image_group.h"
 #include "graphics/panel.h"
@@ -18,26 +20,29 @@ LabelWidget::LabelWidget(UiPrimitives &primitives, LabelWidgetStyle style, int x
 void LabelWidget::draw() const
 {
     int image_base = image_group(GROUP_PANEL_BUTTON);
-    for (int i = 0; i < width_blocks_; ++i) {
-        int image_id;
-        if (style_ == LabelWidgetStyle::Large) {
-            if (i == 0) {
-                image_id = 3 * type_;
-            } else if (i < width_blocks_ - 1) {
-                image_id = 3 * type_ + 1;
-            } else {
-                image_id = 3 * type_ + 2;
-            }
-        } else {
-            if (i == 0) {
-                image_id = 3 * type_ + 40;
-            } else if (i < width_blocks_ - 1) {
-                image_id = 3 * type_ + 41;
-            } else {
-                image_id = 3 * type_ + 42;
-            }
-        }
+    int start_image_id;
+    int middle_image_id;
+    int end_image_id;
 
-        primitives_.draw_image_rect(image_base + image_id, x_ + BLOCK_SIZE * i, y_, 0, 0, COLOR_MASK_NONE);
+    if (style_ == LabelWidgetStyle::Large) {
+        start_image_id = image_base + 3 * type_;
+        middle_image_id = image_base + 3 * type_ + 1;
+        end_image_id = image_base + 3 * type_ + 2;
+    } else {
+        start_image_id = image_base + 3 * type_ + 40;
+        middle_image_id = image_base + 3 * type_ + 41;
+        end_image_id = image_base + 3 * type_ + 42;
     }
+
+    UiTiledStripPrimitive(
+        primitives_,
+        start_image_id,
+        middle_image_id,
+        end_image_id,
+        x_,
+        y_,
+        width_blocks_,
+        0,
+        0)
+        .draw();
 }

@@ -6,6 +6,9 @@
 #include "graphics/panel_widget.h"
 #include "graphics/scrollbar_widget.h"
 #include "graphics/top_menu_panel_widget.h"
+#include "graphics/ui_one_row_border_primitive.h"
+#include "graphics/ui_saved_region_primitive.h"
+#include "graphics/ui_slider_primitive.h"
 #include "graphics/ui_runtime_api.h"
 
 SharedUiRuntime &shared_ui_runtime(void)
@@ -23,6 +26,17 @@ void SharedUiRuntime::draw_button_border(
     color_t color)
 {
     BorderedButtonWidget(primitives_, x, y, width_pixels, height_pixels, has_focus, color).draw();
+}
+
+void SharedUiRuntime::draw_one_row_button_border(
+    int x,
+    int y,
+    int width_pixels,
+    int height_pixels,
+    int has_focus,
+    color_t color)
+{
+    UiOneRowBorderPrimitive(primitives_, x, y, width_pixels, height_pixels, has_focus, color).draw();
 }
 
 void SharedUiRuntime::draw_outer_panel(int x, int y, int width_blocks, int height_blocks)
@@ -67,14 +81,25 @@ void SharedUiRuntime::draw_scrollbar_dot(const scrollbar_type &scrollbar)
     ScrollbarWidget(primitives_, scrollbar).draw();
 }
 
+void SharedUiRuntime::draw_slider(
+    int x,
+    int y,
+    int width_pixels,
+    int min_value,
+    int max_value,
+    int current_value)
+{
+    UiSliderPrimitive(primitives_, x, y, width_pixels, min_value, max_value, current_value).draw();
+}
+
 int SharedUiRuntime::save_region(int image_id, int x, int y, int width, int height)
 {
-    return primitives_.save_region(image_id, x, y, width, height);
+    return UiSavedRegionPrimitive(primitives_, image_id, x, y, width, height).save();
 }
 
 void SharedUiRuntime::draw_saved_region(int image_id, int x, int y)
 {
-    primitives_.draw_saved_region(image_id, x, y);
+    UiSavedRegionPrimitive(primitives_, image_id, x, y, 0, 0).draw();
 }
 
 extern "C" {
@@ -88,6 +113,17 @@ void ui_runtime_draw_button_border(
     color_t color)
 {
     shared_ui_runtime().draw_button_border(x, y, width_pixels, height_pixels, has_focus, color);
+}
+
+void ui_runtime_draw_one_row_button_border(
+    int x,
+    int y,
+    int width_pixels,
+    int height_pixels,
+    int has_focus,
+    color_t color)
+{
+    shared_ui_runtime().draw_one_row_button_border(x, y, width_pixels, height_pixels, has_focus, color);
 }
 
 void ui_runtime_draw_outer_panel(int x, int y, int width_blocks, int height_blocks)
@@ -134,6 +170,17 @@ void ui_runtime_draw_scrollbar_dot(const scrollbar_type *scrollbar)
         return;
     }
     shared_ui_runtime().draw_scrollbar_dot(*scrollbar);
+}
+
+void ui_runtime_draw_slider(
+    int x,
+    int y,
+    int width_pixels,
+    int min_value,
+    int max_value,
+    int current_value)
+{
+    shared_ui_runtime().draw_slider(x, y, width_pixels, min_value, max_value, current_value);
 }
 
 int ui_runtime_save_to_image(int image_id, int x, int y, int width, int height)
