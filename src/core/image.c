@@ -5,6 +5,7 @@
 #include "building/image.h"
 #include "core/buffer.h"
 #include "core/file.h"
+#include "core/image_payload.h"
 #include "core/image_packer.h"
 #include "core/io.h"
 #include "core/log.h"
@@ -616,17 +617,13 @@ static void free_draw_data(image_draw_data *draw_datas, int entries)
 
 static void release_image_resource_tree(image *img)
 {
-    const graphics_renderer_interface *renderer = graphics_renderer();
     if (!img) {
         return;
     }
-    if (!renderer || !renderer->release_image_resource) {
-        return;
-    }
     if (img->top) {
-        renderer->release_image_resource(img->top);
+        image_payload_release(img->top);
     }
-    renderer->release_image_resource(img);
+    image_payload_release(img);
 }
 
 static int upload_cropped_image_resource(
@@ -684,7 +681,40 @@ static int upload_atlas_image_resource(image *img, const image_atlas_data *atlas
         img->atlas.y_offset);
 }
 
-static void upload_atlas_image_resources(image *images, int size, const image_atlas_data *atlas_data, atlas_type type)
+static void make_legacy_image_resource_key(
+    char *buffer,
+    size_t buffer_size,
+    const char *domain,
+    const char *source_name,
+    int index,
+    int is_top)
+{
+    const char *safe_source_name = source_name && *source_name ? source_name : "unknown";
+    snprintf(buffer, buffer_size, "Graphics/Legacy/%s/%s/%d%s", domain, safe_source_name, index, is_top ? "/top" : "");
+}
+
+static void register_legacy_image_payload(
+    image *img,
+    const char *domain,
+    const char *source_name,
+    int index,
+    int is_top)
+{
+    if (!img || img->resource_handle <= 0) {
+        return;
+    }
+    char key[FILE_NAME_MAX];
+    make_legacy_image_resource_key(key, sizeof(key), domain, source_name, index, is_top);
+    image_payload_register(img, key);
+}
+
+static void upload_atlas_image_resources(
+    image *images,
+    int size,
+    const image_atlas_data *atlas_data,
+    atlas_type type,
+    const char *domain,
+    const char *source_name)
 {
     for (int i = 0; i < size; i++) {
         image *img = &images[i];
@@ -695,8 +725,10 @@ static void upload_atlas_image_resources(image *images, int size, const image_at
             continue;
         }
         upload_atlas_image_resource(img, atlas_data);
+        register_legacy_image_payload(img, domain, source_name, i, 0);
         if (img->top) {
             upload_atlas_image_resource(img->top, atlas_data);
+            register_legacy_image_payload(img->top, domain, source_name, i, 1);
         }
     }
 }
@@ -830,7 +862,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     free_draw_data(draw_data, IMAGE_MAIN_ENTRIES);
     free(tmp_data);
     make_plain_fonts_white(data.main, atlas_data, image_group(GROUP_FONT));
-    upload_atlas_image_resources(data.main, IMAGE_MAIN_ENTRIES, atlas_data, ATLAS_MAIN);
+    upload_atlas_image_resources(data.main, IMAGE_MAIN_ENTRIES, atlas_data, ATLAS_MAIN, "main", filename_idx);
     if (!keep_atlas_buffers) {
         if (!assets_init(data.is_editor != is_editor, atlas_data->buffers, atlas_data->image_widths)) {
             image_packer_free(&data.packer);
@@ -945,7 +977,7 @@ static int load_external_fonts(int base_offset)
     free(tmp_data);
     free_draw_data(draw_data, EXTERNAL_FONT_ENTRIES);
     make_plain_fonts_white(data.font, atlas_data, base_offset);
-    upload_atlas_image_resources(data.font, EXTERNAL_FONT_ENTRIES, atlas_data, ATLAS_FONT);
+    upload_atlas_image_resources(data.font, EXTERNAL_FONT_ENTRIES, atlas_data, ATLAS_FONT, "font", EXTERNAL_FONTS_SG2);
     graphics_renderer()->create_image_atlas(atlas_data, 1);
     image_packer_free(&data.packer);
 
@@ -1190,7 +1222,7 @@ static int load_multibyte_font(multibyte_font_type type)
         }
     }
 
-    upload_atlas_image_resources(data.font, entries, atlas_data, ATLAS_FONT);
+    upload_atlas_image_resources(data.font, entries, atlas_data, ATLAS_FONT, "font", font_info->file_v2 ? font_info->file_v2 : font_info->file_v1);
     graphics_renderer()->create_image_atlas(atlas_data, 1);
 
     log_info("Done parsing font", font_info->name, 0);
@@ -1290,7 +1322,7 @@ int image_load_enemy(int enemy_id)
     free(tmp_data);
     free_draw_data(draw_data, ENEMY_ENTRIES);
     data.current_enemy = enemy_id;
-    upload_atlas_image_resources(data.enemy, ENEMY_ENTRIES, atlas_data, ATLAS_ENEMY);
+    upload_atlas_image_resources(data.enemy, ENEMY_ENTRIES, atlas_data, ATLAS_ENEMY, "enemy", filename_idx);
     graphics_renderer()->create_image_atlas(atlas_data, 1);
     image_packer_free(&data.packer);
 

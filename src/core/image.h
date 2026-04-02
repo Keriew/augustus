@@ -67,6 +67,8 @@ typedef struct image {
         int y_offset;
     } atlas;
     image_handle resource_handle;
+    char *resource_key;
+    void *resource_payload;
 } image;
 
 /**

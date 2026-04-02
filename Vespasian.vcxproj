@@ -114,7 +114,9 @@
     <ClCompile Include="src\core\encoding_trad_chinese.c" />
     <ClCompile Include="src\core\file.c" />
     <ClCompile Include="src\core\hotkey_config.c" />
+    <ClCompile Include="src\core\image_data.cpp" />
     <ClCompile Include="src\core\image.c" />
+    <ClCompile Include="src\core\image_payload.cpp" />
     <ClCompile Include="src\core\image_packer.c" />
     <ClCompile Include="src\core\io.c" />
     <ClCompile Include="src\core\lang.cpp" />
@@ -600,6 +602,7 @@
     <ClInclude Include="src\core\encoding_trad_chinese.h" />
     <ClInclude Include="src\core\file.h" />
     <ClInclude Include="src\core\hotkey_config.h" />
+    <ClInclude Include="src\core\image_data.h" />
     <ClInclude Include="src\core\image.h" />
     <ClInclude Include="src\core\image_group.h" />
     <ClInclude Include="src\core\image_group_editor.h" />
