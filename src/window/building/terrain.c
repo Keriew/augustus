@@ -6,7 +6,7 @@
 
 #include "figure/figure.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "sound/speech.h"
 #include "window/building/figures.h"
 

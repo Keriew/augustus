@@ -2,10 +2,8 @@
 
 #include "graphics/ui_tiled_strip_primitive.h"
 
-extern "C" {
 #include "core/image_group.h"
-#include "graphics/panel.h"
-}
+#include "graphics/ui_constants.h"
 
 LabelWidget::LabelWidget(UiPrimitives &primitives, LabelWidgetStyle style, int x, int y, int width_blocks, int type)
     : UiWidget(primitives)

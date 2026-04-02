@@ -12,13 +12,12 @@
 #include "empire/trade_route.h"
 #include "empire/type.h"
 #include "graphics/arrow_button.h"
-#include "graphics/button.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
@@ -626,7 +625,7 @@ static int draw_resource(resource_type resource, int trade_max, int x_offset, in
         time_millis elapsed = time_get_millis() - data.resource_pulse_start;
         float time_seconds = elapsed / 1000.0f; // Convert to seconds
         float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
-        int alpha = 96 + (int) (pulse * 64); // Range: 32â€“160
+        int alpha = 96 + (int) (pulse * 64); // Range: 32Ã¢â‚¬â€œ160
         graphics_tint_rect(x_offset, y_offset, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
             COLOR_MASK_DARK_PINK, alpha);
     }

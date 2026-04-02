@@ -1,5 +1,8 @@
-#ifndef PLATFORM_VITA_H
-#define PLATFORM_VITA_H
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __vita__
 
@@ -24,4 +27,7 @@ void platform_hide_virtual_keyboard(void);
 #define PLATFORM_NO_USER_DIRECTORIES
 
 #endif // __vita__
-#endif // PLATFORM_VITA_H
+
+#ifdef __cplusplus
+}
+#endif

@@ -206,7 +206,6 @@
     <ClCompile Include="src\game\undo.cpp" />
     <ClCompile Include="src\graphics\arrow_button.c" />
     <ClCompile Include="src\graphics\bordered_button_widget.cpp" />
-    <ClCompile Include="src\graphics\button.c" />
     <ClCompile Include="src\graphics\clouds.c" />
     <ClCompile Include="src\graphics\complex_button.c" />
     <ClCompile Include="src\graphics\font.cpp" />
@@ -220,7 +219,6 @@
     <ClCompile Include="src\graphics\lang_text.c" />
     <ClCompile Include="src\graphics\list_box.c" />
     <ClCompile Include="src\graphics\menu.c" />
-    <ClCompile Include="src\graphics\panel.c" />
     <ClCompile Include="src\graphics\panel_widget.cpp" />
     <ClCompile Include="src\graphics\renderer.c" />
     <ClCompile Include="src\graphics\rich_text.c" />
@@ -701,7 +699,6 @@
     <ClInclude Include="src\game\undo.h" />
     <ClInclude Include="src\graphics\arrow_button.h" />
     <ClInclude Include="src\graphics\bordered_button_widget.h" />
-    <ClInclude Include="src\graphics\button.h" />
     <ClInclude Include="src\graphics\button_widget.h" />
     <ClInclude Include="src\graphics\clouds.h" />
     <ClInclude Include="src\graphics\color.h" />
@@ -717,7 +714,6 @@
     <ClInclude Include="src\graphics\lang_text.h" />
     <ClInclude Include="src\graphics\list_box.h" />
     <ClInclude Include="src\graphics\menu.h" />
-    <ClInclude Include="src\graphics\panel.h" />
     <ClInclude Include="src\graphics\panel_widget.h" />
     <ClInclude Include="src\graphics\renderer.h" />
     <ClInclude Include="src\graphics\rich_text.h" />
@@ -735,6 +731,7 @@
     <ClInclude Include="src\graphics\ui_primitives.h" />
     <ClInclude Include="src\graphics\ui_runtime.h" />
     <ClInclude Include="src\graphics\ui_runtime_api.h" />
+    <ClInclude Include="src\graphics\ui_constants.h" />
     <ClInclude Include="src\graphics\ui_saved_region_primitive.h" />
     <ClInclude Include="src\graphics\ui_slider_primitive.h" />
     <ClInclude Include="src\graphics\ui_sprite_primitive.h" />

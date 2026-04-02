@@ -1,4 +1,3 @@
-extern "C" {
 #include "renderer.h"
 
 #include "core/calc.h"
@@ -13,7 +12,6 @@ extern "C" {
 #include "platform/screen.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
-}
 
 #include "platform/render_2d_pipeline.h"
 

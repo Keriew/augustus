@@ -1,10 +1,8 @@
 #include "graphics.h"
 
-extern "C" {
 #include "graphics/renderer.h"
 #include "graphics/screen.h"
 #include "graphics/ui_runtime_api.h"
-}
 
 static void set_translation(int x, int y)
 {

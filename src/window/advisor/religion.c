@@ -6,11 +6,10 @@
 #include "city/gods.h"
 #include "city/houses.h"
 #include "game/settings.h"
-#include "graphics/button.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
 #include "graphics/text.h"
 #include "window/hold_festival.h"
 

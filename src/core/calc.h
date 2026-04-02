@@ -1,9 +1,12 @@
-#ifndef CORE_CALC_H
-#define CORE_CALC_H
+#pragma once
 
 #include "core/direction.h"
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @file
@@ -112,5 +115,6 @@ double calc_bound_double(double value, double min, double max);
  */
 int calc_absolute_decrement(int value, int *step);
 
-
-#endif // CORE_CALC_H
+#ifdef __cplusplus
+}
+#endif

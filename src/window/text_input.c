@@ -6,7 +6,7 @@
 #include "core/string.h"
 #include "graphics/graphics.h"
 #include "graphics/image_button.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/lang_text.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
@@ -160,7 +160,7 @@ void window_text_input_show(const uint8_t *title, const uint8_t *placeholder, co
         handle_input,
     };
 
-    // EXACT previous behavior — uses allow_punctuation = 1, no whitelist
+    // EXACT previous behavior â€” uses allow_punctuation = 1, no whitelist
     init(title, placeholder, text, max_length, NULL, callback);
     window_show(&window);
 }
@@ -175,7 +175,7 @@ void window_text_input_expanded_show(const uint8_t *title, const uint8_t *placeh
         handle_input,
     };
 
-    // New mode — caller provides allowed character list
+    // New mode â€” caller provides allowed character list
     init(title, placeholder, text, max_length, allowed_chars, callback);
     window_show(&window);
 }

@@ -1,7 +1,10 @@
-#ifndef CITY_WARNING_H
-#define CITY_WARNING_H
+#pragma once
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
     WARNING_ORIENTATION = 1,
@@ -104,4 +107,6 @@ void city_warning_clear_id(int id);
 void city_warning_clear_all(void);
 void city_warning_clear_outdated(void);
 
-#endif // CITY_WARNING_H
+#ifdef __cplusplus
+}
+#endif

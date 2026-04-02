@@ -1,5 +1,8 @@
-#ifndef GRAPHICS_IMAGE_GROUP_H
-#define GRAPHICS_IMAGE_GROUP_H
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum {
     GROUP_TERRAIN_BLACK = 1,
@@ -248,4 +251,6 @@ enum {
     GROUP_SELECT_MISSION_BUTTON = 254,
 };
 
-#endif // GRAPHICS_IMAGE_GROUP_H
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,4 @@
-#ifndef GRAPHICS_UI_PRIMITIVES_H
-#define GRAPHICS_UI_PRIMITIVES_H
+#pragma once
 
 #include "core/image.h"
 #include "graphics/color.h"
@@ -33,9 +32,10 @@ public:
 
     int save_region(int image_id, int x, int y, int width, int height) const;
     void draw_saved_region(int image_id, int x, int y) const;
+    void push_renderer_state() const;
+    void pop_renderer_state() const;
+    void set_clip_rectangle(int x, int y, int width, int height) const;
 
 private:
     int logical_size_or_native(int logical_size, int native_size) const;
 };
-
-#endif // GRAPHICS_UI_PRIMITIVES_H

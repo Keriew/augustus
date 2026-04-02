@@ -1,7 +1,10 @@
-#ifndef GAME_SETTINGS_H
-#define GAME_SETTINGS_H
+#pragma once
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
     TOOLTIPS_NONE = 0,
@@ -76,4 +79,6 @@ int setting_personal_savings_for_mission(int mission_id);
 void setting_set_personal_savings_for_mission(int mission_id, int savings);
 void setting_clear_personal_savings(void);
 
-#endif // GAME_SETTINGS_H
+#ifdef __cplusplus
+}
+#endif

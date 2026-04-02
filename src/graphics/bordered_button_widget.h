@@ -1,5 +1,4 @@
-#ifndef GRAPHICS_BORDERED_BUTTON_WIDGET_H
-#define GRAPHICS_BORDERED_BUTTON_WIDGET_H
+#pragma once
 
 #include "graphics/button_widget.h"
 
@@ -17,10 +16,14 @@ public:
     void draw() const;
 
 private:
+    void draw_container() const;
+    void draw_fill() const;
+    void draw_border() const;
+    int width_blocks() const;
+    int height_blocks() const;
+
     int width_pixels_;
     int height_pixels_;
     int has_focus_;
     color_t color_;
 };
-
-#endif // GRAPHICS_BORDERED_BUTTON_WIDGET_H

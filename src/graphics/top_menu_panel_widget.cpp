@@ -2,10 +2,8 @@
 
 #include "graphics/ui_sprite_primitive.h"
 
-extern "C" {
 #include "core/image_group.h"
-#include "graphics/panel.h"
-}
+#include "graphics/ui_constants.h"
 
 TopMenuPanelWidget::TopMenuPanelWidget(UiPrimitives &primitives, int x, int y, int width)
     : UiWidget(primitives)

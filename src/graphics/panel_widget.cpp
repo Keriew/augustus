@@ -22,20 +22,18 @@ PanelWidget::PanelWidget(
 
 void PanelWidget::draw() const
 {
-    UiPanelPrimitiveStyle primitive_style = UiPanelPrimitiveStyle::Inner;
     switch (style_) {
         case PanelWidgetStyle::Outer:
-            primitive_style = UiPanelPrimitiveStyle::Outer;
+            draw_outer();
             break;
         case PanelWidgetStyle::Unbordered:
-            primitive_style = UiPanelPrimitiveStyle::Unbordered;
+            draw_unbordered();
             break;
         case PanelWidgetStyle::Inner:
         default:
-            primitive_style = UiPanelPrimitiveStyle::Inner;
+            draw_inner();
             break;
     }
-    UiPanelPrimitive(primitives_, primitive_style, x_, y_, width_blocks_, height_blocks_, color_).draw();
 }
 
 void PanelWidget::draw_outer() const

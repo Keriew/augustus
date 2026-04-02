@@ -1,11 +1,7 @@
-#ifndef GRAPHICS_IMAGE_BUTTON_WIDGET_H
-#define GRAPHICS_IMAGE_BUTTON_WIDGET_H
+#pragma once
 
 #include "graphics/button_widget.h"
-
-extern "C" {
 #include "graphics/image_button.h"
-}
 
 class ImageButtonWidget : public ButtonWidget {
 public:
@@ -19,5 +15,3 @@ private:
 
     const image_button &button_;
 };
-
-#endif // GRAPHICS_IMAGE_BUTTON_WIDGET_H

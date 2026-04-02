@@ -7,7 +7,7 @@
 #include "game/system.h"
 #include "graphics/image_button.h"
 #include "graphics/generic_button.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
 #include "graphics/screen.h"

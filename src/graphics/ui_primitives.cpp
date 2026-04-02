@@ -1,8 +1,6 @@
 #include "graphics/ui_primitives.h"
 
-extern "C" {
 #include "assets/assets.h"
-}
 
 namespace {
 
@@ -111,4 +109,19 @@ int UiPrimitives::save_region(int image_id, int x, int y, int width, int height)
 void UiPrimitives::draw_saved_region(int image_id, int x, int y) const
 {
     graphics_renderer()->draw_image_to_screen_for_domain(graphics_renderer()->get_render_domain(), image_id, x, y);
+}
+
+void UiPrimitives::push_renderer_state() const
+{
+    graphics_renderer()->push_state();
+}
+
+void UiPrimitives::pop_renderer_state() const
+{
+    graphics_renderer()->pop_state();
+}
+
+void UiPrimitives::set_clip_rectangle(int x, int y, int width, int height) const
+{
+    graphics_renderer()->set_clip_rectangle(x, y, width, height);
 }

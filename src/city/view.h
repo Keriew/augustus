@@ -1,7 +1,10 @@
-#ifndef CITY_VIEW_H
-#define CITY_VIEW_H
+#pragma once
 
 #include "core/buffer.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // TODO get rid of these
 #define VIEW_X_MAX 165
@@ -93,4 +96,6 @@ void city_view_foreach_minimap_tile(
     int x_offset, int y_offset, int absolute_x, int absolute_y,
     int width_tiles, int height_tiles, map_callback *callback);
 
-#endif // CITY_VIEW_H
+#ifdef __cplusplus
+}
+#endif

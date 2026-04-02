@@ -3,11 +3,9 @@
 #include "graphics/ui_panel_primitive.h"
 #include "graphics/ui_sprite_primitive.h"
 
-extern "C" {
 #include "core/calc.h"
 #include "core/image_group.h"
-#include "graphics/panel.h"
-}
+#include "graphics/ui_constants.h"
 
 namespace {
 

@@ -104,6 +104,57 @@ void SharedUiRuntime::draw_saved_region(int image_id, int x, int y)
 
 extern "C" {
 
+void button_none(int param1, int param2)
+{
+    (void) param1;
+    (void) param2;
+}
+
+void button_border_draw(int x, int y, int width_pixels, int height_pixels, int has_focus)
+{
+    shared_ui_runtime().draw_button_border(x, y, width_pixels, height_pixels, has_focus, COLOR_MASK_NONE);
+}
+
+void button_border_draw_colored(int x, int y, int width_pixels, int height_pixels, int has_focus, color_t color)
+{
+    shared_ui_runtime().draw_button_border(x, y, width_pixels, height_pixels, has_focus, color);
+}
+
+void outer_panel_draw(int x, int y, int width_blocks, int height_blocks)
+{
+    shared_ui_runtime().draw_outer_panel(x, y, width_blocks, height_blocks);
+}
+
+void unbordered_panel_draw_colored(int x, int y, int width_blocks, int height_blocks, color_t color)
+{
+    shared_ui_runtime().draw_unbordered_panel(x, y, width_blocks, height_blocks, color);
+}
+
+void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
+{
+    shared_ui_runtime().draw_unbordered_panel(x, y, width_blocks, height_blocks, COLOR_MASK_NONE);
+}
+
+void inner_panel_draw(int x, int y, int width_blocks, int height_blocks)
+{
+    shared_ui_runtime().draw_inner_panel(x, y, width_blocks, height_blocks);
+}
+
+void label_draw(int x, int y, int width_blocks, int type)
+{
+    shared_ui_runtime().draw_label(x, y, width_blocks, type);
+}
+
+void large_label_draw(int x, int y, int width_blocks, int type)
+{
+    shared_ui_runtime().draw_large_label(x, y, width_blocks, type);
+}
+
+int top_menu_black_panel_draw(int x, int y, int width)
+{
+    return shared_ui_runtime().draw_top_menu_black_panel(x, y, width);
+}
+
 void ui_runtime_draw_button_border(
     int x,
     int y,

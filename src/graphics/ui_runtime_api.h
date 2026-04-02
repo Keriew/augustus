@@ -1,13 +1,26 @@
-#ifndef GRAPHICS_UI_RUNTIME_API_H
-#define GRAPHICS_UI_RUNTIME_API_H
+#pragma once
 
 #include "graphics/color.h"
 #include "graphics/image_button.h"
 #include "graphics/scrollbar.h"
+#include "graphics/ui_constants.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void button_none(int param1, int param2);
+
+void button_border_draw(int x, int y, int width_pixels, int height_pixels, int has_focus);
+void button_border_draw_colored(int x, int y, int width_pixels, int height_pixels, int has_focus, color_t color);
+
+void outer_panel_draw(int x, int y, int width_blocks, int height_blocks);
+void inner_panel_draw(int x, int y, int width_blocks, int height_blocks);
+void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks);
+void unbordered_panel_draw_colored(int x, int y, int width_blocks, int height_blocks, color_t color);
+void label_draw(int x, int y, int width_blocks, int type);
+void large_label_draw(int x, int y, int width_blocks, int type);
+int top_menu_black_panel_draw(int x, int y, int width);
 
 void ui_runtime_draw_button_border(
     int x,
@@ -41,5 +54,3 @@ void ui_runtime_draw_from_image(int image_id, int x, int y);
 #ifdef __cplusplus
 }
 #endif
-
-#endif // GRAPHICS_UI_RUNTIME_API_H

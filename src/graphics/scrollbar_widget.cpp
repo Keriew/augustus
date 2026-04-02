@@ -2,10 +2,8 @@
 
 #include "graphics/ui_sprite_primitive.h"
 
-extern "C" {
 #include "core/calc.h"
 #include "core/image_group.h"
-}
 
 ScrollbarWidget::ScrollbarWidget(UiPrimitives &primitives, const scrollbar_type &scrollbar)
     : UiWidget(primitives)

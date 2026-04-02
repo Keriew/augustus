@@ -1,8 +1,7 @@
 #include "grid_box.h"
 
-#include "graphics/button.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/font.h"
-#include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/scroll.h"
@@ -178,7 +177,7 @@ void grid_box_set_bounds(grid_box_type *grid_box, int new_x, int new_y, unsigned
             calculate_scrollable_items(grid_box)
         );
 
-        // Tell the grid‐box to redraw itself with the new bounds.
+        // Tell the gridâ€box to redraw itself with the new bounds.
         grid_box_request_refresh(grid_box);
     }
 }

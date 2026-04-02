@@ -1,11 +1,7 @@
-#ifndef GRAPHICS_SCROLLBAR_WIDGET_H
-#define GRAPHICS_SCROLLBAR_WIDGET_H
+#pragma once
 
 #include "graphics/ui_widget.h"
-
-extern "C" {
 #include "graphics/scrollbar.h"
-}
 
 class ScrollbarWidget : public UiWidget {
 public:
@@ -16,5 +12,3 @@ public:
 private:
     const scrollbar_type &scrollbar_;
 };
-
-#endif // GRAPHICS_SCROLLBAR_WIDGET_H

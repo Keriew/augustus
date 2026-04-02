@@ -2,9 +2,7 @@
 
 #include "graphics/ui_sprite_primitive.h"
 
-extern "C" {
 #include "core/image_group.h"
-}
 
 #include <string_view>
 

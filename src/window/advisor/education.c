@@ -7,7 +7,7 @@
 #include "core/lang.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/text.h"
 
 #define ADVISOR_HEIGHT 17
