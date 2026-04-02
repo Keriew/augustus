@@ -431,6 +431,113 @@ static void push_reference(
     destination.push_back(std::move(reference));
 }
 
+static bool is_local_reference(const AtlasReference &reference);
+
+static int translate_reference_group_key(const AtlasReference &source_reference, std::string &translated_group_key)
+{
+    translated_group_key.clear();
+    if (source_reference.group.empty() || is_local_reference(source_reference)) {
+        return 0;
+    }
+
+    char *end = nullptr;
+    const long numeric_group = strtol(source_reference.group.c_str(), &end, 10);
+    if (end && *end == '\0') {
+        char group_key[FILE_NAME_MAX];
+        if (!legacy_image_extractor_get_group_key(static_cast<int>(numeric_group), group_key, sizeof(group_key))) {
+            return -1;
+        }
+        translated_group_key = group_key;
+        return translated_group_key.empty() ? -1 : 1;
+    }
+
+    translated_group_key = normalize_key(source_reference.group.c_str());
+    return translated_group_key.empty() ? -1 : 1;
+}
+
+static void set_output_group_key(OutputGroup &output_group, const std::string &group_key)
+{
+    output_group.group_key = group_key;
+
+    const size_t separator = group_key.rfind('\\');
+    if (separator == std::string::npos) {
+        output_group.family_name.clear();
+        output_group.group_name = group_key;
+    } else {
+        output_group.family_name = group_key.substr(0, separator);
+        output_group.group_name = group_key.substr(separator + 1);
+    }
+
+    output_group.directory_path = append_path_component(make_augustus_graphics_root(), output_group.group_key);
+    output_group.xml_path = append_path_component(make_augustus_graphics_root(), output_group.group_key + ".xml");
+}
+
+static std::string choose_canonical_group_key(const AtlasDocument &document, const OutputGroup &output_group)
+{
+    std::string canonical_group_key;
+    int invalid_reference = 0;
+
+    for (int image_index : output_group.image_indices) {
+        const AtlasImage &image_data = document.images[image_index];
+
+        auto visit_reference = [&](const AtlasReference &reference) {
+            std::string translated_group_key;
+            const int translated = translate_reference_group_key(reference, translated_group_key);
+            if (translated < 0) {
+                invalid_reference = 1;
+                return;
+            }
+            if (translated == 0) {
+                return;
+            }
+            if (canonical_group_key.empty()) {
+                canonical_group_key = std::move(translated_group_key);
+                return;
+            }
+            if (canonical_group_key != translated_group_key) {
+                invalid_reference = 2;
+                canonical_group_key.clear();
+            }
+        };
+
+        for (const AtlasReference &reference : image_data.layers) {
+            visit_reference(reference);
+            if (invalid_reference == 2) {
+                break;
+            }
+        }
+        if (invalid_reference == 2) {
+            break;
+        }
+
+        for (const AtlasAnimationFrame &frame : image_data.animation.frames_data) {
+            visit_reference(frame.reference);
+            if (invalid_reference == 2) {
+                break;
+            }
+        }
+        if (invalid_reference == 2) {
+            break;
+        }
+    }
+
+    if (invalid_reference == 1) {
+        log_info(
+            "Falling back to assetlist-derived Augustus output path because a referenced group key was invalid",
+            output_group.group_key.c_str(),
+            0);
+        return {};
+    }
+    if (invalid_reference == 2) {
+        log_info(
+            "Falling back to assetlist-derived Augustus output path because wrapper references were ambiguous",
+            output_group.group_key.c_str(),
+            0);
+        return {};
+    }
+    return canonical_group_key;
+}
+
 static int xml_start_image(void)
 {
     AtlasImage image_data;
@@ -746,9 +853,12 @@ static std::vector<OutputGroup> build_output_groups(const AtlasDocument &documen
         }
         name_count++;
 
-        output_group.group_key = output_group.family_name + "\\" + output_group.group_name;
-        output_group.directory_path = append_path_component(make_augustus_graphics_root(), output_group.group_key);
-        output_group.xml_path = append_path_component(make_augustus_graphics_root(), output_group.group_key + ".xml");
+        set_output_group_key(output_group, output_group.family_name + "\\" + output_group.group_name);
+
+        const std::string canonical_group_key = choose_canonical_group_key(document, output_group);
+        if (!canonical_group_key.empty()) {
+            set_output_group_key(output_group, canonical_group_key);
+        }
     }
 
     return grouped_output;

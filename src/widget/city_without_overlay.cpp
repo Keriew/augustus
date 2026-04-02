@@ -42,6 +42,7 @@ extern "C" {
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/property.h"
+#include "map/tile_runtime_api.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "scenario/property.h"
@@ -264,6 +265,16 @@ static int draw_runtime_building_animation(building *b, int x, int y, int grid_o
     return 1;
 }
 
+static int draw_runtime_tile_footprint(int grid_offset, int x, int y, color_t color_mask)
+{
+    const image *img = tile_runtime_get_graphic_image(grid_offset);
+    if (!img) {
+        return 0;
+    }
+    image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, draw_context.scale);
+    return 1;
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -333,6 +344,8 @@ static void draw_footprint(int x, int y, int grid_offset)
         city_draw_highway_footprint(x, y, draw_context.scale, grid_offset, color_mask);
     } else if (building_id && draw_runtime_building_footprint(building_get(building_id), x, y, color_mask)) {
         // Runtime-managed buildings draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
+    } else if (!building_id && draw_runtime_tile_footprint(grid_offset, x, y, color_mask)) {
+        // Runtime-managed terrain tiles draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
     } else {
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     }

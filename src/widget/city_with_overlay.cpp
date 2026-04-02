@@ -30,6 +30,7 @@ extern "C" {
 #include "map/image_context.h"
 #include "map/property.h"
 #include "map/random.h"
+#include "map/tile_runtime_api.h"
 #include "map/tiles.h"
 #include "map/terrain.h"
 #include "widget/city_bridge.h"
@@ -303,6 +304,16 @@ static int draw_runtime_building_animation(building *b, int x, int y, int grid_o
     return 1;
 }
 
+static int draw_runtime_tile_footprint(int grid_offset, int x, int y, color_t color_mask)
+{
+    const image *img = tile_runtime_get_graphic_image(grid_offset);
+    if (!img) {
+        return 0;
+    }
+    image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, scale);
+    return 1;
+}
+
 static int is_drawable_farmhouse(int grid_offset, int map_orientation)
 {
     if (!map_property_is_draw_tile(grid_offset)) {
@@ -571,6 +582,7 @@ static void draw_footprint(int x, int y, int grid_offset)
                 int image_id = image_group(GROUP_TERRAIN_GRASS_1) + (map_random_get(grid_offset) & 7);
                 image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
             }
+        } else if (draw_runtime_tile_footprint(grid_offset, x, y, COLOR_MASK_NONE)) {
         } else if ((terrain & TERRAIN_ROAD) && !(terrain & TERRAIN_BUILDING)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
         } else if ((terrain & TERRAIN_BUILDING) && !map_is_bridge(grid_offset)) {

@@ -1,6 +1,10 @@
 #ifndef MAP_TILES_H
 #define MAP_TILES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void map_tiles_update_all_rocks(void);
 
 void map_tiles_update_region_trees(int x_min, int y_min, int x_max, int y_max);
@@ -53,5 +57,9 @@ void map_tiles_add_entry_exit_flags(void);
 void map_tiles_remove_entry_exit_flags(void);
 
 void map_tiles_update_all(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MAP_TILES_H

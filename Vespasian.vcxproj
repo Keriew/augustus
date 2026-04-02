@@ -285,7 +285,10 @@
     <ClCompile Include="src\map\soldier_strength.c" />
     <ClCompile Include="src\map\sprite.c" />
     <ClCompile Include="src\map\terrain.c" />
-    <ClCompile Include="src\map\tiles.c" />
+    <ClCompile Include="src\map\tile_runtime.cpp" />
+    <ClCompile Include="src\map\tile_type_registry.cpp" />
+    <ClCompile Include="src\map\tile_type_registry_xml.cpp" />
+    <ClCompile Include="src\map\tiles.cpp" />
     <ClCompile Include="src\map\water.c" />
     <ClCompile Include="src\map\water_supply.c" />
     <ClCompile Include="src\platform\arguments.c" />
@@ -790,6 +793,11 @@
     <ClInclude Include="src\map\soldier_strength.h" />
     <ClInclude Include="src\map\sprite.h" />
     <ClInclude Include="src\map\terrain.h" />
+    <ClInclude Include="src\map\tile_runtime.h" />
+    <ClInclude Include="src\map\tile_runtime_api.h" />
+    <ClInclude Include="src\map\tile_runtime_internal.h" />
+    <ClInclude Include="src\map\tile_type_registry.h" />
+    <ClInclude Include="src\map\tile_type_registry_internal.h" />
     <ClInclude Include="src\map\tiles.h" />
     <ClInclude Include="src\map\water.h" />
     <ClInclude Include="src\map\water_supply.h" />
@@ -1045,7 +1053,13 @@
     <IntDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Mods\Augustus\Tiles\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Mods\Augustus\BuildingType\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Mods\Vespasian\Tiles\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Mods\Vespasian\BuildingType\*.xml">

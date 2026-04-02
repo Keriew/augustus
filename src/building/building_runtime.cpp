@@ -233,6 +233,7 @@ const char *building_runtime::resolve_type_specific_graphic_image_id() const
         case BUILDING_DOCTOR:
         case BUILDING_HOSPITAL:
         case BUILDING_BARBER:
+        case BUILDING_LARGE_STATUE:
         case BUILDING_WELL:
         case BUILDING_WORKCAMP:
             return resolve_default_group_image_id();

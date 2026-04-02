@@ -1,5 +1,6 @@
 #include "tiles.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "building/building.h"
 #include "building/connectable.h"
@@ -26,6 +27,9 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "scenario/map.h"
+}
+
+#include "map/tile_runtime_api.h"
 
 
 
@@ -313,6 +317,7 @@ static void remove_plaza_below_building(int x, int y, int grid_offset)
         map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset)) {
         if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
             map_property_clear_plaza_earthquake_or_overgrown_garden(grid_offset);
+            tile_runtime_clear(grid_offset);
         }
     }
 }
@@ -324,6 +329,7 @@ static void clear_plaza_image(int x, int y, int grid_offset)
         map_image_set(grid_offset, 0);
         map_property_set_multi_tile_size(grid_offset, 1);
         map_property_mark_draw_tile(grid_offset);
+        tile_runtime_clear(grid_offset);
     }
 }
 
@@ -352,13 +358,14 @@ static void set_plaza_image(int x, int y, int grid_offset)
         map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) &&
         !map_image_at(grid_offset)) {
         if (is_two_tile_square_plaza(grid_offset)) {
+            int image_offset = 6;
             int image_id = image_group(GROUP_TERRAIN_PLAZA);
             if (map_random_get(grid_offset) & 1) {
-                image_id += 7;
-            } else {
-                image_id += 6;
+                image_offset = 7;
             }
+            image_id += image_offset;
             map_building_tiles_add(0, x, y, 2, image_id, TERRAIN_ROAD);
+            tile_runtime_set_plaza_image_index(grid_offset, image_offset);
         } else {
             // single tile plaza
             static int image_id;
@@ -367,6 +374,7 @@ static void set_plaza_image(int x, int y, int grid_offset)
             }
             int image_offset = (x + y) % 9;
             map_image_set(grid_offset, image_id + image_offset);
+            tile_runtime_set_plaza_image_index(grid_offset, image_offset);
         }
     }
 }
@@ -379,6 +387,7 @@ void map_tiles_update_all_gardens(void)
 
 void map_tiles_update_all_plazas(void)
 {
+    tile_runtime_reset();
     foreach_map_tile(remove_plaza_below_building);
     foreach_map_tile(clear_plaza_image);
     foreach_map_tile(set_plaza_image);

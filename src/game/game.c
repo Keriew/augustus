@@ -30,6 +30,8 @@
 #include "graphics/text.h"
 #include "graphics/video.h"
 #include "graphics/window.h"
+#include "map/tile_runtime_api.h"
+#include "map/tile_type_registry.h"
 #include "platform/file_manager.h"
 #include "platform/prefs.h"
 #include "platform/user_path.h"
@@ -141,6 +143,11 @@ int game_init(void)
     if (!building_type_registry_load()) {
         set_init_failure_message("Failed to load BuildingType definitions.", 0);
         errlog("unable to load BuildingType xml definitions");
+        return 0;
+    }
+    if (!tile_type_registry_load()) {
+        set_init_failure_message("Failed to load Tile definitions.", 0);
+        errlog("unable to load Tile xml definitions");
         return 0;
     }
     building_runtime_reset();
@@ -276,6 +283,7 @@ void game_exit(void)
     // Tear down runtime-managed image groups before payload storage so shutdown does not
     // depend on C++ static destruction order between the two caches.
     building_runtime_reset();
+    tile_runtime_reset();
     image_group_payload_clear_all();
     image_payload_clear_all();
 

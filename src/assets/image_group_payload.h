@@ -22,7 +22,9 @@ public:
     void set_image_animation(const std::string &image_id, const image_animation &animation, std::vector<std::string> frame_image_keys);
     const char *image_key_for(const char *image_id) const;
     const char *top_image_key_for(const char *image_id) const;
+    const char *image_id_at_index(int index) const;
     const image *legacy_image_for(const char *image_id) const;
+    const image *legacy_image_at_index(int index) const;
     const image *animation_frame_for(const char *image_id, int animation_offset) const;
     const image *default_legacy_image() const;
     const char *default_image_id() const;
@@ -32,6 +34,7 @@ private:
     std::string xml_path_;
     xml_asset_source source_ = XML_ASSET_SOURCE_AUTO;
     std::unordered_map<std::string, ImageGroupEntry> images_;
+    std::vector<std::string> image_order_;
     std::string default_image_id_;
 };
 
@@ -44,9 +47,11 @@ extern "C" {
 
 int image_group_payload_load(const char *path_key);
 const image *image_group_payload_get_image(const char *path_key, const char *image_id);
+const image *image_group_payload_get_image_at_index(const char *path_key, int index);
 const image *image_group_payload_get_animation_frame(const char *path_key, const char *image_id, int animation_offset);
 const image *image_group_payload_get_default_image(const char *path_key);
 const char *image_group_payload_get_default_image_id(const char *path_key);
+const char *image_group_payload_get_image_id_at_index(const char *path_key, int index);
 const char *image_group_payload_get_image_key(const char *path_key, const char *image_id);
 void image_group_payload_clear_all(void);
 

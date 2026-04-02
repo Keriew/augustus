@@ -473,6 +473,7 @@ void ImageGroupPayload::set_image(const std::string &image_id, const std::string
         return;
     }
 
+    image_order_.push_back(image_id);
     images_.emplace(image_id, ImageGroupEntry(image_id, image_key, top_image_key));
 }
 
@@ -503,6 +504,14 @@ const char *ImageGroupPayload::top_image_key_for(const char *image_id) const
     return (it == images_.end() || it->second.top_image_key().empty()) ? nullptr : it->second.top_image_key().c_str();
 }
 
+const char *ImageGroupPayload::image_id_at_index(int index) const
+{
+    if (index < 0 || static_cast<size_t>(index) >= image_order_.size()) {
+        return nullptr;
+    }
+    return image_order_[static_cast<size_t>(index)].c_str();
+}
+
 const image *ImageGroupPayload::legacy_image_for(const char *image_id) const
 {
     if (!image_id || !*image_id) {
@@ -510,6 +519,12 @@ const image *ImageGroupPayload::legacy_image_for(const char *image_id) const
     }
     auto it = images_.find(image_id);
     return it == images_.end() ? nullptr : it->second.legacy_image();
+}
+
+const image *ImageGroupPayload::legacy_image_at_index(int index) const
+{
+    const char *image_id = image_id_at_index(index);
+    return image_id ? legacy_image_for(image_id) : nullptr;
 }
 
 const image *ImageGroupPayload::animation_frame_for(const char *image_id, int animation_offset) const
@@ -581,6 +596,16 @@ extern "C" const image *image_group_payload_get_image(const char *path_key, cons
     return payload ? payload->legacy_image_for(image_id) : nullptr;
 }
 
+extern "C" const image *image_group_payload_get_image_at_index(const char *path_key, int index)
+{
+    const ImageGroupPayload *payload = find_group_payload(path_key);
+    if (!payload && !image_group_payload_load(path_key)) {
+        return nullptr;
+    }
+    payload = find_group_payload(path_key);
+    return payload ? payload->legacy_image_at_index(index) : nullptr;
+}
+
 extern "C" const image *image_group_payload_get_default_image(const char *path_key)
 {
     const ImageGroupPayload *payload = find_group_payload(path_key);
@@ -609,6 +634,16 @@ extern "C" const char *image_group_payload_get_default_image_id(const char *path
     }
     payload = find_group_payload(path_key);
     return payload ? payload->default_image_id() : nullptr;
+}
+
+extern "C" const char *image_group_payload_get_image_id_at_index(const char *path_key, int index)
+{
+    const ImageGroupPayload *payload = find_group_payload(path_key);
+    if (!payload && !image_group_payload_load(path_key)) {
+        return nullptr;
+    }
+    payload = find_group_payload(path_key);
+    return payload ? payload->image_id_at_index(index) : nullptr;
 }
 
 extern "C" const char *image_group_payload_get_image_key(const char *path_key, const char *image_id)
