@@ -3,7 +3,7 @@
 #include "assets/assets.h"
 #include "building/menu.h"
 #include "core/config.h"
-#include "graphics/image.h"
+#include "graphics/ui_runtime_api.h"
 #include "sound/effect.h"
 
 #define PRESSED_EFFECT_MILLIS 100
@@ -41,30 +41,7 @@ void image_buttons_draw(int x, int y, image_button *buttons, unsigned int num_bu
 {
     fade_pressed_effect(buttons, num_buttons);
     for (unsigned int i = 0; i < num_buttons; i++) {
-        image_button *btn = &buttons[i];
-        int image_id = 0;
-        if (btn->assetlist_name) {
-            image_id = assets_get_image_id(btn->assetlist_name, btn->image_name);
-        } else if (btn->image_collection) {
-            image_id = image_group(btn->image_collection) + btn->image_offset;
-        } else {
-            image_id = btn->image_offset;
-        }
-        if (!btn->static_image) {
-            if (btn->enabled) {
-                if (btn->pressed) {
-                    image_id += 2;
-                } else if (btn->focused) {
-                    image_id += 1;
-                }
-            } else {
-                image_id += 3;
-            }
-        }
-        if (btn->dont_draw) {
-            continue;
-        }
-        image_draw(image_id, x + btn->x_offset, y + btn->y_offset, COLOR_MASK_NONE, SCALE_NONE);
+        ui_runtime_draw_image_button(x, y, &buttons[i]);
     }
 }
 

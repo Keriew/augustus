@@ -3,6 +3,7 @@
 extern "C" {
 #include "graphics/renderer.h"
 #include "graphics/screen.h"
+#include "graphics/ui_runtime_api.h"
 }
 
 static void set_translation(int x, int y)
@@ -85,11 +86,10 @@ void graphics_tint_rect(int x, int y, int width, int height, color_t rgb, int al
 
 int graphics_save_to_image(int image_id, int x, int y, int width, int height)
 {
-    return graphics_renderer()->save_image_from_screen_for_domain(
-        graphics_renderer()->get_render_domain(), image_id, x, y, width, height);
+    return ui_runtime_save_to_image(image_id, x, y, width, height);
 }
 
 void graphics_draw_from_image(int image_id, int x, int y)
 {
-    graphics_renderer()->draw_image_to_screen_for_domain(graphics_renderer()->get_render_domain(), image_id, x, y);
+    ui_runtime_draw_from_image(image_id, x, y);
 }
