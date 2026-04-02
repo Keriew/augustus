@@ -65,6 +65,7 @@ extern "C" int mod_manager_validate_mod_path(void)
 
 extern "C" int mod_manager_validate_graphics_path(void)
 {
-    return validate_directory_path(g_graphics_path.c_str())
-        || validate_directory_path(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH);
+    const int has_mod_graphics = validate_directory_path(g_graphics_path.c_str()) != 0;
+    const int has_root_graphics = validate_directory_path(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH) != 0;
+    return has_mod_graphics || has_root_graphics;
 }
