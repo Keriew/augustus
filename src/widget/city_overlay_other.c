@@ -751,14 +751,11 @@ const city_overlay *city_overlay_for_water(void)
 
 static color_t get_sentiment_color(int sentiment)
 {
-    sentiment = calc_bound(sentiment - 50, -40, 40);
-    color_t color = COLOR_OVERLAY_NEUTRAL;
-    if (sentiment < 0) {
-        color += COLOR_OVERLAY_NEGATIVE_STEP * (sentiment - 10);
-    } else {
-        color -= COLOR_OVERLAY_POSITIVE_STEP * (sentiment + 10);
-    }
-    return color;
+    static const color_t sentiment_colors[] = {
+        0xccde4939, 0xccff695a, 0xccf7714a, 0xccf7aa52, 0xccf7d35a,
+        0xccdeeb4a, 0xccb5eb5a, 0xcc7beb73, 0xcc5adbce, 0xcc5ac3ef
+    };
+    return sentiment_colors[calc_bound(sentiment / 10, 0, 9)];
 }
 
 static void blend_color_to_footprint(int x, int y, int size, color_t color, float scale)

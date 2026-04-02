@@ -102,10 +102,6 @@ typedef uint32_t color_t;
 #define COLOR_MASK_PASTEL_BLACK       0xff3a3a3a  // soft black 
 #define COLOR_MASK_PASTEL_DARK_BLUE   0xff6d87b8  // desaturated navy blue
 
-#define COLOR_OVERLAY_NEUTRAL 0xccffffff
-#define COLOR_OVERLAY_NEGATIVE_STEP 0x00040505
-#define COLOR_OVERLAY_POSITIVE_STEP 0x00050504
-
 #define COLOR_MOUSE_DARK_GRAY 0xff3f3f3f
 #define COLOR_MOUSE_MEDIUM_GRAY 0xff737373
 #define COLOR_MOUSE_LIGHT_GRAY 0xffb3b3b3
