@@ -4,6 +4,7 @@
 #include "graphics/renderer.h"
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,6 +17,7 @@ int legacy_image_extractor_extract_climate(
     int group_count,
     const char *source_name,
     const image_atlas_data *atlas_data);
+int legacy_image_extractor_get_group_key(int group_id, char *buffer, size_t buffer_size);
 
 #ifdef __cplusplus
 }

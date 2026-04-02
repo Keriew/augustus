@@ -2,6 +2,9 @@
 
 The loader reads every `*.xml` file in this folder at startup. Keep templates/examples in non-`.xml` files so they do not get loaded as live data.
 
+Templates and examples are maintained only in `Mods\Vespasian\BuildingType`.
+`Mods\Augustus\BuildingType` keeps live XML data only.
+
 Current supported nodes:
 
 - `<graphic threshold="N" operator="gt|gte" [water_access="reservoir_range"] />`
@@ -56,4 +59,4 @@ Current engine behavior:
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
 - The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
 
-See `_template.xml.example` for a copy/paste starter.
+See `_template.xml.example` here in `Mods\Vespasian\BuildingType` for a copy/paste starter.

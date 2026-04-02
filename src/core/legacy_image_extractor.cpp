@@ -9,6 +9,7 @@ extern "C" {
 
 #include "spng/spng.h"
 
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -16,7 +17,7 @@ extern "C" {
 
 namespace {
 
-constexpr char kExtractionStampPrefix[] = "legacy_extract_v2:";
+constexpr char kExtractionStampPrefix[] = "legacy_extract_v3:";
 struct LegacyFamily {
     const char *folder_name;
 };
@@ -25,6 +26,12 @@ struct LegacyGroupRange {
     int group_id;
     int first_image_id;
     int last_image_id;
+};
+
+struct ExtractionStats {
+    int groups_exported = 0;
+    int images_exported = 0;
+    int pngs_written = 0;
 };
 
 constexpr LegacyFamily kAdminLogistics { "Admin_Logistics" };
@@ -388,15 +395,125 @@ static bool write_text_file(const std::string &path, const std::string &contents
     return bytes_written == contents.size();
 }
 
-static std::string make_stamp_contents(const char *source_name)
+static void hash_stamp_bytes(uint64_t &hash, const void *data, size_t size)
 {
-    return std::string(kExtractionStampPrefix) + make_source_stem(source_name);
+    const uint8_t *bytes = static_cast<const uint8_t *>(data);
+    const uint64_t fnv_prime = 1099511628211ull;
+    for (size_t i = 0; i < size; ++i) {
+        hash ^= bytes[i];
+        hash *= fnv_prime;
+    }
 }
 
-static bool has_current_stamp(const char *source_name)
+static void hash_stamp_string(uint64_t &hash, const char *text)
+{
+    if (!text) {
+        return;
+    }
+    hash_stamp_bytes(hash, text, strlen(text));
+}
+
+static void hash_stamp_int(uint64_t &hash, int value)
+{
+    hash_stamp_bytes(hash, &value, sizeof(value));
+}
+
+static uint64_t calculate_source_fingerprint(
+    const image *images,
+    int image_count,
+    const uint16_t *group_image_ids,
+    int group_count,
+    const char *source_name,
+    const image_atlas_data *atlas_data)
+{
+    uint64_t hash = 1469598103934665603ull;
+    hash_stamp_string(hash, source_name);
+    hash_stamp_int(hash, image_count);
+    hash_stamp_int(hash, group_count);
+
+    if (group_image_ids && group_count > 0) {
+        hash_stamp_bytes(hash, group_image_ids, static_cast<size_t>(group_count) * sizeof(uint16_t));
+    }
+
+    for (int image_id = 0; image_id < image_count; ++image_id) {
+        const image *img = &images[image_id];
+        if (!is_exportable_main_image(img)) {
+            continue;
+        }
+
+        hash_stamp_int(hash, image_id);
+        hash_stamp_int(hash, img->x_offset);
+        hash_stamp_int(hash, img->y_offset);
+        hash_stamp_int(hash, img->width);
+        hash_stamp_int(hash, img->height);
+        hash_stamp_int(hash, img->original.width);
+        hash_stamp_int(hash, img->original.height);
+        hash_stamp_int(hash, img->is_isometric);
+        hash_stamp_int(hash, img->atlas.id);
+        hash_stamp_int(hash, img->atlas.x_offset);
+        hash_stamp_int(hash, img->atlas.y_offset);
+        hash_stamp_int(hash, img->top ? 1 : 0);
+        if (img->animation) {
+            hash_stamp_int(hash, img->animation->num_sprites);
+            hash_stamp_int(hash, img->animation->sprite_offset_x);
+            hash_stamp_int(hash, img->animation->sprite_offset_y);
+            hash_stamp_int(hash, img->animation->can_reverse);
+            hash_stamp_int(hash, img->animation->speed_id);
+            hash_stamp_int(hash, img->animation->start_offset);
+        }
+    }
+
+    if (atlas_data) {
+        hash_stamp_int(hash, atlas_data->num_images);
+        for (int atlas_index = 0; atlas_index < atlas_data->num_images; ++atlas_index) {
+            const int width = atlas_data->image_widths[atlas_index];
+            const int height = atlas_data->image_heights[atlas_index];
+            hash_stamp_int(hash, width);
+            hash_stamp_int(hash, height);
+            if (atlas_data->buffers[atlas_index] && width > 0 && height > 0) {
+                hash_stamp_bytes(
+                    hash,
+                    atlas_data->buffers[atlas_index],
+                    static_cast<size_t>(width) * height * sizeof(color_t));
+            }
+        }
+    }
+
+    return hash;
+}
+
+static std::string make_stamp_contents(
+    const image *images,
+    int image_count,
+    const uint16_t *group_image_ids,
+    int group_count,
+    const char *source_name,
+    const image_atlas_data *atlas_data)
+{
+    const uint64_t fingerprint = calculate_source_fingerprint(
+        images, image_count, group_image_ids, group_count, source_name, atlas_data);
+    char buffer[160];
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%s%s:%016llx",
+        kExtractionStampPrefix,
+        make_source_stem(source_name).c_str(),
+        static_cast<unsigned long long>(fingerprint));
+    return buffer;
+}
+
+static bool has_current_stamp(
+    const image *images,
+    int image_count,
+    const uint16_t *group_image_ids,
+    int group_count,
+    const char *source_name,
+    const image_atlas_data *atlas_data)
 {
     std::string contents;
-    return read_text_file(make_stamp_path(), contents) && contents == make_stamp_contents(source_name);
+    return read_text_file(make_stamp_path(), contents) &&
+        contents == make_stamp_contents(images, image_count, group_image_ids, group_count, source_name, atlas_data);
 }
 
 static std::vector<LegacyGroupRange> build_group_ranges(
@@ -1077,7 +1194,8 @@ static bool export_group(
     const image *images,
     const LegacyGroupRange &range,
     const image_atlas_data *atlas_data,
-    std::vector<std::string> &manifest_entries)
+    std::vector<std::string> &manifest_entries,
+    ExtractionStats &stats)
 {
     const LegacyFamily &family = family_for_group(range.group_id);
     const std::string group_directory = make_group_directory(family, range.group_id);
@@ -1119,6 +1237,7 @@ static bool export_group(
             return false;
         }
         manifest_entries.push_back("F|" + image_path);
+        stats.pngs_written++;
 
         if (img->top) {
             const std::vector<color_t> top_pixels = extract_full_canvas(img->top, atlas_data);
@@ -1130,6 +1249,7 @@ static bool export_group(
                 return false;
             }
             manifest_entries.push_back("F|" + top_path);
+            stats.pngs_written++;
         }
 
         append_image_xml(xml, exported_images, image_name, image_name, image_name + "_Top", img);
@@ -1147,6 +1267,8 @@ static bool export_group(
     }
     manifest_entries.push_back("D|" + group_directory);
     manifest_entries.push_back("F|" + xml_path);
+    stats.groups_exported++;
+    stats.images_exported += exported_images;
     return true;
 }
 
@@ -1164,8 +1286,19 @@ extern "C" int legacy_image_extractor_extract_climate(
         return 0;
     }
 
-    if (has_current_stamp(source_name)) {
+    std::string existing_stamp;
+    const int has_existing_stamp = read_text_file(make_stamp_path(), existing_stamp);
+    const std::string expected_stamp = make_stamp_contents(
+        images, image_count, group_image_ids, group_count, source_name, atlas_data);
+
+    if (has_existing_stamp && existing_stamp == expected_stamp) {
         return 1;
+    }
+
+    if (!has_existing_stamp) {
+        log_info("Extracting Julius graphics because no extraction stamp was found", source_name, 0);
+    } else {
+        log_info("Extracting Julius graphics because the legacy source fingerprint or XML metadata version changed", source_name, 0);
     }
 
     ensure_directory(mod_manager_get_julius_graphics_path());
@@ -1173,18 +1306,52 @@ extern "C" int legacy_image_extractor_extract_climate(
         ensure_directory(make_family_root_directory(*family));
     }
 
+    log_info("Starting Julius legacy graphics extraction", source_name, 0);
     clear_existing_output();
 
     const std::vector<LegacyGroupRange> ranges = build_group_ranges(group_image_ids, group_count, image_count);
     std::vector<std::string> manifest_entries;
+    ExtractionStats stats;
     for (const LegacyGroupRange &range : ranges) {
-        if (!export_group(images, range, atlas_data, manifest_entries)) {
+        if (!export_group(images, range, atlas_data, manifest_entries, stats)) {
+            log_error("Julius graphics extraction failed", source_name, 0);
             return 0;
         }
     }
 
     if (!write_manifest_entries(manifest_entries)) {
+        log_error("Failed to write Julius extraction manifest", make_manifest_path().c_str(), 0);
         return 0;
     }
-    return write_text_file(make_stamp_path(), make_stamp_contents(source_name)) ? 1 : 0;
+    if (!write_text_file(make_stamp_path(), expected_stamp)) {
+        log_error("Failed to write Julius extraction stamp", make_stamp_path().c_str(), 0);
+        return 0;
+    }
+
+    char summary[256];
+    snprintf(
+        summary,
+        sizeof(summary),
+        "%d groups, %d images, %d pngs",
+        stats.groups_exported,
+        stats.images_exported,
+        stats.pngs_written);
+    log_info("Julius legacy graphics extraction completed", summary, 0);
+    return 1;
+}
+
+extern "C" int legacy_image_extractor_get_group_key(int group_id, char *buffer, size_t buffer_size)
+{
+    if (!buffer || buffer_size == 0) {
+        return 0;
+    }
+
+    const LegacyFamily &family = family_for_group(group_id);
+    const std::string key = make_group_assetlist_name(family, group_id);
+    if (key.empty() || key.size() + 1 > buffer_size) {
+        return 0;
+    }
+
+    snprintf(buffer, buffer_size, "%s", key.c_str());
+    return 1;
 }

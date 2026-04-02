@@ -200,6 +200,7 @@
     <ClCompile Include="src\window\user_path_setup.c" />
     <ClCompile Include="src\window\victory_dialog.c" />
     <ClCompile Include="src\window\video.c" />
+    <ClCompile Include="src\assets\augustus_asset_extractor.cpp" />
     <ClCompile Include="src\assets\assets.cpp" />
     <ClCompile Include="src\assets\group.c" />
     <ClCompile Include="src\assets\image.c" />
@@ -672,6 +673,7 @@
     <ClInclude Include="src\window\user_path_setup.h" />
     <ClInclude Include="src\window\victory_dialog.h" />
     <ClInclude Include="src\window\video.h" />
+    <ClInclude Include="src\assets\augustus_asset_extractor.h" />
     <ClInclude Include="src\assets\assets.h" />
     <ClInclude Include="src\assets\group.h" />
     <ClInclude Include="src\assets\image.h" />
@@ -976,8 +978,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mods\Augustus\BuildingType\*.xml" />
-    <Content Include="Mods\Augustus\BuildingType\*.md" />
-    <Content Include="Mods\Augustus\BuildingType\*.example" />
     <Content Include="Mods\Vespasian\BuildingType\*.xml" />
     <Content Include="Mods\Vespasian\BuildingType\*.md" />
     <Content Include="Mods\Vespasian\BuildingType\*.example" />

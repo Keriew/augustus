@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\assets\augustus_asset_extractor.cpp" />
     <ClCompile Include="src\assets\assets.cpp" />
     <ClCompile Include="src\assets\group.c" />
     <ClCompile Include="src\assets\image.c" />
@@ -505,6 +506,7 @@
     <ResourceCompile Include="res\augustus.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\assets\augustus_asset_extractor.h" />
     <ClInclude Include="src\assets\assets.h" />
     <ClInclude Include="src\assets\group.h" />
     <ClInclude Include="src\assets\image.h" />
@@ -1044,12 +1046,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Mods\Augustus\BuildingType\*.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mods\Augustus\BuildingType\*.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mods\Augustus\BuildingType\*.example">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Mods\Vespasian\BuildingType\*.xml">
