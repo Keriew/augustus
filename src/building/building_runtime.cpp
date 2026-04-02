@@ -1,6 +1,7 @@
 #include "building/building_runtime_internal.h"
 
 #include "assets/image_group_payload.h"
+#include "core/crash_context.h"
 
 extern "C" {
 #include "building/animation.h"
@@ -16,9 +17,55 @@ extern "C" {
 #include "map/building_tiles.h"
 #include "map/road_access.h"
 #include "map/terrain.h"
+#include "core/log.h"
 }
 
+#include <cstdio>
+#include <string>
+#include <unordered_set>
+
 namespace {
+
+std::unordered_set<std::string> g_logged_building_graphics_fallbacks;
+
+void make_building_context(char *buffer, size_t buffer_size, const building *b)
+{
+    if (b) {
+        snprintf(
+            buffer,
+            buffer_size,
+            "building_id=%u type=%d grid_offset=%d",
+            b->id,
+            static_cast<int>(b->type),
+            b->grid_offset);
+    } else {
+        snprintf(buffer, buffer_size, "building=null");
+    }
+}
+
+void log_building_scope_state(void *userdata)
+{
+    const building_runtime *runtime = static_cast<const building_runtime *>(userdata);
+    const building *b = runtime ? runtime->building() : nullptr;
+    const building_type_registry_impl::BuildingType *definition = runtime ? runtime->definition() : nullptr;
+    if (!b) {
+        return;
+    }
+
+    char details[256];
+    snprintf(
+        details,
+        sizeof(details),
+        "state=%d size=%d desirability=%d water=%d upgrade=%d graphics_path=%s graphics_image=%s",
+        b->state,
+        b->size,
+        b->desirability,
+        b->has_water_access,
+        b->upgrade_level,
+        definition && definition->graphics_path() ? definition->graphics_path() : "",
+        definition && definition->graphics_image() ? definition->graphics_image() : "");
+    log_info("Graphics building state", details, 0);
+}
 
 const image *resolve_group_image_candidates(const char *group_key, const char *const *image_ids, size_t image_id_count)
 {
@@ -36,6 +83,29 @@ const image *resolve_group_image_candidates(const char *group_key, const char *c
         }
     }
     return nullptr;
+}
+
+void log_building_graphics_fallback_once(const char *message, const building_runtime *runtime, const char *detail)
+{
+    const building *b = runtime ? runtime->building() : nullptr;
+    const building_type_registry_impl::BuildingType *definition = runtime ? runtime->definition() : nullptr;
+
+    char key_buffer[768];
+    snprintf(
+        key_buffer,
+        sizeof(key_buffer),
+        "%s|type=%d|path=%s|image=%s|detail=%s",
+        message ? message : "",
+        b ? static_cast<int>(b->type) : -1,
+        definition && definition->graphics_path() ? definition->graphics_path() : "",
+        definition && definition->graphics_image() ? definition->graphics_image() : "",
+        detail ? detail : "");
+
+    if (!g_logged_building_graphics_fallbacks.insert(key_buffer).second) {
+        return;
+    }
+
+    crash_context_report_error(message, detail);
 }
 
 }
@@ -253,6 +323,16 @@ const char *building_runtime::resolve_graphic_image_id() const
     if (!uses_new_graphics()) {
         return nullptr;
     }
+    if (definition_->graphics_image() && *definition_->graphics_image()) {
+        if (const char *image_id = resolve_named_group_image_id(definition_->graphics_image())) {
+            return image_id;
+        }
+        log_building_graphics_fallback_once(
+            "Building graphics image id could not be resolved. Falling back to legacy rendering.",
+            this,
+            definition_->graphics_image());
+        return nullptr;
+    }
     if (const char *image_id = resolve_type_specific_graphic_image_id()) {
         return image_id;
     }
@@ -265,9 +345,23 @@ const image *building_runtime::resolve_graphic_image()
         return nullptr;
     }
 
+    char context[256];
+    make_building_context(context, sizeof(context), building_);
+    CrashContextScope crash_scope(
+        "building_runtime.resolve_base_image",
+        context,
+        log_building_scope_state,
+        this);
     refresh_graphic_state();
     const char *image_id = resolve_graphic_image_id();
-    return image_id ? resolve_named_group_image(image_id) : nullptr;
+    const image *img = image_id ? resolve_named_group_image(image_id) : nullptr;
+    if (!img) {
+        log_building_graphics_fallback_once(
+            "Building graphics image could not be resolved. Falling back to legacy rendering.",
+            this,
+            definition_ ? definition_->graphics_path() : "");
+    }
+    return img;
 }
 
 const image *building_runtime::resolve_graphic_animation_frame()
@@ -276,6 +370,13 @@ const image *building_runtime::resolve_graphic_animation_frame()
         return nullptr;
     }
 
+    char context[256];
+    make_building_context(context, sizeof(context), building_);
+    CrashContextScope crash_scope(
+        "building_runtime.resolve_animation_image",
+        context,
+        log_building_scope_state,
+        this);
     refresh_graphic_state();
     const char *image_id = resolve_graphic_image_id();
     if (!image_id) {
@@ -291,7 +392,14 @@ const image *building_runtime::resolve_graphic_animation_frame()
     if (animation_offset <= 0) {
         return nullptr;
     }
-    return image_group_payload_get_animation_frame(definition_->graphics_path(), image_id, animation_offset);
+    const image *frame = image_group_payload_get_animation_frame(definition_->graphics_path(), image_id, animation_offset);
+    if (!frame) {
+        log_building_graphics_fallback_once(
+            "Building animation frame could not be resolved. Falling back to legacy rendering.",
+            this,
+            image_id);
+    }
+    return frame;
 }
 
 void building_runtime::set_building_graphic()
@@ -605,6 +713,7 @@ void building_runtime::spawn_figure()
 extern "C" void building_runtime_reset(void)
 {
     building_runtime_impl::g_runtime_instances.clear();
+    g_logged_building_graphics_fallbacks.clear();
 }
 
 extern "C" void building_runtime_apply_graphic(building *b)

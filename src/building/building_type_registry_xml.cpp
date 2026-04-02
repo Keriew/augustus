@@ -464,6 +464,30 @@ static int parse_graphics_path()
     return 1;
 }
 
+static int parse_graphics_image()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics image outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("value")) {
+        log_error("BuildingType graphics image is missing required attribute 'value'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    std::string image_id = trim_copy(xml_parser_get_attribute_string("value"));
+    if (image_id.empty()) {
+        log_error("Unsupported BuildingType graphics image", xml_parser_get_attribute_string("value"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->set_graphics_image(std::move(image_id));
+    return 1;
+}
+
 static int parse_graphics_upgrade()
 {
     if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
@@ -756,6 +780,7 @@ static const xml_parser_element XML_ELEMENTS[] = {
     { "building", parse_building_root, nullptr, nullptr, nullptr },
     { "graphics", parse_graphics, finish_graphics, "building", nullptr },
     { "path", parse_graphics_path, nullptr, "graphics", nullptr },
+    { "image", parse_graphics_image, nullptr, "graphics", nullptr },
     { "upgrade", parse_graphics_upgrade, nullptr, "graphics", nullptr },
     { "water_access", parse_graphics_water_access, nullptr, "graphics", nullptr },
     { "labor", parse_labor, nullptr, "building", nullptr },

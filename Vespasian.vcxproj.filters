@@ -297,6 +297,7 @@
     <ClCompile Include="src\core\encoding_simp_chinese.c" />
     <ClCompile Include="src\core\encoding_trad_chinese.c" />
     <ClCompile Include="src\core\file.c" />
+    <ClCompile Include="src\core\crash_context.cpp" />
     <ClCompile Include="src\core\hotkey_config.c" />
     <ClCompile Include="src\core\image_data.cpp" />
     <ClCompile Include="src\core\image.c" />
@@ -778,6 +779,7 @@
     <ClInclude Include="src\core\encoding_simp_chinese.h" />
     <ClInclude Include="src\core\encoding_trad_chinese.h" />
     <ClInclude Include="src\core\file.h" />
+    <ClInclude Include="src\core\crash_context.h" />
     <ClInclude Include="src\core\hotkey_config.h" />
     <ClInclude Include="src\core\image_data.h" />
     <ClInclude Include="src\core\image.h" />

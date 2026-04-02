@@ -3,6 +3,7 @@
     <!-- Optional graphics definition -->
     <graphics>
         <path value="Health_Culture\Theatre" />
+        <image value="Image_0000" />
         <upgrade threshold="50" operator="gt" />
         <water_access mode="reservoir_range" />
     </graphics>

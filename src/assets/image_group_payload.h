@@ -22,6 +22,7 @@ public:
     void set_image_animation(const std::string &image_id, const image_animation &animation, std::vector<std::string> frame_image_keys);
     const char *image_key_for(const char *image_id) const;
     const char *top_image_key_for(const char *image_id) const;
+    const ImageGroupEntry *entry_for(const char *image_id) const;
     const char *image_id_at_index(int index) const;
     const image *legacy_image_for(const char *image_id) const;
     const image *legacy_image_at_index(int index) const;

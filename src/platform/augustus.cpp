@@ -317,31 +317,38 @@ static int build_graphics_bootstrap_stamp(char *buffer, size_t buffer_size)
         static_cast<unsigned long long>(graphics_fingerprint_data.hash)) < static_cast<int>(buffer_size);
 }
 
-static void bootstrap_augustus_graphics_directory(void)
+static int bootstrap_augustus_graphics_directory(void)
 {
     ensure_graphics_directory("Mods");
     ensure_graphics_directory("Mods/Augustus");
     if (!augustus_asset_extractor_bootstrap()) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to bootstrap Augustus graphics fallback directory");
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to bootstrap Augustus graphics fallback directory");
+        platform_screen_show_error_message_box(
+            "Startup error",
+            "Failed to bootstrap Augustus graphics.\n\nMore details were written to augustus-log.txt.");
+        return 0;
     }
+    return 1;
 }
 
-static void bootstrap_julius_graphics_directory(void)
+static int bootstrap_julius_graphics_directory(void)
 {
     ensure_graphics_directory("Mods");
     ensure_graphics_directory("Mods/Julius");
     ensure_graphics_directory(mod_manager_get_julius_graphics_path());
+    return 1;
 }
 
-static void bootstrap_canonical_graphics_sources(void)
+static int bootstrap_canonical_graphics_sources(void)
 {
-    bootstrap_augustus_graphics_directory();
-    bootstrap_julius_graphics_directory();
+    return bootstrap_augustus_graphics_directory() && bootstrap_julius_graphics_directory();
 }
 
 static int pre_init_with_current_base_path(void)
 {
-    bootstrap_canonical_graphics_sources();
+    if (!bootstrap_canonical_graphics_sources()) {
+        return 0;
+    }
     return game_pre_init();
 }
 

@@ -16,6 +16,9 @@ public:
     const std::string &top_image_key() const;
     const image *legacy_image() const;
     const image *animation_frame(int animation_offset) const;
+    int has_animation() const;
+    const image_animation &animation() const;
+    const std::vector<std::string> &animation_frame_keys() const;
 
     void set_keys(std::string image_key, std::string top_image_key = std::string());
     void set_animation(const image_animation &animation, std::vector<std::string> frame_image_keys);

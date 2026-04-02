@@ -1,5 +1,7 @@
 #include "assets/augustus_asset_extractor.h"
 
+#include "assets/xml.h"
+#include "core/crash_context.h"
 #include "core/legacy_image_extractor.h"
 
 extern "C" {
@@ -79,11 +81,13 @@ struct AtlasAnimation {
 struct AtlasImage {
     std::string id;
     bool synthetic_id = false;
+    bool has_explicit_id = false;
     bool is_isometric = false;
     bool has_width = false;
     bool has_height = false;
     int width = 0;
     int height = 0;
+    bool materialized = false;
     std::vector<AtlasReference> layers;
     AtlasAnimation animation;
     size_t source_index = 0;
@@ -113,7 +117,27 @@ struct OutputGroup {
     std::vector<int> image_indices;
 };
 
+struct LegacyTemplateImage {
+    std::vector<std::string> parts;
+};
+
+struct LegacyTemplateGroup {
+    std::unordered_map<std::string, LegacyTemplateImage> images;
+};
+
 ParseState g_parse_state;
+std::unordered_map<std::string, LegacyTemplateGroup> g_legacy_template_groups;
+
+struct LegacyTemplateParseState {
+    LegacyTemplateGroup group;
+    std::string current_image_id;
+    int error = 0;
+};
+
+LegacyTemplateParseState g_legacy_template_parse_state;
+
+static bool load_file_to_buffer(const std::string &filename, std::vector<char> &buffer);
+static std::string make_numeric_image_id(const char *image_name);
 
 static std::string sanitize_component(const char *text)
 {
@@ -149,6 +173,33 @@ static std::string normalize_key(const char *text)
         }
     }
     return normalized;
+}
+
+static void set_crash_scope_stage(const char *stage, const char *detail)
+{
+    char context[FILE_NAME_MAX + 64];
+    snprintf(context, sizeof(context), "detail=%s", detail ? detail : "");
+    crash_context_set_stage(stage, context);
+}
+
+static int reference_has_pixel_data(const AtlasReference &reference)
+{
+    return !reference.src.empty() || reference.is_direct_crop;
+}
+
+static int image_has_materialized_pixels(const AtlasImage &image_data)
+{
+    for (const AtlasReference &reference : image_data.layers) {
+        if (reference_has_pixel_data(reference)) {
+            return 1;
+        }
+    }
+    for (const AtlasAnimationFrame &frame : image_data.animation.frames_data) {
+        if (reference_has_pixel_data(frame.reference)) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static int append_path_component(char *buffer, size_t buffer_size, const char *base_path, const char *component)
@@ -479,6 +530,9 @@ static std::string choose_canonical_group_key(const AtlasDocument &document, con
 
     for (int image_index : output_group.image_indices) {
         const AtlasImage &image_data = document.images[image_index];
+        if (image_data.materialized) {
+            continue;
+        }
 
         auto visit_reference = [&](const AtlasReference &reference) {
             std::string translated_group_key;
@@ -538,12 +592,270 @@ static std::string choose_canonical_group_key(const AtlasDocument &document, con
     return canonical_group_key;
 }
 
+static int legacy_template_start_assetlist(void)
+{
+    return 1;
+}
+
+static int legacy_template_start_image(void)
+{
+    const char *id = xml_parser_get_attribute_string("id");
+    g_legacy_template_parse_state.current_image_id = id ? id : "";
+    if (!g_legacy_template_parse_state.current_image_id.empty()) {
+        g_legacy_template_parse_state.group.images[g_legacy_template_parse_state.current_image_id];
+    }
+    return 1;
+}
+
+static int legacy_template_start_layer(void)
+{
+    if (g_legacy_template_parse_state.current_image_id.empty()) {
+        return 1;
+    }
+
+    const char *part = xml_parser_get_attribute_string("part");
+    if (part && *part) {
+        g_legacy_template_parse_state.group.images[g_legacy_template_parse_state.current_image_id].parts.push_back(part);
+    }
+    return 1;
+}
+
+static void legacy_template_end_image(void)
+{
+    g_legacy_template_parse_state.current_image_id.clear();
+}
+
+static const xml_parser_element kLegacyTemplateXmlElements[] = {
+    { "assetlist", legacy_template_start_assetlist, 0 },
+    { "image", legacy_template_start_image, legacy_template_end_image, "assetlist" },
+    { "layer", legacy_template_start_layer, 0, "image" },
+    { "animation", 0, 0, "image" },
+    { "frame", 0, 0, "animation" }
+};
+
+static int load_legacy_template_group(const std::string &group_key, LegacyTemplateGroup &group)
+{
+    auto cached = g_legacy_template_groups.find(group_key);
+    if (cached != g_legacy_template_groups.end()) {
+        group = cached->second;
+        return 1;
+    }
+
+    char xml_path[FILE_NAME_MAX] = { 0 };
+    xml_asset_source resolved_source = XML_ASSET_SOURCE_AUTO;
+    if (!xml_resolve_assetlist_path(xml_path, group_key.c_str(), XML_ASSET_SOURCE_JULIUS, &resolved_source)) {
+        return 0;
+    }
+    (void) resolved_source;
+    if (!file_exists(xml_path, NOT_LOCALIZED)) {
+        return 0;
+    }
+
+    std::vector<char> buffer;
+    if (!load_file_to_buffer(xml_path, buffer)) {
+        return 0;
+    }
+
+    g_legacy_template_parse_state = {};
+    if (!xml_parser_init(
+            kLegacyTemplateXmlElements,
+            static_cast<int>(sizeof(kLegacyTemplateXmlElements) / sizeof(kLegacyTemplateXmlElements[0])),
+            1)) {
+        return 0;
+    }
+
+    const int parsed = xml_parser_parse(buffer.data(), static_cast<unsigned int>(buffer.size()), 1);
+    xml_parser_free();
+    if (!parsed || g_legacy_template_parse_state.error) {
+        return 0;
+    }
+
+    g_legacy_template_groups.emplace(group_key, g_legacy_template_parse_state.group);
+    group = g_legacy_template_parse_state.group;
+    return 1;
+}
+
+static int find_template_target(
+    const AtlasImage &image_data,
+    const OutputGroup &output_group,
+    std::string &template_group_key,
+    std::string &template_image_id)
+{
+    template_group_key = output_group.group_key;
+    template_image_id = image_data.id;
+
+    for (const AtlasReference &reference : image_data.layers) {
+        std::string translated_group_key;
+        const int translated = translate_reference_group_key(reference, translated_group_key);
+        if (translated <= 0) {
+            continue;
+        }
+        template_group_key = std::move(translated_group_key);
+        if (reference.image.empty()) {
+            template_image_id = "Image_0000";
+        } else if (strncmp(reference.image.c_str(), "Image_", 6) == 0) {
+            template_image_id = reference.image;
+        } else {
+            template_image_id = make_numeric_image_id(reference.image.c_str());
+        }
+        return 1;
+    }
+    return !template_group_key.empty() && !template_image_id.empty();
+}
+
+static int infer_default_isometric_parts(const AtlasImage &image_data, std::vector<AtlasReference> &output_layers)
+{
+    if (output_layers.empty()) {
+        return 1;
+    }
+
+    if (output_layers.size() == 1) {
+        if (output_layers[0].part.empty()) {
+            output_layers[0].part = "footprint";
+        }
+        log_info("Augustus extracted image inferred a single isometric footprint layer", image_data.id.c_str(), 0);
+        return 1;
+    }
+
+    if (output_layers.size() > 2) {
+        for (AtlasReference &reference : output_layers) {
+            if (reference.part.empty()) {
+                reference.part = "footprint";
+            }
+        }
+        log_info("Augustus extracted image inferred a multi-slice isometric footprint composite", image_data.id.c_str(), 0);
+        return 1;
+    }
+
+    if (output_layers.size() == 2) {
+        int has_footprint = 0;
+        int has_top = 0;
+        for (const AtlasReference &reference : output_layers) {
+            has_footprint |= reference.part == "footprint";
+            has_top |= reference.part == "top";
+        }
+
+        for (AtlasReference &reference : output_layers) {
+            if (!reference.part.empty()) {
+                continue;
+            }
+            if (!has_footprint) {
+                reference.part = "footprint";
+                has_footprint = 1;
+            } else {
+                reference.part = "top";
+                has_top = 1;
+            }
+        }
+
+        if (!has_top) {
+            for (AtlasReference &reference : output_layers) {
+                if (reference.part == "footprint") {
+                    continue;
+                }
+                reference.part = "top";
+                has_top = 1;
+                break;
+            }
+        }
+
+        log_info("Augustus extracted image inferred footprint/top layer parts heuristically", image_data.id.c_str(), 0);
+        return 1;
+    }
+
+    return 0;
+}
+
+static int build_output_layers(
+    const AtlasImage &image_data,
+    const OutputGroup &output_group,
+    std::vector<AtlasReference> &output_layers)
+{
+    output_layers = image_data.layers;
+
+    int has_missing_part = 0;
+    for (const AtlasReference &reference : output_layers) {
+        if (reference.part.empty()) {
+            has_missing_part = 1;
+            break;
+        }
+    }
+    if (!has_missing_part || !image_data.is_isometric) {
+        return 1;
+    }
+
+    std::string template_group_key;
+    std::string template_image_id;
+    if (!find_template_target(image_data, output_group, template_group_key, template_image_id)) {
+        if (infer_default_isometric_parts(image_data, output_layers)) {
+            return 1;
+        }
+        log_error("Augustus extracted image is missing a template target for part inheritance", image_data.id.c_str(), 0);
+        return 0;
+    }
+
+    LegacyTemplateGroup template_group;
+    if (!load_legacy_template_group(template_group_key, template_group)) {
+        if (infer_default_isometric_parts(image_data, output_layers)) {
+            log_info("Augustus extracted image fell back to heuristic part inference", template_group_key.c_str(), 0);
+            return 1;
+        }
+        log_error("Augustus extracted image could not load legacy template group", template_group_key.c_str(), 0);
+        return 0;
+    }
+
+    auto template_it = template_group.images.find(template_image_id);
+    if (template_it == template_group.images.end() || template_it->second.parts.empty()) {
+        if (infer_default_isometric_parts(image_data, output_layers)) {
+            log_info("Augustus extracted image fell back to heuristic part inference", template_image_id.c_str(), 0);
+            return 1;
+        }
+        log_error("Augustus extracted image has no usable legacy template image", template_image_id.c_str(), 0);
+        return 0;
+    }
+
+    const std::vector<std::string> &template_parts = template_it->second.parts;
+    if (output_layers.size() == template_parts.size()) {
+        for (size_t i = 0; i < output_layers.size(); ++i) {
+            if (output_layers[i].part.empty()) {
+                output_layers[i].part = template_parts[i];
+            }
+        }
+        return 1;
+    }
+
+    if (output_layers.size() == 1 &&
+        output_layers[0].part.empty() &&
+        output_layers[0].src.empty() &&
+        !output_layers[0].group.empty() &&
+        !output_layers[0].is_direct_crop) {
+        AtlasReference base_reference = output_layers[0];
+        output_layers.clear();
+        output_layers.reserve(template_parts.size());
+        for (const std::string &part : template_parts) {
+            AtlasReference duplicated = base_reference;
+            duplicated.part = part;
+            output_layers.push_back(std::move(duplicated));
+        }
+        return 1;
+    }
+
+    if (infer_default_isometric_parts(image_data, output_layers)) {
+        log_info("Augustus extracted image fell back to heuristic part alignment", image_data.id.c_str(), 0);
+        return 1;
+    }
+
+    log_error("Augustus extracted image could not align layer parts with legacy template", image_data.id.c_str(), 0);
+    return 0;
+}
+
 static int xml_start_image(void)
 {
     AtlasImage image_data;
     const char *id = xml_parser_get_attribute_string("id");
     if (id && *id) {
         image_data.id = id;
+        image_data.has_explicit_id = true;
     }
     image_data.synthetic_id = image_data.id.empty();
     image_data.is_isometric = xml_parser_get_attribute_bool("isometric") != 0;
@@ -680,6 +992,7 @@ static bool load_file_to_buffer(const std::string &path, std::vector<char> &buff
 
 static bool parse_document(const std::string &xml_path, AtlasDocument &document)
 {
+    CrashContextScope crash_scope("augustus_extractor.parse_document", xml_path.c_str());
     std::vector<char> buffer;
     if (!load_file_to_buffer(xml_path, buffer)) {
         return false;
@@ -700,13 +1013,19 @@ static bool parse_document(const std::string &xml_path, AtlasDocument &document)
         return false;
     }
 
-    int synthetic_counter = 0;
+    int materialized_counter = 0;
+    int alias_counter = 0;
     for (AtlasImage &image_data : g_parse_state.document.images) {
+        image_data.materialized = image_has_materialized_pixels(image_data);
         if (!image_data.id.empty()) {
             continue;
         }
         char synthetic_name[32];
-        snprintf(synthetic_name, sizeof(synthetic_name), "Image_%04d", synthetic_counter++);
+        if (image_data.materialized) {
+            snprintf(synthetic_name, sizeof(synthetic_name), "Image_%04d", materialized_counter++);
+        } else {
+            snprintf(synthetic_name, sizeof(synthetic_name), "Alias_%04d", alias_counter++);
+        }
         image_data.id = synthetic_name;
         image_data.synthetic_id = true;
     }
@@ -892,6 +1211,7 @@ static bool write_direct_crop(
     const std::string &output_path,
     ExtractionStats &stats)
 {
+    CrashContextScope crash_scope("augustus_extractor.write_direct_crop", image_data.id.c_str());
     const int width = resolve_crop_width(reference, image_data);
     const int height = resolve_crop_height(reference, image_data);
     if (width <= 0 || height <= 0) {
@@ -1032,6 +1352,7 @@ static bool append_image_xml(
     const OutputGroup &output_group,
     ExtractionStats &stats)
 {
+    CrashContextScope crash_scope("augustus_extractor.emit_image", image_data.id.c_str());
     append_indent(xml, 1);
     xml += "<image";
     append_attribute(xml, "id", image_data.id);
@@ -1047,14 +1368,20 @@ static bool append_image_xml(
     xml += ">\n";
 
     const std::string image_stem = sanitize_component(image_data.id.c_str());
-    for (size_t layer_index = 0; layer_index < image_data.layers.size(); ++layer_index) {
+    std::vector<AtlasReference> output_layers;
+    if (!build_output_layers(image_data, output_group, output_layers)) {
+        crash_context_report_error("Augustus extractor could not infer image layer parts", image_data.id.c_str());
+        return false;
+    }
+
+    for (size_t layer_index = 0; layer_index < output_layers.size(); ++layer_index) {
         char stem[FILE_NAME_MAX];
-        if (image_data.layers.size() == 1 && !image_data.animation.present && image_stem != "unnamed") {
+        if (output_layers.size() == 1 && !image_data.animation.present && image_stem != "unnamed") {
             snprintf(stem, sizeof(stem), "%s", image_stem.c_str());
         } else {
             snprintf(stem, sizeof(stem), "%s_Layer_%02d", image_stem.c_str(), static_cast<int>(layer_index + 1));
         }
-        if (!append_reference_xml(xml, image_data, image_data.layers[layer_index], output_group, "layer", stem, stats)) {
+        if (!append_reference_xml(xml, image_data, output_layers[layer_index], output_group, "layer", stem, stats)) {
             return false;
         }
     }
@@ -1108,6 +1435,7 @@ static bool append_image_xml(
 
 static bool export_group(const AtlasDocument &document, const OutputGroup &output_group, ExtractionStats &stats)
 {
+    CrashContextScope crash_scope("augustus_extractor.export_group", output_group.group_key.c_str());
     ensure_directory(append_path_component(make_augustus_graphics_root(), output_group.family_name));
     ensure_directory(output_group.directory_path);
 
@@ -1133,6 +1461,7 @@ static bool export_group(const AtlasDocument &document, const OutputGroup &outpu
 
 static bool export_document(const AtlasDocument &document, ExtractionStats &stats)
 {
+    CrashContextScope crash_scope("augustus_extractor.export_document", document.xml_path.c_str());
     if (!png_load_from_file(document.png_path.c_str(), 0)) {
         log_error("Unable to load Augustus source atlas png", document.png_path.c_str(), 0);
         return false;

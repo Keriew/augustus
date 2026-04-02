@@ -112,6 +112,11 @@ struct GraphicsDefinition {
         path_ = std::move(path);
     }
 
+    void set_image(std::string image)
+    {
+        image_ = std::move(image);
+    }
+
     void set_upgrade_rule(int threshold, GraphicComparison comparison)
     {
         has_upgrade_rule_ = 1;
@@ -133,6 +138,16 @@ struct GraphicsDefinition {
     const char *path() const
     {
         return path_.c_str();
+    }
+
+    int has_image() const
+    {
+        return !image_.empty();
+    }
+
+    const char *image() const
+    {
+        return image_.c_str();
     }
 
     WaterAccessMode water_access_mode() const
@@ -159,6 +174,7 @@ struct GraphicsDefinition {
 
 private:
     std::string path_;
+    std::string image_;
     int has_upgrade_rule_ = 0;
     int upgrade_threshold_ = 0;
     GraphicComparison upgrade_comparison_ = GraphicComparison::None;
@@ -182,6 +198,11 @@ public:
     void set_upgrade_rule(int threshold, GraphicComparison comparison)
     {
         graphics_.set_upgrade_rule(threshold, comparison);
+    }
+
+    void set_graphics_image(std::string image)
+    {
+        graphics_.set_image(std::move(image));
     }
 
     void set_graphics_water_access_mode(WaterAccessMode mode)
@@ -234,6 +255,11 @@ public:
     const char *graphics_path() const
     {
         return graphics_.path();
+    }
+
+    const char *graphics_image() const
+    {
+        return graphics_.image();
     }
 
     WaterAccessMode water_access_mode() const

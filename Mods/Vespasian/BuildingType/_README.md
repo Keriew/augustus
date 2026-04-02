@@ -15,6 +15,7 @@ Current supported nodes:
 Current supported `<graphics>` child nodes:
 
 - `<path value="Health_Culture\Theatre" />`
+- `<image value="Image_0000" />`
 - `<upgrade threshold="N" operator="gt|gte" />`
 - `<water_access mode="reservoir_range" />`
 
@@ -72,6 +73,7 @@ Current engine behavior:
 - Use `block_on_success="true"` when a building should spawn either A or B on the same trigger.
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
+- Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them, such as grouped statue assets.
 - Buildings with a runtime `BuildingType` and a non-empty graphics path now try the new image-group payload path during live city rendering and fall back to legacy rendering when content is missing or unsupported in this phase.
 - The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
 

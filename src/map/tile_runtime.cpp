@@ -1,10 +1,65 @@
 #include "map/tile_runtime_internal.h"
 
 #include "assets/image_group_payload.h"
+#include "core/crash_context.h"
 
 extern "C" {
+#include "core/log.h"
 #include "map/grid.h"
 #include "map/tile_runtime_api.h"
+}
+
+#include <cstdio>
+#include <string>
+#include <unordered_set>
+
+namespace {
+
+std::unordered_set<std::string> g_logged_tile_graphics_fallbacks;
+
+void make_tile_context(char *buffer, size_t buffer_size, int grid_offset)
+{
+    snprintf(buffer, buffer_size, "grid_offset=%d", grid_offset);
+}
+
+void log_tile_scope_state(void *userdata)
+{
+    const tile_runtime *runtime = static_cast<const tile_runtime *>(userdata);
+    if (!runtime || !runtime->definition()) {
+        return;
+    }
+
+    char details[256];
+    snprintf(
+        details,
+        sizeof(details),
+        "grid_offset=%d graphics_path=%s plaza_index=%d",
+        runtime->grid_offset(),
+        runtime->definition()->graphics_path() ? runtime->definition()->graphics_path() : "",
+        runtime->plaza_image_index());
+    log_info("Graphics tile state", details, 0);
+}
+
+void log_tile_graphics_fallback_once(const char *message, const tile_runtime *runtime, const char *detail)
+{
+    char key_buffer[512];
+    snprintf(
+        key_buffer,
+        sizeof(key_buffer),
+        "%s|grid_offset=%d|path=%s|detail=%s",
+        message ? message : "",
+        runtime ? runtime->grid_offset() : -1,
+        runtime && runtime->definition() && runtime->definition()->graphics_path() ?
+            runtime->definition()->graphics_path() : "",
+        detail ? detail : "");
+
+    if (!g_logged_tile_graphics_fallbacks.insert(key_buffer).second) {
+        return;
+    }
+
+    crash_context_report_error(message, detail);
+}
+
 }
 
 namespace tile_runtime_impl {
@@ -42,12 +97,35 @@ const image *tile_runtime::resolve_graphic_image() const
     if (!definition_ || !definition_->has_graphics() || plaza_image_index_ < 0) {
         return nullptr;
     }
-    return image_group_payload_get_image_at_index(definition_->graphics_path(), plaza_image_index_);
+
+    char context[128];
+    make_tile_context(context, sizeof(context), grid_offset_);
+    CrashContextScope crash_scope(
+        "tile_runtime.resolve_graphic_image",
+        context,
+        log_tile_scope_state,
+        const_cast<tile_runtime *>(this));
+    const image *img = image_group_payload_get_image_at_index(definition_->graphics_path(), plaza_image_index_);
+    if (!img) {
+        char detail[256];
+        snprintf(
+            detail,
+            sizeof(detail),
+            "%s index=%d",
+            definition_->graphics_path(),
+            plaza_image_index_);
+        log_tile_graphics_fallback_once(
+            "Tile graphics image could not be resolved. Falling back to legacy rendering.",
+            this,
+            detail);
+    }
+    return img;
 }
 
 extern "C" void tile_runtime_reset(void)
 {
     tile_runtime_impl::g_runtime_tiles.clear();
+    g_logged_tile_graphics_fallbacks.clear();
 }
 
 extern "C" void tile_runtime_clear(int grid_offset)

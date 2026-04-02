@@ -1,5 +1,7 @@
 <building type="large_statue">
     <graphics>
         <path value="Aesthetics\Statue" />
+        <image value="l statue anim" />
+        <water_access mode="reservoir_range" />
     </graphics>
 </building>

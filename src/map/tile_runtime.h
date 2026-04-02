@@ -29,6 +29,11 @@ public:
         plaza_image_index_ = image_index;
     }
 
+    int plaza_image_index() const
+    {
+        return plaza_image_index_;
+    }
+
     const image *resolve_graphic_image() const;
 
 private:

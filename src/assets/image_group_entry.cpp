@@ -73,6 +73,21 @@ const image *ImageGroupEntry::animation_frame(int animation_offset) const
     return frame_image_key.empty() ? nullptr : image_payload_legacy_for_key(frame_image_key.c_str());
 }
 
+int ImageGroupEntry::has_animation() const
+{
+    return has_animation_;
+}
+
+const image_animation &ImageGroupEntry::animation() const
+{
+    return animation_data_;
+}
+
+const std::vector<std::string> &ImageGroupEntry::animation_frame_keys() const
+{
+    return animation_frame_keys_;
+}
+
 void ImageGroupEntry::set_keys(std::string image_key, std::string top_image_key)
 {
     image_key_ = std::move(image_key);
