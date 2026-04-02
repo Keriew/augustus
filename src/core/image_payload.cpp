@@ -8,6 +8,7 @@ extern "C" {
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <new>
 #include <string>
 #include <unordered_map>
 
@@ -64,6 +65,17 @@ static void release_renderer_handle(image_handle handle)
     image temp = {};
     temp.resource_handle = handle;
     renderer->release_image_resource(&temp);
+}
+
+static void release_payload_iterator(PayloadMap::iterator it)
+{
+    if (it == g_payloads.end()) {
+        return;
+    }
+    if (it->second->release() <= 0) {
+        release_renderer_handle(it->second->handle());
+        g_payloads.erase(it);
+    }
 }
 
 static void bind_image_to_payload(image *img, ImagePayload *payload)
@@ -258,6 +270,63 @@ extern "C" const char *image_payload_load_png(image *img, const char *path_key, 
     return image_payload_register(img, path_key);
 }
 
+ImagePayload *image_payload_load_png_payload(const char *path_key, const char *file_path)
+{
+    if (!path_key || !*path_key || !file_path || !*file_path) {
+        return nullptr;
+    }
+
+    if (ImagePayload *existing = find_payload_ptr(path_key)) {
+        existing->retain();
+        return existing;
+    }
+
+    if (!png_load_from_file(file_path, 0)) {
+        return nullptr;
+    }
+
+    int width = 0;
+    int height = 0;
+    if (!png_get_image_size(&width, &height) || width <= 0 || height <= 0) {
+        png_unload();
+        return nullptr;
+    }
+
+    std::unique_ptr<color_t[]> pixels(new (std::nothrow) color_t[static_cast<size_t>(width) * height]);
+    if (!pixels) {
+        png_unload();
+        return nullptr;
+    }
+
+    if (!png_read(pixels.get(), 0, 0, width, height, 0, 0, width, 0)) {
+        png_unload();
+        return nullptr;
+    }
+    png_unload();
+
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (!renderer || !renderer->upload_image_resource) {
+        return nullptr;
+    }
+
+    image legacy_image = {};
+    legacy_image.width = width;
+    legacy_image.height = height;
+    legacy_image.original.width = width;
+    legacy_image.original.height = height;
+    renderer->upload_image_resource(&legacy_image, pixels.get(), width, height);
+    if (legacy_image.resource_handle <= 0) {
+        return nullptr;
+    }
+
+    auto payload = std::make_unique<ImagePayload>(path_key, legacy_image);
+    payload->set_handle(legacy_image.resource_handle);
+    payload->retain();
+    ImagePayload *payload_ptr = payload.get();
+    g_payloads.emplace(payload_ptr->key(), std::move(payload));
+    return payload_ptr;
+}
+
 extern "C" const char *image_payload_register(image *img, const char *path_key)
 {
     if (!img || !path_key || !*path_key || img->resource_handle <= 0) {
@@ -323,6 +392,18 @@ extern "C" image_handle image_payload_handle_for_key(const char *path_key)
         return payload->handle();
     }
     return 0;
+}
+
+void image_payload_retain_key(const char *path_key)
+{
+    if (ImagePayload *payload = find_payload_ptr(path_key)) {
+        payload->retain();
+    }
+}
+
+void image_payload_release_key(const char *path_key)
+{
+    release_payload_iterator(find_payload(path_key));
 }
 
 extern "C" void image_payload_clear_all(void)

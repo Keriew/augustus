@@ -29,6 +29,9 @@ private:
 
 ImagePayload *image_payload_get(const char *path_key);
 const ImagePayload *image_payload_get(const image *img);
+ImagePayload *image_payload_load_png_payload(const char *path_key, const char *file_path);
+void image_payload_retain_key(const char *path_key);
+void image_payload_release_key(const char *path_key);
 #endif
 
 #ifdef __cplusplus

@@ -22,6 +22,8 @@
     <ClCompile Include="src\assets\assets.cpp" />
     <ClCompile Include="src\assets\group.c" />
     <ClCompile Include="src\assets\image.c" />
+    <ClCompile Include="src\assets\image_group_entry.cpp" />
+    <ClCompile Include="src\assets\image_group_payload.cpp" />
     <ClCompile Include="src\assets\layer.cpp" />
     <ClCompile Include="src\assets\xml.cpp" />
     <ClCompile Include="src\building\animation.c" />
@@ -116,6 +118,7 @@
     <ClCompile Include="src\core\hotkey_config.c" />
     <ClCompile Include="src\core\image_data.cpp" />
     <ClCompile Include="src\core\image.c" />
+    <ClCompile Include="src\core\legacy_image_extractor.cpp" />
     <ClCompile Include="src\core\image_payload.cpp" />
     <ClCompile Include="src\core\image_packer.c" />
     <ClCompile Include="src\core\io.c" />
@@ -505,6 +508,8 @@
     <ClInclude Include="src\assets\assets.h" />
     <ClInclude Include="src\assets\group.h" />
     <ClInclude Include="src\assets\image.h" />
+    <ClInclude Include="src\assets\image_group_entry.h" />
+    <ClInclude Include="src\assets\image_group_payload.h" />
     <ClInclude Include="src\assets\layer.h" />
     <ClInclude Include="src\assets\xml.h" />
     <ClInclude Include="src\building\animation.h" />
@@ -606,6 +611,7 @@
     <ClInclude Include="src\core\image.h" />
     <ClInclude Include="src\core\image_group.h" />
     <ClInclude Include="src\core\image_group_editor.h" />
+    <ClInclude Include="src\core\legacy_image_extractor.h" />
     <ClInclude Include="src\core\image_packer.h" />
     <ClInclude Include="src\core\io.h" />
     <ClInclude Include="src\core\lang.h" />

@@ -70,16 +70,23 @@ static int append_julius_graphics_path(char *full_path, const char *relative_pat
     return snprintf(full_path, FILE_NAME_MAX, "%s%s", mod_manager_get_julius_graphics_path(), relative_path) < FILE_NAME_MAX;
 }
 
-static int try_resolved_path(char *full_path, const char *candidate)
+static int try_resolved_path(char *full_path, const char *candidate, xml_asset_source candidate_source, xml_asset_source *resolved_source)
 {
     if (candidate && *candidate && file_exists(candidate, NOT_LOCALIZED)) {
         snprintf(full_path, FILE_NAME_MAX, "%s", candidate);
+        if (resolved_source) {
+            *resolved_source = candidate_source;
+        }
         return 1;
     }
     return 0;
 }
 
-static int resolve_graphics_path(char *full_path, const char *relative_path, xml_asset_source source)
+static int resolve_graphics_path(
+    char *full_path,
+    const char *relative_path,
+    xml_asset_source source,
+    xml_asset_source *resolved_source)
 {
     if (!relative_path || !*relative_path) {
         return 0;
@@ -96,28 +103,29 @@ static int resolve_graphics_path(char *full_path, const char *relative_path, xml
 
     switch (source) {
         case XML_ASSET_SOURCE_MOD:
-            return try_resolved_path(full_path, mod_path)
-                || try_resolved_path(full_path, augustus_path)
-                || try_resolved_path(full_path, julius_path)
-                || try_resolved_path(full_path, root_path)
+            return try_resolved_path(full_path, mod_path, XML_ASSET_SOURCE_MOD, resolved_source)
+                || try_resolved_path(full_path, augustus_path, XML_ASSET_SOURCE_AUGUSTUS, resolved_source)
+                || try_resolved_path(full_path, julius_path, XML_ASSET_SOURCE_JULIUS, resolved_source)
+                || try_resolved_path(full_path, root_path, XML_ASSET_SOURCE_ROOT, resolved_source)
                 || append_mod_graphics_path(full_path, relative_path);
         case XML_ASSET_SOURCE_AUGUSTUS:
-            return try_resolved_path(full_path, augustus_path)
-                || try_resolved_path(full_path, julius_path)
-                || try_resolved_path(full_path, root_path)
+            return try_resolved_path(full_path, augustus_path, XML_ASSET_SOURCE_AUGUSTUS, resolved_source)
+                || try_resolved_path(full_path, julius_path, XML_ASSET_SOURCE_JULIUS, resolved_source)
+                || try_resolved_path(full_path, root_path, XML_ASSET_SOURCE_ROOT, resolved_source)
                 || append_augustus_graphics_path(full_path, relative_path);
         case XML_ASSET_SOURCE_JULIUS:
-            return try_resolved_path(full_path, julius_path)
-                || try_resolved_path(full_path, root_path)
+            return try_resolved_path(full_path, julius_path, XML_ASSET_SOURCE_JULIUS, resolved_source)
+                || try_resolved_path(full_path, root_path, XML_ASSET_SOURCE_ROOT, resolved_source)
                 || append_julius_graphics_path(full_path, relative_path);
         case XML_ASSET_SOURCE_ROOT:
-            return try_resolved_path(full_path, root_path) || append_root_graphics_path(full_path, relative_path);
+            return try_resolved_path(full_path, root_path, XML_ASSET_SOURCE_ROOT, resolved_source)
+                || append_root_graphics_path(full_path, relative_path);
         case XML_ASSET_SOURCE_AUTO:
         default:
-            return try_resolved_path(full_path, mod_path)
-                || try_resolved_path(full_path, augustus_path)
-                || try_resolved_path(full_path, julius_path)
-                || try_resolved_path(full_path, root_path)
+            return try_resolved_path(full_path, mod_path, XML_ASSET_SOURCE_MOD, resolved_source)
+                || try_resolved_path(full_path, augustus_path, XML_ASSET_SOURCE_AUGUSTUS, resolved_source)
+                || try_resolved_path(full_path, julius_path, XML_ASSET_SOURCE_JULIUS, resolved_source)
+                || try_resolved_path(full_path, root_path, XML_ASSET_SOURCE_ROOT, resolved_source)
                 || append_mod_graphics_path(full_path, relative_path);
     }
 }
@@ -324,7 +332,7 @@ int xml_process_assetlist_file_from_source(const char *xml_file_name, xml_asset_
     log_info("Loading assetlist file", xml_file_name, 0);
 
     char full_path[FILE_NAME_MAX];
-    if (!resolve_graphics_path(full_path, xml_file_name, source)) {
+    if (!resolve_graphics_path(full_path, xml_file_name, source, 0)) {
         log_error("Unable to resolve assetlist file", xml_file_name, 0);
         return 0;
     }
@@ -388,26 +396,55 @@ void xml_finish(void)
     data.initialized = 0;
 }
 
-void xml_get_full_image_path(char *full_path, const char *image_file_name)
+int xml_resolve_assetlist_path(char *full_path, const char *assetlist_key, xml_asset_source source, xml_asset_source *resolved_source)
 {
     char relative_path[FILE_NAME_MAX];
-    if (snprintf(relative_path, FILE_NAME_MAX, "%s/%s.png", data.base_path, image_file_name) >= FILE_NAME_MAX) {
-        log_error("Image path too long", image_file_name, 0);
-        return;
+    if (!assetlist_key || !*assetlist_key) {
+        return 0;
     }
-    if (!resolve_graphics_path(full_path, relative_path, data.current_source)) {
+    if (snprintf(relative_path, FILE_NAME_MAX, "%s.xml", assetlist_key) >= FILE_NAME_MAX) {
+        log_error("Assetlist path too long", assetlist_key, 0);
+        return 0;
+    }
+    return resolve_graphics_path(full_path, relative_path, source, resolved_source);
+}
+
+int xml_resolve_image_path(char *full_path, const char *assetlist_key, const char *image_file_name, xml_asset_source source)
+{
+    char relative_path[FILE_NAME_MAX];
+    if (!assetlist_key || !*assetlist_key || !image_file_name || !*image_file_name) {
+        return 0;
+    }
+    if (snprintf(relative_path, FILE_NAME_MAX, "%s/%s.png", assetlist_key, image_file_name) >= FILE_NAME_MAX) {
+        log_error("Image path too long", image_file_name, 0);
+        return 0;
+    }
+    return resolve_graphics_path(full_path, relative_path, source, 0);
+}
+
+int xml_resolve_group_image_path(char *full_path, const char *group_name, xml_asset_source source)
+{
+    char relative_path[FILE_NAME_MAX];
+    if (!group_name || !*group_name) {
+        return 0;
+    }
+    if (snprintf(relative_path, FILE_NAME_MAX, "%s.png", group_name) >= FILE_NAME_MAX) {
+        log_error("Group image path too long", group_name, 0);
+        return 0;
+    }
+    return resolve_graphics_path(full_path, relative_path, source, 0);
+}
+
+void xml_get_full_image_path(char *full_path, const char *image_file_name)
+{
+    if (!xml_resolve_image_path(full_path, data.base_path, image_file_name, data.current_source)) {
         log_error("Unable to resolve image path", image_file_name, 0);
     }
 }
 
 void xml_get_full_group_image_path(char *full_path, const char *group_name)
 {
-    char relative_path[FILE_NAME_MAX];
-    if (snprintf(relative_path, FILE_NAME_MAX, "%s.png", group_name) >= FILE_NAME_MAX) {
-        log_error("Group image path too long", group_name, 0);
-        return;
-    }
-    if (!resolve_graphics_path(full_path, relative_path, data.current_source)) {
+    if (!xml_resolve_group_image_path(full_path, group_name, data.current_source)) {
         log_error("Unable to resolve group image path", group_name, 0);
     }
 }

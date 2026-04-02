@@ -1,0 +1,46 @@
+#pragma once
+
+#include "assets/image_group_entry.h"
+#include "assets/xml.h"
+#include "core/image.h"
+
+#ifdef __cplusplus
+#include <string>
+#include <unordered_map>
+
+class ImageGroupPayload {
+public:
+    ImageGroupPayload(std::string key, std::string xml_path, xml_asset_source source);
+    ~ImageGroupPayload();
+
+    const std::string &key() const;
+    const std::string &xml_path() const;
+    xml_asset_source source() const;
+
+    void set_image(const std::string &image_id, const std::string &image_key, const std::string &top_image_key = std::string());
+    const char *image_key_for(const char *image_id) const;
+    const char *top_image_key_for(const char *image_id) const;
+    const image *legacy_image_for(const char *image_id) const;
+
+private:
+    std::string key_;
+    std::string xml_path_;
+    xml_asset_source source_ = XML_ASSET_SOURCE_AUTO;
+    std::unordered_map<std::string, ImageGroupEntry> images_;
+};
+
+const ImageGroupPayload *image_group_payload_get(const char *path_key);
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int image_group_payload_load(const char *path_key);
+const image *image_group_payload_get_image(const char *path_key, const char *image_id);
+const char *image_group_payload_get_image_key(const char *path_key, const char *image_id);
+void image_group_payload_clear_all(void);
+
+#ifdef __cplusplus
+}
+#endif
