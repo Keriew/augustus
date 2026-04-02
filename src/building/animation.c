@@ -23,7 +23,7 @@ static void advance_monument_secondary_animation(building *b)
     }
 }
 
-int building_animation_offset(building *b, int image_id, int grid_offset)
+static int building_animation_offset_impl(building *b, const image *img, int grid_offset)
 {
     if (b->type == BUILDING_FOUNTAIN && (b->num_workers <= 0 || !b->has_water_access)) {
         return 0;
@@ -130,7 +130,6 @@ int building_animation_offset(building *b, int image_id, int grid_offset)
     //    }
     //}
 
-    const image *img = image_get(image_id);
     if (!img->animation) {
         return 0;
     }
@@ -200,6 +199,19 @@ int building_animation_offset(building *b, int image_id, int grid_offset)
 
     map_sprite_animation_set(grid_offset, is_reverse ? new_sprite | 0x80 : new_sprite);
     return new_sprite;
+}
+
+int building_animation_offset(building *b, int image_id, int grid_offset)
+{
+    return building_animation_offset_for_image(b, image_get(image_id), grid_offset);
+}
+
+int building_animation_offset_for_image(building *b, const image *img, int grid_offset)
+{
+    if (!img) {
+        return 0;
+    }
+    return building_animation_offset_impl(b, img, grid_offset);
 }
 
 int building_animation_advance_storage_flag(building *b, int image_id)

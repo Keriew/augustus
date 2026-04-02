@@ -239,6 +239,31 @@ static int draw_runtime_building_top(building *b, int x, int y, color_t color_ma
     return 1;
 }
 
+static int draw_runtime_building_animation(building *b, int x, int y, int grid_offset, color_t color_mask)
+{
+    if (!map_property_is_draw_tile(grid_offset) || !b) {
+        return 0;
+    }
+
+    b = building_main(b);
+    const image *img = b ? building_runtime_get_graphic_image(b) : 0;
+    if (!img || !img->animation) {
+        return 0;
+    }
+
+    const image *frame = building_runtime_get_graphic_animation_frame(b);
+    if (!frame) {
+        return 0;
+    }
+
+    int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
+    image_draw_image(frame,
+        x + img->animation->sprite_offset_x,
+        y + img->animation->sprite_offset_y - y_offset,
+        color_mask, draw_context.scale);
+    return 1;
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -903,6 +928,10 @@ static void draw_animation(int x, int y, int grid_offset)
             if (b->type == BUILDING_DEPOT) {
                 draw_depot_resource(b, x, y, color_mask);
             }
+        }
+    } else if (building_id && draw_runtime_building_animation(b, x, y, grid_offset, color_mask)) {
+        if (b->has_plague) {
+            draw_plague(b, x, y, color_mask);
         }
     } else if (map_property_is_draw_tile(grid_offset) && building_id && b->has_plague) {
         draw_plague(b, x, y, color_mask);

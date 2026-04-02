@@ -7,6 +7,7 @@
 #ifdef __cplusplus
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 class ImageGroupPayload {
 public:
@@ -18,10 +19,13 @@ public:
     xml_asset_source source() const;
 
     void set_image(const std::string &image_id, const std::string &image_key, const std::string &top_image_key = std::string());
+    void set_image_animation(const std::string &image_id, const image_animation &animation, std::vector<std::string> frame_image_keys);
     const char *image_key_for(const char *image_id) const;
     const char *top_image_key_for(const char *image_id) const;
     const image *legacy_image_for(const char *image_id) const;
+    const image *animation_frame_for(const char *image_id, int animation_offset) const;
     const image *default_legacy_image() const;
+    const char *default_image_id() const;
 
 private:
     std::string key_;
@@ -40,7 +44,9 @@ extern "C" {
 
 int image_group_payload_load(const char *path_key);
 const image *image_group_payload_get_image(const char *path_key, const char *image_id);
+const image *image_group_payload_get_animation_frame(const char *path_key, const char *image_id, int animation_offset);
 const image *image_group_payload_get_default_image(const char *path_key);
+const char *image_group_payload_get_default_image_id(const char *path_key);
 const char *image_group_payload_get_image_key(const char *path_key, const char *image_id);
 void image_group_payload_clear_all(void);
 

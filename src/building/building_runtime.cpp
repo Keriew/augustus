@@ -3,6 +3,7 @@
 #include "assets/image_group_payload.h"
 
 extern "C" {
+#include "building/animation.h"
 #include "building/building_runtime_api.h"
 #include "building/image.h"
 #include "building/properties.h"
@@ -99,6 +100,28 @@ int building_runtime::uses_new_graphics() const
     return building_ && definition_ && definition_->has_graphic() && definition_->graphics_path() && *definition_->graphics_path();
 }
 
+const char *building_runtime::resolve_named_group_image_id(const char *image_id) const
+{
+    if (!uses_new_graphics() || !image_id || !*image_id) {
+        return nullptr;
+    }
+    return image_group_payload_get_image(definition_->graphics_path(), image_id) ? image_id : nullptr;
+}
+
+const char *building_runtime::resolve_candidate_graphic_image_id(const char *const *image_ids, size_t image_id_count) const
+{
+    if (!uses_new_graphics() || !image_ids) {
+        return nullptr;
+    }
+
+    for (size_t i = 0; i < image_id_count; i++) {
+        if (const char *image_id = resolve_named_group_image_id(image_ids[i])) {
+            return image_id;
+        }
+    }
+    return nullptr;
+}
+
 const image *building_runtime::resolve_named_group_image(const char *image_id) const
 {
     if (!uses_new_graphics() || !image_id || !*image_id) {
@@ -115,7 +138,7 @@ const image *building_runtime::resolve_candidate_graphic_image(const char *const
     return resolve_group_image_candidates(definition_->graphics_path(), image_ids, image_id_count);
 }
 
-const image *building_runtime::resolve_default_group_image() const
+const char *building_runtime::resolve_default_group_image_id() const
 {
     static const char *default_image_ids[] = {
         "main",
@@ -126,13 +149,19 @@ const image *building_runtime::resolve_default_group_image() const
         "0"
     };
 
-    if (const image *img = resolve_candidate_graphic_image(default_image_ids, sizeof(default_image_ids) / sizeof(default_image_ids[0]))) {
-        return img;
+    if (const char *image_id = resolve_candidate_graphic_image_id(default_image_ids, sizeof(default_image_ids) / sizeof(default_image_ids[0]))) {
+        return image_id;
     }
-    return uses_new_graphics() ? image_group_payload_get_default_image(definition_->graphics_path()) : nullptr;
+    return uses_new_graphics() ? image_group_payload_get_default_image_id(definition_->graphics_path()) : nullptr;
 }
 
-const image *building_runtime::resolve_type_specific_graphic_image() const
+const image *building_runtime::resolve_default_group_image() const
+{
+    const char *image_id = resolve_default_group_image_id();
+    return image_id ? resolve_named_group_image(image_id) : nullptr;
+}
+
+const char *building_runtime::resolve_type_specific_graphic_image_id() const
 {
     if (!uses_new_graphics()) {
         return nullptr;
@@ -144,60 +173,60 @@ const image *building_runtime::resolve_type_specific_graphic_image() const
             static const char *base_image_ids[] = { "Theatre ON", "Theater ON", "Theatre", "Theater", "ON" };
             static const char *upgrade_image_ids[] = { "Theatre Upgrade ON", "Theater Upgrade ON", "Upgrade ON" };
             return building_->upgrade_level ?
-                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+                resolve_candidate_graphic_image_id(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image_id(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
         }
         case BUILDING_AMPHITHEATER:
         {
             static const char *base_image_ids[] = { "Amphitheatre ON", "Amphitheater ON", "Amphitheatre", "Amphitheater", "ON" };
             static const char *upgrade_image_ids[] = { "Amphitheatre Upgrade ON", "Amphitheater Upgrade ON", "Upgrade ON" };
             return building_->upgrade_level ?
-                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+                resolve_candidate_graphic_image_id(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image_id(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
         }
         case BUILDING_ARENA:
         {
             static const char *base_image_ids[] = { "Arena ON", "Arena", "ON" };
             static const char *upgrade_image_ids[] = { "Arena Upgrade ON", "Upgrade ON" };
             return building_->upgrade_level ?
-                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+                resolve_candidate_graphic_image_id(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image_id(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
         }
         case BUILDING_SCHOOL:
         {
             static const char *upgrade_image_ids[] = { "Upgraded_School", "School Upgrade ON", "Upgrade ON" };
             if (building_->upgrade_level) {
-                return resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]));
+                return resolve_candidate_graphic_image_id(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]));
             }
-            return resolve_default_group_image();
+            return resolve_default_group_image_id();
         }
         case BUILDING_ACADEMY:
         {
             static const char *base_image_ids[] = { "Academy_Fix", "Academy OFF", "Academy", "OFF" };
             static const char *upgrade_image_ids[] = { "Upgraded_Academy", "Academy Upgrade ON", "Upgrade ON" };
-            const image *img = building_->upgrade_level ?
-                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
-            return img ? img : resolve_default_group_image();
+            const char *image_id = building_->upgrade_level ?
+                resolve_candidate_graphic_image_id(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image_id(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+            return image_id ? image_id : resolve_default_group_image_id();
         }
         case BUILDING_LIBRARY:
         {
             static const char *base_image_ids[] = { "Downgraded_Library", "Library OFF", "Library", "OFF" };
             static const char *upgrade_image_ids[] = { "Library ON", "Upgraded_Library", "ON" };
-            const image *img = building_->upgrade_level ?
-                resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
-            return img ? img : resolve_default_group_image();
+            const char *image_id = building_->upgrade_level ?
+                resolve_candidate_graphic_image_id(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
+                resolve_candidate_graphic_image_id(base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
+            return image_id ? image_id : resolve_default_group_image_id();
         }
         case BUILDING_FORUM:
         {
             static const char *upgrade_image_ids[] = { "Upgraded_Forum", "Forum Upgrade ON", "Upgrade ON" };
             if (building_->upgrade_level) {
-                if (const image *img = resolve_candidate_graphic_image(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]))) {
-                    return img;
+                if (const char *image_id = resolve_candidate_graphic_image_id(upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]))) {
+                    return image_id;
                 }
             }
-            return resolve_default_group_image();
+            return resolve_default_group_image_id();
         }
         case BUILDING_ACTOR_COLONY:
         case BUILDING_GLADIATOR_SCHOOL:
@@ -206,10 +235,27 @@ const image *building_runtime::resolve_type_specific_graphic_image() const
         case BUILDING_BARBER:
         case BUILDING_WELL:
         case BUILDING_WORKCAMP:
-            return resolve_default_group_image();
+            return resolve_default_group_image_id();
         default:
             return nullptr;
     }
+}
+
+const image *building_runtime::resolve_type_specific_graphic_image() const
+{
+    const char *image_id = resolve_type_specific_graphic_image_id();
+    return image_id ? resolve_named_group_image(image_id) : nullptr;
+}
+
+const char *building_runtime::resolve_graphic_image_id() const
+{
+    if (!uses_new_graphics()) {
+        return nullptr;
+    }
+    if (const char *image_id = resolve_type_specific_graphic_image_id()) {
+        return image_id;
+    }
+    return resolve_default_group_image_id();
 }
 
 const image *building_runtime::resolve_graphic_image()
@@ -219,10 +265,32 @@ const image *building_runtime::resolve_graphic_image()
     }
 
     refresh_graphic_state();
-    if (const image *img = resolve_type_specific_graphic_image()) {
-        return img;
+    const char *image_id = resolve_graphic_image_id();
+    return image_id ? resolve_named_group_image(image_id) : nullptr;
+}
+
+const image *building_runtime::resolve_graphic_animation_frame()
+{
+    if (!uses_new_graphics()) {
+        return nullptr;
     }
-    return resolve_default_group_image();
+
+    refresh_graphic_state();
+    const char *image_id = resolve_graphic_image_id();
+    if (!image_id) {
+        return nullptr;
+    }
+
+    const image *img = resolve_named_group_image(image_id);
+    if (!img || !img->animation) {
+        return nullptr;
+    }
+
+    int animation_offset = building_animation_offset_for_image(building_, img, building_->grid_offset);
+    if (animation_offset <= 0) {
+        return nullptr;
+    }
+    return image_group_payload_get_animation_frame(definition_->graphics_path(), image_id, animation_offset);
 }
 
 void building_runtime::set_building_graphic()
@@ -556,6 +624,14 @@ extern "C" const image *building_runtime_get_graphic_image(building *b)
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         return instance->resolve_graphic_image();
+    }
+    return nullptr;
+}
+
+extern "C" const image *building_runtime_get_graphic_animation_frame(building *b)
+{
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
+        return instance->resolve_graphic_animation_frame();
     }
     return nullptr;
 }

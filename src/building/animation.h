@@ -2,8 +2,10 @@
 #define BUILDING_ANIMATION_H
 
 #include "building/building.h"
+#include "core/image.h"
 
 int building_animation_offset(building *b, int image_id, int grid_offset);
+int building_animation_offset_for_image(building *b, const image *img, int grid_offset);
 
 int building_animation_advance_storage_flag(building *b, int image_id);
 

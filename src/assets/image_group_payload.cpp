@@ -28,6 +28,15 @@ struct PendingImage {
     std::string id;
     std::string image_key;
     std::string top_image_key;
+    image_animation animation = {};
+    int has_animation = 0;
+    int implicit_animation_frame_count = 0;
+};
+
+struct PendingAnimationSpec {
+    std::string image_id;
+    image_animation animation = {};
+    int implicit_frame_count = 0;
 };
 
 struct ParseState {
@@ -36,6 +45,8 @@ struct ParseState {
     xml_asset_source source = XML_ASSET_SOURCE_AUTO;
     std::unique_ptr<ImageGroupPayload> payload;
     PendingImage current_image;
+    std::vector<std::string> image_order;
+    std::vector<PendingAnimationSpec> pending_animations;
     int error = 0;
 };
 
@@ -194,6 +205,13 @@ static int commit_pending_image(void)
         g_parse_state.current_image.id,
         g_parse_state.current_image.image_key,
         g_parse_state.current_image.top_image_key);
+    if (g_parse_state.current_image.has_animation) {
+        PendingAnimationSpec animation_spec = {};
+        animation_spec.image_id = g_parse_state.current_image.id;
+        animation_spec.animation = g_parse_state.current_image.animation;
+        animation_spec.implicit_frame_count = g_parse_state.current_image.implicit_animation_frame_count;
+        g_parse_state.pending_animations.push_back(std::move(animation_spec));
+    }
     clear_pending_image();
     return 1;
 }
@@ -261,6 +279,7 @@ static int xml_start_image(void)
         return 0;
     }
     g_parse_state.current_image.id = id;
+    g_parse_state.image_order.push_back(id);
 
     const char *path = xml_parser_get_attribute_string("src");
     const char *group = xml_parser_get_attribute_string("group");
@@ -289,6 +308,14 @@ static int xml_start_layer(void)
 
 static int xml_start_animation(void)
 {
+    g_parse_state.current_image.has_animation = 1;
+    g_parse_state.current_image.animation = {};
+    g_parse_state.current_image.animation.num_sprites = xml_parser_get_attribute_int("frames");
+    g_parse_state.current_image.animation.speed_id = xml_parser_get_attribute_int("speed");
+    g_parse_state.current_image.animation.can_reverse = xml_parser_get_attribute_bool("reversible");
+    g_parse_state.current_image.animation.sprite_offset_x = xml_parser_get_attribute_int("x");
+    g_parse_state.current_image.animation.sprite_offset_y = xml_parser_get_attribute_int("y");
+    g_parse_state.current_image.implicit_animation_frame_count = g_parse_state.current_image.animation.num_sprites;
     return 1;
 }
 
@@ -309,6 +336,46 @@ static void xml_end_image(void)
 
 static void xml_end_animation(void)
 {
+}
+
+static void finalize_pending_animations(void)
+{
+    if (!g_parse_state.payload) {
+        return;
+    }
+
+    for (const PendingAnimationSpec &animation_spec : g_parse_state.pending_animations) {
+        if (animation_spec.implicit_frame_count <= 0) {
+            continue;
+        }
+
+        std::vector<std::string> frame_image_keys;
+        for (size_t i = 0; i < g_parse_state.image_order.size(); i++) {
+            if (g_parse_state.image_order[i] != animation_spec.image_id) {
+                continue;
+            }
+
+            for (int frame_index = 1; frame_index <= animation_spec.implicit_frame_count; frame_index++) {
+                const size_t order_index = i + static_cast<size_t>(frame_index);
+                if (order_index >= g_parse_state.image_order.size()) {
+                    break;
+                }
+
+                const char *frame_key = g_parse_state.payload->image_key_for(g_parse_state.image_order[order_index].c_str());
+                if (!frame_key || !*frame_key) {
+                    break;
+                }
+                frame_image_keys.emplace_back(frame_key);
+            }
+            break;
+        }
+
+        if (!frame_image_keys.empty()) {
+            image_animation animation = animation_spec.animation;
+            animation.num_sprites = static_cast<int>(frame_image_keys.size());
+            g_parse_state.payload->set_image_animation(animation_spec.image_id, animation, std::move(frame_image_keys));
+        }
+    }
 }
 
 static const xml_parser_element kXmlElements[] = {
@@ -347,6 +414,7 @@ static std::unique_ptr<ImageGroupPayload> parse_group_file(
         g_parse_state.payload.reset();
         return nullptr;
     }
+    finalize_pending_animations();
     return std::move(g_parse_state.payload);
 }
 
@@ -408,6 +476,15 @@ void ImageGroupPayload::set_image(const std::string &image_id, const std::string
     images_.emplace(image_id, ImageGroupEntry(image_id, image_key, top_image_key));
 }
 
+void ImageGroupPayload::set_image_animation(const std::string &image_id, const image_animation &animation, std::vector<std::string> frame_image_keys)
+{
+    auto it = images_.find(image_id);
+    if (it == images_.end()) {
+        return;
+    }
+    it->second.set_animation(animation, std::move(frame_image_keys));
+}
+
 const char *ImageGroupPayload::image_key_for(const char *image_id) const
 {
     if (!image_id || !*image_id) {
@@ -435,12 +512,26 @@ const image *ImageGroupPayload::legacy_image_for(const char *image_id) const
     return it == images_.end() ? nullptr : it->second.legacy_image();
 }
 
+const image *ImageGroupPayload::animation_frame_for(const char *image_id, int animation_offset) const
+{
+    if (!image_id || !*image_id || animation_offset <= 0) {
+        return nullptr;
+    }
+    auto it = images_.find(image_id);
+    return it == images_.end() ? nullptr : it->second.animation_frame(animation_offset);
+}
+
 const image *ImageGroupPayload::default_legacy_image() const
 {
     if (default_image_id_.empty()) {
         return nullptr;
     }
     return legacy_image_for(default_image_id_.c_str());
+}
+
+const char *ImageGroupPayload::default_image_id() const
+{
+    return default_image_id_.empty() ? nullptr : default_image_id_.c_str();
 }
 
 const ImageGroupPayload *image_group_payload_get(const char *path_key)
@@ -498,6 +589,26 @@ extern "C" const image *image_group_payload_get_default_image(const char *path_k
     }
     payload = find_group_payload(path_key);
     return payload ? payload->default_legacy_image() : nullptr;
+}
+
+extern "C" const image *image_group_payload_get_animation_frame(const char *path_key, const char *image_id, int animation_offset)
+{
+    const ImageGroupPayload *payload = find_group_payload(path_key);
+    if (!payload && !image_group_payload_load(path_key)) {
+        return nullptr;
+    }
+    payload = find_group_payload(path_key);
+    return payload ? payload->animation_frame_for(image_id, animation_offset) : nullptr;
+}
+
+extern "C" const char *image_group_payload_get_default_image_id(const char *path_key)
+{
+    const ImageGroupPayload *payload = find_group_payload(path_key);
+    if (!payload && !image_group_payload_load(path_key)) {
+        return nullptr;
+    }
+    payload = find_group_payload(path_key);
+    return payload ? payload->default_image_id() : nullptr;
 }
 
 extern "C" const char *image_group_payload_get_image_key(const char *path_key, const char *image_id)

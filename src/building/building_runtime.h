@@ -19,6 +19,7 @@ public:
     void set_building_graphic();
     void spawn_figure();
     const image *resolve_graphic_image();
+    const image *resolve_graphic_animation_frame();
 
     const ::building *building() const
     {
@@ -33,6 +34,11 @@ public:
 private:
     void refresh_graphic_state();
     int uses_new_graphics() const;
+    const char *resolve_named_group_image_id(const char *image_id) const;
+    const char *resolve_candidate_graphic_image_id(const char *const *image_ids, size_t image_id_count) const;
+    const char *resolve_default_group_image_id() const;
+    const char *resolve_type_specific_graphic_image_id() const;
+    const char *resolve_graphic_image_id() const;
     const image *resolve_named_group_image(const char *image_id) const;
     const image *resolve_candidate_graphic_image(const char *const *image_ids, size_t image_id_count) const;
     const image *resolve_default_group_image() const;

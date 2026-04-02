@@ -278,6 +278,31 @@ static int draw_runtime_building_top(building *b, int x, int y, color_t color_ma
     return 1;
 }
 
+static int draw_runtime_building_animation(building *b, int x, int y, int grid_offset, color_t color_mask)
+{
+    if (!map_property_is_draw_tile(grid_offset) || !b) {
+        return 0;
+    }
+
+    b = building_main(b);
+    const image *img = b ? building_runtime_get_graphic_image(b) : 0;
+    if (!img || !img->animation) {
+        return 0;
+    }
+
+    const image *frame = building_runtime_get_graphic_animation_frame(b);
+    if (!frame) {
+        return 0;
+    }
+
+    int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
+    image_draw_image(frame,
+        x + img->animation->sprite_offset_x,
+        y + img->animation->sprite_offset_y - y_offset,
+        color_mask, scale);
+    return 1;
+}
+
 static int is_drawable_farmhouse(int grid_offset, int map_orientation)
 {
     if (!map_property_is_draw_tile(grid_offset)) {
@@ -831,44 +856,56 @@ static void draw_animation(int x, int y, int grid_offset)
     const image *img = image_get(image_id);
     if (map_is_bridge(grid_offset)) {
         city_draw_bridge(x, y, scale, grid_offset);
-    } else if (img->animation && draw) {
-        if (map_property_is_draw_tile(grid_offset)) {
+    } else {
+        if (draw && map_building_at(grid_offset)) {
             building *b = building_get(map_building_at(grid_offset));
             int color_mask = draw_building_as_deleted(b) ? building_construction_clear_color() : 0;
             if (is_building_selected(b)) {
                 color_mask = get_building_color_mask(b);
             }
-            if (b->type == BUILDING_GRANARY) {
-                if (img->animation) {
-                    image_draw(image_group(GROUP_BUILDING_GRANARY) + 1,
-                        x + img->animation->sprite_offset_x,
-                        y + 60 + img->animation->sprite_offset_y - img->height,
-                        color_mask, scale);
+            if (draw_runtime_building_animation(b, x, y, grid_offset, color_mask)) {
+                return;
+            }
+        }
+        if (img->animation && draw) {
+            if (map_property_is_draw_tile(grid_offset)) {
+                building *b = building_get(map_building_at(grid_offset));
+                int color_mask = draw_building_as_deleted(b) ? building_construction_clear_color() : 0;
+                if (is_building_selected(b)) {
+                    color_mask = get_building_color_mask(b);
                 }
-                if (b->resources[RESOURCE_NONE] < FULL_GRANARY) {
-                    image_draw(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask, scale);
-                }
-                if (b->resources[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
-                    image_draw(image_group(GROUP_BUILDING_GRANARY) + 3, x + 56, y - 50, color_mask, scale);
-                }
-                if (b->resources[RESOURCE_NONE] < HALF_GRANARY) {
-                    image_draw(image_group(GROUP_BUILDING_GRANARY) + 4, x + 91, y - 50, color_mask, scale);
-                }
-                if (b->resources[RESOURCE_NONE] < QUARTER_GRANARY) {
-                    image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, scale);
-                }
-                draw_permissions_flag(b, x + 81, y - 101, color_mask);
-            } else {
-                int animation_offset = building_animation_offset(b, image_id, grid_offset);
-                if (animation_offset > 0) {
-                    if (animation_offset > img->animation->num_sprites) {
-                        animation_offset = img->animation->num_sprites;
+                if (b->type == BUILDING_GRANARY) {
+                    if (img->animation) {
+                        image_draw(image_group(GROUP_BUILDING_GRANARY) + 1,
+                            x + img->animation->sprite_offset_x,
+                            y + 60 + img->animation->sprite_offset_y - img->height,
+                            color_mask, scale);
                     }
-                    int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
-                    image_draw(image_id + img->animation->start_offset + animation_offset,
-                        x + img->animation->sprite_offset_x,
-                        y + img->animation->sprite_offset_y - y_offset,
-                        color_mask, scale);
+                    if (b->resources[RESOURCE_NONE] < FULL_GRANARY) {
+                        image_draw(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask, scale);
+                    }
+                    if (b->resources[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
+                        image_draw(image_group(GROUP_BUILDING_GRANARY) + 3, x + 56, y - 50, color_mask, scale);
+                    }
+                    if (b->resources[RESOURCE_NONE] < HALF_GRANARY) {
+                        image_draw(image_group(GROUP_BUILDING_GRANARY) + 4, x + 91, y - 50, color_mask, scale);
+                    }
+                    if (b->resources[RESOURCE_NONE] < QUARTER_GRANARY) {
+                        image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, scale);
+                    }
+                    draw_permissions_flag(b, x + 81, y - 101, color_mask);
+                } else {
+                    int animation_offset = building_animation_offset(b, image_id, grid_offset);
+                    if (animation_offset > 0) {
+                        if (animation_offset > img->animation->num_sprites) {
+                            animation_offset = img->animation->num_sprites;
+                        }
+                        int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
+                        image_draw(image_id + img->animation->start_offset + animation_offset,
+                            x + img->animation->sprite_offset_x,
+                            y + img->animation->sprite_offset_y - y_offset,
+                            color_mask, scale);
+                    }
                 }
             }
         }

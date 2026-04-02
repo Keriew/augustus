@@ -39,6 +39,15 @@ void image_draw(int image_id, int x, int y, color_t color, float scale)
     graphics_renderer()->draw_image_request(&request);
 }
 
+void image_draw_image(const image *img, int x, int y, color_t color, float scale)
+{
+    if (!img) {
+        return;
+    }
+    render_2d_request request = make_legacy_request(img, x, y, color, scale, 0);
+    graphics_renderer()->draw_image_request(&request);
+}
+
 void image_draw_silhouette(int image_id, int x, int y, color_t color, float scale)
 {
     const image *img = image_get(image_id);

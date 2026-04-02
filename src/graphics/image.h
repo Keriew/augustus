@@ -12,6 +12,7 @@ extern "C" {
 #define SCALE_NONE 1.0f
 
 void image_draw(int image_id, int x, int y, color_t color, float scale);
+void image_draw_image(const image *img, int x, int y, color_t color, float scale);
 
 void image_draw_silhouette(int image_id, int x, int y, color_t color, float scale);
 void image_draw_enemy(int image_id, int x, int y, float scale);
