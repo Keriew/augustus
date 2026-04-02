@@ -204,6 +204,7 @@ const image *building_runtime::resolve_type_specific_graphic_image() const
         case BUILDING_DOCTOR:
         case BUILDING_HOSPITAL:
         case BUILDING_BARBER:
+        case BUILDING_WELL:
         case BUILDING_WORKCAMP:
             return resolve_default_group_image();
         default:

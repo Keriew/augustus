@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="well">
+    <graphics>
+        <path value="Admin_Logistics\Well" />
+    </graphics>
+</building>
