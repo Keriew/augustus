@@ -1,6 +1,7 @@
 #include "core/image_payload.h"
 
 extern "C" {
+#include "core/png_read.h"
 #include "graphics/renderer.h"
 }
 
@@ -203,6 +204,58 @@ extern "C" const char *image_payload_acquire(image *img, const char *path_key)
     payload->retain();
     bind_image_to_payload(img, payload);
     return img->resource_key;
+}
+
+extern "C" const char *image_payload_load_png(image *img, const char *path_key, const char *file_path)
+{
+    if (!img || !path_key || !*path_key || !file_path || !*file_path) {
+        return nullptr;
+    }
+
+    if (find_payload_ptr(path_key)) {
+        return image_payload_acquire(img, path_key);
+    }
+
+    if (!png_load_from_file(file_path, 0)) {
+        return nullptr;
+    }
+
+    int width = 0;
+    int height = 0;
+    if (!png_get_image_size(&width, &height) || width <= 0 || height <= 0) {
+        png_unload();
+        return nullptr;
+    }
+
+    color_t *pixels = static_cast<color_t *>(malloc(sizeof(color_t) * width * height));
+    if (!pixels) {
+        png_unload();
+        return nullptr;
+    }
+
+    if (!png_read(pixels, 0, 0, width, height, 0, 0, width, 0)) {
+        free(pixels);
+        png_unload();
+        return nullptr;
+    }
+    png_unload();
+
+    img->x_offset = 0;
+    img->y_offset = 0;
+    img->width = width;
+    img->height = height;
+    img->original.width = width;
+    img->original.height = height;
+
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (!renderer || !renderer->upload_image_resource) {
+        free(pixels);
+        return nullptr;
+    }
+
+    renderer->upload_image_resource(img, pixels, width, height);
+    free(pixels);
+    return image_payload_register(img, path_key);
 }
 
 extern "C" const char *image_payload_register(image *img, const char *path_key)

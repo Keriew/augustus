@@ -568,6 +568,42 @@ static void register_asset_image_payload(asset_image *img, int is_top)
     image_payload_register(target, key);
 }
 
+static int asset_image_can_use_direct_payload(const asset_image *img)
+{
+    if (!img || img->is_reference || img->img.is_isometric || img->img.top || &img->first_layer != img->last_layer) {
+        return 0;
+    }
+
+    const layer *source = &img->first_layer;
+    return source->asset_image_path && *source->asset_image_path &&
+        !source->calculated_image_id &&
+        source->invert == INVERT_NONE &&
+        source->rotate == ROTATE_NONE &&
+        source->part == PART_BOTH &&
+        source->mask == LAYER_MASK_NONE &&
+        source->src_x == 0 &&
+        source->src_y == 0 &&
+        source->x_offset == 0 &&
+        source->y_offset == 0 &&
+        img->img.original.width == source->width &&
+        img->img.original.height == source->height;
+}
+
+static int load_asset_image_direct_payload(asset_image *img)
+{
+    if (!asset_image_can_use_direct_payload(img)) {
+        return 0;
+    }
+
+    const layer *source = &img->first_layer;
+    if (!image_payload_load_png(&img->img, source->asset_image_path, source->asset_image_path)) {
+        return 0;
+    }
+
+    img->img.atlas.id = (ATLAS_UNPACKED_EXTRA_ASSET << IMAGE_ATLAS_BIT_OFFSET) + img->index;
+    return 1;
+}
+
 int asset_image_init_array(void)
 {
     data.total_isometric_images = 0;
@@ -607,6 +643,9 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
             continue;
         }
         load_image(current_image, main_images, main_image_widths);
+        if (load_asset_image_direct_payload(current_image)) {
+            continue;
+        }
         int top_height = current_image->img.top ? current_image->img.top->height : 0;
 
         if (graphics_renderer()->should_pack_image(current_image->img.width, current_image->img.height + top_height)) {
@@ -649,13 +688,17 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
     }
 
     png_unload();
-    image_packer_pack(&packer);
+    const image_atlas_data *atlas_data = 0;
+    if (rect > 0) {
+        image_packer_pack(&packer);
 
-    const image_atlas_data *atlas_data = graphics_renderer()->prepare_image_atlas(ATLAS_EXTRA_ASSET,
-        packer.result.images_needed, packer.result.last_image_width, packer.result.last_image_height);
-    if (!atlas_data) {
-        log_error("Failed to create packed images atlas - out of memory", 0, 0);
-        return 0;
+        atlas_data = graphics_renderer()->prepare_image_atlas(ATLAS_EXTRA_ASSET,
+            packer.result.images_needed, packer.result.last_image_width, packer.result.last_image_height);
+        if (!atlas_data) {
+            log_error("Failed to create packed images atlas - out of memory", 0, 0);
+            image_packer_free(&packer);
+            return 0;
+        }
     }
 
     int total_unpacked_assets = 0;
@@ -671,6 +714,8 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
                 free((color_t *) current_image->data); // Freeing a const pointer - ugly but necessary
                 current_image->data = 0;
             }
+        } else if (asset_image_can_use_direct_payload(current_image) && current_image->img.resource_handle > 0) {
+            continue;
         } else if (graphics_renderer()->should_pack_image(current_image->img.width, current_image->img.height + top_height)) {
             int original_width = current_image->img.width;
             int original_height = current_image->img.height;
@@ -752,7 +797,9 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
         }
     }
     image_packer_free(&packer);
-    graphics_renderer()->create_image_atlas(atlas_data, 1);
+    if (atlas_data) {
+        graphics_renderer()->create_image_atlas(atlas_data, 1);
+    }
 #endif
     return 1;
 }

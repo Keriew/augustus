@@ -36,6 +36,7 @@ extern "C" {
 #endif
 
 const char *image_payload_acquire(image *img, const char *path_key);
+const char *image_payload_load_png(image *img, const char *path_key, const char *file_path);
 const char *image_payload_register(image *img, const char *path_key);
 void image_payload_release(image *img);
 const char *image_payload_key(const image *img);
