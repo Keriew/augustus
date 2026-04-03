@@ -13,6 +13,8 @@
 
 #include <stdlib.h>
 
+#include "map/routing.h"
+
 static int use_fixed_seed = 0;
 static unsigned int fixed_seed = 0;
 

@@ -114,6 +114,9 @@ static void button_back(const generic_button *button);
 static void size_selected(int id);
 static void algorithm_selected(int id);
 static void climate_selected(int id);
+static void sync_settings_from_scenario(void);
+static void apply_scenario_settings(void);
+static void randomize_scenario_settings(void);
 
 static const uint8_t label_size[] = "Size";
 static const uint8_t label_algorithm[] = "Algorithm";
@@ -190,6 +193,8 @@ static struct {
     uint8_t seed_text[SEED_TEXT_LENGTH];
     int settings_initialized;
     scenario_climate climate_index;
+    int initial_funds;
+    scenario_win_criteria win_criteria;
 } data;
 
 static minimap_functions preview_minimap_functions;
@@ -260,10 +265,11 @@ static void generate_preview_map(void)
     scenario_editor_create(data.size_index);
     scenario_map_init();
     if (data.settings_initialized) {
-        // apply_scenario_settings();
+        apply_scenario_settings();
     } else {
-        // sync_settings_from_scenario();
+        sync_settings_from_scenario();
         data.settings_initialized = 1;
+        apply_scenario_settings();
     }
     clear_map_data();
     map_image_init_edges();
@@ -416,6 +422,7 @@ static void button_randomize(const generic_button *button)
     unsigned int random_seed = generate_seed_value();
     sprintf(data.seed_text, "%d", random_seed);
     seed_input.placeholder = data.seed_text;
+    randomize_scenario_settings();
     // input_box_set_text(&seed_input, data.seed_text);
     generate_preview_map();
     window_invalidate();
@@ -441,7 +448,7 @@ static void button_open_editor(const generic_button *button)
         return;
     }
 
-    // apply_scenario_settings();
+    apply_scenario_settings();
 
     input_box_stop(&seed_input);
     if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) {
@@ -474,7 +481,7 @@ static void button_start_game(const generic_button *button)
     scenario_map_init();
     clear_map_data();
     map_image_init_edges();
-    // apply_scenario_settings();
+    apply_scenario_settings();
     terrain_generator_generate((terrain_generator_algorithm) data.algorithm_index);
     scenario_set_name(scenario_name_text);
     scenario_set_custom(2);
@@ -520,6 +527,57 @@ static void climate_selected(int id)
     window_invalidate();
 }
 
+static void sync_settings_from_scenario(void)
+{
+    data.climate_index = scenario_property_climate();
+    data.initial_funds = scenario.initial_funds;
+    data.win_criteria = scenario.win_criteria;
+}
+
+static void apply_scenario_settings(void)
+{
+    scenario_change_climate(data.climate_index);
+    scenario.initial_funds = data.initial_funds;
+    scenario.win_criteria = data.win_criteria;
+
+    // Stub: future scenario settings (resources/victory/etc.) should be applied here.
+}
+
+static void randomize_scenario_settings(void)
+{
+    data.climate_index = (scenario_climate) (generate_seed_value() % CLIMATE_COUNT);
+
+    data.initial_funds = 500 + (int) (generate_seed_value() % 60) * 250;
+
+    data.win_criteria.culture.enabled = (int) (generate_seed_value() % 2);
+    data.win_criteria.prosperity.enabled = (int) (generate_seed_value() % 2);
+    data.win_criteria.peace.enabled = (int) (generate_seed_value() % 2);
+    data.win_criteria.favor.enabled = (int) (generate_seed_value() % 2);
+    data.win_criteria.population.enabled = (int) (generate_seed_value() % 3 == 0);
+
+    data.win_criteria.culture.goal = 10 + (int) (generate_seed_value() % 91);
+    data.win_criteria.prosperity.goal = 10 + (int) (generate_seed_value() % 91);
+    data.win_criteria.peace.goal = 10 + (int) (generate_seed_value() % 91);
+    data.win_criteria.favor.goal = 10 + (int) (generate_seed_value() % 91);
+    data.win_criteria.population.goal = 500 + (int) (generate_seed_value() % 56) * 250;
+
+    data.win_criteria.time_limit.enabled = (int) (generate_seed_value() % 4 == 0);
+    data.win_criteria.time_limit.years = 5 + (int) (generate_seed_value() % 36);
+
+    data.win_criteria.survival_time.enabled = 0;
+    if (!data.win_criteria.time_limit.enabled && generate_seed_value() % 5 == 0) {
+        data.win_criteria.survival_time.enabled = 1;
+    }
+    data.win_criteria.survival_time.years = 5 + (int) (generate_seed_value() % 36);
+
+    if (!data.win_criteria.culture.enabled && !data.win_criteria.prosperity.enabled
+        && !data.win_criteria.peace.enabled && !data.win_criteria.favor.enabled
+        && !data.win_criteria.population.enabled && !data.win_criteria.time_limit.enabled
+        && !data.win_criteria.survival_time.enabled) {
+        data.win_criteria.culture.enabled = 1;
+    }
+}
+
 static void init(void)
 {
     data.focus_button_id = 0;
@@ -528,6 +586,8 @@ static void init(void)
     data.seed_text[0] = 0;
     data.settings_initialized = 0;
     data.climate_index = CLIMATE_CENTRAL;
+    data.initial_funds = 1000;
+    memset(&data.win_criteria, 0, sizeof(data.win_criteria));
 
     seed_input.text = data.seed_text;
     seed_input.allowed_chars = INPUT_BOX_CHARS_NUMERIC;
