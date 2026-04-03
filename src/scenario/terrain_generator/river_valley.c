@@ -161,7 +161,7 @@ void terrain_generator_generate_river_valley(void)
                     continue;
                 }
                 int grid_offset = map_grid_offset(wx, wy);
-                map_terrain_set(grid_offset, TERRAIN_WATER);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_WATER);
                 map_elevation_set(grid_offset, 0);
             }
         }
@@ -195,13 +195,13 @@ void terrain_generator_generate_river_valley(void)
 
             int roll = terrain_generator_random_between(0, 100);
             if (dist <= 2 && roll < 30) {
-                map_terrain_set(grid_offset, TERRAIN_MEADOW);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_MEADOW);
             } else if (elevation >= 2 && roll < 12) {
-                map_terrain_set(grid_offset, TERRAIN_ROCK);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_ROCK);
             } else if (roll < 8) {
-                map_terrain_set(grid_offset, TERRAIN_TREE);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_TREE);
             } else if (roll < 16) {
-                map_terrain_set(grid_offset, TERRAIN_SHRUB);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_SHRUB);
             }
         }
     }

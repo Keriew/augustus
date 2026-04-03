@@ -13,13 +13,15 @@ void terrain_generator_generate_flat_plains(void)
             int grid_offset = map_grid_offset(x, y);
             int roll = terrain_generator_random_between(0, 100);
             if (roll < 6) {
-                map_terrain_set(grid_offset, TERRAIN_TREE);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_TREE);
             } else if (roll < 8) {
-                map_terrain_set(grid_offset, TERRAIN_ROCK);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_ROCK);
             } else if (roll < 18) {
-                map_terrain_set(grid_offset, TERRAIN_SHRUB);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_SHRUB);
             } else if (roll < 35) {
-                map_terrain_set(grid_offset, TERRAIN_MEADOW);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_MEADOW);
+            } else if (roll < 60) {
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_WATER);
             }
         }
     }

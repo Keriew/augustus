@@ -109,6 +109,8 @@ static void set_road_tile(int x, int y)
     map_property_clear_constructing(grid_offset);
     map_property_set_multi_tile_size(grid_offset, 1);
     map_property_mark_draw_tile(grid_offset);
+    map_tiles_update_area_roads(x, y, 3);
+    map_tiles_update_region_empty_land(x - 1, y - 1, x + 1, y + 1);
 }
 
 static void add_road_between_points(int start_x, int start_y, int end_x, int end_y)

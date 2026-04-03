@@ -1242,9 +1242,6 @@ static translation_string all_strings[] = {
     /* System - Kampagnen-Menü */
     {TR_MAIN_MENU_SELECT_CAMPAIGN, "Neue Kampagne starten"},
     {TR_MAIN_MENU_TERRAIN_GENERATOR, "Terrain generator"},
-    {TR_TERRAIN_GENERATOR_FLAT_PLAINS, "Flat plains"},
-    {TR_TERRAIN_GENERATOR_RIVER_VALLEY, "River valley"},
-    {TR_TERRAIN_GENERATOR_PERLIN, "Perlin"},
     {TR_WINDOW_SELECT_CAMPAIGN, "Eine Kampagne auswählen"},
     {TR_WINDOW_CAMPAIGN_AUTHOR, "Autor:"},
     {TR_WINDOW_CAMPAIGN_NO_DESC, "Keine Beschreibung"},

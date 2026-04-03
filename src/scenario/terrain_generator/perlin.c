@@ -83,7 +83,7 @@ static void generate_grassland(void)
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int grid_offset = map_grid_offset(x, y);
-            map_terrain_set(grid_offset, TERRAIN_CLEAR);
+            map_terrain_set_with_tile_update(grid_offset, TERRAIN_CLEAR);
             map_elevation_set(grid_offset, 0);
         }
     }
@@ -104,7 +104,7 @@ static void add_forests(void)
                 // }
                 // int terrain = TERRAIN_SHRUB;
                 // map_terrain_set(map_grid_offset(x, y), terrain);
-                map_terrain_set(map_grid_offset(x, y), TERRAIN_ROCK);
+                map_terrain_set_with_tile_update(map_grid_offset(x, y), TERRAIN_ROCK);
             }
         }
     }
@@ -122,7 +122,7 @@ static void add_mountains(void)
                 // int elevation = 2 + (int) ((n - 0.68f) * 10.0f);
                 // elevation = terrain_generator_clamp_int(elevation, 2, 4);
                 // map_elevation_set(map_grid_offset(x, y), elevation);
-                map_terrain_set(map_grid_offset(x, y), TERRAIN_ROCK);
+                map_terrain_set_with_tile_update(map_grid_offset(x, y), TERRAIN_ROCK);
             }
         }
     }
@@ -144,7 +144,7 @@ static void add_meadows(void)
             }
             float n = fbm((float) x + 2500.0f, (float) y + 2500.0f, meadow_seed);
             if (n > 0.52f && n < 0.65f) {
-                map_terrain_set(grid_offset, TERRAIN_MEADOW);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_MEADOW);
             }
         }
     }
@@ -171,7 +171,7 @@ static void add_sea_edge(void)
             }
             if (is_sea) {
                 int grid_offset = map_grid_offset(x, y);
-                map_terrain_set(grid_offset, TERRAIN_WATER);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_WATER);
                 map_elevation_set(grid_offset, 0);
             }
         }
