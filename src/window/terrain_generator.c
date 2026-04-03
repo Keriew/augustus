@@ -3,14 +3,18 @@
 #include "assets/assets.h"
 #include "city/view.h"
 #include "core/config.h"
+#include "core/dir.h"
 #include "core/image_group.h"
 #include "core/string.h"
 #include "editor/editor.h"
+#include "game/file.h"
+#include "game/file_editor.h"
 #include "game/game.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
@@ -30,6 +34,8 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
+#include "building/type.h"
+#include "scenario/allowed_building.h"
 #include "scenario/editor.h"
 #include "scenario/data.h"
 #include "scenario/map.h"
@@ -42,6 +48,7 @@
 #include "window/plain_message_dialog.h"
 #include "window/select_list.h"
 #include "window/video.h"
+#include "window/city.h"
 #include "window/editor/map.h"
 
 #include <string.h>
@@ -50,43 +57,72 @@
 #define WINDOW_HEIGHT 480
 
 #define CONTROL_LABEL_X 32
-#define CONTROL_VALUE_X 120
-#define CONTROL_BUTTON_WIDTH 180
-#define CONTROL_BUTTON_HEIGHT 24
+#define CONTROL_VALUE_X 160
+#define CONTROL_BUTTON_WIDTH 120
+#define CONTROL_BUTTON_HEIGHT 20
 
-#define SIZE_BUTTON_Y 90
-#define ALGORITHM_BUTTON_Y 130
-#define SEED_INPUT_Y 170
+#define SIZE_BUTTON_Y 60
+#define ALGORITHM_BUTTON_Y 84
+#define SEED_INPUT_Y 108
+#define RANDOMIZE_BUTTON_Y 144
+#define CLIMATE_BUTTON_Y 168
 
-#define ACTION_BUTTON_WIDTH 260
-#define ACTION_BUTTON_HEIGHT 28
-#define ACTION_BUTTON_X 32
-#define REGENERATE_BUTTON_Y 230
-#define OPEN_EDITOR_BUTTON_Y 270
-#define BACK_BUTTON_Y 310
+
+#define SETTINGS_LABEL_Y 135
+#define SETTINGS_ROW_Y 155
+#define SETTINGS_ROW_HEIGHT 22
+
+#define VICTORY_LABEL_Y (SETTINGS_ROW_Y + SETTINGS_ROW_HEIGHT * 4 + 8)
+#define VICTORY_ROW_Y (VICTORY_LABEL_Y + 20)
+
+#define SETTING_BUTTON_WIDTH 120
+#define TOGGLE_BUTTON_WIDTH 60
+#define VALUE_BUTTON_WIDTH 90
+#define CRITERIA_TOGGLE_X CONTROL_VALUE_X
+#define CRITERIA_VALUE_X (CONTROL_VALUE_X + TOGGLE_BUTTON_WIDTH + 8)
+
+#define ACTION_BUTTON_WIDTH 288
+#define ACTION_BUTTON_HEIGHT 24
+#define ACTION_BUTTON_X 320
+
+#define REGENERATE_BUTTON_Y 356
+#define OPEN_EDITOR_BUTTON_Y 384
+#define START_GAME_BUTTON_Y 412
+#define BACK_BUTTON_Y 440
+
 
 #define PREVIEW_X 320
-#define PREVIEW_Y 80
+#define PREVIEW_Y 60
 #define PREVIEW_WIDTH 288
-#define PREVIEW_HEIGHT 320
+// #define PREVIEW_HEIGHT 240
+#define PREVIEW_HEIGHT 288
 
 #define SEED_TEXT_LENGTH 16
 #define TERRAIN_GENERATOR_SIZE_COUNT 6
 
+#define CLIMATE_COUNT 3
+
 static void button_select_size(const generic_button *button);
 static void button_select_algorithm(const generic_button *button);
+static void button_select_climate(const generic_button *button);
+static void button_randomize(const generic_button *button);
 static void button_regenerate(const generic_button *button);
 static void button_open_editor(const generic_button *button);
+static void button_start_game(const generic_button *button);
 static void button_back(const generic_button *button);
 
 static void size_selected(int id);
 static void algorithm_selected(int id);
+static void climate_selected(int id);
 
 static const uint8_t label_size[] = "Size";
 static const uint8_t label_algorithm[] = "Algorithm";
 static const uint8_t label_seed[] = "Seed";
+static const uint8_t label_randomize[] = "Randomize";
+static const uint8_t label_climate[] = "Climate";
 static const uint8_t label_regenerate[] = "Regenerate preview";
 static const uint8_t label_open_editor[] = "Open in editor";
+static const uint8_t label_start_game[] = "Start game";
 static const uint8_t label_back[] = "Back";
 static const uint8_t label_seed_placeholder[] = "Random";
 
@@ -96,6 +132,17 @@ static const uint8_t size_label_80[] = "80 x 80";
 static const uint8_t size_label_100[] = "100 x 100";
 static const uint8_t size_label_120[] = "120 x 120";
 static const uint8_t size_label_160[] = "160 x 160";
+
+static const uint8_t label_climate_central[] = "Central";
+static const uint8_t label_climate_northern[] = "Northern";
+static const uint8_t label_climate_desert[] = "Desert";
+
+
+static const uint8_t *climate_labels[CLIMATE_COUNT] = {
+    label_climate_central,
+    label_climate_northern,
+    label_climate_desert
+};
 
 static const uint8_t *terrain_generator_size_labels[TERRAIN_GENERATOR_SIZE_COUNT] = {
     size_label_40,
@@ -108,11 +155,15 @@ static const uint8_t *terrain_generator_size_labels[TERRAIN_GENERATOR_SIZE_COUNT
 
 static const uint8_t *terrain_generator_algorithm_labels[TERRAIN_GENERATOR_COUNT];
 
+
 static generic_button buttons[] = {
     {CONTROL_VALUE_X, SIZE_BUTTON_Y, CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT, button_select_size, 0, 0},
     {CONTROL_VALUE_X, ALGORITHM_BUTTON_Y, CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT, button_select_algorithm, 0, 0},
+    {CONTROL_VALUE_X, CLIMATE_BUTTON_Y, CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT, button_select_climate, 0, 0},
+    {CONTROL_VALUE_X, RANDOMIZE_BUTTON_Y, CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT, button_randomize, 0, 0},
     {ACTION_BUTTON_X, REGENERATE_BUTTON_Y, ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, button_regenerate, 0, 0},
     {ACTION_BUTTON_X, OPEN_EDITOR_BUTTON_Y, ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, button_open_editor, 0, 0},
+    {ACTION_BUTTON_X, START_GAME_BUTTON_Y, ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, button_start_game, 0, 0},
     {ACTION_BUTTON_X, BACK_BUTTON_Y, ACTION_BUTTON_WIDTH, ACTION_BUTTON_HEIGHT, button_back, 0, 0}
 };
 
@@ -137,11 +188,30 @@ static struct {
     int size_index;
     int algorithm_index;
     uint8_t seed_text[SEED_TEXT_LENGTH];
+    int settings_initialized;
+    scenario_climate climate_index;
 } data;
 
 static minimap_functions preview_minimap_functions;
 
 static uint8_t preview_road_flags[GRID_SIZE * GRID_SIZE];
+
+static int get_group_allowed(const building_type *types, unsigned int count)
+{
+    for (unsigned int i = 0; i < count; i++) {
+        if (!scenario_allowed_building(types[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static void set_group_allowed(const building_type *types, unsigned int count, int allowed)
+{
+    for (unsigned int i = 0; i < count; i++) {
+        scenario_allowed_building_set(types[i], allowed);
+    }
+}
 
 static void preview_viewport(int *x, int *y, int *width, int *height)
 {
@@ -189,11 +259,18 @@ static void generate_preview_map(void)
 {
     scenario_editor_create(data.size_index);
     scenario_map_init();
+    if (data.settings_initialized) {
+        // apply_scenario_settings();
+    } else {
+        // sync_settings_from_scenario();
+        data.settings_initialized = 1;
+    }
     clear_map_data();
     map_image_init_edges();
 
     unsigned int seed = 0;
     int use_seed = get_seed_value(&seed);
+
     terrain_generator_set_seed(use_seed, seed);
     terrain_generator_generate((terrain_generator_algorithm) data.algorithm_index);
     int width = map_grid_width();
@@ -250,6 +327,8 @@ static void draw_background(void)
     text_draw(label_size, CONTROL_LABEL_X, SIZE_BUTTON_Y + 6, FONT_NORMAL_BLACK, 0);
     text_draw(label_algorithm, CONTROL_LABEL_X, ALGORITHM_BUTTON_Y + 6, FONT_NORMAL_BLACK, 0);
     text_draw(label_seed, CONTROL_LABEL_X, SEED_INPUT_Y + 6, FONT_NORMAL_BLACK, 0);
+    // text_draw(label_randomize, CONTROL_LABEL_X, RANDOMIZE_BUTTON_Y + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_climate, CONTROL_LABEL_X, CLIMATE_BUTTON_Y + 6, FONT_NORMAL_BLACK, 0);
 
     inner_panel_draw(PREVIEW_X - 8, PREVIEW_Y - 8, (PREVIEW_WIDTH + 16) / BLOCK_SIZE,
         (PREVIEW_HEIGHT + 16) / BLOCK_SIZE);
@@ -272,10 +351,17 @@ static void draw_foreground(void)
         CONTROL_VALUE_X, SIZE_BUTTON_Y + 6, CONTROL_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
     text_draw_centered(terrain_generator_algorithm_labels[data.algorithm_index],
         CONTROL_VALUE_X, ALGORITHM_BUTTON_Y + 6, CONTROL_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
+    text_draw_centered(label_randomize,
+        CONTROL_VALUE_X, RANDOMIZE_BUTTON_Y + 6, CONTROL_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
+    text_draw_centered(climate_labels[data.climate_index],
+        CONTROL_VALUE_X, CLIMATE_BUTTON_Y + 6, CONTROL_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
+    
 
     text_draw_centered(label_regenerate, ACTION_BUTTON_X, REGENERATE_BUTTON_Y + 8,
         ACTION_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
     text_draw_centered(label_open_editor, ACTION_BUTTON_X, OPEN_EDITOR_BUTTON_Y + 8,
+        ACTION_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
+    text_draw_centered(label_start_game, ACTION_BUTTON_X, START_GAME_BUTTON_Y + 8,
         ACTION_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
     text_draw_centered(label_back, ACTION_BUTTON_X, BACK_BUTTON_Y + 8,
         ACTION_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
@@ -319,6 +405,22 @@ static void button_select_algorithm(const generic_button *button)
         TERRAIN_GENERATOR_COUNT, algorithm_selected);
 }
 
+static void button_select_climate(const generic_button *button)
+{
+    window_select_list_show_text(0, 0, button, climate_labels, CLIMATE_COUNT, climate_selected);
+}
+
+static void button_randomize(const generic_button *button)
+{
+    (void) button;
+    unsigned int random_seed = generate_seed_value();
+    sprintf(data.seed_text, "%d", random_seed);
+    seed_input.placeholder = data.seed_text;
+    // input_box_set_text(&seed_input, data.seed_text);
+    generate_preview_map();
+    window_invalidate();
+}
+
 static void button_regenerate(const generic_button *button)
 {
     (void) button;
@@ -339,11 +441,55 @@ static void button_open_editor(const generic_button *button)
         return;
     }
 
+    // apply_scenario_settings();
+
     input_box_stop(&seed_input);
     if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) {
         window_video_show("map_intro.smk", window_editor_map_show);
     }
     sound_music_play_editor();
+}
+
+static void button_start_game(const generic_button *button)
+{
+    (void) button;
+    const uint8_t scenario_name_text[] = "generated_terrain";
+    const char scenario_filename[] = "generated_terrain.map";
+
+    const char *scenario_path = dir_append_location(scenario_filename, PATH_LOCATION_SCENARIO);
+
+    input_box_stop(&seed_input);
+
+    if (!scenario_path) {
+        window_plain_message_dialog_show(TR_SAVEGAME_NOT_ABLE_TO_SAVE_TITLE,
+            TR_SAVEGAME_NOT_ABLE_TO_SAVE_MESSAGE, 1);
+        return;
+    }
+
+    unsigned int seed = 0;
+    int use_seed = get_seed_value(&seed);
+    terrain_generator_set_seed(use_seed, seed);
+
+    scenario_editor_create(data.size_index);
+    scenario_map_init();
+    clear_map_data();
+    map_image_init_edges();
+    // apply_scenario_settings();
+    terrain_generator_generate((terrain_generator_algorithm) data.algorithm_index);
+    scenario_set_name(scenario_name_text);
+    scenario_set_custom(2);
+
+    if (!game_file_editor_write_scenario(scenario_path)) {
+        window_plain_message_dialog_show(TR_SAVEGAME_NOT_ABLE_TO_SAVE_TITLE,
+            TR_SAVEGAME_NOT_ABLE_TO_SAVE_MESSAGE, 1);
+        return;
+    }
+
+    window_city_show();
+    if (!game_file_start_scenario_by_name(scenario_name())) {
+        window_plain_message_dialog_show_with_extra(TR_REPLAY_MAP_NOT_FOUND_TITLE,
+            TR_REPLAY_MAP_NOT_FOUND_MESSAGE, 0, scenario_name());
+    }
 }
 
 static void button_back(const generic_button *button)
@@ -367,19 +513,32 @@ static void algorithm_selected(int id)
     window_invalidate();
 }
 
+static void climate_selected(int id)
+{
+    data.climate_index = id;
+    generate_preview_map();
+    window_invalidate();
+}
+
 static void init(void)
 {
     data.focus_button_id = 0;
     data.size_index = 2;
     data.algorithm_index = 0;
     data.seed_text[0] = 0;
+    data.settings_initialized = 0;
+    data.climate_index = CLIMATE_CENTRAL;
 
     seed_input.text = data.seed_text;
     seed_input.allowed_chars = INPUT_BOX_CHARS_NUMERIC;
-    seed_input.placeholder = label_seed_placeholder;
 
-    terrain_generator_algorithm_labels[0] = translation_for(TR_TERRAIN_GENERATOR_FLAT_PLAINS);
-    terrain_generator_algorithm_labels[1] = translation_for(TR_TERRAIN_GENERATOR_RIVER_VALLEY);
+    unsigned int random_seed = generate_seed_value();
+    sprintf(data.seed_text, "%d", random_seed);
+    seed_input.placeholder = data.seed_text;
+
+    terrain_generator_algorithm_labels[2] = "Flat Plains";
+    terrain_generator_algorithm_labels[1] = "River Valley";
+    terrain_generator_algorithm_labels[0] = "Perlin";
 
     input_box_start(&seed_input);
     generate_preview_map();
