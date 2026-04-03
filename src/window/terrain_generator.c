@@ -51,6 +51,7 @@
 #include "window/city.h"
 #include "window/editor/map.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define WINDOW_WIDTH 640
@@ -102,6 +103,20 @@
 
 #define CLIMATE_COUNT 3
 
+#define SETTINGS_INPUT_WIDTH_BLOCKS 8
+#define SETTINGS_INPUT_HEIGHT_BLOCKS 2
+#define SETTINGS_INPUT_X CONTROL_VALUE_X
+#define SETTINGS_START_Y 196
+#define SETTINGS_ROW_SPACING 24
+#define SETTINGS_TEXT_LENGTH 12
+
+#define FUNDS_MIN 0
+#define FUNDS_MAX 99999
+#define CRITERIA_PERCENT_MIN 0
+#define CRITERIA_PERCENT_MAX 100
+#define POPULATION_GOAL_MIN 0
+#define POPULATION_GOAL_MAX 50000
+
 static void button_select_size(const generic_button *button);
 static void button_select_algorithm(const generic_button *button);
 static void button_select_climate(const generic_button *button);
@@ -117,6 +132,15 @@ static void climate_selected(int id);
 static void sync_settings_from_scenario(void);
 static void apply_scenario_settings(void);
 static void randomize_scenario_settings(void);
+static void sync_settings_to_inputs(void);
+static void sync_inputs_to_settings(void);
+static void set_input_box_value(input_box *box, int value);
+static void initial_funds_on_change(int is_addition_at_end);
+static void culture_goal_on_change(int is_addition_at_end);
+static void prosperity_goal_on_change(int is_addition_at_end);
+static void peace_goal_on_change(int is_addition_at_end);
+static void favor_goal_on_change(int is_addition_at_end);
+static void population_goal_on_change(int is_addition_at_end);
 
 static const uint8_t label_size[] = "Size";
 static const uint8_t label_algorithm[] = "Algorithm";
@@ -128,6 +152,12 @@ static const uint8_t label_open_editor[] = "Open in editor";
 static const uint8_t label_start_game[] = "Start game";
 static const uint8_t label_back[] = "Back";
 static const uint8_t label_seed_placeholder[] = "Random";
+static const uint8_t label_initial_funds[] = "Initial funds";
+static const uint8_t label_culture_goal[] = "Culture goal";
+static const uint8_t label_prosperity_goal[] = "Prosperity goal";
+static const uint8_t label_peace_goal[] = "Peace goal";
+static const uint8_t label_favor_goal[] = "Favor goal";
+static const uint8_t label_population_goal[] = "Population goal";
 
 static const uint8_t size_label_40[] = "40 x 40";
 static const uint8_t size_label_60[] = "60 x 60";
@@ -185,6 +215,120 @@ static input_box seed_input = {
     NULL,
     INPUT_BOX_CHARS_NUMERIC
 };
+
+static uint8_t initial_funds_text[SETTINGS_TEXT_LENGTH] = { 0 };
+static uint8_t culture_goal_text[SETTINGS_TEXT_LENGTH] = { 0 };
+static uint8_t prosperity_goal_text[SETTINGS_TEXT_LENGTH] = { 0 };
+static uint8_t peace_goal_text[SETTINGS_TEXT_LENGTH] = { 0 };
+static uint8_t favor_goal_text[SETTINGS_TEXT_LENGTH] = { 0 };
+static uint8_t population_goal_text[SETTINGS_TEXT_LENGTH] = { 0 };
+
+static input_box initial_funds_input = {
+    SETTINGS_INPUT_X,
+    SETTINGS_START_Y,
+    SETTINGS_INPUT_WIDTH_BLOCKS,
+    SETTINGS_INPUT_HEIGHT_BLOCKS,
+    FONT_NORMAL_WHITE,
+    0,
+    initial_funds_text,
+    SETTINGS_TEXT_LENGTH,
+    0,
+    NULL,
+    initial_funds_on_change,
+    NULL,
+    INPUT_BOX_CHARS_NUMERIC
+};
+
+static input_box culture_goal_input = {
+    SETTINGS_INPUT_X,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING,
+    SETTINGS_INPUT_WIDTH_BLOCKS,
+    SETTINGS_INPUT_HEIGHT_BLOCKS,
+    FONT_NORMAL_WHITE,
+    0,
+    culture_goal_text,
+    SETTINGS_TEXT_LENGTH,
+    0,
+    NULL,
+    culture_goal_on_change,
+    NULL,
+    INPUT_BOX_CHARS_NUMERIC
+};
+
+static input_box prosperity_goal_input = {
+    SETTINGS_INPUT_X,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 2,
+    SETTINGS_INPUT_WIDTH_BLOCKS,
+    SETTINGS_INPUT_HEIGHT_BLOCKS,
+    FONT_NORMAL_WHITE,
+    0,
+    prosperity_goal_text,
+    SETTINGS_TEXT_LENGTH,
+    0,
+    NULL,
+    prosperity_goal_on_change,
+    NULL,
+    INPUT_BOX_CHARS_NUMERIC
+};
+
+static input_box peace_goal_input = {
+    SETTINGS_INPUT_X,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 3,
+    SETTINGS_INPUT_WIDTH_BLOCKS,
+    SETTINGS_INPUT_HEIGHT_BLOCKS,
+    FONT_NORMAL_WHITE,
+    0,
+    peace_goal_text,
+    SETTINGS_TEXT_LENGTH,
+    0,
+    NULL,
+    peace_goal_on_change,
+    NULL,
+    INPUT_BOX_CHARS_NUMERIC
+};
+
+static input_box favor_goal_input = {
+    SETTINGS_INPUT_X,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 4,
+    SETTINGS_INPUT_WIDTH_BLOCKS,
+    SETTINGS_INPUT_HEIGHT_BLOCKS,
+    FONT_NORMAL_WHITE,
+    0,
+    favor_goal_text,
+    SETTINGS_TEXT_LENGTH,
+    0,
+    NULL,
+    favor_goal_on_change,
+    NULL,
+    INPUT_BOX_CHARS_NUMERIC
+};
+
+static input_box population_goal_input = {
+    SETTINGS_INPUT_X,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 5,
+    SETTINGS_INPUT_WIDTH_BLOCKS,
+    SETTINGS_INPUT_HEIGHT_BLOCKS,
+    FONT_NORMAL_WHITE,
+    0,
+    population_goal_text,
+    SETTINGS_TEXT_LENGTH,
+    0,
+    NULL,
+    population_goal_on_change,
+    NULL,
+    INPUT_BOX_CHARS_NUMERIC
+};
+
+static input_box *settings_inputs[] = {
+    &initial_funds_input,
+    &culture_goal_input,
+    &prosperity_goal_input,
+    &peace_goal_input,
+    &favor_goal_input,
+    &population_goal_input
+};
+
+static input_box *active_input = &seed_input;
 
 static struct {
     unsigned int focus_button_id;
@@ -258,6 +402,131 @@ static int get_seed_value(unsigned int *seed_out)
     }
     *seed_out = (unsigned int) seed;
     return 1;
+}
+
+static int clamp_int(int value, int min_value, int max_value)
+{
+    if (value < min_value) {
+        return min_value;
+    }
+    if (value > max_value) {
+        return max_value;
+    }
+    return value;
+}
+
+static int parse_input_box_value(const input_box *box)
+{
+    if (!string_length(box->text)) {
+        return 0;
+    }
+    return string_to_int(box->text);
+}
+
+static int sanitize_input_box_value(input_box *box, int min_value, int max_value)
+{
+    int value = clamp_int(parse_input_box_value(box), min_value, max_value);
+    set_input_box_value(box, value);
+    return value;
+}
+
+static void set_input_box_value(input_box *box, int value)
+{
+    snprintf((char *) box->text, box->text_length, "%d", value);
+}
+
+static void initial_funds_on_change(int is_addition_at_end)
+{
+    (void) is_addition_at_end;
+    sanitize_input_box_value(&initial_funds_input, FUNDS_MIN, FUNDS_MAX);
+}
+
+static void culture_goal_on_change(int is_addition_at_end)
+{
+    (void) is_addition_at_end;
+    sanitize_input_box_value(&culture_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+}
+
+static void prosperity_goal_on_change(int is_addition_at_end)
+{
+    (void) is_addition_at_end;
+    sanitize_input_box_value(&prosperity_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+}
+
+static void peace_goal_on_change(int is_addition_at_end)
+{
+    (void) is_addition_at_end;
+    sanitize_input_box_value(&peace_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+}
+
+static void favor_goal_on_change(int is_addition_at_end)
+{
+    (void) is_addition_at_end;
+    sanitize_input_box_value(&favor_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+}
+
+static void population_goal_on_change(int is_addition_at_end)
+{
+    (void) is_addition_at_end;
+    sanitize_input_box_value(&population_goal_input, POPULATION_GOAL_MIN, POPULATION_GOAL_MAX);
+}
+
+static void draw_static_input_box(const input_box *box)
+{
+    inner_panel_draw(box->x, box->y, box->width_blocks, box->height_blocks);
+    text_draw(box->text, box->x + 16, box->y + 10, box->font, 0);
+}
+
+static int is_mouse_inside_box(const mouse *m, const input_box *box)
+{
+    return m->x >= box->x && m->x < box->x + box->width_blocks * BLOCK_SIZE
+        && m->y >= box->y && m->y < box->y + box->height_blocks * BLOCK_SIZE;
+}
+
+static void focus_input_box(input_box *box)
+{
+    if (active_input == box) {
+        return;
+    }
+
+    if (active_input) {
+        input_box_stop(active_input);
+    }
+    active_input = box;
+    input_box_start(active_input);
+}
+
+static void sync_settings_to_inputs(void)
+{
+    set_input_box_value(&initial_funds_input, data.initial_funds);
+    set_input_box_value(&culture_goal_input, data.win_criteria.culture.goal);
+    set_input_box_value(&prosperity_goal_input, data.win_criteria.prosperity.goal);
+    set_input_box_value(&peace_goal_input, data.win_criteria.peace.goal);
+    set_input_box_value(&favor_goal_input, data.win_criteria.favor.goal);
+    set_input_box_value(&population_goal_input, data.win_criteria.population.goal);
+
+    if (active_input) {
+        input_box_refresh_text(active_input);
+    }
+}
+
+static void sync_inputs_to_settings(void)
+{
+    data.initial_funds = sanitize_input_box_value(&initial_funds_input, FUNDS_MIN, FUNDS_MAX);
+
+    data.win_criteria.culture.goal = sanitize_input_box_value(&culture_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+    data.win_criteria.prosperity.goal = sanitize_input_box_value(&prosperity_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+    data.win_criteria.peace.goal = sanitize_input_box_value(&peace_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+    data.win_criteria.favor.goal = sanitize_input_box_value(&favor_goal_input, CRITERIA_PERCENT_MIN, CRITERIA_PERCENT_MAX);
+    data.win_criteria.population.goal = sanitize_input_box_value(&population_goal_input, POPULATION_GOAL_MIN, POPULATION_GOAL_MAX);
+
+    data.win_criteria.culture.enabled = data.win_criteria.culture.goal > 0;
+    data.win_criteria.prosperity.enabled = data.win_criteria.prosperity.goal > 0;
+    data.win_criteria.peace.enabled = data.win_criteria.peace.goal > 0;
+    data.win_criteria.favor.enabled = data.win_criteria.favor.goal > 0;
+    data.win_criteria.population.enabled = data.win_criteria.population.goal > 0;
+
+    sync_settings_to_inputs();
 }
 
 static void generate_preview_map(void)
@@ -336,6 +605,13 @@ static void draw_background(void)
     // text_draw(label_randomize, CONTROL_LABEL_X, RANDOMIZE_BUTTON_Y + 6, FONT_NORMAL_BLACK, 0);
     text_draw(label_climate, CONTROL_LABEL_X, CLIMATE_BUTTON_Y + 6, FONT_NORMAL_BLACK, 0);
 
+    text_draw(label_initial_funds, CONTROL_LABEL_X, SETTINGS_START_Y + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_culture_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_prosperity_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 2 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_peace_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 3 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_favor_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 4 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_population_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 5 + 6, FONT_NORMAL_BLACK, 0);
+
     inner_panel_draw(PREVIEW_X - 8, PREVIEW_Y - 8, (PREVIEW_WIDTH + 16) / BLOCK_SIZE,
         (PREVIEW_HEIGHT + 16) / BLOCK_SIZE);
     widget_minimap_draw(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
@@ -372,7 +648,18 @@ static void draw_foreground(void)
     text_draw_centered(label_back, ACTION_BUTTON_X, BACK_BUTTON_Y + 8,
         ACTION_BUTTON_WIDTH, FONT_NORMAL_BLACK, 0);
 
-    input_box_draw(&seed_input);
+    if (active_input == &seed_input) {
+        input_box_draw(&seed_input);
+    } else {
+        draw_static_input_box(&seed_input);
+    }
+    for (unsigned int i = 0; i < sizeof(settings_inputs) / sizeof(settings_inputs[0]); i++) {
+        if (settings_inputs[i] == active_input) {
+            input_box_draw(settings_inputs[i]);
+        } else {
+            draw_static_input_box(settings_inputs[i]);
+        }
+    }
 
     graphics_reset_dialog();
 }
@@ -383,13 +670,30 @@ static void handle_input(const mouse *m, const hotkeys *h)
     data.focus_button_id = 0;
 
     if (input_box_is_accepted()) {
+        sync_inputs_to_settings();
         generate_preview_map();
         window_invalidate();
         return;
     }
 
-    if (input_box_handle_mouse(m_dialog, &seed_input) ||
-        generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, sizeof(buttons) / sizeof(buttons[0]),
+    if (active_input && input_box_handle_mouse(m_dialog, active_input)) {
+        return;
+    }
+
+    if (m_dialog->left.went_up) {
+        if (is_mouse_inside_box(m_dialog, &seed_input)) {
+            focus_input_box(&seed_input);
+            return;
+        }
+        for (unsigned int i = 0; i < sizeof(settings_inputs) / sizeof(settings_inputs[0]); i++) {
+            if (is_mouse_inside_box(m_dialog, settings_inputs[i])) {
+                focus_input_box(settings_inputs[i]);
+                return;
+            }
+        }
+    }
+
+    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, sizeof(buttons) / sizeof(buttons[0]),
             &data.focus_button_id)) {
         return;
     }
@@ -431,6 +735,7 @@ static void button_randomize(const generic_button *button)
 static void button_regenerate(const generic_button *button)
 {
     (void) button;
+    sync_inputs_to_settings();
     generate_preview_map();
     window_invalidate();
 }
@@ -450,7 +755,9 @@ static void button_open_editor(const generic_button *button)
 
     apply_scenario_settings();
 
-    input_box_stop(&seed_input);
+    if (active_input) {
+        input_box_stop(active_input);
+    }
     if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) {
         window_video_show("map_intro.smk", window_editor_map_show);
     }
@@ -465,7 +772,9 @@ static void button_start_game(const generic_button *button)
 
     const char *scenario_path = dir_append_location(scenario_filename, PATH_LOCATION_SCENARIO);
 
-    input_box_stop(&seed_input);
+    if (active_input) {
+        input_box_stop(active_input);
+    }
 
     if (!scenario_path) {
         window_plain_message_dialog_show(TR_SAVEGAME_NOT_ABLE_TO_SAVE_TITLE,
@@ -502,7 +811,9 @@ static void button_start_game(const generic_button *button)
 static void button_back(const generic_button *button)
 {
     (void) button;
-    input_box_stop(&seed_input);
+    if (active_input) {
+        input_box_stop(active_input);
+    }
     window_go_back();
 }
 
@@ -532,15 +843,15 @@ static void sync_settings_from_scenario(void)
     data.climate_index = scenario_property_climate();
     data.initial_funds = scenario.initial_funds;
     data.win_criteria = scenario.win_criteria;
+    sync_settings_to_inputs();
 }
 
 static void apply_scenario_settings(void)
 {
+    sync_inputs_to_settings();
     scenario_change_climate(data.climate_index);
     scenario.initial_funds = data.initial_funds;
     scenario.win_criteria = data.win_criteria;
-
-    // Stub: future scenario settings (resources/victory/etc.) should be applied here.
 }
 
 static void randomize_scenario_settings(void)
@@ -561,21 +872,12 @@ static void randomize_scenario_settings(void)
     data.win_criteria.favor.goal = 10 + (int) (generate_seed_value() % 91);
     data.win_criteria.population.goal = 500 + (int) (generate_seed_value() % 56) * 250;
 
-    data.win_criteria.time_limit.enabled = (int) (generate_seed_value() % 4 == 0);
-    data.win_criteria.time_limit.years = 5 + (int) (generate_seed_value() % 36);
-
-    data.win_criteria.survival_time.enabled = 0;
-    if (!data.win_criteria.time_limit.enabled && generate_seed_value() % 5 == 0) {
-        data.win_criteria.survival_time.enabled = 1;
-    }
-    data.win_criteria.survival_time.years = 5 + (int) (generate_seed_value() % 36);
-
     if (!data.win_criteria.culture.enabled && !data.win_criteria.prosperity.enabled
         && !data.win_criteria.peace.enabled && !data.win_criteria.favor.enabled
-        && !data.win_criteria.population.enabled && !data.win_criteria.time_limit.enabled
-        && !data.win_criteria.survival_time.enabled) {
+        && !data.win_criteria.population.enabled) {
         data.win_criteria.culture.enabled = 1;
     }
+    sync_settings_to_inputs();
 }
 
 static void init(void)
@@ -600,7 +902,8 @@ static void init(void)
     terrain_generator_algorithm_labels[1] = "River Valley";
     terrain_generator_algorithm_labels[0] = "Perlin";
 
-    input_box_start(&seed_input);
+    active_input = &seed_input;
+    input_box_start(active_input);
     generate_preview_map();
 }
 
