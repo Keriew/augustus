@@ -539,6 +539,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator/flat_plains.c
     ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator/river_valley.c
     ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator/perlin.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/terrain_generator/river.c
     ${PROJECT_SOURCE_DIR}/src/scenario/emperor_change.c
     ${PROJECT_SOURCE_DIR}/src/scenario/empire.c
     ${PROJECT_SOURCE_DIR}/src/scenario/gladiator_revolt.c

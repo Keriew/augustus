@@ -228,9 +228,11 @@ void terrain_generator_generate_perlin(unsigned int seed)
     meadow_seed = seed;
 
     generate_grassland();
-    add_forests();
-    add_mountains();
-    add_meadows();
-    add_lakes();
+
+    terrain_generator_generate_river();
+    // add_forests();
+    // add_mountains();
+    // add_meadows();
+    // add_lakes();
     // add_sea_edge();
 }
