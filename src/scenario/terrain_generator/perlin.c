@@ -96,15 +96,14 @@ static void add_forests(void)
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (map_terrain_get(grid_offset) != TERRAIN_CLEAR) {
+                continue;
+            }
+
             float n = fbm((float) x, (float) y, perlin_seed);
             if (n > 0.58f) {
-                int terrain = map_terrain_get(map_grid_offset(x, y));
-                // if (!(terrain & TERRAIN_TREE)) {
-                //     terrain |= TERRAIN_TREE;
-                // }
-                // int terrain = TERRAIN_SHRUB;
-                // map_terrain_set(map_grid_offset(x, y), terrain);
-                map_terrain_set_with_tile_update(map_grid_offset(x, y), TERRAIN_ROCK);
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_TREE);
             }
         }
     }
@@ -117,6 +116,10 @@ static void add_mountains(void)
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (map_terrain_get(grid_offset) != TERRAIN_CLEAR) {
+                continue;
+            }
             float n = fbm((float) x + 1000.0f, (float) y + 1000.0f, mountain_seed);
             if (n > 0.68f) {
                 // int elevation = 2 + (int) ((n - 0.68f) * 10.0f);
@@ -136,6 +139,9 @@ static void add_meadows(void)
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             int grid_offset = map_grid_offset(x, y);
+            if (map_terrain_get(grid_offset) != TERRAIN_CLEAR) {
+                continue;
+            }
             if (map_elevation_at(grid_offset) > 0) {
                 continue;
             }
@@ -230,9 +236,10 @@ void terrain_generator_generate_perlin(unsigned int seed)
     generate_grassland();
 
     terrain_generator_generate_river();
-    // add_forests();
-    // add_mountains();
-    // add_meadows();
+    // terrain_generator_straight_river();
+    add_forests();
+    add_mountains();
+    add_meadows();
     // add_lakes();
     // add_sea_edge();
 }

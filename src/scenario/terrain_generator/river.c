@@ -96,6 +96,30 @@ static void carve_river_tile(int x, int y)
     map_elevation_set(grid_offset, 0);
 }
 
+static void carve_river_tile_brush(int x, int y, int r)
+{
+    if (r <= 0) {
+        carve_river_tile(x, y);
+        return;
+    }
+
+    for (int dy = -r; dy <= r; dy++) {
+        for (int dx = -r; dx <= r; dx++) {
+            if ((dx * dx) + (dy * dy) > (r * r)) {
+                continue;
+            }
+
+            int nx = x + dx;
+            int ny = y + dy;
+            if (!map_grid_is_inside(nx, ny, 1)) {
+                continue;
+            }
+
+            carve_river_tile(nx, ny);
+        }
+    }
+}
+
 typedef struct {
     int x;
     int y;
@@ -127,10 +151,24 @@ static void record_river_tile(int x, int y)
     generated_river_tile_count++;
 }
 
+
+
 static void replay_river_tiles(void)
 {
+    const int river_min_radius = 1;
+    const int river_max_radius = 10;
+    int current_river_radius = river_min_radius;
+
     for (int i = 0; i < generated_river_tile_count; i++) {
-        carve_river_tile(generated_river_tiles[i].x, generated_river_tiles[i].y);
+        // Adjust the river_radius by randomly increasing or decreasing it by 1 step
+        current_river_radius += terrain_generator_random_between(-1, 2);
+        if (current_river_radius < river_min_radius) {
+            current_river_radius = river_min_radius;
+        } else if (current_river_radius > river_max_radius) {
+            current_river_radius = river_max_radius;
+        }
+
+        carve_river_tile_brush(generated_river_tiles[i].x, generated_river_tiles[i].y, current_river_radius);
     }
 }
 
@@ -227,6 +265,55 @@ static int choose_next_direction(
     }
 
     return -1;
+}
+
+
+
+void terrain_generator_straight_river(void)
+{
+    int width = map_grid_width();
+    int height = map_grid_height();
+    if (width <= 1 || height <= 1) {
+        return;
+    }
+
+    generated_river_tile_count = 0;
+
+    int start_side = terrain_generator_random_between(0, 4);
+    int x = 0;
+    int y = 0;
+    choose_edge_point(start_side, width, height, &x, &y);
+
+    int end_x = x;
+    int end_y = y;
+    switch (start_side) {
+        case SIDE_NORTH:
+            end_y = height - 1;
+            break;
+        case SIDE_SOUTH:
+            end_y = 0;
+            break;
+        case SIDE_WEST:
+            end_x = width - 1;
+            break;
+        default:
+            end_x = 0;
+            break;
+    }
+
+    int step_x = sign_int(end_x - x);
+    int step_y = sign_int(end_y - y);
+    int guard = 0;
+    int max_steps = width + height + 4;
+
+    while ((x != end_x || y != end_y) && guard++ < max_steps) {
+        record_river_tile(x, y);
+        x += step_x;
+        y += step_y;
+    }
+
+    record_river_tile(end_x, end_y);
+    replay_river_tiles();
 }
 
 void terrain_generator_generate_river(void)
