@@ -13,6 +13,9 @@
 
 #include <stdlib.h>
 
+static int use_fixed_seed = 0;
+static unsigned int fixed_seed = 0;
+
 int terrain_generator_clamp_int(int value, int min_value, int max_value)
 {
     if (value < min_value) {
@@ -28,9 +31,6 @@ int terrain_generator_random_between(int min_value, int max_value)
 {
     return random_between_from_stdlib(min_value, max_value);
 }
-
-static int use_fixed_seed = 0;
-static unsigned int fixed_seed = 0;
 
 static void clear_base_terrain(void)
 {
@@ -180,14 +180,21 @@ void terrain_generator_generate(terrain_generator_algorithm algorithm)
     if (use_fixed_seed) {
         random_set_stdlib_seed(fixed_seed);
     } else {
-        random_clear_stdlib_seed();
+        fixed_seed = terrain_generator_random_between(1, 0x7fffffff);
+        use_fixed_seed = 1;
+        random_set_stdlib_seed(fixed_seed);
     }
+
+
 
     clear_base_terrain();
 
     switch (algorithm) {
         case TERRAIN_GENERATOR_RIVER_VALLEY:
             terrain_generator_generate_river_valley();
+            break;
+        case TERRAIN_GENERATOR_PERLIN:
+            terrain_generator_generate_perlin(fixed_seed);
             break;
         case TERRAIN_GENERATOR_FLAT_PLAINS:
         default:
