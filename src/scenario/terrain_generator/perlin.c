@@ -150,6 +150,47 @@ static void add_meadows(void)
     }
 }
 
+
+static void add_lakes(void)
+{
+    int width = map_grid_width();
+    int height = map_grid_height();
+    int area = width * height;
+
+    int lake_count = 1 + area / 8000;
+    if (lake_count < 1) {
+        lake_count = 1;
+    } else if (lake_count > 6) {
+        lake_count = 6;
+    }
+
+    for (int i = 0; i < lake_count; i++) {
+        int radius = terrain_generator_random_between(2, 6);
+        int center_x = terrain_generator_random_between(radius + 2, width - radius - 3);
+        int center_y = terrain_generator_random_between(radius + 2, height - radius - 3);
+        unsigned int shape_seed = perlin_seed + 3001u + (unsigned int) i * 97u;
+
+        for (int dy = -radius - 2; dy <= radius + 2; dy++) {
+            for (int dx = -radius - 2; dx <= radius + 2; dx++) {
+                int x = center_x + dx;
+                int y = center_y + dy;
+                if (!map_grid_is_inside(x, y, 1)) {
+                    continue;
+                }
+
+                float dist = sqrtf((float) (dx * dx + dy * dy));
+                float n = fbm((float) x * 0.35f, (float) y * 0.35f, shape_seed);
+                float threshold = (float) radius * (0.75f + 0.55f * n);
+                if (dist <= threshold) {
+                    int grid_offset = map_grid_offset(x, y);
+                    map_terrain_set_with_tile_update(grid_offset, TERRAIN_WATER);
+                    map_elevation_set(grid_offset, 0);
+                }
+            }
+        }
+    }
+}
+
 static void add_sea_edge(void)
 {
     int width = map_grid_width();
@@ -188,7 +229,8 @@ void terrain_generator_generate_perlin(unsigned int seed)
 
     generate_grassland();
     add_forests();
-    // add_mountains();
-    // add_meadows();
+    add_mountains();
+    add_meadows();
+    add_lakes();
     // add_sea_edge();
 }
