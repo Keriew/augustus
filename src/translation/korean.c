@@ -1472,6 +1472,7 @@ static translation_string all_strings[] = {
     {TR_MAIN_MENU_TERRAIN_GENERATOR, "Terrain generator"},
     {TR_TERRAIN_GENERATOR_FLAT_PLAINS, "Flat plains"},
     {TR_TERRAIN_GENERATOR_RIVER_VALLEY, "River valley"},
+    {TR_TERRAIN_GENERATOR_PERLIN, "Perlin"},
     {TR_WINDOW_SELECT_CAMPAIGN, "캠페인을 선택하세요"},
     {TR_WINDOW_CAMPAIGN_AUTHOR, "원작자:"},
     {TR_WINDOW_CAMPAIGN_NO_DESC, "설명 없음"},

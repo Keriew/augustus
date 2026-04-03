@@ -1471,8 +1471,6 @@ static translation_string all_strings[] = {
     {TR_CHEAT_EDITOR_WARNING_TEXT, "Usare l'editor di mappe in modalità città può corrompere il salvataggio o causare un crash del gioco.\n\nProcedere a proprio rischio e pericolo e assicurarsi di avere una copia di sicurezza del salvataggio corrente."},
     {TR_MAIN_MENU_SELECT_CAMPAIGN, "Inizia nuova campagna"},
     {TR_MAIN_MENU_TERRAIN_GENERATOR, "Terrain generator"},
-    {TR_TERRAIN_GENERATOR_FLAT_PLAINS, "Flat plains"},
-    {TR_TERRAIN_GENERATOR_RIVER_VALLEY, "River valley"},
     {TR_WINDOW_SELECT_CAMPAIGN, "Seleziona una campagna"},
     {TR_WINDOW_CAMPAIGN_AUTHOR, "Autore:"},
     {TR_WINDOW_CAMPAIGN_NO_DESC, "Nessuna descrizione"},
