@@ -9,11 +9,8 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "scenario/editor_map.h"
-#include "scenario/map.h"
 
 #include <stdlib.h>
-
-#include "map/routing.h"
 
 static int use_fixed_seed = 0;
 static unsigned int fixed_seed = 0;
@@ -194,15 +191,12 @@ void terrain_generator_generate(terrain_generator_algorithm algorithm)
     clear_base_terrain();
 
     switch (algorithm) {
-        case TERRAIN_GENERATOR_RIVER_VALLEY:
-            terrain_generator_generate_river_valley();
+        case TERRAIN_GENERATOR_RIVER:
+            terrain_generator_river_map(fixed_seed);
             break;
-        case TERRAIN_GENERATOR_PERLIN:
-            terrain_generator_generate_perlin(fixed_seed);
-            break;
-        case TERRAIN_GENERATOR_FLAT_PLAINS:
+        case TERRAIN_GENERATOR_RANDOM:
         default:
-            terrain_generator_generate_flat_plains();
+            terrain_generator_random_terrain();
             break;
     }
 

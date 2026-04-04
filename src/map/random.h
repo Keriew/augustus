@@ -15,6 +15,5 @@ void map_random_save_state(buffer *buf);
 
 void map_random_load_state(buffer *buf);
 
-unsigned int generate_seed_value(void);
 
 #endif // MAP_RANDOM_H

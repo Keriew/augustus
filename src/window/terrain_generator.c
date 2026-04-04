@@ -5,6 +5,7 @@
 #include "core/config.h"
 #include "core/dir.h"
 #include "core/image_group.h"
+#include "core/random.h"
 #include "core/string.h"
 #include "editor/editor.h"
 #include "game/file.h"
@@ -34,8 +35,6 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
-#include "building/type.h"
-#include "scenario/allowed_building.h"
 #include "scenario/editor.h"
 #include "scenario/data.h"
 #include "scenario/map.h"
@@ -344,23 +343,6 @@ static struct {
 static minimap_functions preview_minimap_functions;
 
 static uint8_t preview_road_flags[GRID_SIZE * GRID_SIZE];
-
-static int get_group_allowed(const building_type *types, unsigned int count)
-{
-    for (unsigned int i = 0; i < count; i++) {
-        if (!scenario_allowed_building(types[i])) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-static void set_group_allowed(const building_type *types, unsigned int count, int allowed)
-{
-    for (unsigned int i = 0; i < count; i++) {
-        scenario_allowed_building_set(types[i], allowed);
-    }
-}
 
 static void preview_viewport(int *x, int *y, int *width, int *height)
 {
@@ -747,13 +729,14 @@ static void button_open_editor(const generic_button *button)
     int use_seed = get_seed_value(&seed);
     terrain_generator_set_seed(use_seed, seed);
 
+    apply_scenario_settings();
+
     if (!editor_is_present() ||
         !game_init_editor_generated(data.size_index, data.algorithm_index)) {
         window_plain_message_dialog_show(TR_NO_EDITOR_TITLE, TR_NO_EDITOR_MESSAGE, 1);
         return;
     }
 
-    apply_scenario_settings();
 
     if (active_input) {
         input_box_stop(active_input);

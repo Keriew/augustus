@@ -2,9 +2,6 @@
 
 #include "core/random.h"
 
-#include <stdlib.h>
-#include <time.h>
-
 #include "map/grid.h"
 
 static grid_u8 random_value;
@@ -46,13 +43,3 @@ void map_random_load_state(buffer *buf)
     map_grid_load_state_u8(random_value.items, buf);
 }
 
-unsigned int generate_seed_value(void)
-{
-    // Generate a random value between 1 and UINT_MAX. Return the unsingned value directly, as it can be used as a seed for the terrain generator.
-    // Do not use time value directly as it is just increasing and might not provide enough randomness if the terrain generator is opened multiple times within the same second. Instead, use a combination of time and a random value from the C library's rand() function to increase randomness.
-    unsigned int time_seed = (unsigned int) time(NULL);
-    unsigned int rand_seed = (unsigned int) rand();
-    unsigned int seed = time_seed ^ rand_seed; // Combine time and rand values using XOR
-    seed = seed == 0 ? 1 : seed; // Ensure seed is not zero, as some terrain generators might treat zero as a special case.
-    return seed;
-}

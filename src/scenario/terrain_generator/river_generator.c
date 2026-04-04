@@ -11,6 +11,7 @@ static unsigned int perlin_seed = 1;
 static unsigned int mountain_seed = 1;
 static unsigned int meadow_seed = 1;
 
+// Mixes integer coordinates and seed into a stable pseudo-random 32-bit value.
 static uint32_t hash_2d(int x, int y, unsigned int seed)
 {
     uint32_t h = (uint32_t) x;
@@ -20,21 +21,25 @@ static uint32_t hash_2d(int x, int y, unsigned int seed)
     return h ^ (h >> 16);
 }
 
+// Maps the 2D hash to a normalized [0, 1] float.
 static float hash_value(int x, int y, unsigned int seed)
 {
     return (hash_2d(x, y, seed) & 0xffffu) / 65535.0f;
 }
 
+// Quintic smoothing curve used for interpolation weights.
 static float fade(float t)
 {
     return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
 }
 
+// Linear interpolation between two values.
 static float lerp(float a, float b, float t)
 {
     return a + (b - a) * t;
 }
 
+// Bilinearly interpolated value noise sampled from four lattice corners.
 static float value_noise(float x, float y, unsigned int seed)
 {
     int x0 = (int) floorf(x);
@@ -55,6 +60,7 @@ static float value_noise(float x, float y, unsigned int seed)
     return lerp(ix0, ix1, sy);
 }
 
+// Fractal Brownian motion: sums multiple noise octaves for richer structure.
 static float fbm(float x, float y, unsigned int seed)
 {
     float sum = 0.0f;
@@ -75,6 +81,7 @@ static float fbm(float x, float y, unsigned int seed)
     return sum;
 }
 
+// Resets the map to flat grassland as the base layer for procedural passes.
 static void generate_grassland(void)
 {
     int width = map_grid_width();
@@ -89,6 +96,7 @@ static void generate_grassland(void)
     }
 }
 
+// Places forests using an fBM threshold, but only on untouched clear tiles.
 static void add_forests(void)
 {
     int width = map_grid_width();
@@ -109,6 +117,7 @@ static void add_forests(void)
     }
 }
 
+// Places mountain rock patches in high-noise regions on remaining clear tiles.
 static void add_mountains(void)
 {
     int width = map_grid_width();
@@ -131,6 +140,7 @@ static void add_mountains(void)
     }
 }
 
+// Adds meadow patches from a mid-range noise band on low, clear terrain.
 static void add_meadows(void)
 {
     int width = map_grid_width();
@@ -157,6 +167,8 @@ static void add_meadows(void)
 }
 
 
+// Carves irregular circular lakes with noise-distorted shorelines.
+// Not used at the moment.
 static void add_lakes(void)
 {
     int width = map_grid_width();
@@ -197,6 +209,8 @@ static void add_lakes(void)
     }
 }
 
+// Floods one random border to form a simple sea edge.
+// Not used at the moment
 static void add_sea_edge(void)
 {
     int width = map_grid_width();
@@ -225,16 +239,14 @@ static void add_sea_edge(void)
     }
 }
 
-void terrain_generator_generate_perlin(unsigned int seed)
+// Builds a complete terrain pass from base layer through river and biome overlays.
+void terrain_generator_river_map(unsigned int seed)
 {
-
-
     perlin_seed = seed;
     mountain_seed = seed;
     meadow_seed = seed;
 
     generate_grassland();
-
     terrain_generator_generate_river();
     // terrain_generator_straight_river();
     add_forests();

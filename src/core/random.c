@@ -134,6 +134,14 @@ int random_between_from_stdlib(int min, int max)
     return min + rnd;
 }
 
+unsigned int generate_seed_value(void)
+{
+    unsigned int high = (unsigned int) random_from_stdlib();
+    unsigned int low = (unsigned int) random_from_stdlib();
+    unsigned int seed = (high << 16) ^ low ^ (unsigned int) time(NULL);
+    return seed ? seed : 1;
+}
+
 double random_fractional_from_stdlib(void)
 {
     return (double) random_from_stdlib() / (double) RAND_MAX;

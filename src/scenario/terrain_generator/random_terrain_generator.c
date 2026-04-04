@@ -3,7 +3,7 @@
 #include "map/grid.h"
 #include "map/terrain.h"
 
-void terrain_generator_generate_flat_plains(void)
+void terrain_generator_random_terrain(void)
 {
     int width = map_grid_width();
     int height = map_grid_height();
