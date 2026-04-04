@@ -881,9 +881,8 @@ static void init(void)
     sprintf(data.seed_text, "%d", random_seed);
     seed_input.placeholder = data.seed_text;
 
-    terrain_generator_algorithm_labels[2] = "Flat Plains";
-    terrain_generator_algorithm_labels[1] = "River Valley";
-    terrain_generator_algorithm_labels[0] = "Perlin";
+    terrain_generator_algorithm_labels[1] = "Random";
+    terrain_generator_algorithm_labels[0] = "River";
 
     active_input = &seed_input;
     input_box_start(active_input);

@@ -14,13 +14,13 @@ void terrain_generator_random_terrain(void)
             int roll = terrain_generator_random_between(0, 100);
             if (roll < 6) {
                 map_terrain_set_with_tile_update(grid_offset, TERRAIN_TREE);
-            } else if (roll < 8) {
-                map_terrain_set_with_tile_update(grid_offset, TERRAIN_ROCK);
-            } else if (roll < 18) {
+            } else if (roll < 12) {
                 map_terrain_set_with_tile_update(grid_offset, TERRAIN_SHRUB);
-            } else if (roll < 35) {
+            } else if (roll < 18) {
                 map_terrain_set_with_tile_update(grid_offset, TERRAIN_MEADOW);
-            } else if (roll < 60) {
+            } else if (roll < 19) {
+                map_terrain_set_with_tile_update(grid_offset, TERRAIN_ROCK);
+            } else if (roll < 20) {
                 map_terrain_set_with_tile_update(grid_offset, TERRAIN_WATER);
             }
         }

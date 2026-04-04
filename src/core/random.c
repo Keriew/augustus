@@ -139,6 +139,9 @@ unsigned int generate_seed_value(void)
     unsigned int high = (unsigned int) random_from_stdlib();
     unsigned int low = (unsigned int) random_from_stdlib();
     unsigned int seed = (high << 16) ^ low ^ (unsigned int) time(NULL);
+
+    // Keep bit 31 clear so signed interpretation can never appear negative.
+    seed &= 0x7fffffffu;
     return seed ? seed : 1;
 }
 
