@@ -19,7 +19,6 @@
 #include "graphics/weather.h"
 #include "graphics/window.h"
 #include "sound/music.h"
-#include "translation/translation.h"
 #include "window/cck_selection.h"
 #include "window/config.h"
 #include "window/editor/map.h"
