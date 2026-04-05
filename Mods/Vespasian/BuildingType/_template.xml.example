@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="replace_with_building_attr">
+    <!-- Optional runtime state definition -->
+    <state>
+        <water_access mode="reservoir_range" />
+    </state>
+
     <!-- Optional graphics definition -->
     <graphics>
-        <water_access mode="reservoir_range" />
         <default>
             <path value="Health_Culture\Example_Base" />
         </default>
@@ -15,6 +19,11 @@
             <condition type="working" />
             <path value="Health_Culture\Example_Working" />
         </variant>
+        <overlay>
+            <condition type="water_access" />
+            <path value="Aesthetics\Example_Overlay" />
+            <image value="Overlay_Anim" />
+        </overlay>
     </graphics>
 
     <!-- Optional labor phase -->

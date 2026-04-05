@@ -19,6 +19,7 @@ public:
     xml_asset_source source() const;
 
     void set_image(const std::string &image_id, const std::string &image_key, const std::string &top_image_key = std::string());
+    void set_image_raster(const std::string &image_id, std::vector<color_t> combined_pixels, int combined_width, int combined_height, int top_height);
     void set_image_animation(const std::string &image_id, const image_animation &animation, std::vector<std::string> frame_image_keys);
     const char *image_key_for(const char *image_id) const;
     const char *top_image_key_for(const char *image_id) const;

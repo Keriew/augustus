@@ -162,7 +162,7 @@ building_runtime *get_or_create_instance(::building *building_data)
 
 }
 
-void building_runtime::refresh_graphic_state()
+void building_runtime::refresh_runtime_state()
 {
     if (!building_ || !definition_ || !definition_->has_graphic()) {
         return;
@@ -176,9 +176,22 @@ void building_runtime::refresh_graphic_state()
     building_->upgrade_level = definition_->upgrade_level_for(*building_);
 }
 
+void building_runtime::clear_resolved_graphics()
+{
+    resolved_graphic_image_ = nullptr;
+    owns_graphics_ = 0;
+    owns_graphic_animation_ = 0;
+    resolved_animation_layers_.clear();
+}
+
 int building_runtime::uses_new_graphics() const
 {
     return building_ && definition_ && definition_->has_graphic() && definition_->graphics_path() && *definition_->graphics_path();
+}
+
+int building_runtime::graphics_state_is_authoritative() const
+{
+    return uses_new_graphics();
 }
 
 const building_type_registry_impl::GraphicsTarget *building_runtime::resolve_graphic_target() const
@@ -364,7 +377,7 @@ const char *building_runtime::resolve_graphic_image_id(const building_type_regis
             return image_id;
         }
         log_building_graphics_fallback_once(
-            "Building graphics image id could not be resolved. Falling back to legacy rendering.",
+            "Building graphics image id could not be resolved.",
             this,
             target->image(),
             group_key,
@@ -381,6 +394,105 @@ const char *building_runtime::resolve_graphic_image_id(const building_type_regis
     return resolve_default_group_image_id(group_key);
 }
 
+void building_runtime::append_graphic_animation_layer(
+    const building_type_registry_impl::GraphicsTarget *target,
+    const image *img,
+    const char *image_id)
+{
+    owns_graphic_animation_ = 1;
+    if (!target || !img || !img->animation || !image_id || !*image_id) {
+        return;
+    }
+
+    int animation_offset = building_animation_offset_for_image(building_, img, building_->grid_offset);
+    if (animation_offset <= 0) {
+        return;
+    }
+
+    const image *frame = image_group_payload_get_animation_frame(target->path(), image_id, animation_offset);
+    if (!frame) {
+        log_building_graphics_fallback_once(
+            "Building animation frame could not be resolved.",
+            this,
+            image_id,
+            target->path(),
+            image_id);
+        return;
+    }
+
+    resolved_animation_layers_.push_back({ img, frame });
+}
+
+void building_runtime::resolve_graphics_state()
+{
+    clear_resolved_graphics();
+    if (!uses_new_graphics()) {
+        return;
+    }
+
+    owns_graphics_ = graphics_state_is_authoritative();
+    owns_graphic_animation_ = owns_graphics_;
+    refresh_runtime_state();
+
+    const building_type_registry_impl::GraphicsTarget *target = resolve_graphic_target();
+    if (!target || !target->has_path()) {
+        log_building_graphics_fallback_once(
+            "Building graphics target could not be resolved.",
+            this,
+            definition_ ? definition_->attr() : "");
+        owns_graphic_animation_ = owns_graphics_;
+        return;
+    }
+
+    const char *image_id = resolve_graphic_image_id(target);
+    if (!image_id) {
+        owns_graphic_animation_ = owns_graphics_;
+        return;
+    }
+
+    const image *img = resolve_named_group_image(target->path(), image_id);
+    if (!img) {
+        log_building_graphics_fallback_once(
+            "Building graphics image could not be resolved.",
+            this,
+            target->path(),
+            target->path(),
+            image_id);
+        owns_graphic_animation_ = owns_graphics_;
+        return;
+    }
+
+    resolved_graphic_image_ = img;
+    append_graphic_animation_layer(target, img, image_id);
+
+    std::vector<const building_type_registry_impl::GraphicsTarget *> overlays =
+        definition_->resolve_graphics_overlays(*building_);
+    for (const building_type_registry_impl::GraphicsTarget *overlay : overlays) {
+        if (!overlay || !overlay->has_path()) {
+            continue;
+        }
+
+        const char *overlay_image_id = resolve_graphic_image_id(overlay);
+        if (!overlay_image_id) {
+            continue;
+        }
+
+        const image *overlay_image = resolve_named_group_image(overlay->path(), overlay_image_id);
+        if (!overlay_image) {
+            log_building_graphics_fallback_once(
+                "Building graphics overlay image could not be resolved.",
+                this,
+                overlay->path(),
+                overlay->path(),
+                overlay_image_id);
+            owns_graphic_animation_ = 1;
+            continue;
+        }
+
+        append_graphic_animation_layer(overlay, overlay_image, overlay_image_id);
+    }
+}
+
 const image *building_runtime::resolve_graphic_image()
 {
     if (!uses_new_graphics()) {
@@ -394,28 +506,8 @@ const image *building_runtime::resolve_graphic_image()
         context,
         log_building_scope_state,
         this);
-    refresh_graphic_state();
-
-    const building_type_registry_impl::GraphicsTarget *target = resolve_graphic_target();
-    if (!target || !target->has_path()) {
-        log_building_graphics_fallback_once(
-            "Building graphics target could not be resolved. Falling back to legacy rendering.",
-            this,
-            definition_ ? definition_->attr() : "");
-        return nullptr;
-    }
-
-    const char *image_id = resolve_graphic_image_id(target);
-    const image *img = image_id ? resolve_named_group_image(target->path(), image_id) : nullptr;
-    if (!img) {
-        log_building_graphics_fallback_once(
-            "Building graphics image could not be resolved. Falling back to legacy rendering.",
-            this,
-            target->path(),
-            target->path(),
-            image_id);
-    }
-    return img;
+    resolve_graphics_state();
+    return resolved_graphic_image_;
 }
 
 const image *building_runtime::resolve_graphic_animation_frame()
@@ -431,38 +523,8 @@ const image *building_runtime::resolve_graphic_animation_frame()
         context,
         log_building_scope_state,
         this);
-    refresh_graphic_state();
-
-    const building_type_registry_impl::GraphicsTarget *target = resolve_graphic_target();
-    if (!target || !target->has_path()) {
-        return nullptr;
-    }
-
-    const char *image_id = resolve_graphic_image_id(target);
-    if (!image_id) {
-        return nullptr;
-    }
-
-    const image *img = resolve_named_group_image(target->path(), image_id);
-    if (!img || !img->animation) {
-        return nullptr;
-    }
-
-    int animation_offset = building_animation_offset_for_image(building_, img, building_->grid_offset);
-    if (animation_offset <= 0) {
-        return nullptr;
-    }
-
-    const image *frame = image_group_payload_get_animation_frame(target->path(), image_id, animation_offset);
-    if (!frame) {
-        log_building_graphics_fallback_once(
-            "Building animation frame could not be resolved. Falling back to legacy rendering.",
-            this,
-            image_id,
-            target->path(),
-            image_id);
-    }
-    return frame;
+    resolve_graphics_state();
+    return resolved_animation_layers_.empty() ? nullptr : resolved_animation_layers_.front().frame_image;
 }
 
 void building_runtime::set_building_graphic()
@@ -471,7 +533,7 @@ void building_runtime::set_building_graphic()
         return;
     }
 
-    refresh_graphic_state();
+    refresh_runtime_state();
     map_building_tiles_add(building_->id, building_->x, building_->y, building_->size, building_image_get(building_), TERRAIN_BUILDING);
 }
 
@@ -763,6 +825,8 @@ void building_runtime::spawn_figure()
         return;
     }
 
+    refresh_runtime_state();
+
     const std::vector<building_type_registry_impl::SpawnDelayGroup> &spawn_groups = definition_->spawn_groups();
     // Groups own the shared delay/guard phase, then policies inside them can either cooperate or block one another.
     for (size_t i = 0; i < spawn_groups.size(); i++) {
@@ -771,6 +835,45 @@ void building_runtime::spawn_figure()
             spawn_service_roamer_group(group, i);
         }
     }
+}
+
+int building_runtime::owns_graphics()
+{
+    if (!uses_new_graphics()) {
+        return 0;
+    }
+    resolve_graphics_state();
+    return owns_graphics_;
+}
+
+int building_runtime::owns_graphic_animation()
+{
+    if (!uses_new_graphics()) {
+        return 0;
+    }
+    resolve_graphics_state();
+    return owns_graphic_animation_;
+}
+
+int building_runtime::graphic_animation_layer_count()
+{
+    if (!uses_new_graphics()) {
+        return 0;
+    }
+    resolve_graphics_state();
+    return static_cast<int>(resolved_animation_layers_.size());
+}
+
+const building_runtime_animation_layer *building_runtime::graphic_animation_layer(int index)
+{
+    if (!uses_new_graphics()) {
+        return nullptr;
+    }
+    resolve_graphics_state();
+    if (index < 0 || static_cast<size_t>(index) >= resolved_animation_layers_.size()) {
+        return nullptr;
+    }
+    return &resolved_animation_layers_[static_cast<size_t>(index)];
 }
 
 extern "C" void building_runtime_reset(void)
@@ -805,6 +908,50 @@ extern "C" const image *building_runtime_get_graphic_animation_frame(building *b
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         return instance->resolve_graphic_animation_frame();
+    }
+    return nullptr;
+}
+
+extern "C" int building_runtime_owns_graphics(building *b)
+{
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
+        return instance->owns_graphics();
+    }
+    return 0;
+}
+
+extern "C" int building_runtime_owns_graphic_animation(building *b)
+{
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
+        return instance->owns_graphic_animation();
+    }
+    return 0;
+}
+
+extern "C" int building_runtime_get_graphic_animation_layer_count(building *b)
+{
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
+        return instance->graphic_animation_layer_count();
+    }
+    return 0;
+}
+
+extern "C" const image *building_runtime_get_graphic_animation_layer_image(building *b, int layer_index)
+{
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
+        if (const building_runtime_animation_layer *layer = instance->graphic_animation_layer(layer_index)) {
+            return layer->base_image;
+        }
+    }
+    return nullptr;
+}
+
+extern "C" const image *building_runtime_get_graphic_animation_layer_frame(building *b, int layer_index)
+{
+    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
+        if (const building_runtime_animation_layer *layer = instance->graphic_animation_layer(layer_index)) {
+            return layer->frame_image;
+        }
     }
     return nullptr;
 }

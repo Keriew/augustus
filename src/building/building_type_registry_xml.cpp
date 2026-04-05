@@ -388,6 +388,29 @@ static int parse_graphics_comparison(const char *comparison_text, GraphicCompari
     return 0;
 }
 
+static int parse_state()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered state definition before building root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_state) {
+        log_error("BuildingType xml contains duplicate state nodes", g_parse_state.definition->attr(), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.saw_state = 1;
+    g_parse_state.parsing_state = 1;
+    return 1;
+}
+
+static void finish_state()
+{
+    g_parse_state.parsing_state = 0;
+}
+
 static int parse_building_root()
 {
     if (!xml_parser_has_attribute("type")) {
@@ -425,7 +448,9 @@ static int parse_graphics()
     g_parse_state.parsing_graphics = 1;
     g_parse_state.saw_legacy_graphics_nodes = 0;
     g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.has_current_graphics_overlay = 0;
     g_parse_state.current_graphics_variant_index = 0;
+    g_parse_state.current_graphics_overlay_index = 0;
     g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
     return 1;
 }
@@ -452,7 +477,9 @@ static void finish_graphics()
     g_parse_state.parsing_graphics = 0;
     g_parse_state.saw_legacy_graphics_nodes = 0;
     g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.has_current_graphics_overlay = 0;
     g_parse_state.current_graphics_variant_index = 0;
+    g_parse_state.current_graphics_overlay_index = 0;
     g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
 }
 
@@ -507,6 +534,7 @@ static int parse_graphics_variant()
     g_parse_state.definition->add_graphics_variant();
     g_parse_state.has_current_graphics_variant = 1;
     g_parse_state.current_graphics_variant_index = g_parse_state.definition->graphics().variants().size() - 1;
+    g_parse_state.has_current_graphics_overlay = 0;
     g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Variant;
     return 1;
 }
@@ -524,6 +552,43 @@ static void finish_graphics_variant()
     }
 
     g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
+}
+
+static int parse_graphics_overlay()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics overlay outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_legacy_graphics_nodes) {
+        log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant/overlay nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->add_graphics_overlay();
+    g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.has_current_graphics_overlay = 1;
+    g_parse_state.current_graphics_overlay_index = g_parse_state.definition->graphics().overlays().size() - 1;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Overlay;
+    return 1;
+}
+
+static void finish_graphics_overlay()
+{
+    if (!g_parse_state.parsing_graphics) {
+        return;
+    }
+
+    GraphicsOverlay *overlay = g_parse_state.definition->last_graphics_overlay();
+    if (!overlay || !overlay->target.has_path()) {
+        log_error("BuildingType graphics overlay is missing required child node 'path'", 0, 0);
+        g_parse_state.error = 1;
+    }
+
+    g_parse_state.has_current_graphics_overlay = 0;
     g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
 }
 
@@ -579,6 +644,22 @@ static int parse_graphics_path()
                 return 0;
             }
             variant->target.set_path(std::move(normalized_path));
+            break;
+        }
+        case GraphicsParseTargetScope::Overlay:
+        {
+            if (g_parse_state.saw_legacy_graphics_nodes) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant/overlay nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            GraphicsOverlay *overlay = g_parse_state.definition->last_graphics_overlay();
+            if (!overlay) {
+                log_error("Encountered graphics path without an active overlay", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            overlay->target.set_path(std::move(normalized_path));
             break;
         }
     }
@@ -639,6 +720,22 @@ static int parse_graphics_image()
             variant->target.set_image(std::move(image_id));
             break;
         }
+        case GraphicsParseTargetScope::Overlay:
+        {
+            if (g_parse_state.saw_legacy_graphics_nodes) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant/overlay nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            GraphicsOverlay *overlay = g_parse_state.definition->last_graphics_overlay();
+            if (!overlay) {
+                log_error("Encountered graphics image without an active overlay", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            overlay->target.set_image(std::move(image_id));
+            break;
+        }
     }
     return 1;
 }
@@ -690,8 +787,9 @@ static int parse_graphics_upgrade()
 
 static int parse_graphics_condition()
 {
-    if (!g_parse_state.definition || !g_parse_state.parsing_graphics || !g_parse_state.has_current_graphics_variant) {
-        log_error("Encountered graphics condition outside graphics variant", 0, 0);
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics ||
+        (!g_parse_state.has_current_graphics_variant && !g_parse_state.has_current_graphics_overlay)) {
+        log_error("Encountered graphics condition outside graphics variant or overlay", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
@@ -705,6 +803,8 @@ static int parse_graphics_condition()
     GraphicsCondition condition;
     if (type_text && strcmp(type_text, "working") == 0) {
         condition.type = GraphicsConditionType::Working;
+    } else if (type_text && strcmp(type_text, "water_access") == 0) {
+        condition.type = GraphicsConditionType::WaterAccess;
     } else if (type_text && strcmp(type_text, "desirability") == 0) {
         if (!xml_parser_has_attribute("operator")) {
             log_error("BuildingType graphics desirability condition is missing required attribute 'operator'", 0, 0);
@@ -740,14 +840,18 @@ static int parse_graphics_condition()
         return 0;
     }
 
-    g_parse_state.definition->add_graphics_condition(condition);
+    if (g_parse_state.has_current_graphics_variant) {
+        g_parse_state.definition->add_graphics_variant_condition(condition);
+    } else {
+        g_parse_state.definition->add_graphics_overlay_condition(condition);
+    }
     return 1;
 }
 
-static int parse_graphics_water_access()
+static int parse_water_access()
 {
-    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
-        log_error("Encountered graphics water_access outside graphics node", 0, 0);
+    if (!g_parse_state.definition || (!g_parse_state.parsing_graphics && !g_parse_state.parsing_state)) {
+        log_error("Encountered water_access outside state or graphics node", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
@@ -759,12 +863,12 @@ static int parse_graphics_water_access()
 
     const char *mode_text = xml_parser_get_attribute_string("mode");
     if (!mode_text || strcmp(mode_text, "reservoir_range") != 0) {
-        log_error("Unsupported BuildingType graphics water_access mode", mode_text, 0);
+        log_error("Unsupported BuildingType water_access mode", mode_text, 0);
         g_parse_state.error = 1;
         return 0;
     }
 
-    g_parse_state.definition->set_graphics_water_access_mode(WaterAccessMode::ReservoirRange);
+    g_parse_state.definition->set_state_water_access_mode(WaterAccessMode::ReservoirRange);
     return 1;
 }
 
@@ -1004,14 +1108,16 @@ static int parse_spawn()
 
 static const xml_parser_element XML_ELEMENTS[] = {
     { "building", parse_building_root, nullptr, nullptr, nullptr },
+    { "state", parse_state, finish_state, "building", nullptr },
     { "graphics", parse_graphics, finish_graphics, "building", nullptr },
     { "default", parse_graphics_default, finish_graphics_default, "graphics", nullptr },
     { "variant", parse_graphics_variant, finish_graphics_variant, "graphics", nullptr },
-    { "path", parse_graphics_path, nullptr, "graphics|default|variant", nullptr },
-    { "image", parse_graphics_image, nullptr, "graphics|default|variant", nullptr },
+    { "overlay", parse_graphics_overlay, finish_graphics_overlay, "graphics", nullptr },
+    { "path", parse_graphics_path, nullptr, "graphics|default|variant|overlay", nullptr },
+    { "image", parse_graphics_image, nullptr, "graphics|default|variant|overlay", nullptr },
     { "upgrade", parse_graphics_upgrade, nullptr, "graphics", nullptr },
-    { "condition", parse_graphics_condition, nullptr, "variant", nullptr },
-    { "water_access", parse_graphics_water_access, nullptr, "graphics", nullptr },
+    { "condition", parse_graphics_condition, nullptr, "variant|overlay", nullptr },
+    { "water_access", parse_water_access, nullptr, "graphics|state", nullptr },
     { "labor", parse_labor, nullptr, "building", nullptr },
     { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },
     { "spawn", parse_spawn, nullptr, "spawn_group", nullptr }

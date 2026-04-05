@@ -39,6 +39,8 @@ int GraphicsCondition::matches(const ::building &building) const
     switch (type) {
         case GraphicsConditionType::Working:
             return building.num_workers > 0 && building.has_water_access;
+        case GraphicsConditionType::WaterAccess:
+            return building.has_water_access;
         case GraphicsConditionType::Desirability:
             switch (comparison) {
                 case GraphicComparison::GreaterThan:
@@ -65,6 +67,27 @@ int GraphicsVariant::matches(const ::building &building) const
     return 1;
 }
 
+int GraphicsOverlay::matches(const ::building &building) const
+{
+    for (const GraphicsCondition &condition : conditions) {
+        if (!condition.matches(building)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void StateDefinition::set_water_access_mode(WaterAccessMode mode)
+{
+    has_water_access_rule_ = 1;
+    water_access_mode_ = mode;
+}
+
+WaterAccessMode StateDefinition::water_access_mode() const
+{
+    return has_water_access_rule_ ? water_access_mode_ : WaterAccessMode::None;
+}
+
 void GraphicsDefinition::set_default_path(std::string path)
 {
     default_target_.set_path(std::move(path));
@@ -82,12 +105,6 @@ void GraphicsDefinition::set_upgrade_rule(int threshold, GraphicComparison compa
     upgrade_comparison_ = comparison;
 }
 
-void GraphicsDefinition::set_water_access_mode(WaterAccessMode mode)
-{
-    has_water_access_rule_ = 1;
-    water_access_mode_ = mode;
-}
-
 void GraphicsDefinition::mark_default_node()
 {
     uses_structured_nodes_ = 1;
@@ -101,6 +118,13 @@ GraphicsVariant &GraphicsDefinition::add_variant()
     return variants_.back();
 }
 
+GraphicsOverlay &GraphicsDefinition::add_overlay()
+{
+    uses_structured_nodes_ = 1;
+    overlays_.emplace_back();
+    return overlays_.back();
+}
+
 GraphicsVariant *GraphicsDefinition::last_variant()
 {
     return variants_.empty() ? nullptr : &variants_.back();
@@ -109,6 +133,16 @@ GraphicsVariant *GraphicsDefinition::last_variant()
 const GraphicsVariant *GraphicsDefinition::last_variant() const
 {
     return variants_.empty() ? nullptr : &variants_.back();
+}
+
+GraphicsOverlay *GraphicsDefinition::last_overlay()
+{
+    return overlays_.empty() ? nullptr : &overlays_.back();
+}
+
+const GraphicsOverlay *GraphicsDefinition::last_overlay() const
+{
+    return overlays_.empty() ? nullptr : &overlays_.back();
 }
 
 int GraphicsDefinition::has_path() const
@@ -156,6 +190,11 @@ const std::vector<GraphicsVariant> &GraphicsDefinition::variants() const
     return variants_;
 }
 
+const std::vector<GraphicsOverlay> &GraphicsDefinition::overlays() const
+{
+    return overlays_;
+}
+
 const GraphicsTarget *GraphicsDefinition::resolve_target(const ::building &building) const
 {
     for (const GraphicsVariant &variant : variants_) {
@@ -166,9 +205,15 @@ const GraphicsTarget *GraphicsDefinition::resolve_target(const ::building &build
     return default_target_.has_path() ? &default_target_ : nullptr;
 }
 
-WaterAccessMode GraphicsDefinition::water_access_mode() const
+std::vector<const GraphicsTarget *> GraphicsDefinition::resolve_overlays(const ::building &building) const
 {
-    return has_water_access_rule_ ? water_access_mode_ : WaterAccessMode::None;
+    std::vector<const GraphicsTarget *> resolved;
+    for (const GraphicsOverlay &overlay : overlays_) {
+        if (overlay.target.has_path() && overlay.matches(building)) {
+            resolved.push_back(&overlay.target);
+        }
+    }
+    return resolved;
 }
 
 unsigned char GraphicsDefinition::upgrade_level_for(const ::building &building) const
@@ -208,6 +253,11 @@ BuildingType::BuildingType(building_type type, std::string attr)
 {
 }
 
+void BuildingType::set_state_water_access_mode(WaterAccessMode mode)
+{
+    state_.set_water_access_mode(mode);
+}
+
 void BuildingType::set_graphics_path(std::string path)
 {
     graphics_.set_default_path(std::move(path));
@@ -223,11 +273,6 @@ void BuildingType::set_upgrade_rule(int threshold, GraphicComparison comparison)
     graphics_.set_upgrade_rule(threshold, comparison);
 }
 
-void BuildingType::set_graphics_water_access_mode(WaterAccessMode mode)
-{
-    graphics_.set_water_access_mode(mode);
-}
-
 void BuildingType::mark_graphics_default_node()
 {
     graphics_.mark_default_node();
@@ -238,16 +283,34 @@ GraphicsVariant &BuildingType::add_graphics_variant()
     return graphics_.add_variant();
 }
 
+GraphicsOverlay &BuildingType::add_graphics_overlay()
+{
+    return graphics_.add_overlay();
+}
+
 GraphicsVariant *BuildingType::last_graphics_variant()
 {
     return graphics_.last_variant();
 }
 
-void BuildingType::add_graphics_condition(GraphicsCondition condition)
+GraphicsOverlay *BuildingType::last_graphics_overlay()
+{
+    return graphics_.last_overlay();
+}
+
+void BuildingType::add_graphics_variant_condition(GraphicsCondition condition)
 {
     GraphicsVariant *variant = graphics_.last_variant();
     if (variant) {
         variant->conditions.push_back(std::move(condition));
+    }
+}
+
+void BuildingType::add_graphics_overlay_condition(GraphicsCondition condition)
+{
+    GraphicsOverlay *overlay = graphics_.last_overlay();
+    if (overlay) {
+        overlay->conditions.push_back(std::move(condition));
     }
 }
 
@@ -285,6 +348,11 @@ const char *BuildingType::attr() const
     return attr_.c_str();
 }
 
+const StateDefinition &BuildingType::state() const
+{
+    return state_;
+}
+
 const GraphicsDefinition &BuildingType::graphics() const
 {
     return graphics_;
@@ -305,6 +373,11 @@ const GraphicsTarget *BuildingType::resolve_graphics_target(const ::building &bu
     return graphics_.resolve_target(building);
 }
 
+std::vector<const GraphicsTarget *> BuildingType::resolve_graphics_overlays(const ::building &building) const
+{
+    return graphics_.resolve_overlays(building);
+}
+
 int BuildingType::uses_structured_graphics() const
 {
     return graphics_.uses_structured_nodes();
@@ -312,7 +385,7 @@ int BuildingType::uses_structured_graphics() const
 
 WaterAccessMode BuildingType::water_access_mode() const
 {
-    return graphics_.water_access_mode();
+    return state_.water_access_mode();
 }
 
 int BuildingType::has_graphic() const

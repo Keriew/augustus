@@ -1,7 +1,16 @@
 <building type="large_statue">
-    <graphics>
-        <path value="Aesthetics\Statue" />
-        <image value="l statue anim" />
+    <state>
         <water_access mode="reservoir_range" />
+    </state>
+    <graphics>
+        <default>
+            <path value="Aesthetics\Statue" />
+            <image value="Image_0002" />
+        </default>
+        <overlay>
+            <condition type="water_access" />
+            <path value="Aesthetics\l_statue_anim" />
+            <image value="l statue anim" />
+        </overlay>
     </graphics>
 </building>

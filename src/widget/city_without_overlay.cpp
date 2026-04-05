@@ -220,11 +220,32 @@ static const image *get_runtime_graphic_image(building *b)
     return b ? building_runtime_get_graphic_image(b) : 0;
 }
 
+static int runtime_owns_building_graphics(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    b = building_main(b);
+    return b ? building_runtime_owns_graphics(b) : 0;
+}
+
+static int runtime_owns_building_animation(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    b = building_main(b);
+    return b ? building_runtime_owns_graphic_animation(b) : 0;
+}
+
 static int draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask)
 {
+    if (!runtime_owns_building_graphics(b)) {
+        return 0;
+    }
     const image *img = get_runtime_graphic_image(b);
     if (!img) {
-        return 0;
+        return 1;
     }
     image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, draw_context.scale);
     return 1;
@@ -232,9 +253,12 @@ static int draw_runtime_building_footprint(building *b, int x, int y, color_t co
 
 static int draw_runtime_building_top(building *b, int x, int y, color_t color_mask)
 {
+    if (!runtime_owns_building_graphics(b)) {
+        return 0;
+    }
     const image *img = get_runtime_graphic_image(b);
     if (!img) {
-        return 0;
+        return 1;
     }
     image_draw_isometric_top_from_draw_tile_image(img, x, y, color_mask, draw_context.scale);
     return 1;
@@ -247,21 +271,24 @@ static int draw_runtime_building_animation(building *b, int x, int y, int grid_o
     }
 
     b = building_main(b);
-    const image *img = b ? building_runtime_get_graphic_image(b) : 0;
-    if (!img || !img->animation) {
+    if (!runtime_owns_building_animation(b)) {
         return 0;
     }
 
-    const image *frame = building_runtime_get_graphic_animation_frame(b);
-    if (!frame) {
-        return 0;
-    }
+    int layer_count = building_runtime_get_graphic_animation_layer_count(b);
+    for (int layer_index = 0; layer_index < layer_count; layer_index++) {
+        const image *img = building_runtime_get_graphic_animation_layer_image(b, layer_index);
+        const image *frame = building_runtime_get_graphic_animation_layer_frame(b, layer_index);
+        if (!img || !img->animation || !frame) {
+            continue;
+        }
 
-    int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
-    image_draw_image(frame,
-        x + img->animation->sprite_offset_x,
-        y + img->animation->sprite_offset_y - y_offset,
-        color_mask, draw_context.scale);
+        int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
+        image_draw_image(frame,
+            x + img->animation->sprite_offset_x,
+            y + img->animation->sprite_offset_y - y_offset,
+            color_mask, draw_context.scale);
+    }
     return 1;
 }
 
@@ -893,7 +920,11 @@ static void draw_animation(int x, int y, int grid_offset)
         // Hover effect for animations - only if not deleted or selected
         color_mask = COLOR_MASK_HOVER;
     }
-    if (img->animation) {
+    if (building_id && draw_runtime_building_animation(b, x, y, grid_offset, color_mask)) {
+        if (b->has_plague) {
+            draw_plague(b, x, y, color_mask);
+        }
+    } else if (img->animation) {
         if (map_property_is_draw_tile(grid_offset)) {
             if (b->type == BUILDING_DOCK) {
                 draw_dock_workers(b, x, y, color_mask);
@@ -941,10 +972,6 @@ static void draw_animation(int x, int y, int grid_offset)
             if (b->type == BUILDING_DEPOT) {
                 draw_depot_resource(b, x, y, color_mask);
             }
-        }
-    } else if (building_id && draw_runtime_building_animation(b, x, y, grid_offset, color_mask)) {
-        if (b->has_plague) {
-            draw_plague(b, x, y, color_mask);
         }
     } else if (map_property_is_draw_tile(grid_offset) && building_id && b->has_plague) {
         draw_plague(b, x, y, color_mask);

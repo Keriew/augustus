@@ -71,6 +71,7 @@ enum class SpawnCondition {
 enum class GraphicsConditionType {
     None,
     Working,
+    WaterAccess,
     Desirability
 };
 
@@ -137,16 +138,36 @@ struct GraphicsVariant {
     int matches(const ::building &building) const;
 };
 
+struct GraphicsOverlay {
+    GraphicsTarget target;
+    std::vector<GraphicsCondition> conditions;
+
+    int matches(const ::building &building) const;
+};
+
+class StateDefinition {
+public:
+    void set_water_access_mode(WaterAccessMode mode);
+
+    WaterAccessMode water_access_mode() const;
+
+private:
+    int has_water_access_rule_ = 0;
+    WaterAccessMode water_access_mode_ = WaterAccessMode::None;
+};
+
 class GraphicsDefinition {
 public:
     void set_default_path(std::string path);
     void set_default_image(std::string image);
     void set_upgrade_rule(int threshold, GraphicComparison comparison);
-    void set_water_access_mode(WaterAccessMode mode);
     void mark_default_node();
     GraphicsVariant &add_variant();
+    GraphicsOverlay &add_overlay();
     GraphicsVariant *last_variant();
     const GraphicsVariant *last_variant() const;
+    GraphicsOverlay *last_overlay();
+    const GraphicsOverlay *last_overlay() const;
 
     int has_path() const;
     const char *path() const;
@@ -159,19 +180,18 @@ public:
     int has_variants() const;
     const GraphicsTarget *default_target() const;
     const std::vector<GraphicsVariant> &variants() const;
+    const std::vector<GraphicsOverlay> &overlays() const;
     const GraphicsTarget *resolve_target(const ::building &building) const;
-
-    WaterAccessMode water_access_mode() const;
+    std::vector<const GraphicsTarget *> resolve_overlays(const ::building &building) const;
     unsigned char upgrade_level_for(const ::building &building) const;
 
 private:
     GraphicsTarget default_target_;
     std::vector<GraphicsVariant> variants_;
+    std::vector<GraphicsOverlay> overlays_;
     int has_upgrade_rule_ = 0;
     int upgrade_threshold_ = 0;
     GraphicComparison upgrade_comparison_ = GraphicComparison::None;
-    int has_water_access_rule_ = 0;
-    WaterAccessMode water_access_mode_ = WaterAccessMode::None;
     int uses_structured_nodes_ = 0;
     int has_default_node_ = 0;
 };
@@ -180,14 +200,17 @@ class BuildingType {
 public:
     BuildingType(building_type type, std::string attr);
 
+    void set_state_water_access_mode(WaterAccessMode mode);
     void set_graphics_path(std::string path);
     void set_graphics_image(std::string image);
     void set_upgrade_rule(int threshold, GraphicComparison comparison);
-    void set_graphics_water_access_mode(WaterAccessMode mode);
     void mark_graphics_default_node();
     GraphicsVariant &add_graphics_variant();
+    GraphicsOverlay &add_graphics_overlay();
     GraphicsVariant *last_graphics_variant();
-    void add_graphics_condition(GraphicsCondition condition);
+    GraphicsOverlay *last_graphics_overlay();
+    void add_graphics_variant_condition(GraphicsCondition condition);
+    void add_graphics_overlay_condition(GraphicsCondition condition);
 
     void add_spawn_policy(SpawnPolicy policy);
     void set_labor_policy(LaborPolicy policy);
@@ -196,10 +219,12 @@ public:
 
     building_type type() const;
     const char *attr() const;
+    const StateDefinition &state() const;
     const GraphicsDefinition &graphics() const;
     const char *graphics_path() const;
     const char *graphics_image() const;
     const GraphicsTarget *resolve_graphics_target(const ::building &building) const;
+    std::vector<const GraphicsTarget *> resolve_graphics_overlays(const ::building &building) const;
     int uses_structured_graphics() const;
     WaterAccessMode water_access_mode() const;
     int has_graphic() const;
@@ -211,6 +236,7 @@ public:
 private:
     building_type type_;
     std::string attr_;
+    StateDefinition state_;
     GraphicsDefinition graphics_;
     int has_labor_policy_ = 0;
     LaborPolicy labor_policy_;

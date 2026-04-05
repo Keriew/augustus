@@ -409,6 +409,35 @@ int xml_resolve_assetlist_path(char *full_path, const char *assetlist_key, xml_a
     return resolve_graphics_path(full_path, relative_path, source, resolved_source);
 }
 
+int xml_collect_assetlist_sources(const char *assetlist_key, xml_asset_source *sources, int max_sources)
+{
+    if (!assetlist_key || !*assetlist_key || !sources || max_sources <= 0) {
+        return 0;
+    }
+
+    static const xml_asset_source kPriorityOrder[] = {
+        XML_ASSET_SOURCE_MOD,
+        XML_ASSET_SOURCE_AUGUSTUS,
+        XML_ASSET_SOURCE_JULIUS,
+        XML_ASSET_SOURCE_ROOT
+    };
+
+    int count = 0;
+    for (int i = 0; i < static_cast<int>(sizeof(kPriorityOrder) / sizeof(kPriorityOrder[0])); i++) {
+        if (count >= max_sources) {
+            break;
+        }
+
+        char full_path[FILE_NAME_MAX] = { 0 };
+        xml_asset_source resolved_source = XML_ASSET_SOURCE_AUTO;
+        if (xml_resolve_assetlist_path(full_path, assetlist_key, kPriorityOrder[i], &resolved_source) &&
+            resolved_source == kPriorityOrder[i]) {
+            sources[count++] = kPriorityOrder[i];
+        }
+    }
+    return count;
+}
+
 int xml_resolve_image_path(char *full_path, const char *assetlist_key, const char *image_file_name, xml_asset_source source)
 {
     char relative_path[FILE_NAME_MAX];

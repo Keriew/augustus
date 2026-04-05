@@ -259,11 +259,23 @@ static const image *get_runtime_graphic_image(building *b)
     return b ? building_runtime_get_graphic_image(b) : 0;
 }
 
+static int runtime_owns_building_graphics(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    b = building_main(b);
+    return b ? building_runtime_owns_graphics(b) : 0;
+}
+
 static int draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask)
 {
+    if (!runtime_owns_building_graphics(b)) {
+        return 0;
+    }
     const image *img = get_runtime_graphic_image(b);
     if (!img) {
-        return 0;
+        return 1;
     }
     image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, scale);
     return 1;
@@ -271,9 +283,12 @@ static int draw_runtime_building_footprint(building *b, int x, int y, color_t co
 
 static int draw_runtime_building_top(building *b, int x, int y, color_t color_mask)
 {
+    if (!runtime_owns_building_graphics(b)) {
+        return 0;
+    }
     const image *img = get_runtime_graphic_image(b);
     if (!img) {
-        return 0;
+        return 1;
     }
     image_draw_isometric_top_from_draw_tile_image(img, x, y, color_mask, scale);
     return 1;
@@ -286,21 +301,24 @@ static int draw_runtime_building_animation(building *b, int x, int y, int grid_o
     }
 
     b = building_main(b);
-    const image *img = b ? building_runtime_get_graphic_image(b) : 0;
-    if (!img || !img->animation) {
+    if (!b || !building_runtime_owns_graphic_animation(b)) {
         return 0;
     }
 
-    const image *frame = building_runtime_get_graphic_animation_frame(b);
-    if (!frame) {
-        return 0;
-    }
+    int layer_count = building_runtime_get_graphic_animation_layer_count(b);
+    for (int layer_index = 0; layer_index < layer_count; layer_index++) {
+        const image *img = building_runtime_get_graphic_animation_layer_image(b, layer_index);
+        const image *frame = building_runtime_get_graphic_animation_layer_frame(b, layer_index);
+        if (!img || !img->animation || !frame) {
+            continue;
+        }
 
-    int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
-    image_draw_image(frame,
-        x + img->animation->sprite_offset_x,
-        y + img->animation->sprite_offset_y - y_offset,
-        color_mask, scale);
+        int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
+        image_draw_image(frame,
+            x + img->animation->sprite_offset_x,
+            y + img->animation->sprite_offset_y - y_offset,
+            color_mask, scale);
+    }
     return 1;
 }
 

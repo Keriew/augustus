@@ -327,6 +327,41 @@ ImagePayload *image_payload_load_png_payload(const char *path_key, const char *f
     return payload_ptr;
 }
 
+ImagePayload *image_payload_load_pixels_payload(const char *path_key, const image &legacy_image, const color_t *pixels, int width, int height)
+{
+    if (!path_key || !*path_key || !pixels || width <= 0 || height <= 0) {
+        return nullptr;
+    }
+
+    if (ImagePayload *existing = find_payload_ptr(path_key)) {
+        existing->retain();
+        return existing;
+    }
+
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (!renderer || !renderer->upload_image_resource) {
+        return nullptr;
+    }
+
+    image uploaded_image = legacy_image;
+    uploaded_image.resource_handle = 0;
+    uploaded_image.resource_key = nullptr;
+    uploaded_image.resource_payload = nullptr;
+    uploaded_image.top = nullptr;
+    uploaded_image.animation = nullptr;
+    renderer->upload_image_resource(&uploaded_image, pixels, width, height);
+    if (uploaded_image.resource_handle <= 0) {
+        return nullptr;
+    }
+
+    auto payload = std::make_unique<ImagePayload>(path_key, uploaded_image);
+    payload->set_handle(uploaded_image.resource_handle);
+    payload->retain();
+    ImagePayload *payload_ptr = payload.get();
+    g_payloads.emplace(payload_ptr->key(), std::move(payload));
+    return payload_ptr;
+}
+
 extern "C" const char *image_payload_register(image *img, const char *path_key)
 {
     if (!img || !path_key || !*path_key || img->resource_handle <= 0) {

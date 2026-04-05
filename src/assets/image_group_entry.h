@@ -3,6 +3,8 @@
 #include "core/image.h"
 
 #ifdef __cplusplus
+#include "graphics/color.h"
+
 #include <string>
 #include <vector>
 
@@ -19,9 +21,14 @@ public:
     int has_animation() const;
     const image_animation &animation() const;
     const std::vector<std::string> &animation_frame_keys() const;
+    const std::vector<color_t> &combined_pixels() const;
+    int combined_width() const;
+    int combined_height() const;
+    int top_height() const;
 
     void set_keys(std::string image_key, std::string top_image_key = std::string());
     void set_animation(const image_animation &animation, std::vector<std::string> frame_image_keys);
+    void set_raster(std::vector<color_t> combined_pixels, int combined_width, int combined_height, int top_height);
 
 private:
     void rebuild_legacy_image() const;
@@ -36,5 +43,9 @@ private:
     mutable image legacy_image_ = {};
     mutable image legacy_top_image_ = {};
     mutable image_animation legacy_animation_ = {};
+    std::vector<color_t> combined_pixels_;
+    int combined_width_ = 0;
+    int combined_height_ = 0;
+    int top_height_ = 0;
 };
 #endif

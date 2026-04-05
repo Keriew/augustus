@@ -88,6 +88,26 @@ const std::vector<std::string> &ImageGroupEntry::animation_frame_keys() const
     return animation_frame_keys_;
 }
 
+const std::vector<color_t> &ImageGroupEntry::combined_pixels() const
+{
+    return combined_pixels_;
+}
+
+int ImageGroupEntry::combined_width() const
+{
+    return combined_width_;
+}
+
+int ImageGroupEntry::combined_height() const
+{
+    return combined_height_;
+}
+
+int ImageGroupEntry::top_height() const
+{
+    return top_height_;
+}
+
 void ImageGroupEntry::set_keys(std::string image_key, std::string top_image_key)
 {
     image_key_ = std::move(image_key);
@@ -101,4 +121,12 @@ void ImageGroupEntry::set_animation(const image_animation &animation, std::vecto
     animation_frame_keys_ = std::move(frame_image_keys);
     has_animation_ = !animation_frame_keys_.empty();
     legacy_image_dirty_ = 1;
+}
+
+void ImageGroupEntry::set_raster(std::vector<color_t> combined_pixels, int combined_width, int combined_height, int top_height)
+{
+    combined_pixels_ = std::move(combined_pixels);
+    combined_width_ = combined_width;
+    combined_height_ = combined_height;
+    top_height_ = top_height;
 }

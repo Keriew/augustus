@@ -7,14 +7,18 @@ Templates and examples are maintained only in `Mods\Vespasian\BuildingType`.
 
 Current supported nodes:
 
+- `<state> ... </state>`
 - `<graphics> ... </graphics>`
 - `<labor labor_seeker_mode="..." labor_min_houses="N" />`
 - `<spawn_group ...>`
 - `<spawn ... />`
 
-Current supported `<graphics>` child nodes:
+Current supported `<state>` child nodes:
 
 - `<water_access mode="reservoir_range" />`
+
+Current supported `<graphics>` child nodes:
+
 - Legacy flat mode:
   - `<path value="Health_Culture\Theatre" />`
   - `<image value="Image_0000" />`
@@ -22,7 +26,9 @@ Current supported `<graphics>` child nodes:
 - Structured mode:
   - `<default> ... </default>`
   - `<variant> ... </variant>`
+  - `<overlay> ... </overlay>`
   - `<condition type="working" />`
+  - `<condition type="water_access" />`
   - `<condition type="desirability" operator="gt|gte" threshold="N" />`
 
 `<path value="...">` rules:
@@ -40,12 +46,15 @@ Structured `<graphics>` rules:
 - all `<condition>` nodes inside one `<variant>` must match
 - the first matching variant wins
 - the `<default>` target is used when no variant matches
-- do not mix legacy root `<path>/<image>/<upgrade>` nodes with structured `<default>/<variant>` nodes
+- matching `<overlay>` entries add animation-only layers on top of the resolved base graphics
+- do not mix legacy root `<path>/<image>/<upgrade>` nodes with structured `<default>/<variant>/<overlay>` nodes
 - `<image value="..."/>` is optional inside `<default>` or `<variant>` when a graphics group needs a specific named image
+- `<image value="..."/>` is optional inside `<overlay>` too
 
 Current supported graphics conditions:
 
 - `type="working"` means `num_workers > 0 && has_water_access`
+- `type="water_access"` means `has_water_access`
 - `type="desirability" operator="gt|gte" threshold="N"` compares the building desirability against `N`
 
 Current supported `<labor>` attributes:
@@ -96,7 +105,8 @@ Current engine behavior:
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
 - Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them, such as grouped statue assets.
 - Use structured `<graphics>` when one building can swap between several whole graphics groups based on runtime state, like the bathhouse.
-- Buildings with a runtime `BuildingType` and a non-empty graphics path now try the new image-group payload path during live city rendering and fall back to legacy rendering when content is missing or unsupported in this phase.
+- Put water refresh rules under `<state>` so graphics and spawn behavior share the same derived runtime state.
+- Buildings with a runtime `BuildingType` and a non-empty graphics path now use the new image-group payload path as the authoritative live renderer path.
 - The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
 
 See `_template.xml.example` here in `Mods\Vespasian\BuildingType` for a copy/paste starter.
