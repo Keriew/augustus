@@ -13,6 +13,7 @@ extern "C" {
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <utility>
 
 namespace building_type_registry_impl {
 
@@ -414,7 +415,7 @@ static int parse_graphics()
         g_parse_state.error = 1;
         return 0;
     }
-    if (g_parse_state.definition->has_graphic()) {
+    if (g_parse_state.saw_graphic) {
         log_error("BuildingType xml contains duplicate graphics nodes", g_parse_state.definition->attr(), 0);
         g_parse_state.error = 1;
         return 0;
@@ -422,7 +423,10 @@ static int parse_graphics()
 
     g_parse_state.saw_graphic = 1;
     g_parse_state.parsing_graphics = 1;
-    g_parse_state.current_graphics_has_path = 0;
+    g_parse_state.saw_legacy_graphics_nodes = 0;
+    g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.current_graphics_variant_index = 0;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
     return 1;
 }
 
@@ -431,12 +435,96 @@ static void finish_graphics()
     if (!g_parse_state.parsing_graphics) {
         return;
     }
-    if (!g_parse_state.current_graphics_has_path) {
+
+    if (g_parse_state.definition->uses_structured_graphics()) {
+        if (!g_parse_state.definition->graphics().has_default_node()) {
+            log_error("BuildingType graphics is missing required child node 'default'", 0, 0);
+            g_parse_state.error = 1;
+        } else if (!g_parse_state.definition->graphics().default_target()) {
+            log_error("BuildingType graphics default is missing required child node 'path'", 0, 0);
+            g_parse_state.error = 1;
+        }
+    } else if (!g_parse_state.definition->has_graphic()) {
         log_error("BuildingType graphics is missing required child node 'path'", 0, 0);
         g_parse_state.error = 1;
     }
+
     g_parse_state.parsing_graphics = 0;
-    g_parse_state.current_graphics_has_path = 0;
+    g_parse_state.saw_legacy_graphics_nodes = 0;
+    g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.current_graphics_variant_index = 0;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
+}
+
+static int parse_graphics_default()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics default outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_legacy_graphics_nodes) {
+        log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.definition->graphics().has_default_node()) {
+        log_error("BuildingType graphics contains duplicate default nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->mark_graphics_default_node();
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Default;
+    return 1;
+}
+
+static void finish_graphics_default()
+{
+    if (!g_parse_state.parsing_graphics) {
+        return;
+    }
+    if (!g_parse_state.definition->graphics().default_target()) {
+        log_error("BuildingType graphics default is missing required child node 'path'", 0, 0);
+        g_parse_state.error = 1;
+    }
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
+}
+
+static int parse_graphics_variant()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics variant outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_legacy_graphics_nodes) {
+        log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->add_graphics_variant();
+    g_parse_state.has_current_graphics_variant = 1;
+    g_parse_state.current_graphics_variant_index = g_parse_state.definition->graphics().variants().size() - 1;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Variant;
+    return 1;
+}
+
+static void finish_graphics_variant()
+{
+    if (!g_parse_state.parsing_graphics) {
+        return;
+    }
+
+    GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
+    if (!variant || !variant->target.has_path()) {
+        log_error("BuildingType graphics variant is missing required child node 'path'", 0, 0);
+        g_parse_state.error = 1;
+    }
+
+    g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
 }
 
 static int parse_graphics_path()
@@ -459,8 +547,41 @@ static int parse_graphics_path()
         return 0;
     }
 
-    g_parse_state.definition->set_graphics_path(std::move(normalized_path));
-    g_parse_state.current_graphics_has_path = 1;
+    switch (g_parse_state.current_graphics_target_scope) {
+        case GraphicsParseTargetScope::Root:
+            if (g_parse_state.definition->uses_structured_graphics()) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            g_parse_state.definition->set_graphics_path(std::move(normalized_path));
+            g_parse_state.saw_legacy_graphics_nodes = 1;
+            break;
+        case GraphicsParseTargetScope::Default:
+            if (g_parse_state.saw_legacy_graphics_nodes) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            g_parse_state.definition->set_graphics_path(std::move(normalized_path));
+            break;
+        case GraphicsParseTargetScope::Variant:
+        {
+            if (g_parse_state.saw_legacy_graphics_nodes) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
+            if (!variant) {
+                log_error("Encountered graphics path without an active variant", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            variant->target.set_path(std::move(normalized_path));
+            break;
+        }
+    }
     return 1;
 }
 
@@ -484,7 +605,41 @@ static int parse_graphics_image()
         return 0;
     }
 
-    g_parse_state.definition->set_graphics_image(std::move(image_id));
+    switch (g_parse_state.current_graphics_target_scope) {
+        case GraphicsParseTargetScope::Root:
+            if (g_parse_state.definition->uses_structured_graphics()) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            g_parse_state.definition->set_graphics_image(std::move(image_id));
+            g_parse_state.saw_legacy_graphics_nodes = 1;
+            break;
+        case GraphicsParseTargetScope::Default:
+            if (g_parse_state.saw_legacy_graphics_nodes) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            g_parse_state.definition->set_graphics_image(std::move(image_id));
+            break;
+        case GraphicsParseTargetScope::Variant:
+        {
+            if (g_parse_state.saw_legacy_graphics_nodes) {
+                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
+            if (!variant) {
+                log_error("Encountered graphics image without an active variant", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            variant->target.set_image(std::move(image_id));
+            break;
+        }
+    }
     return 1;
 }
 
@@ -492,6 +647,12 @@ static int parse_graphics_upgrade()
 {
     if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
         log_error("Encountered graphics upgrade outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.current_graphics_target_scope != GraphicsParseTargetScope::Root ||
+        g_parse_state.definition->uses_structured_graphics()) {
+        log_error("BuildingType graphics upgrade is only supported in legacy flat graphics nodes", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
@@ -514,7 +675,72 @@ static int parse_graphics_upgrade()
         return 0;
     }
 
-    g_parse_state.definition->set_upgrade_rule(xml_parser_get_attribute_int("threshold"), comparison);
+    int threshold = 0;
+    const char *threshold_text = xml_parser_get_attribute_string("threshold");
+    if (!threshold_text || !parse_int_strict(threshold_text, &threshold)) {
+        log_error("Unsupported BuildingType graphics upgrade threshold", threshold_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->set_upgrade_rule(threshold, comparison);
+    g_parse_state.saw_legacy_graphics_nodes = 1;
+    return 1;
+}
+
+static int parse_graphics_condition()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics || !g_parse_state.has_current_graphics_variant) {
+        log_error("Encountered graphics condition outside graphics variant", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("type")) {
+        log_error("BuildingType graphics condition is missing required attribute 'type'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    const char *type_text = xml_parser_get_attribute_string("type");
+    GraphicsCondition condition;
+    if (type_text && strcmp(type_text, "working") == 0) {
+        condition.type = GraphicsConditionType::Working;
+    } else if (type_text && strcmp(type_text, "desirability") == 0) {
+        if (!xml_parser_has_attribute("operator")) {
+            log_error("BuildingType graphics desirability condition is missing required attribute 'operator'", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+        if (!xml_parser_has_attribute("threshold")) {
+            log_error("BuildingType graphics desirability condition is missing required attribute 'threshold'", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        const char *comparison_text = xml_parser_get_attribute_string("operator");
+        if (!parse_graphics_comparison(comparison_text, &condition.comparison)) {
+            log_error("Unsupported BuildingType graphics condition operator", comparison_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        int threshold = 0;
+        const char *threshold_text = xml_parser_get_attribute_string("threshold");
+        if (!threshold_text || !parse_int_strict(threshold_text, &threshold)) {
+            log_error("Unsupported BuildingType graphics condition threshold", threshold_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        condition.type = GraphicsConditionType::Desirability;
+        condition.threshold = threshold;
+    } else {
+        log_error("Unsupported BuildingType graphics condition type", type_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->add_graphics_condition(condition);
     return 1;
 }
 
@@ -779,9 +1005,12 @@ static int parse_spawn()
 static const xml_parser_element XML_ELEMENTS[] = {
     { "building", parse_building_root, nullptr, nullptr, nullptr },
     { "graphics", parse_graphics, finish_graphics, "building", nullptr },
-    { "path", parse_graphics_path, nullptr, "graphics", nullptr },
-    { "image", parse_graphics_image, nullptr, "graphics", nullptr },
+    { "default", parse_graphics_default, finish_graphics_default, "graphics", nullptr },
+    { "variant", parse_graphics_variant, finish_graphics_variant, "graphics", nullptr },
+    { "path", parse_graphics_path, nullptr, "graphics|default|variant", nullptr },
+    { "image", parse_graphics_image, nullptr, "graphics|default|variant", nullptr },
     { "upgrade", parse_graphics_upgrade, nullptr, "graphics", nullptr },
+    { "condition", parse_graphics_condition, nullptr, "variant", nullptr },
     { "water_access", parse_graphics_water_access, nullptr, "graphics", nullptr },
     { "labor", parse_labor, nullptr, "building", nullptr },
     { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },

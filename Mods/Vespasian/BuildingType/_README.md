@@ -14,10 +14,16 @@ Current supported nodes:
 
 Current supported `<graphics>` child nodes:
 
-- `<path value="Health_Culture\Theatre" />`
-- `<image value="Image_0000" />`
-- `<upgrade threshold="N" operator="gt|gte" />`
 - `<water_access mode="reservoir_range" />`
+- Legacy flat mode:
+  - `<path value="Health_Culture\Theatre" />`
+  - `<image value="Image_0000" />`
+  - `<upgrade threshold="N" operator="gt|gte" />`
+- Structured mode:
+  - `<default> ... </default>`
+  - `<variant> ... </variant>`
+  - `<condition type="working" />`
+  - `<condition type="desirability" operator="gt|gte" threshold="N" />`
 
 `<path value="...">` rules:
 
@@ -26,6 +32,21 @@ Current supported `<graphics>` child nodes:
 - do not include the `Graphics\` prefix
 - do not include the `.xml` suffix
 - example: `Mods\Augustus\Graphics\Health_Culture\Theatre.xml` becomes `Health_Culture\Theatre`
+
+Structured `<graphics>` rules:
+
+- `<default>` is required when using structured mode
+- `<variant>` entries are checked in XML order
+- all `<condition>` nodes inside one `<variant>` must match
+- the first matching variant wins
+- the `<default>` target is used when no variant matches
+- do not mix legacy root `<path>/<image>/<upgrade>` nodes with structured `<default>/<variant>` nodes
+- `<image value="..."/>` is optional inside `<default>` or `<variant>` when a graphics group needs a specific named image
+
+Current supported graphics conditions:
+
+- `type="working"` means `num_workers > 0 && has_water_access`
+- `type="desirability" operator="gt|gte" threshold="N"` compares the building desirability against `N`
 
 Current supported `<labor>` attributes:
 
@@ -74,6 +95,7 @@ Current engine behavior:
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
 - Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them, such as grouped statue assets.
+- Use structured `<graphics>` when one building can swap between several whole graphics groups based on runtime state, like the bathhouse.
 - Buildings with a runtime `BuildingType` and a non-empty graphics path now try the new image-group payload path during live city rendering and fall back to legacy rendering when content is missing or unsupported in this phase.
 - The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
 

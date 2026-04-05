@@ -213,6 +213,7 @@
     <ClCompile Include="src\building\barracks.c" />
     <ClCompile Include="src\building\building.c" />
     <ClCompile Include="src\building\building_runtime.cpp" />
+    <ClCompile Include="src\building\building_type.cpp" />
     <ClCompile Include="src\building\building_type_registry.cpp" />
     <ClCompile Include="src\building\building_type_registry_xml.cpp" />
     <ClCompile Include="src\building\caravanserai.c" />
@@ -692,6 +693,8 @@
     <ClInclude Include="src\building\building_runtime.h" />
     <ClInclude Include="src\building\building_runtime_api.h" />
     <ClInclude Include="src\building\building_runtime_internal.h" />
+    <ClInclude Include="src\building\building_type.h" />
+    <ClInclude Include="src\building\building_type_api.h" />
     <ClInclude Include="src\building\building_type_registry.h" />
     <ClInclude Include="src\building\building_type_registry_internal.h" />
     <ClInclude Include="src\building\caravanserai.h" />

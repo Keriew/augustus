@@ -2,10 +2,19 @@
 <building type="replace_with_building_attr">
     <!-- Optional graphics definition -->
     <graphics>
-        <path value="Health_Culture\Theatre" />
-        <image value="Image_0000" />
-        <upgrade threshold="50" operator="gt" />
         <water_access mode="reservoir_range" />
+        <default>
+            <path value="Health_Culture\Example_Base" />
+        </default>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="50" />
+            <condition type="working" />
+            <path value="Health_Culture\Example_Fancy_Working" />
+        </variant>
+        <variant>
+            <condition type="working" />
+            <path value="Health_Culture\Example_Working" />
+        </variant>
     </graphics>
 
     <!-- Optional labor phase -->

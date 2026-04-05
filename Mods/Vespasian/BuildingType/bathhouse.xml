@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="bathhouse">
     <graphics>
-        <path value="Health_Culture\Bathhouse" />
-        <upgrade threshold="30" operator="gt" />
         <water_access mode="reservoir_range" />
+        <default>
+            <path value="Health_Culture\Bathhouse_No_Water" />
+        </default>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="30" />
+            <condition type="working" />
+            <path value="Health_Culture\Bathhouse_Fancy_Water" />
+        </variant>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="30" />
+            <path value="Health_Culture\Bathhouse_Fancy_No_Water" />
+        </variant>
+        <variant>
+            <condition type="working" />
+            <path value="Health_Culture\Bathhouse_Water" />
+        </variant>
     </graphics>
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="bathhouse_worker">

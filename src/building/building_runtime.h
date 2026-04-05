@@ -1,4 +1,10 @@
-#include "building/building_type_registry_internal.h"
+#ifndef BUILDING_BUILDING_RUNTIME_H
+#define BUILDING_BUILDING_RUNTIME_H
+
+#include "building/building_type.h"
+
+#include <cstddef>
+#include <vector>
 
 extern "C" {
 #include "core/image.h"
@@ -34,15 +40,16 @@ public:
 private:
     void refresh_graphic_state();
     int uses_new_graphics() const;
-    const char *resolve_named_group_image_id(const char *image_id) const;
-    const char *resolve_candidate_graphic_image_id(const char *const *image_ids, size_t image_id_count) const;
-    const char *resolve_default_group_image_id() const;
-    const char *resolve_type_specific_graphic_image_id() const;
-    const char *resolve_graphic_image_id() const;
-    const image *resolve_named_group_image(const char *image_id) const;
-    const image *resolve_candidate_graphic_image(const char *const *image_ids, size_t image_id_count) const;
-    const image *resolve_default_group_image() const;
-    const image *resolve_type_specific_graphic_image() const;
+    const building_type_registry_impl::GraphicsTarget *resolve_graphic_target() const;
+    const char *resolve_named_group_image_id(const char *group_key, const char *image_id) const;
+    const char *resolve_candidate_graphic_image_id(const char *group_key, const char *const *image_ids, size_t image_id_count) const;
+    const char *resolve_default_group_image_id(const char *group_key) const;
+    const char *resolve_type_specific_graphic_image_id(const char *group_key) const;
+    const char *resolve_graphic_image_id(const building_type_registry_impl::GraphicsTarget *target) const;
+    const image *resolve_named_group_image(const char *group_key, const char *image_id) const;
+    const image *resolve_candidate_graphic_image(const char *group_key, const char *const *image_ids, size_t image_id_count) const;
+    const image *resolve_default_group_image(const char *group_key) const;
+    const image *resolve_type_specific_graphic_image(const char *group_key) const;
     int worker_percentage() const;
     void check_labor_problem();
     void generate_labor_seeker(int x, int y);
@@ -67,3 +74,5 @@ private:
     const building_type_registry_impl::BuildingType *definition_;
     std::vector<unsigned char> spawn_delay_counters_;
 };
+
+#endif // BUILDING_BUILDING_RUNTIME_H
