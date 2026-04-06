@@ -24,7 +24,7 @@ extern "C" {
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/menu.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"

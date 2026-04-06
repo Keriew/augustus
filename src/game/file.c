@@ -225,7 +225,8 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     game_state_unpause();
 
     weather_reset();
-    building_runtime_reset();
+    // After new city/scenario init, every live building instance is rebound to its runtime wrapper and gets cached image-group bindings.
+    building_runtime_initialize_city_graphics_cache();
 }
 
 static void load_empire_data(int is_custom_scenario, int empire_id)
@@ -331,7 +332,8 @@ static void initialize_saved_game(void)
     game_state_unpause();
 
     weather_reset();
-    building_runtime_reset();
+    // This is where restored saved buildings become renderer-ready again after the world has finished loading.
+    building_runtime_initialize_city_graphics_cache();
 }
 
 static int start_scenario(const uint8_t *scenario_name, const char *scenario_file)

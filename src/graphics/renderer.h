@@ -1,5 +1,4 @@
-#ifndef GRAPHICS_RENDERER_H
-#define GRAPHICS_RENDERER_H
+#pragma once
 
 #include "core/image.h"
 
@@ -53,6 +52,7 @@ typedef enum {
 
 typedef struct {
     const image *img;
+    image_handle handle;
     float x;
     float y;
     float logical_width;
@@ -64,6 +64,24 @@ typedef struct {
     int disable_coord_scaling;
     int use_silhouette;
 } render_2d_request;
+
+typedef struct {
+    image_handle handle;
+    int width;
+    int height;
+    int x_offset;
+    int y_offset;
+    int is_isometric;
+    float x;
+    float y;
+    float logical_width;
+    float logical_height;
+    color_t color;
+    render_domain domain;
+    render_scaling_policy scaling_policy;
+    double angle;
+    int disable_coord_scaling;
+} managed_image_request;
 
 typedef struct {
     atlas_type type;
@@ -88,9 +106,12 @@ typedef struct {
     void (*set_output_scale)(float scale);
     void (*set_render_domain)(render_domain domain);
     render_domain (*get_render_domain)(void);
+    void (*push_state)(void);
+    void (*pop_state)(void);
 
     void (*draw_image)(const image *img, int x, int y, color_t color, float scale);
     void (*draw_image_request)(const render_2d_request *request);
+    void (*draw_managed_image_request)(const managed_image_request *request);
     void (*draw_image_advanced)(const image *img, float x, float y, color_t color,
         float scale_x, float scale_y, double angle, int disable_coord_scaling);
     void (*draw_silhouette)(const image *img, int x, int y, color_t color, float scale);
@@ -131,6 +152,8 @@ typedef struct {
 
     void (*load_unpacked_image)(const image *img, const color_t *pixels);
     void (*free_unpacked_image)(const image *img);
+    void (*upload_image_resource)(image *img, const color_t *pixels, int width, int height);
+    void (*release_image_resource)(image *img);
 
     int (*should_pack_image)(int width, int height);
 
@@ -145,4 +168,3 @@ void graphics_renderer_set_interface(const graphics_renderer_interface *new_rend
 }
 #endif
 
-#endif // GRAPHICS_RENDERER_H

@@ -1,4 +1,5 @@
 #include "building/building_type_registry_internal.h"
+#include "assets/image_group_payload.h"
 
 extern "C" {
 #include "building/building_runtime_api.h"
@@ -8,11 +9,13 @@ extern "C" {
 #include "core/log.h"
 #include "core/xml_parser.h"
 #include "figure/action.h"
+#include "game/resource.h"
 }
 
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <utility>
 
 namespace building_type_registry_impl {
 
@@ -286,6 +289,142 @@ static int parse_spawn_direction(const char *value)
     return DIR_0_TOP;
 }
 
+static int equals_ignore_case_ascii(char left, char right)
+{
+    if (left >= 'A' && left <= 'Z') {
+        left = static_cast<char>(left - 'A' + 'a');
+    }
+    if (right >= 'A' && right <= 'Z') {
+        right = static_cast<char>(right - 'A' + 'a');
+    }
+    return left == right;
+}
+
+static int starts_with_ignore_case_ascii(const std::string &value, const char *prefix)
+{
+    if (!prefix) {
+        return 0;
+    }
+
+    size_t prefix_length = strlen(prefix);
+    if (value.size() < prefix_length) {
+        return 0;
+    }
+
+    for (size_t i = 0; i < prefix_length; i++) {
+        if (!equals_ignore_case_ascii(value[i], prefix[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int ends_with_ignore_case_ascii(const std::string &value, const char *suffix)
+{
+    if (!suffix) {
+        return 0;
+    }
+
+    size_t suffix_length = strlen(suffix);
+    if (value.size() < suffix_length) {
+        return 0;
+    }
+
+    size_t start = value.size() - suffix_length;
+    for (size_t i = 0; i < suffix_length; i++) {
+        if (!equals_ignore_case_ascii(value[start + i], suffix[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static std::string normalize_graphics_path(const char *value)
+{
+    std::string normalized = trim_copy(value ? value : "");
+    if (normalized.empty()) {
+        return std::string();
+    }
+
+    for (char &ch : normalized) {
+        if (ch == '/') {
+            ch = '\\';
+        }
+    }
+
+    std::string collapsed;
+    collapsed.reserve(normalized.size());
+    char previous = '\0';
+    for (char ch : normalized) {
+        if (ch == '\\' && previous == '\\') {
+            continue;
+        }
+        collapsed.push_back(ch);
+        previous = ch;
+    }
+    normalized = collapsed;
+
+    if (starts_with_ignore_case_ascii(normalized, "graphics\\") ||
+        starts_with_ignore_case_ascii(normalized, "\\") ||
+        ends_with_ignore_case_ascii(normalized, ".xml") ||
+        normalized.back() == '\\') {
+        return std::string();
+    }
+
+    return normalized;
+}
+
+static int parse_graphics_comparison(const char *comparison_text, GraphicComparison *out_comparison)
+{
+    if (!out_comparison) {
+        return 0;
+    }
+    if (comparison_text && strcmp(comparison_text, "lt") == 0) {
+        *out_comparison = GraphicComparison::LessThan;
+        return 1;
+    }
+    if (comparison_text && (strcmp(comparison_text, "lte") == 0 || strcmp(comparison_text, "let") == 0)) {
+        *out_comparison = GraphicComparison::LessThanOrEqual;
+        return 1;
+    }
+    if (comparison_text && strcmp(comparison_text, "eq") == 0) {
+        *out_comparison = GraphicComparison::Equal;
+        return 1;
+    }
+    if (comparison_text && strcmp(comparison_text, "gt") == 0) {
+        *out_comparison = GraphicComparison::GreaterThan;
+        return 1;
+    }
+    if (comparison_text && strcmp(comparison_text, "gte") == 0) {
+        *out_comparison = GraphicComparison::GreaterThanOrEqual;
+        return 1;
+    }
+    return 0;
+}
+
+static int parse_state()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered state definition before building root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_state) {
+        log_error("BuildingType xml contains duplicate state nodes", g_parse_state.definition->attr(), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.saw_state = 1;
+    g_parse_state.parsing_state = 1;
+    return 1;
+}
+
+static void finish_state()
+{
+    g_parse_state.parsing_state = 0;
+}
+
 static int parse_building_root()
 {
     if (!xml_parser_has_attribute("type")) {
@@ -306,51 +445,314 @@ static int parse_building_root()
     return 1;
 }
 
-static int parse_graphic()
+static int parse_graphics()
 {
     if (!g_parse_state.definition) {
-        log_error("Encountered graphic definition before building root", 0, 0);
+        log_error("Encountered graphics definition before building root", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
-
-    if (!xml_parser_has_attribute("threshold")) {
-        log_error("BuildingType graphic is missing required attribute 'threshold'", 0, 0);
+    if (g_parse_state.saw_graphic) {
+        log_error("BuildingType xml contains duplicate graphics nodes", g_parse_state.definition->attr(), 0);
         g_parse_state.error = 1;
         return 0;
-    }
-    if (!xml_parser_has_attribute("operator")) {
-        log_error("BuildingType graphic is missing required attribute 'operator'", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-
-    const char *comparison_text = xml_parser_get_attribute_string("operator");
-    GraphicComparison comparison = GraphicComparison::None;
-    if (comparison_text && strcmp(comparison_text, "gt") == 0) {
-        comparison = GraphicComparison::GreaterThan;
-    } else if (comparison_text && strcmp(comparison_text, "gte") == 0) {
-        comparison = GraphicComparison::GreaterThanOrEqual;
-    } else {
-        log_error("Unsupported BuildingType graphic operator", comparison_text, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-
-    g_parse_state.definition->set_threshold(xml_parser_get_attribute_int("threshold"), comparison);
-
-    if (xml_parser_has_attribute("water_access")) {
-        const char *water_access = xml_parser_get_attribute_string("water_access");
-        if (water_access && strcmp(water_access, "reservoir_range") == 0) {
-            g_parse_state.definition->set_water_access_mode(WaterAccessMode::ReservoirRange);
-        } else {
-            log_error("Unsupported BuildingType graphic water_access", water_access, 0);
-            g_parse_state.error = 1;
-            return 0;
-        }
     }
 
     g_parse_state.saw_graphic = 1;
+    g_parse_state.parsing_graphics = 1;
+    g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.current_graphics_variant_index = 0;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
+    return 1;
+}
+
+static void finish_graphics()
+{
+    if (!g_parse_state.parsing_graphics) {
+        return;
+    }
+
+    if (!g_parse_state.definition->graphics().has_default_node()) {
+        log_error("BuildingType graphics is missing required child node 'default'", 0, 0);
+        g_parse_state.error = 1;
+    } else if (!g_parse_state.definition->graphics().default_target().has_path()) {
+        log_error("BuildingType graphics is missing required child node 'path'", 0, 0);
+        g_parse_state.error = 1;
+    }
+
+    g_parse_state.parsing_graphics = 0;
+    g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.current_graphics_variant_index = 0;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
+}
+
+static int parse_graphics_default()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics default outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.definition->graphics().has_default_node()) {
+        log_error("BuildingType graphics contains duplicate default nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->mark_graphics_default_node();
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Default;
+    return 1;
+}
+
+static void finish_graphics_default()
+{
+    if (!g_parse_state.parsing_graphics) {
+        return;
+    }
+    if (!g_parse_state.definition->graphics().default_target().has_path()) {
+        log_error("BuildingType graphics default is missing required child node 'path'", 0, 0);
+        g_parse_state.error = 1;
+    }
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
+}
+
+static int parse_graphics_variant()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics variant outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    g_parse_state.definition->add_graphics_variant();
+    g_parse_state.has_current_graphics_variant = 1;
+    g_parse_state.current_graphics_variant_index = g_parse_state.definition->graphics().variants().size() - 1;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Variant;
+    return 1;
+}
+
+static void finish_graphics_variant()
+{
+    if (!g_parse_state.parsing_graphics) {
+        return;
+    }
+
+    GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
+    if (!variant || !variant->target.has_path()) {
+        log_error("BuildingType graphics variant is missing required child node 'path'", 0, 0);
+        g_parse_state.error = 1;
+    }
+
+    g_parse_state.has_current_graphics_variant = 0;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
+}
+
+static int parse_graphics_path()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics path outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("value")) {
+        log_error("BuildingType graphics path is missing required attribute 'value'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    std::string normalized_path = normalize_graphics_path(xml_parser_get_attribute_string("value"));
+    if (normalized_path.empty()) {
+        log_error("Unsupported BuildingType graphics path", xml_parser_get_attribute_string("value"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    switch (g_parse_state.current_graphics_target_scope) {
+        case GraphicsParseTargetScope::Default:
+            g_parse_state.definition->default_graphics_target().set_path(std::move(normalized_path));
+            break;
+        case GraphicsParseTargetScope::Variant:
+        {
+            GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
+            if (!variant) {
+                log_error("Encountered graphics path without an active variant", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            variant->target.set_path(std::move(normalized_path));
+            break;
+        }
+        case GraphicsParseTargetScope::None:
+        default:
+            log_error("BuildingType graphics path must appear inside default or variant", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+    }
+    return 1;
+}
+
+static int parse_graphics_image()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
+        log_error("Encountered graphics image outside graphics node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("value")) {
+        log_error("BuildingType graphics image is missing required attribute 'value'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    std::string image_id = trim_copy(xml_parser_get_attribute_string("value"));
+    if (image_id.empty()) {
+        log_error("Unsupported BuildingType graphics image", xml_parser_get_attribute_string("value"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    switch (g_parse_state.current_graphics_target_scope) {
+        case GraphicsParseTargetScope::Default:
+            g_parse_state.definition->default_graphics_target().set_image(std::move(image_id));
+            break;
+        case GraphicsParseTargetScope::Variant:
+        {
+            GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
+            if (!variant) {
+                log_error("Encountered graphics image without an active variant", 0, 0);
+                g_parse_state.error = 1;
+                return 0;
+            }
+            variant->target.set_image(std::move(image_id));
+            break;
+        }
+        case GraphicsParseTargetScope::None:
+        default:
+            log_error("BuildingType graphics image must appear inside default or variant", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+    }
+    return 1;
+}
+
+static resource_type parse_resource_type_name(const char *name)
+{
+    if (!name || !*name) {
+        return RESOURCE_NONE;
+    }
+
+    const std::string normalized_name = trim_copy(name);
+    if (normalized_name.empty()) {
+        return RESOURCE_NONE;
+    }
+
+    for (resource_type type = RESOURCE_MIN; type < RESOURCE_MAX; type = static_cast<resource_type>(type + 1)) {
+        resource_data *data = resource_get_data(type);
+        if (!data || !data->xml_attr_name) {
+            continue;
+        }
+        if (xml_parser_compare_multiple(data->xml_attr_name, normalized_name.c_str())) {
+            return type;
+        }
+    }
+    return RESOURCE_NONE;
+}
+
+static int parse_graphics_condition()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics || !g_parse_state.has_current_graphics_variant) {
+        log_error("Encountered graphics condition outside graphics variant", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("type")) {
+        log_error("BuildingType graphics condition is missing required attribute 'type'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    const char *type_text = xml_parser_get_attribute_string("type");
+    GraphicsCondition condition;
+    if (type_text && strcmp(type_text, "has_workers") == 0) {
+        condition.type = GraphicsConditionType::HasWorkers;
+    } else if (type_text && strcmp(type_text, "working") == 0) {
+        condition.type = GraphicsConditionType::Working;
+    } else if (type_text && strcmp(type_text, "water_access") == 0) {
+        condition.type = GraphicsConditionType::WaterAccess;
+    } else if (type_text && strcmp(type_text, "resource_positive") == 0) {
+        if (!xml_parser_has_attribute("resource")) {
+            log_error("BuildingType graphics resource_positive condition is missing required attribute 'resource'", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        const char *resource_text = xml_parser_get_attribute_string("resource");
+        condition.resource = parse_resource_type_name(resource_text);
+        if (condition.resource == RESOURCE_NONE) {
+            log_error("Unsupported BuildingType graphics resource_positive resource", resource_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+        condition.type = GraphicsConditionType::ResourcePositive;
+    } else if (type_text && strcmp(type_text, "desirability") == 0) {
+        if (!xml_parser_has_attribute("operator")) {
+            log_error("BuildingType graphics desirability condition is missing required attribute 'operator'", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+        if (!xml_parser_has_attribute("threshold")) {
+            log_error("BuildingType graphics desirability condition is missing required attribute 'threshold'", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        const char *comparison_text = xml_parser_get_attribute_string("operator");
+        if (!parse_graphics_comparison(comparison_text, &condition.comparison)) {
+            log_error("Unsupported BuildingType graphics condition operator", comparison_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        int threshold = 0;
+        const char *threshold_text = xml_parser_get_attribute_string("threshold");
+        if (!threshold_text || !parse_int_strict(threshold_text, &threshold)) {
+            log_error("Unsupported BuildingType graphics condition threshold", threshold_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        condition.type = GraphicsConditionType::Desirability;
+        condition.threshold = threshold;
+    } else {
+        log_error("Unsupported BuildingType graphics condition type", type_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->add_graphics_variant_condition(condition);
+    return 1;
+}
+
+static int parse_water_access()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_state) {
+        log_error("Encountered water_access outside state node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("mode")) {
+        log_error("BuildingType state water_access is missing required attribute 'mode'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    const char *mode_text = xml_parser_get_attribute_string("mode");
+    if (!mode_text || strcmp(mode_text, "reservoir_range") != 0) {
+        log_error("Unsupported BuildingType water_access mode", mode_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->set_state_water_access_mode(WaterAccessMode::ReservoirRange);
     return 1;
 }
 
@@ -590,7 +992,14 @@ static int parse_spawn()
 
 static const xml_parser_element XML_ELEMENTS[] = {
     { "building", parse_building_root, nullptr, nullptr, nullptr },
-    { "graphic", parse_graphic, nullptr, "building", nullptr },
+    { "state", parse_state, finish_state, "building", nullptr },
+    { "graphics", parse_graphics, finish_graphics, "building", nullptr },
+    { "default", parse_graphics_default, finish_graphics_default, "graphics", nullptr },
+    { "variant", parse_graphics_variant, finish_graphics_variant, "graphics", nullptr },
+    { "path", parse_graphics_path, nullptr, "default|variant", nullptr },
+    { "image", parse_graphics_image, nullptr, "default|variant", nullptr },
+    { "condition", parse_graphics_condition, nullptr, "variant", nullptr },
+    { "water_access", parse_water_access, nullptr, "state", nullptr },
     { "labor", parse_labor, nullptr, "building", nullptr },
     { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },
     { "spawn", parse_spawn, nullptr, "spawn_group", nullptr }
@@ -628,6 +1037,100 @@ static int load_file_to_buffer(const char *filename, std::vector<char> &buffer)
     return 1;
 }
 
+// Input: one authored graphics target from a BuildingType plus a short scope label for logging.
+// Output: true when the referenced runtime group/image namespace exists up front, false when the BuildingType should lose native graphics.
+static int validate_graphics_target_entry(
+    const BuildingType &definition,
+    const GraphicsTarget &target,
+    const char *target_scope)
+{
+    if (!target.has_path()) {
+        return 1;
+    }
+    if (!image_group_payload_load(target.path())) {
+        char detail[512];
+        snprintf(
+            detail,
+            sizeof(detail),
+            "building=%s scope=%s path=%s",
+            definition.attr(),
+            target_scope ? target_scope : "graphics",
+            target.path());
+        log_error("Disabling invalid runtime graphics because the group could not be loaded", detail, 0);
+        return 0;
+    }
+
+    const ImageGroupPayload *payload = image_group_payload_get(target.path());
+    if (!payload) {
+        char detail[512];
+        snprintf(
+            detail,
+            sizeof(detail),
+            "building=%s scope=%s path=%s",
+            definition.attr(),
+            target_scope ? target_scope : "graphics",
+            target.path());
+        log_error("Disabling invalid runtime graphics because the payload could not be found", detail, 0);
+        return 0;
+    }
+
+    const ImageGroupEntry *entry = target.has_image() ? payload->entry_for(target.image()) : payload->default_entry();
+    if (!entry) {
+        char detail[768];
+        if (target.has_image()) {
+            snprintf(
+                detail,
+                sizeof(detail),
+                "building=%s scope=%s path=%s image=%s",
+                definition.attr(),
+                target_scope ? target_scope : "graphics",
+                target.path(),
+                target.image());
+            log_error("Disabling invalid runtime graphics because the referenced image id could not be resolved", detail, 0);
+        } else {
+            snprintf(
+                detail,
+                sizeof(detail),
+                "building=%s scope=%s path=%s",
+                definition.attr(),
+                target_scope ? target_scope : "graphics",
+                target.path());
+            log_error("Disabling invalid runtime graphics because the group has no default entry", detail, 0);
+        }
+        return 0;
+    }
+
+    return 1;
+}
+
+// Input: one parsed BuildingType definition that may contain native runtime graphics targets.
+// Output: no return value; invalid graphics are cleared immediately so runtime rendering never sees unresolved assets.
+static void validate_runtime_graphics_or_clear(BuildingType &definition)
+{
+    if (!definition.has_graphic()) {
+        return;
+    }
+
+    int valid = 1;
+    valid = validate_graphics_target_entry(definition, definition.graphics().default_target(), "default");
+
+    if (valid) {
+        const std::vector<GraphicsVariant> &variants = definition.graphics().variants();
+        for (size_t i = 0; i < variants.size(); i++) {
+            char scope[64];
+            snprintf(scope, sizeof(scope), "variant[%u]", static_cast<unsigned int>(i));
+            if (!validate_graphics_target_entry(definition, variants[i].target, scope)) {
+                valid = 0;
+                break;
+            }
+        }
+    }
+
+    if (!valid) {
+        definition.clear_graphics();
+    }
+}
+
 static int parse_definition_file(const char *filename)
 {
     std::vector<char> buffer;
@@ -650,6 +1153,7 @@ static int parse_definition_file(const char *filename)
         return 0;
     }
 
+    validate_runtime_graphics_or_clear(*g_parse_state.definition);
     g_building_types[g_parse_state.definition->type()] = std::move(g_parse_state.definition);
     return 1;
 }

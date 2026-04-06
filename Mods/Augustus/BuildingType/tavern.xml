@@ -1,4 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="tavern">
-    <graphic threshold="45" operator="gt" />
+    <graphics>
+        <default>
+            <path value="Health_Culture\Tavern_OFF" />
+            <image value="Tavern OFF" />
+        </default>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="45" />
+            <condition type="has_workers" />
+            <condition type="resource_positive" resource="wine" />
+            <path value="Health_Culture\Tavern_OFF" />
+            <image value="Tavern Upgrade ON" />
+        </variant>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="45" />
+            <path value="Health_Culture\Tavern_OFF" />
+            <image value="Tavern Upgrade OFF" />
+        </variant>
+        <variant>
+            <condition type="has_workers" />
+            <condition type="resource_positive" resource="wine" />
+            <path value="Health_Culture\Tavern_OFF" />
+            <image value="Tavern ON" />
+        </variant>
+    </graphics>
 </building>

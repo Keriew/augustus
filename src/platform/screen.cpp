@@ -1,4 +1,3 @@
-extern "C" {
 #include "platform/screen.h"
 
 #include "city/view.h"
@@ -15,7 +14,6 @@ extern "C" {
 #include "platform/renderer.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
-}
 
 #include "SDL.h"
 

@@ -1,7 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="replace_with_building_attr">
-    <!-- Optional graphic rule -->
-    <graphic threshold="50" operator="gt" />
+    <!-- Optional runtime state definition -->
+    <state>
+        <water_access mode="reservoir_range" />
+    </state>
+
+    <!-- Optional graphics definition -->
+    <graphics>
+        <default>
+            <path value="Health_Culture\Example_Base" />
+        </default>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="50" />
+            <condition type="has_workers" />
+            <condition type="water_access" />
+            <path value="Health_Culture\Example_Fancy_Working" />
+        </variant>
+        <variant>
+            <condition type="has_workers" />
+            <condition type="water_access" />
+            <path value="Health_Culture\Example_Working" />
+        </variant>
+        <variant>
+            <condition type="resource_positive" resource="wine" />
+            <path value="Health_Culture\Example_Supplied" />
+        </variant>
+    </graphics>
 
     <!-- Optional labor phase -->
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />

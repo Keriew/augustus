@@ -3,6 +3,8 @@
 
 #include "building/building_runtime.h"
 
+#include <memory>
+
 namespace building_runtime_impl {
 
 extern std::vector<std::unique_ptr<building_runtime>> g_runtime_instances;

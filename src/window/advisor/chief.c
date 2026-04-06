@@ -14,7 +14,7 @@
 #include "core/calc.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/text.h"
 #include "scenario/invasion.h"
 #include "scenario/property.h"

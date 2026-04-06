@@ -11,14 +11,13 @@
 #include "game/settings.h"
 #include "game/system.h"
 #include "game/speed.h"
-#include "graphics/button.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/color.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
 #include "graphics/list_box.h"
 #include "graphics/image.h"
-#include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/scrollbar.h"
 #include "graphics/text.h"
@@ -1384,7 +1383,7 @@ static void draw_list_box_item(const list_box_item *item)
         graphics_draw_inset_rect(item->x + 2, item->y + item->height - 5, item->width - 6, 1, COLOR_INSET_DARK, COLOR_INSET_LIGHT);
     }
     if (item->is_focused) {
-        button_border_draw(item->x, item->y - 2, item->width, item->height, 1);
+        ui_runtime_draw_one_row_button_border(item->x, item->y - 2, item->width, item->height, 1, COLOR_MASK_NONE);
     }
 
     font_t f = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
@@ -1462,7 +1461,7 @@ static void op_draw_bg_checkbox(const config_widget *w, int x, int y, int avail_
     int text_h = text_draw_multiline(txt, x + 30, y + 3, avail_text_w, 0, FONT_NORMAL_BLACK, 0);
     int text_center_y = y + (text_h / 2);
     int box_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
-    button_border_draw(x, box_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 0);
+    ui_runtime_draw_one_row_button_border(x, box_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 0, COLOR_MASK_NONE);
     if (data.config_values[w->subtype].new_value) {
         text_draw(string_from_ascii("x"), x + 6, box_y + 3, FONT_NORMAL_BLACK, 0);
     }
@@ -1476,7 +1475,7 @@ static void op_draw_fg_checkbox(const config_widget *w, int x, int y, int avail_
     int text_h = checkbox_text_height(txt, avail_text_w);
     int text_center_y = y + (text_h / 2);
     int box_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
-    button_border_draw(x, box_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 1);
+    ui_runtime_draw_one_row_button_border(x, box_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 1, COLOR_MASK_NONE);
 }
 static int op_input_checkbox(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
@@ -1511,7 +1510,13 @@ static void op_draw_bg_select(const config_widget *w, int x, int y, int avail_te
 static void op_draw_fg_select(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {
     const generic_button *btn = &select_buttons[w->subtype];
-    button_border_draw(btn->x, y + btn->y + w->y_offset, btn->width, btn->height, focused);
+    ui_runtime_draw_one_row_button_border(
+        btn->x,
+        y + btn->y + w->y_offset,
+        btn->width,
+        btn->height,
+        focused,
+        COLOR_MASK_NONE);
 }
 static int op_input_select(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
@@ -1549,10 +1554,13 @@ static int  op_input_desc(const config_widget *w, int x, int y, int avail_text_w
 static void numerical_range_draw(const numerical_range_widget *r, int x, int y, const uint8_t *value_text, int extra_w)
 {
     text_draw(value_text, x, y + 6, FONT_NORMAL_BLACK, 0);
-    inner_panel_draw(x + r->x, y + 4, r->width_blocks + extra_w / 16, 1);
-    int width = r->width_blocks * BLOCK_SIZE + extra_w - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE;
-    int pos = (r->min != r->max) ? ((*r->value - r->min) * width / (r->max - r->min)) : width / 2;
-    image_draw(image_group(GROUP_PANEL_BUTTON) + 37, x + r->x + NUMERICAL_SLIDER_PADDING + pos, y + 2, COLOR_MASK_NONE, SCALE_NONE);
+    ui_runtime_draw_slider(
+        x + r->x,
+        y + 4,
+        r->width_blocks * BLOCK_SIZE + extra_w,
+        r->min,
+        r->max,
+        *r->value);
 }
 static int is_over_slider(const numerical_range_widget *r, const mouse *m, int x, int y, int extra_w)
 {
@@ -1865,7 +1873,12 @@ static void draw_background(void)
         }
         page_buttons[i].x = page_x_offset - 10;
         page_buttons[i].width = w + 15;
-        data.graphics_behind_tab[i] = graphics_save_to_image(data.graphics_behind_tab[i], page_buttons[i].x, 75, page_buttons[i].width, 3);
+        data.graphics_behind_tab[i] = graphics_save_to_image(
+            data.graphics_behind_tab[i],
+            page_buttons[i].x,
+            75,
+            page_buttons[i].width,
+            3);
         page_x_offset += w;
     }
 
@@ -1902,8 +1915,13 @@ static void draw_foreground(void)
 
     //  tab tops & borders
     for (unsigned int i = 0; i < CONFIG_PAGES; ++i) {
-        button_border_draw(page_buttons[i].x, page_buttons[i].y, page_buttons[i].width, page_buttons[i].height,
-                           data.page_focus_button == i + 1);
+        ui_runtime_draw_one_row_button_border(
+            page_buttons[i].x,
+            page_buttons[i].y,
+            page_buttons[i].width,
+            page_buttons[i].height,
+            data.page_focus_button == i + 1,
+            COLOR_MASK_NONE);
         if (data.page == i) {
             graphics_draw_from_image(data.graphics_behind_tab[i], page_buttons[i].x, 75);
         } else {
@@ -1924,8 +1942,13 @@ static void draw_foreground(void)
 
     //  bottom buttons borders
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
-        button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
-                           data.bottom_focus_button == i + 1);
+        ui_runtime_draw_one_row_button_border(
+            bottom_buttons[i].x,
+            bottom_buttons[i].y,
+            bottom_buttons[i].width,
+            bottom_buttons[i].height,
+            data.bottom_focus_button == i + 1,
+            COLOR_MASK_NONE);
     }
 
     //  scrollbar (if needed)

@@ -5,7 +5,7 @@
 #include "graphics/graphics.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/window.h"
 #include "input/input.h"
 #include "window/advisors.h"

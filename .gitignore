@@ -61,8 +61,16 @@ res/augustus.icns
 /codex_augustus_long_term_memory.md
 /codex_augustus_repo_map_memory.md
 /codex_augustus_handoff.md
+/_codex_renderer_resource_working_memory.md
+/_codex_building_graphics_runtime_working_memory.md
+/_codex_tile_graphics_runtime_working_memory.md
 /tree_clear_known_bug.md
 /tool_mode_state_known_bug.md
 /graphics_upscale_pipeline_notes.md
 /augustus.97d2cb33
 /x64
+/Win32
+/Mods/Augustus/Graphics/
+/Mods/Julius/Graphics/
+/Mods/Vespasian/Graphics/
+/extracted_graphics_sample

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="large_statue">
+    <graphics>
+        <default>
+            <path value="Aesthetics\Statue" />
+            <image value="Image_0002" />
+        </default>
+    </graphics>
+</building>

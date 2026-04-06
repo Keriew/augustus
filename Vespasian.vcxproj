@@ -1,0 +1,1150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\assets\augustus_asset_extractor.cpp" />
+    <ClCompile Include="src\assets\assets.cpp" />
+    <ClCompile Include="src\assets\group.c" />
+    <ClCompile Include="src\assets\image.c" />
+    <ClCompile Include="src\assets\image_group_entry.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_cache.cpp" />
+    <ClCompile Include="src\assets\image_group_payload.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_materialize.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_merge.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_parse.cpp" />
+    <ClCompile Include="src\assets\layer.cpp" />
+    <ClCompile Include="src\assets\xml.cpp" />
+    <ClCompile Include="src\building\animation.c" />
+    <ClCompile Include="src\building\armoury.c" />
+    <ClCompile Include="src\building\barracks.c" />
+    <ClCompile Include="src\building\building.c" />
+    <ClCompile Include="src\building\building_runtime.cpp" />
+    <ClCompile Include="src\building\building_type.cpp" />
+    <ClCompile Include="src\building\building_type_registry.cpp" />
+    <ClCompile Include="src\building\building_type_registry_xml.cpp" />
+    <ClCompile Include="src\building\caravanserai.c" />
+    <ClCompile Include="src\building\clone.c" />
+    <ClCompile Include="src\building\connectable.c" />
+    <ClCompile Include="src\building\construction.cpp" />
+    <ClCompile Include="src\building\construction_building.c" />
+    <ClCompile Include="src\building\construction_clear.cpp" />
+    <ClCompile Include="src\building\construction_routed.c" />
+    <ClCompile Include="src\building\construction_warning.c" />
+    <ClCompile Include="src\building\count.c" />
+    <ClCompile Include="src\building\data_transfer.c" />
+    <ClCompile Include="src\building\destruction.c" />
+    <ClCompile Include="src\building\distribution.c" />
+    <ClCompile Include="src\building\dock.c" />
+    <ClCompile Include="src\building\entertainment.c" />
+    <ClCompile Include="src\building\figure.cpp" />
+    <ClCompile Include="src\building\government.c" />
+    <ClCompile Include="src\building\granary.c" />
+    <ClCompile Include="src\building\house.c" />
+    <ClCompile Include="src\building\house_evolution.c" />
+    <ClCompile Include="src\building\house_population.c" />
+    <ClCompile Include="src\building\house_service.c" />
+    <ClCompile Include="src\building\image.c" />
+    <ClCompile Include="src\building\industry.c" />
+    <ClCompile Include="src\building\lighthouse.c" />
+    <ClCompile Include="src\building\list.c" />
+    <ClCompile Include="src\building\maintenance.c" />
+    <ClCompile Include="src\building\market.c" />
+    <ClCompile Include="src\building\menu.c" />
+    <ClCompile Include="src\building\mess_hall.c" />
+    <ClCompile Include="src\building\monument.c" />
+    <ClCompile Include="src\building\properties.c" />
+    <ClCompile Include="src\building\tool_mode.cpp" />
+    <ClCompile Include="src\building\roadblock.c" />
+    <ClCompile Include="src\building\rotation.c" />
+    <ClCompile Include="src\building\state.c" />
+    <ClCompile Include="src\building\storage.c" />
+    <ClCompile Include="src\building\tavern.c" />
+    <ClCompile Include="src\building\temple.c" />
+    <ClCompile Include="src\building\variant.c" />
+    <ClCompile Include="src\building\warehouse.c" />
+    <ClCompile Include="src\city\buildings.c" />
+    <ClCompile Include="src\city\culture.c" />
+    <ClCompile Include="src\city\data.c" />
+    <ClCompile Include="src\city\data_private.c" />
+    <ClCompile Include="src\city\emperor.c" />
+    <ClCompile Include="src\city\entertainment.c" />
+    <ClCompile Include="src\city\festival.c" />
+    <ClCompile Include="src\city\figures.c" />
+    <ClCompile Include="src\city\finance.c" />
+    <ClCompile Include="src\city\games.c" />
+    <ClCompile Include="src\city\gods.c" />
+    <ClCompile Include="src\city\health.c" />
+    <ClCompile Include="src\city\houses.c" />
+    <ClCompile Include="src\city\labor.c" />
+    <ClCompile Include="src\city\map.c" />
+    <ClCompile Include="src\city\message.c" />
+    <ClCompile Include="src\city\migration.c" />
+    <ClCompile Include="src\city\military.c" />
+    <ClCompile Include="src\city\mission.c" />
+    <ClCompile Include="src\city\population.c" />
+    <ClCompile Include="src\city\race_bet.c" />
+    <ClCompile Include="src\city\ratings.c" />
+    <ClCompile Include="src\city\request.c" />
+    <ClCompile Include="src\city\resource.c" />
+    <ClCompile Include="src\city\sentiment.c" />
+    <ClCompile Include="src\city\sound.c" />
+    <ClCompile Include="src\city\trade.c" />
+    <ClCompile Include="src\city\trade_policy.c" />
+    <ClCompile Include="src\city\victory.c" />
+    <ClCompile Include="src\city\view.c" />
+    <ClCompile Include="src\city\warning.c" />
+    <ClCompile Include="src\core\array.c" />
+    <ClCompile Include="src\core\buffer.c" />
+    <ClCompile Include="src\core\calc.c" />
+    <ClCompile Include="src\core\config.cpp" />
+    <ClCompile Include="src\core\dir.c" />
+    <ClCompile Include="src\core\encoding.c" />
+    <ClCompile Include="src\core\encoding_japanese.c" />
+    <ClCompile Include="src\core\encoding_korean.c" />
+    <ClCompile Include="src\core\encoding_simp_chinese.c" />
+    <ClCompile Include="src\core\encoding_trad_chinese.c" />
+    <ClCompile Include="src\core\file.c" />
+    <ClCompile Include="src\core\crash_context.cpp" />
+    <ClCompile Include="src\core\hotkey_config.c" />
+    <ClCompile Include="src\core\image_data.cpp" />
+    <ClCompile Include="src\core\image.c" />
+    <ClCompile Include="src\core\legacy_image_extractor.cpp" />
+    <ClCompile Include="src\core\image_payload.cpp" />
+    <ClCompile Include="src\core\image_packer.c" />
+    <ClCompile Include="src\core\io.c" />
+    <ClCompile Include="src\core\lang.cpp" />
+    <ClCompile Include="src\core\locale.c" />
+    <ClCompile Include="src\core\memory_block.c" />
+    <ClCompile Include="src\core\png_read.c" />
+    <ClCompile Include="src\core\random.c" />
+    <ClCompile Include="src\core\smacker.c" />
+    <ClCompile Include="src\core\speed.c" />
+    <ClCompile Include="src\core\string.c" />
+    <ClCompile Include="src\core\time.c" />
+    <ClCompile Include="src\core\xml_exporter.c" />
+    <ClCompile Include="src\core\xml_parser.c" />
+    <ClCompile Include="src\core\zip.c" />
+    <ClCompile Include="src\core\zlib_helper.c" />
+    <ClCompile Include="src\editor\editor.c" />
+    <ClCompile Include="src\editor\tool.c" />
+    <ClCompile Include="src\editor\tool_restriction.c" />
+    <ClCompile Include="src\empire\city.c" />
+    <ClCompile Include="src\empire\editor.c" />
+    <ClCompile Include="src\empire\empire.c" />
+    <ClCompile Include="src\empire\export_xml.c" />
+    <ClCompile Include="src\empire\import_xml.c" />
+    <ClCompile Include="src\empire\object.c" />
+    <ClCompile Include="src\empire\trade_prices.c" />
+    <ClCompile Include="src\empire\trade_route.c" />
+    <ClCompile Include="src\figuretype\animal.c" />
+    <ClCompile Include="src\figuretype\cartpusher.c" />
+    <ClCompile Include="src\figuretype\crime.c" />
+    <ClCompile Include="src\figuretype\depot.c" />
+    <ClCompile Include="src\figuretype\docker.c" />
+    <ClCompile Include="src\figuretype\editor.c" />
+    <ClCompile Include="src\figuretype\enemy.c" />
+    <ClCompile Include="src\figuretype\entertainer.c" />
+    <ClCompile Include="src\figuretype\maintenance.c" />
+    <ClCompile Include="src\figuretype\migrant.c" />
+    <ClCompile Include="src\figuretype\missile.c" />
+    <ClCompile Include="src\figuretype\native.c" />
+    <ClCompile Include="src\figuretype\service.c" />
+    <ClCompile Include="src\figuretype\soldier.c" />
+    <ClCompile Include="src\figuretype\supplier.c" />
+    <ClCompile Include="src\figuretype\trader.c" />
+    <ClCompile Include="src\figuretype\wall.c" />
+    <ClCompile Include="src\figuretype\water.c" />
+    <ClCompile Include="src\figuretype\workcamp.c" />
+    <ClCompile Include="src\figure\action.c" />
+    <ClCompile Include="src\figure\combat.c" />
+    <ClCompile Include="src\figure\enemy_army.c" />
+    <ClCompile Include="src\figure\figure.c" />
+    <ClCompile Include="src\figure\formation.c" />
+    <ClCompile Include="src\figure\formation_enemy.c" />
+    <ClCompile Include="src\figure\formation_herd.c" />
+    <ClCompile Include="src\figure\formation_layout.c" />
+    <ClCompile Include="src\figure\formation_legion.c" />
+    <ClCompile Include="src\figure\image.c" />
+    <ClCompile Include="src\figure\movement.c" />
+    <ClCompile Include="src\figure\name.c" />
+    <ClCompile Include="src\figure\phrase.c" />
+    <ClCompile Include="src\figure\properties.c" />
+    <ClCompile Include="src\figure\roamer_preview.c" />
+    <ClCompile Include="src\figure\route.c" />
+    <ClCompile Include="src\figure\service.c" />
+    <ClCompile Include="src\figure\sound.c" />
+    <ClCompile Include="src\figure\trader.c" />
+    <ClCompile Include="src\figure\visited_buildings.c" />
+    <ClCompile Include="src\game\animation.c" />
+    <ClCompile Include="src\game\campaign\campaign.c" />
+    <ClCompile Include="src\game\campaign\file.c" />
+    <ClCompile Include="src\game\campaign\mission.c" />
+    <ClCompile Include="src\game\campaign\original.c" />
+    <ClCompile Include="src\game\campaign\player_data.c" />
+    <ClCompile Include="src\game\campaign\xml.c" />
+    <ClCompile Include="src\game\cheats.c" />
+    <ClCompile Include="src\game\difficulty.c" />
+    <ClCompile Include="src\game\file.c" />
+    <ClCompile Include="src\game\file_editor.c" />
+    <ClCompile Include="src\game\file_io.c" />
+    <ClCompile Include="src\game\game.c" />
+    <ClCompile Include="src\game\mission.c" />
+    <ClCompile Include="src\game\mod_manager.cpp" />
+    <ClCompile Include="src\game\orientation.c" />
+    <ClCompile Include="src\game\resource.c" />
+    <ClCompile Include="src\game\settings.c" />
+    <ClCompile Include="src\game\speed.cpp" />
+    <ClCompile Include="src\game\state.c" />
+    <ClCompile Include="src\game\tick.c" />
+    <ClCompile Include="src\game\time.c" />
+    <ClCompile Include="src\game\tutorial.c" />
+    <ClCompile Include="src\game\undo.cpp" />
+    <ClCompile Include="src\graphics\arrow_button.c" />
+    <ClCompile Include="src\graphics\bordered_button_widget.cpp" />
+    <ClCompile Include="src\graphics\clouds.c" />
+    <ClCompile Include="src\graphics\complex_button.c" />
+    <ClCompile Include="src\graphics\font.cpp" />
+    <ClCompile Include="src\graphics\generic_button.c" />
+    <ClCompile Include="src\graphics\graphics.cpp" />
+    <ClCompile Include="src\graphics\grid_box.c" />
+    <ClCompile Include="src\graphics\image.cpp" />
+    <ClCompile Include="src\graphics\runtime_texture.cpp" />
+    <ClCompile Include="src\graphics\image_button.c" />
+    <ClCompile Include="src\graphics\image_button_widget.cpp" />
+    <ClCompile Include="src\graphics\label_widget.cpp" />
+    <ClCompile Include="src\graphics\lang_text.c" />
+    <ClCompile Include="src\graphics\list_box.c" />
+    <ClCompile Include="src\graphics\menu.c" />
+    <ClCompile Include="src\graphics\panel_widget.cpp" />
+    <ClCompile Include="src\graphics\renderer.c" />
+    <ClCompile Include="src\graphics\rich_text.c" />
+    <ClCompile Include="src\graphics\screen.cpp" />
+    <ClCompile Include="src\graphics\screenshot.c" />
+    <ClCompile Include="src\graphics\scrollbar.c" />
+    <ClCompile Include="src\graphics\scrollbar_widget.cpp" />
+    <ClCompile Include="src\graphics\text.cpp" />
+    <ClCompile Include="src\graphics\top_menu_panel_widget.cpp" />
+    <ClCompile Include="src\graphics\tooltip.cpp" />
+    <ClCompile Include="src\graphics\ui_border_primitive.cpp" />
+    <ClCompile Include="src\graphics\ui_one_row_border_primitive.cpp" />
+    <ClCompile Include="src\graphics\ui_panel_primitive.cpp" />
+    <ClCompile Include="src\graphics\ui_primitives.cpp" />
+    <ClCompile Include="src\graphics\ui_runtime.cpp" />
+    <ClCompile Include="src\graphics\ui_saved_region_primitive.cpp" />
+    <ClCompile Include="src\graphics\ui_slider_primitive.cpp" />
+    <ClCompile Include="src\graphics\ui_sprite_primitive.cpp" />
+    <ClCompile Include="src\graphics\ui_tiled_strip_primitive.cpp" />
+    <ClCompile Include="src\graphics\video.c" />
+    <ClCompile Include="src\graphics\warning.c" />
+    <ClCompile Include="src\graphics\weather.c" />
+    <ClCompile Include="src\graphics\window.cpp" />
+    <ClCompile Include="src\input\cursor.cpp" />
+    <ClCompile Include="src\input\hotkey.c" />
+    <ClCompile Include="src\input\input.c" />
+    <ClCompile Include="src\input\joystick.c" />
+    <ClCompile Include="src\input\keyboard.c" />
+    <ClCompile Include="src\input\keys.c" />
+    <ClCompile Include="src\input\mouse.c" />
+    <ClCompile Include="src\input\scroll.c" />
+    <ClCompile Include="src\input\touch.c" />
+    <ClCompile Include="src\input\zoom.c" />
+    <ClCompile Include="src\map\aqueduct.c" />
+    <ClCompile Include="src\map\bookmark.c" />
+    <ClCompile Include="src\map\bridge.c" />
+    <ClCompile Include="src\map\building.c" />
+    <ClCompile Include="src\map\building_tiles.c" />
+    <ClCompile Include="src\map\desirability.c" />
+    <ClCompile Include="src\map\elevation.c" />
+    <ClCompile Include="src\map\figure.c" />
+    <ClCompile Include="src\map\grid.c" />
+    <ClCompile Include="src\map\image.c" />
+    <ClCompile Include="src\map\image_context.c" />
+    <ClCompile Include="src\map\natives.c" />
+    <ClCompile Include="src\map\orientation.c" />
+    <ClCompile Include="src\map\point.c" />
+    <ClCompile Include="src\map\property.c" />
+    <ClCompile Include="src\map\random.c" />
+    <ClCompile Include="src\map\ring.c" />
+    <ClCompile Include="src\map\road_access.c" />
+    <ClCompile Include="src\map\road_aqueduct.c" />
+    <ClCompile Include="src\map\road_network.c" />
+    <ClCompile Include="src\map\routing.c" />
+    <ClCompile Include="src\map\routing_data.c" />
+    <ClCompile Include="src\map\routing_path.c" />
+    <ClCompile Include="src\map\routing_terrain.c" />
+    <ClCompile Include="src\map\soldier_strength.c" />
+    <ClCompile Include="src\map\sprite.c" />
+    <ClCompile Include="src\map\terrain.c" />
+    <ClCompile Include="src\map\tile_runtime.cpp" />
+    <ClCompile Include="src\map\tile_type_registry.cpp" />
+    <ClCompile Include="src\map\tile_type_registry_xml.cpp" />
+    <ClCompile Include="src\map\tiles.cpp" />
+    <ClCompile Include="src\map\water.c" />
+    <ClCompile Include="src\map\water_supply.c" />
+    <ClCompile Include="src\platform\arguments.c" />
+    <ClCompile Include="src\platform\augustus.cpp" />
+    <ClCompile Include="src\platform\crash_handler.c" />
+    <ClCompile Include="src\platform\cursor.c" />
+    <ClCompile Include="src\platform\file_manager.c" />
+    <ClCompile Include="src\platform\file_manager_cache.c" />
+    <ClCompile Include="src\platform\icon.c" />
+    <ClCompile Include="src\platform\joystick.c" />
+    <ClCompile Include="src\platform\keyboard_input.c" />
+    <ClCompile Include="src\platform\log.c" />
+    <ClCompile Include="src\platform\mouse.c" />
+    <ClCompile Include="src\platform\platform.c" />
+    <ClCompile Include="src\platform\prefs.c" />
+    <ClCompile Include="src\platform\render_2d_pipeline.cpp" />
+    <ClCompile Include="src\platform\renderer.cpp" />
+    <ClCompile Include="src\platform\screen.cpp" />
+    <ClCompile Include="src\platform\sound_device.c" />
+    <ClCompile Include="src\platform\touch.c" />
+    <ClCompile Include="src\platform\user_path.c" />
+    <ClCompile Include="src\platform\version.c" />
+    <ClCompile Include="src\platform\virtual_keyboard.c" />
+    <ClCompile Include="src\scenario\allowed_building.c" />
+    <ClCompile Include="src\scenario\criteria.c" />
+    <ClCompile Include="src\scenario\custom_media.c" />
+    <ClCompile Include="src\scenario\custom_messages.c" />
+    <ClCompile Include="src\scenario\custom_messages_export_xml.c" />
+    <ClCompile Include="src\scenario\custom_messages_import_xml.c" />
+    <ClCompile Include="src\scenario\custom_variable.c" />
+    <ClCompile Include="src\scenario\demand_change.c" />
+    <ClCompile Include="src\scenario\distant_battle.c" />
+    <ClCompile Include="src\scenario\earthquake.c" />
+    <ClCompile Include="src\scenario\editor.c" />
+    <ClCompile Include="src\scenario\editor_events.c" />
+    <ClCompile Include="src\scenario\editor_map.c" />
+    <ClCompile Include="src\scenario\emperor_change.c" />
+    <ClCompile Include="src\scenario\empire.c" />
+    <ClCompile Include="src\scenario\event\action_handler.c" />
+    <ClCompile Include="src\scenario\event\action_types.c" />
+    <ClCompile Include="src\scenario\event\condition_comparison_helper.c" />
+    <ClCompile Include="src\scenario\event\condition_handler.c" />
+    <ClCompile Include="src\scenario\event\condition_types.c" />
+    <ClCompile Include="src\scenario\event\controller.c" />
+    <ClCompile Include="src\scenario\event\event.c" />
+    <ClCompile Include="src\scenario\event\export_xml.c" />
+    <ClCompile Include="src\scenario\event\formula.c" />
+    <ClCompile Include="src\scenario\event\import_xml.cpp" />
+    <ClCompile Include="src\scenario\event\parameter_city.c" />
+    <ClCompile Include="src\scenario\event\parameter_data.c" />
+    <ClCompile Include="src\scenario\gladiator_revolt.c" />
+    <ClCompile Include="src\scenario\invasion.c" />
+    <ClCompile Include="src\scenario\map.c" />
+    <ClCompile Include="src\scenario\message_media_text_blob.c" />
+    <ClCompile Include="src\scenario\model_xml.cpp" />
+    <ClCompile Include="src\scenario\price_change.c" />
+    <ClCompile Include="src\scenario\property.c" />
+    <ClCompile Include="src\scenario\random_event.c" />
+    <ClCompile Include="src\scenario\request.c" />
+    <ClCompile Include="src\scenario\scenario.c" />
+    <ClCompile Include="src\sound\city.c" />
+    <ClCompile Include="src\sound\effect.c" />
+    <ClCompile Include="src\sound\music.c" />
+    <ClCompile Include="src\sound\speech.c" />
+    <ClCompile Include="src\sound\system.c" />
+    <ClCompile Include="src\translation\czech.c" />
+    <ClCompile Include="src\translation\english.c" />
+    <ClCompile Include="src\translation\french.c" />
+    <ClCompile Include="src\translation\german.c" />
+    <ClCompile Include="src\translation\greek.c" />
+    <ClCompile Include="src\translation\italian.c" />
+    <ClCompile Include="src\translation\japanese.c" />
+    <ClCompile Include="src\translation\korean.c" />
+    <ClCompile Include="src\translation\polish.c" />
+    <ClCompile Include="src\translation\portuguese.c" />
+    <ClCompile Include="src\translation\russian.c" />
+    <ClCompile Include="src\translation\simplified_chinese.c" />
+    <ClCompile Include="src\translation\spanish.c" />
+    <ClCompile Include="src\translation\swedish.c" />
+    <ClCompile Include="src\translation\traditional_chinese.c" />
+    <ClCompile Include="src\translation\translation.c" />
+    <ClCompile Include="src\translation\ukrainian.c" />
+    <ClCompile Include="src\widget\city.c" />
+    <ClCompile Include="src\widget\city_bridge.c" />
+    <ClCompile Include="src\widget\city_building_ghost.cpp" />
+    <ClCompile Include="src\widget\city_draw.cpp" />
+    <ClCompile Include="src\widget\city_draw_highway.c" />
+    <ClCompile Include="src\widget\city_draw_overlay.cpp" />
+    <ClCompile Include="src\widget\city_figure.c" />
+    <ClCompile Include="src\widget\city_overlay_education.c" />
+    <ClCompile Include="src\widget\city_overlay_entertainment.c" />
+    <ClCompile Include="src\widget\city_overlay_health.c" />
+    <ClCompile Include="src\widget\city_overlay_housing.c" />
+    <ClCompile Include="src\widget\city_overlay_other.c" />
+    <ClCompile Include="src\widget\city_overlay_risks.c" />
+    <ClCompile Include="src\widget\city_pause_menu.c" />
+    <ClCompile Include="src\widget\city_water_ghost.c" />
+    <ClCompile Include="src\widget\city_without_overlay.cpp" />
+    <ClCompile Include="src\widget\city_with_overlay.cpp" />
+    <ClCompile Include="src\widget\dropdown_button.c" />
+    <ClCompile Include="src\widget\input_box.c" />
+    <ClCompile Include="src\widget\map_editor.c" />
+    <ClCompile Include="src\widget\map_editor_pause_menu.c" />
+    <ClCompile Include="src\widget\map_editor_tool.c" />
+    <ClCompile Include="src\widget\minimap.c" />
+    <ClCompile Include="src\widget\sidebar\city.cpp" />
+    <ClCompile Include="src\widget\sidebar\common.c" />
+    <ClCompile Include="src\widget\sidebar\editor.c" />
+    <ClCompile Include="src\widget\sidebar\extra.c" />
+    <ClCompile Include="src\widget\sidebar\military.c" />
+    <ClCompile Include="src\widget\sidebar\slide.c" />
+    <ClCompile Include="src\widget\top_menu.cpp" />
+    <ClCompile Include="src\widget\top_menu_editor.c" />
+    <ClCompile Include="src\window\advisors.c" />
+    <ClCompile Include="src\window\advisor\chief.c" />
+    <ClCompile Include="src\window\advisor\education.c" />
+    <ClCompile Include="src\window\advisor\entertainment.c" />
+    <ClCompile Include="src\window\advisor\financial.c" />
+    <ClCompile Include="src\window\advisor\health.c" />
+    <ClCompile Include="src\window\advisor\housing.c" />
+    <ClCompile Include="src\window\advisor\imperial.c" />
+    <ClCompile Include="src\window\advisor\labor.c" />
+    <ClCompile Include="src\window\advisor\military.c" />
+    <ClCompile Include="src\window\advisor\population.c" />
+    <ClCompile Include="src\window\advisor\ratings.c" />
+    <ClCompile Include="src\window\advisor\religion.c" />
+    <ClCompile Include="src\window\advisor\trade.c" />
+    <ClCompile Include="src\window\asset_previewer.c" />
+    <ClCompile Include="src\window\building\common.c" />
+    <ClCompile Include="src\window\building\culture.c" />
+    <ClCompile Include="src\window\building\depot.c" />
+    <ClCompile Include="src\window\building\distribution.c" />
+    <ClCompile Include="src\window\building\figures.c" />
+    <ClCompile Include="src\window\building\government.c" />
+    <ClCompile Include="src\window\building\house.c" />
+    <ClCompile Include="src\window\building\industry.c" />
+    <ClCompile Include="src\window\building\military.c" />
+    <ClCompile Include="src\window\building\terrain.c" />
+    <ClCompile Include="src\window\building\utility.c" />
+    <ClCompile Include="src\window\building_info.c" />
+    <ClCompile Include="src\window\build_menu.cpp" />
+    <ClCompile Include="src\window\cck_selection.c" />
+    <ClCompile Include="src\window\city.c" />
+    <ClCompile Include="src\window\config.c" />
+    <ClCompile Include="src\window\console.c" />
+    <ClCompile Include="src\window\donate_to_city.c" />
+    <ClCompile Include="src\window\editor\allowed_buildings.c" />
+    <ClCompile Include="src\window\editor\attributes.c" />
+    <ClCompile Include="src\window\editor\build_menu.c" />
+    <ClCompile Include="src\window\editor\custom_messages.c" />
+    <ClCompile Include="src\window\editor\custom_variables.c" />
+    <ClCompile Include="src\window\editor\demand_changes.c" />
+    <ClCompile Include="src\window\editor\edit_demand_change.c" />
+    <ClCompile Include="src\window\editor\edit_invasion.c" />
+    <ClCompile Include="src\window\editor\edit_price_change.c" />
+    <ClCompile Include="src\window\editor\edit_request.c" />
+    <ClCompile Include="src\window\editor\empire.c" />
+    <ClCompile Include="src\window\editor\empire_properties.c" />
+    <ClCompile Include="src\window\editor\invasions.c" />
+    <ClCompile Include="src\window\editor\map.c" />
+    <ClCompile Include="src\window\editor\model_data.cpp" />
+    <ClCompile Include="src\window\editor\price_changes.c" />
+    <ClCompile Include="src\window\editor\requests.c" />
+    <ClCompile Include="src\window\editor\scenario_action_edit.c" />
+    <ClCompile Include="src\window\editor\scenario_condition_edit.c" />
+    <ClCompile Include="src\window\editor\scenario_events.c" />
+    <ClCompile Include="src\window\editor\scenario_event_details.c" />
+    <ClCompile Include="src\window\editor\select_city_by_type.c" />
+    <ClCompile Include="src\window\editor\select_city_trade_route.c" />
+    <ClCompile Include="src\window\editor\select_custom_message.c" />
+    <ClCompile Include="src\window\editor\select_scenario_action_type.c" />
+    <ClCompile Include="src\window\editor\select_scenario_condition_type.c" />
+    <ClCompile Include="src\window\editor\select_special_attribute_mapping.c" />
+    <ClCompile Include="src\window\editor\special_events.c" />
+    <ClCompile Include="src\window\editor\starting_conditions.c" />
+    <ClCompile Include="src\window\editor\start_year.c" />
+    <ClCompile Include="src\window\editor\win_criteria.c" />
+    <ClCompile Include="src\window\empire.c" />
+    <ClCompile Include="src\window\empire_sidebar_sort.c" />
+    <ClCompile Include="src\window\file_dialog.c" />
+    <ClCompile Include="src\window\gift_to_emperor.c" />
+    <ClCompile Include="src\window\hold_festival.c" />
+    <ClCompile Include="src\window\hold_games.c" />
+    <ClCompile Include="src\window\hotkey_config.c" />
+    <ClCompile Include="src\window\hotkey_editor.c" />
+    <ClCompile Include="src\window\intermezzo.c" />
+    <ClCompile Include="src\window\intro_video.c" />
+    <ClCompile Include="src\window\labor_priority.c" />
+    <ClCompile Include="src\window\logo.c" />
+    <ClCompile Include="src\window\main_menu.c" />
+    <ClCompile Include="src\window\message_dialog.c" />
+    <ClCompile Include="src\window\message_list.c" />
+    <ClCompile Include="src\window\military_menu.c" />
+    <ClCompile Include="src\window\mission_briefing.c" />
+    <ClCompile Include="src\window\mission_end.c" />
+    <ClCompile Include="src\window\mission_list.c" />
+    <ClCompile Include="src\window\mission_selection.c" />
+    <ClCompile Include="src\window\numeric_input.c" />
+    <ClCompile Include="src\window\option_popup.c" />
+    <ClCompile Include="src\window\overlay_menu.c" />
+    <ClCompile Include="src\window\plain_message_dialog.c" />
+    <ClCompile Include="src\window\popup_dialog.c" />
+    <ClCompile Include="src\window\race_bet.c" />
+    <ClCompile Include="src\window\resource_settings.c" />
+    <ClCompile Include="src\window\select_campaign.c" />
+    <ClCompile Include="src\window\select_list.c" />
+    <ClCompile Include="src\window\set_salary.c" />
+    <ClCompile Include="src\window\text_input.c" />
+    <ClCompile Include="src\window\trade_opened.c" />
+    <ClCompile Include="src\window\trade_prices.c" />
+    <ClCompile Include="src\window\user_path_setup.c" />
+    <ClCompile Include="src\window\victory_dialog.c" />
+    <ClCompile Include="src\window\video.c" />
+    <ClCompile Include="ext\spng\spng.c" />
+    <ClCompile Include="ext\sxml\sxml.c" />
+    <ClCompile Include="ext\tinyfiledialogs\tinyfiledialogs.c" />
+    <ClCompile Include="ext\zip\zip.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\augustus.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\assets\augustus_asset_extractor.h" />
+    <ClInclude Include="src\assets\assets.h" />
+    <ClInclude Include="src\assets\group.h" />
+    <ClInclude Include="src\assets\image.h" />
+    <ClInclude Include="src\assets\image_group_entry.h" />
+    <ClInclude Include="src\assets\image_group_payload.h" />
+    <ClInclude Include="src\assets\layer.h" />
+    <ClInclude Include="src\assets\xml.h" />
+    <ClInclude Include="src\building\animation.h" />
+    <ClInclude Include="src\building\armoury.h" />
+    <ClInclude Include="src\building\barracks.h" />
+    <ClInclude Include="src\building\building.h" />
+    <ClInclude Include="src\building\building_runtime.h" />
+    <ClInclude Include="src\building\building_runtime_api.h" />
+    <ClInclude Include="src\building\building_runtime_internal.h" />
+    <ClInclude Include="src\building\building_type.h" />
+    <ClInclude Include="src\building\building_type_api.h" />
+    <ClInclude Include="src\building\building_type_registry.h" />
+    <ClInclude Include="src\building\building_type_registry_internal.h" />
+    <ClInclude Include="src\building\caravanserai.h" />
+    <ClInclude Include="src\building\clone.h" />
+    <ClInclude Include="src\building\connectable.h" />
+    <ClInclude Include="src\building\construction.h" />
+    <ClInclude Include="src\building\construction_building.h" />
+    <ClInclude Include="src\building\construction_clear.h" />
+    <ClInclude Include="src\building\tool_mode.h" />
+    <ClInclude Include="src\building\construction_routed.h" />
+    <ClInclude Include="src\building\construction_warning.h" />
+    <ClInclude Include="src\building\count.h" />
+    <ClInclude Include="src\building\data_transfer.h" />
+    <ClInclude Include="src\building\destruction.h" />
+    <ClInclude Include="src\building\distribution.h" />
+    <ClInclude Include="src\building\dock.h" />
+    <ClInclude Include="src\building\entertainment.h" />
+    <ClInclude Include="src\building\figure.h" />
+    <ClInclude Include="src\building\government.h" />
+    <ClInclude Include="src\building\granary.h" />
+    <ClInclude Include="src\building\house.h" />
+    <ClInclude Include="src\building\house_evolution.h" />
+    <ClInclude Include="src\building\house_population.h" />
+    <ClInclude Include="src\building\house_service.h" />
+    <ClInclude Include="src\building\image.h" />
+    <ClInclude Include="src\building\industry.h" />
+    <ClInclude Include="src\building\lighthouse.h" />
+    <ClInclude Include="src\building\list.h" />
+    <ClInclude Include="src\building\maintenance.h" />
+    <ClInclude Include="src\building\market.h" />
+    <ClInclude Include="src\building\menu.h" />
+    <ClInclude Include="src\building\mess_hall.h" />
+    <ClInclude Include="src\building\monument.h" />
+    <ClInclude Include="src\building\properties.h" />
+    <ClInclude Include="src\building\roadblock.h" />
+    <ClInclude Include="src\building\rotation.h" />
+    <ClInclude Include="src\building\state.h" />
+    <ClInclude Include="src\building\storage.h" />
+    <ClInclude Include="src\building\tavern.h" />
+    <ClInclude Include="src\building\temple.h" />
+    <ClInclude Include="src\building\type.h" />
+    <ClInclude Include="src\building\variant.h" />
+    <ClInclude Include="src\building\warehouse.h" />
+    <ClInclude Include="src\city\buildings.h" />
+    <ClInclude Include="src\city\constants.h" />
+    <ClInclude Include="src\city\culture.h" />
+    <ClInclude Include="src\city\data.h" />
+    <ClInclude Include="src\city\data_private.h" />
+    <ClInclude Include="src\city\emperor.h" />
+    <ClInclude Include="src\city\entertainment.h" />
+    <ClInclude Include="src\city\festival.h" />
+    <ClInclude Include="src\city\figures.h" />
+    <ClInclude Include="src\city\finance.h" />
+    <ClInclude Include="src\city\games.h" />
+    <ClInclude Include="src\city\gods.h" />
+    <ClInclude Include="src\city\health.h" />
+    <ClInclude Include="src\city\houses.h" />
+    <ClInclude Include="src\city\labor.h" />
+    <ClInclude Include="src\city\map.h" />
+    <ClInclude Include="src\city\message.h" />
+    <ClInclude Include="src\city\migration.h" />
+    <ClInclude Include="src\city\military.h" />
+    <ClInclude Include="src\city\mission.h" />
+    <ClInclude Include="src\city\population.h" />
+    <ClInclude Include="src\city\race_bet.h" />
+    <ClInclude Include="src\city\ratings.h" />
+    <ClInclude Include="src\city\request.h" />
+    <ClInclude Include="src\city\resource.h" />
+    <ClInclude Include="src\city\sentiment.h" />
+    <ClInclude Include="src\city\sound.h" />
+    <ClInclude Include="src\city\trade.h" />
+    <ClInclude Include="src\city\trade_policy.h" />
+    <ClInclude Include="src\city\victory.h" />
+    <ClInclude Include="src\city\view.h" />
+    <ClInclude Include="src\city\warning.h" />
+    <ClInclude Include="src\core\array.h" />
+    <ClInclude Include="src\core\buffer.h" />
+    <ClInclude Include="src\core\calc.h" />
+    <ClInclude Include="src\core\config.h" />
+    <ClInclude Include="src\core\dir.h" />
+    <ClInclude Include="src\core\direction.h" />
+    <ClInclude Include="src\core\encoding.h" />
+    <ClInclude Include="src\core\encoding_japanese.h" />
+    <ClInclude Include="src\core\encoding_korean.h" />
+    <ClInclude Include="src\core\encoding_simp_chinese.h" />
+    <ClInclude Include="src\core\encoding_trad_chinese.h" />
+    <ClInclude Include="src\core\file.h" />
+    <ClInclude Include="src\core\crash_context.h" />
+    <ClInclude Include="src\core\hotkey_config.h" />
+    <ClInclude Include="src\core\image_data.h" />
+    <ClInclude Include="src\core\image.h" />
+    <ClInclude Include="src\core\image_group.h" />
+    <ClInclude Include="src\core\image_group_editor.h" />
+    <ClInclude Include="src\core\legacy_image_extractor.h" />
+    <ClInclude Include="src\core\image_packer.h" />
+    <ClInclude Include="src\core\io.h" />
+    <ClInclude Include="src\core\lang.h" />
+    <ClInclude Include="src\core\locale.h" />
+    <ClInclude Include="src\core\log.h" />
+    <ClInclude Include="src\core\memory_block.h" />
+    <ClInclude Include="src\core\png_read.h" />
+    <ClInclude Include="src\core\random.h" />
+    <ClInclude Include="src\core\smacker.h" />
+    <ClInclude Include="src\core\speed.h" />
+    <ClInclude Include="src\core\string.h" />
+    <ClInclude Include="src\core\time.h" />
+    <ClInclude Include="src\core\xml_exporter.h" />
+    <ClInclude Include="src\core\xml_parser.h" />
+    <ClInclude Include="src\core\zip.h" />
+    <ClInclude Include="src\core\zlib_helper.h" />
+    <ClInclude Include="src\editor\editor.h" />
+    <ClInclude Include="src\editor\tool.h" />
+    <ClInclude Include="src\editor\tool_restriction.h" />
+    <ClInclude Include="src\empire\city.h" />
+    <ClInclude Include="src\empire\editor.h" />
+    <ClInclude Include="src\empire\empire.h" />
+    <ClInclude Include="src\empire\export_xml.h" />
+    <ClInclude Include="src\empire\import_xml.h" />
+    <ClInclude Include="src\empire\object.h" />
+    <ClInclude Include="src\empire\trade_prices.h" />
+    <ClInclude Include="src\empire\trade_route.h" />
+    <ClInclude Include="src\empire\type.h" />
+    <ClInclude Include="src\figuretype\animal.h" />
+    <ClInclude Include="src\figuretype\cartpusher.h" />
+    <ClInclude Include="src\figuretype\crime.h" />
+    <ClInclude Include="src\figuretype\depot.h" />
+    <ClInclude Include="src\figuretype\docker.h" />
+    <ClInclude Include="src\figuretype\editor.h" />
+    <ClInclude Include="src\figuretype\enemy.h" />
+    <ClInclude Include="src\figuretype\entertainer.h" />
+    <ClInclude Include="src\figuretype\maintenance.h" />
+    <ClInclude Include="src\figuretype\migrant.h" />
+    <ClInclude Include="src\figuretype\missile.h" />
+    <ClInclude Include="src\figuretype\native.h" />
+    <ClInclude Include="src\figuretype\service.h" />
+    <ClInclude Include="src\figuretype\soldier.h" />
+    <ClInclude Include="src\figuretype\supplier.h" />
+    <ClInclude Include="src\figuretype\trader.h" />
+    <ClInclude Include="src\figuretype\wall.h" />
+    <ClInclude Include="src\figuretype\water.h" />
+    <ClInclude Include="src\figuretype\workcamp.h" />
+    <ClInclude Include="src\figure\action.h" />
+    <ClInclude Include="src\figure\combat.h" />
+    <ClInclude Include="src\figure\enemy_army.h" />
+    <ClInclude Include="src\figure\figure.h" />
+    <ClInclude Include="src\figure\formation.h" />
+    <ClInclude Include="src\figure\formation_enemy.h" />
+    <ClInclude Include="src\figure\formation_herd.h" />
+    <ClInclude Include="src\figure\formation_layout.h" />
+    <ClInclude Include="src\figure\formation_legion.h" />
+    <ClInclude Include="src\figure\image.h" />
+    <ClInclude Include="src\figure\movement.h" />
+    <ClInclude Include="src\figure\name.h" />
+    <ClInclude Include="src\figure\phrase.h" />
+    <ClInclude Include="src\figure\properties.h" />
+    <ClInclude Include="src\figure\roamer_preview.h" />
+    <ClInclude Include="src\figure\route.h" />
+    <ClInclude Include="src\figure\service.h" />
+    <ClInclude Include="src\figure\sound.h" />
+    <ClInclude Include="src\figure\trader.h" />
+    <ClInclude Include="src\figure\type.h" />
+    <ClInclude Include="src\figure\visited_buildings.h" />
+    <ClInclude Include="src\game\animation.h" />
+    <ClInclude Include="src\game\campaign.h" />
+    <ClInclude Include="src\game\campaign\file.h" />
+    <ClInclude Include="src\game\campaign\mission.h" />
+    <ClInclude Include="src\game\campaign\original.h" />
+    <ClInclude Include="src\game\campaign\player_data.h" />
+    <ClInclude Include="src\game\campaign\xml.h" />
+    <ClInclude Include="src\game\cheats.h" />
+    <ClInclude Include="src\game\difficulty.h" />
+    <ClInclude Include="src\game\file.h" />
+    <ClInclude Include="src\game\file_editor.h" />
+    <ClInclude Include="src\game\file_io.h" />
+    <ClInclude Include="src\game\mod_manager.h" />
+    <ClInclude Include="src\game\game.h" />
+    <ClInclude Include="src\game\mission.h" />
+    <ClInclude Include="src\game\orientation.h" />
+    <ClInclude Include="src\game\resource.h" />
+    <ClInclude Include="src\game\save_version.h" />
+    <ClInclude Include="src\game\settings.h" />
+    <ClInclude Include="src\game\speed.h" />
+    <ClInclude Include="src\game\state.h" />
+    <ClInclude Include="src\game\system.h" />
+    <ClInclude Include="src\game\tick.h" />
+    <ClInclude Include="src\game\time.h" />
+    <ClInclude Include="src\game\tutorial.h" />
+    <ClInclude Include="src\game\undo.h" />
+    <ClInclude Include="src\graphics\arrow_button.h" />
+    <ClInclude Include="src\graphics\bordered_button_widget.h" />
+    <ClInclude Include="src\graphics\button_widget.h" />
+    <ClInclude Include="src\graphics\clouds.h" />
+    <ClInclude Include="src\graphics\color.h" />
+    <ClInclude Include="src\graphics\complex_button.h" />
+    <ClInclude Include="src\graphics\font.h" />
+    <ClInclude Include="src\graphics\generic_button.h" />
+    <ClInclude Include="src\graphics\graphics.h" />
+    <ClInclude Include="src\graphics\grid_box.h" />
+    <ClInclude Include="src\graphics\image.h" />
+    <ClInclude Include="src\graphics\image_button.h" />
+    <ClInclude Include="src\graphics\image_button_widget.h" />
+    <ClInclude Include="src\graphics\label_widget.h" />
+    <ClInclude Include="src\graphics\lang_text.h" />
+    <ClInclude Include="src\graphics\list_box.h" />
+    <ClInclude Include="src\graphics\menu.h" />
+    <ClInclude Include="src\graphics\panel_widget.h" />
+    <ClInclude Include="src\graphics\renderer.h" />
+    <ClInclude Include="src\graphics\rich_text.h" />
+    <ClInclude Include="src\graphics\screen.h" />
+    <ClInclude Include="src\graphics\screenshot.h" />
+    <ClInclude Include="src\graphics\scrollbar.h" />
+    <ClInclude Include="src\graphics\scrollbar_widget.h" />
+    <ClInclude Include="src\graphics\text.h" />
+    <ClInclude Include="src\graphics\top_menu_panel_widget.h" />
+    <ClInclude Include="src\graphics\tooltip.h" />
+    <ClInclude Include="src\graphics\ui_border_primitive.h" />
+    <ClInclude Include="src\graphics\ui_one_row_border_primitive.h" />
+    <ClInclude Include="src\graphics\ui_panel_primitive.h" />
+    <ClInclude Include="src\graphics\ui_primitive.h" />
+    <ClInclude Include="src\graphics\ui_primitives.h" />
+    <ClInclude Include="src\graphics\ui_runtime.h" />
+    <ClInclude Include="src\graphics\ui_runtime_api.h" />
+    <ClInclude Include="src\graphics\ui_constants.h" />
+    <ClInclude Include="src\graphics\ui_saved_region_primitive.h" />
+    <ClInclude Include="src\graphics\ui_slider_primitive.h" />
+    <ClInclude Include="src\graphics\ui_sprite_primitive.h" />
+    <ClInclude Include="src\graphics\ui_tiled_strip_primitive.h" />
+    <ClInclude Include="src\graphics\ui_widget.h" />
+    <ClInclude Include="src\graphics\video.h" />
+    <ClInclude Include="src\graphics\warning.h" />
+    <ClInclude Include="src\graphics\weather.h" />
+    <ClInclude Include="src\graphics\window.h" />
+    <ClInclude Include="src\input\cursor.h" />
+    <ClInclude Include="src\input\hotkey.h" />
+    <ClInclude Include="src\input\input.h" />
+    <ClInclude Include="src\input\joystick.h" />
+    <ClInclude Include="src\input\keyboard.h" />
+    <ClInclude Include="src\input\keys.h" />
+    <ClInclude Include="src\input\mouse.h" />
+    <ClInclude Include="src\input\scroll.h" />
+    <ClInclude Include="src\input\touch.h" />
+    <ClInclude Include="src\input\zoom.h" />
+    <ClInclude Include="src\map\aqueduct.h" />
+    <ClInclude Include="src\map\bookmark.h" />
+    <ClInclude Include="src\map\bridge.h" />
+    <ClInclude Include="src\map\building.h" />
+    <ClInclude Include="src\map\building_tiles.h" />
+    <ClInclude Include="src\map\data.h" />
+    <ClInclude Include="src\map\desirability.h" />
+    <ClInclude Include="src\map\elevation.h" />
+    <ClInclude Include="src\map\figure.h" />
+    <ClInclude Include="src\map\grid.h" />
+    <ClInclude Include="src\map\image.h" />
+    <ClInclude Include="src\map\image_context.h" />
+    <ClInclude Include="src\map\natives.h" />
+    <ClInclude Include="src\map\orientation.h" />
+    <ClInclude Include="src\map\point.h" />
+    <ClInclude Include="src\map\property.h" />
+    <ClInclude Include="src\map\random.h" />
+    <ClInclude Include="src\map\ring.h" />
+    <ClInclude Include="src\map\road_access.h" />
+    <ClInclude Include="src\map\road_aqueduct.h" />
+    <ClInclude Include="src\map\road_network.h" />
+    <ClInclude Include="src\map\routing.h" />
+    <ClInclude Include="src\map\routing_data.h" />
+    <ClInclude Include="src\map\routing_path.h" />
+    <ClInclude Include="src\map\routing_terrain.h" />
+    <ClInclude Include="src\map\soldier_strength.h" />
+    <ClInclude Include="src\map\sprite.h" />
+    <ClInclude Include="src\map\terrain.h" />
+    <ClInclude Include="src\map\tile_runtime.h" />
+    <ClInclude Include="src\map\tile_runtime_api.h" />
+    <ClInclude Include="src\map\tile_runtime_internal.h" />
+    <ClInclude Include="src\map\tile_type_registry.h" />
+    <ClInclude Include="src\map\tile_type_registry_internal.h" />
+    <ClInclude Include="src\map\tiles.h" />
+    <ClInclude Include="src\map\water.h" />
+    <ClInclude Include="src\map\water_supply.h" />
+    <ClInclude Include="src\platform\arguments.h" />
+    <ClInclude Include="src\platform\cursor.h" />
+    <ClInclude Include="src\platform\emscripten\emscripten.h" />
+    <ClInclude Include="src\platform\file_manager.h" />
+    <ClInclude Include="src\platform\file_manager_cache.h" />
+    <ClInclude Include="src\platform\icon.h" />
+    <ClInclude Include="src\platform\joystick.h" />
+    <ClInclude Include="src\platform\keyboard_input.h" />
+    <ClInclude Include="src\platform\platform.h" />
+    <ClInclude Include="src\platform\prefs.h" />
+    <ClInclude Include="src\platform\render_2d_pipeline.h" />
+    <ClInclude Include="src\platform\renderer.h" />
+    <ClInclude Include="src\platform\screen.h" />
+    <ClInclude Include="src\platform\touch.h" />
+    <ClInclude Include="src\platform\user_path.h" />
+    <ClInclude Include="src\scenario\allowed_building.h" />
+    <ClInclude Include="src\scenario\criteria.h" />
+    <ClInclude Include="src\scenario\custom_media.h" />
+    <ClInclude Include="src\scenario\custom_messages.h" />
+    <ClInclude Include="src\scenario\custom_messages_export_xml.h" />
+    <ClInclude Include="src\scenario\custom_messages_import_xml.h" />
+    <ClInclude Include="src\scenario\custom_variable.h" />
+    <ClInclude Include="src\scenario\data.h" />
+    <ClInclude Include="src\scenario\demand_change.h" />
+    <ClInclude Include="src\scenario\distant_battle.h" />
+    <ClInclude Include="src\scenario\earthquake.h" />
+    <ClInclude Include="src\scenario\editor.h" />
+    <ClInclude Include="src\scenario\editor_events.h" />
+    <ClInclude Include="src\scenario\editor_map.h" />
+    <ClInclude Include="src\scenario\emperor_change.h" />
+    <ClInclude Include="src\scenario\empire.h" />
+    <ClInclude Include="src\scenario\event\action_handler.h" />
+    <ClInclude Include="src\scenario\event\action_types.h" />
+    <ClInclude Include="src\scenario\event\condition_comparison_helper.h" />
+    <ClInclude Include="src\scenario\event\condition_handler.h" />
+    <ClInclude Include="src\scenario\event\condition_types.h" />
+    <ClInclude Include="src\scenario\event\controller.h" />
+    <ClInclude Include="src\scenario\event\data.h" />
+    <ClInclude Include="src\scenario\event\event.h" />
+    <ClInclude Include="src\scenario\event\export_xml.h" />
+    <ClInclude Include="src\scenario\event\formula.h" />
+    <ClInclude Include="src\scenario\event\import_xml.h" />
+    <ClInclude Include="src\scenario\event\parameter_city.h" />
+    <ClInclude Include="src\scenario\event\parameter_data.h" />
+    <ClInclude Include="src\scenario\gladiator_revolt.h" />
+    <ClInclude Include="src\scenario\invasion.h" />
+    <ClInclude Include="src\scenario\map.h" />
+    <ClInclude Include="src\scenario\message_media_text_blob.h" />
+    <ClInclude Include="src\scenario\model_xml.h" />
+    <ClInclude Include="src\scenario\price_change.h" />
+    <ClInclude Include="src\scenario\property.h" />
+    <ClInclude Include="src\scenario\random_event.h" />
+    <ClInclude Include="src\scenario\request.h" />
+    <ClInclude Include="src\scenario\scenario.h" />
+    <ClInclude Include="src\scenario\types.h" />
+    <ClInclude Include="src\sound\city.h" />
+    <ClInclude Include="src\sound\device.h" />
+    <ClInclude Include="src\sound\effect.h" />
+    <ClInclude Include="src\sound\music.h" />
+    <ClInclude Include="src\sound\speech.h" />
+    <ClInclude Include="src\sound\system.h" />
+    <ClInclude Include="src\translation\common.h" />
+    <ClInclude Include="src\translation\translation.h" />
+    <ClInclude Include="src\widget\city.h" />
+    <ClInclude Include="src\widget\city_bridge.h" />
+    <ClInclude Include="src\widget\city_building_ghost.h" />
+    <ClInclude Include="src\widget\city_draw.h" />
+    <ClInclude Include="src\widget\city_draw_highway.h" />
+    <ClInclude Include="src\widget\city_draw_overlay.h" />
+    <ClInclude Include="src\widget\city_figure.h" />
+    <ClInclude Include="src\widget\city_overlay.h" />
+    <ClInclude Include="src\widget\city_overlay_education.h" />
+    <ClInclude Include="src\widget\city_overlay_entertainment.h" />
+    <ClInclude Include="src\widget\city_overlay_health.h" />
+    <ClInclude Include="src\widget\city_overlay_housing.h" />
+    <ClInclude Include="src\widget\city_overlay_other.h" />
+    <ClInclude Include="src\widget\city_overlay_risks.h" />
+    <ClInclude Include="src\widget\city_pause_menu.h" />
+    <ClInclude Include="src\widget\city_water_ghost.h" />
+    <ClInclude Include="src\widget\city_without_overlay.h" />
+    <ClInclude Include="src\widget\city_with_overlay.h" />
+    <ClInclude Include="src\widget\dropdown_button.h" />
+    <ClInclude Include="src\widget\input_box.h" />
+    <ClInclude Include="src\widget\map_editor.h" />
+    <ClInclude Include="src\widget\map_editor_pause_menu.h" />
+    <ClInclude Include="src\widget\map_editor_tool.h" />
+    <ClInclude Include="src\widget\minimap.h" />
+    <ClInclude Include="src\widget\sidebar\city.h" />
+    <ClInclude Include="src\widget\sidebar\common.h" />
+    <ClInclude Include="src\widget\sidebar\editor.h" />
+    <ClInclude Include="src\widget\sidebar\extra.h" />
+    <ClInclude Include="src\widget\sidebar\military.h" />
+    <ClInclude Include="src\widget\sidebar\slide.h" />
+    <ClInclude Include="src\widget\top_menu.h" />
+    <ClInclude Include="src\widget\top_menu_editor.h" />
+    <ClInclude Include="src\window\advisors.h" />
+    <ClInclude Include="src\window\advisor\chief.h" />
+    <ClInclude Include="src\window\advisor\education.h" />
+    <ClInclude Include="src\window\advisor\entertainment.h" />
+    <ClInclude Include="src\window\advisor\financial.h" />
+    <ClInclude Include="src\window\advisor\health.h" />
+    <ClInclude Include="src\window\advisor\housing.h" />
+    <ClInclude Include="src\window\advisor\imperial.h" />
+    <ClInclude Include="src\window\advisor\labor.h" />
+    <ClInclude Include="src\window\advisor\military.h" />
+    <ClInclude Include="src\window\advisor\population.h" />
+    <ClInclude Include="src\window\advisor\ratings.h" />
+    <ClInclude Include="src\window\advisor\religion.h" />
+    <ClInclude Include="src\window\advisor\trade.h" />
+    <ClInclude Include="src\window\asset_previewer.h" />
+    <ClInclude Include="src\window\building\common.h" />
+    <ClInclude Include="src\window\building\culture.h" />
+    <ClInclude Include="src\window\building\depot.h" />
+    <ClInclude Include="src\window\building\distribution.h" />
+    <ClInclude Include="src\window\building\figures.h" />
+    <ClInclude Include="src\window\building\government.h" />
+    <ClInclude Include="src\window\building\house.h" />
+    <ClInclude Include="src\window\building\industry.h" />
+    <ClInclude Include="src\window\building\military.h" />
+    <ClInclude Include="src\window\building\terrain.h" />
+    <ClInclude Include="src\window\building\utility.h" />
+    <ClInclude Include="src\window\building_info.h" />
+    <ClInclude Include="src\window\build_menu.h" />
+    <ClInclude Include="src\window\cck_selection.h" />
+    <ClInclude Include="src\window\city.h" />
+    <ClInclude Include="src\window\config.h" />
+    <ClInclude Include="src\window\console.h" />
+    <ClInclude Include="src\window\donate_to_city.h" />
+    <ClInclude Include="src\window\editor\allowed_buildings.h" />
+    <ClInclude Include="src\window\editor\attributes.h" />
+    <ClInclude Include="src\window\editor\build_menu.h" />
+    <ClInclude Include="src\window\editor\custom_messages.h" />
+    <ClInclude Include="src\window\editor\custom_variables.h" />
+    <ClInclude Include="src\window\editor\demand_changes.h" />
+    <ClInclude Include="src\window\editor\edit_demand_change.h" />
+    <ClInclude Include="src\window\editor\edit_invasion.h" />
+    <ClInclude Include="src\window\editor\edit_price_change.h" />
+    <ClInclude Include="src\window\editor\edit_request.h" />
+    <ClInclude Include="src\window\editor\empire.h" />
+    <ClInclude Include="src\window\editor\empire_properties.h" />
+    <ClInclude Include="src\window\editor\invasions.h" />
+    <ClInclude Include="src\window\editor\map.h" />
+    <ClInclude Include="src\window\editor\model_data.h" />
+    <ClInclude Include="src\window\editor\price_changes.h" />
+    <ClInclude Include="src\window\editor\requests.h" />
+    <ClInclude Include="src\window\editor\scenario_action_edit.h" />
+    <ClInclude Include="src\window\editor\scenario_condition_edit.h" />
+    <ClInclude Include="src\window\editor\scenario_events.h" />
+    <ClInclude Include="src\window\editor\scenario_event_details.h" />
+    <ClInclude Include="src\window\editor\select_city_by_type.h" />
+    <ClInclude Include="src\window\editor\select_city_trade_route.h" />
+    <ClInclude Include="src\window\editor\select_custom_message.h" />
+    <ClInclude Include="src\window\editor\select_scenario_action_type.h" />
+    <ClInclude Include="src\window\editor\select_scenario_condition_type.h" />
+    <ClInclude Include="src\window\editor\select_special_attribute_mapping.h" />
+    <ClInclude Include="src\window\editor\special_events.h" />
+    <ClInclude Include="src\window\editor\starting_conditions.h" />
+    <ClInclude Include="src\window\editor\start_year.h" />
+    <ClInclude Include="src\window\editor\win_criteria.h" />
+    <ClInclude Include="src\window\empire.h" />
+    <ClInclude Include="src\window\empire_sidebar_sort.h" />
+    <ClInclude Include="src\window\file_dialog.h" />
+    <ClInclude Include="src\window\gift_to_emperor.h" />
+    <ClInclude Include="src\window\hold_festival.h" />
+    <ClInclude Include="src\window\hold_games.h" />
+    <ClInclude Include="src\window\hotkey_config.h" />
+    <ClInclude Include="src\window\hotkey_editor.h" />
+    <ClInclude Include="src\window\intermezzo.h" />
+    <ClInclude Include="src\window\intro_video.h" />
+    <ClInclude Include="src\window\labor_priority.h" />
+    <ClInclude Include="src\window\logo.h" />
+    <ClInclude Include="src\window\main_menu.h" />
+    <ClInclude Include="src\window\message_dialog.h" />
+    <ClInclude Include="src\window\message_list.h" />
+    <ClInclude Include="src\window\military_menu.h" />
+    <ClInclude Include="src\window\mission_briefing.h" />
+    <ClInclude Include="src\window\mission_end.h" />
+    <ClInclude Include="src\window\mission_list.h" />
+    <ClInclude Include="src\window\mission_selection.h" />
+    <ClInclude Include="src\window\numeric_input.h" />
+    <ClInclude Include="src\window\option_popup.h" />
+    <ClInclude Include="src\window\overlay_menu.h" />
+    <ClInclude Include="src\window\plain_message_dialog.h" />
+    <ClInclude Include="src\window\popup_dialog.h" />
+    <ClInclude Include="src\window\race_bet.h" />
+    <ClInclude Include="src\window\resource_settings.h" />
+    <ClInclude Include="src\window\select_campaign.h" />
+    <ClInclude Include="src\window\select_list.h" />
+    <ClInclude Include="src\window\set_salary.h" />
+    <ClInclude Include="src\window\text_input.h" />
+    <ClInclude Include="src\window\trade_opened.h" />
+    <ClInclude Include="src\window\trade_prices.h" />
+    <ClInclude Include="src\window\user_path_setup.h" />
+    <ClInclude Include="src\window\victory_dialog.h" />
+    <ClInclude Include="src\window\video.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{97d2cb33-8ded-4e9c-9650-7165dee085c0}</ProjectGuid>
+    <RootNamespace>Vespasian</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <TargetName>Vespasian</TargetName>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ModsContent Include="Mods\**\*" />
+  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)ext;$(ProjectDir)ext\dirent;$(ProjectDir)vendor\SDL2-2.32.10\include;$(ProjectDir)vendor\SDL2_mixer-2.8.1\include;$(ProjectDir)ext\easyav1_dummy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\SDL2-2.32.10\lib\x64;$(ProjectDir)vendor\SDL2_mixer-2.8.1\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;dbghelp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)ext;$(ProjectDir)ext\dirent;$(ProjectDir)vendor\SDL2-2.32.10\include;$(ProjectDir)vendor\SDL2_mixer-2.8.1\include;$(ProjectDir)ext\easyav1_dummy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\SDL2-2.32.10\lib\x64;$(ProjectDir)vendor\SDL2_mixer-2.8.1\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;dbghelp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="CopyModsToOutput" AfterTargets="Build">
+    <MakeDir Directories="$(OutDir)Mods" />
+    <Copy
+      SourceFiles="@(ModsContent)"
+      DestinationFiles="@(ModsContent->'$(OutDir)Mods\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

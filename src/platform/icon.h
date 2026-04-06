@@ -1,7 +1,10 @@
-#ifndef PLATFORM_ICON_H
-#define PLATFORM_ICON_H
+#pragma once
 
 #include "SDL.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Get the window icon's pixels
@@ -9,4 +12,6 @@
  */
 void *platform_icon_get_pixels(void);
 
-#endif // PLATFORM_ICON_H
+#ifdef __cplusplus
+}
+#endif

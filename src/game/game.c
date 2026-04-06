@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include "assets/assets.h"
+#include "assets/image_group_payload_api.h"
 #include "building/properties.h"
 #include "building/building_runtime_api.h"
 #include "building/building_type_registry.h"
@@ -8,6 +9,7 @@
 #include "core/config.h"
 #include "core/hotkey_config.h"
 #include "core/image.h"
+#include "core/image_payload.h"
 #include "core/lang.h"
 #include "core/locale.h"
 #include "core/log.h"
@@ -28,6 +30,8 @@
 #include "graphics/text.h"
 #include "graphics/video.h"
 #include "graphics/window.h"
+#include "map/tile_runtime_api.h"
+#include "map/tile_type_registry.h"
 #include "platform/file_manager.h"
 #include "platform/prefs.h"
 #include "platform/user_path.h"
@@ -134,6 +138,7 @@ int game_init(void)
     }
 
     model_reset();
+    resource_init();
 
     building_properties_init();
     if (!building_type_registry_load()) {
@@ -141,11 +146,15 @@ int game_init(void)
         errlog("unable to load BuildingType xml definitions");
         return 0;
     }
+    if (!tile_type_registry_load()) {
+        set_init_failure_message("Failed to load Tile definitions.", 0);
+        errlog("unable to load Tile xml definitions");
+        return 0;
+    }
     building_runtime_reset();
     load_augustus_messages();
     sound_system_init();
     game_state_init();
-    resource_init();
     int actions = ACTION_NONE;
     if (missing_fonts) {
         actions |= ACTION_SHOW_MESSAGE_MISSING_FONTS;
@@ -271,6 +280,13 @@ void game_display_fps(int fps)
 
 void game_exit(void)
 {
+    // Tear down runtime-managed image groups before payload storage so shutdown does not
+    // depend on C++ static destruction order between the two caches.
+    building_runtime_reset();
+    tile_runtime_reset();
+    image_group_payload_clear_all();
+    image_payload_clear_all();
+
     video_shutdown();
     settings_save();
     config_save();

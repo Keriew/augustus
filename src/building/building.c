@@ -7,6 +7,7 @@
 #include "building/data_transfer.h"
 #include "building/destruction.h"
 #include "building/distribution.h"
+#include "building/building_runtime_api.h"
 #include "building/industry.h"
 #include "building/granary.h"
 #include "building/menu.h"
@@ -330,6 +331,7 @@ void building_clear_related_data(building *b)
     }
 }
 
+// Restoring an undone building can immediately make it visible again, so rebuild its native runtime graphics cache here.
 building *building_restore_from_undo(building *to_restore)
 {
     building *b = array_item(data.buildings, to_restore->id);
@@ -338,6 +340,9 @@ building *building_restore_from_undo(building *to_restore)
         data.buildings.size = b->id + 1;
     }
     fill_adjacent_types(b);
+    if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
+        building_runtime_apply_graphic(b);
+    }
     return b;
 }
 
@@ -637,6 +642,8 @@ void building_update_state(void)
     {
         if (b->state == BUILDING_STATE_CREATED) {
             b->state = BUILDING_STATE_IN_USE;
+            // When a created building becomes live, rebuild its cached native image-group bindings immediately.
+            building_runtime_apply_graphic(b);
         }
         if (b->state == BUILDING_STATE_IN_USE && b->house_size) {
             continue;

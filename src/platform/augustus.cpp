@@ -1,4 +1,6 @@
 extern "C" {
+#include "assets/augustus_asset_extractor.h"
+#include "assets/assets.h"
 #include "core/config.h"
 #include "core/encoding.h"
 #include "core/file.h"
@@ -38,6 +40,7 @@ extern "C" {
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,10 +74,282 @@ static struct {
     FILE *log_file;
 } data = { 1 };
 
+static const char *AUGUSTUS_GRAPHICS_BOOTSTRAP_STAMP_PREFIX = "renderer_resource_bootstrap_v2:";
+
+static struct {
+    uint64_t hash;
+    char current_directory[FILE_NAME_MAX];
+    int failed;
+} graphics_fingerprint_data;
+
+static struct {
+    char current_src[FILE_NAME_MAX];
+    char current_dst[FILE_NAME_MAX];
+    int failed;
+    int files_copied;
+    int directories_created;
+} graphics_copy_data;
+
 static void write_to_output(FILE *output, const char *message)
 {
     fwrite(message, sizeof(char), strlen(message), output);
     fflush(output);
+}
+
+static int read_stamp_file(const char *path, char *buffer, size_t buffer_size)
+{
+    if (!buffer || buffer_size == 0) {
+        return 0;
+    }
+    FILE *file = file_open(path, "rt");
+    if (!file) {
+        buffer[0] = '\0';
+        return 0;
+    }
+    size_t bytes_read = fread(buffer, 1, buffer_size - 1, file);
+    buffer[bytes_read] = '\0';
+    file_close(file);
+    return 1;
+}
+
+static int write_stamp_file(const char *path, const char *stamp)
+{
+    FILE *file = file_open(path, "wt");
+    if (!file) {
+        return 0;
+    }
+    fwrite(stamp, sizeof(char), strlen(stamp), file);
+    file_close(file);
+    return 1;
+}
+
+static void ensure_graphics_directory(const char *path)
+{
+    if (!path || !*path) {
+        return;
+    }
+    platform_file_manager_create_directory(path, 0, 1);
+}
+
+static int stop_on_first_graphics_entry(const char *name, long modified_time)
+{
+    (void) name;
+    (void) modified_time;
+    return LIST_MATCH;
+}
+
+static int append_path_component(char *buffer, size_t buffer_size, const char *base_path, const char *component)
+{
+    if (!buffer || buffer_size == 0 || !base_path || !*base_path || !component || !*component) {
+        return 0;
+    }
+
+    const size_t base_length = strlen(base_path);
+    const int has_separator = base_length > 0 &&
+        (base_path[base_length - 1] == '/' || base_path[base_length - 1] == '\\');
+    return snprintf(buffer, buffer_size, has_separator ? "%s%s" : "%s/%s", base_path, component) <
+        static_cast<int>(buffer_size);
+}
+
+static void hash_graphics_fingerprint_bytes(const void *data_ptr, size_t size)
+{
+    const unsigned char *bytes = static_cast<const unsigned char *>(data_ptr);
+    const uint64_t fnv_prime = 1099511628211ull;
+    for (size_t i = 0; i < size; ++i) {
+        graphics_fingerprint_data.hash ^= bytes[i];
+        graphics_fingerprint_data.hash *= fnv_prime;
+    }
+}
+
+static void hash_graphics_fingerprint_string(const char *value)
+{
+    if (!value) {
+        return;
+    }
+    hash_graphics_fingerprint_bytes(value, strlen(value));
+}
+
+static void hash_graphics_fingerprint_int64(uint64_t value)
+{
+    hash_graphics_fingerprint_bytes(&value, sizeof(value));
+}
+
+static int fingerprint_graphics_directory_recursive(const char *path);
+static int copy_graphics_directory_recursive(const char *src, const char *dst);
+
+static int fingerprint_graphics_file(const char *name, long modified_time)
+{
+    hash_graphics_fingerprint_string(name);
+    hash_graphics_fingerprint_int64(static_cast<uint64_t>(modified_time));
+    return LIST_CONTINUE;
+}
+
+static int fingerprint_graphics_directory(const char *name, long modified_time)
+{
+    char next_directory[FILE_NAME_MAX];
+    snprintf(next_directory, FILE_NAME_MAX, "%s/%s", graphics_fingerprint_data.current_directory, name);
+    hash_graphics_fingerprint_string(name);
+    hash_graphics_fingerprint_int64(static_cast<uint64_t>(modified_time));
+    if (!fingerprint_graphics_directory_recursive(next_directory)) {
+        graphics_fingerprint_data.failed = 1;
+        return LIST_MATCH;
+    }
+    return LIST_CONTINUE;
+}
+
+static int fingerprint_graphics_directory_recursive(const char *path)
+{
+    char previous_directory[FILE_NAME_MAX];
+    snprintf(previous_directory, FILE_NAME_MAX, "%s", graphics_fingerprint_data.current_directory);
+    snprintf(graphics_fingerprint_data.current_directory, FILE_NAME_MAX, "%s", path);
+
+    const int files_result = platform_file_manager_list_directory_contents(
+        path, TYPE_FILE, 0, fingerprint_graphics_file);
+    const int directories_result = platform_file_manager_list_directory_contents(
+        path, TYPE_DIR, 0, fingerprint_graphics_directory);
+
+    snprintf(graphics_fingerprint_data.current_directory, FILE_NAME_MAX, "%s", previous_directory);
+    return files_result != LIST_ERROR && directories_result != LIST_ERROR && !graphics_fingerprint_data.failed;
+}
+
+static void log_graphics_copy_path_error(const char *message, const char *src, const char *dst)
+{
+    char details[FILE_NAME_MAX * 2];
+    snprintf(details, sizeof(details), "src=%s dst=%s", src ? src : "(null)", dst ? dst : "(null)");
+    log_error(message, details, 0);
+}
+
+static int copy_graphics_file_entry(const char *name, long modified_time)
+{
+    (void) modified_time;
+
+    char src_path[FILE_NAME_MAX];
+    char dst_path[FILE_NAME_MAX];
+    if (!append_path_component(src_path, sizeof(src_path), graphics_copy_data.current_src, name) ||
+        !append_path_component(dst_path, sizeof(dst_path), graphics_copy_data.current_dst, name)) {
+        log_graphics_copy_path_error("Augustus bootstrap path too long while copying file", graphics_copy_data.current_src, graphics_copy_data.current_dst);
+        graphics_copy_data.failed = 1;
+        return LIST_ERROR;
+    }
+
+    if (!platform_file_manager_copy_file(src_path, dst_path)) {
+        log_graphics_copy_path_error("Failed to copy Augustus graphics file", src_path, dst_path);
+        graphics_copy_data.failed = 1;
+        return LIST_ERROR;
+    }
+
+    graphics_copy_data.files_copied++;
+    return LIST_CONTINUE;
+}
+
+static int copy_graphics_directory_entry(const char *name, long modified_time)
+{
+    (void) modified_time;
+
+    char src_path[FILE_NAME_MAX];
+    char dst_path[FILE_NAME_MAX];
+    if (!append_path_component(src_path, sizeof(src_path), graphics_copy_data.current_src, name) ||
+        !append_path_component(dst_path, sizeof(dst_path), graphics_copy_data.current_dst, name)) {
+        log_graphics_copy_path_error("Augustus bootstrap path too long while copying directory", graphics_copy_data.current_src, graphics_copy_data.current_dst);
+        graphics_copy_data.failed = 1;
+        return LIST_ERROR;
+    }
+
+    if (!copy_graphics_directory_recursive(src_path, dst_path)) {
+        graphics_copy_data.failed = 1;
+        return LIST_ERROR;
+    }
+
+    return LIST_CONTINUE;
+}
+
+static int copy_graphics_directory_recursive(const char *src, const char *dst)
+{
+    char previous_src[FILE_NAME_MAX];
+    char previous_dst[FILE_NAME_MAX];
+    snprintf(previous_src, sizeof(previous_src), "%s", graphics_copy_data.current_src);
+    snprintf(previous_dst, sizeof(previous_dst), "%s", graphics_copy_data.current_dst);
+    snprintf(graphics_copy_data.current_src, sizeof(graphics_copy_data.current_src), "%s", src);
+    snprintf(graphics_copy_data.current_dst, sizeof(graphics_copy_data.current_dst), "%s", dst);
+
+    if (!platform_file_manager_create_directory(dst, 0, 1)) {
+        log_graphics_copy_path_error("Failed to create Augustus graphics directory", src, dst);
+        graphics_copy_data.failed = 1;
+    } else {
+        graphics_copy_data.directories_created++;
+    }
+
+    const int dirs_result = graphics_copy_data.failed ? LIST_ERROR :
+        platform_file_manager_list_directory_contents(src, TYPE_DIR, 0, copy_graphics_directory_entry);
+    const int files_result = (graphics_copy_data.failed || dirs_result == LIST_ERROR) ? LIST_ERROR :
+        platform_file_manager_list_directory_contents(src, TYPE_FILE, 0, copy_graphics_file_entry);
+
+    snprintf(graphics_copy_data.current_src, sizeof(graphics_copy_data.current_src), "%s", previous_src);
+    snprintf(graphics_copy_data.current_dst, sizeof(graphics_copy_data.current_dst), "%s", previous_dst);
+    return !graphics_copy_data.failed && dirs_result != LIST_ERROR && files_result != LIST_ERROR;
+}
+
+static int build_graphics_bootstrap_stamp(char *buffer, size_t buffer_size)
+{
+    if (!buffer || buffer_size == 0) {
+        return 0;
+    }
+
+    char graphics_source_path[FILE_NAME_MAX];
+    const char *asset_root = platform_file_manager_get_directory_for_location(PATH_LOCATION_ASSET, 0);
+    if (!append_path_component(graphics_source_path, sizeof(graphics_source_path), asset_root, ASSETS_IMAGE_PATH)) {
+        return 0;
+    }
+
+    memset(&graphics_fingerprint_data, 0, sizeof(graphics_fingerprint_data));
+    graphics_fingerprint_data.hash = 1469598103934665603ull;
+    hash_graphics_fingerprint_string(graphics_source_path);
+
+    if (!fingerprint_graphics_directory_recursive(graphics_source_path)) {
+        return 0;
+    }
+
+    return snprintf(
+        buffer,
+        buffer_size,
+        "%s%016llx",
+        AUGUSTUS_GRAPHICS_BOOTSTRAP_STAMP_PREFIX,
+        static_cast<unsigned long long>(graphics_fingerprint_data.hash)) < static_cast<int>(buffer_size);
+}
+
+static int bootstrap_augustus_graphics_directory(void)
+{
+    ensure_graphics_directory("Mods");
+    ensure_graphics_directory("Mods/Augustus");
+    if (!augustus_asset_extractor_bootstrap()) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to bootstrap Augustus graphics fallback directory");
+        platform_screen_show_error_message_box(
+            "Startup error",
+            "Failed to bootstrap Augustus graphics.\n\nMore details were written to augustus-log.txt.");
+        return 0;
+    }
+    return 1;
+}
+
+static int bootstrap_julius_graphics_directory(void)
+{
+    ensure_graphics_directory("Mods");
+    ensure_graphics_directory("Mods/Julius");
+    ensure_graphics_directory(mod_manager_get_julius_graphics_path());
+    return 1;
+}
+
+static int bootstrap_canonical_graphics_sources(void)
+{
+    return bootstrap_augustus_graphics_directory() && bootstrap_julius_graphics_directory();
+}
+
+static int pre_init_with_current_base_path(void)
+{
+    if (!bootstrap_canonical_graphics_sources()) {
+        return 0;
+    }
+    return game_pre_init();
 }
 
 #ifdef __IPHONEOS__
@@ -573,11 +848,11 @@ static int pre_init(const char *custom_data_dir)
                 NULL);
             return 0;
         }
-        return game_pre_init();
+        return pre_init_with_current_base_path();
     }
 
     SDL_Log("Loading game from working directory");
-    if (game_pre_init()) {
+    if (pre_init_with_current_base_path()) {
         return 1;
     }
 
@@ -591,7 +866,7 @@ static int pre_init(const char *custom_data_dir)
         if (base_path) {
             if (platform_file_manager_set_base_path(base_path)) {
                 SDL_Log("Loading game from base path %s", base_path);
-                if (game_pre_init()) {
+                if (pre_init_with_current_base_path()) {
 #ifndef __IPHONEOS__
                     SDL_free(base_path);
 #endif
@@ -609,7 +884,7 @@ static int pre_init(const char *custom_data_dir)
     const char *user_dir = pref_data_dir();
     if (*user_dir) {
         SDL_Log("Loading game from user pref %s", user_dir);
-        if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
+        if (platform_file_manager_set_base_path(user_dir) && pre_init_with_current_base_path()) {
             return 1;
         }
     }
@@ -617,7 +892,7 @@ static int pre_init(const char *custom_data_dir)
     user_dir = ask_for_data_dir(0);
     while (user_dir) {
         SDL_Log("Loading game from user-selected dir %s", user_dir);
-        if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
+        if (platform_file_manager_set_base_path(user_dir) && pre_init_with_current_base_path()) {
             pref_save_data_dir(user_dir);
 #ifdef __ANDROID__
             SDL_AndroidShowToast("C3 files found. Path saved.", 0, 0, 0, 0);

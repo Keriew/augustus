@@ -22,7 +22,7 @@
 #include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/screen.h"
 #include "graphics/scrollbar.h"
 #include "graphics/text.h"
@@ -1745,7 +1745,7 @@ static void draw_trade_button_highlights(void)
             time_millis elapsed = time_get_millis() - data.trade_route_anim_start;
             float time_seconds = elapsed / 1000.0f; // Convert to seconds
             float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
-            int alpha = 96 + (int) (pulse * 64); // Range: 32â€“160
+            int alpha = 96 + (int) (pulse * 64); // Range: 32Ã¢â‚¬â€œ160
             graphics_tint_rect(btn->x, btn->y, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
                 COLOR_MASK_DARK_PINK, alpha);
         }
@@ -1971,7 +1971,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         empire_scroll_map(position.x, position.y);
     }
 
-    // Only let the gridâ€box process clicks if the sidebar is actually expanded:
+    // Only let the gridÃ¢â‚¬Âbox process clicks if the sidebar is actually expanded:
     if (!data.sidebar.border_btn.is_collapsed) {
         if (window_empire_sidebar_sort_handle_expanding_buttons_input(m)) {
             return; //block other input handling if the expanding buttons are active

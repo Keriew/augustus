@@ -1,10 +1,14 @@
-#ifndef GRAPHICS_IMAGE_BUTTON_H
-#define GRAPHICS_IMAGE_BUTTON_H
+#pragma once
 
-#include "graphics/button.h"
 #include "input/mouse.h"
 
 #include "core/time.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void button_none(int param1, int param2);
 
 enum {
     IB_NORMAL = 4,
@@ -41,4 +45,6 @@ void image_buttons_draw(int x, int y, image_button *buttons, unsigned int num_bu
 int image_buttons_handle_mouse(
     const mouse *m, int x, int y, image_button *buttons, unsigned int num_buttons, unsigned int *focus_button_id);
 
-#endif // GRAPHICS_IMAGE_BUTTON_H
+#ifdef __cplusplus
+}
+#endif

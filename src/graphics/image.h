@@ -12,6 +12,7 @@ extern "C" {
 #define SCALE_NONE 1.0f
 
 void image_draw(int image_id, int x, int y, color_t color, float scale);
+void image_draw_image(const image *img, int x, int y, color_t color, float scale);
 
 void image_draw_silhouette(int image_id, int x, int y, color_t color, float scale);
 void image_draw_enemy(int image_id, int x, int y, float scale);
@@ -25,11 +26,15 @@ void image_draw_blurred_fullscreen(int image_id, int intensity);
 
 void image_draw_border(int base_image_id, int x, int y, color_t color);
 
+void image_draw_isometric_footprint_image(const image *img, int x, int y, color_t color_mask, float scale);
 void image_draw_isometric_footprint(int image_id, int x, int y, color_t color_mask, float scale);
+void image_draw_isometric_footprint_from_draw_tile_image(const image *img, int x, int y, color_t color_mask, float scale);
 void image_draw_isometric_footprint_from_draw_tile(int image_id, int x, int y, color_t color_mask, float scale);
 void image_blend_footprint_color(int x, int y, color_t color, float scale);
 
+void image_draw_isometric_top_image(const image *img, int x, int y, color_t color_mask, float scale);
 void image_draw_isometric_top(int image_id, int x, int y, color_t color_mask, float scale);
+void image_draw_isometric_top_from_draw_tile_image(const image *img, int x, int y, color_t color_mask, float scale);
 void image_draw_isometric_top_from_draw_tile(int image_id, int x, int y, color_t color_mask, float scale);
 void image_draw_set_isometric_top_from_draw_tile(int image_id, int x, int y, color_t color_mask, float scale);
 

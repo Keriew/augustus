@@ -1,0 +1,9 @@
+#pragma once
+
+enum {
+    BLOCK_SIZE = 16,
+    BLACK_PANEL_BLOCK_WIDTH = 20,
+    BLACK_PANEL_MIDDLE_BLOCKS = 4,
+    LABEL_TYPE_NORMAL = 1,
+    LABEL_TYPE_HOVER = 2
+};

@@ -3,6 +3,7 @@
 #include "assets/group.h"
 #include "core/array.h"
 #include "core/image.h"
+#include "core/image_payload.h"
 #include "core/image_packer.h"
 #include "core/log.h"
 #include "core/png_read.h"
@@ -79,6 +80,11 @@ static void translate_reference_position(asset_image *img)
         img->img.y_offset = referenced->img.y_offset;
         img->img.atlas.x_offset = referenced->img.atlas.x_offset;
         img->img.atlas.y_offset = referenced->img.atlas.y_offset;
+        if (referenced->img.resource_key) {
+            image_payload_acquire(&img->img, referenced->img.resource_key);
+        } else {
+            img->img.resource_handle = referenced->img.resource_handle;
+        }
         img->img.top = referenced->img.top;
         width = referenced->img.width;
         height = referenced->img.height;
@@ -89,6 +95,11 @@ static void translate_reference_position(asset_image *img)
         img->img.y_offset = referenced->y_offset;
         img->img.atlas.x_offset = referenced->atlas.x_offset;
         img->img.atlas.y_offset = referenced->atlas.y_offset;
+        if (referenced->resource_key) {
+            image_payload_acquire(&img->img, referenced->resource_key);
+        } else {
+            img->img.resource_handle = referenced->resource_handle;
+        }
         img->img.top = referenced->top;
         width = referenced->width;
         height = referenced->height;
@@ -456,8 +467,12 @@ void asset_image_unload(asset_image *img)
     free((char *) img->id);
     free((color_t *) img->data); // Freeing a const pointer - ugly but necessary
     if (!img->is_reference) {
+        if (img->img.top) {
+            image_payload_release(img->img.top);
+        }
         free(img->img.top);
     }
+    image_payload_release(&img->img);
     free(img->img.animation);
     img->id = 0;
     img->data = 0;
@@ -474,6 +489,119 @@ static void new_image(asset_image *img, unsigned int index)
 static int is_image_active(const asset_image *img)
 {
     return img->active;
+}
+
+static int upload_cropped_image_resource(
+    image *img,
+    const color_t *pixels,
+    int source_width,
+    int source_height,
+    int source_x,
+    int source_y)
+{
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (!img) {
+        return 0;
+    }
+    if (!renderer || !renderer->release_image_resource || !renderer->upload_image_resource) {
+        return 0;
+    }
+    renderer->release_image_resource(img);
+    if (!pixels || img->width <= 0 || img->height <= 0 ||
+        source_width <= 0 || source_height <= 0 ||
+        source_x < 0 || source_y < 0 ||
+        source_x + img->width > source_width ||
+        source_y + img->height > source_height) {
+        return 0;
+    }
+
+    color_t *cropped = malloc(sizeof(color_t) * img->width * img->height);
+    if (!cropped) {
+        return 0;
+    }
+    for (int y = 0; y < img->height; y++) {
+        memcpy(&cropped[y * img->width],
+            &pixels[(source_y + y) * source_width + source_x],
+            sizeof(color_t) * img->width);
+    }
+    renderer->upload_image_resource(img, cropped, img->width, img->height);
+    free(cropped);
+    return img->resource_handle != 0;
+}
+
+static int upload_atlas_image_resource(image *img, const image_atlas_data *atlas_data)
+{
+    if (!img || !atlas_data) {
+        return 0;
+    }
+    int atlas_index = img->atlas.id & IMAGE_ATLAS_BIT_MASK;
+    if (atlas_index < 0 || atlas_index >= atlas_data->num_images) {
+        return 0;
+    }
+    return upload_cropped_image_resource(img,
+        atlas_data->buffers[atlas_index],
+        atlas_data->image_widths[atlas_index],
+        atlas_data->image_heights[atlas_index],
+        img->atlas.x_offset,
+        img->atlas.y_offset);
+}
+
+static void make_asset_image_resource_key(const asset_image *img, int is_top, char *buffer, size_t buffer_size)
+{
+    const image_groups *group = group_get_from_image_index(img ? (int) img->index : -1);
+    const char *group_name = group && group->name ? group->name : "Unknown";
+    const char *image_name = img && img->id && *img->id ? img->id : "Unnamed";
+    snprintf(buffer, buffer_size, "Graphics/%s/%s%s", group_name, image_name, is_top ? "/top" : "");
+}
+
+static void register_asset_image_payload(asset_image *img, int is_top)
+{
+    if (!img) {
+        return;
+    }
+    image *target = is_top ? img->img.top : &img->img;
+    if (!target || target->resource_handle <= 0) {
+        return;
+    }
+    char key[FILE_NAME_MAX];
+    make_asset_image_resource_key(img, is_top, key, sizeof(key));
+    image_payload_register(target, key);
+}
+
+static int asset_image_can_use_direct_payload(const asset_image *img)
+{
+    if (!img || img->is_reference || img->img.is_isometric || img->img.top || &img->first_layer != img->last_layer) {
+        return 0;
+    }
+
+    const layer *source = &img->first_layer;
+    return source->asset_image_path && *source->asset_image_path &&
+        !source->calculated_image_id &&
+        source->invert == INVERT_NONE &&
+        source->rotate == ROTATE_NONE &&
+        source->part == PART_BOTH &&
+        source->mask == LAYER_MASK_NONE &&
+        source->src_x == 0 &&
+        source->src_y == 0 &&
+        source->x_offset == 0 &&
+        source->y_offset == 0 &&
+        img->img.original.width == source->width &&
+        img->img.original.height == source->height;
+}
+
+static int load_asset_image_direct_payload(asset_image *img)
+{
+    if (!asset_image_can_use_direct_payload(img)) {
+        return 0;
+    }
+
+    const layer *source = &img->first_layer;
+    if (!image_payload_load_png(&img->img, source->asset_image_path, source->asset_image_path)) {
+        return 0;
+    }
+
+    img->img.atlas.id = (ATLAS_UNPACKED_EXTRA_ASSET << IMAGE_ATLAS_BIT_OFFSET) + img->index;
+    return 1;
 }
 
 int asset_image_init_array(void)
@@ -515,6 +643,9 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
             continue;
         }
         load_image(current_image, main_images, main_image_widths);
+        if (load_asset_image_direct_payload(current_image)) {
+            continue;
+        }
         int top_height = current_image->img.top ? current_image->img.top->height : 0;
 
         if (graphics_renderer()->should_pack_image(current_image->img.width, current_image->img.height + top_height)) {
@@ -557,13 +688,17 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
     }
 
     png_unload();
-    image_packer_pack(&packer);
+    const image_atlas_data *atlas_data = 0;
+    if (rect > 0) {
+        image_packer_pack(&packer);
 
-    const image_atlas_data *atlas_data = graphics_renderer()->prepare_image_atlas(ATLAS_EXTRA_ASSET,
-        packer.result.images_needed, packer.result.last_image_width, packer.result.last_image_height);
-    if (!atlas_data) {
-        log_error("Failed to create packed images atlas - out of memory", 0, 0);
-        return 0;
+        atlas_data = graphics_renderer()->prepare_image_atlas(ATLAS_EXTRA_ASSET,
+            packer.result.images_needed, packer.result.last_image_width, packer.result.last_image_height);
+        if (!atlas_data) {
+            log_error("Failed to create packed images atlas - out of memory", 0, 0);
+            image_packer_free(&packer);
+            return 0;
+        }
     }
 
     int total_unpacked_assets = 0;
@@ -579,6 +714,8 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
                 free((color_t *) current_image->data); // Freeing a const pointer - ugly but necessary
                 current_image->data = 0;
             }
+        } else if (asset_image_can_use_direct_payload(current_image) && current_image->img.resource_handle > 0) {
+            continue;
         } else if (graphics_renderer()->should_pack_image(current_image->img.width, current_image->img.height + top_height)) {
             int original_width = current_image->img.width;
             int original_height = current_image->img.height;
@@ -622,6 +759,13 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
                 image_copy(&copy);
             }
 
+            upload_atlas_image_resource(&current_image->img, atlas_data);
+            register_asset_image_payload(current_image, 0);
+            if (current_image->img.top) {
+                upload_atlas_image_resource(current_image->img.top, atlas_data);
+                register_asset_image_payload(current_image, 1);
+            }
+
             free((color_t *) current_image->data); // Freeing a const pointer - ugly but necessary
 
             current_image->data = 0;
@@ -631,11 +775,31 @@ int asset_image_load_all(color_t **main_images, int *main_image_widths)
             if (current_image->img.top) {
                 current_image->img.top->atlas.id += total_unpacked_assets;
             }
+            upload_cropped_image_resource(
+                &current_image->img,
+                current_image->data,
+                current_image->img.original.width,
+                current_image->img.original.height + top_height,
+                current_image->img.x_offset,
+                current_image->img.y_offset + current_image->img.atlas.y_offset);
+            register_asset_image_payload(current_image, 0);
+            if (current_image->img.top) {
+                upload_cropped_image_resource(
+                    current_image->img.top,
+                    current_image->data,
+                    current_image->img.top->original.width,
+                    current_image->img.top->original.height,
+                    current_image->img.top->x_offset,
+                    current_image->img.top->y_offset);
+                register_asset_image_payload(current_image, 1);
+            }
             total_unpacked_assets++;
         }
     }
     image_packer_free(&packer);
-    graphics_renderer()->create_image_atlas(atlas_data, 1);
+    if (atlas_data) {
+        graphics_renderer()->create_image_atlas(atlas_data, 1);
+    }
 #endif
     return 1;
 }
@@ -717,6 +881,11 @@ const asset_image *asset_image_create_external(const char *filename)
     img->id = id;
     img->img.atlas.id = ATLAS_UNPACKED_EXTRA_ASSET << IMAGE_ATLAS_BIT_OFFSET;
     img->img.atlas.id += img->index;
+    const graphics_renderer_interface *renderer = graphics_renderer();
+    if (renderer && renderer->upload_image_resource) {
+        renderer->upload_image_resource(&img->img, pixels, img->img.width, img->img.height);
+    }
+    image_payload_register(&img->img, filename);
     return img;
 #else
     return 0;

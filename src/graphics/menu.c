@@ -3,7 +3,7 @@
 #include "core/calc.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
+#include "graphics/ui_runtime_api.h"
 
 #define TOP_MENU_BASE_X_OFFSET 10
 #define MENU_BASE_TEXT_Y_OFFSET 6

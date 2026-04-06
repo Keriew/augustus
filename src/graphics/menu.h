@@ -1,7 +1,10 @@
-#ifndef GRAPHICS_MENU_H
-#define GRAPHICS_MENU_H
+#pragma once
 
 #include "input/mouse.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define TOP_MENU_HEIGHT 24
 
@@ -29,4 +32,6 @@ void menu_draw(menu_bar_item *menu, int focus_item_id);
 int menu_handle_mouse(const mouse *m, menu_bar_item *menu, int *focus_item_id);
 void menu_update_text(menu_bar_item *menu, int index, int text_number);
 
-#endif // GRAPHICS_MENU_H
+#ifdef __cplusplus
+}
+#endif

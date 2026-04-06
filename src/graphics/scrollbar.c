@@ -1,11 +1,10 @@
 #include "scrollbar.h"
 
 #include "core/calc.h"
-#include "core/image.h"
 #include "core/image_group.h"
-#include "graphics/image.h"
 #include "graphics/image_button.h"
 #include "graphics/screen.h"
+#include "graphics/ui_runtime_api.h"
 
 enum {
     TOUCH_DRAG_NONE = 0,
@@ -72,24 +71,7 @@ void scrollbar_draw(scrollbar_type *scrollbar)
         image_buttons_draw(scrollbar->x, scrollbar->y, &image_button_scroll_up, 1);
         image_buttons_draw(scrollbar->x, scrollbar->y + scrollbar->height - SCROLL_BUTTON_HEIGHT,
             &image_button_scroll_down, 1);
-
-        int pct;
-        if (scrollbar->scroll_position <= 0) {
-            pct = 0;
-        } else if (scrollbar->scroll_position >= scrollbar->max_scroll_position) {
-            pct = 100;
-        } else {
-            pct = calc_percentage(scrollbar->scroll_position, scrollbar->max_scroll_position);
-        }
-        int offset = calc_adjust_with_percentage(
-            scrollbar->height - TOTAL_BUTTON_HEIGHT - 2 * scrollbar->dot_padding, pct);
-        if (scrollbar->is_dragging_scrollbar_dot) {
-            offset = scrollbar->scrollbar_dot_drag_offset;
-        }
-        image_draw(image_group(GROUP_PANEL_BUTTON) + 39,
-            scrollbar->x + (SCROLL_BUTTON_WIDTH - SCROLL_DOT_SIZE) / 2,
-            scrollbar->y + offset + SCROLL_BUTTON_HEIGHT + scrollbar->dot_padding,
-            COLOR_MASK_NONE, SCALE_NONE);
+        ui_runtime_draw_scrollbar_dot(scrollbar);
     }
 }
 

@@ -62,6 +62,10 @@ int assets_init(int force_reload, color_t **main_images, int *main_image_widths)
     int total_xml_files = root_xml_files->num_files;
     const dir_listing *mod_xml_files = dir_find_files_with_extension(mod_manager_get_graphics_path(), "xml");
     total_xml_files += mod_xml_files->num_files;
+    const dir_listing *augustus_xml_files = dir_find_files_with_extension(mod_manager_get_augustus_graphics_path(), "xml");
+    total_xml_files += augustus_xml_files->num_files;
+    const dir_listing *julius_xml_files = dir_find_files_with_extension(mod_manager_get_julius_graphics_path(), "xml");
+    total_xml_files += julius_xml_files->num_files;
 
     if (!group_create_all(total_xml_files) || !asset_image_init_array()) {
         log_error("Not enough memory to initialize extra assets. The game will probably crash.", 0, 0);
@@ -72,6 +76,12 @@ int assets_init(int force_reload, color_t **main_images, int *main_image_widths)
     xml_init();
 
     if (!load_assetlists_from_source(mod_manager_get_graphics_path(), XML_ASSET_SOURCE_MOD)) {
+        return 0;
+    }
+    if (!load_assetlists_from_source(mod_manager_get_augustus_graphics_path(), XML_ASSET_SOURCE_AUGUSTUS)) {
+        return 0;
+    }
+    if (!load_assetlists_from_source(mod_manager_get_julius_graphics_path(), XML_ASSET_SOURCE_JULIUS)) {
         return 0;
     }
     if (!load_assetlists_from_source(ASSETS_DIRECTORY "/" ASSETS_IMAGE_PATH, XML_ASSET_SOURCE_ROOT)) {
@@ -246,7 +256,7 @@ const image *assets_get_font_image(int letter_id)
 void assets_load_unpacked_asset(int image_id)
 {
     asset_image *img = asset_image_get_from_id(image_id - IMAGE_MAIN_ENTRIES);
-    if (!img) {
+    if (!img || img->img.resource_handle) {
         return;
     }
     const color_t *pixels;

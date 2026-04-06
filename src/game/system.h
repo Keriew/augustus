@@ -1,8 +1,11 @@
-#ifndef GAME_SYSTEM_H
-#define GAME_SYSTEM_H
+#pragma once
 
 #include "graphics/color.h"
 #include "input/keys.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @file
@@ -211,4 +214,6 @@ const char *system_show_select_folder_dialog(const char *title, const char *defa
  */
 void system_exit(void);
 
-#endif // GAME_SYSTEM_H
+#ifdef __cplusplus
+}
+#endif

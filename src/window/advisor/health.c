@@ -6,11 +6,10 @@
 #include "city/houses.h"
 #include "city/population.h"
 #include "core/calc.h"
-#include "graphics/button.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h" 
 

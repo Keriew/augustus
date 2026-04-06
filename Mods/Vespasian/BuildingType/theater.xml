@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="theater">
-    <graphic threshold="45" operator="gt" />
+    <graphics>
+        <default>
+            <path value="Health_Culture\Theater" />
+            <image value="Image_0000" />
+        </default>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="45" />
+            <condition type="has_workers" />
+            <path value="Health_Culture\Theatre_ON_01" />
+            <image value="Theatre Upgrade ON" />
+        </variant>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="45" />
+            <path value="Health_Culture\Theatre_Upgrade_OFF" />
+            <image value="Theatre Upgrade OFF" />
+        </variant>
+        <variant>
+            <condition type="has_workers" />
+            <path value="Health_Culture\Theatre_ON_01" />
+            <image value="Theatre ON" />
+        </variant>
+    </graphics>
     <labor labor_seeker_mode="generate_if_below" labor_min_houses="50" />
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="actor">
         <spawn mode="service_roamer" spawn_figure="actor"

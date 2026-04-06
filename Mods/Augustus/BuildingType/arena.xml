@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="arena">
-    <graphic threshold="45" operator="gt" />
+    <graphics>
+        <default>
+            <path value="Health_Culture\Arena_OFF" />
+            <image value="Arena OFF" />
+        </default>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="45" />
+            <condition type="has_workers" />
+            <path value="Health_Culture\Arena_OFF" />
+            <image value="Arena Upgrade ON" />
+        </variant>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="45" />
+            <path value="Health_Culture\Arena_OFF" />
+            <image value="Arena Upgrade OFF" />
+        </variant>
+        <variant>
+            <condition type="has_workers" />
+            <path value="Health_Culture\Arena_OFF" />
+            <image value="Arena ON" />
+        </variant>
+    </graphics>
     <labor labor_seeker_mode="generate_if_below" labor_min_houses="50" />
     <spawn_group road_access="normal" delay_bands="100:6,75:12,50:20,25:40,1:70" existing_figure="gladiator,lion_tamer">
         <spawn mode="service_roamer" spawn_figure="lion_tamer"

@@ -2,12 +2,54 @@
 
 The loader reads every `*.xml` file in this folder at startup. Keep templates/examples in non-`.xml` files so they do not get loaded as live data.
 
+Templates and examples are maintained only in `Mods\Vespasian\BuildingType`.
+`Mods\Augustus\BuildingType` keeps live XML data only.
+
 Current supported nodes:
 
-- `<graphic threshold="N" operator="gt|gte" [water_access="reservoir_range"] />`
+- `<state> ... </state>`
+- `<graphics> ... </graphics>`
 - `<labor labor_seeker_mode="..." labor_min_houses="N" />`
 - `<spawn_group ...>`
 - `<spawn ... />`
+
+Current supported `<state>` child nodes:
+
+- `<water_access mode="reservoir_range" />`
+
+Current supported `<graphics>` child nodes:
+
+- `<default> ... </default>`
+- `<variant> ... </variant>`
+- `<condition type="has_workers" />`
+- `<condition type="water_access" />`
+- `<condition type="resource_positive" resource="wine" />`
+- `<condition type="desirability" operator="lt|lte|eq|gt|gte" threshold="N" />`
+
+`<path value="...">` rules:
+
+- path is relative to the winning `Graphics` folder
+- use backslash-delimited logical keys
+- do not include the `Graphics\` prefix
+- do not include the `.xml` suffix
+- example: `Mods\Augustus\Graphics\Health_Culture\Theatre.xml` becomes `Health_Culture\Theatre`
+
+Structured `<graphics>` rules:
+
+- `<default>` is required
+- `<variant>` entries are checked in XML order
+- all `<condition>` nodes inside one `<variant>` must match
+- the first matching variant wins
+- the `<default>` target is used when no variant matches
+- `<path>` and optional `<image>` must live inside `<default>` or `<variant>`
+- put water refresh rules under `<state>`, not under `<graphics>`
+
+Current supported graphics conditions:
+
+- `type="has_workers"` means `num_workers > 0`
+- `type="water_access"` means `has_water_access`
+- `type="resource_positive" resource="wine"` means the building has at least one unit of that resource
+- `type="desirability" operator="lt|lte|eq|gt|gte" threshold="N"` compares the building desirability against `N`
 
 Current supported `<labor>` attributes:
 
@@ -47,13 +89,15 @@ Current supported `<spawn>` attributes:
 
 Current engine behavior:
 
-- Only the migrated building families use `<spawn>` so far.
+- Repo-owned BuildingType graphics use only the structured `<graphics>` schema.
 - A `spawn_group` owns the shared delay/guard phase, then runs its child `<spawn>` policies in order.
 - Delay evaluation now uses the explicit `delay_bands` data from XML rather than a hardcoded named profile.
 - Ordered policies can coordinate: a policy that succeeds with `block_on_success="true"` stops later sibling policies in the same group.
 - Use `block_on_success="true"` when a building should spawn either A or B on the same trigger.
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
-- The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
+- Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them.
+- Put shared derived state such as water access under `<state>` so graphics and spawn behavior read the same runtime facts.
+- Buildings with a validated runtime `BuildingType` graphics block now use the native runtime renderer path as the authoritative live path.
 
-See `_template.xml.example` for a copy/paste starter.
+See `_template.xml.example` here in `Mods\Vespasian\BuildingType` for a copy/paste starter.

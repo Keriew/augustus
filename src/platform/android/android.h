@@ -1,5 +1,8 @@
-#ifndef PLATFORM_ANDROID_H
-#define PLATFORM_ANDROID_H
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __ANDROID__
 
@@ -20,4 +23,7 @@ void platform_show_virtual_keyboard(void);
 void platform_hide_virtual_keyboard(void);
 
 #endif // __ANDROID__
-#endif // PLATFORM_ANDROID_H
+
+#ifdef __cplusplus
+}
+#endif

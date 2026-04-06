@@ -1,0 +1,5 @@
+<tile type="plaza">
+    <graphics>
+        <path value="Terrain_Maps\Plaza" />
+    </graphics>
+</tile>

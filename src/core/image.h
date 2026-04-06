@@ -1,5 +1,4 @@
-#ifndef CORE_IMAGE_H
-#define CORE_IMAGE_H
+#pragma once
 
 #include "core/encoding.h"
 #include "core/image_group.h"
@@ -45,6 +44,8 @@ typedef struct {
     int start_offset;
 } image_animation;
 
+typedef int image_handle;
+
 /**
  * Image metadata
  */
@@ -65,6 +66,9 @@ typedef struct image {
         int x_offset;
         int y_offset;
     } atlas;
+    image_handle resource_handle;
+    char *resource_key;
+    void *resource_payload;
 } image;
 
 /**
@@ -198,4 +202,3 @@ void image_copy_isometric_footprint(const image_copy_info *copy);
 }
 #endif
 
-#endif // CORE_IMAGE_H

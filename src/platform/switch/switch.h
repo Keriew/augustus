@@ -1,5 +1,8 @@
-#ifndef PLATFORM_SWITCH_H
-#define PLATFORM_SWITCH_H
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __SWITCH__
 
@@ -25,4 +28,7 @@ void platform_hide_virtual_keyboard(void);
 #define PLATFORM_NO_USER_DIRECTORIES
 
 #endif // __SWITCH__
-#endif // PLATFORM_SWITCH_H
+
+#ifdef __cplusplus
+}
+#endif

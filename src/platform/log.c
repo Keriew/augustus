@@ -67,6 +67,14 @@ void log_info(const char *msg, const char *param_str, int param_int)
     }
 }
 
+void log_warning(const char *msg, const char *param_str, int param_int)
+{
+    build_message(msg, param_str, param_int);
+    if (!count_archived_message()) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", log_buffer);
+    }
+}
+
 void log_error(const char *msg, const char *param_str, int param_int)
 {
     build_message(msg, param_str, param_int);

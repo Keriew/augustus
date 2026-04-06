@@ -1,12 +1,10 @@
 #include "screen.h"
 
-extern "C" {
 #include "city/view.h"
 #include "city/warning.h"
 #include "core/calc.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
-}
 
 static struct {
     int width;

@@ -1,11 +1,10 @@
 #include "edit_price_change.h"
 
 #include "game/resource.h"
-#include "graphics/button.h"
+#include "graphics/ui_runtime_api.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
-#include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
