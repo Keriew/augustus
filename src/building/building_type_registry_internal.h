@@ -11,10 +11,9 @@
 namespace building_type_registry_impl {
 
 enum class GraphicsParseTargetScope {
-    Root,
+    None,
     Default,
-    Variant,
-    Overlay
+    Variant
 };
 
 struct ParseState {
@@ -25,12 +24,9 @@ struct ParseState {
     int saw_state = 0;
     int parsing_state = 0;
     int parsing_graphics = 0;
-    int saw_legacy_graphics_nodes = 0;
     int has_current_graphics_variant = 0;
-    int has_current_graphics_overlay = 0;
     size_t current_graphics_variant_index = 0;
-    size_t current_graphics_overlay_index = 0;
-    GraphicsParseTargetScope current_graphics_target_scope = GraphicsParseTargetScope::Root;
+    GraphicsParseTargetScope current_graphics_target_scope = GraphicsParseTargetScope::None;
     int saw_spawn = 0;
     int error = 0;
 };

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="theater">
+    <graphics>
+        <default>
+            <path value="Health_Culture\Theater" />
+            <image value="Image_0000" />
+        </default>
+    </graphics>
+    <labor labor_seeker_mode="generate_if_below" labor_min_houses="50" />
+    <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="actor">
+        <spawn mode="service_roamer" spawn_figure="actor"
+            action_state="entertainer_roaming" direction="top" figure_slot="primary" init_roaming="true"
+            graphic_timing="before_successful_spawn" />
+    </spawn_group>
+</building>

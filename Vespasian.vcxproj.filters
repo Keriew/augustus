@@ -74,7 +74,9 @@
     <ClCompile Include="src\widget\city.c" />
     <ClCompile Include="src\widget\city_bridge.c" />
     <ClCompile Include="src\widget\city_building_ghost.cpp" />
+    <ClCompile Include="src\widget\city_draw.cpp" />
     <ClCompile Include="src\widget\city_draw_highway.c" />
+    <ClCompile Include="src\widget\city_draw_overlay.cpp" />
     <ClCompile Include="src\widget\city_figure.c" />
     <ClCompile Include="src\widget\city_overlay_education.c" />
     <ClCompile Include="src\widget\city_overlay_entertainment.c" />
@@ -556,7 +558,9 @@
     <ClInclude Include="src\widget\city.h" />
     <ClInclude Include="src\widget\city_bridge.h" />
     <ClInclude Include="src\widget\city_building_ghost.h" />
+    <ClInclude Include="src\widget\city_draw.h" />
     <ClInclude Include="src\widget\city_draw_highway.h" />
+    <ClInclude Include="src\widget\city_draw_overlay.h" />
     <ClInclude Include="src\widget\city_figure.h" />
     <ClInclude Include="src\widget\city_overlay.h" />
     <ClInclude Include="src\widget\city_overlay_education.h" />

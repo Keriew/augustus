@@ -6,6 +6,8 @@
 
 #ifdef __cplusplus
 
+#include <string>
+
 class tile_runtime {
 public:
     tile_runtime(int grid_offset, const tile_type_registry_impl::TileType *definition)
@@ -24,14 +26,14 @@ public:
         return definition_;
     }
 
-    void set_plaza_image_index(int image_index)
+    void set_plaza_image_id(const char *image_id)
     {
-        plaza_image_index_ = image_index;
+        plaza_image_id_ = image_id ? image_id : "";
     }
 
-    int plaza_image_index() const
+    const char *plaza_image_id() const
     {
-        return plaza_image_index_;
+        return plaza_image_id_.c_str();
     }
 
     const RuntimeDrawSlice *resolve_graphic_slice() const;
@@ -39,7 +41,7 @@ public:
 private:
     int grid_offset_ = -1;
     const tile_type_registry_impl::TileType *definition_ = nullptr;
-    int plaza_image_index_ = -1;
+    std::string plaza_image_id_;
 };
 
 namespace tile_runtime_impl {

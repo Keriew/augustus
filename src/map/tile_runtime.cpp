@@ -34,10 +34,10 @@ void log_tile_scope_state(void *userdata)
     snprintf(
         details,
         sizeof(details),
-        "grid_offset=%d graphics_path=%s plaza_index=%d",
+        "grid_offset=%d graphics_path=%s plaza_image=%s",
         runtime->grid_offset(),
         runtime->definition()->graphics_path() ? runtime->definition()->graphics_path() : "",
-        runtime->plaza_image_index());
+        runtime->plaza_image_id());
     log_info("Graphics tile state", details, 0);
 }
 
@@ -58,7 +58,7 @@ void log_tile_graphics_fallback_once(const char *message, const tile_runtime *ru
         return;
     }
 
-    crash_context_report_error(message, detail);
+    error_context_report_error(message, detail);
 }
 
 }
@@ -93,11 +93,11 @@ tile_runtime *get_or_create_instance(int grid_offset, tile_type_registry_impl::T
 
 }
 
-// Input: one runtime tile wrapper that already knows its authored plaza image index.
+// Input: one runtime tile wrapper that already knows its authored plaza image id.
 // Output: the native footprint slice for that tile, or null when the authored runtime tile graphic cannot be resolved.
 const RuntimeDrawSlice *tile_runtime::resolve_graphic_slice() const
 {
-    if (!definition_ || !definition_->has_graphics() || plaza_image_index_ < 0) {
+    if (!definition_ || !definition_->has_graphics() || !plaza_image_id_[0]) {
         return nullptr;
     }
 
@@ -113,9 +113,9 @@ const RuntimeDrawSlice *tile_runtime::resolve_graphic_slice() const
         snprintf(
             detail,
             sizeof(detail),
-            "%s index=%d",
+            "%s image=%s",
             definition_->graphics_path(),
-            plaza_image_index_);
+            plaza_image_id());
         log_tile_graphics_fallback_once(
             "Tile graphics image could not be resolved. Falling back to legacy rendering.",
             this,
@@ -128,15 +128,15 @@ const RuntimeDrawSlice *tile_runtime::resolve_graphic_slice() const
         return nullptr;
     }
 
-    const ImageGroupEntry *entry = payload->entry_at_index(plaza_image_index_);
+    const ImageGroupEntry *entry = payload->entry_for(plaza_image_id());
     if (!entry || !entry->footprint()) {
         char detail[256];
         snprintf(
             detail,
             sizeof(detail),
-            "%s index=%d",
+            "%s image=%s",
             definition_->graphics_path(),
-            plaza_image_index_);
+            plaza_image_id());
         log_tile_graphics_fallback_once(
             "Tile graphics image could not be resolved. Falling back to legacy rendering.",
             this,
@@ -157,15 +157,15 @@ extern "C" void tile_runtime_clear(int grid_offset)
     tile_runtime_impl::g_runtime_tiles.erase(grid_offset);
 }
 
-extern "C" void tile_runtime_set_plaza_image_index(int grid_offset, int image_index)
+extern "C" void tile_runtime_set_plaza_image_id(int grid_offset, const char *image_id)
 {
-    if (image_index < 0) {
+    if (!image_id || !*image_id) {
         tile_runtime_clear(grid_offset);
         return;
     }
 
     if (tile_runtime *instance = tile_runtime_impl::get_or_create_instance(grid_offset, tile_type_registry_impl::TileKind::Plaza)) {
-        instance->set_plaza_image_index(image_index);
+        instance->set_plaza_image_id(image_id);
     }
 }
 

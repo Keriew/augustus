@@ -138,6 +138,7 @@ int game_init(void)
     }
 
     model_reset();
+    resource_init();
 
     building_properties_init();
     if (!building_type_registry_load()) {
@@ -154,7 +155,6 @@ int game_init(void)
     load_augustus_messages();
     sound_system_init();
     game_state_init();
-    resource_init();
     int actions = ACTION_NONE;
     if (missing_fonts) {
         actions |= ACTION_SHOW_MESSAGE_MISSING_FONTS;

@@ -1,8 +1,6 @@
 #include "city_without_overlay.h"
 
-#include "building/building_runtime_graphics.h"
-#include "graphics/runtime_texture.h"
-#include "map/tile_runtime_graphics.h"
+#include "widget/city_draw.h"
 
 extern "C" {
 #include "assets/assets.h"
@@ -213,100 +211,6 @@ static int is_building_hovered(building *b)
     return (b->id == draw_context.hovered_building_id || main_part_id == draw_context.hovered_building_id);
 }
 
-static const RuntimeDrawSlice *get_runtime_graphic_footprint(building *b)
-{
-    if (!b) {
-        return 0;
-    }
-    b = building_main(b);
-    return b ? building_runtime_get_graphic_footprint_slice(b) : 0;
-}
-
-static const RuntimeDrawSlice *get_runtime_graphic_top(building *b)
-{
-    if (!b) {
-        return 0;
-    }
-    b = building_main(b);
-    return b ? building_runtime_get_graphic_top_slice(b) : 0;
-}
-
-static int runtime_owns_building_graphics(building *b)
-{
-    if (!b) {
-        return 0;
-    }
-    b = building_main(b);
-    return b ? building_runtime_owns_graphics(b) : 0;
-}
-
-static int runtime_owns_building_animation(building *b)
-{
-    if (!b) {
-        return 0;
-    }
-    b = building_main(b);
-    return b ? building_runtime_owns_graphic_animation(b) : 0;
-}
-
-static int draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask)
-{
-    if (!runtime_owns_building_graphics(b)) {
-        return 0;
-    }
-    const RuntimeDrawSlice *slice = get_runtime_graphic_footprint(b);
-    if (!slice) {
-        return 1;
-    }
-    runtime_texture_draw(*slice, x, y, color_mask, draw_context.scale);
-    return 1;
-}
-
-static int draw_runtime_building_top(building *b, int x, int y, color_t color_mask)
-{
-    if (!runtime_owns_building_graphics(b)) {
-        return 0;
-    }
-    const RuntimeDrawSlice *slice = get_runtime_graphic_top(b);
-    if (!slice) {
-        return 1;
-    }
-    runtime_texture_draw(*slice, x, y, color_mask, draw_context.scale);
-    return 1;
-}
-
-static int draw_runtime_building_animation(building *b, int x, int y, int grid_offset, color_t color_mask)
-{
-    if (!map_property_is_draw_tile(grid_offset) || !b) {
-        return 0;
-    }
-
-    b = building_main(b);
-    if (!runtime_owns_building_animation(b)) {
-        return 0;
-    }
-
-    int layer_count = building_runtime_get_graphic_animation_layer_count(b);
-    for (int layer_index = 0; layer_index < layer_count; layer_index++) {
-        const RuntimeDrawSlice *frame = building_runtime_get_graphic_animation_layer_frame(b, layer_index);
-        if (!frame) {
-            continue;
-        }
-        runtime_texture_draw(*frame, x, y, color_mask, draw_context.scale);
-    }
-    return 1;
-}
-
-static int draw_runtime_tile_footprint(int grid_offset, int x, int y, color_t color_mask)
-{
-    const RuntimeDrawSlice *slice = tile_runtime_get_graphic_footprint_slice(grid_offset);
-    if (!slice) {
-        return 0;
-    }
-    runtime_texture_draw(*slice, x, y, color_mask, draw_context.scale);
-    return 1;
-}
-
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -374,9 +278,9 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, draw_context.scale, grid_offset, color_mask);
-    } else if (building_id && draw_runtime_building_footprint(building_get(building_id), x, y, color_mask)) {
+    } else if (building_id && city_draw_runtime_building_footprint(building_get(building_id), x, y, color_mask, draw_context.scale)) {
         // Runtime-managed buildings draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
-    } else if (!building_id && draw_runtime_tile_footprint(grid_offset, x, y, color_mask)) {
+    } else if (!building_id && city_draw_runtime_tile_footprint(grid_offset, x, y, color_mask, draw_context.scale)) {
         // Runtime-managed terrain tiles draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
     } else {
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
@@ -635,7 +539,7 @@ static void draw_top(int x, int y, int grid_offset)
         color_mask = COLOR_MASK_HOVER;
     }
 
-    if (!draw_runtime_building_top(b, x, y, color_mask)) {
+    if (!city_draw_runtime_building_top(b, x, y, color_mask, draw_context.scale)) {
         image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     }
     // specific buildings
@@ -925,7 +829,7 @@ static void draw_animation(int x, int y, int grid_offset)
         // Hover effect for animations - only if not deleted or selected
         color_mask = COLOR_MASK_HOVER;
     }
-    if (building_id && draw_runtime_building_animation(b, x, y, grid_offset, color_mask)) {
+    if (building_id && city_draw_runtime_building_animation(b, x, y, grid_offset, color_mask, draw_context.scale)) {
         if (b->has_plague) {
             draw_plague(b, x, y, color_mask);
         }
@@ -1084,7 +988,7 @@ static void draw_hippodrome_ornaments(int x, int y, int grid_offset)
 
 static int should_draw_top_before_deletion(int grid_offset)
 {
-    return is_multi_tile_terrain(grid_offset) && has_adjacent_deletion(grid_offset);
+    return (is_multi_tile_terrain(grid_offset) != 0) && (has_adjacent_deletion(grid_offset) != 0);
 }
 
 static void deletion_draw_terrain_top(int x, int y, int grid_offset)

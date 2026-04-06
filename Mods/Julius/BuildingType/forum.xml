@@ -4,10 +4,6 @@
         <default>
             <path value="Admin_Logistics\Forum" />
         </default>
-        <variant>
-            <condition type="desirability" operator="gt" threshold="30" />
-            <path value="Admin_Logistics\Upgraded_Forum" />
-        </variant>
     </graphics>
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="tax_collector">

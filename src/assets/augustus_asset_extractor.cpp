@@ -731,8 +731,12 @@ static int infer_default_isometric_parts(const AtlasImage &image_data, std::vect
         int has_footprint = 0;
         int has_top = 0;
         for (const AtlasReference &reference : output_layers) {
-            has_footprint |= reference.part == "footprint";
-            has_top |= reference.part == "top";
+            if (reference.part == "footprint") {
+                has_footprint = 1;
+            }
+            if (reference.part == "top") {
+                has_top = 1;
+            }
         }
 
         for (AtlasReference &reference : output_layers) {

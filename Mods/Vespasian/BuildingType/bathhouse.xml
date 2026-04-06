@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="bathhouse">
-    <graphics>
+    <state>
         <water_access mode="reservoir_range" />
+    </state>
+    <graphics>
         <default>
             <path value="Health_Culture\Bathhouse_No_Water" />
         </default>
         <variant>
             <condition type="desirability" operator="gt" threshold="30" />
-            <condition type="working" />
+            <condition type="has_workers" />
+            <condition type="water_access" />
             <path value="Health_Culture\Bathhouse_Fancy_Water" />
         </variant>
         <variant>
@@ -15,7 +18,8 @@
             <path value="Health_Culture\Bathhouse_Fancy_No_Water" />
         </variant>
         <variant>
-            <condition type="working" />
+            <condition type="has_workers" />
+            <condition type="water_access" />
             <path value="Health_Culture\Bathhouse_Water" />
         </variant>
     </graphics>

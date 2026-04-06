@@ -12,18 +12,19 @@
         </default>
         <variant>
             <condition type="desirability" operator="gt" threshold="50" />
-            <condition type="working" />
+            <condition type="has_workers" />
+            <condition type="water_access" />
             <path value="Health_Culture\Example_Fancy_Working" />
         </variant>
         <variant>
-            <condition type="working" />
+            <condition type="has_workers" />
+            <condition type="water_access" />
             <path value="Health_Culture\Example_Working" />
         </variant>
-        <overlay>
-            <condition type="water_access" />
-            <path value="Aesthetics\Example_Overlay" />
-            <image value="Overlay_Anim" />
-        </overlay>
+        <variant>
+            <condition type="resource_positive" resource="wine" />
+            <path value="Health_Culture\Example_Supplied" />
+        </variant>
     </graphics>
 
     <!-- Optional labor phase -->

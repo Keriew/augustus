@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<building type="forum">
+<building type="senate">
     <graphics>
         <default>
-            <path value="Admin_Logistics\Forum" />
+            <path value="Admin_Logistics\Senate" />
         </default>
         <variant>
             <condition type="desirability" operator="gt" threshold="30" />
-            <path value="Admin_Logistics\Upgraded_Forum" />
+            <path value="Admin_Logistics\Senate_Fancy" />
         </variant>
     </graphics>
     <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />

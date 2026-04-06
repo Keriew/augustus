@@ -45,7 +45,7 @@ private:
     int mirror_animation_offset(const RuntimeAnimationTrack &track) const;
     int uses_new_graphics() const;
     int graphics_state_is_authoritative() const;
-    const building_type_registry_impl::GraphicsTarget *resolve_graphic_target() const;
+    std::vector<const building_type_registry_impl::GraphicsTarget *> resolve_graphic_targets() const;
     const ImageGroupEntry *resolve_graphic_entry(const building_type_registry_impl::GraphicsTarget *target) const;
     void append_graphic_animation_layer(const ImageGroupEntry &entry);
     int worker_percentage() const;

@@ -19,17 +19,12 @@ Current supported `<state>` child nodes:
 
 Current supported `<graphics>` child nodes:
 
-- Legacy flat mode:
-  - `<path value="Health_Culture\Theatre" />`
-  - `<image value="Image_0000" />`
-  - `<upgrade threshold="N" operator="gt|gte" />`
-- Structured mode:
-  - `<default> ... </default>`
-  - `<variant> ... </variant>`
-  - `<overlay> ... </overlay>`
-  - `<condition type="working" />`
-  - `<condition type="water_access" />`
-  - `<condition type="desirability" operator="gt|gte" threshold="N" />`
+- `<default> ... </default>`
+- `<variant> ... </variant>`
+- `<condition type="has_workers" />`
+- `<condition type="water_access" />`
+- `<condition type="resource_positive" resource="wine" />`
+- `<condition type="desirability" operator="lt|lte|eq|gt|gte" threshold="N" />`
 
 `<path value="...">` rules:
 
@@ -41,21 +36,20 @@ Current supported `<graphics>` child nodes:
 
 Structured `<graphics>` rules:
 
-- `<default>` is required when using structured mode
+- `<default>` is required
 - `<variant>` entries are checked in XML order
 - all `<condition>` nodes inside one `<variant>` must match
 - the first matching variant wins
 - the `<default>` target is used when no variant matches
-- matching `<overlay>` entries add animation-only layers on top of the resolved base graphics
-- do not mix legacy root `<path>/<image>/<upgrade>` nodes with structured `<default>/<variant>/<overlay>` nodes
-- `<image value="..."/>` is optional inside `<default>` or `<variant>` when a graphics group needs a specific named image
-- `<image value="..."/>` is optional inside `<overlay>` too
+- `<path>` and optional `<image>` must live inside `<default>` or `<variant>`
+- put water refresh rules under `<state>`, not under `<graphics>`
 
 Current supported graphics conditions:
 
-- `type="working"` means `num_workers > 0 && has_water_access`
+- `type="has_workers"` means `num_workers > 0`
 - `type="water_access"` means `has_water_access`
-- `type="desirability" operator="gt|gte" threshold="N"` compares the building desirability against `N`
+- `type="resource_positive" resource="wine"` means the building has at least one unit of that resource
+- `type="desirability" operator="lt|lte|eq|gt|gte" threshold="N"` compares the building desirability against `N`
 
 Current supported `<labor>` attributes:
 
@@ -95,18 +89,15 @@ Current supported `<spawn>` attributes:
 
 Current engine behavior:
 
-- Only the migrated building families use `<spawn>` so far.
-- The old `<graphic .../>` node is no longer part of the supported format; migrate to `<graphics>...</graphics>`.
+- Repo-owned BuildingType graphics use only the structured `<graphics>` schema.
 - A `spawn_group` owns the shared delay/guard phase, then runs its child `<spawn>` policies in order.
 - Delay evaluation now uses the explicit `delay_bands` data from XML rather than a hardcoded named profile.
 - Ordered policies can coordinate: a policy that succeeds with `block_on_success="true"` stops later sibling policies in the same group.
 - Use `block_on_success="true"` when a building should spawn either A or B on the same trigger.
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
-- Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them, such as grouped statue assets.
-- Use structured `<graphics>` when one building can swap between several whole graphics groups based on runtime state, like the bathhouse.
-- Put water refresh rules under `<state>` so graphics and spawn behavior share the same derived runtime state.
-- Buildings with a runtime `BuildingType` and a non-empty graphics path now use the new image-group payload path as the authoritative live renderer path.
-- The current implementation is building-side only. Future work is expected to introduce startup-loaded `FigureType` definitions and runtime `FigureInstance` wrappers while keeping save-compatible C structs underneath.
+- Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them.
+- Put shared derived state such as water access under `<state>` so graphics and spawn behavior read the same runtime facts.
+- Buildings with a validated runtime `BuildingType` graphics block now use the native runtime renderer path as the authoritative live path.
 
 See `_template.xml.example` here in `Mods\Vespasian\BuildingType` for a copy/paste starter.

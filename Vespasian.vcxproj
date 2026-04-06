@@ -381,7 +381,9 @@
     <ClCompile Include="src\widget\city.c" />
     <ClCompile Include="src\widget\city_bridge.c" />
     <ClCompile Include="src\widget\city_building_ghost.cpp" />
+    <ClCompile Include="src\widget\city_draw.cpp" />
     <ClCompile Include="src\widget\city_draw_highway.c" />
+    <ClCompile Include="src\widget\city_draw_overlay.cpp" />
     <ClCompile Include="src\widget\city_figure.c" />
     <ClCompile Include="src\widget\city_overlay_education.c" />
     <ClCompile Include="src\widget\city_overlay_entertainment.c" />
@@ -877,7 +879,9 @@
     <ClInclude Include="src\widget\city.h" />
     <ClInclude Include="src\widget\city_bridge.h" />
     <ClInclude Include="src\widget\city_building_ghost.h" />
+    <ClInclude Include="src\widget\city_draw.h" />
     <ClInclude Include="src\widget\city_draw_highway.h" />
+    <ClInclude Include="src\widget\city_draw_overlay.h" />
     <ClInclude Include="src\widget\city_figure.h" />
     <ClInclude Include="src\widget\city_overlay.h" />
     <ClInclude Include="src\widget\city_overlay_education.h" />
@@ -1063,24 +1067,7 @@
     <IntDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="Mods\Augustus\Tiles\*.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mods\Augustus\BuildingType\*.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mods\Vespasian\Tiles\*.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mods\Vespasian\BuildingType\*.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mods\Vespasian\BuildingType\*.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Mods\Vespasian\BuildingType\*.example">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <ModsContent Include="Mods\**\*" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -1151,6 +1138,13 @@
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="CopyModsToOutput" AfterTargets="Build">
+    <MakeDir Directories="$(OutDir)Mods" />
+    <Copy
+      SourceFiles="@(ModsContent)"
+      DestinationFiles="@(ModsContent->'$(OutDir)Mods\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>

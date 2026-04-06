@@ -11,7 +11,14 @@ extern "C" {
  */
 
 /**
- * Logs an info message
+ * Severity definitions used across the runtime:
+ * Warning = probably unintended, probably safe.
+ * Error = definitely unintended, survivable, and does not damage game state, save data, or campaign data.
+ * Fatal error = unrecoverable or likely to cause data loss, and the process must stop.
+ */
+
+/**
+ * Logs an info message.
  * @param msg Message
  * @param param_str Extra info (string)
  * @param param_int Extra info (integer)
@@ -19,7 +26,15 @@ extern "C" {
 void log_info(const char *msg, const char *param_str, int param_int);
 
 /**
- * Logs an error message
+ * Logs a warning message.
+ * @param msg Message
+ * @param param_str Extra info (string)
+ * @param param_int Extra info (integer)
+ */
+void log_warning(const char *msg, const char *param_str, int param_int);
+
+/**
+ * Logs an error message.
  * @param msg Message
  * @param param_str Extra info (string)
  * @param param_int Extra info (integer)

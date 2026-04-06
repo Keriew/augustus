@@ -47,6 +47,21 @@ extern "C" {
 static int aqueduct_include_construction = 0;
 static int highway_top_tile_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
 static int elevation_recalculate_trees = 0;
+static const char *SINGLE_TILE_PLAZA_IMAGE_IDS[9] = {
+    "Plazas",
+    "Image_0000",
+    "Image_0001",
+    "Alias_0000",
+    "Image_0002",
+    "Image_0003",
+    "Alias_0001",
+    "Image_0004",
+    "Image_0005"
+};
+static const char *LARGE_PLAZA_IMAGE_IDS[2] = {
+    "Image_0006",
+    "Image_0007"
+};
 
 static int is_clear(int x, int y, int size, int disallowed_terrain, int check_figure, int check_image)
 {
@@ -365,7 +380,7 @@ static void set_plaza_image(int x, int y, int grid_offset)
             }
             image_id += image_offset;
             map_building_tiles_add(0, x, y, 2, image_id, TERRAIN_ROAD);
-            tile_runtime_set_plaza_image_index(grid_offset, image_offset);
+            tile_runtime_set_plaza_image_id(grid_offset, LARGE_PLAZA_IMAGE_IDS[image_offset - 6]);
         } else {
             // single tile plaza
             static int image_id;
@@ -374,7 +389,7 @@ static void set_plaza_image(int x, int y, int grid_offset)
             }
             int image_offset = (x + y) % 9;
             map_image_set(grid_offset, image_id + image_offset);
-            tile_runtime_set_plaza_image_index(grid_offset, image_offset);
+            tile_runtime_set_plaza_image_id(grid_offset, SINGLE_TILE_PLAZA_IMAGE_IDS[image_offset]);
         }
     }
 }

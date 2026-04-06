@@ -1,8 +1,6 @@
 #include "city_with_overlay.h"
 
-#include "building/building_runtime_graphics.h"
-#include "graphics/runtime_texture.h"
-#include "map/tile_runtime_graphics.h"
+#include "widget/city_draw_overlay.h"
 
 extern "C" {
 #include "assets/assets.h"
@@ -252,91 +250,6 @@ static int is_building_selected(building *b)
 
 }
 
-static const RuntimeDrawSlice *get_runtime_graphic_footprint(building *b)
-{
-    if (!b) {
-        return 0;
-    }
-    b = building_main(b);
-    return b ? building_runtime_get_graphic_footprint_slice(b) : 0;
-}
-
-static const RuntimeDrawSlice *get_runtime_graphic_top(building *b)
-{
-    if (!b) {
-        return 0;
-    }
-    b = building_main(b);
-    return b ? building_runtime_get_graphic_top_slice(b) : 0;
-}
-
-static int runtime_owns_building_graphics(building *b)
-{
-    if (!b) {
-        return 0;
-    }
-    b = building_main(b);
-    return b ? building_runtime_owns_graphics(b) : 0;
-}
-
-static int draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask)
-{
-    if (!runtime_owns_building_graphics(b)) {
-        return 0;
-    }
-    const RuntimeDrawSlice *slice = get_runtime_graphic_footprint(b);
-    if (!slice) {
-        return 1;
-    }
-    runtime_texture_draw(*slice, x, y, color_mask, scale);
-    return 1;
-}
-
-static int draw_runtime_building_top(building *b, int x, int y, color_t color_mask)
-{
-    if (!runtime_owns_building_graphics(b)) {
-        return 0;
-    }
-    const RuntimeDrawSlice *slice = get_runtime_graphic_top(b);
-    if (!slice) {
-        return 1;
-    }
-    runtime_texture_draw(*slice, x, y, color_mask, scale);
-    return 1;
-}
-
-static int draw_runtime_building_animation(building *b, int x, int y, int grid_offset, color_t color_mask)
-{
-    if (!map_property_is_draw_tile(grid_offset) || !b) {
-        return 0;
-    }
-
-    b = building_main(b);
-    if (!b || !building_runtime_owns_graphic_animation(b)) {
-        return 0;
-    }
-
-    int layer_count = building_runtime_get_graphic_animation_layer_count(b);
-    for (int layer_index = 0; layer_index < layer_count; layer_index++) {
-        const RuntimeDrawSlice *frame = building_runtime_get_graphic_animation_layer_frame(b, layer_index);
-        if (!frame) {
-            continue;
-        }
-        runtime_texture_draw(*frame, x, y, color_mask, scale);
-    }
-    return 1;
-}
-
-static int draw_runtime_tile_footprint(int grid_offset, int x, int y, color_t color_mask)
-{
-    const RuntimeDrawSlice *slice = tile_runtime_get_graphic_footprint_slice(grid_offset);
-    if (!slice) {
-        return 0;
-    }
-    runtime_texture_draw(*slice, x, y, color_mask, scale);
-    return 1;
-}
-
 static int is_drawable_farmhouse(int grid_offset, int map_orientation)
 {
     if (!map_property_is_draw_tile(grid_offset)) {
@@ -543,7 +456,7 @@ void city_with_overlay_draw_building_footprint(int x, int y, int grid_offset, in
                 image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
             }
         } else {
-            if (!draw_runtime_building_footprint(b, x, y, color_mask)) {
+            if (!city_draw_overlay_runtime_building_footprint(b, x, y, color_mask, scale)) {
                 image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
             }
         }
@@ -605,7 +518,7 @@ static void draw_footprint(int x, int y, int grid_offset)
                 int image_id = image_group(GROUP_TERRAIN_GRASS_1) + (map_random_get(grid_offset) & 7);
                 image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
             }
-        } else if (draw_runtime_tile_footprint(grid_offset, x, y, COLOR_MASK_NONE)) {
+        } else if (city_draw_overlay_runtime_tile_footprint(grid_offset, x, y, COLOR_MASK_NONE, scale)) {
         } else if ((terrain & TERRAIN_ROAD) && !(terrain & TERRAIN_BUILDING)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
         } else if ((terrain & TERRAIN_BUILDING) && !map_is_bridge(grid_offset)) {
@@ -808,7 +721,7 @@ static void draw_building_top(int grid_offset, building *b, int x, int y)
         draw_depot_resource(b, x, y, color_mask);
     }
 
-    if (!draw_runtime_building_top(b, x, y, color_mask)) {
+    if (!city_draw_overlay_runtime_building_top(b, x, y, color_mask, scale)) {
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
     }
 }
@@ -898,7 +811,7 @@ static void draw_animation(int x, int y, int grid_offset)
             if (is_building_selected(b)) {
                 color_mask = get_building_color_mask(b);
             }
-            if (draw_runtime_building_animation(b, x, y, grid_offset, color_mask)) {
+            if (city_draw_overlay_runtime_building_animation(b, x, y, grid_offset, color_mask, scale)) {
                 return;
             }
         }

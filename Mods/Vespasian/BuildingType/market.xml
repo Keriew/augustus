@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="market">
     <graphics>
-        <path value="Admin_Logistics\Market" />
-        <upgrade threshold="30" operator="gt" />
+        <default>
+            <path value="Admin_Logistics\Market" />
+            <image value="Image_0000" />
+        </default>
+        <variant>
+            <condition type="desirability" operator="gt" threshold="30" />
+            <path value="Admin_Logistics\Market_Fancy" />
+            <image value="Image_0000" />
+        </variant>
     </graphics>
 </building>

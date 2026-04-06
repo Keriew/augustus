@@ -9,6 +9,7 @@ extern "C" {
 #include "core/log.h"
 #include "core/xml_parser.h"
 #include "figure/action.h"
+#include "game/resource.h"
 }
 
 #include <cstdlib>
@@ -378,6 +379,18 @@ static int parse_graphics_comparison(const char *comparison_text, GraphicCompari
     if (!out_comparison) {
         return 0;
     }
+    if (comparison_text && strcmp(comparison_text, "lt") == 0) {
+        *out_comparison = GraphicComparison::LessThan;
+        return 1;
+    }
+    if (comparison_text && (strcmp(comparison_text, "lte") == 0 || strcmp(comparison_text, "let") == 0)) {
+        *out_comparison = GraphicComparison::LessThanOrEqual;
+        return 1;
+    }
+    if (comparison_text && strcmp(comparison_text, "eq") == 0) {
+        *out_comparison = GraphicComparison::Equal;
+        return 1;
+    }
     if (comparison_text && strcmp(comparison_text, "gt") == 0) {
         *out_comparison = GraphicComparison::GreaterThan;
         return 1;
@@ -447,12 +460,9 @@ static int parse_graphics()
 
     g_parse_state.saw_graphic = 1;
     g_parse_state.parsing_graphics = 1;
-    g_parse_state.saw_legacy_graphics_nodes = 0;
     g_parse_state.has_current_graphics_variant = 0;
-    g_parse_state.has_current_graphics_overlay = 0;
     g_parse_state.current_graphics_variant_index = 0;
-    g_parse_state.current_graphics_overlay_index = 0;
-    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
     return 1;
 }
 
@@ -462,37 +472,24 @@ static void finish_graphics()
         return;
     }
 
-    if (g_parse_state.definition->uses_structured_graphics()) {
-        if (!g_parse_state.definition->graphics().has_default_node()) {
-            log_error("BuildingType graphics is missing required child node 'default'", 0, 0);
-            g_parse_state.error = 1;
-        } else if (!g_parse_state.definition->graphics().default_target()) {
-            log_error("BuildingType graphics default is missing required child node 'path'", 0, 0);
-            g_parse_state.error = 1;
-        }
-    } else if (!g_parse_state.definition->has_graphic()) {
+    if (!g_parse_state.definition->graphics().has_default_node()) {
+        log_error("BuildingType graphics is missing required child node 'default'", 0, 0);
+        g_parse_state.error = 1;
+    } else if (!g_parse_state.definition->graphics().default_target().has_path()) {
         log_error("BuildingType graphics is missing required child node 'path'", 0, 0);
         g_parse_state.error = 1;
     }
 
     g_parse_state.parsing_graphics = 0;
-    g_parse_state.saw_legacy_graphics_nodes = 0;
     g_parse_state.has_current_graphics_variant = 0;
-    g_parse_state.has_current_graphics_overlay = 0;
     g_parse_state.current_graphics_variant_index = 0;
-    g_parse_state.current_graphics_overlay_index = 0;
-    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
 }
 
 static int parse_graphics_default()
 {
     if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
         log_error("Encountered graphics default outside graphics node", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-    if (g_parse_state.saw_legacy_graphics_nodes) {
-        log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
@@ -512,11 +509,11 @@ static void finish_graphics_default()
     if (!g_parse_state.parsing_graphics) {
         return;
     }
-    if (!g_parse_state.definition->graphics().default_target()) {
+    if (!g_parse_state.definition->graphics().default_target().has_path()) {
         log_error("BuildingType graphics default is missing required child node 'path'", 0, 0);
         g_parse_state.error = 1;
     }
-    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
 }
 
 static int parse_graphics_variant()
@@ -526,16 +523,9 @@ static int parse_graphics_variant()
         g_parse_state.error = 1;
         return 0;
     }
-    if (g_parse_state.saw_legacy_graphics_nodes) {
-        log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-
     g_parse_state.definition->add_graphics_variant();
     g_parse_state.has_current_graphics_variant = 1;
     g_parse_state.current_graphics_variant_index = g_parse_state.definition->graphics().variants().size() - 1;
-    g_parse_state.has_current_graphics_overlay = 0;
     g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Variant;
     return 1;
 }
@@ -553,44 +543,7 @@ static void finish_graphics_variant()
     }
 
     g_parse_state.has_current_graphics_variant = 0;
-    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
-}
-
-static int parse_graphics_overlay()
-{
-    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
-        log_error("Encountered graphics overlay outside graphics node", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-    if (g_parse_state.saw_legacy_graphics_nodes) {
-        log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant/overlay nodes", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-
-    g_parse_state.definition->add_graphics_overlay();
-    g_parse_state.has_current_graphics_variant = 0;
-    g_parse_state.has_current_graphics_overlay = 1;
-    g_parse_state.current_graphics_overlay_index = g_parse_state.definition->graphics().overlays().size() - 1;
-    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Overlay;
-    return 1;
-}
-
-static void finish_graphics_overlay()
-{
-    if (!g_parse_state.parsing_graphics) {
-        return;
-    }
-
-    GraphicsOverlay *overlay = g_parse_state.definition->last_graphics_overlay();
-    if (!overlay || !overlay->target.has_path()) {
-        log_error("BuildingType graphics overlay is missing required child node 'path'", 0, 0);
-        g_parse_state.error = 1;
-    }
-
-    g_parse_state.has_current_graphics_overlay = 0;
-    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::Root;
+    g_parse_state.current_graphics_target_scope = GraphicsParseTargetScope::None;
 }
 
 static int parse_graphics_path()
@@ -614,30 +567,11 @@ static int parse_graphics_path()
     }
 
     switch (g_parse_state.current_graphics_target_scope) {
-        case GraphicsParseTargetScope::Root:
-            if (g_parse_state.definition->uses_structured_graphics()) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            g_parse_state.definition->set_graphics_path(std::move(normalized_path));
-            g_parse_state.saw_legacy_graphics_nodes = 1;
-            break;
         case GraphicsParseTargetScope::Default:
-            if (g_parse_state.saw_legacy_graphics_nodes) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            g_parse_state.definition->set_graphics_path(std::move(normalized_path));
+            g_parse_state.definition->default_graphics_target().set_path(std::move(normalized_path));
             break;
         case GraphicsParseTargetScope::Variant:
         {
-            if (g_parse_state.saw_legacy_graphics_nodes) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
             GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
             if (!variant) {
                 log_error("Encountered graphics path without an active variant", 0, 0);
@@ -647,22 +581,11 @@ static int parse_graphics_path()
             variant->target.set_path(std::move(normalized_path));
             break;
         }
-        case GraphicsParseTargetScope::Overlay:
-        {
-            if (g_parse_state.saw_legacy_graphics_nodes) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant/overlay nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            GraphicsOverlay *overlay = g_parse_state.definition->last_graphics_overlay();
-            if (!overlay) {
-                log_error("Encountered graphics path without an active overlay", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            overlay->target.set_path(std::move(normalized_path));
-            break;
-        }
+        case GraphicsParseTargetScope::None:
+        default:
+            log_error("BuildingType graphics path must appear inside default or variant", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
     }
     return 1;
 }
@@ -688,30 +611,11 @@ static int parse_graphics_image()
     }
 
     switch (g_parse_state.current_graphics_target_scope) {
-        case GraphicsParseTargetScope::Root:
-            if (g_parse_state.definition->uses_structured_graphics()) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            g_parse_state.definition->set_graphics_image(std::move(image_id));
-            g_parse_state.saw_legacy_graphics_nodes = 1;
-            break;
         case GraphicsParseTargetScope::Default:
-            if (g_parse_state.saw_legacy_graphics_nodes) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            g_parse_state.definition->set_graphics_image(std::move(image_id));
+            g_parse_state.definition->default_graphics_target().set_image(std::move(image_id));
             break;
         case GraphicsParseTargetScope::Variant:
         {
-            if (g_parse_state.saw_legacy_graphics_nodes) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
             GraphicsVariant *variant = g_parse_state.definition->last_graphics_variant();
             if (!variant) {
                 log_error("Encountered graphics image without an active variant", 0, 0);
@@ -721,76 +625,42 @@ static int parse_graphics_image()
             variant->target.set_image(std::move(image_id));
             break;
         }
-        case GraphicsParseTargetScope::Overlay:
-        {
-            if (g_parse_state.saw_legacy_graphics_nodes) {
-                log_error("BuildingType graphics cannot mix legacy root nodes with structured default/variant/overlay nodes", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            GraphicsOverlay *overlay = g_parse_state.definition->last_graphics_overlay();
-            if (!overlay) {
-                log_error("Encountered graphics image without an active overlay", 0, 0);
-                g_parse_state.error = 1;
-                return 0;
-            }
-            overlay->target.set_image(std::move(image_id));
-            break;
-        }
+        case GraphicsParseTargetScope::None:
+        default:
+            log_error("BuildingType graphics image must appear inside default or variant", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
     }
     return 1;
 }
 
-static int parse_graphics_upgrade()
+static resource_type parse_resource_type_name(const char *name)
 {
-    if (!g_parse_state.definition || !g_parse_state.parsing_graphics) {
-        log_error("Encountered graphics upgrade outside graphics node", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-    if (g_parse_state.current_graphics_target_scope != GraphicsParseTargetScope::Root ||
-        g_parse_state.definition->uses_structured_graphics()) {
-        log_error("BuildingType graphics upgrade is only supported in legacy flat graphics nodes", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-    if (!xml_parser_has_attribute("threshold")) {
-        log_error("BuildingType graphics upgrade is missing required attribute 'threshold'", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
-    }
-    if (!xml_parser_has_attribute("operator")) {
-        log_error("BuildingType graphics upgrade is missing required attribute 'operator'", 0, 0);
-        g_parse_state.error = 1;
-        return 0;
+    if (!name || !*name) {
+        return RESOURCE_NONE;
     }
 
-    GraphicComparison comparison = GraphicComparison::None;
-    const char *comparison_text = xml_parser_get_attribute_string("operator");
-    if (!parse_graphics_comparison(comparison_text, &comparison)) {
-        log_error("Unsupported BuildingType graphics upgrade operator", comparison_text, 0);
-        g_parse_state.error = 1;
-        return 0;
+    const std::string normalized_name = trim_copy(name);
+    if (normalized_name.empty()) {
+        return RESOURCE_NONE;
     }
 
-    int threshold = 0;
-    const char *threshold_text = xml_parser_get_attribute_string("threshold");
-    if (!threshold_text || !parse_int_strict(threshold_text, &threshold)) {
-        log_error("Unsupported BuildingType graphics upgrade threshold", threshold_text, 0);
-        g_parse_state.error = 1;
-        return 0;
+    for (resource_type type = RESOURCE_MIN; type < RESOURCE_MAX; type = static_cast<resource_type>(type + 1)) {
+        resource_data *data = resource_get_data(type);
+        if (!data || !data->xml_attr_name) {
+            continue;
+        }
+        if (xml_parser_compare_multiple(data->xml_attr_name, normalized_name.c_str())) {
+            return type;
+        }
     }
-
-    g_parse_state.definition->set_upgrade_rule(threshold, comparison);
-    g_parse_state.saw_legacy_graphics_nodes = 1;
-    return 1;
+    return RESOURCE_NONE;
 }
 
 static int parse_graphics_condition()
 {
-    if (!g_parse_state.definition || !g_parse_state.parsing_graphics ||
-        (!g_parse_state.has_current_graphics_variant && !g_parse_state.has_current_graphics_overlay)) {
-        log_error("Encountered graphics condition outside graphics variant or overlay", 0, 0);
+    if (!g_parse_state.definition || !g_parse_state.parsing_graphics || !g_parse_state.has_current_graphics_variant) {
+        log_error("Encountered graphics condition outside graphics variant", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
@@ -802,10 +672,27 @@ static int parse_graphics_condition()
 
     const char *type_text = xml_parser_get_attribute_string("type");
     GraphicsCondition condition;
-    if (type_text && strcmp(type_text, "working") == 0) {
+    if (type_text && strcmp(type_text, "has_workers") == 0) {
+        condition.type = GraphicsConditionType::HasWorkers;
+    } else if (type_text && strcmp(type_text, "working") == 0) {
         condition.type = GraphicsConditionType::Working;
     } else if (type_text && strcmp(type_text, "water_access") == 0) {
         condition.type = GraphicsConditionType::WaterAccess;
+    } else if (type_text && strcmp(type_text, "resource_positive") == 0) {
+        if (!xml_parser_has_attribute("resource")) {
+            log_error("BuildingType graphics resource_positive condition is missing required attribute 'resource'", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        const char *resource_text = xml_parser_get_attribute_string("resource");
+        condition.resource = parse_resource_type_name(resource_text);
+        if (condition.resource == RESOURCE_NONE) {
+            log_error("Unsupported BuildingType graphics resource_positive resource", resource_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+        condition.type = GraphicsConditionType::ResourcePositive;
     } else if (type_text && strcmp(type_text, "desirability") == 0) {
         if (!xml_parser_has_attribute("operator")) {
             log_error("BuildingType graphics desirability condition is missing required attribute 'operator'", 0, 0);
@@ -841,23 +728,19 @@ static int parse_graphics_condition()
         return 0;
     }
 
-    if (g_parse_state.has_current_graphics_variant) {
-        g_parse_state.definition->add_graphics_variant_condition(condition);
-    } else {
-        g_parse_state.definition->add_graphics_overlay_condition(condition);
-    }
+    g_parse_state.definition->add_graphics_variant_condition(condition);
     return 1;
 }
 
 static int parse_water_access()
 {
-    if (!g_parse_state.definition || (!g_parse_state.parsing_graphics && !g_parse_state.parsing_state)) {
-        log_error("Encountered water_access outside state or graphics node", 0, 0);
+    if (!g_parse_state.definition || !g_parse_state.parsing_state) {
+        log_error("Encountered water_access outside state node", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
     if (!xml_parser_has_attribute("mode")) {
-        log_error("BuildingType graphics water_access is missing required attribute 'mode'", 0, 0);
+        log_error("BuildingType state water_access is missing required attribute 'mode'", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
@@ -1113,12 +996,10 @@ static const xml_parser_element XML_ELEMENTS[] = {
     { "graphics", parse_graphics, finish_graphics, "building", nullptr },
     { "default", parse_graphics_default, finish_graphics_default, "graphics", nullptr },
     { "variant", parse_graphics_variant, finish_graphics_variant, "graphics", nullptr },
-    { "overlay", parse_graphics_overlay, finish_graphics_overlay, "graphics", nullptr },
-    { "path", parse_graphics_path, nullptr, "graphics|default|variant|overlay", nullptr },
-    { "image", parse_graphics_image, nullptr, "graphics|default|variant|overlay", nullptr },
-    { "upgrade", parse_graphics_upgrade, nullptr, "graphics", nullptr },
-    { "condition", parse_graphics_condition, nullptr, "variant|overlay", nullptr },
-    { "water_access", parse_water_access, nullptr, "graphics|state", nullptr },
+    { "path", parse_graphics_path, nullptr, "default|variant", nullptr },
+    { "image", parse_graphics_image, nullptr, "default|variant", nullptr },
+    { "condition", parse_graphics_condition, nullptr, "variant", nullptr },
+    { "water_access", parse_water_access, nullptr, "state", nullptr },
     { "labor", parse_labor, nullptr, "building", nullptr },
     { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },
     { "spawn", parse_spawn, nullptr, "spawn_group", nullptr }
@@ -1157,7 +1038,7 @@ static int load_file_to_buffer(const char *filename, std::vector<char> &buffer)
 }
 
 // Input: one authored graphics target from a BuildingType plus a short scope label for logging.
-// Output: true when the referenced runtime group/image can be resolved up front, false when the BuildingType should lose native graphics.
+// Output: true when the referenced runtime group/image namespace exists up front, false when the BuildingType should lose native graphics.
 static int validate_graphics_target_entry(
     const BuildingType &definition,
     const GraphicsTarget &target,
@@ -1193,38 +1074,33 @@ static int validate_graphics_target_entry(
         return 0;
     }
 
-    if (target.has_image()) {
-        if (payload->entry_for(target.image())) {
-            return 1;
-        }
-
+    const ImageGroupEntry *entry = target.has_image() ? payload->entry_for(target.image()) : payload->default_entry();
+    if (!entry) {
         char detail[768];
-        snprintf(
-            detail,
-            sizeof(detail),
-            "building=%s scope=%s path=%s image=%s",
-            definition.attr(),
-            target_scope ? target_scope : "graphics",
-            target.path(),
-            target.image());
-        log_error("Disabling invalid runtime graphics because the referenced image id could not be resolved", detail, 0);
+        if (target.has_image()) {
+            snprintf(
+                detail,
+                sizeof(detail),
+                "building=%s scope=%s path=%s image=%s",
+                definition.attr(),
+                target_scope ? target_scope : "graphics",
+                target.path(),
+                target.image());
+            log_error("Disabling invalid runtime graphics because the referenced image id could not be resolved", detail, 0);
+        } else {
+            snprintf(
+                detail,
+                sizeof(detail),
+                "building=%s scope=%s path=%s",
+                definition.attr(),
+                target_scope ? target_scope : "graphics",
+                target.path());
+            log_error("Disabling invalid runtime graphics because the group has no default entry", detail, 0);
+        }
         return 0;
     }
 
-    if (payload->default_entry()) {
-        return 1;
-    }
-
-    char detail[512];
-    snprintf(
-        detail,
-        sizeof(detail),
-        "building=%s scope=%s path=%s",
-        definition.attr(),
-        target_scope ? target_scope : "graphics",
-        target.path());
-    log_error("Disabling invalid runtime graphics because the group has no default entry", detail, 0);
-    return 0;
+    return 1;
 }
 
 // Input: one parsed BuildingType definition that may contain native runtime graphics targets.
@@ -1236,9 +1112,7 @@ static void validate_runtime_graphics_or_clear(BuildingType &definition)
     }
 
     int valid = 1;
-    if (const GraphicsTarget *default_target = definition.graphics().default_target()) {
-        valid = validate_graphics_target_entry(definition, *default_target, "default");
-    }
+    valid = validate_graphics_target_entry(definition, definition.graphics().default_target(), "default");
 
     if (valid) {
         const std::vector<GraphicsVariant> &variants = definition.graphics().variants();
@@ -1246,18 +1120,6 @@ static void validate_runtime_graphics_or_clear(BuildingType &definition)
             char scope[64];
             snprintf(scope, sizeof(scope), "variant[%u]", static_cast<unsigned int>(i));
             if (!validate_graphics_target_entry(definition, variants[i].target, scope)) {
-                valid = 0;
-                break;
-            }
-        }
-    }
-
-    if (valid) {
-        const std::vector<GraphicsOverlay> &overlays = definition.graphics().overlays();
-        for (size_t i = 0; i < overlays.size(); i++) {
-            char scope[64];
-            snprintf(scope, sizeof(scope), "overlay[%u]", static_cast<unsigned int>(i));
-            if (!validate_graphics_target_entry(definition, overlays[i].target, scope)) {
                 valid = 0;
                 break;
             }

@@ -69,21 +69,20 @@ void log_building_scope_state(void *userdata)
         return;
     }
 
-    const building_type_registry_impl::GraphicsTarget *target =
-        definition ? definition->resolve_graphics_target(*b) : nullptr;
+    std::vector<const building_type_registry_impl::GraphicsTarget *> targets =
+        definition ? definition->resolve_graphics_targets(*b) : std::vector<const building_type_registry_impl::GraphicsTarget *>();
+    const building_type_registry_impl::GraphicsTarget *target = targets.empty() ? nullptr : targets.front();
 
     char details[256];
     snprintf(
         details,
         sizeof(details),
-        "state=%d size=%d desirability=%d water=%d upgrade=%d graphics_path=%s graphics_image=%s target_path=%s target_image=%s",
+        "state=%d size=%d desirability=%d water=%d upgrade=%d target_path=%s target_image=%s",
         b->state,
         b->size,
         b->desirability,
         b->has_water_access,
         b->upgrade_level,
-        definition && definition->graphics_path() ? definition->graphics_path() : "",
-        definition && definition->graphics_image() ? definition->graphics_image() : "",
         target && target->has_path() ? target->path() : "",
         target && target->has_image() ? target->image() : "");
     log_info("Graphics building state", details, 0);
@@ -106,15 +105,15 @@ void log_building_graphics_fallback_once(
         "%s|type=%d|path=%s|image=%s|detail=%s",
         message ? message : "",
         b ? static_cast<int>(b->type) : -1,
-        group_key ? group_key : (definition && definition->graphics_path() ? definition->graphics_path() : ""),
-        image_id ? image_id : (definition && definition->graphics_image() ? definition->graphics_image() : ""),
+        group_key ? group_key : "",
+        image_id ? image_id : "",
         detail ? detail : "");
 
     if (!g_logged_building_graphics_fallbacks.insert(key_buffer).second) {
         return;
     }
 
-    crash_context_report_error(message, detail);
+    error_context_report_error(message, detail);
 }
 
 }
@@ -193,15 +192,12 @@ int building_runtime::graphics_state_is_authoritative() const
     return uses_new_graphics();
 }
 
-const building_type_registry_impl::GraphicsTarget *building_runtime::resolve_graphic_target() const
+std::vector<const building_type_registry_impl::GraphicsTarget *> building_runtime::resolve_graphic_targets() const
 {
     if (!uses_new_graphics()) {
-        return nullptr;
+        return {};
     }
-    if (definition_->uses_structured_graphics()) {
-        return definition_->resolve_graphics_target(*building_);
-    }
-    return definition_->graphics().default_target();
+    return definition_->resolve_graphics_targets(*building_);
 }
 
 const ImageGroupEntry *building_runtime::resolve_graphic_entry(const building_type_registry_impl::GraphicsTarget *target) const
@@ -411,7 +407,7 @@ int building_runtime::mirror_animation_offset(const RuntimeAnimationTrack &track
 // Output: no return value; the currently active frame slice is appended to the resolved runtime draw list when the track is active.
 void building_runtime::append_graphic_animation_layer(const ImageGroupEntry &entry)
 {
-    owns_graphic_animation_ = 1;
+    owns_graphic_animation_ = entry.has_animation() ? 1 : 0;
     if (!entry.has_animation()) {
         return;
     }
@@ -444,11 +440,11 @@ void building_runtime::resolve_graphics_state()
     }
 
     owns_graphics_ = graphics_state_is_authoritative();
-    owns_graphic_animation_ = owns_graphics_;
+    owns_graphic_animation_ = 0;
     refresh_runtime_state();
 
-    const building_type_registry_impl::GraphicsTarget *target = resolve_graphic_target();
-    if (!target || !target->has_path()) {
+    std::vector<const building_type_registry_impl::GraphicsTarget *> matched_targets = resolve_graphic_targets();
+    if (matched_targets.empty()) {
         log_building_graphics_fallback_once(
             "Building graphics target could not be resolved.",
             this,
@@ -458,44 +454,70 @@ void building_runtime::resolve_graphics_state()
         return;
     }
 
-    const ImageGroupEntry *entry = resolve_graphic_entry(target);
-    if (!entry) {
-        owns_graphics_ = 0;
-        owns_graphic_animation_ = 0;
-        return;
+    const building_type_registry_impl::GraphicsTarget *selected_base_target = nullptr;
+    const ImageGroupEntry *selected_base_entry = nullptr;
+    std::vector<const ImageGroupEntry *> animation_entries;
+
+    for (const building_type_registry_impl::GraphicsTarget *target : matched_targets) {
+        if (!target || !target->has_path()) {
+            continue;
+        }
+
+        const ImageGroupEntry *entry = resolve_graphic_entry(target);
+        if (!entry) {
+            continue;
+        }
+
+        if (!selected_base_entry && entry->footprint()) {
+            selected_base_target = target;
+            selected_base_entry = entry;
+        }
+
+        if (entry->has_animation()) {
+            animation_entries.push_back(entry);
+        }
     }
-    if (!entry->footprint()) {
+
+    if (!selected_base_entry) {
+        const building_type_registry_impl::GraphicsTarget &default_target = definition_->graphics().default_target();
+        if (default_target.has_path()) {
+            const ImageGroupEntry *default_entry = resolve_graphic_entry(&default_target);
+            if (default_entry && default_entry->footprint()) {
+                selected_base_target = &default_target;
+                selected_base_entry = default_entry;
+            }
+        }
+    }
+
+    if (!selected_base_entry) {
         log_building_graphics_fallback_once(
-            "Building graphics entry is missing a footprint slice.",
+            "Building graphics entry is missing a footprint slice. Falling back to legacy rendering.",
             this,
-            target->path(),
-            target->path(),
-            target->has_image() ? target->image() : nullptr);
+            definition_ ? definition_->attr() : "",
+            selected_base_target && selected_base_target->has_path() ? selected_base_target->path() : nullptr,
+            selected_base_target && selected_base_target->has_image() ? selected_base_target->image() : nullptr);
         owns_graphics_ = 0;
         owns_graphic_animation_ = 0;
         return;
     }
 
-    if (const RuntimeDrawSlice *footprint = entry->footprint()) {
+    if (const RuntimeDrawSlice *footprint = selected_base_entry->footprint()) {
         resolved_graphic_footprint_ = *footprint;
     }
-    if (const RuntimeDrawSlice *top = entry->top()) {
+    if (const RuntimeDrawSlice *top = selected_base_entry->top()) {
         resolved_graphic_top_ = *top;
     }
-    append_graphic_animation_layer(*entry);
 
-    std::vector<const building_type_registry_impl::GraphicsTarget *> overlays =
-        definition_->resolve_graphics_overlays(*building_);
-    for (const building_type_registry_impl::GraphicsTarget *overlay : overlays) {
-        if (!overlay || !overlay->has_path()) {
+    for (const ImageGroupEntry *animation_entry : animation_entries) {
+        if (!animation_entry) {
             continue;
         }
+        append_graphic_animation_layer(*animation_entry);
+    }
 
-        const ImageGroupEntry *overlay_entry = resolve_graphic_entry(overlay);
-        if (!overlay_entry) {
-            continue;
-        }
-        append_graphic_animation_layer(*overlay_entry);
+    if (!resolved_graphic_footprint_.is_valid() && !resolved_graphic_top_.is_valid() && resolved_animation_frame_slices_.empty()) {
+        owns_graphics_ = 0;
+        owns_graphic_animation_ = 0;
     }
 }
 
