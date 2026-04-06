@@ -137,6 +137,11 @@ struct LegacyTemplateParseState {
 
 LegacyTemplateParseState g_legacy_template_parse_state;
 
+struct InferredPartCache {
+    std::unordered_map<std::string, std::vector<std::string>> parts_by_image_id;
+    std::unordered_map<std::string, int> resolution_state_by_image_id;
+};
+
 static bool load_file_to_buffer(const std::string &filename, std::vector<char> &buffer);
 static std::string make_numeric_image_id(const char *image_name);
 
@@ -676,182 +681,232 @@ static int load_legacy_template_group(const std::string &group_key, LegacyTempla
     return 1;
 }
 
-static int find_template_target(
-    const AtlasImage &image_data,
+static const AtlasImage *find_output_group_image(
+    const AtlasDocument &document,
     const OutputGroup &output_group,
-    std::string &template_group_key,
-    std::string &template_image_id)
+    const std::string &image_id)
 {
-    template_group_key = output_group.group_key;
-    template_image_id = image_data.id;
-
-    for (const AtlasReference &reference : image_data.layers) {
-        std::string translated_group_key;
-        const int translated = translate_reference_group_key(reference, translated_group_key);
-        if (translated <= 0) {
-            continue;
+    for (int image_index : output_group.image_indices) {
+        const AtlasImage &candidate = document.images[image_index];
+        if (candidate.id == image_id) {
+            return &candidate;
         }
-        template_group_key = std::move(translated_group_key);
-        if (reference.image.empty()) {
-            template_image_id = "Image_0000";
-        } else if (strncmp(reference.image.c_str(), "Image_", 6) == 0) {
-            template_image_id = reference.image;
-        } else {
-            template_image_id = make_numeric_image_id(reference.image.c_str());
-        }
-        return 1;
     }
-    return !template_group_key.empty() && !template_image_id.empty();
+    return nullptr;
 }
 
-static int infer_default_isometric_parts(const AtlasImage &image_data, std::vector<AtlasReference> &output_layers)
+static std::string resolve_reference_image_id(const AtlasReference &reference)
 {
-    if (output_layers.empty()) {
+    if (reference.image.empty()) {
+        return "Image_0000";
+    }
+    if (strncmp(reference.image.c_str(), "Image_", 6) == 0) {
+        return reference.image;
+    }
+    return make_numeric_image_id(reference.image.c_str());
+}
+
+static int load_reference_template_parts(
+    const AtlasReference &reference,
+    LegacyTemplateGroup &template_group,
+    std::string &template_image_id)
+{
+    template_image_id.clear();
+
+    std::string translated_group_key;
+    const int translated = translate_reference_group_key(reference, translated_group_key);
+    if (translated <= 0) {
+        return translated;
+    }
+
+    if (!load_legacy_template_group(translated_group_key, template_group)) {
+        return 0;
+    }
+
+    template_image_id = resolve_reference_image_id(reference);
+    return !template_image_id.empty();
+}
+
+static int assign_missing_isometric_parts(const AtlasImage &image_data, std::vector<AtlasReference> &output_layers)
+{
+    if (output_layers.empty() || !image_data.is_isometric) {
         return 1;
     }
 
-    if (output_layers.size() == 1) {
-        if (output_layers[0].part.empty()) {
-            output_layers[0].part = "footprint";
+    int has_footprint = 0;
+    int has_top = 0;
+    for (const AtlasReference &reference : output_layers) {
+        has_footprint |= reference.part == "footprint";
+        has_top |= reference.part == "top";
+    }
+
+    for (AtlasReference &reference : output_layers) {
+        if (!reference.part.empty()) {
+            continue;
         }
-        log_info("Augustus extracted image inferred a single isometric footprint layer", image_data.id.c_str(), 0);
-        return 1;
+        if (!has_footprint) {
+            reference.part = "footprint";
+            has_footprint = 1;
+        } else {
+            reference.part = "top";
+            has_top = 1;
+        }
     }
 
-    if (output_layers.size() > 2) {
+    if (!has_top && output_layers.size() > 1) {
         for (AtlasReference &reference : output_layers) {
-            if (reference.part.empty()) {
-                reference.part = "footprint";
-            }
-        }
-        log_info("Augustus extracted image inferred a multi-slice isometric footprint composite", image_data.id.c_str(), 0);
-        return 1;
-    }
-
-    if (output_layers.size() == 2) {
-        int has_footprint = 0;
-        int has_top = 0;
-        for (const AtlasReference &reference : output_layers) {
-            if (reference.part == "footprint") {
-                has_footprint = 1;
-            }
-            if (reference.part == "top") {
-                has_top = 1;
-            }
-        }
-
-        for (AtlasReference &reference : output_layers) {
-            if (!reference.part.empty()) {
-                continue;
-            }
-            if (!has_footprint) {
-                reference.part = "footprint";
-                has_footprint = 1;
-            } else {
-                reference.part = "top";
-                has_top = 1;
-            }
-        }
-
-        if (!has_top) {
-            for (AtlasReference &reference : output_layers) {
-                if (reference.part == "footprint") {
-                    continue;
-                }
+            if (reference.part != "footprint") {
                 reference.part = "top";
                 has_top = 1;
                 break;
             }
         }
-
-        log_info("Augustus extracted image inferred footprint/top layer parts heuristically", image_data.id.c_str(), 0);
-        return 1;
     }
 
-    return 0;
+    if (output_layers.size() == 1 && output_layers[0].part.empty()) {
+        output_layers[0].part = "footprint";
+    }
+
+    return 1;
 }
 
-static int build_output_layers(
+static int infer_image_parts(
+    const AtlasDocument &document,
     const AtlasImage &image_data,
     const OutputGroup &output_group,
-    std::vector<AtlasReference> &output_layers)
-{
-    output_layers = image_data.layers;
+    InferredPartCache &cache,
+    std::vector<std::string> &parts);
 
-    int has_missing_part = 0;
-    for (const AtlasReference &reference : output_layers) {
-        if (reference.part.empty()) {
-            has_missing_part = 1;
-            break;
-        }
-    }
-    if (!has_missing_part || !image_data.is_isometric) {
+static int infer_reference_parts(
+    const AtlasDocument &document,
+    const AtlasReference &reference,
+    const OutputGroup &output_group,
+    InferredPartCache &cache,
+    std::vector<std::string> &parts)
+{
+    parts.clear();
+
+    if (!reference.part.empty()) {
+        parts.push_back(reference.part);
         return 1;
     }
-
-    std::string template_group_key;
-    std::string template_image_id;
-    if (!find_template_target(image_data, output_group, template_group_key, template_image_id)) {
-        if (infer_default_isometric_parts(image_data, output_layers)) {
-            return 1;
-        }
-        log_error("Augustus extracted image is missing a template target for part inheritance", image_data.id.c_str(), 0);
+    if (reference.group.empty()) {
         return 0;
+    }
+    if (is_local_reference(reference)) {
+        const std::string image_id = reference.image.empty() ? std::string("Image_0000") : reference.image;
+        const AtlasImage *local_image = find_output_group_image(document, output_group, image_id);
+        if (!local_image) {
+            return 0;
+        }
+        return infer_image_parts(document, *local_image, output_group, cache, parts);
     }
 
     LegacyTemplateGroup template_group;
-    if (!load_legacy_template_group(template_group_key, template_group)) {
-        if (infer_default_isometric_parts(image_data, output_layers)) {
-            log_info("Augustus extracted image fell back to heuristic part inference", template_group_key.c_str(), 0);
-            return 1;
-        }
-        log_error("Augustus extracted image could not load legacy template group", template_group_key.c_str(), 0);
-        return 0;
+    std::string template_image_id;
+    const int loaded = load_reference_template_parts(reference, template_group, template_image_id);
+    if (loaded <= 0) {
+        return loaded;
     }
 
     auto template_it = template_group.images.find(template_image_id);
     if (template_it == template_group.images.end() || template_it->second.parts.empty()) {
-        if (infer_default_isometric_parts(image_data, output_layers)) {
-            log_info("Augustus extracted image fell back to heuristic part inference", template_image_id.c_str(), 0);
-            return 1;
-        }
-        log_error("Augustus extracted image has no usable legacy template image", template_image_id.c_str(), 0);
         return 0;
     }
 
-    const std::vector<std::string> &template_parts = template_it->second.parts;
-    if (output_layers.size() == template_parts.size()) {
-        for (size_t i = 0; i < output_layers.size(); ++i) {
-            if (output_layers[i].part.empty()) {
-                output_layers[i].part = template_parts[i];
+    parts = template_it->second.parts;
+    return 1;
+}
+
+static int build_output_layers(
+    const AtlasDocument &document,
+    const AtlasImage &image_data,
+    const OutputGroup &output_group,
+    InferredPartCache &cache,
+    std::vector<AtlasReference> &output_layers)
+{
+    output_layers.clear();
+    output_layers.reserve(image_data.layers.size());
+
+    if (!image_data.is_isometric) {
+        output_layers = image_data.layers;
+        return 1;
+    }
+
+    for (const AtlasReference &reference : image_data.layers) {
+        if (!reference.part.empty()) {
+            output_layers.push_back(reference);
+            continue;
+        }
+
+        std::vector<std::string> inherited_parts;
+        const int inherited = infer_reference_parts(document, reference, output_group, cache, inherited_parts);
+        if (inherited < 0) {
+            return 0;
+        }
+        if (inherited > 0 && !inherited_parts.empty()) {
+            for (const std::string &part : inherited_parts) {
+                AtlasReference duplicated = reference;
+                duplicated.part = part;
+                output_layers.push_back(std::move(duplicated));
             }
+            continue;
         }
+        output_layers.push_back(reference);
+    }
+
+    return assign_missing_isometric_parts(image_data, output_layers);
+}
+
+static int infer_image_parts(
+    const AtlasDocument &document,
+    const AtlasImage &image_data,
+    const OutputGroup &output_group,
+    InferredPartCache &cache,
+    std::vector<std::string> &parts)
+{
+    parts.clear();
+    if (!image_data.is_isometric) {
         return 1;
     }
 
-    if (output_layers.size() == 1 &&
-        output_layers[0].part.empty() &&
-        output_layers[0].src.empty() &&
-        !output_layers[0].group.empty() &&
-        !output_layers[0].is_direct_crop) {
-        AtlasReference base_reference = output_layers[0];
-        output_layers.clear();
-        output_layers.reserve(template_parts.size());
-        for (const std::string &part : template_parts) {
-            AtlasReference duplicated = base_reference;
-            duplicated.part = part;
-            output_layers.push_back(std::move(duplicated));
+    auto cached = cache.parts_by_image_id.find(image_data.id);
+    if (cached != cache.parts_by_image_id.end()) {
+        parts = cached->second;
+        return 1;
+    }
+
+    int &resolution_state = cache.resolution_state_by_image_id[image_data.id];
+    if (resolution_state == 1) {
+        log_info("Augustus extracted image detected recursive local part inference; falling back to current partial knowledge", image_data.id.c_str(), 0);
+        return 0;
+    }
+
+    resolution_state = 1;
+    std::vector<AtlasReference> output_layers;
+    const int built = build_output_layers(document, image_data, output_group, cache, output_layers);
+    if (!built) {
+        resolution_state = 0;
+        return 0;
+    }
+
+    parts.reserve(output_layers.size());
+    for (const AtlasReference &reference : output_layers) {
+        if (!reference.part.empty()) {
+            parts.push_back(reference.part);
         }
-        return 1;
     }
 
-    if (infer_default_isometric_parts(image_data, output_layers)) {
-        log_info("Augustus extracted image fell back to heuristic part alignment", image_data.id.c_str(), 0);
-        return 1;
+    if (parts.size() == 1 &&
+        parts[0] == "footprint" &&
+        image_data.layers.size() == 1 &&
+        image_data.layers[0].part.empty()) {
+        parts.push_back("top");
     }
 
-    log_error("Augustus extracted image could not align layer parts with legacy template", image_data.id.c_str(), 0);
-    return 0;
+    cache.parts_by_image_id.emplace(image_data.id, parts);
+    resolution_state = 2;
+    return 1;
 }
 
 static int xml_start_image(void)
@@ -1460,14 +1515,16 @@ static bool append_reference_xml(
 
 static bool append_image_xml(
     std::string &xml,
+    const AtlasDocument &document,
     const AtlasImage &image_data,
     const OutputGroup &output_group,
+    InferredPartCache &part_cache,
     ExtractionStats &stats)
 {
     CrashContextScope crash_scope("augustus_extractor.emit_image", image_data.id.c_str());
     const std::string image_stem = sanitize_component(image_data.id.c_str());
     std::vector<AtlasReference> output_layers;
-    if (!build_output_layers(image_data, output_group, output_layers)) {
+    if (!build_output_layers(document, image_data, output_group, part_cache, output_layers)) {
         crash_context_report_error("Augustus extractor could not infer image layer parts", image_data.id.c_str());
         return false;
     }
@@ -1558,13 +1615,14 @@ static bool export_group(const AtlasDocument &document, const OutputGroup &outpu
     CrashContextScope crash_scope("augustus_extractor.export_group", output_group.group_key.c_str());
     ensure_directory(append_path_component(make_augustus_graphics_root(), output_group.family_name));
     ensure_directory(output_group.directory_path);
+    InferredPartCache part_cache;
 
     std::string xml = "<?xml version=\"1.0\"?>\n<!DOCTYPE assetlist>\n<assetlist";
     append_attribute(xml, "name", output_group.group_key);
     xml += ">\n";
 
     for (int image_index : output_group.image_indices) {
-        if (!append_image_xml(xml, document.images[image_index], output_group, stats)) {
+        if (!append_image_xml(xml, document, document.images[image_index], output_group, part_cache, stats)) {
             return false;
         }
     }
