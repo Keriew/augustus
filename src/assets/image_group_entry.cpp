@@ -1,13 +1,9 @@
 #include "assets/image_group_entry.h"
 
-#include "core/image_payload.h"
-
 #include <utility>
 
-ImageGroupEntry::ImageGroupEntry(std::string id, std::string image_key, std::string top_image_key)
+ImageGroupEntry::ImageGroupEntry(std::string id)
     : id_(std::move(id))
-    , image_key_(std::move(image_key))
-    , top_image_key_(std::move(top_image_key))
 {
 }
 
@@ -16,61 +12,19 @@ const std::string &ImageGroupEntry::id() const
     return id_;
 }
 
-const std::string &ImageGroupEntry::image_key() const
+const RuntimeDrawSlice *ImageGroupEntry::footprint() const
 {
-    return image_key_;
+    return footprint_.is_valid() ? &footprint_ : nullptr;
 }
 
-const std::string &ImageGroupEntry::top_image_key() const
+const RuntimeDrawSlice *ImageGroupEntry::top() const
 {
-    return top_image_key_;
+    return has_top_ && top_.is_valid() ? &top_ : nullptr;
 }
 
-void ImageGroupEntry::rebuild_legacy_image() const
+int ImageGroupEntry::has_top() const
 {
-    legacy_image_dirty_ = 0;
-    legacy_image_ = {};
-    legacy_top_image_ = {};
-    legacy_animation_ = {};
-
-    const image *base = image_key_.empty() ? nullptr : image_payload_legacy_for_key(image_key_.c_str());
-    if (!base) {
-        return;
-    }
-
-    legacy_image_ = *base;
-    legacy_image_.top = nullptr;
-    legacy_image_.animation = nullptr;
-
-    if (!top_image_key_.empty()) {
-        if (const image *top = image_payload_legacy_for_key(top_image_key_.c_str())) {
-            legacy_top_image_ = *top;
-            legacy_image_.top = &legacy_top_image_;
-        }
-    }
-
-    if (has_animation_) {
-        legacy_animation_ = animation_data_;
-        legacy_animation_.num_sprites = static_cast<int>(animation_frame_keys_.size());
-        legacy_image_.animation = &legacy_animation_;
-    }
-}
-
-const image *ImageGroupEntry::legacy_image() const
-{
-    if (legacy_image_dirty_) {
-        rebuild_legacy_image();
-    }
-    return legacy_image_.resource_handle > 0 ? &legacy_image_ : nullptr;
-}
-
-const image *ImageGroupEntry::animation_frame(int animation_offset) const
-{
-    if (animation_offset <= 0 || animation_offset > static_cast<int>(animation_frame_keys_.size())) {
-        return nullptr;
-    }
-    const std::string &frame_image_key = animation_frame_keys_[animation_offset - 1];
-    return frame_image_key.empty() ? nullptr : image_payload_legacy_for_key(frame_image_key.c_str());
+    return has_top_ && top_.is_valid();
 }
 
 int ImageGroupEntry::has_animation() const
@@ -78,29 +32,34 @@ int ImageGroupEntry::has_animation() const
     return has_animation_;
 }
 
-const image_animation &ImageGroupEntry::animation() const
+const RuntimeAnimationTrack &ImageGroupEntry::animation() const
 {
-    return animation_data_;
+    return animation_;
 }
 
-const std::vector<std::string> &ImageGroupEntry::animation_frame_keys() const
+int ImageGroupEntry::is_isometric() const
 {
-    return animation_frame_keys_;
+    return is_isometric_;
 }
 
-const std::vector<color_t> &ImageGroupEntry::combined_pixels() const
+int ImageGroupEntry::tile_span() const
 {
-    return combined_pixels_;
+    return tile_span_;
 }
 
-int ImageGroupEntry::combined_width() const
+const std::vector<color_t> &ImageGroupEntry::split_pixels() const
 {
-    return combined_width_;
+    return split_pixels_;
 }
 
-int ImageGroupEntry::combined_height() const
+int ImageGroupEntry::split_width() const
 {
-    return combined_height_;
+    return split_width_;
+}
+
+int ImageGroupEntry::split_height() const
+{
+    return split_height_;
 }
 
 int ImageGroupEntry::top_height() const
@@ -108,25 +67,36 @@ int ImageGroupEntry::top_height() const
     return top_height_;
 }
 
-void ImageGroupEntry::set_keys(std::string image_key, std::string top_image_key)
+void ImageGroupEntry::set_base_slice(RuntimeDrawSlice footprint, int is_isometric, int tile_span)
 {
-    image_key_ = std::move(image_key);
-    top_image_key_ = std::move(top_image_key);
-    legacy_image_dirty_ = 1;
+    footprint_ = std::move(footprint);
+    is_isometric_ = is_isometric;
+    tile_span_ = tile_span;
 }
 
-void ImageGroupEntry::set_animation(const image_animation &animation, std::vector<std::string> frame_image_keys)
+void ImageGroupEntry::set_top_slice(RuntimeDrawSlice top)
 {
-    animation_data_ = animation;
-    animation_frame_keys_ = std::move(frame_image_keys);
-    has_animation_ = !animation_frame_keys_.empty();
-    legacy_image_dirty_ = 1;
+    top_ = std::move(top);
+    has_top_ = top_.is_valid();
 }
 
-void ImageGroupEntry::set_raster(std::vector<color_t> combined_pixels, int combined_width, int combined_height, int top_height)
+void ImageGroupEntry::clear_top_slice()
 {
-    combined_pixels_ = std::move(combined_pixels);
-    combined_width_ = combined_width;
-    combined_height_ = combined_height;
+    top_ = {};
+    has_top_ = 0;
+}
+
+void ImageGroupEntry::set_animation(RuntimeAnimationTrack animation)
+{
+    animation_ = std::move(animation);
+    animation_.num_frames = static_cast<int>(animation_.frames.size());
+    has_animation_ = !animation_.frames.empty();
+}
+
+void ImageGroupEntry::set_split_pixels(std::vector<color_t> split_pixels, int split_width, int split_height, int top_height)
+{
+    split_pixels_ = std::move(split_pixels);
+    split_width_ = split_width;
+    split_height_ = split_height;
     top_height_ = top_height;
 }

@@ -1,4 +1,5 @@
 #include "building/building_type_registry_internal.h"
+#include "assets/image_group_payload.h"
 
 extern "C" {
 #include "building/building_runtime_api.h"
@@ -1155,6 +1156,119 @@ static int load_file_to_buffer(const char *filename, std::vector<char> &buffer)
     return 1;
 }
 
+// Input: one authored graphics target from a BuildingType plus a short scope label for logging.
+// Output: true when the referenced runtime group/image can be resolved up front, false when the BuildingType should lose native graphics.
+static int validate_graphics_target_entry(
+    const BuildingType &definition,
+    const GraphicsTarget &target,
+    const char *target_scope)
+{
+    if (!target.has_path()) {
+        return 1;
+    }
+    if (!image_group_payload_load(target.path())) {
+        char detail[512];
+        snprintf(
+            detail,
+            sizeof(detail),
+            "building=%s scope=%s path=%s",
+            definition.attr(),
+            target_scope ? target_scope : "graphics",
+            target.path());
+        log_error("Disabling invalid runtime graphics because the group could not be loaded", detail, 0);
+        return 0;
+    }
+
+    const ImageGroupPayload *payload = image_group_payload_get(target.path());
+    if (!payload) {
+        char detail[512];
+        snprintf(
+            detail,
+            sizeof(detail),
+            "building=%s scope=%s path=%s",
+            definition.attr(),
+            target_scope ? target_scope : "graphics",
+            target.path());
+        log_error("Disabling invalid runtime graphics because the payload could not be found", detail, 0);
+        return 0;
+    }
+
+    if (target.has_image()) {
+        if (payload->entry_for(target.image())) {
+            return 1;
+        }
+
+        char detail[768];
+        snprintf(
+            detail,
+            sizeof(detail),
+            "building=%s scope=%s path=%s image=%s",
+            definition.attr(),
+            target_scope ? target_scope : "graphics",
+            target.path(),
+            target.image());
+        log_error("Disabling invalid runtime graphics because the referenced image id could not be resolved", detail, 0);
+        return 0;
+    }
+
+    if (payload->default_entry()) {
+        return 1;
+    }
+
+    char detail[512];
+    snprintf(
+        detail,
+        sizeof(detail),
+        "building=%s scope=%s path=%s",
+        definition.attr(),
+        target_scope ? target_scope : "graphics",
+        target.path());
+    log_error("Disabling invalid runtime graphics because the group has no default entry", detail, 0);
+    return 0;
+}
+
+// Input: one parsed BuildingType definition that may contain native runtime graphics targets.
+// Output: no return value; invalid graphics are cleared immediately so runtime rendering never sees unresolved assets.
+static void validate_runtime_graphics_or_clear(BuildingType &definition)
+{
+    if (!definition.has_graphic()) {
+        return;
+    }
+
+    int valid = 1;
+    if (const GraphicsTarget *default_target = definition.graphics().default_target()) {
+        valid = validate_graphics_target_entry(definition, *default_target, "default");
+    }
+
+    if (valid) {
+        const std::vector<GraphicsVariant> &variants = definition.graphics().variants();
+        for (size_t i = 0; i < variants.size(); i++) {
+            char scope[64];
+            snprintf(scope, sizeof(scope), "variant[%u]", static_cast<unsigned int>(i));
+            if (!validate_graphics_target_entry(definition, variants[i].target, scope)) {
+                valid = 0;
+                break;
+            }
+        }
+    }
+
+    if (valid) {
+        const std::vector<GraphicsOverlay> &overlays = definition.graphics().overlays();
+        for (size_t i = 0; i < overlays.size(); i++) {
+            char scope[64];
+            snprintf(scope, sizeof(scope), "overlay[%u]", static_cast<unsigned int>(i));
+            if (!validate_graphics_target_entry(definition, overlays[i].target, scope)) {
+                valid = 0;
+                break;
+            }
+        }
+    }
+
+    if (!valid) {
+        definition.clear_graphics();
+    }
+}
+
 static int parse_definition_file(const char *filename)
 {
     std::vector<char> buffer;
@@ -1177,6 +1291,7 @@ static int parse_definition_file(const char *filename)
         return 0;
     }
 
+    validate_runtime_graphics_or_clear(*g_parse_state.definition);
     g_building_types[g_parse_state.definition->type()] = std::move(g_parse_state.definition);
     return 1;
 }

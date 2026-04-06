@@ -2,12 +2,15 @@
 #include "building/building_type_registry_internal.h"
 
 #include "assets/image_group_payload.h"
+#include "building/building_runtime_graphics.h"
 #include "core/crash_context.h"
 
 extern "C" {
-#include "building/animation.h"
 #include "building/building_runtime_api.h"
+#include "building/count.h"
 #include "building/image.h"
+#include "building/industry.h"
+#include "building/monument.h"
 #include "building/properties.h"
 #include "city/population.h"
 #include "core/calc.h"
@@ -15,8 +18,11 @@ extern "C" {
 #include "figure/action.h"
 #include "figure/figure.h"
 #include "figure/movement.h"
+#include "game/animation.h"
+#include "game/resource.h"
 #include "map/building_tiles.h"
 #include "map/road_access.h"
+#include "map/sprite.h"
 #include "map/terrain.h"
 #include "core/log.h"
 }
@@ -28,6 +34,16 @@ extern "C" {
 namespace {
 
 std::unordered_set<std::string> g_logged_building_graphics_fallbacks;
+
+void advance_runtime_monument_secondary_animation(building *b)
+{
+    if (b && b->type == BUILDING_GRAND_TEMPLE_CERES && b->monument.upgrades == 1) {
+        b->monument.secondary_frame++;
+        if (b->monument.secondary_frame > 4) {
+            b->monument.secondary_frame = 0;
+        }
+    }
+}
 
 void make_building_context(char *buffer, size_t buffer_size, const building *b)
 {
@@ -71,24 +87,6 @@ void log_building_scope_state(void *userdata)
         target && target->has_path() ? target->path() : "",
         target && target->has_image() ? target->image() : "");
     log_info("Graphics building state", details, 0);
-}
-
-const image *resolve_group_image_candidates(const char *group_key, const char *const *image_ids, size_t image_id_count)
-{
-    if (!group_key || !*group_key || !image_ids) {
-        return nullptr;
-    }
-
-    for (size_t i = 0; i < image_id_count; i++) {
-        const char *image_id = image_ids[i];
-        if (!image_id || !*image_id) {
-            continue;
-        }
-        if (const image *img = image_group_payload_get_image(group_key, image_id)) {
-            return img;
-        }
-    }
-    return nullptr;
 }
 
 void log_building_graphics_fallback_once(
@@ -178,15 +176,16 @@ void building_runtime::refresh_runtime_state()
 
 void building_runtime::clear_resolved_graphics()
 {
-    resolved_graphic_image_ = nullptr;
+    resolved_graphic_footprint_ = {};
+    resolved_graphic_top_ = {};
     owns_graphics_ = 0;
     owns_graphic_animation_ = 0;
-    resolved_animation_layers_.clear();
+    resolved_animation_frame_slices_.clear();
 }
 
 int building_runtime::uses_new_graphics() const
 {
-    return building_ && definition_ && definition_->has_graphic() && definition_->graphics_path() && *definition_->graphics_path();
+    return building_ && definition_ && definition_->has_graphic();
 }
 
 int building_runtime::graphics_state_is_authoritative() const
@@ -205,222 +204,236 @@ const building_type_registry_impl::GraphicsTarget *building_runtime::resolve_gra
     return definition_->graphics().default_target();
 }
 
-const char *building_runtime::resolve_named_group_image_id(const char *group_key, const char *image_id) const
-{
-    if (!uses_new_graphics() || !group_key || !*group_key || !image_id || !*image_id) {
-        return nullptr;
-    }
-    return image_group_payload_get_image(group_key, image_id) ? image_id : nullptr;
-}
-
-const char *building_runtime::resolve_candidate_graphic_image_id(
-    const char *group_key,
-    const char *const *image_ids,
-    size_t image_id_count) const
-{
-    if (!uses_new_graphics() || !group_key || !*group_key || !image_ids) {
-        return nullptr;
-    }
-
-    for (size_t i = 0; i < image_id_count; i++) {
-        if (const char *image_id = resolve_named_group_image_id(group_key, image_ids[i])) {
-            return image_id;
-        }
-    }
-    return nullptr;
-}
-
-const image *building_runtime::resolve_named_group_image(const char *group_key, const char *image_id) const
-{
-    if (!uses_new_graphics() || !group_key || !*group_key || !image_id || !*image_id) {
-        return nullptr;
-    }
-    return image_group_payload_get_image(group_key, image_id);
-}
-
-const image *building_runtime::resolve_candidate_graphic_image(
-    const char *group_key,
-    const char *const *image_ids,
-    size_t image_id_count) const
-{
-    if (!uses_new_graphics() || !group_key || !*group_key) {
-        return nullptr;
-    }
-    return resolve_group_image_candidates(group_key, image_ids, image_id_count);
-}
-
-const char *building_runtime::resolve_default_group_image_id(const char *group_key) const
-{
-    static const char *default_image_ids[] = {
-        "main",
-        "Main",
-        "default",
-        "Default",
-        "Image_0000",
-        "0"
-    };
-
-    if (const char *image_id = resolve_candidate_graphic_image_id(
-            group_key,
-            default_image_ids,
-            sizeof(default_image_ids) / sizeof(default_image_ids[0]))) {
-        return image_id;
-    }
-    return uses_new_graphics() ? image_group_payload_get_default_image_id(group_key) : nullptr;
-}
-
-const image *building_runtime::resolve_default_group_image(const char *group_key) const
-{
-    const char *image_id = resolve_default_group_image_id(group_key);
-    return image_id ? resolve_named_group_image(group_key, image_id) : nullptr;
-}
-
-const char *building_runtime::resolve_type_specific_graphic_image_id(const char *group_key) const
-{
-    if (!uses_new_graphics() || !group_key || !*group_key) {
-        return nullptr;
-    }
-
-    switch (building_->type) {
-        case BUILDING_THEATER:
-        {
-            static const char *base_image_ids[] = { "Theatre ON", "Theater ON", "Theatre", "Theater", "ON" };
-            static const char *upgrade_image_ids[] = { "Theatre Upgrade ON", "Theater Upgrade ON", "Upgrade ON" };
-            return building_->upgrade_level ?
-                resolve_candidate_graphic_image_id(group_key, upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image_id(group_key, base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
-        }
-        case BUILDING_AMPHITHEATER:
-        {
-            static const char *base_image_ids[] = { "Amphitheatre ON", "Amphitheater ON", "Amphitheatre", "Amphitheater", "ON" };
-            static const char *upgrade_image_ids[] = { "Amphitheatre Upgrade ON", "Amphitheater Upgrade ON", "Upgrade ON" };
-            return building_->upgrade_level ?
-                resolve_candidate_graphic_image_id(group_key, upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image_id(group_key, base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
-        }
-        case BUILDING_ARENA:
-        {
-            static const char *base_image_ids[] = { "Arena ON", "Arena", "ON" };
-            static const char *upgrade_image_ids[] = { "Arena Upgrade ON", "Upgrade ON" };
-            return building_->upgrade_level ?
-                resolve_candidate_graphic_image_id(group_key, upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image_id(group_key, base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
-        }
-        case BUILDING_SCHOOL:
-        {
-            static const char *upgrade_image_ids[] = { "Upgraded_School", "School Upgrade ON", "Upgrade ON" };
-            if (building_->upgrade_level) {
-                return resolve_candidate_graphic_image_id(group_key, upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]));
-            }
-            return resolve_default_group_image_id(group_key);
-        }
-        case BUILDING_ACADEMY:
-        {
-            static const char *base_image_ids[] = { "Academy_Fix", "Academy OFF", "Academy", "OFF" };
-            static const char *upgrade_image_ids[] = { "Upgraded_Academy", "Academy Upgrade ON", "Upgrade ON" };
-            const char *image_id = building_->upgrade_level ?
-                resolve_candidate_graphic_image_id(group_key, upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image_id(group_key, base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
-            return image_id ? image_id : resolve_default_group_image_id(group_key);
-        }
-        case BUILDING_LIBRARY:
-        {
-            static const char *base_image_ids[] = { "Downgraded_Library", "Library OFF", "Library", "OFF" };
-            static const char *upgrade_image_ids[] = { "Library ON", "Upgraded_Library", "ON" };
-            const char *image_id = building_->upgrade_level ?
-                resolve_candidate_graphic_image_id(group_key, upgrade_image_ids, sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0])) :
-                resolve_candidate_graphic_image_id(group_key, base_image_ids, sizeof(base_image_ids) / sizeof(base_image_ids[0]));
-            return image_id ? image_id : resolve_default_group_image_id(group_key);
-        }
-        case BUILDING_FORUM:
-        {
-            static const char *upgrade_image_ids[] = { "Upgraded_Forum", "Forum Upgrade ON", "Upgrade ON" };
-            if (building_->upgrade_level) {
-                if (const char *image_id = resolve_candidate_graphic_image_id(
-                        group_key,
-                        upgrade_image_ids,
-                        sizeof(upgrade_image_ids) / sizeof(upgrade_image_ids[0]))) {
-                    return image_id;
-                }
-            }
-            return resolve_default_group_image_id(group_key);
-        }
-        case BUILDING_ACTOR_COLONY:
-        case BUILDING_GLADIATOR_SCHOOL:
-        case BUILDING_DOCTOR:
-        case BUILDING_HOSPITAL:
-        case BUILDING_BARBER:
-        case BUILDING_LARGE_STATUE:
-        case BUILDING_WELL:
-        case BUILDING_WORKCAMP:
-            return resolve_default_group_image_id(group_key);
-        default:
-            return nullptr;
-    }
-}
-
-const image *building_runtime::resolve_type_specific_graphic_image(const char *group_key) const
-{
-    const char *image_id = resolve_type_specific_graphic_image_id(group_key);
-    return image_id ? resolve_named_group_image(group_key, image_id) : nullptr;
-}
-
-const char *building_runtime::resolve_graphic_image_id(const building_type_registry_impl::GraphicsTarget *target) const
+const ImageGroupEntry *building_runtime::resolve_graphic_entry(const building_type_registry_impl::GraphicsTarget *target) const
 {
     if (!uses_new_graphics() || !target || !target->has_path()) {
         return nullptr;
     }
 
-    const char *group_key = target->path();
-    if (target->has_image()) {
-        if (const char *image_id = resolve_named_group_image_id(group_key, target->image())) {
-            return image_id;
-        }
+    if (!image_group_payload_load(target->path())) {
         log_building_graphics_fallback_once(
-            "Building graphics image id could not be resolved.",
+            "Building graphics group could not be resolved.",
             this,
-            target->image(),
-            group_key,
-            target->image());
+            target->path(),
+            target->path(),
+            target->has_image() ? target->image() : nullptr);
         return nullptr;
     }
 
-    if (!definition_->uses_structured_graphics()) {
-        if (const char *image_id = resolve_type_specific_graphic_image_id(group_key)) {
-            return image_id;
+    const ImageGroupPayload *payload = image_group_payload_get(target->path());
+    if (!payload) {
+        log_building_graphics_fallback_once(
+            "Building graphics group payload could not be resolved.",
+            this,
+            target->path(),
+            target->path(),
+            target->has_image() ? target->image() : nullptr);
+        return nullptr;
+    }
+
+    const ImageGroupEntry *entry = target->has_image() ? payload->entry_for(target->image()) : payload->default_entry();
+    if (!entry) {
+        log_building_graphics_fallback_once(
+            target->has_image() ? "Building graphics image id could not be resolved." :
+                                  "Building graphics default entry could not be resolved.",
+            this,
+            target->has_image() ? target->image() : target->path(),
+            target->path(),
+            target->has_image() ? target->image() : payload->default_image_id());
+        return nullptr;
+    }
+
+    return entry;
+}
+
+// Input: one runtime animation track plus the live building/grid state that owns it.
+// Output: the 1-based frame index that should be drawn now, while mirroring legacy timing/gating without using legacy image payloads.
+int building_runtime::mirror_animation_offset(const RuntimeAnimationTrack &track) const
+{
+    if (!building_ || track.num_frames <= 0) {
+        return 0;
+    }
+
+    if (building_->type == BUILDING_FOUNTAIN && (building_->num_workers <= 0 || !building_->has_water_access)) {
+        return 0;
+    }
+    if (building_->type == BUILDING_RESERVOIR && !building_->has_water_access) {
+        return 0;
+    }
+    if (building_is_workshop(building_->type)) {
+        if (building_->num_workers <= 0 || building_->strike_duration_days > 0 ||
+            !building_industry_has_raw_materials_for_production(building_)) {
+            return 0;
+        }
+    }
+    if (building_->type == BUILDING_CONCRETE_MAKER) {
+        if (!building_->has_water_access || building_->data.industry.progress == 0) {
+            return 0;
+        }
+    }
+    if ((building_->type == BUILDING_PREFECTURE || building_->type == BUILDING_ENGINEERS_POST) && building_->num_workers <= 0) {
+        return 0;
+    }
+    if (building_->type == BUILDING_MARKET && building_->num_workers <= 0) {
+        return 0;
+    }
+    if (building_->type == BUILDING_WAREHOUSE && building_->num_workers < model_get_building(building_->type)->laborers) {
+        return 0;
+    }
+    if (building_->type == BUILDING_DOCK && building_->data.dock.num_ships <= 0) {
+        map_sprite_animation_set(building_->grid_offset, 1);
+        return 1;
+    }
+    if (building_->type == BUILDING_MARBLE_QUARRY && (building_->num_workers <= 0 || building_->strike_duration_days > 0)) {
+        map_sprite_animation_set(building_->grid_offset, 1);
+        return 1;
+    } else if (building_is_raw_resource_producer(building_->type) && (building_->num_workers <= 0 || building_->strike_duration_days > 0)) {
+        return 0;
+    }
+    if (building_->type == BUILDING_GLADIATOR_SCHOOL) {
+        if (building_->num_workers <= 0) {
+            map_sprite_animation_set(building_->grid_offset, 1);
+            return 1;
+        }
+    } else if (building_->type >= BUILDING_THEATER && building_->type <= BUILDING_CHARIOT_MAKER &&
+        building_->type != BUILDING_HIPPODROME && building_->num_workers <= 0) {
+        return 0;
+    }
+    if (building_->type == BUILDING_GRANARY && building_->num_workers < model_get_building(building_->type)->laborers) {
+        return 0;
+    }
+    if (building_monument_is_monument(building_) && (building_->type != BUILDING_ORACLE && building_->type != BUILDING_NYMPHAEUM &&
+        (building_->num_workers <= 0 || building_->monument.phase != MONUMENT_FINISHED))) {
+        return 0;
+    }
+    if (building_->type == BUILDING_CITY_MINT &&
+        ((building_->output_resource_id == RESOURCE_DENARII &&
+            building_->resources[RESOURCE_GOLD] < BUILDING_INDUSTRY_CITY_MINT_GOLD_PER_COIN) || building_->num_workers <= 0 ||
+            (building_count_active(BUILDING_SENATE) == 0))) {
+        return 0;
+    }
+    if ((building_->type == BUILDING_ARCHITECT_GUILD || building_->type == BUILDING_MESS_HALL || building_->type == BUILDING_ARENA)
+        && building_->num_workers <= 0) {
+        return 0;
+    }
+    if (building_->type == BUILDING_TAVERN && (building_->num_workers <= 0 || !building_->resources[RESOURCE_WINE])) {
+        return 0;
+    }
+    if (building_->type == BUILDING_WATCHTOWER && (building_->num_workers <= 0 || !building_->figure_id4)) {
+        return 0;
+    }
+    if (building_->type == BUILDING_LARGE_STATUE && !building_->has_water_access) {
+        return 0;
+    }
+    if (building_->type == BUILDING_DEPOT && building_->num_workers <= 0) {
+        return 0;
+    }
+    if (building_->type == BUILDING_ARMOURY && building_->num_workers <= 0) {
+        return 0;
+    }
+    if (building_->type == BUILDING_AMPHITHEATER && building_->num_workers <= 0) {
+        return 0;
+    }
+
+    if (!track.speed_id) {
+        return map_sprite_animation_at(building_->grid_offset) & 0x7f;
+    }
+    if (!game_animation_should_advance(track.speed_id)) {
+        return map_sprite_animation_at(building_->grid_offset) & 0x7f;
+    }
+
+    int new_sprite = 0;
+    int is_reverse = 0;
+    if (building_->type == BUILDING_WINE_WORKSHOP) {
+        const int pct_done = calc_percentage(building_->data.industry.progress, building_industry_get_max_progress(building_));
+        const int current_sprite = map_sprite_animation_at(building_->grid_offset);
+        if (pct_done <= 0) {
+            new_sprite = 0;
+        } else if (pct_done < 4) {
+            new_sprite = 1;
+        } else if (pct_done < 8) {
+            new_sprite = 2;
+        } else if (pct_done < 12) {
+            new_sprite = 3;
+        } else if (pct_done < 96) {
+            const int first_mid_sprite = 4;
+            const int last_mid_sprite = track.num_frames < 8 ? track.num_frames : 8;
+            if (current_sprite < first_mid_sprite) {
+                new_sprite = first_mid_sprite;
+            } else {
+                new_sprite = current_sprite + 1;
+                if (new_sprite > last_mid_sprite) {
+                    new_sprite = first_mid_sprite;
+                }
+            }
+        } else {
+            const int first_late_sprite = track.num_frames < 9 ? track.num_frames : 9;
+            if (current_sprite < first_late_sprite) {
+                new_sprite = first_late_sprite;
+            } else {
+                new_sprite = current_sprite + 1;
+                if (new_sprite > track.num_frames) {
+                    new_sprite = track.num_frames;
+                }
+            }
+        }
+    } else if (track.can_reverse) {
+        if (map_sprite_animation_at(building_->grid_offset) & 0x80) {
+            is_reverse = 1;
+        }
+        const int current_sprite = map_sprite_animation_at(building_->grid_offset) & 0x7f;
+        if (is_reverse) {
+            new_sprite = current_sprite - 1;
+            if (new_sprite < 1) {
+                new_sprite = 1;
+                is_reverse = 0;
+            }
+        } else {
+            new_sprite = current_sprite + 1;
+            if (new_sprite > track.num_frames) {
+                new_sprite = track.num_frames;
+                is_reverse = 1;
+            }
+        }
+    } else {
+        new_sprite = map_sprite_animation_at(building_->grid_offset) + 1;
+        if (new_sprite > track.num_frames) {
+            advance_runtime_monument_secondary_animation(building_);
+            new_sprite = 1;
         }
     }
 
-    return resolve_default_group_image_id(group_key);
+    map_sprite_animation_set(building_->grid_offset, is_reverse ? new_sprite | 0x80 : new_sprite);
+    return new_sprite;
 }
 
-void building_runtime::append_graphic_animation_layer(
-    const building_type_registry_impl::GraphicsTarget *target,
-    const image *img,
-    const char *image_id)
+// Input: one resolved native graphics entry that may own animation frames.
+// Output: no return value; the currently active frame slice is appended to the resolved runtime draw list when the track is active.
+void building_runtime::append_graphic_animation_layer(const ImageGroupEntry &entry)
 {
     owns_graphic_animation_ = 1;
-    if (!target || !img || !img->animation || !image_id || !*image_id) {
+    if (!entry.has_animation()) {
         return;
     }
 
-    int animation_offset = building_animation_offset_for_image(building_, img, building_->grid_offset);
+    const RuntimeAnimationTrack &track = entry.animation();
+    const int animation_offset = mirror_animation_offset(track);
     if (animation_offset <= 0) {
         return;
     }
 
-    const image *frame = image_group_payload_get_animation_frame(target->path(), image_id, animation_offset);
-    if (!frame) {
-        log_building_graphics_fallback_once(
-            "Building animation frame could not be resolved.",
-            this,
-            image_id,
-            target->path(),
-            image_id);
+    const size_t frame_index = static_cast<size_t>(animation_offset - 1);
+    if (frame_index >= track.frames.size()) {
         return;
     }
 
-    resolved_animation_layers_.push_back({ img, frame });
+    RuntimeDrawSlice frame_slice = track.frames[frame_index];
+    frame_slice.draw_offset_x += track.sprite_offset_x;
+    frame_slice.draw_offset_y += track.sprite_offset_y;
+    if (const RuntimeDrawSlice *top_slice = entry.top()) {
+        frame_slice.draw_offset_y += top_slice->draw_offset_y;
+    }
+    resolved_animation_frame_slices_.push_back(frame_slice);
 }
 
 void building_runtime::resolve_graphics_state()
@@ -440,30 +453,36 @@ void building_runtime::resolve_graphics_state()
             "Building graphics target could not be resolved.",
             this,
             definition_ ? definition_->attr() : "");
-        owns_graphic_animation_ = owns_graphics_;
+        owns_graphics_ = 0;
+        owns_graphic_animation_ = 0;
         return;
     }
 
-    const char *image_id = resolve_graphic_image_id(target);
-    if (!image_id) {
-        owns_graphic_animation_ = owns_graphics_;
+    const ImageGroupEntry *entry = resolve_graphic_entry(target);
+    if (!entry) {
+        owns_graphics_ = 0;
+        owns_graphic_animation_ = 0;
         return;
     }
-
-    const image *img = resolve_named_group_image(target->path(), image_id);
-    if (!img) {
+    if (!entry->footprint()) {
         log_building_graphics_fallback_once(
-            "Building graphics image could not be resolved.",
+            "Building graphics entry is missing a footprint slice.",
             this,
             target->path(),
             target->path(),
-            image_id);
-        owns_graphic_animation_ = owns_graphics_;
+            target->has_image() ? target->image() : nullptr);
+        owns_graphics_ = 0;
+        owns_graphic_animation_ = 0;
         return;
     }
 
-    resolved_graphic_image_ = img;
-    append_graphic_animation_layer(target, img, image_id);
+    if (const RuntimeDrawSlice *footprint = entry->footprint()) {
+        resolved_graphic_footprint_ = *footprint;
+    }
+    if (const RuntimeDrawSlice *top = entry->top()) {
+        resolved_graphic_top_ = *top;
+    }
+    append_graphic_animation_layer(*entry);
 
     std::vector<const building_type_registry_impl::GraphicsTarget *> overlays =
         definition_->resolve_graphics_overlays(*building_);
@@ -472,28 +491,17 @@ void building_runtime::resolve_graphics_state()
             continue;
         }
 
-        const char *overlay_image_id = resolve_graphic_image_id(overlay);
-        if (!overlay_image_id) {
+        const ImageGroupEntry *overlay_entry = resolve_graphic_entry(overlay);
+        if (!overlay_entry) {
             continue;
         }
-
-        const image *overlay_image = resolve_named_group_image(overlay->path(), overlay_image_id);
-        if (!overlay_image) {
-            log_building_graphics_fallback_once(
-                "Building graphics overlay image could not be resolved.",
-                this,
-                overlay->path(),
-                overlay->path(),
-                overlay_image_id);
-            owns_graphic_animation_ = 1;
-            continue;
-        }
-
-        append_graphic_animation_layer(overlay, overlay_image, overlay_image_id);
+        append_graphic_animation_layer(*overlay_entry);
     }
 }
 
-const image *building_runtime::resolve_graphic_image()
+// Input: the runtime building wrapper for one live building.
+// Output: the current native footprint slice for renderer-owned building graphics, or null when this building stays on the legacy path.
+const RuntimeDrawSlice *building_runtime::graphic_footprint()
 {
     if (!uses_new_graphics()) {
         return nullptr;
@@ -507,10 +515,12 @@ const image *building_runtime::resolve_graphic_image()
         log_building_scope_state,
         this);
     resolve_graphics_state();
-    return resolved_graphic_image_;
+    return resolved_graphic_footprint_.is_valid() ? &resolved_graphic_footprint_ : nullptr;
 }
 
-const image *building_runtime::resolve_graphic_animation_frame()
+// Input: the runtime building wrapper for one live building.
+// Output: the current native top slice for renderer-owned building graphics, or null when no separate top exists.
+const RuntimeDrawSlice *building_runtime::graphic_top()
 {
     if (!uses_new_graphics()) {
         return nullptr;
@@ -519,12 +529,12 @@ const image *building_runtime::resolve_graphic_animation_frame()
     char context[256];
     make_building_context(context, sizeof(context), building_);
     CrashContextScope crash_scope(
-        "building_runtime.resolve_animation_image",
+        "building_runtime.resolve_top_image",
         context,
         log_building_scope_state,
         this);
     resolve_graphics_state();
-    return resolved_animation_layers_.empty() ? nullptr : resolved_animation_layers_.front().frame_image;
+    return resolved_graphic_top_.is_valid() ? &resolved_graphic_top_ : nullptr;
 }
 
 void building_runtime::set_building_graphic()
@@ -861,19 +871,19 @@ int building_runtime::graphic_animation_layer_count()
         return 0;
     }
     resolve_graphics_state();
-    return static_cast<int>(resolved_animation_layers_.size());
+    return static_cast<int>(resolved_animation_frame_slices_.size());
 }
 
-const building_runtime_animation_layer *building_runtime::graphic_animation_layer(int index)
+const RuntimeDrawSlice *building_runtime::graphic_animation_layer_frame(int index)
 {
     if (!uses_new_graphics()) {
         return nullptr;
     }
     resolve_graphics_state();
-    if (index < 0 || static_cast<size_t>(index) >= resolved_animation_layers_.size()) {
+    if (index < 0 || static_cast<size_t>(index) >= resolved_animation_frame_slices_.size()) {
         return nullptr;
     }
-    return &resolved_animation_layers_[static_cast<size_t>(index)];
+    return &resolved_animation_frame_slices_[static_cast<size_t>(index)];
 }
 
 extern "C" void building_runtime_reset(void)
@@ -896,23 +906,23 @@ extern "C" void building_runtime_spawn_figure(building *b)
     }
 }
 
-extern "C" const image *building_runtime_get_graphic_image(building *b)
+const RuntimeDrawSlice *building_runtime_get_graphic_footprint_slice(building *b)
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
-        return instance->resolve_graphic_image();
+        return instance->graphic_footprint();
     }
     return nullptr;
 }
 
-extern "C" const image *building_runtime_get_graphic_animation_frame(building *b)
+const RuntimeDrawSlice *building_runtime_get_graphic_top_slice(building *b)
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
-        return instance->resolve_graphic_animation_frame();
+        return instance->graphic_top();
     }
     return nullptr;
 }
 
-extern "C" int building_runtime_owns_graphics(building *b)
+int building_runtime_owns_graphics(building *b)
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         return instance->owns_graphics();
@@ -920,7 +930,7 @@ extern "C" int building_runtime_owns_graphics(building *b)
     return 0;
 }
 
-extern "C" int building_runtime_owns_graphic_animation(building *b)
+int building_runtime_owns_graphic_animation(building *b)
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         return instance->owns_graphic_animation();
@@ -928,7 +938,7 @@ extern "C" int building_runtime_owns_graphic_animation(building *b)
     return 0;
 }
 
-extern "C" int building_runtime_get_graphic_animation_layer_count(building *b)
+int building_runtime_get_graphic_animation_layer_count(building *b)
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
         return instance->graphic_animation_layer_count();
@@ -936,22 +946,10 @@ extern "C" int building_runtime_get_graphic_animation_layer_count(building *b)
     return 0;
 }
 
-extern "C" const image *building_runtime_get_graphic_animation_layer_image(building *b, int layer_index)
+const RuntimeDrawSlice *building_runtime_get_graphic_animation_layer_frame(building *b, int layer_index)
 {
     if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
-        if (const building_runtime_animation_layer *layer = instance->graphic_animation_layer(layer_index)) {
-            return layer->base_image;
-        }
-    }
-    return nullptr;
-}
-
-extern "C" const image *building_runtime_get_graphic_animation_layer_frame(building *b, int layer_index)
-{
-    if (building_runtime *instance = building_runtime_impl::get_or_create_instance(b)) {
-        if (const building_runtime_animation_layer *layer = instance->graphic_animation_layer(layer_index)) {
-            return layer->frame_image;
-        }
+        return instance->graphic_animation_layer_frame(layer_index);
     }
     return nullptr;
 }

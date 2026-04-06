@@ -1,7 +1,7 @@
 #include "game.h"
 
 #include "assets/assets.h"
-#include "assets/image_group_payload.h"
+#include "assets/image_group_payload_api.h"
 #include "building/properties.h"
 #include "building/building_runtime_api.h"
 #include "building/building_type_registry.h"

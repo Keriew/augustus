@@ -1,51 +1,55 @@
 #pragma once
 
-#include "core/image.h"
-
-#ifdef __cplusplus
 #include "graphics/color.h"
+#include "graphics/runtime_texture.h"
 
 #include <string>
 #include <vector>
 
+struct RuntimeAnimationTrack {
+    int num_frames = 0;
+    int sprite_offset_x = 0;
+    int sprite_offset_y = 0;
+    int can_reverse = 0;
+    int speed_id = 0;
+    std::vector<RuntimeDrawSlice> frames;
+};
+
 class ImageGroupEntry {
 public:
     ImageGroupEntry() = default;
-    ImageGroupEntry(std::string id, std::string image_key, std::string top_image_key = std::string());
+    explicit ImageGroupEntry(std::string id);
 
     const std::string &id() const;
-    const std::string &image_key() const;
-    const std::string &top_image_key() const;
-    const image *legacy_image() const;
-    const image *animation_frame(int animation_offset) const;
+    const RuntimeDrawSlice *footprint() const;
+    const RuntimeDrawSlice *top() const;
+    int has_top() const;
     int has_animation() const;
-    const image_animation &animation() const;
-    const std::vector<std::string> &animation_frame_keys() const;
-    const std::vector<color_t> &combined_pixels() const;
-    int combined_width() const;
-    int combined_height() const;
+    const RuntimeAnimationTrack &animation() const;
+    int is_isometric() const;
+    int tile_span() const;
+    const std::vector<color_t> &split_pixels() const;
+    int split_width() const;
+    int split_height() const;
     int top_height() const;
 
-    void set_keys(std::string image_key, std::string top_image_key = std::string());
-    void set_animation(const image_animation &animation, std::vector<std::string> frame_image_keys);
-    void set_raster(std::vector<color_t> combined_pixels, int combined_width, int combined_height, int top_height);
+    void set_base_slice(RuntimeDrawSlice footprint, int is_isometric, int tile_span);
+    void set_top_slice(RuntimeDrawSlice top);
+    void clear_top_slice();
+    void set_animation(RuntimeAnimationTrack animation);
+    void set_split_pixels(std::vector<color_t> split_pixels, int split_width, int split_height, int top_height);
 
 private:
-    void rebuild_legacy_image() const;
-
     std::string id_;
-    std::string image_key_;
-    std::string top_image_key_;
-    image_animation animation_data_ = {};
-    std::vector<std::string> animation_frame_keys_;
+    RuntimeDrawSlice footprint_;
+    RuntimeDrawSlice top_;
+    RuntimeAnimationTrack animation_;
+    int has_top_ = 0;
     int has_animation_ = 0;
-    mutable int legacy_image_dirty_ = 1;
-    mutable image legacy_image_ = {};
-    mutable image legacy_top_image_ = {};
-    mutable image_animation legacy_animation_ = {};
-    std::vector<color_t> combined_pixels_;
-    int combined_width_ = 0;
-    int combined_height_ = 0;
+    int is_isometric_ = 0;
+    int tile_span_ = 0;
+    std::vector<color_t> split_pixels_;
+    int split_width_ = 0;
+    int split_height_ = 0;
     int top_height_ = 0;
 };
-#endif

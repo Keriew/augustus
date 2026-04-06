@@ -205,7 +205,11 @@
     <ClCompile Include="src\assets\group.c" />
     <ClCompile Include="src\assets\image.c" />
     <ClCompile Include="src\assets\image_group_entry.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_cache.cpp" />
     <ClCompile Include="src\assets\image_group_payload.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_materialize.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_merge.cpp" />
+    <ClCompile Include="src\assets\image_group_payload_parse.cpp" />
     <ClCompile Include="src\assets\layer.cpp" />
     <ClCompile Include="src\assets\xml.cpp" />
     <ClCompile Include="src\building\animation.c" />
@@ -401,6 +405,7 @@
     <ClCompile Include="src\graphics\graphics.cpp" />
     <ClCompile Include="src\graphics\grid_box.c" />
     <ClCompile Include="src\graphics\image.cpp" />
+    <ClCompile Include="src\graphics\runtime_texture.cpp" />
     <ClCompile Include="src\graphics\image_button.c" />
     <ClCompile Include="src\graphics\image_button_widget.cpp" />
     <ClCompile Include="src\graphics\label_widget.cpp" />

@@ -1,4 +1,4 @@
-#include "renderer.h"
+﻿#include "renderer.h"
 
 #include "core/calc.h"
 #include "core/config.h"
@@ -80,6 +80,8 @@ typedef struct managed_image_resource {
     int width;
     int height;
 } managed_image_resource;
+
+static void draw_image_request(const render_2d_request *request);
 
 typedef struct render_state {
     SDL_Texture *target;
@@ -457,6 +459,35 @@ static image_handle request_image_handle(const render_2d_request *request)
         return request->img->resource_handle;
     }
     return 0;
+}
+
+static void draw_managed_image_request(const managed_image_request *request)
+{
+    if (!request || request->handle <= 0 || request->width <= 0 || request->height <= 0) {
+        return;
+    }
+
+    image runtime_image = {};
+    runtime_image.width = request->width;
+    runtime_image.height = request->height;
+    runtime_image.x_offset = request->x_offset;
+    runtime_image.y_offset = request->y_offset;
+    runtime_image.is_isometric = request->is_isometric;
+    runtime_image.resource_handle = request->handle;
+
+    render_2d_request bridged_request = {};
+    bridged_request.img = &runtime_image;
+    bridged_request.handle = request->handle;
+    bridged_request.x = request->x;
+    bridged_request.y = request->y;
+    bridged_request.logical_width = request->logical_width;
+    bridged_request.logical_height = request->logical_height;
+    bridged_request.color = request->color;
+    bridged_request.domain = request->domain;
+    bridged_request.scaling_policy = request->scaling_policy;
+    bridged_request.angle = request->angle;
+    bridged_request.disable_coord_scaling = request->disable_coord_scaling;
+    draw_image_request(&bridged_request);
 }
 
 static void free_unpacked_assets(void)
@@ -1549,6 +1580,7 @@ static void create_renderer_interface(void)
     data.renderer_interface.pop_state = pop_render_state;
     data.renderer_interface.draw_image = draw_texture;
     data.renderer_interface.draw_image_request = draw_image_request;
+    data.renderer_interface.draw_managed_image_request = draw_managed_image_request;
     data.renderer_interface.draw_image_advanced = draw_texture_advanced;
     data.renderer_interface.draw_silhouette = draw_silhouetted_texture;
     data.renderer_interface.create_custom_image = create_custom_texture;

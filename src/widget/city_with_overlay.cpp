@@ -1,9 +1,12 @@
 #include "city_with_overlay.h"
 
+#include "building/building_runtime_graphics.h"
+#include "graphics/runtime_texture.h"
+#include "map/tile_runtime_graphics.h"
+
 extern "C" {
 #include "assets/assets.h"
 #include "building/animation.h"
-#include "building/building_runtime_api.h"
 #include "building/construction.h"
 #include "building/construction_clear.h"
 #include "building/granary.h"
@@ -30,7 +33,6 @@ extern "C" {
 #include "map/image_context.h"
 #include "map/property.h"
 #include "map/random.h"
-#include "map/tile_runtime_api.h"
 #include "map/tiles.h"
 #include "map/terrain.h"
 #include "widget/city_bridge.h"
@@ -250,13 +252,22 @@ static int is_building_selected(building *b)
 
 }
 
-static const image *get_runtime_graphic_image(building *b)
+static const RuntimeDrawSlice *get_runtime_graphic_footprint(building *b)
 {
     if (!b) {
         return 0;
     }
     b = building_main(b);
-    return b ? building_runtime_get_graphic_image(b) : 0;
+    return b ? building_runtime_get_graphic_footprint_slice(b) : 0;
+}
+
+static const RuntimeDrawSlice *get_runtime_graphic_top(building *b)
+{
+    if (!b) {
+        return 0;
+    }
+    b = building_main(b);
+    return b ? building_runtime_get_graphic_top_slice(b) : 0;
 }
 
 static int runtime_owns_building_graphics(building *b)
@@ -273,11 +284,11 @@ static int draw_runtime_building_footprint(building *b, int x, int y, color_t co
     if (!runtime_owns_building_graphics(b)) {
         return 0;
     }
-    const image *img = get_runtime_graphic_image(b);
-    if (!img) {
+    const RuntimeDrawSlice *slice = get_runtime_graphic_footprint(b);
+    if (!slice) {
         return 1;
     }
-    image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, scale);
+    runtime_texture_draw(*slice, x, y, color_mask, scale);
     return 1;
 }
 
@@ -286,11 +297,11 @@ static int draw_runtime_building_top(building *b, int x, int y, color_t color_ma
     if (!runtime_owns_building_graphics(b)) {
         return 0;
     }
-    const image *img = get_runtime_graphic_image(b);
-    if (!img) {
+    const RuntimeDrawSlice *slice = get_runtime_graphic_top(b);
+    if (!slice) {
         return 1;
     }
-    image_draw_isometric_top_from_draw_tile_image(img, x, y, color_mask, scale);
+    runtime_texture_draw(*slice, x, y, color_mask, scale);
     return 1;
 }
 
@@ -307,28 +318,22 @@ static int draw_runtime_building_animation(building *b, int x, int y, int grid_o
 
     int layer_count = building_runtime_get_graphic_animation_layer_count(b);
     for (int layer_index = 0; layer_index < layer_count; layer_index++) {
-        const image *img = building_runtime_get_graphic_animation_layer_image(b, layer_index);
-        const image *frame = building_runtime_get_graphic_animation_layer_frame(b, layer_index);
-        if (!img || !img->animation || !frame) {
+        const RuntimeDrawSlice *frame = building_runtime_get_graphic_animation_layer_frame(b, layer_index);
+        if (!frame) {
             continue;
         }
-
-        int y_offset = img->top ? img->top->original.height - FOOTPRINT_HALF_HEIGHT : 0;
-        image_draw_image(frame,
-            x + img->animation->sprite_offset_x,
-            y + img->animation->sprite_offset_y - y_offset,
-            color_mask, scale);
+        runtime_texture_draw(*frame, x, y, color_mask, scale);
     }
     return 1;
 }
 
 static int draw_runtime_tile_footprint(int grid_offset, int x, int y, color_t color_mask)
 {
-    const image *img = tile_runtime_get_graphic_image(grid_offset);
-    if (!img) {
+    const RuntimeDrawSlice *slice = tile_runtime_get_graphic_footprint_slice(grid_offset);
+    if (!slice) {
         return 0;
     }
-    image_draw_isometric_footprint_from_draw_tile_image(img, x, y, color_mask, scale);
+    runtime_texture_draw(*slice, x, y, color_mask, scale);
     return 1;
 }
 

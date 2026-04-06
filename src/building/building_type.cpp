@@ -278,6 +278,11 @@ void BuildingType::mark_graphics_default_node()
     graphics_.mark_default_node();
 }
 
+void BuildingType::clear_graphics()
+{
+    graphics_ = GraphicsDefinition();
+}
+
 GraphicsVariant &BuildingType::add_graphics_variant()
 {
     return graphics_.add_variant();

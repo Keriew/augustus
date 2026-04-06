@@ -66,6 +66,24 @@ typedef struct {
 } render_2d_request;
 
 typedef struct {
+    image_handle handle;
+    int width;
+    int height;
+    int x_offset;
+    int y_offset;
+    int is_isometric;
+    float x;
+    float y;
+    float logical_width;
+    float logical_height;
+    color_t color;
+    render_domain domain;
+    render_scaling_policy scaling_policy;
+    double angle;
+    int disable_coord_scaling;
+} managed_image_request;
+
+typedef struct {
     atlas_type type;
     int num_images;
     color_t **buffers;
@@ -93,6 +111,7 @@ typedef struct {
 
     void (*draw_image)(const image *img, int x, int y, color_t color, float scale);
     void (*draw_image_request)(const render_2d_request *request);
+    void (*draw_managed_image_request)(const managed_image_request *request);
     void (*draw_image_advanced)(const image *img, float x, float y, color_t color,
         float scale_x, float scale_y, double angle, int disable_coord_scaling);
     void (*draw_silhouette)(const image *img, int x, int y, color_t color, float scale);

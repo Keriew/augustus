@@ -1,7 +1,7 @@
 #ifndef MAP_TILE_RUNTIME_H
 #define MAP_TILE_RUNTIME_H
 
-#include "core/image.h"
+#include "graphics/runtime_texture.h"
 #include "map/tile_type_registry_internal.h"
 
 #ifdef __cplusplus
@@ -34,7 +34,7 @@ public:
         return plaza_image_index_;
     }
 
-    const image *resolve_graphic_image() const;
+    const RuntimeDrawSlice *resolve_graphic_slice() const;
 
 private:
     int grid_offset_ = -1;

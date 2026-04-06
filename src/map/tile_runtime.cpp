@@ -1,6 +1,7 @@
 #include "map/tile_runtime_internal.h"
 
 #include "assets/image_group_payload.h"
+#include "map/tile_runtime_graphics.h"
 #include "core/crash_context.h"
 
 extern "C" {
@@ -92,7 +93,9 @@ tile_runtime *get_or_create_instance(int grid_offset, tile_type_registry_impl::T
 
 }
 
-const image *tile_runtime::resolve_graphic_image() const
+// Input: one runtime tile wrapper that already knows its authored plaza image index.
+// Output: the native footprint slice for that tile, or null when the authored runtime tile graphic cannot be resolved.
+const RuntimeDrawSlice *tile_runtime::resolve_graphic_slice() const
 {
     if (!definition_ || !definition_->has_graphics() || plaza_image_index_ < 0) {
         return nullptr;
@@ -105,8 +108,7 @@ const image *tile_runtime::resolve_graphic_image() const
         context,
         log_tile_scope_state,
         const_cast<tile_runtime *>(this));
-    const image *img = image_group_payload_get_image_at_index(definition_->graphics_path(), plaza_image_index_);
-    if (!img) {
+    if (!image_group_payload_load(definition_->graphics_path())) {
         char detail[256];
         snprintf(
             detail,
@@ -118,8 +120,30 @@ const image *tile_runtime::resolve_graphic_image() const
             "Tile graphics image could not be resolved. Falling back to legacy rendering.",
             this,
             detail);
+        return nullptr;
     }
-    return img;
+
+    const ImageGroupPayload *payload = image_group_payload_get(definition_->graphics_path());
+    if (!payload) {
+        return nullptr;
+    }
+
+    const ImageGroupEntry *entry = payload->entry_at_index(plaza_image_index_);
+    if (!entry || !entry->footprint()) {
+        char detail[256];
+        snprintf(
+            detail,
+            sizeof(detail),
+            "%s index=%d",
+            definition_->graphics_path(),
+            plaza_image_index_);
+        log_tile_graphics_fallback_once(
+            "Tile graphics image could not be resolved. Falling back to legacy rendering.",
+            this,
+            detail);
+        return nullptr;
+    }
+    return entry->footprint();
 }
 
 extern "C" void tile_runtime_reset(void)
@@ -145,10 +169,10 @@ extern "C" void tile_runtime_set_plaza_image_index(int grid_offset, int image_in
     }
 }
 
-extern "C" const image *tile_runtime_get_graphic_image(int grid_offset)
+const RuntimeDrawSlice *tile_runtime_get_graphic_footprint_slice(int grid_offset)
 {
     if (tile_runtime *instance = tile_runtime_impl::get_instance(grid_offset)) {
-        return instance->resolve_graphic_image();
+        return instance->resolve_graphic_slice();
     }
     return nullptr;
 }

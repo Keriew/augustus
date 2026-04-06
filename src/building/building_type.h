@@ -205,6 +205,7 @@ public:
     void set_graphics_image(std::string image);
     void set_upgrade_rule(int threshold, GraphicComparison comparison);
     void mark_graphics_default_node();
+    void clear_graphics();
     GraphicsVariant &add_graphics_variant();
     GraphicsOverlay &add_graphics_overlay();
     GraphicsVariant *last_graphics_variant();
