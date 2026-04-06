@@ -4,10 +4,10 @@
 
 struct building;
 
-// Input: a building pointer that may reference any part of a multi-tile building plus the tile draw origin.
+// Input: a building pointer that may reference any part of a multi-tile building plus the tile draw origin and grid offset.
 // Output: draws the native runtime footprint when this stage is owned by the native path and returns 1 in that case.
 // Returning 0 means the caller should continue with its existing fallback stage logic.
-int city_draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask, float scale);
+int city_draw_runtime_building_footprint(building *b, int x, int y, int grid_offset, color_t color_mask, float scale);
 
 // Input: a building pointer that may reference any part of a multi-tile building plus the tile draw origin.
 // Output: draws the native runtime top when this stage is owned by the native path and returns 1 in that case.

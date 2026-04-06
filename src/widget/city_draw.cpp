@@ -54,10 +54,13 @@ int city_draw_runtime_owns_building_animation(building *b)
     return b ? building_runtime_owns_graphic_animation(b) : 0;
 }
 
-int city_draw_runtime_building_footprint(building *b, int x, int y, color_t color_mask, float scale)
+int city_draw_runtime_building_footprint(building *b, int x, int y, int grid_offset, color_t color_mask, float scale)
 {
     if (!city_draw_runtime_owns_building_graphics(b)) {
         return 0;
+    }
+    if (!map_property_is_draw_tile(grid_offset)) {
+        return 1;
     }
 
     b = get_main_building(b);

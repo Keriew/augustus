@@ -278,7 +278,8 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, draw_context.scale, grid_offset, color_mask);
-    } else if (building_id && city_draw_runtime_building_footprint(building_get(building_id), x, y, color_mask, draw_context.scale)) {
+    } else if (building_id &&
+        city_draw_runtime_building_footprint(building_get(building_id), x, y, grid_offset, color_mask, draw_context.scale)) {
         // Runtime-managed buildings draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
     } else if (!building_id && city_draw_runtime_tile_footprint(grid_offset, x, y, color_mask, draw_context.scale)) {
         // Runtime-managed terrain tiles draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.

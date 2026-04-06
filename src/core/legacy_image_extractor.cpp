@@ -17,7 +17,7 @@ extern "C" {
 
 namespace {
 
-constexpr char kExtractionStampPrefix[] = "legacy_extract_v3:";
+constexpr char kExtractionStampPrefix[] = "legacy_extract_v4:";
 struct LegacyFamily {
     const char *folder_name;
 };
@@ -1039,6 +1039,53 @@ static std::vector<color_t> extract_full_canvas(const image *img, const image_at
     return pixels;
 }
 
+struct FootprintExportData {
+    std::vector<color_t> pixels;
+    int height = 0;
+    int trimmed_bottom_rows = 0;
+};
+
+static int count_trailing_transparent_bottom_rows(const color_t *pixels, int width, int height)
+{
+    if (!pixels || width <= 0 || height <= 0) {
+        return 0;
+    }
+
+    for (int y = height - 1; y >= 0; --y) {
+        const color_t *row = &pixels[static_cast<size_t>(y) * width];
+        for (int x = 0; x < width; ++x) {
+            if ((row[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
+                return height - y - 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+static FootprintExportData normalize_isometric_footprint_export(
+    const std::vector<color_t> &pixels,
+    int width,
+    int height)
+{
+    FootprintExportData normalized;
+    normalized.pixels = pixels;
+    normalized.height = height;
+    normalized.trimmed_bottom_rows = count_trailing_transparent_bottom_rows(
+        pixels.data(),
+        width,
+        height);
+
+    if (normalized.trimmed_bottom_rows <= 0 || normalized.trimmed_bottom_rows >= height) {
+        normalized.trimmed_bottom_rows = 0;
+        return normalized;
+    }
+
+    normalized.height = height - normalized.trimmed_bottom_rows;
+    normalized.pixels.resize(static_cast<size_t>(width) * normalized.height);
+    return normalized;
+}
+
 static bool write_png(const std::string &path, const color_t *pixels, int width, int height)
 {
     if (!pixels || width <= 0 || height <= 0) {
@@ -1124,7 +1171,9 @@ static void append_image_xml(
     const std::string &id,
     const std::string &src,
     const std::string &top_src,
-    const image *img)
+    const image *img,
+    int image_height,
+    int footprint_layer_y)
 {
     const bool has_animation = img->animation && img->animation->num_sprites > 0;
     const bool is_layered = img->is_isometric || img->top != nullptr;
@@ -1137,7 +1186,7 @@ static void append_image_xml(
     }
     if (img->is_isometric) {
         append_attribute(xml, "width", img->original.width > 0 ? img->original.width : img->width);
-        append_attribute(xml, "height", img->original.height > 0 ? img->original.height : img->height);
+        append_attribute(xml, "height", image_height);
         append_attribute(xml, "isometric", "true");
     }
 
@@ -1153,6 +1202,9 @@ static void append_image_xml(
         xml += "<layer";
         append_attribute(xml, "src", src);
         if (img->is_isometric) {
+            if (footprint_layer_y > 0) {
+                append_attribute(xml, "y", footprint_layer_y);
+            }
             append_attribute(xml, "part", "footprint");
         }
         xml += "/>\n";
@@ -1231,8 +1283,23 @@ static bool export_group(
 
         const int width = img->original.width > 0 ? img->original.width : img->width;
         const int height = img->original.height > 0 ? img->original.height : img->height;
+        FootprintExportData footprint_export;
+        if (img->is_isometric) {
+            footprint_export = normalize_isometric_footprint_export(pixels, width, height);
+        } else {
+            footprint_export.pixels = pixels;
+            footprint_export.height = height;
+        }
+        const int exported_image_height =
+            (img->is_isometric && !img->top && footprint_export.trimmed_bottom_rows > 0)
+            ? footprint_export.height
+            : height;
+        const int footprint_layer_y =
+            (img->is_isometric && img->top && footprint_export.trimmed_bottom_rows > 0)
+            ? footprint_export.trimmed_bottom_rows
+            : 0;
         const std::string image_path = group_directory + "/" + image_name + ".png";
-        if (!write_png(image_path, pixels.data(), width, height)) {
+        if (!write_png(image_path, footprint_export.pixels.data(), width, footprint_export.height)) {
             log_error("Failed to write Julius PNG", image_path.c_str(), 0);
             return false;
         }
@@ -1252,7 +1319,15 @@ static bool export_group(
             stats.pngs_written++;
         }
 
-        append_image_xml(xml, exported_images, image_name, image_name, image_name + "_Top", img);
+        append_image_xml(
+            xml,
+            exported_images,
+            image_name,
+            image_name,
+            image_name + "_Top",
+            img,
+            exported_image_height,
+            footprint_layer_y);
     }
 
     xml += "</assetlist>\n";

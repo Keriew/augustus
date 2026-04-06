@@ -17,6 +17,7 @@ extern "C" {
 
 #include "spng/spng.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
@@ -28,7 +29,7 @@ extern "C" {
 
 namespace {
 
-constexpr char kStampPrefix[] = "augustus_extract_v1:";
+constexpr char kStampPrefix[] = "augustus_extract_v2:";
 
 struct ExtractionStats {
     int source_files = 0;
@@ -1209,6 +1210,113 @@ static int resolve_crop_height(const AtlasReference &reference, const AtlasImage
     return 0;
 }
 
+static int count_trailing_transparent_bottom_rows(const color_t *pixels, int width, int height)
+{
+    if (!pixels || width <= 0 || height <= 0) {
+        return 0;
+    }
+
+    for (int y = height - 1; y >= 0; --y) {
+        const color_t *row = &pixels[static_cast<size_t>(y) * width];
+        for (int x = 0; x < width; ++x) {
+            if ((row[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
+                return height - y - 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+static bool measure_direct_crop_trim(
+    const AtlasImage &image_data,
+    const AtlasReference &reference,
+    int &trimmed_bottom_rows)
+{
+    trimmed_bottom_rows = 0;
+
+    const int width = resolve_crop_width(reference, image_data);
+    const int height = resolve_crop_height(reference, image_data);
+    if (width <= 0 || height <= 0) {
+        return false;
+    }
+
+    std::vector<color_t> pixels(static_cast<size_t>(width) * height, ALPHA_TRANSPARENT);
+    const int src_x = reference.has_src_x ? reference.src_x : 0;
+    const int src_y = reference.has_src_y ? reference.src_y : 0;
+    if (!png_read(pixels.data(), src_x, src_y, width, height, 0, 0, width, 0)) {
+        return false;
+    }
+
+    trimmed_bottom_rows = count_trailing_transparent_bottom_rows(pixels.data(), width, height);
+    if (trimmed_bottom_rows >= height) {
+        trimmed_bottom_rows = 0;
+    }
+    return true;
+}
+
+static bool normalize_direct_crop_footprints(
+    const AtlasImage &image_data,
+    std::vector<AtlasReference> &output_layers,
+    int &image_height_override)
+{
+    image_height_override = 0;
+    if (!image_data.is_isometric || output_layers.empty()) {
+        return true;
+    }
+
+    int has_top_part = 0;
+    int footprint_only_direct_crop = 1;
+    int saw_trimmed_footprint = 0;
+
+    for (const AtlasReference &reference : output_layers) {
+        if (reference.part == "top") {
+            has_top_part = 1;
+        }
+        if (!reference.is_direct_crop || reference.part != "footprint") {
+            footprint_only_direct_crop = 0;
+        }
+    }
+
+    for (AtlasReference &reference : output_layers) {
+        if (!reference.is_direct_crop || reference.part != "footprint") {
+            continue;
+        }
+
+        int trimmed_bottom_rows = 0;
+        if (!measure_direct_crop_trim(image_data, reference, trimmed_bottom_rows)) {
+            log_error("Failed to measure Augustus extracted crop", image_data.id.c_str(), 0);
+            return false;
+        }
+        if (trimmed_bottom_rows <= 0) {
+            continue;
+        }
+
+        const int height = resolve_crop_height(reference, image_data);
+        if (height <= trimmed_bottom_rows) {
+            continue;
+        }
+
+        saw_trimmed_footprint = 1;
+        reference.height = height - trimmed_bottom_rows;
+        reference.has_height = true;
+        if (has_top_part) {
+            reference.y = (reference.has_y ? reference.y : 0) + trimmed_bottom_rows;
+            reference.has_y = true;
+        }
+    }
+
+    if (!has_top_part && footprint_only_direct_crop && saw_trimmed_footprint) {
+        for (const AtlasReference &reference : output_layers) {
+            const int height = resolve_crop_height(reference, image_data);
+            const int y = reference.has_y ? reference.y : 0;
+            image_height_override = std::max(image_height_override, std::max(0, y) + height);
+        }
+    }
+
+    return true;
+}
+
 static bool write_direct_crop(
     const AtlasImage &image_data,
     const AtlasReference &reference,
@@ -1357,26 +1465,34 @@ static bool append_image_xml(
     ExtractionStats &stats)
 {
     CrashContextScope crash_scope("augustus_extractor.emit_image", image_data.id.c_str());
-    append_indent(xml, 1);
-    xml += "<image";
-    append_attribute(xml, "id", image_data.id);
-    if (image_data.has_width && image_data.width > 0) {
-        append_attribute(xml, "width", image_data.width);
-    }
-    if (image_data.has_height && image_data.height > 0) {
-        append_attribute(xml, "height", image_data.height);
-    }
-    if (image_data.is_isometric) {
-        append_attribute(xml, "isometric", "true");
-    }
-    xml += ">\n";
-
     const std::string image_stem = sanitize_component(image_data.id.c_str());
     std::vector<AtlasReference> output_layers;
     if (!build_output_layers(image_data, output_group, output_layers)) {
         crash_context_report_error("Augustus extractor could not infer image layer parts", image_data.id.c_str());
         return false;
     }
+
+    int image_height_override = 0;
+    if (!normalize_direct_crop_footprints(image_data, output_layers, image_height_override)) {
+        crash_context_report_error("Augustus extractor could not normalize direct footprint crops", image_data.id.c_str());
+        return false;
+    }
+
+    append_indent(xml, 1);
+    xml += "<image";
+    append_attribute(xml, "id", image_data.id);
+    if (image_data.has_width && image_data.width > 0) {
+        append_attribute(xml, "width", image_data.width);
+    }
+    if (image_height_override > 0) {
+        append_attribute(xml, "height", image_height_override);
+    } else if (image_data.has_height && image_data.height > 0) {
+        append_attribute(xml, "height", image_data.height);
+    }
+    if (image_data.is_isometric) {
+        append_attribute(xml, "isometric", "true");
+    }
+    xml += ">\n";
 
     for (size_t layer_index = 0; layer_index < output_layers.size(); ++layer_index) {
         char stem[FILE_NAME_MAX];

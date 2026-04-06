@@ -456,7 +456,7 @@ void city_with_overlay_draw_building_footprint(int x, int y, int grid_offset, in
                 image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
             }
         } else {
-            if (!city_draw_overlay_runtime_building_footprint(b, x, y, color_mask, scale)) {
+            if (!city_draw_overlay_runtime_building_footprint(b, x, y, grid_offset, color_mask, scale)) {
                 image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
             }
         }
