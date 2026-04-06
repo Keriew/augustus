@@ -139,21 +139,17 @@ const std::vector<GraphicsVariant> &GraphicsDefinition::variants() const
     return variants_;
 }
 
-std::vector<const GraphicsTarget *> GraphicsDefinition::resolve_targets(const ::building &building) const
+const GraphicsTarget *GraphicsDefinition::resolve_target(const ::building &building) const
 {
-    std::vector<const GraphicsTarget *> targets;
     for (const GraphicsVariant &variant : variants_) {
         if (variant.target.has_path() && variant.matches(building)) {
-            targets.push_back(&variant.target);
+            return &variant.target;
         }
     }
-    if (!targets.empty()) {
-        return targets;
-    }
     if (default_target_.has_path()) {
-        return { &default_target_ };
+        return &default_target_;
     }
-    return {};
+    return nullptr;
 }
 
 unsigned char GraphicsDefinition::upgrade_level_for(const ::building &building) const
@@ -261,9 +257,9 @@ const GraphicsDefinition &BuildingType::graphics() const
     return graphics_;
 }
 
-std::vector<const GraphicsTarget *> BuildingType::resolve_graphics_targets(const ::building &building) const
+const GraphicsTarget *BuildingType::resolve_graphics_target(const ::building &building) const
 {
-    return graphics_.resolve_targets(building);
+    return graphics_.resolve_target(building);
 }
 
 WaterAccessMode BuildingType::water_access_mode() const

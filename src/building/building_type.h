@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include <string>
+#include <cstdint>
 #include <vector>
 
 namespace building_type_registry_impl {
@@ -169,7 +170,7 @@ public:
     int has_default_node() const;
     int has_variants() const;
     const std::vector<GraphicsVariant> &variants() const;
-    std::vector<const GraphicsTarget *> resolve_targets(const ::building &building) const;
+    const GraphicsTarget *resolve_target(const ::building &building) const;
     unsigned char upgrade_level_for(const ::building &building) const;
 
 private:
@@ -199,7 +200,7 @@ public:
     const char *attr() const;
     const StateDefinition &state() const;
     const GraphicsDefinition &graphics() const;
-    std::vector<const GraphicsTarget *> resolve_graphics_targets(const ::building &building) const;
+    const GraphicsTarget *resolve_graphics_target(const ::building &building) const;
     WaterAccessMode water_access_mode() const;
     int has_graphic() const;
     int has_labor_policy() const;

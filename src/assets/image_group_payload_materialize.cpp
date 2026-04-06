@@ -17,6 +17,22 @@ namespace image_group_payload_internal {
 
 namespace {
 
+// Input: one uploaded payload object plus one logical slice template.
+// Output: a runtime slice populated from the payload's actual renderer handle and logical dimensions.
+int populate_slice_from_payload(const ImagePayload *payload, int is_isometric, RuntimeDrawSlice &out_slice)
+{
+    out_slice = RuntimeDrawSlice();
+    if (!payload) {
+        return 0;
+    }
+
+    out_slice.handle = payload->handle();
+    out_slice.width = payload->legacy().width;
+    out_slice.height = payload->legacy().height;
+    out_slice.is_isometric = is_isometric;
+    return out_slice.is_valid();
+}
+
 // Input: one resolved entry that already stores split-source pixels.
 // Output: the logical combined-canvas height used by legacy isometric references.
 int derive_original_height(const ResolvedImageEntry &entry)
@@ -234,12 +250,13 @@ int materialize_explicit_frame(
     frame_image.original.width = frame_surface.width;
     frame_image.original.height = frame_surface.height;
     out_frame_key = make_entry_payload_key(doc.key, doc.source, entry.id) + "\\frame_" + std::to_string(frame_index);
-    if (!image_payload_load_pixels_payload(
+    const ImagePayload *payload = image_payload_load_pixels_payload(
             out_frame_key.c_str(),
             frame_image,
             frame_surface.pixels.data(),
             frame_surface.width,
-            frame_surface.height)) {
+            frame_surface.height);
+    if (!payload) {
         out_frame_key.clear();
         return 0;
     }
@@ -280,9 +297,10 @@ int resolve_animation(
             }
             if (const ImagePayload *payload = image_payload_get(frame_key.c_str())) {
                 RuntimeDrawSlice frame_slice;
-                frame_slice.handle = payload->handle();
-                frame_slice.width = payload->legacy().width;
-                frame_slice.height = payload->legacy().height;
+                if (!populate_slice_from_payload(payload, 0, frame_slice)) {
+                    crash_context_report_error("Animation frame materialized with an invalid runtime slice", frame_key.c_str());
+                    return 0;
+                }
                 out_entry.animation.frames.push_back(frame_slice);
             }
             out_entry.animation_frame_keys.push_back(std::move(frame_key));
@@ -716,12 +734,13 @@ int upload_split_surface(
         base_image.is_isometric = is_isometric;
         base_image.atlas.y_offset = top_height;
 
-        if (!image_payload_load_pixels_payload(
+        const ImagePayload *footprint_payload = image_payload_load_pixels_payload(
                 base_key.c_str(),
                 base_image,
                 &split_surface.pixels[static_cast<size_t>(top_height) * split_surface.width],
                 split_surface.width,
-                footprint_height)) {
+                footprint_height);
+        if (!footprint_payload) {
             return 0;
         }
 
@@ -730,27 +749,32 @@ int upload_split_surface(
         top_image.height = top_height;
         top_image.original.width = split_surface.width;
         top_image.original.height = top_height;
-        if (!image_payload_load_pixels_payload(
+        const ImagePayload *top_payload = image_payload_load_pixels_payload(
                 (base_key + "\\top").c_str(),
                 top_image,
                 split_surface.pixels.data(),
                 split_surface.width,
-                top_height)) {
+                top_height);
+        if (!top_payload) {
             image_payload_release_key(base_key.c_str());
             return 0;
         }
 
         out_footprint.texture_key = base_key;
-        out_footprint.slice.handle = base_image.resource_handle;
-        out_footprint.slice.width = base_image.width;
-        out_footprint.slice.height = base_image.height;
-        out_footprint.slice.is_isometric = is_isometric;
+        if (!populate_slice_from_payload(footprint_payload, is_isometric, out_footprint.slice)) {
+            crash_context_report_error("Resolved image group footprint materialized with an invalid runtime slice", base_key.c_str());
+            image_payload_release_key((base_key + "\\top").c_str());
+            image_payload_release_key(base_key.c_str());
+            return 0;
+        }
 
         out_top.texture_key = base_key + "\\top";
-        out_top.slice.handle = top_image.resource_handle;
-        out_top.slice.width = top_image.width;
-        out_top.slice.height = top_image.height;
-        out_top.slice.is_isometric = 0;
+        if (!populate_slice_from_payload(top_payload, 0, out_top.slice)) {
+            crash_context_report_error("Resolved image group top materialized with an invalid runtime slice", (base_key + "\\top").c_str());
+            image_payload_release_key((base_key + "\\top").c_str());
+            image_payload_release_key(base_key.c_str());
+            return 0;
+        }
         return 1;
     }
 
@@ -760,20 +784,22 @@ int upload_split_surface(
     base_image.original.width = split_surface.width;
     base_image.original.height = split_surface.height;
     base_image.is_isometric = is_isometric;
-    if (!image_payload_load_pixels_payload(
+    const ImagePayload *footprint_payload = image_payload_load_pixels_payload(
             base_key.c_str(),
             base_image,
             split_surface.pixels.data(),
             split_surface.width,
-            split_surface.height)) {
+            split_surface.height);
+    if (!footprint_payload) {
         return 0;
     }
 
     out_footprint.texture_key = base_key;
-    out_footprint.slice.handle = base_image.resource_handle;
-    out_footprint.slice.width = base_image.width;
-    out_footprint.slice.height = base_image.height;
-    out_footprint.slice.is_isometric = is_isometric;
+    if (!populate_slice_from_payload(footprint_payload, is_isometric, out_footprint.slice)) {
+        crash_context_report_error("Resolved image group footprint materialized with an invalid runtime slice", base_key.c_str());
+        image_payload_release_key(base_key.c_str());
+        return 0;
+    }
     out_top = {};
     return 1;
 }

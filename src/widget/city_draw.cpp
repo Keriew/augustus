@@ -97,20 +97,14 @@ int city_draw_runtime_building_animation(building *b, int x, int y, int grid_off
     }
 
     if (!city_draw_runtime_owns_building_animation(b)) {
-        return 0;
+        return 1;
     }
 
-    const int layer_count = building_runtime_get_graphic_animation_layer_count(b);
-    int drew_frame = 0;
-    for (int layer_index = 0; layer_index < layer_count; layer_index++) {
-        const RuntimeDrawSlice *frame = building_runtime_get_graphic_animation_layer_frame(b, layer_index);
-        if (!frame) {
-            continue;
-        }
+    const RuntimeDrawSlice *frame = building_runtime_get_graphic_animation_slice(b);
+    if (frame) {
         runtime_texture_draw(*frame, x, y, color_mask, scale);
-        drew_frame = 1;
     }
-    return drew_frame;
+    return 1;
 }
 
 int city_draw_runtime_tile_footprint(int grid_offset, int x, int y, color_t color_mask, float scale)

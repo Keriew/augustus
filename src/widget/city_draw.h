@@ -15,7 +15,7 @@ int city_draw_runtime_building_footprint(building *b, int x, int y, color_t colo
 int city_draw_runtime_building_top(building *b, int x, int y, color_t color_mask, float scale);
 
 // Input: a building pointer, the tile draw origin, and the grid offset for the owning draw tile.
-// Output: draws the native runtime animation stage when native graphics own that stage and returns 1 in that case.
+// Output: draws the current cached native animation frame when native graphics own that stage and returns 1 in that case.
 // Returning 0 means the caller should continue with its existing fallback stage logic.
 int city_draw_runtime_building_animation(building *b, int x, int y, int grid_offset, color_t color_mask, float scale);
 
