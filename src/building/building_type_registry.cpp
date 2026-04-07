@@ -1,6 +1,7 @@
 #include "building/building_type_registry_internal.h"
 
 extern "C" {
+#include "building/properties.h"
 #include "platform/file_manager.h"
 }
 
@@ -40,4 +41,21 @@ extern "C" int building_type_registry_validate_mod(void)
     return static_cast<int>(
         static_cast<bool>(mod_manager_validate_mod_path()) &&
         static_cast<bool>(directory_exists(g_building_type_path.c_str())));
+}
+
+extern "C" void building_type_registry_apply_model_overrides(void)
+{
+    using namespace building_type_registry_impl;
+
+    for (const std::unique_ptr<BuildingType> &definition : g_building_types) {
+        if (!definition || !definition->has_labor() || !definition->labor().has_employee_count()) {
+            continue;
+        }
+
+        model_building *model = model_get_building(definition->type());
+        if (!model) {
+            continue;
+        }
+        model->laborers = definition->labor().employee_count();
+    }
 }

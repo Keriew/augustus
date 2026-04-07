@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="armoury">
+    <graphics>
+        <default>
+            <path value="Military\Armoury_OFF_C" />
+            <image value="Armoury_OFF_C" />
+        </default>
+        <variant>
+            <condition type="has_workers" />
+            <path value="Military\Armoury_OFF_C" />
+            <image value="Armoury_ON_C" />
+        </variant>
+    </graphics>
+
+    <labor>
+        <employees count="6" />
+        <seeker mode="spawn_if_below" min_houses="50" />
+    </labor>
+</building>

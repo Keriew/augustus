@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="watchtower">
+    <graphics>
+        <default>
+            <path value="Military\Watchtower_ON_01" />
+            <image value="Watchtower C OFF" />
+        </default>
+        <variant>
+            <condition type="has_workers" />
+            <condition type="figure_slot_occupied" slot="quaternary" />
+            <path value="Military\Watchtower_ON_01" />
+            <image value="Watchtower C ON" />
+        </variant>
+    </graphics>
+
+    <labor>
+        <employees count="8" />
+        <seeker mode="spawn_if_below" min_houses="100" />
+    </labor>
+</building>

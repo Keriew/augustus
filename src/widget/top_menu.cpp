@@ -1,3 +1,5 @@
+#include "building/building_type_registry.h"
+
 extern "C" {
 #include "top_menu.h"
 
@@ -539,32 +541,7 @@ static color_t get_savings_color_mask(void)
 
 static char get_cosmetic_day_of_month(void)
 {
-    static const char days_in_month[] = {
-        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-    };
-
-    int year = game_time_year();
-    int month = game_time_month();
-    int day = game_time_day();
-    int tick = game_time_tick();
-
-    int is_leap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
-    //extra points for leap years
-    int days_this_month = days_in_month[month];
-    if (month == 1 && is_leap) {
-        days_this_month = 29;
-    }
-
-    // Total ticks into the current in-game month (0 to 799)
-    int total_ticks = day * 50 + tick;
-    // Scale to real calendar day, add 1 to offset 0-based indexing
-    char cosmetic_day = (total_ticks * days_this_month) / 800 + 1;
-
-    if (cosmetic_day > days_this_month) {
-        cosmetic_day = days_this_month;
-    }
-
-    return cosmetic_day;
+    return static_cast<char>(game_time_day() + 1);
 }
 
 extern "C" void widget_top_menu_draw(int force)
@@ -902,6 +879,7 @@ static void replay_map_confirmed(int confirmed, int checked)
         window_mission_selection_show_again();
     }
     model_reset();
+    building_type_registry_apply_model_overrides();
     scenario_events_process_all();
 }
 

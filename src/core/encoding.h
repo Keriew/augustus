@@ -5,6 +5,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Encoding type
  */
@@ -90,5 +94,9 @@ void encoding_utf16_to_utf8(const uint16_t *input, char *output);
  * @param output Output buffer to store the UTF-16 encoded input
  */
 void encoding_utf8_to_utf16(const char *input, uint16_t *output);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_ENCODING_H

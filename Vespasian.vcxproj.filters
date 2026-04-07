@@ -84,7 +84,7 @@
     <ClCompile Include="src\widget\city_overlay_housing.c" />
     <ClCompile Include="src\widget\city_overlay_other.c" />
     <ClCompile Include="src\widget\city_overlay_risks.c" />
-    <ClCompile Include="src\widget\city_pause_menu.c" />
+    <ClCompile Include="src\widget\city_pause_menu.cpp" />
     <ClCompile Include="src\widget\city_water_ghost.c" />
     <ClCompile Include="src\widget\city_without_overlay.cpp" />
     <ClCompile Include="src\widget\city_with_overlay.cpp" />
@@ -155,7 +155,7 @@
     <ClCompile Include="src\window\editor\scenario_action_edit.c" />
     <ClCompile Include="src\window\editor\scenario_condition_edit.c" />
     <ClCompile Include="src\window\editor\scenario_events.c" />
-    <ClCompile Include="src\window\editor\scenario_event_details.c" />
+    <ClCompile Include="src\window\editor\scenario_event_details.cpp" />
     <ClCompile Include="src\window\editor\select_city_by_type.c" />
     <ClCompile Include="src\window\editor\select_city_trade_route.c" />
     <ClCompile Include="src\window\editor\select_custom_message.c" />
@@ -281,7 +281,7 @@
     <ClCompile Include="src\city\migration.c" />
     <ClCompile Include="src\city\military.c" />
     <ClCompile Include="src\city\mission.c" />
-    <ClCompile Include="src\city\population.c" />
+    <ClCompile Include="src\city\population.cpp" />
     <ClCompile Include="src\city\race_bet.c" />
     <ClCompile Include="src\city\ratings.c" />
     <ClCompile Include="src\city\request.c" />
@@ -385,17 +385,18 @@
     <ClCompile Include="src\game\difficulty.c" />
     <ClCompile Include="src\game\file.c" />
     <ClCompile Include="src\game\file_editor.c" />
-    <ClCompile Include="src\game\file_io.c" />
-    <ClCompile Include="src\game\game.c" />
+    <ClCompile Include="src\game\file_io.cpp" />
+    <ClCompile Include="src\game\game.cpp" />
     <ClCompile Include="src\game\mission.c" />
     <ClCompile Include="src\game\mod_manager.cpp" />
     <ClCompile Include="src\game\orientation.c" />
     <ClCompile Include="src\game\resource.c" />
     <ClCompile Include="src\game\settings.c" />
+    <ClCompile Include="src\game\defines.cpp" />
     <ClCompile Include="src\game\speed.cpp" />
     <ClCompile Include="src\game\state.c" />
-    <ClCompile Include="src\game\tick.c" />
-    <ClCompile Include="src\game\time.c" />
+    <ClCompile Include="src\game\tick.cpp" />
+    <ClCompile Include="src\game\time.cpp" />
     <ClCompile Include="src\game\tutorial.c" />
     <ClCompile Include="src\game\undo.cpp" />
     <ClCompile Include="src\graphics\arrow_button.c" />
@@ -883,6 +884,7 @@
     <ClInclude Include="src\game\file.h" />
     <ClInclude Include="src\game\file_editor.h" />
     <ClInclude Include="src\game\file_io.h" />
+    <ClInclude Include="src\game\defines.h" />
     <ClInclude Include="src\game\mod_manager.h" />
     <ClInclude Include="src\game\game.h" />
     <ClInclude Include="src\game\mission.h" />

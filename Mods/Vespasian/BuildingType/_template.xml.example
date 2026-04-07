@@ -22,13 +22,20 @@
             <path value="Health_Culture\Example_Working" />
         </variant>
         <variant>
+            <condition type="figure_slot_occupied" slot="quaternary" />
+            <path value="Health_Culture\Example_Guarded" />
+        </variant>
+        <variant>
             <condition type="resource_positive" resource="wine" />
             <path value="Health_Culture\Example_Supplied" />
         </variant>
     </graphics>
 
     <!-- Optional labor phase -->
-    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
+    <labor>
+        <employees count="10" />
+        <seeker mode="spawn_if_below" min_houses="50" />
+    </labor>
 
     <!-- Optional shared-delay spawn group -->
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="librarian"

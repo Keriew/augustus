@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
 * @file
 * Read to or write from memory buffer.
@@ -189,5 +193,9 @@ void buffer_init_dynamic_array(buffer *buf, size_t array_size, size_t element_si
  * @return Number of array items.
  */
 size_t buffer_load_dynamic_array(buffer *buf);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_BUFFER_H

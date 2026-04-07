@@ -30,6 +30,7 @@ extern "C" {
 #include "platform/screen.h"
 #include "platform/switch/switch.h"
 #include "platform/touch.h"
+#include "platform/user_path.h"
 #include "platform/vita/vita.h"
 #include "window/asset_previewer.h"
 #include "building/building_type_registry.h"
@@ -939,6 +940,19 @@ static void setup(const augustus_args *args)
     }
 
     mod_manager_set_mod_name(args->mod_name);
+    if (!config_must_configure_user_directory() && platform_file_manager_is_directory_writeable(pref_user_dir())) {
+        platform_user_path_create_subdirectories();
+        if (!mod_manager_load_mod_list()) {
+            const char *failure_reason = mod_manager_get_failure_reason();
+            SDL_ShowSimpleMessageBox(
+                SDL_MESSAGEBOX_ERROR,
+                "Startup error",
+                failure_reason && *failure_reason ? failure_reason : "Failed to load mod list.",
+                NULL);
+            SDL_Log("Failed to load mod list");
+            exit_with_status(3);
+        }
+    }
     if (!building_type_registry_validate_mod()) {
         char message[512];
         snprintf(message, sizeof(message),
@@ -946,7 +960,7 @@ static void setup(const augustus_args *args)
             building_type_registry_get_building_type_path());
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Missing mod", message, NULL);
         SDL_Log("Missing mod directory: %s", building_type_registry_get_building_type_path());
-        exit_with_status(3);
+        exit_with_status(4);
     }
 
     // If starting the log file failed (because, for example, the executable path isn't writable)

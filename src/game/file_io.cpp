@@ -1,5 +1,8 @@
 #include "file_io.h"
 
+#include "building/building_type_registry.h"
+
+extern "C" {
 #include "building/barracks.h"
 #include "building/count.h"
 #include "building/granary.h"
@@ -67,6 +70,7 @@
 #include "scenario/scenario.h"
 #include "sound/city.h"
 #include "widget/minimap.h"
+}
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -321,6 +325,19 @@ static struct {
     char active_mod_name[FILE_NAME_MAX];
 } loaded_save_mod_metadata;
 
+static int allocate_zeroed_piece_buffer(buffer *buf, int size)
+{
+    uint8_t *data = static_cast<uint8_t *>(malloc(size));
+    if (!data) {
+        log_error("Unable to allocate file piece buffer", 0, size);
+        return 0;
+    }
+
+    memset(data, 0, size);
+    buffer_init(buf, data, size);
+    return 1;
+}
+
 static void init_file_piece(file_piece *piece, int size, int compressed)
 {
     piece->compressed = compressed;
@@ -328,9 +345,9 @@ static void init_file_piece(file_piece *piece, int size, int compressed)
     if (piece->dynamic) {
         buffer_init(&piece->buf, 0, 0);
     } else {
-        void *data = malloc(size);
-        memset(data, 0, size);
-        buffer_init(&piece->buf, data, size);
+        if (!allocate_zeroed_piece_buffer(&piece->buf, size)) {
+            buffer_init(&piece->buf, 0, 0);
+        }
     }
 }
 
@@ -360,7 +377,7 @@ static void clear_savegame_pieces(void)
 
 static void clear_scenario_pieces(void)
 {
-    scenario_data.version = 0;
+    scenario_data.version = SCENARIO_VERSION_NONE;
     for (int i = 0; i < scenario_data.num_pieces; i++) {
         buffer_reset(&scenario_data.pieces[i].buf);
         free(scenario_data.pieces[i].buf.data);
@@ -790,7 +807,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
 {
     resource_version_t resource_version = RESOURCE_ORIGINAL_VERSION;
     if (version > SCENARIO_LAST_NO_STATIC_RESOURCES) {
-        resource_version = buffer_read_u32(file->resource_version);
+        resource_version = static_cast<resource_version_t>(buffer_read_u32(file->resource_version));
     }
     resource_set_mapping(resource_version);
 
@@ -842,6 +859,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         empire_load_custom_map(file->empire_map);
     }
     model_reset();
+    building_type_registry_apply_model_overrides();
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(file->model_data);
     } else {
@@ -902,11 +920,16 @@ static scenario_version_t save_version_to_scenario_version(savegame_version_t sa
     if (save_version <= SAVE_GAME_LAST_NO_SCENARIO_VERSION) {
         return SCENARIO_LAST_NO_SAVE_VERSION_WRITE;
     }
-    return buffer_read_i32(buf);
+    return static_cast<scenario_version_t>(buffer_read_i32(buf));
 }
 
 static void savegame_load_from_state(savegame_state *state, savegame_version_t version)
 {
+    if (!state) {
+        log_error("Unable to load savegame state: state is null", 0, 0);
+        return;
+    }
+
     scenario_version_t scenario_version = save_version_to_scenario_version(version, state->scenario_version);
     scenario_settings_load_state(state->scenario_campaign_mission,
         state->scenario_settings,
@@ -973,6 +996,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
 
     model_reset();
+    building_type_registry_apply_model_overrides();
     if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         model_load_model_data(state->building_model_data);
     }
@@ -1020,9 +1044,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     map_bookmark_load_state(state->bookmarks);
 
     buffer_skip(state->end_marker, 284);
-    if (state) {
-        buffer_skip(state->end_marker, 8);
-    }
+    buffer_skip(state->end_marker, 8);
     if (version <= SAVE_GAME_LAST_NO_DELIVERIES_VERSION) {
         building_monument_initialize_deliveries();
     } else {
@@ -1151,15 +1173,16 @@ static void savegame_save_to_state(savegame_state *state)
     production_rates_save(state->production_rates);
 }
 
-static int get_scenario_version(FILE *fp)
+static scenario_version_t get_scenario_version(FILE *fp)
 {
-    char version_magic[8];
-    size_t read = fread(version_magic, 1, 8, fp);
+    static const char kVersionMagic[] = "VERSION";
+    char version_magic[sizeof(kVersionMagic) - 1];
+    size_t read = fread(version_magic, 1, sizeof(version_magic), fp);
     if (read != sizeof(version_magic)) {
         log_error("Unable to read version header from file", 0, 0);
-        return 0;
+        return SCENARIO_VERSION_NONE;
     }
-    if (strcmp(version_magic, "VERSION") != 0) {
+    if (memcmp(version_magic, kVersionMagic, sizeof(version_magic)) != 0) {
         rewind(fp);
         return SCENARIO_LAST_UNVERSIONED;
     }
@@ -1170,9 +1193,9 @@ static int get_scenario_version(FILE *fp)
     read = fread(version_data, 1, 4, fp);
     if (read != sizeof(version_data)) {
         log_error("Unable to read version number from file", 0, 0);
-        return 0;
+        return SCENARIO_VERSION_NONE;
     }
-    return buffer_read_i32(&buf);
+    return static_cast<scenario_version_t>(buffer_read_i32(&buf));
 }
 
 static int read_int32(FILE *fp)
@@ -1272,9 +1295,9 @@ static int prepare_dynamic_piece_from_file(FILE *fp, file_piece *piece)
         if (!size) {
             return 0;
         }
-        uint8_t *data = malloc(size);
-        memset(data, 0, size);
-        buffer_init(&piece->buf, data, size);
+        if (!allocate_zeroed_piece_buffer(&piece->buf, size)) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -1286,27 +1309,28 @@ static int prepare_dynamic_piece_from_buffer(buffer *buf, file_piece *piece)
         if (!size) {
             return 0;
         }
-        uint8_t *data = malloc(size);
-        memset(data, 0, size);
-        buffer_init(&piece->buf, data, size);
+        if (!allocate_zeroed_piece_buffer(&piece->buf, size)) {
+            return 0;
+        }
     }
     return 1;
 }
 
-static int get_scenario_version_from_buffer(buffer *buf)
+static scenario_version_t get_scenario_version_from_buffer(buffer *buf)
 {
-    char version_magic[8];
-    size_t read = buffer_read_raw(buf, version_magic, 8);
+    static const char kVersionMagic[] = "VERSION";
+    char version_magic[sizeof(kVersionMagic) - 1];
+    size_t read = buffer_read_raw(buf, version_magic, sizeof(version_magic));
     if (read != sizeof(version_magic)) {
         log_error("Unable to read version header from file", 0, 0);
-        return 0;
+        return SCENARIO_VERSION_NONE;
     }
-    if (strcmp(version_magic, "VERSION") != 0) {
+    if (memcmp(version_magic, kVersionMagic, sizeof(version_magic)) != 0) {
         buffer_reset(buf);
         return SCENARIO_LAST_UNVERSIONED;
     }
 
-    return buffer_read_i32(buf);
+    return static_cast<scenario_version_t>(buffer_read_i32(buf));
 }
 
 static int load_scenario_from_buffer(buffer *buf)
@@ -1468,8 +1492,8 @@ static int read_scenario_info(saved_game_info *info)
     scenario_map_data_from_buffer(state->scenario, &minimap_data.city_width, &minimap_data.city_height,
         &grid_start, &grid_border_size, scenario_data.version);
     info->map_size = minimap_data.city_width;
-    minimap_data.version = 0;
-    minimap_data.climate = info->climate;
+    minimap_data.version = static_cast<savegame_version_t>(0);
+    minimap_data.climate = static_cast<scenario_climate>(info->climate);
     minimap_data.functions.building = 0;
     minimap_data.functions.climate = get_climate;
     minimap_data.functions.map.width = map_width;
@@ -1639,9 +1663,9 @@ static int get_savegame_versions_from_buffer(buffer *buf, savegame_version_t *sa
     resource_version_t *resource_version)
 {
     buffer_skip(buf, 4);
-    *save_version = buffer_read_i32(buf);
+    *save_version = static_cast<savegame_version_t>(buffer_read_i32(buf));
     if (*save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
-        *resource_version = buffer_read_i32(buf);
+        *resource_version = static_cast<resource_version_t>(buffer_read_i32(buf));
     } else {
         *resource_version = RESOURCE_ORIGINAL_VERSION;
     }
@@ -1658,14 +1682,14 @@ static int get_savegame_versions(FILE *fp, savegame_version_t *save_version, res
         fread(data, 1, 4, fp) != 4) {
         return 0;
     }
-    *save_version = buffer_read_i32(&buf);
+    *save_version = static_cast<savegame_version_t>(buffer_read_i32(&buf));
     int seek_back_bytes = -8;
     if (*save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
         buffer_reset(&buf);
         if (fread(data, 1, 4, fp) != 4) {
             return 0;
         }
-        *resource_version = buffer_read_i32(&buf);
+        *resource_version = static_cast<resource_version_t>(buffer_read_i32(&buf));
         seek_back_bytes = -12;
     } else {
         *resource_version = RESOURCE_ORIGINAL_VERSION;
@@ -1845,7 +1869,7 @@ static savegame_load_status savegame_read_file_info(saved_game_info *info, saveg
     scenario_map_data_from_buffer(state->scenario, &minimap_data.city_width, &minimap_data.city_height,
         &grid_start, &grid_border_size, scenario_version);
     info->map_size = minimap_data.city_width;
-    minimap_data.climate = scenario_climate_from_buffer(state->scenario, scenario_version);
+    minimap_data.climate = static_cast<scenario_climate>(scenario_climate_from_buffer(state->scenario, scenario_version));
     minimap_data.functions.building = savegame_building;
     minimap_data.functions.climate = get_climate;
     minimap_data.functions.map.width = map_width;
@@ -1869,8 +1893,6 @@ static savegame_load_status savegame_read_file_info(saved_game_info *info, saveg
 
 int game_file_io_read_saved_game_info(const char *filename, int offset, saved_game_info *info)
 {
-    memset(info, 0, sizeof(saved_game_info));
-
     if (!info) {
         return SAVEGAME_STATUS_INVALID;
     }
@@ -1895,7 +1917,7 @@ int game_file_io_read_saved_game_info(const char *filename, int offset, saved_ga
     }
     resource_set_mapping(resource_version);
     init_savegame_data(save_version);
-    result = savegame_read_from_file(fp, save_version);
+    result = static_cast<savegame_load_status>(savegame_read_from_file(fp, save_version));
     file_close(fp);
     if (result != SAVEGAME_STATUS_OK) {
         return FILE_LOAD_WRONG_FILE_FORMAT;

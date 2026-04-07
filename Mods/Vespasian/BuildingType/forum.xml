@@ -9,7 +9,10 @@
             <path value="Admin_Logistics\Upgraded_Forum" />
         </variant>
     </graphics>
-    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
+    <labor>
+        <employees count="6" />
+        <seeker mode="spawn_if_below" min_houses="50" />
+    </labor>
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="tax_collector">
         <spawn mode="service_roamer" spawn_figure="tax_collector"
             action_state="tax_collector_created" direction="top" figure_slot="primary" spawn_count="1"

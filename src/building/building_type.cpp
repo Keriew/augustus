@@ -43,6 +43,18 @@ int GraphicsCondition::matches(const ::building &building) const
             return building.num_workers > 0 && building.has_water_access;
         case GraphicsConditionType::WaterAccess:
             return building.has_water_access;
+        case GraphicsConditionType::FigureSlotOccupied:
+            switch (figure_slot) {
+                case FigureSlot::Primary:
+                    return building.figure_id > 0;
+                case FigureSlot::Secondary:
+                    return building.figure_id2 > 0;
+                case FigureSlot::Quaternary:
+                    return building.figure_id4 > 0;
+                case FigureSlot::None:
+                default:
+                    return 0;
+            }
         case GraphicsConditionType::ResourcePositive:
             return resource > RESOURCE_NONE && resource < RESOURCE_MAX && building.resources[resource] > 0;
         case GraphicsConditionType::Desirability:
@@ -65,6 +77,43 @@ int GraphicsCondition::matches(const ::building &building) const
         default:
             return 0;
     }
+}
+
+void LaborDefinition::set_employee_count(int count)
+{
+    has_employee_count_ = 1;
+    employee_count_ = count;
+}
+
+void LaborDefinition::set_seeker_policy(LaborSeekerPolicy policy)
+{
+    has_seeker_policy_ = 1;
+    seeker_policy_ = policy;
+}
+
+int LaborDefinition::has_employee_count() const
+{
+    return has_employee_count_;
+}
+
+int LaborDefinition::employee_count() const
+{
+    return employee_count_;
+}
+
+int LaborDefinition::has_seeker_policy() const
+{
+    return has_seeker_policy_;
+}
+
+const LaborSeekerPolicy &LaborDefinition::seeker_policy() const
+{
+    return seeker_policy_;
+}
+
+int LaborDefinition::has_any() const
+{
+    return has_employee_count_ || has_seeker_policy_;
 }
 
 int GraphicsVariant::matches(const ::building &building) const
@@ -221,10 +270,14 @@ void BuildingType::add_spawn_policy(SpawnPolicy policy)
     spawn_groups_.back().policies.push_back(std::move(policy));
 }
 
-void BuildingType::set_labor_policy(LaborPolicy policy)
+void BuildingType::set_labor_employee_count(int count)
 {
-    labor_policy_ = policy;
-    has_labor_policy_ = 1;
+    labor_.set_employee_count(count);
+}
+
+void BuildingType::set_labor_seeker_policy(LaborSeekerPolicy policy)
+{
+    labor_.set_seeker_policy(policy);
 }
 
 void BuildingType::add_spawn_group(SpawnDelayGroup group)
@@ -272,14 +325,14 @@ int BuildingType::has_graphic() const
     return graphics_.has_path();
 }
 
-int BuildingType::has_labor_policy() const
+int BuildingType::has_labor() const
 {
-    return has_labor_policy_;
+    return labor_.has_any();
 }
 
-const LaborPolicy &BuildingType::labor_policy() const
+const LaborDefinition &BuildingType::labor() const
 {
-    return labor_policy_;
+    return labor_;
 }
 
 const std::vector<SpawnDelayGroup> &BuildingType::spawn_groups() const

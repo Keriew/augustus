@@ -1,3 +1,5 @@
+#include "building/building_type_registry.h"
+
 extern "C" {
 #include "model_xml.h"
 
@@ -192,6 +194,7 @@ static int parse_xml(char *buf, int buffer_length)
 {
     model_reset();
     resource_init();
+    building_type_registry_apply_model_overrides();
     data.success = 1;
     if (!xml_parser_init(xml_elements, MAX_XML_ELEMENTS, 1)) {
         data.success = 0;
@@ -201,6 +204,7 @@ static int parse_xml(char *buf, int buffer_length)
             data.success = 0;
             model_reset();
             resource_init();
+            building_type_registry_apply_model_overrides();
         }
     }
     xml_parser_free();
@@ -256,6 +260,7 @@ int scenario_model_xml_parse_file(const char *filename)
     if (!success) {
         log_error("Error parsing file", filename, 0);
         model_reset();
+        building_type_registry_apply_model_overrides();
     }
     return success;
 }

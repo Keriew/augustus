@@ -733,11 +733,14 @@ static int assign_missing_isometric_parts(const AtlasImage &image_data, std::vec
         return 1;
     }
 
-    int has_footprint = 0;
-    int has_top = 0;
+    bool has_footprint = false;
+    bool has_top = false;
     for (const AtlasReference &reference : output_layers) {
-        has_footprint |= reference.part == "footprint";
-        has_top |= reference.part == "top";
+        if (reference.part == "footprint") {
+            has_footprint = true;
+        } else if (reference.part == "top") {
+            has_top = true;
+        }
     }
 
     for (AtlasReference &reference : output_layers) {
@@ -746,10 +749,10 @@ static int assign_missing_isometric_parts(const AtlasImage &image_data, std::vec
         }
         if (!has_footprint) {
             reference.part = "footprint";
-            has_footprint = 1;
+            has_footprint = true;
         } else {
             reference.part = "top";
-            has_top = 1;
+            has_top = true;
         }
     }
 
@@ -757,7 +760,7 @@ static int assign_missing_isometric_parts(const AtlasImage &image_data, std::vec
         for (AtlasReference &reference : output_layers) {
             if (reference.part != "footprint") {
                 reference.part = "top";
-                has_top = 1;
+                has_top = true;
                 break;
             }
         }

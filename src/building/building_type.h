@@ -78,13 +78,14 @@ enum class GraphicsConditionType {
     HasWorkers,
     Working,
     WaterAccess,
+    FigureSlotOccupied,
     ResourcePositive,
     Desirability
 };
 
-struct LaborPolicy {
-    LaborSeekerMode labor_seeker_mode = LaborSeekerMode::None;
-    int labor_min_houses = 0;
+struct LaborSeekerPolicy {
+    LaborSeekerMode mode = LaborSeekerMode::None;
+    int min_houses = 0;
 };
 
 struct DelayBand {
@@ -133,10 +134,29 @@ private:
 struct GraphicsCondition {
     GraphicsConditionType type = GraphicsConditionType::None;
     GraphicComparison comparison = GraphicComparison::None;
+    FigureSlot figure_slot = FigureSlot::None;
     int threshold = 0;
     resource_type resource = RESOURCE_NONE;
 
     int matches(const ::building &building) const;
+};
+
+class LaborDefinition {
+public:
+    void set_employee_count(int count);
+    void set_seeker_policy(LaborSeekerPolicy policy);
+
+    int has_employee_count() const;
+    int employee_count() const;
+    int has_seeker_policy() const;
+    const LaborSeekerPolicy &seeker_policy() const;
+    int has_any() const;
+
+private:
+    int has_employee_count_ = 0;
+    int employee_count_ = 0;
+    int has_seeker_policy_ = 0;
+    LaborSeekerPolicy seeker_policy_;
 };
 
 struct GraphicsVariant {
@@ -192,7 +212,8 @@ public:
     void add_graphics_variant_condition(GraphicsCondition condition);
 
     void add_spawn_policy(SpawnPolicy policy);
-    void set_labor_policy(LaborPolicy policy);
+    void set_labor_employee_count(int count);
+    void set_labor_seeker_policy(LaborSeekerPolicy policy);
     void add_spawn_group(SpawnDelayGroup group);
     SpawnDelayGroup *last_spawn_group();
 
@@ -203,8 +224,8 @@ public:
     const GraphicsTarget *resolve_graphics_target(const ::building &building) const;
     WaterAccessMode water_access_mode() const;
     int has_graphic() const;
-    int has_labor_policy() const;
-    const LaborPolicy &labor_policy() const;
+    int has_labor() const;
+    const LaborDefinition &labor() const;
     const std::vector<SpawnDelayGroup> &spawn_groups() const;
     unsigned char upgrade_level_for(const ::building &building) const;
 
@@ -213,8 +234,7 @@ private:
     std::string attr_;
     StateDefinition state_;
     GraphicsDefinition graphics_;
-    int has_labor_policy_ = 0;
-    LaborPolicy labor_policy_;
+    LaborDefinition labor_;
     std::vector<SpawnDelayGroup> spawn_groups_;
 };
 

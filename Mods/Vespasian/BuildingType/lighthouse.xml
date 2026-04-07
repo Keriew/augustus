@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="lighthouse">
+    <graphics>
+        <default>
+            <path value="Monuments\Lighthouse_OFF" />
+            <image value="Lighthouse OFF" />
+        </default>
+        <variant>
+            <condition type="has_workers" />
+            <path value="Monuments\Lighthouse_OFF" />
+            <image value="Lighthouse ON" />
+        </variant>
+    </graphics>
+
+    <labor>
+        <employees count="20" />
+        <seeker mode="spawn_if_below" min_houses="100" />
+    </labor>
+</building>

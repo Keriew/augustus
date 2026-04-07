@@ -11,4 +11,7 @@
             <image value="Image_0000" />
         </variant>
     </graphics>
+    <labor>
+        <employees count="5" />
+    </labor>
 </building>

@@ -1,5 +1,8 @@
 #include "city_pause_menu.h"
 
+#include "building/building_type_registry.h"
+
+extern "C" {
 #include "building/construction.h"
 #include "building/properties.h"
 #include "core/lang.h"
@@ -26,6 +29,7 @@
 #include "window/main_menu.h"
 #include "window/mission_selection.h"
 #include "window/plain_message_dialog.h"
+}
 
 static void button_click(const generic_button *button);
 
@@ -103,6 +107,7 @@ static void replay_map_confirmed(int confirmed, int checked)
         window_mission_selection_show_again();
     }
     model_reset();
+    building_type_registry_apply_model_overrides();
     scenario_events_process_all();
 }
 

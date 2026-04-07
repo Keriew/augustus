@@ -9,7 +9,7 @@ Current supported nodes:
 
 - `<state> ... </state>`
 - `<graphics> ... </graphics>`
-- `<labor labor_seeker_mode="..." labor_min_houses="N" />`
+- `<labor> ... </labor>`
 - `<spawn_group ...>`
 - `<spawn ... />`
 
@@ -23,6 +23,7 @@ Current supported `<graphics>` child nodes:
 - `<variant> ... </variant>`
 - `<condition type="has_workers" />`
 - `<condition type="water_access" />`
+- `<condition type="figure_slot_occupied" slot="primary|secondary|quaternary" />`
 - `<condition type="resource_positive" resource="wine" />`
 - `<condition type="desirability" operator="lt|lte|eq|gt|gte" threshold="N" />`
 
@@ -48,13 +49,14 @@ Current supported graphics conditions:
 
 - `type="has_workers"` means `num_workers > 0`
 - `type="water_access"` means `has_water_access`
+- `type="figure_slot_occupied" slot="primary|secondary|quaternary"` means the named tracked legacy figure slot is occupied
 - `type="resource_positive" resource="wine"` means the building has at least one unit of that resource
 - `type="desirability" operator="lt|lte|eq|gt|gte" threshold="N"` compares the building desirability against `N`
 
-Current supported `<labor>` attributes:
+Current supported `<labor>` child nodes:
 
-- `labor_seeker_mode="none|spawn_if_below|generate_if_below"`
-- `labor_min_houses="N"`
+- `<employees count="N" />`
+- `<seeker mode="none|spawn_if_below|generate_if_below" min_houses="N" />`
 
 Current supported `<spawn_group>` attributes:
 
@@ -98,6 +100,7 @@ Current engine behavior:
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
 - Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them.
 - Put shared derived state such as water access under `<state>` so graphics and spawn behavior read the same runtime facts.
+- Put BuildingType-authored employee defaults under `<labor><employees ... /></labor>` so the XML and live model table stay in sync.
 - Buildings with a validated runtime `BuildingType` graphics block now use the native runtime renderer path as the authoritative live path.
 
 See `_template.xml.example` here in `Mods\Vespasian\BuildingType` for a copy/paste starter.

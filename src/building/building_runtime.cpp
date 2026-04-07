@@ -6,12 +6,17 @@
 #include "core/crash_context.h"
 
 extern "C" {
+#include "building/armoury.h"
 #include "building/building_runtime_api.h"
 #include "building/count.h"
+#include "building/caravanserai.h"
+#include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
+#include "building/lighthouse.h"
 #include "building/monument.h"
 #include "building/properties.h"
+#include "building/warehouse.h"
 #include "city/population.h"
 #include "core/calc.h"
 #include "core/config.h"
@@ -231,6 +236,8 @@ std::uint64_t building_runtime::graphics_state_signature() const
     mix(static_cast<std::uint64_t>(building_->data.industry.progress));
     mix(static_cast<std::uint64_t>(building_->data.industry.has_raw_materials));
     mix(static_cast<std::uint64_t>(building_->output_resource_id));
+    mix(static_cast<std::uint64_t>(building_->figure_id));
+    mix(static_cast<std::uint64_t>(building_->figure_id2));
     mix(static_cast<std::uint64_t>(building_->figure_id4));
     mix(static_cast<std::uint64_t>(building_->monument.phase));
     mix(static_cast<std::uint64_t>(building_->monument.upgrades));
@@ -629,6 +636,18 @@ int building_runtime::worker_percentage() const
     return calc_percentage(building_->num_workers, model_get_building(building_->type)->laborers);
 }
 
+int building_runtime::default_spawn_delay() const
+{
+    static const std::vector<building_type_registry_impl::DelayBand> kDefaultDelayBands = {
+        { 100, 3 },
+        { 75, 7 },
+        { 50, 15 },
+        { 25, 29 },
+        { 1, 44 }
+    };
+    return evaluate_delay(kDefaultDelayBands);
+}
+
 void building_runtime::check_labor_problem()
 {
     if (building_->houses_covered <= 0) {
@@ -677,14 +696,19 @@ void building_runtime::spawn_labor_seeker(int x, int y, int min_houses)
     }
 }
 
-void building_runtime::run_labor_phase(const building_type_registry_impl::LaborPolicy &labor_policy, const map_point &road)
+void building_runtime::run_labor_phase(const building_type_registry_impl::LaborDefinition &labor, const map_point &road)
 {
-    switch (labor_policy.labor_seeker_mode) {
+    if (!labor.has_seeker_policy()) {
+        return;
+    }
+
+    const building_type_registry_impl::LaborSeekerPolicy &labor_policy = labor.seeker_policy();
+    switch (labor_policy.mode) {
         case building_type_registry_impl::LaborSeekerMode::SpawnIfBelow:
-            spawn_labor_seeker(road.x, road.y, labor_policy.labor_min_houses);
+            spawn_labor_seeker(road.x, road.y, labor_policy.min_houses);
             break;
         case building_type_registry_impl::LaborSeekerMode::GenerateIfBelow:
-            if (building_->houses_covered <= labor_policy.labor_min_houses) {
+            if (building_->houses_covered <= labor_policy.min_houses) {
                 generate_labor_seeker(road.x, road.y);
             }
             break;
@@ -715,6 +739,350 @@ int building_runtime::has_figure_of_any(const std::vector<figure_type> &types)
         }
     }
     return 0;
+}
+
+unsigned int *building_runtime::figure_slot_storage(building_type_registry_impl::FigureSlot slot)
+{
+    switch (slot) {
+        case building_type_registry_impl::FigureSlot::Primary:
+            return &building_->figure_id;
+        case building_type_registry_impl::FigureSlot::Secondary:
+            return &building_->figure_id2;
+        case building_type_registry_impl::FigureSlot::Quaternary:
+            return &building_->figure_id4;
+        case building_type_registry_impl::FigureSlot::None:
+        default:
+            return nullptr;
+    }
+}
+
+int building_runtime::slot_has_live_figure(
+    building_type_registry_impl::FigureSlot slot,
+    figure_type primary_type,
+    figure_type secondary_type)
+{
+    unsigned int *slot_value = figure_slot_storage(slot);
+    if (!slot_value || *slot_value <= 0) {
+        return 0;
+    }
+
+    figure *existing = figure_get(*slot_value);
+    if (!existing || !existing->state || existing->building_id != building_->id) {
+        *slot_value = 0;
+        return 0;
+    }
+    if (existing->type != primary_type && existing->type != secondary_type) {
+        *slot_value = 0;
+        return 0;
+    }
+    return 1;
+}
+
+void building_runtime::send_supplier_to_destination(figure *supplier, int destination_building_id)
+{
+    if (!supplier) {
+        return;
+    }
+    if (supplier->destination_building_id) {
+        supplier->last_destinatation_id = supplier->destination_building_id;
+    }
+
+    supplier->destination_building_id = destination_building_id;
+    ::building *destination = building_get(destination_building_id);
+    if (!destination) {
+        supplier->action_state = FIGURE_ACTION_146_SUPPLIER_RETURNING;
+        supplier->destination_x = supplier->x;
+        supplier->destination_y = supplier->y;
+        return;
+    }
+
+    map_point road;
+    int destination_found = 0;
+    if (destination->type == BUILDING_WAREHOUSE) {
+        if (map_has_road_access_warehouse(destination->x, destination->y, &road)) {
+            destination_found = 1;
+        }
+    } else if (destination->type == BUILDING_GRANARY) {
+        if (map_has_road_access_granary(destination->x, destination->y, &road)) {
+            destination_found = 1;
+        }
+    } else if (destination->type == BUILDING_GRAND_TEMPLE_VENUS) {
+        if (map_has_road_access(destination->x, destination->y, destination->size, &road)) {
+            destination_found = 1;
+        }
+    }
+
+    if (destination_found) {
+        supplier->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
+        supplier->destination_x = road.x;
+        supplier->destination_y = road.y;
+    } else {
+        supplier->action_state = FIGURE_ACTION_146_SUPPLIER_RETURNING;
+        supplier->destination_x = supplier->x;
+        supplier->destination_y = supplier->y;
+    }
+}
+
+int building_runtime::spawn_caravanserai_supplier(const map_point &road)
+{
+    if (slot_has_live_figure(
+            building_type_registry_impl::FigureSlot::Primary,
+            FIGURE_CARAVANSERAI_SUPPLIER,
+            FIGURE_LABOR_SEEKER)) {
+        return 0;
+    }
+
+    int destination_building_id = building_caravanserai_get_storage_destination(building_);
+    if (!destination_building_id) {
+        return 0;
+    }
+
+    figure *supplier = figure_create(FIGURE_CARAVANSERAI_SUPPLIER, road.x, road.y, DIR_0_TOP);
+    if (!supplier) {
+        return 0;
+    }
+
+    supplier->building_id = building_->id;
+    supplier->collecting_item_id = building_->data.market.fetch_inventory_id;
+    building_->figure_id = supplier->id;
+    send_supplier_to_destination(supplier, destination_building_id);
+    return 1;
+}
+
+int building_runtime::spawn_lighthouse_supplier(const map_point &road)
+{
+    if (slot_has_live_figure(
+            building_type_registry_impl::FigureSlot::Primary,
+            FIGURE_LIGHTHOUSE_SUPPLIER,
+            FIGURE_LABOR_SEEKER)) {
+        return 0;
+    }
+
+    int destination_building_id = building_lighthouse_get_storage_destination(building_);
+    if (!destination_building_id) {
+        return 0;
+    }
+
+    figure *supplier = figure_create(FIGURE_LIGHTHOUSE_SUPPLIER, road.x, road.y, DIR_0_TOP);
+    if (!supplier) {
+        return 0;
+    }
+
+    supplier->building_id = building_->id;
+    supplier->collecting_item_id = RESOURCE_TIMBER;
+    building_->figure_id = supplier->id;
+    send_supplier_to_destination(supplier, destination_building_id);
+    return 1;
+}
+
+void building_runtime::spawn_architect_guild()
+{
+    check_labor_problem();
+
+    map_point road;
+    if (!resolve_road_access(building_type_registry_impl::RoadAccessMode::Normal, &road)) {
+        return;
+    }
+
+    if (definition_ && definition_->has_labor()) {
+        run_labor_phase(definition_->labor(), road);
+    }
+    if (has_figure_of_type(FIGURE_WORK_CAMP_ARCHITECT)) {
+        return;
+    }
+
+    int spawn_delay = default_spawn_delay();
+    if (!spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay++;
+    if (building_->figure_spawn_delay <= spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay = 0;
+    if (!building_monument_get_monument(road.x, road.y, RESOURCE_NONE, building_->road_network_id, 0)) {
+        return;
+    }
+
+    figure *architect = figure_create(FIGURE_WORK_CAMP_ARCHITECT, road.x, road.y, DIR_4_BOTTOM);
+    if (!architect) {
+        return;
+    }
+    architect->action_state = FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED;
+    architect->building_id = building_->id;
+    building_->figure_id = architect->id;
+}
+
+void building_runtime::spawn_caravanserai()
+{
+    check_labor_problem();
+
+    map_point road;
+    if (!resolve_road_access(building_type_registry_impl::RoadAccessMode::Normal, &road)) {
+        return;
+    }
+
+    if (definition_ && definition_->has_labor()) {
+        run_labor_phase(definition_->labor(), road);
+    }
+
+    int spawn_delay = default_spawn_delay();
+    if (!spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay++;
+    if (building_->figure_spawn_delay <= spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay = 0;
+    spawn_caravanserai_supplier(road);
+}
+
+void building_runtime::spawn_lighthouse()
+{
+    check_labor_problem();
+
+    map_point road;
+    if (!resolve_road_access(building_type_registry_impl::RoadAccessMode::Normal, &road)) {
+        return;
+    }
+
+    if (definition_ && definition_->has_labor()) {
+        run_labor_phase(definition_->labor(), road);
+    }
+
+    int spawn_delay = default_spawn_delay();
+    if (!spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay++;
+    if (building_->figure_spawn_delay <= spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay = 0;
+    spawn_lighthouse_supplier(road);
+}
+
+void building_runtime::spawn_watchtower()
+{
+    check_labor_problem();
+    if (building_->figure_id || building_->figure_id2) {
+        return;
+    }
+
+    map_point road;
+    if (!resolve_road_access(building_type_registry_impl::RoadAccessMode::Normal, &road)) {
+        return;
+    }
+
+    if (definition_ && definition_->has_labor()) {
+        run_labor_phase(definition_->labor(), road);
+    }
+    if (building_->figure_id2) {
+        return;
+    }
+    if (!slot_has_live_figure(building_type_registry_impl::FigureSlot::Quaternary, FIGURE_WATCHTOWER_ARCHER)) {
+        return;
+    }
+
+    static const std::vector<building_type_registry_impl::DelayBand> kWatchtowerDelays = {
+        { 100, 10 },
+        { 75, 20 },
+        { 50, 30 },
+        { 25, 40 },
+        { 1, 60 }
+    };
+    int spawn_delay = evaluate_delay(kWatchtowerDelays);
+    if (!spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay++;
+    if (building_->figure_spawn_delay <= spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay = 0;
+    figure *primary_watchman = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_0_TOP);
+    if (!primary_watchman) {
+        return;
+    }
+    primary_watchman->action_state = FIGURE_ACTION_220_WATCHMAN_PATROL_INITIATE;
+    primary_watchman->building_id = building_->id;
+    building_->figure_id = primary_watchman->id;
+
+    figure *secondary_watchman = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_0_TOP);
+    if (!secondary_watchman) {
+        return;
+    }
+    secondary_watchman->action_state = FIGURE_ACTION_220_WATCHMAN_PATROL_INITIATE;
+    secondary_watchman->building_id = building_->id;
+    building_->figure_id2 = secondary_watchman->id;
+}
+
+void building_runtime::spawn_armoury()
+{
+    check_labor_problem();
+
+    map_point road;
+    if (!resolve_road_access(building_type_registry_impl::RoadAccessMode::Normal, &road)) {
+        return;
+    }
+
+    if (definition_ && definition_->has_labor()) {
+        run_labor_phase(definition_->labor(), road);
+    }
+
+    static const std::vector<building_type_registry_impl::DelayBand> kArmouryDelays = {
+        { 100, 3 },
+        { 75, 8 },
+        { 50, 16 },
+        { 25, 24 },
+        { 1, 48 }
+    };
+    int pct_workers = worker_percentage();
+    int carts_available = pct_workers >= 100 ? 2 : 1;
+    int spawn_delay = evaluate_delay(kArmouryDelays);
+    if (!spawn_delay) {
+        return;
+    }
+
+    int has_primary = slot_has_live_figure(building_type_registry_impl::FigureSlot::Primary, FIGURE_WAREHOUSEMAN);
+    int has_quaternary = slot_has_live_figure(building_type_registry_impl::FigureSlot::Quaternary, FIGURE_WAREHOUSEMAN);
+    if (has_primary && carts_available == 1) {
+        return;
+    }
+    if (has_primary && has_quaternary) {
+        return;
+    }
+
+    building_type_registry_impl::FigureSlot target_slot =
+        has_primary ? building_type_registry_impl::FigureSlot::Quaternary : building_type_registry_impl::FigureSlot::Primary;
+
+    building_->figure_spawn_delay++;
+    if (building_->figure_spawn_delay <= spawn_delay) {
+        return;
+    }
+
+    building_->figure_spawn_delay = 0;
+    if (!building_armoury_is_needed(building_)) {
+        return;
+    }
+
+    figure *warehouseman = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
+    if (!warehouseman) {
+        return;
+    }
+    warehouseman->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
+    warehouseman->collecting_item_id = RESOURCE_WEAPONS;
+    warehouseman->building_id = building_->id;
+    assign_figure_slot(target_slot, warehouseman->id);
 }
 
 int building_runtime::resolve_road_access(building_type_registry_impl::RoadAccessMode mode, map_point *road) const
@@ -870,8 +1238,8 @@ void building_runtime::spawn_service_roamer_group(const building_type_registry_i
         return;
     }
 
-    if (definition_ && definition_->has_labor_policy()) {
-        run_labor_phase(definition_->labor_policy(), road);
+    if (definition_ && definition_->has_labor()) {
+        run_labor_phase(definition_->labor(), road);
     }
 
     if (group.guard_timing == building_type_registry_impl::GuardTiming::AfterLaborSeeker &&
@@ -915,6 +1283,32 @@ void building_runtime::spawn_figure()
     refresh_runtime_state();
 
     const std::vector<building_type_registry_impl::SpawnDelayGroup> &spawn_groups = definition_->spawn_groups();
+    if (spawn_groups.empty()) {
+        if (definition_->has_graphic()) {
+            set_building_graphic();
+        }
+
+        switch (building_->type) {
+            case BUILDING_ARCHITECT_GUILD:
+                spawn_architect_guild();
+                return;
+            case BUILDING_CARAVANSERAI:
+                spawn_caravanserai();
+                return;
+            case BUILDING_LIGHTHOUSE:
+                spawn_lighthouse();
+                return;
+            case BUILDING_WATCHTOWER:
+                spawn_watchtower();
+                return;
+            case BUILDING_ARMOURY:
+                spawn_armoury();
+                return;
+            default:
+                return;
+        }
+    }
+
     // Groups own the shared delay/guard phase, then policies inside them can either cooperate or block one another.
     for (size_t i = 0; i < spawn_groups.size(); i++) {
         const building_type_registry_impl::SpawnDelayGroup &group = spawn_groups[i];

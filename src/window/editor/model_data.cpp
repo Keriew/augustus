@@ -1,3 +1,5 @@
+#include "building/building_type_registry.h"
+
 extern "C" {
 #include "model_data.h"
 
@@ -114,6 +116,7 @@ static void button_static_click(const generic_button *button)
         case 1:
             model_reset();
             resource_init();
+            building_type_registry_apply_model_overrides();
             window_request_refresh();
             break;
         case 2:

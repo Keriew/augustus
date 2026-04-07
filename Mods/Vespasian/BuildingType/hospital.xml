@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="hospital">
-    <labor labor_seeker_mode="spawn_if_below" labor_min_houses="50" />
+    <labor>
+        <employees count="30" />
+        <seeker mode="spawn_if_below" min_houses="50" />
+    </labor>
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="surgeon">
         <spawn mode="service_roamer" spawn_figure="surgeon"
             action_state="roaming" direction="top" figure_slot="primary" init_roaming="true" />
