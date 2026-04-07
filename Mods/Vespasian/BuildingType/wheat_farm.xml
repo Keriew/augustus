@@ -9,4 +9,10 @@
     <labor>
         <employees count="10" />
     </labor>
+    <storages>
+        <storage path="wheat_output" />
+    </storages>
+    <production_methods>
+        <production_method path="wheat_farm_basic" />
+    </production_methods>
 </building>

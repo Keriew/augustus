@@ -16,6 +16,9 @@ extern "C" {
 
 namespace building_type_registry_impl {
 
+class ProductionMethod;
+class StorageType;
+
 enum class GraphicComparison {
     None,
     LessThan,
@@ -216,6 +219,10 @@ public:
     void set_labor_seeker_policy(LaborSeekerPolicy policy);
     void add_spawn_group(SpawnDelayGroup group);
     SpawnDelayGroup *last_spawn_group();
+    void add_storage_reference(std::string path);
+    void add_production_method_reference(std::string path);
+    void add_storage_type(const StorageType *storage_type);
+    void add_production_method(const ProductionMethod *production_method);
 
     building_type type() const;
     const char *attr() const;
@@ -227,6 +234,12 @@ public:
     int has_labor() const;
     const LaborDefinition &labor() const;
     const std::vector<SpawnDelayGroup> &spawn_groups() const;
+    const std::vector<std::string> &storage_reference_paths() const;
+    const std::vector<std::string> &production_method_reference_paths() const;
+    const std::vector<const StorageType *> &storage_types() const;
+    const std::vector<const ProductionMethod *> &production_methods() const;
+    int has_native_storage() const;
+    int has_native_production() const;
     unsigned char upgrade_level_for(const ::building &building) const;
 
 private:
@@ -236,6 +249,10 @@ private:
     GraphicsDefinition graphics_;
     LaborDefinition labor_;
     std::vector<SpawnDelayGroup> spawn_groups_;
+    std::vector<std::string> storage_reference_paths_;
+    std::vector<std::string> production_method_reference_paths_;
+    std::vector<const StorageType *> storage_types_;
+    std::vector<const ProductionMethod *> production_methods_;
 };
 
 } // namespace building_type_registry_impl

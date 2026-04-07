@@ -1,6 +1,10 @@
 #ifndef BUILDING_INDUSTRY_H
 #define BUILDING_INDUSTRY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "building/building.h"
 #include "game/resource.h"
 #include "map/point.h"
@@ -40,5 +44,9 @@ int building_get_workshop_for_raw_material_with_room(int x, int y, int resource,
 
 void building_industry_advance_stats(void);
 void building_industry_start_strikes(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // BUILDING_INDUSTRY_H

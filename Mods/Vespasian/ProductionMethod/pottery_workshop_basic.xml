@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<production_method>
+    <kind value="workshop" />
+    <output resource="pottery" />
+    <input resource="clay" amount="100" />
+</production_method>

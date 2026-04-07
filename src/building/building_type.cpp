@@ -285,6 +285,26 @@ void BuildingType::add_spawn_group(SpawnDelayGroup group)
     spawn_groups_.push_back(std::move(group));
 }
 
+void BuildingType::add_storage_reference(std::string path)
+{
+    storage_reference_paths_.push_back(std::move(path));
+}
+
+void BuildingType::add_production_method_reference(std::string path)
+{
+    production_method_reference_paths_.push_back(std::move(path));
+}
+
+void BuildingType::add_storage_type(const StorageType *storage_type)
+{
+    storage_types_.push_back(storage_type);
+}
+
+void BuildingType::add_production_method(const ProductionMethod *production_method)
+{
+    production_methods_.push_back(production_method);
+}
+
 SpawnDelayGroup *BuildingType::last_spawn_group()
 {
     return spawn_groups_.empty() ? nullptr : &spawn_groups_.back();
@@ -338,6 +358,36 @@ const LaborDefinition &BuildingType::labor() const
 const std::vector<SpawnDelayGroup> &BuildingType::spawn_groups() const
 {
     return spawn_groups_;
+}
+
+const std::vector<std::string> &BuildingType::storage_reference_paths() const
+{
+    return storage_reference_paths_;
+}
+
+const std::vector<std::string> &BuildingType::production_method_reference_paths() const
+{
+    return production_method_reference_paths_;
+}
+
+const std::vector<const StorageType *> &BuildingType::storage_types() const
+{
+    return storage_types_;
+}
+
+const std::vector<const ProductionMethod *> &BuildingType::production_methods() const
+{
+    return production_methods_;
+}
+
+int BuildingType::has_native_storage() const
+{
+    return !storage_types_.empty();
+}
+
+int BuildingType::has_native_production() const
+{
+    return !production_methods_.empty();
 }
 
 unsigned char BuildingType::upgrade_level_for(const ::building &building) const

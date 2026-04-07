@@ -3,6 +3,8 @@
 
 #include "assets/image_group_payload.h"
 #include "building/building_runtime_graphics.h"
+#include "building/production_runtime_api.h"
+#include "building/storage_runtime_api.h"
 #include "core/crash_context.h"
 
 extern "C" {
@@ -1345,12 +1347,25 @@ int building_runtime::owns_graphic_animation()
     return graphics_cache_.owns_graphic_animation;
 }
 
+int building_runtime::owns_native_storage() const
+{
+    return definition_ && definition_->has_native_storage();
+}
+
+int building_runtime::owns_native_production() const
+{
+    return definition_ && definition_->has_native_production();
+}
+
 extern "C" void building_runtime_reset(void)
 {
     building_runtime_impl::g_runtime_instances.clear();
+    production_runtime_reset();
+    storage_runtime_reset();
 }
 
-// After save load/new city init, bind each live building instance to its runtime wrapper and precompute its cached image-group bindings.
+// After save load/new city init, bind each live building instance to its runtime wrapper, rebuild native storage/production instances,
+// and precompute cached image-group bindings.
 extern "C" void building_runtime_initialize_city_graphics_cache(void)
 {
     building_runtime_reset();
@@ -1368,6 +1383,9 @@ extern "C" void building_runtime_initialize_city_graphics_cache(void)
             instance->set_building_graphic();
         }
     }
+
+    storage_runtime_initialize_city();
+    production_runtime_initialize_city();
 }
 
 extern "C" void building_runtime_apply_graphic(building *b)

@@ -33,6 +33,8 @@ public:
     const RuntimeDrawSlice *graphic_animation();
     int owns_graphics();
     int owns_graphic_animation();
+    int owns_native_storage() const;
+    int owns_native_production() const;
 
     const ::building *building() const
     {
