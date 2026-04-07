@@ -1,3 +1,7 @@
+#include "graphics/advisor_card_button_widget.h"
+#include "graphics/ui_runtime.h"
+
+extern "C" {
 #include "ratings.h"
 
 #include "city/ratings.h"
@@ -13,10 +17,12 @@
 #include "graphics/window.h"
 #include "scenario/criteria.h"
 #include "scenario/property.h"
+}
 
 #define ADVISOR_HEIGHT 27
 
 static void button_rating(const generic_button *button);
+static void draw_rating_widgets(void);
 
 static generic_button rating_buttons[] = {
     { 80, 286, 110, 66, button_rating, 0, SELECTED_RATING_CULTURE},
@@ -64,50 +70,21 @@ static int draw_background(void)
     // culture
     int culture = city_rating_culture();
     int has_culture_goal = !open_play && scenario_criteria_culture_enabled();
-    button_border_draw(80, 286, 110, 66, focus_button_id == SELECTED_RATING_CULTURE);
-    lang_text_draw_centered(53, 1, 80, 294, 110, FONT_NORMAL_BLACK);
-    text_draw_number_centered(culture, 80, 309, 100, FONT_LARGE_BLACK);
-    width = text_draw_number(has_culture_goal ? scenario_criteria_culture() : 0,
-        '@', " ", 85, 334, FONT_NORMAL_BLACK, 0);
-    lang_text_draw(53, 5, 85 + width, 334, FONT_NORMAL_BLACK);
-    int has_reached = !has_culture_goal || culture >= scenario_criteria_culture();
-    draw_rating_column(110, 274, culture, has_reached);
-
+    draw_rating_column(110, 274, culture, !has_culture_goal || culture >= scenario_criteria_culture());
     // prosperity
     int prosperity = city_rating_prosperity();
     int has_prosperity_goal = !open_play && scenario_criteria_prosperity_enabled();
-    button_border_draw(200, 286, 110, 66, focus_button_id == SELECTED_RATING_PROSPERITY);
-    lang_text_draw_centered(53, 2, 200, 294, 110, FONT_NORMAL_BLACK);
-    text_draw_number_centered(prosperity, 200, 309, 100, FONT_LARGE_BLACK);
-    width = text_draw_number(has_prosperity_goal ? scenario_criteria_prosperity() : 0,
-        '@', " ", 205, 334, FONT_NORMAL_BLACK, 0);
-    lang_text_draw(53, 5, 205 + width, 334, FONT_NORMAL_BLACK);
-    has_reached = !has_prosperity_goal || prosperity >= scenario_criteria_prosperity();
-    draw_rating_column(230, 274, prosperity, has_reached);
+    draw_rating_column(230, 274, prosperity, !has_prosperity_goal || prosperity >= scenario_criteria_prosperity());
 
     // peace
     int peace = city_rating_peace();
     int has_peace_goal = !open_play && scenario_criteria_peace_enabled();
-    button_border_draw(320, 286, 110, 66, focus_button_id == SELECTED_RATING_PEACE);
-    lang_text_draw_centered(53, 3, 320, 294, 110, FONT_NORMAL_BLACK);
-    text_draw_number_centered(peace, 320, 309, 100, FONT_LARGE_BLACK);
-    width = text_draw_number(has_peace_goal ? scenario_criteria_peace() : 0,
-        '@', " ", 325, 334, FONT_NORMAL_BLACK, 0);
-    lang_text_draw(53, 5, 325 + width, 334, FONT_NORMAL_BLACK);
-    has_reached = !has_peace_goal || peace >= scenario_criteria_peace();
-    draw_rating_column(350, 274, peace, has_reached);
+    draw_rating_column(350, 274, peace, !has_peace_goal || peace >= scenario_criteria_peace());
 
     // favor
     int favor = city_rating_favor();
     int has_favor_goal = !open_play && scenario_criteria_favor_enabled();
-    button_border_draw(440, 286, 110, 66, focus_button_id == SELECTED_RATING_FAVOR);
-    lang_text_draw_centered(53, 4, 440, 294, 110, FONT_NORMAL_BLACK);
-    text_draw_number_centered(favor, 440, 309, 100, FONT_LARGE_BLACK);
-    width = text_draw_number(has_favor_goal ? scenario_criteria_favor() : 0,
-        '@', " ", 445, 334, FONT_NORMAL_BLACK, 0);
-    lang_text_draw(53, 5, 445 + width, 334, FONT_NORMAL_BLACK);
-    has_reached = !has_favor_goal || favor >= scenario_criteria_favor();
-    draw_rating_column(470, 274, favor, has_reached);
+    draw_rating_column(470, 274, favor, !has_favor_goal || favor >= scenario_criteria_favor());
 
     // bottom info box
     inner_panel_draw(64, 356, 32, 4);
@@ -168,10 +145,78 @@ static int draw_background(void)
 
 static void draw_foreground(void)
 {
-    button_border_draw(80, 286, 110, 66, focus_button_id == SELECTED_RATING_CULTURE);
-    button_border_draw(200, 286, 110, 66, focus_button_id == SELECTED_RATING_PROSPERITY);
-    button_border_draw(320, 286, 110, 66, focus_button_id == SELECTED_RATING_PEACE);
-    button_border_draw(440, 286, 110, 66, focus_button_id == SELECTED_RATING_FAVOR);
+    draw_rating_widgets();
+}
+
+static void draw_rating_widgets(void)
+{
+    UiPrimitives &primitives = shared_ui_runtime().primitives();
+    const int open_play = scenario_is_open_play();
+
+    const struct {
+        int x;
+        int title_id;
+        int value;
+        int goal_enabled;
+        int goal_value;
+        int focus_id;
+    } cards[] = {
+        {80, 1, city_rating_culture(), !open_play && scenario_criteria_culture_enabled(), scenario_criteria_culture(), SELECTED_RATING_CULTURE},
+        {200, 2, city_rating_prosperity(), !open_play && scenario_criteria_prosperity_enabled(), scenario_criteria_prosperity(), SELECTED_RATING_PROSPERITY},
+        {320, 3, city_rating_peace(), !open_play && scenario_criteria_peace_enabled(), scenario_criteria_peace(), SELECTED_RATING_PEACE},
+        {440, 4, city_rating_favor(), !open_play && scenario_criteria_favor_enabled(), scenario_criteria_favor(), SELECTED_RATING_FAVOR},
+    };
+
+    for (const auto &card : cards) {
+        UiTextSpec texts[3] = {};
+
+        texts[0].content_type = UiTextContentType::Language;
+        texts[0].alignment = UiTextAlignment::Center;
+        texts[0].text_group = 53;
+        texts[0].text_id = card.title_id;
+        texts[0].x = card.x;
+        texts[0].y = 294;
+        texts[0].box_width = 110;
+        texts[0].font = FONT_NORMAL_BLACK;
+
+        texts[1].content_type = UiTextContentType::Number;
+        texts[1].alignment = UiTextAlignment::Center;
+        texts[1].value = card.value;
+        texts[1].x = card.x;
+        texts[1].y = 309;
+        texts[1].box_width = 100;
+        texts[1].font = FONT_LARGE_BLACK;
+
+        texts[2].content_type = UiTextContentType::Language;
+        texts[2].alignment = UiTextAlignment::Left;
+        texts[2].text_group = 53;
+        texts[2].text_id = 5;
+        texts[2].x = card.x + 5 + text_get_number_width(card.goal_enabled ? card.goal_value : 0, '@', " ", FONT_NORMAL_BLACK);
+        texts[2].y = 334;
+        texts[2].font = FONT_NORMAL_BLACK;
+
+        AdvisorCardButtonWidget(
+            primitives,
+            card.x,
+            286,
+            110,
+            66,
+            focus_button_id == static_cast<unsigned int>(card.focus_id),
+            texts,
+            3)
+            .draw();
+
+        UiTextSpec goal_number = {};
+        goal_number.content_type = UiTextContentType::Number;
+        goal_number.alignment = UiTextAlignment::Left;
+        goal_number.value = card.goal_enabled ? card.goal_value : 0;
+        goal_number.prefix = '@';
+        goal_number.postfix = " ";
+        goal_number.x = card.x + 5;
+        goal_number.y = 334;
+        goal_number.font = FONT_NORMAL_BLACK;
+        UiTextPrimitive(primitives, goal_number).draw();
+    }
 }
 
 static int handle_mouse(const mouse *m)
@@ -181,7 +226,7 @@ static int handle_mouse(const mouse *m)
 
 static void button_rating(const generic_button *button)
 {
-    int rating = button->parameter1;
+    const selected_rating rating = static_cast<selected_rating>(button->parameter1);
     city_rating_select(rating);
     window_invalidate();
 }

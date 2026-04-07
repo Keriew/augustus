@@ -9,6 +9,11 @@
 
 class SharedUiRuntime {
 public:
+    UiPrimitives &primitives()
+    {
+        return primitives_;
+    }
+
     void draw_button_border(
         int x,
         int y,

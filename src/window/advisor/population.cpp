@@ -1,3 +1,7 @@
+#include "graphics/advisor_card_button_widget.h"
+#include "graphics/ui_runtime.h"
+
+extern "C" {
 #include "population.h"
 
 #include "building/count.h"
@@ -21,10 +25,12 @@
 #include "scenario/property.h"
 #include "scenario/criteria.h"
 #include "window/advisors.h"
+}
 
 #define ADVISOR_HEIGHT 27
 
 static void button_graph(const generic_button *button);
+static void draw_graph_button_widgets(void);
 
 static generic_button graph_buttons[] = {
     { 509,  61, 104, 55, button_graph},
@@ -265,8 +271,8 @@ static void draw_society_graph(int full_size, int x, int y)
 static int calculate_total_housing_buildings(void)
 {
     int total_houses = 0;
-    for (building_type house = BUILDING_HOUSE_SMALL_TENT; house <= BUILDING_HOUSE_LUXURY_PALACE; house++) {
-        total_houses += building_count_active(house);
+    for (int house = BUILDING_HOUSE_SMALL_TENT; house <= BUILDING_HOUSE_LUXURY_PALACE; ++house) {
+        total_houses += building_count_active(static_cast<building_type>(house));
     }
     return total_houses;
 }
@@ -470,8 +476,6 @@ static int draw_background(void)
     }
 
     lang_text_draw_centered(55, big_text, 60, 295, 400, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(55, top_text, 504, 130, 100, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(55, bot_text, 504, 230, 100, FONT_NORMAL_BLACK);
 
     big_graph(1, 70, 64);
     top_graph(0, 511, 63);
@@ -494,16 +498,68 @@ static int draw_background(void)
 
 static void draw_foreground(void)
 {
-    if (focus_button_id == 0) {
-        button_border_draw(507, 60, 106, 57, 0);
-        button_border_draw(507, 160, 106, 57, 0);
-    } else if (focus_button_id == 1) {
-        button_border_draw(507, 60, 106, 57, 1);
-        button_border_draw(507, 160, 106, 57, 0);
-    } else if (focus_button_id == 2) {
-        button_border_draw(507, 60, 106, 57, 0);
-        button_border_draw(507, 160, 106, 57, 1);
+    draw_graph_button_widgets();
+}
+
+static void draw_graph_button_widgets(void)
+{
+    int graph_order = city_population_graph_order();
+    int top_text = 4;
+    int bot_text = 5;
+
+    switch (graph_order) {
+        default:
+        case 0: top_text = 4; bot_text = 5; break;
+        case 1: top_text = 5; bot_text = 4; break;
+        case 2: top_text = 3; bot_text = 5; break;
+        case 3: top_text = 5; bot_text = 3; break;
+        case 4: top_text = 3; bot_text = 4; break;
+        case 5: top_text = 4; bot_text = 3; break;
     }
+
+    UiPrimitives &primitives = shared_ui_runtime().primitives();
+
+    UiTextSpec top_button_text = {};
+    top_button_text.content_type = UiTextContentType::Language;
+    top_button_text.alignment = UiTextAlignment::Center;
+    top_button_text.text_group = 55;
+    top_button_text.text_id = top_text;
+    top_button_text.x = 504;
+    top_button_text.y = 130;
+    top_button_text.box_width = 100;
+    top_button_text.font = FONT_NORMAL_BLACK;
+
+    AdvisorCardButtonWidget(
+        primitives,
+        507,
+        60,
+        106,
+        57,
+        focus_button_id == 1,
+        &top_button_text,
+        1)
+        .draw();
+
+    UiTextSpec bottom_button_text = {};
+    bottom_button_text.content_type = UiTextContentType::Language;
+    bottom_button_text.alignment = UiTextAlignment::Center;
+    bottom_button_text.text_group = 55;
+    bottom_button_text.text_id = bot_text;
+    bottom_button_text.x = 504;
+    bottom_button_text.y = 230;
+    bottom_button_text.box_width = 100;
+    bottom_button_text.font = FONT_NORMAL_BLACK;
+
+    AdvisorCardButtonWidget(
+        primitives,
+        507,
+        160,
+        106,
+        57,
+        focus_button_id == 2,
+        &bottom_button_text,
+        1)
+        .draw();
 }
 
 static int handle_mouse(const mouse *m)

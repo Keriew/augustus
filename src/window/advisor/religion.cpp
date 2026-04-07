@@ -1,3 +1,7 @@
+#include "graphics/advisor_text_button_widget.h"
+#include "graphics/ui_runtime.h"
+
+extern "C" {
 #include "religion.h"
 
 #include "assets/assets.h"
@@ -12,8 +16,10 @@
 #include "graphics/lang_text.h"
 #include "graphics/text.h"
 #include "window/hold_festival.h"
+}
 
 static void button_hold_festival(const generic_button *button);
+static void draw_hold_festival_widget(void);
 
 static generic_button hold_festival_button[] = {
     {102, 340, 300, 20, button_hold_festival},
@@ -113,8 +119,6 @@ static void draw_festival_info(void)
     lang_text_draw(58, 15, 112 + width, 315, FONT_NORMAL_WHITE);
     if (city_festival_is_planned()) {
         lang_text_draw_centered(58, 34, 102, 339, 300, FONT_NORMAL_WHITE);
-    } else {
-        lang_text_draw_centered(58, 16, 102, 339, 300, FONT_NORMAL_WHITE);
     }
     lang_text_draw_multiline(58, 18 + get_festival_advice(), 56, 360, 400, FONT_NORMAL_WHITE);
 }
@@ -167,7 +171,7 @@ static int draw_background(void)
 static void draw_foreground(void)
 {
     if (!city_festival_is_planned()) {
-        button_border_draw(102, 335, 300, 20, focus_button_id == 1);
+        draw_hold_festival_widget();
     }
 }
 
@@ -181,6 +185,23 @@ static void button_hold_festival(const generic_button *button)
     if (!city_festival_is_planned()) {
         window_hold_festival_show();
     }
+}
+
+static void draw_hold_festival_widget(void)
+{
+    UiPrimitives &primitives = shared_ui_runtime().primitives();
+
+    UiTextSpec button_text = {};
+    button_text.content_type = UiTextContentType::Language;
+    button_text.alignment = UiTextAlignment::Center;
+    button_text.text_group = 58;
+    button_text.text_id = 16;
+    button_text.x = 102;
+    button_text.y = 339;
+    button_text.box_width = 300;
+    button_text.font = FONT_NORMAL_WHITE;
+
+    AdvisorTextButtonWidget(primitives, 102, 335, 300, 20, focus_button_id == 1, button_text).draw();
 }
 
 static void get_tooltip_text(advisor_tooltip_result *r)

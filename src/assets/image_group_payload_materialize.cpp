@@ -44,63 +44,6 @@ int derive_original_height(const ResolvedImageEntry &entry)
     return entry.top_height + footprint_height / 2;
 }
 
-struct CroppedRuntimeSurface {
-    RasterSurface surface;
-    int x_offset = 0;
-    int y_offset = 0;
-};
-
-// Input: one runtime-composed raster surface.
-// Output: the opaque-bounds crop plus renderer placement offsets for top-flush, bottom-padded runtime footprints.
-int crop_runtime_surface_like_legacy(const RasterSurface &source, CroppedRuntimeSurface &out_surface)
-{
-    out_surface = CroppedRuntimeSurface();
-    if (!raster_has_pixels(source)) {
-        return 0;
-    }
-
-    int x_first_opaque = source.width;
-    int y_first_opaque = source.height;
-    int x_last_opaque = -1;
-    int y_last_opaque = -1;
-
-    for (int y = 0; y < source.height; y++) {
-        const color_t *row = &source.pixels[static_cast<size_t>(y) * source.width];
-        for (int x = 0; x < source.width; x++) {
-            if ((row[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
-                x_first_opaque = std::min(x_first_opaque, x);
-                y_first_opaque = std::min(y_first_opaque, y);
-                x_last_opaque = std::max(x_last_opaque, x);
-                y_last_opaque = std::max(y_last_opaque, y);
-            }
-        }
-    }
-
-    if (x_last_opaque < 0 || y_last_opaque < 0) {
-        return 0;
-    }
-
-    const int bottom_padding = source.height - y_last_opaque - 1;
-
-    out_surface.x_offset = x_first_opaque;
-    // Runtime-extracted footprint rasters stay top-flush and carry transparent padding below the diamond.
-    // Cancel that trailing padding before the renderer sees the slice so the footprint anchors to the tile.
-    out_surface.y_offset = y_first_opaque - bottom_padding;
-    out_surface.surface.width = x_last_opaque - x_first_opaque + 1;
-    out_surface.surface.height = y_last_opaque - y_first_opaque + 1;
-    out_surface.surface.pixels.resize(
-        static_cast<size_t>(out_surface.surface.width) * out_surface.surface.height);
-
-    for (int y = 0; y < out_surface.surface.height; y++) {
-        memcpy(
-            &out_surface.surface.pixels[static_cast<size_t>(y) * out_surface.surface.width],
-            &source.pixels[static_cast<size_t>(y_first_opaque + y) * source.width + x_first_opaque],
-            sizeof(color_t) * out_surface.surface.width);
-    }
-
-    return raster_has_pixels(out_surface.surface);
-}
-
 // Input: one source-local document and one raw PNG layer reference.
 // Output: a prepared layer containing a cropped raster plus transform metadata.
 int prepare_png_layer(const ImageGroupDoc &doc, const RawLayerDef &raw_layer, PreparedLayer &out_layer)
@@ -792,34 +735,23 @@ int upload_split_surface(
         return 0;
     }
 
-    CroppedRuntimeSurface cropped_footprint;
-    const RasterSurface *footprint_upload_surface = &footprint_source;
-    if (is_isometric) {
-        if (!crop_runtime_surface_like_legacy(footprint_source, cropped_footprint)) {
-            return 0;
-        }
-        footprint_upload_surface = &cropped_footprint.surface;
-    }
-
     if (top_height > 0) {
         const int footprint_height = footprint_source.height;
         const int original_canvas_height = top_height + footprint_height / 2;
         image base_image = {};
-        base_image.width = footprint_upload_surface->width;
-        base_image.height = footprint_upload_surface->height;
+        base_image.width = footprint_source.width;
+        base_image.height = footprint_source.height;
         base_image.original.width = split_surface.width;
         base_image.original.height = original_canvas_height;
         base_image.is_isometric = is_isometric;
         base_image.atlas.y_offset = top_height;
-        base_image.x_offset = cropped_footprint.x_offset;
-        base_image.y_offset = cropped_footprint.y_offset;
 
         const ImagePayload *footprint_payload = image_payload_load_pixels_payload(
                 base_key.c_str(),
                 base_image,
-                footprint_upload_surface->pixels.data(),
-                footprint_upload_surface->width,
-                footprint_upload_surface->height);
+                footprint_source.pixels.data(),
+                footprint_source.width,
+                footprint_source.height);
         if (!footprint_payload) {
             return 0;
         }
@@ -847,8 +779,6 @@ int upload_split_surface(
             image_payload_release_key(base_key.c_str());
             return 0;
         }
-        out_footprint.slice.draw_offset_x = base_image.x_offset;
-        out_footprint.slice.draw_offset_y = base_image.y_offset;
 
         out_top.texture_key = base_key + "\\top";
         if (!populate_slice_from_payload(top_payload, 0, out_top.slice)) {
@@ -861,19 +791,17 @@ int upload_split_surface(
     }
 
     image base_image = {};
-    base_image.width = footprint_upload_surface->width;
-    base_image.height = footprint_upload_surface->height;
+    base_image.width = footprint_source.width;
+    base_image.height = footprint_source.height;
     base_image.original.width = split_surface.width;
     base_image.original.height = split_surface.height;
     base_image.is_isometric = is_isometric;
-    base_image.x_offset = cropped_footprint.x_offset;
-    base_image.y_offset = cropped_footprint.y_offset;
     const ImagePayload *footprint_payload = image_payload_load_pixels_payload(
             base_key.c_str(),
             base_image,
-            footprint_upload_surface->pixels.data(),
-            footprint_upload_surface->width,
-            footprint_upload_surface->height);
+            footprint_source.pixels.data(),
+            footprint_source.width,
+            footprint_source.height);
     if (!footprint_payload) {
         return 0;
     }
@@ -884,8 +812,6 @@ int upload_split_surface(
         image_payload_release_key(base_key.c_str());
         return 0;
     }
-    out_footprint.slice.draw_offset_x = base_image.x_offset;
-    out_footprint.slice.draw_offset_y = base_image.y_offset;
     out_top = {};
     return 1;
 }

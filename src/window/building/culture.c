@@ -970,7 +970,7 @@ void window_building_draw_tavern(building_info_context *c)
 static void draw_games_info(building_info_context *c, int y_offset)
 {
     inner_panel_draw(c->x_offset + 16, c->y_offset + y_offset + 214, c->width_blocks - 2, 6);
-    window_entertainment_draw_games_text(c->x_offset + 32, c->y_offset + y_offset + 224);
+    window_entertainment_draw_games_text(c->x_offset + 32, c->y_offset + y_offset + 224, 1);
 }
 
 int window_building_handle_mouse_colosseum(const mouse *m, building_info_context *c)

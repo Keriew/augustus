@@ -8,6 +8,7 @@ typedef void (*crash_context_log_callback)(void *userdata);
  * Error = definitely unintended, survivable, and does not damage game state, save data, or campaign data.
  * Fatal error = unrecoverable or likely to cause data loss, and the process must stop.
  *
+ * Preferred names for new code are ErrorContextScope and error_context_*.
  * The CrashContextScope / crash_context_* names are kept as compatibility wrappers for the existing codebase.
  * User-facing logs emitted by this module should use error terminology for non-fatal conditions.
  */
@@ -28,6 +29,8 @@ public:
 private:
     int token_ = -1;
 };
+
+using ErrorContextScope = CrashContextScope;
 #endif
 
 #ifdef __cplusplus

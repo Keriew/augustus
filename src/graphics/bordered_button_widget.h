@@ -2,6 +2,11 @@
 
 #include "graphics/button_widget.h"
 
+enum class BorderedButtonFillStyle {
+    PanelTexture,
+    Transparent,
+};
+
 class BorderedButtonWidget : public ButtonWidget {
 public:
     BorderedButtonWidget(
@@ -11,7 +16,8 @@ public:
         int width_pixels,
         int height_pixels,
         int has_focus,
-        color_t color);
+        color_t color,
+        BorderedButtonFillStyle fill_style = BorderedButtonFillStyle::PanelTexture);
 
     void draw() const;
 
@@ -26,4 +32,5 @@ private:
     int height_pixels_;
     int has_focus_;
     color_t color_;
+    BorderedButtonFillStyle fill_style_;
 };

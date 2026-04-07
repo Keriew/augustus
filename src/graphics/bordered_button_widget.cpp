@@ -41,12 +41,14 @@ BorderedButtonWidget::BorderedButtonWidget(
     int width_pixels,
     int height_pixels,
     int has_focus,
-    color_t color)
+    color_t color,
+    BorderedButtonFillStyle fill_style)
     : ButtonWidget(primitives, x, y)
     , width_pixels_(width_pixels)
     , height_pixels_(height_pixels)
     , has_focus_(has_focus)
     , color_(color)
+    , fill_style_(fill_style)
 {
 }
 
@@ -66,6 +68,9 @@ void BorderedButtonWidget::draw_container() const
 
 void BorderedButtonWidget::draw_fill() const
 {
+    if (fill_style_ == BorderedButtonFillStyle::Transparent) {
+        return;
+    }
     ScopedButtonClip clip(primitives_, x_, y_, width_pixels_, height_pixels_);
     UiPanelPrimitive(
         primitives_,
