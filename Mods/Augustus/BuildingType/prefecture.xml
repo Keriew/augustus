@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="prefecture">
+    <graphics>
+        <default>
+            <path value="Admin_Logistics\Prefecture" />
+            <image value="Image_0000" />
+        </default>
+    </graphics>
+    <labor>
+        <employees count="6" />
+        <seeker mode="spawn_if_below" min_houses="100" />
+    </labor>
+    <spawn_group road_access="normal" delay_bands="100:0,75:1,50:3,25:7,1:15" existing_figure="prefect">
+        <spawn mode="service_roamer" spawn_figure="prefect"
+            action_state="prefect_created" direction="top" figure_slot="primary" init_roaming="false" />
+    </spawn_group>
+</building>

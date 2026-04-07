@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="lion_house">
+    <graphics>
+        <default>
+            <path value="Health_Culture\Lion_House" />
+            <image value="Image_0000" />
+        </default>
+    </graphics>
+    <labor>
+        <employees count="8" />
+        <seeker mode="spawn_if_below" min_houses="50" />
+    </labor>
+    <spawn_group road_access="normal" delay_bands="100:5,75:10,50:20,25:35,1:60">
+        <spawn mode="service_roamer" spawn_figure="lion_tamer"
+            action_state="entertainer_school_created" direction="top" figure_slot="primary" init_roaming="false" />
+    </spawn_group>
+</building>

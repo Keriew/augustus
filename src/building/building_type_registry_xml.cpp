@@ -75,9 +75,11 @@ static figure_type parse_figure_type_name(const char *name)
         { "barber", FIGURE_BARBER },
         { "bathhouse_worker", FIGURE_BATHHOUSE_WORKER },
         { "doctor", FIGURE_DOCTOR },
+        { "engineer", FIGURE_ENGINEER },
         { "gladiator", FIGURE_GLADIATOR },
         { "librarian", FIGURE_LIBRARIAN },
         { "lion_tamer", FIGURE_LION_TAMER },
+        { "prefect", FIGURE_PREFECT },
         { "school_child", FIGURE_SCHOOL_CHILD },
         { "surgeon", FIGURE_SURGEON },
         { "teacher", FIGURE_TEACHER },
@@ -102,6 +104,8 @@ static int parse_action_state_name(const char *name)
     };
     static const named_action_state action_names[] = {
         { "roaming", FIGURE_ACTION_125_ROAMING },
+        { "engineer_created", FIGURE_ACTION_60_ENGINEER_CREATED },
+        { "prefect_created", FIGURE_ACTION_70_PREFECT_CREATED },
         { "tax_collector_created", FIGURE_ACTION_40_TAX_COLLECTOR_CREATED },
         { "entertainer_roaming", FIGURE_ACTION_94_ENTERTAINER_ROAMING },
         { "entertainer_school_created", FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED },
@@ -202,7 +206,7 @@ static int parse_delay_bands_attribute(const char *value, std::vector<DelayBand>
             if (!parse_int_strict(percentage_text, &percentage) || !parse_int_strict(delay_text, &delay)) {
                 return 0;
             }
-            if (percentage < 1 || percentage > 100 || delay <= 0) {
+            if (percentage < 1 || percentage > 100 || delay < 0) {
                 return 0;
             }
             if (percentage >= previous_percentage) {

@@ -282,109 +282,6 @@ static void spawn_figure_tower(building *b)
     }
 }
 
-static void spawn_figure_engineers_post(building *b)
-{
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_ENGINEER)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 100);
-        int pct_workers = worker_percentage(b);
-        int spawn_delay;
-        if (pct_workers >= 100) {
-            spawn_delay = 0;
-        } else if (pct_workers >= 75) {
-            spawn_delay = 1;
-        } else if (pct_workers >= 50) {
-            spawn_delay = 3;
-        } else if (pct_workers >= 25) {
-            spawn_delay = 7;
-        } else if (pct_workers >= 1) {
-            spawn_delay = 15;
-        } else {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_ENGINEER, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_60_ENGINEER_CREATED;
-            f->building_id = b->id;
-            b->figure_id = f->id;
-        }
-    }
-}
-
-static void spawn_figure_prefecture(building *b)
-{
-    check_labor_problem(b);
-    if (has_figure_of_type(b, FIGURE_PREFECT)) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 100);
-        int pct_workers = worker_percentage(b);
-        int spawn_delay;
-        if (pct_workers >= 100) {
-            spawn_delay = 0;
-        } else if (pct_workers >= 75) {
-            spawn_delay = 1;
-        } else if (pct_workers >= 50) {
-            spawn_delay = 3;
-        } else if (pct_workers >= 25) {
-            spawn_delay = 7;
-        } else if (pct_workers >= 1) {
-            spawn_delay = 15;
-        } else {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_PREFECT, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_70_PREFECT_CREATED;
-            f->building_id = b->id;
-            b->figure_id = f->id;
-        }
-    }
-}
-
-static void spawn_figure_lion_house(building *b)
-{
-    check_labor_problem(b);
-    check_labor_problem(b);
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int pct_workers = worker_percentage(b);
-        int spawn_delay;
-        if (pct_workers >= 100) {
-            spawn_delay = 5;
-        } else if (pct_workers >= 75) {
-            spawn_delay = 10;
-        } else if (pct_workers >= 50) {
-            spawn_delay = 20;
-        } else if (pct_workers >= 25) {
-            spawn_delay = 35;
-        } else if (pct_workers >= 1) {
-            spawn_delay = 60;
-        } else {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_LION_TAMER, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED;
-            f->building_id = b->id;
-            b->figure_id = f->id;
-        }
-    }
-}
-
 static void spawn_figure_chariot(building *b, map_point road, int use_figure_2)
 {
     figure *f = figure_create(FIGURE_CHARIOTEER, road.x, road.y, DIR_0_TOP);
@@ -1405,10 +1302,10 @@ void building_figure_generate(void)
                     spawn_figure_tower(b);
                     break;
                 case BUILDING_ENGINEERS_POST:
-                    spawn_figure_engineers_post(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_PREFECTURE:
-                    spawn_figure_prefecture(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_ACTOR_COLONY:
                 case BUILDING_GLADIATOR_SCHOOL:
@@ -1424,7 +1321,7 @@ void building_figure_generate(void)
                     runtime_building->spawn_figure();
                     break;
                 case BUILDING_LION_HOUSE:
-                    spawn_figure_lion_house(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_CHARIOT_MAKER:
                     spawn_figure_chariot_maker(b);

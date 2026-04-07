@@ -38,6 +38,11 @@ extern "C" {
 
 namespace {
 
+int graphics_definition_is_data_only(building_type type)
+{
+    return type == BUILDING_WHEAT_FARM || type == BUILDING_POTTERY_WORKSHOP;
+}
+
 void advance_runtime_monument_secondary_animation(building *b)
 {
     if (b && b->type == BUILDING_GRAND_TEMPLE_CERES && b->monument.upgrades == 1) {
@@ -202,7 +207,10 @@ void building_runtime::clear_cached_graphics_bindings()
 
 int building_runtime::uses_new_graphics() const
 {
-    return building_ && definition_ && definition_->has_graphic();
+    return building_ &&
+        definition_ &&
+        definition_->has_graphic() &&
+        !graphics_definition_is_data_only(building_->type);
 }
 
 int building_runtime::building_state_supports_native_graphics() const
@@ -618,7 +626,7 @@ const RuntimeDrawSlice *building_runtime::graphic_animation()
 // Output: eagerly rebuilds its cached image-group bindings so later draw code only reads cached refs.
 void building_runtime::set_building_graphic()
 {
-    if (!building_ || !definition_ || !definition_->has_graphic()) {
+    if (!uses_new_graphics()) {
         return;
     }
 
@@ -645,7 +653,8 @@ int building_runtime::default_spawn_delay() const
         { 25, 29 },
         { 1, 44 }
     };
-    return evaluate_delay(kDefaultDelayBands);
+    int delay = evaluate_delay(kDefaultDelayBands);
+    return delay < 0 ? 0 : delay;
 }
 
 void building_runtime::check_labor_problem()
@@ -999,7 +1008,7 @@ void building_runtime::spawn_watchtower()
         { 1, 60 }
     };
     int spawn_delay = evaluate_delay(kWatchtowerDelays);
-    if (!spawn_delay) {
+    if (spawn_delay < 0) {
         return;
     }
 
@@ -1049,7 +1058,7 @@ void building_runtime::spawn_armoury()
     int pct_workers = worker_percentage();
     int carts_available = pct_workers >= 100 ? 2 : 1;
     int spawn_delay = evaluate_delay(kArmouryDelays);
-    if (!spawn_delay) {
+    if (spawn_delay < 0) {
         return;
     }
 
@@ -1104,7 +1113,7 @@ int building_runtime::evaluate_delay(const std::vector<building_type_registry_im
             return delay_band.delay;
         }
     }
-    return 0;
+    return -1;
 }
 
 int building_runtime::evaluate_condition(building_type_registry_impl::SpawnCondition condition) const
@@ -1252,7 +1261,7 @@ void building_runtime::spawn_service_roamer_group(const building_type_registry_i
     }
 
     int spawn_delay = evaluate_delay(group.delay_bands);
-    if (!spawn_delay) {
+    if (spawn_delay < 0) {
         return;
     }
 
