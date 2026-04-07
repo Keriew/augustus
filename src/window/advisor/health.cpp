@@ -201,6 +201,7 @@ static void draw_coverage_toggle_widgets(void)
     health_text.y = generic_buttons[0].y + 5;
     health_text.box_width = generic_buttons[0].width;
     health_text.font = FONT_SMALL_PLAIN;
+    health_text.color = COLOR_BLACK;
 
     AdvisorTextButtonWidget(
         primitives,
@@ -221,6 +222,7 @@ static void draw_coverage_toggle_widgets(void)
     water_text.y = generic_buttons[1].y + 5;
     water_text.box_width = generic_buttons[1].width;
     water_text.font = FONT_SMALL_PLAIN;
+    water_text.color = COLOR_BLACK;
 
     AdvisorTextButtonWidget(
         primitives,

@@ -1,6 +1,10 @@
 #ifndef WINDOW_FILE_DIALOG_H
 #define WINDOW_FILE_DIALOG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     FILE_DIALOG_SAVE = 0,
     FILE_DIALOG_LOAD = 1,
@@ -18,5 +22,9 @@ typedef enum {
 } file_type;
 
 void window_file_dialog_show(file_type type, file_dialog_type dialog_type);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WINDOW_FILE_DIALOG_H

@@ -1834,14 +1834,20 @@ static void draw_trade_button_highlights(void)
     for (int i = 0; i < resource_button_count; ++i) {
         const resource_button *btn = &resource_buttons[i];
         if (data.hovered_resource_button == i && btn->do_highlight) {
-            button_border_draw(btn->x - 1, btn->y - 1, btn->width + 2, btn->height + 2, 1);
+            graphics_draw_inset_rect(
+                btn->x - 1,
+                btn->y - 1,
+                btn->width + 2,
+                btn->height + 2,
+                COLOR_INSET_DARK,
+                COLOR_INSET_LIGHT);
             continue;
         }
         if (data.focus_resource == btn->res) {
             time_millis elapsed = time_get_millis() - data.trade_route_anim_start;
             float time_seconds = elapsed / 1000.0f; // Convert to seconds
             float pulse = sinf(time_seconds * 1.0f * 3.14f); // 1 full cycle per second
-            int alpha = 96 + (int) (pulse * 64); // Range: 32Ã¢â‚¬â€œ160
+            int alpha = 96 + (int) (pulse * 64); // Range: 32ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“160
             graphics_tint_rect(btn->x, btn->y, RESOURCE_ICON_WIDTH - 1, RESOURCE_ICON_HEIGHT - 1,
                 COLOR_MASK_DARK_PINK, alpha);
         }
@@ -2067,7 +2073,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         empire_scroll_map(position.x, position.y);
     }
 
-    // Only let the gridÃ¢â‚¬Âbox process clicks if the sidebar is actually expanded:
+    // Only let the gridÃƒÂ¢Ã¢â€šÂ¬Ã‚Âbox process clicks if the sidebar is actually expanded:
     if (!data.sidebar.border_btn.is_collapsed) {
         if (window_empire_sidebar_sort_handle_expanding_buttons_input(m)) {
             return; //block other input handling if the expanding buttons are active

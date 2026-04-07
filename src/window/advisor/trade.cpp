@@ -123,31 +123,21 @@ static int draw_background(void)
     int width = lang_text_get_width(54, 1, FONT_NORMAL_BLACK);
     lang_text_draw(54, 1, 575 - width, 38, FONT_NORMAL_BLACK);
 
-    int land_policy_available = building_monument_working(BUILDING_CARAVANSERAI);
-    int sea_policy_available = building_monument_working(BUILDING_LIGHTHOUSE);
-
-    button_border_draw(45, 390, 40, 30, land_policy_available && data.focus_button_id == 3);
-    int image_id;
-
-    if (land_policy_available) {
-        image_id = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1;
-    } else {
-        image_id = assets_get_image_id("UI", "Land Trade Policy Off Button");
-    }
-    image_draw(image_id, 51, 394, COLOR_MASK_NONE, SCALE_NONE);
-
-    button_border_draw(95, 390, 40, 30, sea_policy_available && data.focus_button_id == 4);
-
-    if (sea_policy_available) {
-        image_id = image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE);
-    } else {
-        image_id = assets_get_image_id("UI", "Sea Trade Policy Off Button");
-    }
-    image_draw(image_id, 99, 394, COLOR_MASK_NONE, SCALE_NONE);
-
     grid_box_request_refresh(&resource_grid);
 
     return ADVISOR_HEIGHT;
+}
+
+static void draw_policy_button(int x, int y, int is_available, int has_focus, int active_image_id, const char *inactive_asset_name)
+{
+    button_border_draw(x, y, 40, 30, has_focus);
+
+    int image_id = active_image_id;
+    if (!is_available) {
+        image_id = assets_get_image_id("UI", inactive_asset_name);
+    }
+
+    image_draw(image_id, x + 6, y + 4, COLOR_MASK_NONE, SCALE_NONE);
 }
 
 static void draw_resource_status_text(resource_type resource, int x, int y, int box_width)
@@ -262,8 +252,20 @@ static void draw_foreground(void)
 
     int land_policy_available = building_monument_working(BUILDING_CARAVANSERAI);
     int sea_policy_available = building_monument_working(BUILDING_LIGHTHOUSE);
-    button_border_draw(45, 390, 40, 30, land_policy_available && data.focus_button_id == 3);
-    button_border_draw(95, 390, 40, 30, sea_policy_available && data.focus_button_id == 4);
+    draw_policy_button(
+        45,
+        390,
+        land_policy_available,
+        land_policy_available && data.focus_button_id == 3,
+        image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE) + 1,
+        "Land Trade Policy Off Button");
+    draw_policy_button(
+        95,
+        390,
+        sea_policy_available,
+        sea_policy_available && data.focus_button_id == 4,
+        image_group(GROUP_EMPIRE_TRADE_ROUTE_TYPE),
+        "Sea Trade Policy Off Button");
 }
 
 static int handle_mouse(const mouse *m)

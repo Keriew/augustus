@@ -480,7 +480,7 @@
     <ClCompile Include="src\window\editor\win_criteria.c" />
     <ClCompile Include="src\window\empire.cpp" />
     <ClCompile Include="src\window\empire_sidebar_sort.c" />
-    <ClCompile Include="src\window\file_dialog.c" />
+    <ClCompile Include="src\window\file_dialog.cpp" />
     <ClCompile Include="src\window\gift_to_emperor.c" />
     <ClCompile Include="src\window\hold_festival.c" />
     <ClCompile Include="src\window\hold_games.c" />

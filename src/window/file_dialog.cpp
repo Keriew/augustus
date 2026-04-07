@@ -1,5 +1,6 @@
 #include "file_dialog.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "core/calc.h"
 #include "core/config.h"
@@ -10,7 +11,6 @@
 #include "core/image_group.h"
 #include "core/image_group_editor.h"
 #include "core/lang.h"
-#include "core/log.h"
 #include "core/string.h"
 #include "editor/editor.h"
 #include "editor/empire.h"
@@ -51,6 +51,7 @@
 #include "widget/minimap.h"
 #include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
+}
 
 #include <string.h>
 
@@ -81,6 +82,11 @@ typedef struct {
     char last_loaded_file[FILE_NAME_MAX];
 } file_type_data;
 
+typedef enum {
+    FILE_DIALOG_SORT_BY_NAME,
+    FILE_DIALOG_SORT_BY_DATE
+} file_dialog_sort_type;
+
 static struct {
     file_type type;
     file_dialog_type dialog_type;
@@ -88,10 +94,7 @@ static struct {
     const dir_listing *file_list;
     dir_listing filtered_file_list;
     uint8_t filter_text[FILTER_TEXT_SIZE];
-    enum {
-        SORT_BY_NAME,
-        SORT_BY_DATE
-    } sort_type;
+    file_dialog_sort_type sort_type;
     unsigned int sort_by_button_focused;
 
     file_type_data *file_data;
@@ -120,9 +123,9 @@ static list_box_type list_box = {
     .width_blocks = 20,
     .height_blocks = 22,
     .item_height = 16,
-    .decorate_scrollbar = 0,
     .draw_inner_panel = 1,
     .extend_to_hidden_scrollbar = 0,
+    .decorate_scrollbar = 0,
     .draw_item = draw_file,
     .on_select = select_file,
     .handle_tooltip = file_tooltip,
@@ -166,7 +169,7 @@ static int compare_modified_time(const void *va, const void *vb)
 static void sort_file_list(void)
 {
     qsort(data.filtered_file_list.files, data.filtered_file_list.num_files, sizeof(dir_entry),
-        data.sort_type == SORT_BY_NAME ? compare_name : compare_modified_time);
+        data.sort_type == FILE_DIALOG_SORT_BY_NAME ? compare_name : compare_modified_time);
 }
 
 static void init_filtered_file_list(void)
@@ -177,7 +180,7 @@ static void init_filtered_file_list(void)
         data.filtered_file_list.files = 0;
         data.filtered_file_list.num_files = 0;
     }
-    data.filtered_file_list.files = malloc(sizeof(dir_entry) * data.file_list->num_files);
+    data.filtered_file_list.files = static_cast<dir_entry *>(malloc(sizeof(dir_entry) * data.file_list->num_files));
     if (!data.filtered_file_list.files) {
         return;
     }
@@ -287,12 +290,14 @@ static void init(file_type type, file_dialog_type dialog_type)
         main_input.text_length = FILE_NAME_MAX;
         main_input.width_blocks = 38;
         main_input.put_clear_button_outside_box = 0;
+        main_input.font = FONT_NORMAL_BLACK;
     } else {
         main_input.placeholder = lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_FILTER);
         main_input.text = data.filter_text;
         main_input.text_length = FILTER_TEXT_SIZE;
         main_input.width_blocks = 18;
         main_input.put_clear_button_outside_box = 1;
+        main_input.font = FONT_NORMAL_WHITE;
     }
 
     input_box_start(&main_input);
@@ -340,6 +345,28 @@ static void draw_mission_info(int x_offset, int y_offset, int box_size)
     text_draw_ellipsized(text, x_offset, y_offset, box_size, FONT_NORMAL_BLACK, 0);
 }
 
+static void draw_sort_button(void)
+{
+    button_border_draw(
+        sort_by_button[0].x,
+        sort_by_button[0].y,
+        sort_by_button[0].width,
+        sort_by_button[0].height,
+        data.sort_by_button_focused
+    );
+
+    int sort_translation = TR_SAVE_DIALOG_SORTING_BY_NAME + data.sort_type;
+    int sort_button_text_y = sort_by_button[0].y + sort_by_button[0].height / 2 - 5;
+    lang_text_draw_centered(
+        CUSTOM_TRANSLATION,
+        sort_translation,
+        sort_by_button[0].x,
+        sort_button_text_y,
+        sort_by_button[0].width,
+        FONT_NORMAL_BLACK
+    );
+}
+
 static void draw_background(void)
 {
     window_draw_underlying_window();
@@ -347,9 +374,11 @@ static void draw_background(void)
         const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
         if (filename && data.type != FILE_TYPE_EMPIRE_IMAGE) {
             if (data.type == FILE_TYPE_SAVED_GAME) {
-                data.savegame_info_status = game_file_io_read_saved_game_info(filename, 0, &data.info);
+                data.savegame_info_status = static_cast<savegame_load_status>(
+                    game_file_io_read_saved_game_info(filename, 0, &data.info));
             } else {
-                data.savegame_info_status = game_file_io_read_scenario_info(filename, &data.info);
+                data.savegame_info_status = static_cast<savegame_load_status>(
+                    game_file_io_read_scenario_info(filename, &data.info));
             }
         } else {
             data.savegame_info_status = SAVEGAME_STATUS_INVALID;
@@ -413,18 +442,6 @@ static void draw_foreground(void)
         }
         // Proceed? text
         lang_text_draw_right_aligned(43, 5, 362, 447, 164, FONT_NORMAL_BLACK);
-
-        // Sorting text
-        int sort_translation = TR_SAVE_DIALOG_SORTING_BY_NAME + data.sort_type;
-        int sort_button_text_y = sort_by_button[0].y + sort_by_button[0].height / 2 - 5;
-        lang_text_draw_centered(
-            CUSTOM_TRANSLATION,
-            sort_translation,
-            sort_by_button[0].x,
-            sort_button_text_y,
-            sort_by_button[0].width,
-            FONT_NORMAL_BLACK
-        );
 
         // Saved game info
         if (*data.selected_file && data.type != FILE_TYPE_EMPIRE && data.type != FILE_TYPE_SCENARIO_EVENTS &&
@@ -490,13 +507,7 @@ static void draw_foreground(void)
     }
     list_box_draw(&list_box);
     input_box_draw(&main_input);
-    button_border_draw(
-        sort_by_button[0].x,
-        sort_by_button[0].y,
-        sort_by_button[0].width,
-        sort_by_button[0].height,
-        data.sort_by_button_focused
-    );
+    draw_sort_button();
     image_buttons_draw(0, 0, image_buttons, 2);
     graphics_reset_dialog();
 }
@@ -746,7 +757,7 @@ static void button_ok_cancel(int is_ok, int param2)
                 return;
             }
         } else if (data.type == FILE_TYPE_EMPIRE_IMAGE) {
-            int result = filename && file_exists(filename, MAY_BE_LOCALIZED);
+            int result = (filename != 0) && (file_exists(filename, MAY_BE_LOCALIZED) != 0);
             if (result) {
                 if (image_get(assets_get_external_image(filename, 1))->width < 1440) {
                     window_popup_dialog_show_confirmation(translation_for(TR_EDITOR_IMAGE_TO_SMALL),
@@ -787,10 +798,10 @@ static void button_ok_cancel(int is_ok, int param2)
 
 static void button_toggle_sort_type(const generic_button *button)
 {
-    if (data.sort_type == SORT_BY_NAME) {
-        data.sort_type = SORT_BY_DATE;
+    if (data.sort_type == FILE_DIALOG_SORT_BY_NAME) {
+        data.sort_type = FILE_DIALOG_SORT_BY_DATE;
     } else {
-        data.sort_type = SORT_BY_NAME;
+        data.sort_type = FILE_DIALOG_SORT_BY_NAME;
     }
     sort_file_list();
     select_correct_index();
