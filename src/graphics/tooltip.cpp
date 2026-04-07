@@ -8,6 +8,7 @@ extern "C" {
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/lang.h"
+#include "core/log.h"
 #include "core/string.h"
 #include "core/time.h"
 #include "game/cheats.h"
@@ -30,6 +31,7 @@ extern "C" {
 #include "window/advisors.h"
 }
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #define COMPOSED_TOOLTIP_TEXT_MAX 1000
@@ -156,9 +158,50 @@ static void save_tooltip_text(const uint8_t *text)
     last_tooltip_text[length] = '\0';
 }
 
+static void log_empty_button_tooltip(const tooltip_context *c)
+{
+    char detail[256];
+    snprintf(detail, sizeof(detail),
+        "window=%d domain=%d text_group=%d text_id=%d translation=%d mouse=(%d,%d)",
+        window_get_id(),
+        c->domain,
+        c->text_group,
+        c->text_id,
+        c->translation_key,
+        c->mouse_x,
+        c->mouse_y);
+    log_error("Button tooltip resolved to no text", detail, 0);
+}
+
+static void log_tooltip_creation_failure(
+    const char *tooltip_kind,
+    const tooltip_context *c,
+    render_domain domain,
+    int width,
+    int height)
+{
+    char detail[256];
+    snprintf(detail, sizeof(detail),
+        "kind=%s window=%d domain=%d size=%dx%d mouse=(%d,%d)",
+        tooltip_kind ? tooltip_kind : "unknown",
+        window_get_id(),
+        domain,
+        width,
+        height,
+        c->mouse_x,
+        c->mouse_y);
+    log_error("Tooltip render target creation failed", detail, 0);
+}
+
 static void draw_button_tooltip(tooltip_context *c)
 {
     const uint8_t *text = get_tooltip_text(c);
+    if (!text || !*text) {
+        save_tooltip_text(0);
+        log_empty_button_tooltip(c);
+        return;
+    }
+
     int width = 200;
     int largest_width;
     int lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
@@ -244,6 +287,7 @@ static void draw_button_tooltip(tooltip_context *c)
 
     if (!graphics_renderer()->start_tooltip_creation_for_domain(c->domain, width, height)) {
         save_tooltip_text(0);
+        log_tooltip_creation_failure("button", c, c->domain, width, height);
         return;
     }
 
@@ -295,6 +339,7 @@ static void draw_overlay_tooltip(tooltip_context *c)
 
     if (!graphics_renderer()->start_tooltip_creation_for_domain(domain, width, height)) {
         save_tooltip_text(0);
+        log_tooltip_creation_failure("overlay", c, domain, width, height);
         return;
     }
 
@@ -370,6 +415,7 @@ static void draw_senate_tooltip(tooltip_context *c)
 
     if (!graphics_renderer()->start_tooltip_creation_for_domain(domain, width, height)) {
         save_tooltip_text(0);
+        log_tooltip_creation_failure("senate", c, domain, width, height);
         return;
     }
 
@@ -482,6 +528,7 @@ static void draw_tile_tooltip(tooltip_context *c)
         }
 
         if (!graphics_renderer()->start_tooltip_creation_for_domain(domain, width, height)) {
+            log_tooltip_creation_failure("tile", c, domain, width, height);
             return;
         }
 

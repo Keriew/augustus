@@ -1,6 +1,9 @@
 #include "graphics/ui_primitives.h"
 
 #include "assets/assets.h"
+#include "core/log.h"
+
+#include <stdio.h>
 
 namespace {
 
@@ -41,6 +44,7 @@ const image *UiPrimitives::resolve_image(int image_id) const
 
     const image *img = image_get(image_id);
     if (!img) {
+        log_error("Widget image id could not be resolved", 0, image_id);
         return 0;
     }
 
@@ -98,7 +102,17 @@ int UiPrimitives::image_id_from_asset_names(std::string_view assetlist_name, std
     if (assetlist_name.empty() || image_name.empty()) {
         return 0;
     }
-    return assets_get_image_id(assetlist_name.data(), image_name.data());
+
+    const int image_id = assets_get_image_id(assetlist_name.data(), image_name.data());
+    if (!image_id) {
+        char detail[256];
+        snprintf(detail, sizeof(detail),
+            "asset=%.*s image=%.*s",
+            static_cast<int>(assetlist_name.size()), assetlist_name.data(),
+            static_cast<int>(image_name.size()), image_name.data());
+        log_error("Widget asset image could not be resolved", detail, 0);
+    }
+    return image_id;
 }
 
 int UiPrimitives::save_region(int image_id, int x, int y, int width, int height) const

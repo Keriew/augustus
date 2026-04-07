@@ -3,6 +3,10 @@
 
 #include "graphics/weather.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int window_city_military_is_cursor_in_menu(void);
 
 void window_city_draw_all(void);
@@ -19,5 +23,9 @@ void window_city_return(void);
 /** @brief collective check to see if the current window is any of the city view windows */
 int window_city_is_window_cityview(void);
 void window_city_draw_custom_variables_text_display(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WINDOW_CITY_H

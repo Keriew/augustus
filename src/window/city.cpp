@@ -1,3 +1,4 @@
+extern "C" {
 #include "city.h"
 
 #include "building/clone.h"
@@ -52,6 +53,7 @@
 #include "window/file_dialog.h"
 #include "window/message_list.h"
 #include "window/overlay_menu.h"
+}
 
 #define TOPLEFT_MESSAGES_X 5
 #define TOPLEFT_MESSAGES_Y_SPACING 24
@@ -127,12 +129,12 @@ static int find_index(const uint8_t *string, char search)
     return -1;
 }
 
-static int is_same_mapping(const hotkey_mapping *current, const hotkey_mapping *new)
+static int is_same_mapping(const hotkey_mapping *current, const hotkey_mapping *candidate)
 {
-    if (!new) {
+    if (!candidate) {
         return current->key == KEY_TYPE_NONE;
     }
-    return current->key == new->key && current->modifiers == new->modifiers;
+    return current->key == candidate->key && current->modifiers == candidate->modifiers;
 }
 
 static const uint8_t *get_paused_text(void)
@@ -676,6 +678,17 @@ static int has_storage_orders(building_type type)
         (type == BUILDING_LARGE_TEMPLE_VENUS && building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE));
 }
 
+static int tooltip_has_widget_payload(const tooltip_context *c)
+{
+    return c->type != TOOLTIP_NONE
+        || c->text_id != 0
+        || c->translation_key != 0
+        || c->precomposed_text != 0
+        || c->has_numeric_prefix
+        || c->num_extra_values > 0
+        || c->num_extra_texts > 0;
+}
+
 static void cycle_legion(void)
 {
     static int current_legion_id = 0;
@@ -743,7 +756,7 @@ static void handle_hotkeys(const hotkeys *h)
         window_invalidate();
     }
     if (h->show_advisor) {
-        window_advisors_show_advisor(h->show_advisor);
+        window_advisors_show_advisor(static_cast<advisor_type>(h->show_advisor));
     }
     if (h->cycle_legion) {
         cycle_legion();
@@ -787,7 +800,7 @@ static void handle_hotkeys(const hotkeys *h)
         building_rotation_rotate_backward();
     }
     if (h->building) {
-        set_construction_building_type(h->building, 0);
+        set_construction_building_type(static_cast<building_type>(h->building), 0);
     }
     if (h->undo) {
         game_undo_perform();
@@ -879,16 +892,20 @@ static void handle_input_military(const mouse *m, const hotkeys *h)
 static void get_tooltip(tooltip_context *c)
 {
     int text_id = widget_top_menu_get_tooltip_text(c);
-    if (!text_id) {
+    if (!text_id && !tooltip_has_widget_payload(c)) {
         if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && formation_get_selected()) {
             text_id = widget_sidebar_military_get_tooltip_text(c);
         } else {
             text_id = widget_sidebar_city_get_tooltip_text(c);
         }
     }
-    if (text_id || c->translation_key) {
-        c->type = TOOLTIP_BUTTON;
-        c->text_id = text_id;
+    if (text_id || tooltip_has_widget_payload(c)) {
+        if (c->type == TOOLTIP_NONE) {
+            c->type = TOOLTIP_BUTTON;
+        }
+        if (text_id) {
+            c->text_id = text_id;
+        }
         return;
     }
     const mouse *m_pixel = mouse_get_pixel();

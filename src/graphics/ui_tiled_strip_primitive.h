@@ -15,7 +15,8 @@ public:
         int segment_count,
         int logical_tile_width,
         int logical_tile_height,
-        color_t color = COLOR_MASK_NONE);
+        color_t color = COLOR_MASK_NONE,
+        int middle_pattern_length = 1);
 
     void draw() const;
 
@@ -32,6 +33,7 @@ private:
     int logical_tile_width_;
     int logical_tile_height_;
     color_t color_;
+    int middle_pattern_length_;
 };
 
 #endif // GRAPHICS_UI_TILED_STRIP_PRIMITIVE_H

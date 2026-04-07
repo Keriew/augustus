@@ -10,7 +10,8 @@ UiTiledStripPrimitive::UiTiledStripPrimitive(
     int segment_count,
     int logical_tile_width,
     int logical_tile_height,
-    color_t color)
+    color_t color,
+    int middle_pattern_length)
     : UiPrimitive(primitives)
     , start_image_id_(start_image_id)
     , middle_image_id_(middle_image_id)
@@ -21,6 +22,7 @@ UiTiledStripPrimitive::UiTiledStripPrimitive(
     , logical_tile_width_(logical_tile_width)
     , logical_tile_height_(logical_tile_height)
     , color_(color)
+    , middle_pattern_length_(middle_pattern_length > 0 ? middle_pattern_length : 1)
 {
 }
 
@@ -60,6 +62,8 @@ void UiTiledStripPrimitive::draw() const
             image_id = start_image_id_;
         } else if (i == segment_count_ - 1) {
             image_id = end_image_id_;
+        } else if (middle_pattern_length_ > 1) {
+            image_id = middle_image_id_ + ((i - 1) % middle_pattern_length_);
         }
 
         primitives_.draw_image_rect(

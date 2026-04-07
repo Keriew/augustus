@@ -438,7 +438,7 @@
     <ClCompile Include="src\window\building_info.c" />
     <ClCompile Include="src\window\build_menu.cpp" />
     <ClCompile Include="src\window\cck_selection.c" />
-    <ClCompile Include="src\window\city.c" />
+    <ClCompile Include="src\window\city.cpp" />
     <ClCompile Include="src\window\config.c" />
     <ClCompile Include="src\window\console.c" />
     <ClCompile Include="src\window\donate_to_city.c" />
