@@ -1,5 +1,7 @@
 #include "tooltip.h"
 
+#include "core/crash_context.h"
+
 extern "C" {
 #include "building/building.h"
 #include "city/labor.h"
@@ -8,7 +10,6 @@ extern "C" {
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/lang.h"
-#include "core/log.h"
 #include "core/string.h"
 #include "core/time.h"
 #include "game/cheats.h"
@@ -170,7 +171,7 @@ static void log_empty_button_tooltip(const tooltip_context *c)
         c->translation_key,
         c->mouse_x,
         c->mouse_y);
-    log_error("Button tooltip resolved to no text", detail, 0);
+    error_context_report_error("Button tooltip resolved to no text", detail);
 }
 
 static void log_tooltip_creation_failure(
@@ -190,7 +191,7 @@ static void log_tooltip_creation_failure(
         height,
         c->mouse_x,
         c->mouse_y);
-    log_error("Tooltip render target creation failed", detail, 0);
+    error_context_report_error("Tooltip render target creation failed", detail);
 }
 
 static void draw_button_tooltip(tooltip_context *c)
