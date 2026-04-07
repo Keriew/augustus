@@ -2,7 +2,7 @@
 #define CORE_XML_PARSER_H
 
 #define XML_PARSER_MAX_ATTRIBUTES 13
-#define XML_PARSER_TAG_MAX_LENGTH 12
+#define XML_PARSER_TAG_MAX_LENGTH 32
 
 /*
  * @brief A structure that holds info about a xml element.

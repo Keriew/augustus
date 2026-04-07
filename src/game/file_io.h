@@ -4,6 +4,10 @@
 #include "core/buffer.h"
 #include "scenario/data.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     SAVEGAME_FROM_CUSTOM_SCENARIO = 0,
     SAVEGAME_FROM_ORIGINAL_CAMPAIGN = 1,
@@ -60,5 +64,9 @@ int game_file_io_last_loaded_save_has_mod_mismatch(void);
 const char *game_file_io_last_loaded_save_mod_name(void);
 
 const char *game_file_io_last_loaded_active_mod_name(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GAME_FILE_IO_H

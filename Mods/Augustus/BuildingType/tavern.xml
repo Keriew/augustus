@@ -24,4 +24,7 @@
             <image value="Tavern ON" />
         </variant>
     </graphics>
+    <labor>
+        <employees count="8" />
+    </labor>
 </building>

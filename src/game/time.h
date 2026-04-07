@@ -3,16 +3,19 @@
 
 #include "core/buffer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file
  * Game time.
  * One year has 12 months.
- * One month has 16 days.
- * One day has 50 ticks.
  */
-#define GAME_TIME_TICKS_PER_DAY 50
-#define GAME_TIME_DAYS_PER_MONTH 16
 #define GAME_TIME_MONTHS_PER_YEAR 12
+#define GAME_TIME_LEGACY_DAYS_PER_MONTH 16
+#define GAME_TIME_TICKS_PER_DAY (game_time_ticks_per_day())
+#define GAME_TIME_DAYS_PER_MONTH (game_time_days_in_month(game_time_month()))
 
 /**
  * Initializes game time to the given year with all other fields zero
@@ -40,6 +43,15 @@ int game_time_day(void);
  * The current game tick within the day
  */
 int game_time_tick(void);
+
+int game_time_ticks_per_day(void);
+int game_time_days_in_month(int month);
+int game_time_days_in_current_month(void);
+int game_time_days_per_year(void);
+int game_time_ticks_per_month(int month);
+int game_time_ticks_per_year(void);
+int game_time_is_last_day_of_month(void);
+int game_time_is_last_day_of_year(void);
 
 /**
  * Increases tick
@@ -80,5 +92,9 @@ void game_time_save_state(buffer *buf);
 void game_time_load_state(buffer *buf);
 
 void game_time_load_basic_info(buffer *buf, int *month, int *year);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GAME_TIME_H

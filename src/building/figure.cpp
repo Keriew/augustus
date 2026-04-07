@@ -4,14 +4,11 @@ extern "C" {
 #include "building/figure.h"
 
 #include "assets/assets.h"
-#include "building/armoury.h"
 #include "building/barracks.h"
 #include "building/building_runtime_api.h"
-#include "building/caravanserai.h"
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
-#include "building/lighthouse.h"
 #include "building/market.h"
 #include "building/mess_hall.h"
 #include "building/monument.h"
@@ -721,48 +718,6 @@ static void spawn_figure_market(building *b)
     }
 }
 
-static void spawn_caravanserai_supplier(building *b, int x, int y)
-{
-    if (b->figure_id) {
-        figure *f = figure_get(b->figure_id);
-        if (f->state != FIGURE_STATE_ALIVE ||
-            (f->type != FIGURE_CARAVANSERAI_SUPPLIER && f->type != FIGURE_LABOR_SEEKER)) {
-            b->figure_id = 0;
-        }
-        return;
-    }
-    int dst_building_id = building_caravanserai_get_storage_destination(b);
-    if (dst_building_id == 0) {
-        return;
-    }
-    figure *f = figure_create(FIGURE_CARAVANSERAI_SUPPLIER, x, y, DIR_0_TOP);
-    f->building_id = b->id;
-    b->figure_id = f->id;
-    f->collecting_item_id = b->data.market.fetch_inventory_id;
-    send_supplier_to_destination(f, dst_building_id);
-}
-
-static void spawn_lighthouse_supplier(building *b, int x, int y)
-{
-    if (b->figure_id) {
-        figure *f = figure_get(b->figure_id);
-        if (f->state != FIGURE_STATE_ALIVE ||
-            (f->type != FIGURE_LIGHTHOUSE_SUPPLIER && f->type != FIGURE_LABOR_SEEKER)) {
-            b->figure_id = 0;
-        }
-        return;
-    }
-    int dst_building_id = building_lighthouse_get_storage_destination(b);
-    if (dst_building_id == 0) {
-        return;
-    }
-    figure *f = figure_create(FIGURE_LIGHTHOUSE_SUPPLIER, x, y, DIR_0_TOP);
-    f->building_id = b->id;
-    b->figure_id = f->id;
-    f->collecting_item_id = RESOURCE_TIMBER; // Raw Resource
-    send_supplier_to_destination(f, dst_building_id);
-}
-
 static void spawn_figure_grand_temple_mars(building *b)
 {
     check_labor_problem(b);
@@ -1255,32 +1210,6 @@ static void spawn_figure_military_academy(building *b)
     }
 }
 
-static void spawn_figure_architect_guild(building *b)
-{
-    check_labor_problem(b);
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 100);
-        if (has_figure_of_type(b, FIGURE_WORK_CAMP_ARCHITECT)) {
-            return;
-        }
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            if (building_monument_get_monument(road.x, road.y, RESOURCE_NONE, b->road_network_id, 0)) {
-                figure *f = figure_create(FIGURE_WORK_CAMP_ARCHITECT, road.x, road.y, DIR_4_BOTTOM);
-                f->action_state = FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED;
-                b->figure_id = f->id;
-                f->building_id = b->id;
-            }
-        }
-    }
-}
-
 static void spawn_figure_fort_supplier(building *fort)
 {
     building *supply_post = building_get(city_buildings_get_mess_hall());
@@ -1360,91 +1289,6 @@ static void spawn_figure_mess_hall(building *b)
     }
 }
 
-static void spawn_figure_caravanserai(building *b)
-{
-    check_labor_problem(b);
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 100);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            spawn_caravanserai_supplier(b, road.x, road.y);
-        }
-    }
-}
-
-static void spawn_figure_lighthouse(building *b)
-{
-    check_labor_problem(b);
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 100);
-        int spawn_delay = default_spawn_delay(b);
-        if (!spawn_delay) {
-            return;
-        }
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            spawn_lighthouse_supplier(b, road.x, road.y);
-        }
-    }
-}
-
-static void spawn_figure_watchtower(building *b)
-{
-    check_labor_problem(b);
-    if (b->figure_id || b->figure_id2) {
-        return;
-    }
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 100);
-        int pct_workers = worker_percentage(b);
-        int spawn_delay;
-
-        if (!b->figure_id4) { // Don't spawn watchmen until they get sentry from the barracks
-            return;
-        }
-
-        if (pct_workers >= 100) {
-            spawn_delay = 10;
-        } else if (pct_workers >= 75) {
-            spawn_delay = 20;
-        } else if (pct_workers >= 50) {
-            spawn_delay = 30;
-        } else if (pct_workers >= 25) {
-            spawn_delay = 40;
-        } else if (pct_workers >= 1) {
-            spawn_delay = 60;
-        } else {
-            return;
-        }
-
-        if (b->figure_id2) {
-            return;
-        }
-
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_220_WATCHMAN_PATROL_INITIATE;
-            f->building_id = b->id;
-            b->figure_id = f->id;
-            f = figure_create(FIGURE_WATCHMAN, road.x, road.y, DIR_0_TOP);
-            f->action_state = FIGURE_ACTION_220_WATCHMAN_PATROL_INITIATE;
-            f->building_id = b->id;
-            b->figure_id2 = f->id;
-        }
-    }
-}
-
 static void spawn_figure_depot(building *b)
 {
     check_labor_problem(b);
@@ -1493,62 +1337,6 @@ static void spawn_figure_depot(building *b)
                     b->data.distribution.cartpusher_ids[i] = f->id;
                     break;
                 }
-            }
-        }
-    }
-}
-
-static void spawn_figure_armoury(building *b)
-{
-    check_labor_problem(b);
-
-    map_point road;
-    if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        spawn_labor_seeker(b, road.x, road.y, 50);
-        int pct_workers = worker_percentage(b);
-        int spawn_delay;
-        int carts_available = 1;
-        if (pct_workers >= 100) {
-            spawn_delay = 3;
-            carts_available = 2;
-        } else if (pct_workers >= 75) {
-            spawn_delay = 8;
-        } else if (pct_workers >= 50) {
-            spawn_delay = 16;
-        } else if (pct_workers >= 25) {
-            spawn_delay = 24;
-        } else if (pct_workers >= 1) {
-            spawn_delay = 48;
-        } else {
-            return;
-        }
-
-        if (b->figure_id && carts_available == 1) {
-            return;
-        }
-
-        if (b->figure_id && b->figure_id4) {
-            return;
-        }
-
-        int figure_id_to_use = 1;
-        if (b->figure_id) {
-            figure_id_to_use = 4;
-        }
-
-        b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > spawn_delay) {
-            b->figure_spawn_delay = 0;
-            if (building_armoury_is_needed(b)) {
-                figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
-                f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
-                f->collecting_item_id = RESOURCE_WEAPONS;
-                if (figure_id_to_use == 1) {
-                    b->figure_id = f->id;
-                } else {
-                    b->figure_id4 = f->id;
-                }
-                f->building_id = b->id;
             }
         }
     }
@@ -1693,7 +1481,7 @@ void building_figure_generate(void)
                     spawn_figure_military_academy(b);
                     break;
                 case BUILDING_ARCHITECT_GUILD:
-                    spawn_figure_architect_guild(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_MESS_HALL:
                     spawn_figure_mess_hall(b);
@@ -1709,22 +1497,22 @@ void building_figure_generate(void)
                     spawn_figure_temple(b);
                     break;
                 case BUILDING_LIGHTHOUSE:
-                    spawn_figure_lighthouse(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_TAVERN:
                     spawn_figure_tavern(b);
                     break;
                 case BUILDING_WATCHTOWER:
-                    spawn_figure_watchtower(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_CARAVANSERAI:
-                    spawn_figure_caravanserai(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_DEPOT:
                     spawn_figure_depot(b);
                     break;
                 case BUILDING_ARMOURY:
-                    spawn_figure_armoury(b);
+                    runtime_building->spawn_figure();
                     break;
             }
         }

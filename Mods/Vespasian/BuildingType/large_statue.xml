@@ -13,4 +13,7 @@
             <image value="l statue anim" />
         </variant>
     </graphics>
+    <labor>
+        <employees count="0" />
+    </labor>
 </building>

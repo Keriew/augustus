@@ -1,10 +1,12 @@
 #include "scenario_event_details.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
 #include "editor/editor.h"
+#include "game/time.h"
 #include "graphics/ui_runtime_api.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -26,6 +28,7 @@
 #include "window/numeric_input.h"
 #include "window/popup_dialog.h"
 #include "window/select_list.h"
+}
 
 #define BUTTON_LEFT_PADDING 32
 #define BUTTON_WIDTH 608
@@ -88,6 +91,9 @@ static void click_action_button(const grid_box_item *item);
 static void handle_condition_tooltip(const grid_box_item *item, tooltip_context *c);
 static void handle_action_tooltip(const grid_box_item *item, tooltip_context *c);
 
+static grid_box_type make_conditions_grid_box(void);
+static grid_box_type make_actions_grid_box(void);
+
 static void button_select_all_none(const generic_button *button);
 static int convert_display_to_days(int display);
 static int convert_days_to_display(int days);
@@ -132,35 +138,8 @@ static input_box event_name_input = {
     100, 40, 32, 2, FONT_NORMAL_WHITE, 1, data.event_name, EVENT_NAME_LENGTH
 };
 
-static grid_box_type conditions_grid_box = {
-    .x = 16,
-    .y = 188,
-    .width = 18 * BLOCK_SIZE,
-    .height = 13 * BLOCK_SIZE + 2,
-    .num_columns = 1,
-    .item_height = 30,
-    .item_margin.horizontal = 10,
-    .item_margin.vertical = 4,
-    .extend_to_hidden_scrollbar = 1,
-    .draw_item = draw_condition_button,
-    .on_click = click_condition_button,
-    .handle_tooltip = handle_condition_tooltip
-};
-
-static grid_box_type actions_grid_box = {
-    .x = 320,
-    .y = 188,
-    .width = 18 * BLOCK_SIZE,
-    .height = 13 * BLOCK_SIZE + 2,
-    .num_columns = 1,
-    .item_height = 30,
-    .item_margin.horizontal = 10,
-    .item_margin.vertical = 4,
-    .extend_to_hidden_scrollbar = 1,
-    .draw_item = draw_action_button,
-    .on_click = click_action_button,
-    .handle_tooltip = handle_action_tooltip
-};
+static grid_box_type conditions_grid_box = make_conditions_grid_box();
+static grid_box_type actions_grid_box = make_actions_grid_box();
 
 #define NUM_TOP_BUTTONS (sizeof(top_buttons) / sizeof(generic_button))
 
@@ -191,6 +170,40 @@ static generic_button bottom_buttons[] = {
     {524, 439, 100, 25, button_ok},
 };
 
+static grid_box_type make_conditions_grid_box(void)
+{
+    grid_box_type box = {};
+    box.x = 16;
+    box.y = 188;
+    box.width = 18 * BLOCK_SIZE;
+    box.height = 13 * BLOCK_SIZE + 2;
+    box.num_columns = 1;
+    box.item_height = 30;
+    box.item_margin = { 10, 4 };
+    box.extend_to_hidden_scrollbar = 1;
+    box.draw_item = draw_condition_button;
+    box.on_click = click_condition_button;
+    box.handle_tooltip = handle_condition_tooltip;
+    return box;
+}
+
+static grid_box_type make_actions_grid_box(void)
+{
+    grid_box_type box = {};
+    box.x = 320;
+    box.y = 188;
+    box.width = 18 * BLOCK_SIZE;
+    box.height = 13 * BLOCK_SIZE + 2;
+    box.num_columns = 1;
+    box.item_height = 30;
+    box.item_margin = { 10, 4 };
+    box.extend_to_hidden_scrollbar = 1;
+    box.draw_item = draw_action_button;
+    box.on_click = click_action_button;
+    box.handle_tooltip = handle_action_tooltip;
+    return box;
+}
+
 static unsigned int count_maximum_needed_list_items(void)
 {
     unsigned int total_items = 0;
@@ -210,8 +223,8 @@ static void update_visible_conditions_and_actions(void)
     if (max_needed_items > data.conditions.available) {
         free(data.conditions.list);
         free(data.conditions.selected);
-        data.conditions.list = calloc(max_needed_items, sizeof(condition_list_item));
-        data.conditions.selected = calloc(max_needed_items, sizeof(uint8_t));
+        data.conditions.list = (condition_list_item *) calloc(max_needed_items, sizeof(condition_list_item));
+        data.conditions.selected = (uint8_t *) calloc(max_needed_items, sizeof(uint8_t));
 
         if (!data.conditions.list) {
             log_error("Unable to create conditions list - out of memory. The game will probably crash.", 0, 0);
@@ -259,8 +272,8 @@ static void update_visible_conditions_and_actions(void)
     if (data.event->actions.size > data.actions.available) {
         free(data.actions.list);
         free(data.actions.selected);
-        data.actions.list = calloc(data.event->actions.size, sizeof(scenario_action_t *));
-        data.actions.selected = calloc(data.event->actions.size, sizeof(uint8_t));
+        data.actions.list = (scenario_action_t **) calloc(data.event->actions.size, sizeof(scenario_action_t *));
+        data.actions.selected = (uint8_t *) calloc(data.event->actions.size, sizeof(uint8_t));
 
         if (!data.actions.list) {
             log_error("Unable to create actions list - out of memory. The game will probably crash.", 0, 0);
@@ -289,7 +302,7 @@ static void update_groups(void)
         free(data.conditions.groups.names[i]);
     }
     free(data.conditions.groups.names);
-    data.conditions.groups.names = calloc(data.event->condition_groups.size + 1, sizeof(uint8_t *));
+    data.conditions.groups.names = (uint8_t **) calloc(data.event->condition_groups.size + 1, sizeof(uint8_t *));
     if (!data.conditions.groups.names) {
         log_error("Unable to create groups list - out of memory. The game will probably crash.", 0, 0);
         data.conditions.groups.available = 0;
@@ -298,20 +311,20 @@ static void update_groups(void)
     data.conditions.groups.available = data.event->condition_groups.size + 1;
     const uint8_t *text = translation_for(TR_EDITOR_SCENARIO_EVENTS_NO_GROUP);
     int length = string_length(text) + 1;
-    data.conditions.groups.names[0] = calloc(length, sizeof(uint8_t *));
+    data.conditions.groups.names[0] = (uint8_t *) calloc(length, sizeof(uint8_t));
     string_copy(text, data.conditions.groups.names[0], length);
 
     for (unsigned int i = 1; i < data.event->condition_groups.size; i++) {
         text = translation_for(TR_EDITOR_SCENARIO_EVENTS_GROUP);
         length = string_length(text) + 11;
-        data.conditions.groups.names[i] = calloc(length, sizeof(uint8_t *));
+        data.conditions.groups.names[i] = (uint8_t *) calloc(length, sizeof(uint8_t));
         uint8_t *cursor = string_copy(text, data.conditions.groups.names[i], length);
         string_from_int(cursor, i, 0);
     }
 
     text = translation_for(TR_EDITOR_SCENARIO_EVENTS_NEW_GROUP);
     length = string_length(text) + 1;
-    data.conditions.groups.names[data.event->condition_groups.size] = calloc(length, sizeof(uint8_t *));
+    data.conditions.groups.names[data.event->condition_groups.size] = (uint8_t *) calloc(length, sizeof(uint8_t));
     string_copy(text, data.conditions.groups.names[data.event->condition_groups.size], length);
 }
 
@@ -425,7 +438,7 @@ static void draw_background(void)
 
     // Helper debug text during city mode
     if (!editor_is_active()) {
-        text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED + data.event->state),
+        text_draw_centered(translation_for((translation_key) (TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED + data.event->state)),
             420, 40, 80, FONT_NORMAL_GREEN, color_from_state(data.event->state));
         text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENT_EXECUTION_COUNT),
             data.event->execution_count, "", 40, 72, FONT_NORMAL_PLAIN, COLOR_BLACK);
@@ -576,8 +589,9 @@ static void draw_condition_button(const grid_box_item *item)
         return;
     }
     int selection_button_y_offset = (item->height - 20) / 2;
+    const int selection_button_has_focus = item->is_focused ? (item->mouse.x < 20 ? 1 : 0) : 0;
     button_border_draw(item->x, item->y + selection_button_y_offset, 20, 20,
-        item->is_focused && item->mouse.x < 20);
+        selection_button_has_focus);
 
     if (data.conditions.selected && data.conditions.selected[item->index]) {
         int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
@@ -586,7 +600,8 @@ static void draw_condition_button(const grid_box_item *item)
             item->y + selection_button_y_offset + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    button_border_draw(item->x + 24, item->y, item->width - 24, item->height, item->is_focused && item->mouse.x >= 24);
+    const int label_button_has_focus = item->is_focused ? (item->mouse.x >= 24 ? 1 : 0) : 0;
+    button_border_draw(item->x + 24, item->y, item->width - 24, item->height, label_button_has_focus);
 
     const scenario_condition_t *condition = data.conditions.list[item->index].condition;
     uint8_t text[MAX_TEXT_LENGTH];
@@ -601,8 +616,9 @@ static void draw_condition_button(const grid_box_item *item)
 static void draw_action_button(const grid_box_item *item)
 {
     int selection_button_y_offset = (item->height - 20) / 2;
+    const int selection_button_has_focus = item->is_focused ? (item->mouse.x < 20 ? 1 : 0) : 0;
     button_border_draw(item->x, item->y + selection_button_y_offset, 20, 20,
-        item->is_focused && item->mouse.x < 20);
+        selection_button_has_focus);
 
     if (data.actions.selected && data.actions.selected[item->index]) {
         int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
@@ -611,7 +627,8 @@ static void draw_action_button(const grid_box_item *item)
             item->y + selection_button_y_offset + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    button_border_draw(item->x + 24, item->y, item->width - 24, item->height, item->is_focused && item->mouse.x >= 24);
+    const int label_button_has_focus = item->is_focused ? (item->mouse.x >= 24 ? 1 : 0) : 0;
+    button_border_draw(item->x + 24, item->y, item->width - 24, item->height, label_button_has_focus);
     const scenario_action_t *action = data.actions.list[item->index];
     uint8_t text[MAX_TEXT_LENGTH];
     scenario_events_parameter_data_get_display_string_for_action(action, text, MAX_TEXT_LENGTH);
@@ -723,9 +740,20 @@ static void button_repeat_times(const generic_button *button)
 static int convert_days_to_display(int days)
 {
     if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
-        return days / 16;
+        if (days <= 0) {
+            return 0;
+        }
+
+        int display = 0;
+        int remaining_days = days;
+        while (remaining_days >= game_time_days_in_month(display % GAME_TIME_MONTHS_PER_YEAR)) {
+            remaining_days -= game_time_days_in_month(display % GAME_TIME_MONTHS_PER_YEAR);
+            display++;
+        }
+        return display;
     } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
-        return days / 16 / 12;
+        const int days_per_year = game_time_days_per_year();
+        return days_per_year > 0 ? days / days_per_year : 0;
     } else {
         return days;
     }
@@ -734,9 +762,13 @@ static int convert_days_to_display(int days)
 static int convert_display_to_days(int display)
 {
     if (data.event->repeat_interval == REPEAT_INTERVAL_MONTHS) {
-        return display * 16;
+        int days = 0;
+        for (int i = 0; i < display; i++) {
+            days += game_time_days_in_month(i % GAME_TIME_MONTHS_PER_YEAR);
+        }
+        return days;
     } else if (data.event->repeat_interval == REPEAT_INTERVAL_YEARS) {
-        return display * 16 * 12;
+        return display * game_time_days_per_year();
     } else {
         return display;
     }

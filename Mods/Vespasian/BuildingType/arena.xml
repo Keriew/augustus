@@ -22,7 +22,10 @@
             <image value="Arena ON" />
         </variant>
     </graphics>
-    <labor labor_seeker_mode="generate_if_below" labor_min_houses="50" />
+    <labor>
+        <employees count="25" />
+        <seeker mode="generate_if_below" min_houses="50" />
+    </labor>
     <spawn_group road_access="normal" delay_bands="100:6,75:12,50:20,25:40,1:70" existing_figure="gladiator,lion_tamer">
         <spawn mode="service_roamer" spawn_figure="lion_tamer"
             action_state="entertainer_roaming" direction="top" figure_slot="primary" init_roaming="true"

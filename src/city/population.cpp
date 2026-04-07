@@ -1,28 +1,17 @@
-#include "population.h"
+#include "city/population.h"
 
+extern "C" {
 #include "building/building.h"
 #include "building/house_population.h"
 #include "city/data_private.h"
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/random.h"
+#include "game/defines.h"
+}
 
 static const int BIRTHS_PER_AGE_DECENNIUM[10] = {
     0, 3, 16, 9, 2, 0, 0, 0, 0, 0
-};
-
-static const int DEATHS_PER_HEALTH_PER_AGE_DECENNIUM[11][10] = {
-    {20, 10, 5, 10, 20, 30, 50, 85, 100, 100},
-    {15, 8, 4, 8, 16, 25, 45, 70, 90, 100},
-    {10, 6, 2, 6, 12, 20, 30, 55, 80, 90},
-    {5, 4, 0, 4, 8, 15, 25, 40, 65, 80},
-    {3, 2, 0, 2, 6, 12, 20, 30, 50, 70},
-    {2, 0, 0, 0, 4, 8, 15, 25, 40, 60},
-    {1, 0, 0, 0, 2, 6, 12, 20, 30, 50},
-    {0, 0, 0, 0, 0, 4, 8, 15, 20, 40},
-    {0, 0, 0, 0, 0, 2, 6, 10, 15, 30},
-    {0, 0, 0, 0, 0, 0, 4, 5, 10, 20},
-    {0, 0, 0, 0, 0, 0, 0, 2, 5, 10}
 };
 
 int city_population(void)
@@ -304,7 +293,7 @@ static void yearly_advance_ages_and_calculate_deaths(void)
     city_data.population.yearly_deaths = 0;
     for (int decennium = 9; decennium >= 0; decennium--) {
         int people = city_population_in_age_decennium(decennium);
-        int death_percentage = DEATHS_PER_HEALTH_PER_AGE_DECENNIUM[city_data.health.value / 10][decennium];
+        int death_percentage = game_defines_mortality_percentage(city_data.health.value / 10, decennium);
         int deaths = calc_adjust_with_percentage(people, death_percentage);
         int removed = house_population_remove_from_city(deaths + aged100);
         remove_from_census_in_age_decennium(decennium, deaths);
@@ -370,7 +359,8 @@ static int calculate_people_per_house_type(void)
     city_data.population.people_in_tents = 0;
     city_data.population.people_in_large_insula_and_above = 0;
     int total = 0;
-    for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
+    for (int type_index = BUILDING_HOUSE_SMALL_TENT; type_index <= BUILDING_HOUSE_LUXURY_PALACE; type_index++) {
+        const building_type type = static_cast<building_type>(type_index);
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state == BUILDING_STATE_UNUSED || b->state == BUILDING_STATE_UNDO ||
                 b->state == BUILDING_STATE_DELETED_BY_GAME || b->state == BUILDING_STATE_DELETED_BY_PLAYER ||

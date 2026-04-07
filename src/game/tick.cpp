@@ -1,5 +1,6 @@
-#include "tick.h"
+#include "game/tick.h"
 
+extern "C" {
 #include "building/connectable.h"
 #include "building/count.h"
 #include "building/dock.h"
@@ -63,6 +64,7 @@
 #include "scenario/request.h"
 #include "sound/music.h"
 #include "widget/minimap.h"
+}
 
 static void advance_year(void)
 {
@@ -134,8 +136,7 @@ static void advance_day(void)
         building_lighthouse_consume_timber();
     }
     tutorial_on_day_tick();
-    if (config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE) && game_time_month() == 11 && game_time_day() == 15) {
-        // 0-based index so 11 = December, 15 = last day of the month
+    if (config_get(CONFIG_GP_CH_YEARLY_AUTOSAVE) && game_time_is_last_day_of_year()) {
         game_file_make_yearly_autosave();
     }
     scenario_events_progress_paused(1);

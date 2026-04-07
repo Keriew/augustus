@@ -22,7 +22,10 @@
             <image value="Theatre ON" />
         </variant>
     </graphics>
-    <labor labor_seeker_mode="generate_if_below" labor_min_houses="50" />
+    <labor>
+        <employees count="8" />
+        <seeker mode="generate_if_below" min_houses="50" />
+    </labor>
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="actor">
         <spawn mode="service_roamer" spawn_figure="actor"
             action_state="entertainer_roaming" direction="top" figure_slot="primary" init_roaming="true"

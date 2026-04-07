@@ -678,6 +678,22 @@ static int parse_graphics_condition()
         condition.type = GraphicsConditionType::Working;
     } else if (type_text && strcmp(type_text, "water_access") == 0) {
         condition.type = GraphicsConditionType::WaterAccess;
+    } else if (type_text && strcmp(type_text, "figure_slot_occupied") == 0) {
+        if (!xml_parser_has_attribute("slot")) {
+            log_error("BuildingType graphics figure_slot_occupied condition is missing required attribute 'slot'", 0, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+
+        const char *figure_slot_text = xml_parser_get_attribute_string("slot");
+        condition.figure_slot = parse_figure_slot(figure_slot_text);
+        if (condition.figure_slot == FigureSlot::None || (strcmp(figure_slot_text, "primary") != 0 &&
+            strcmp(figure_slot_text, "secondary") != 0 && strcmp(figure_slot_text, "quaternary") != 0)) {
+            log_error("Unsupported BuildingType graphics figure_slot_occupied slot", figure_slot_text, 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
+        condition.type = GraphicsConditionType::FigureSlotOccupied;
     } else if (type_text && strcmp(type_text, "resource_positive") == 0) {
         if (!xml_parser_has_attribute("resource")) {
             log_error("BuildingType graphics resource_positive condition is missing required attribute 'resource'", 0, 0);
@@ -763,26 +779,99 @@ static int parse_labor()
         g_parse_state.error = 1;
         return 0;
     }
-    if (!xml_parser_has_attribute("labor_seeker_mode")) {
-        log_error("BuildingType labor is missing required attribute 'labor_seeker_mode'", 0, 0);
+    if (g_parse_state.saw_labor) {
+        log_error("BuildingType xml contains duplicate labor nodes", g_parse_state.definition->attr(), 0);
         g_parse_state.error = 1;
         return 0;
     }
 
-    LaborPolicy labor_policy;
-    const char *labor_mode_text = xml_parser_get_attribute_string("labor_seeker_mode");
-    labor_policy.labor_seeker_mode = parse_labor_seeker_mode(labor_mode_text);
-    if (labor_policy.labor_seeker_mode == LaborSeekerMode::None && strcmp(labor_mode_text, "none") != 0) {
-        log_error("Unsupported BuildingType labor labor_seeker_mode", labor_mode_text, 0);
+    g_parse_state.saw_labor = 1;
+    g_parse_state.parsing_labor = 1;
+    g_parse_state.saw_labor_employees = 0;
+    g_parse_state.saw_labor_seeker = 0;
+    return 1;
+}
+
+static void finish_labor()
+{
+    if (!g_parse_state.parsing_labor) {
+        return;
+    }
+    if (!g_parse_state.saw_labor_employees && !g_parse_state.saw_labor_seeker) {
+        log_error("BuildingType labor is missing a supported child node", 0, 0);
+        g_parse_state.error = 1;
+    }
+    g_parse_state.parsing_labor = 0;
+}
+
+static int parse_labor_employees()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_labor) {
+        log_error("Encountered labor employees outside labor node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_labor_employees) {
+        log_error("BuildingType labor contains duplicate employees nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("count")) {
+        log_error("BuildingType labor employees is missing required attribute 'count'", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
 
-    if (xml_parser_has_attribute("labor_min_houses")) {
-        labor_policy.labor_min_houses = xml_parser_get_attribute_int("labor_min_houses");
+    int count = xml_parser_get_attribute_int("count");
+    if (count < 0) {
+        log_error("Unsupported BuildingType labor employees count", xml_parser_get_attribute_string("count"), 0);
+        g_parse_state.error = 1;
+        return 0;
     }
 
-    g_parse_state.definition->set_labor_policy(labor_policy);
+    g_parse_state.definition->set_labor_employee_count(count);
+    g_parse_state.saw_labor_employees = 1;
+    return 1;
+}
+
+static int parse_labor_seeker()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_labor) {
+        log_error("Encountered labor seeker outside labor node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_labor_seeker) {
+        log_error("BuildingType labor contains duplicate seeker nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("mode")) {
+        log_error("BuildingType labor seeker is missing required attribute 'mode'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    LaborSeekerPolicy labor_policy;
+    const char *labor_mode_text = xml_parser_get_attribute_string("mode");
+    labor_policy.mode = parse_labor_seeker_mode(labor_mode_text);
+    if (labor_policy.mode == LaborSeekerMode::None && strcmp(labor_mode_text, "none") != 0) {
+        log_error("Unsupported BuildingType labor seeker mode", labor_mode_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    if (xml_parser_has_attribute("min_houses")) {
+        labor_policy.min_houses = xml_parser_get_attribute_int("min_houses");
+    }
+    if (labor_policy.min_houses < 0) {
+        log_error("Unsupported BuildingType labor seeker min_houses", xml_parser_get_attribute_string("min_houses"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->set_labor_seeker_policy(labor_policy);
+    g_parse_state.saw_labor_seeker = 1;
     return 1;
 }
 
@@ -1000,7 +1089,9 @@ static const xml_parser_element XML_ELEMENTS[] = {
     { "image", parse_graphics_image, nullptr, "default|variant", nullptr },
     { "condition", parse_graphics_condition, nullptr, "variant", nullptr },
     { "water_access", parse_water_access, nullptr, "state", nullptr },
-    { "labor", parse_labor, nullptr, "building", nullptr },
+    { "labor", parse_labor, finish_labor, "building", nullptr },
+    { "employees", parse_labor_employees, nullptr, "labor", nullptr },
+    { "seeker", parse_labor_seeker, nullptr, "labor", nullptr },
     { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },
     { "spawn", parse_spawn, nullptr, "spawn_group", nullptr }
 };
@@ -1186,6 +1277,7 @@ extern "C" int building_type_registry_load(void)
         }
     }
 
+    building_type_registry_apply_model_overrides();
     building_runtime_reset();
     return 1;
 }

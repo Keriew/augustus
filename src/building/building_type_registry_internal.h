@@ -21,9 +21,13 @@ struct ParseState {
     size_t current_spawn_group_index = 0;
     int has_current_spawn_group = 0;
     int saw_graphic = 0;
+    int saw_labor = 0;
+    int saw_labor_employees = 0;
+    int saw_labor_seeker = 0;
     int saw_state = 0;
     int parsing_state = 0;
     int parsing_graphics = 0;
+    int parsing_labor = 0;
     int has_current_graphics_variant = 0;
     size_t current_graphics_variant_index = 0;
     GraphicsParseTargetScope current_graphics_target_scope = GraphicsParseTargetScope::None;

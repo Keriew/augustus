@@ -1,0 +1,19 @@
+<defines>
+  <calendar id="default" ticks_per_day="50">
+    <month_days values="31,28,31,30,31,30,31,31,30,31,30,31" />
+  </calendar>
+
+  <mortality_table id="default">
+    <health bucket="0" values="20,10,5,10,20,30,50,85,100,100" />
+    <health bucket="1" values="15,8,4,8,16,25,45,70,90,100" />
+    <health bucket="2" values="10,6,2,6,12,20,30,55,80,90" />
+    <health bucket="3" values="5,4,0,4,8,15,25,40,65,80" />
+    <health bucket="4" values="3,2,0,2,6,12,20,30,50,70" />
+    <health bucket="5" values="2,0,0,0,4,8,15,25,40,60" />
+    <health bucket="6" values="1,0,0,0,2,6,12,20,30,50" />
+    <health bucket="7" values="0,0,0,0,0,4,8,15,20,40" />
+    <health bucket="8" values="0,0,0,0,0,2,6,10,15,30" />
+    <health bucket="9" values="0,0,0,0,0,0,4,5,10,20" />
+    <health bucket="10" values="0,0,0,0,0,0,0,2,5,10" />
+  </mortality_table>
+</defines>

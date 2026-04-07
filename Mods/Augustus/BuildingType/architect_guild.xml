@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="architect_guild">
+    <graphics>
+        <default>
+            <path value="Admin_Logistics\Architects_Guild_On_01" />
+            <image value="Arch Guild OFF" />
+        </default>
+        <variant>
+            <condition type="has_workers" />
+            <path value="Admin_Logistics\Architects_Guild_On_01" />
+            <image value="Arch Guild ON" />
+        </variant>
+    </graphics>
+
+    <labor>
+        <employees count="12" />
+        <seeker mode="spawn_if_below" min_houses="100" />
+    </labor>
+</building>

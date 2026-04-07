@@ -5,4 +5,7 @@
             <path value="Admin_Logistics\Well" />
         </default>
     </graphics>
+    <labor>
+        <employees count="0" />
+    </labor>
 </building>

@@ -1,15 +1,18 @@
 #include "game.h"
 
+#include "building/building_type_registry.h"
+#include "core/image_payload.h"
+#include "game/defines.h"
+
+extern "C" {
 #include "assets/assets.h"
 #include "assets/image_group_payload_api.h"
 #include "building/properties.h"
 #include "building/building_runtime_api.h"
-#include "building/building_type_registry.h"
 #include "city/view.h"
 #include "core/config.h"
 #include "core/hotkey_config.h"
 #include "core/image.h"
-#include "core/image_payload.h"
 #include "core/lang.h"
 #include "core/locale.h"
 #include "core/log.h"
@@ -43,6 +46,7 @@
 #include "window/editor/map.h"
 #include "window/logo.h"
 #include "window/main_menu.h"
+}
 
 #include <stdio.h>
 
@@ -139,6 +143,12 @@ int game_init(void)
 
     model_reset();
     resource_init();
+
+    if (!game_defines_load()) {
+        set_init_failure_message("Failed to load gameplay defines.", game_defines_get_failure_reason());
+        errlog("unable to load gameplay defines");
+        return 0;
+    }
 
     building_properties_init();
     if (!building_type_registry_load()) {
