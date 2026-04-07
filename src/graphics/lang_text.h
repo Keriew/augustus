@@ -5,6 +5,10 @@
 #include "graphics/color.h"
 #include "translation/translation.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     LANG_FRAG_LABEL,    // a lang string
     LANG_FRAG_AMOUNT,   // a number + associated lang string
@@ -56,5 +60,9 @@ int lang_text_draw_sequence_ellipsized(const lang_fragment *seq, int count, int 
 int lang_text_draw_sequence_centered_ellipsized(const lang_fragment *seq, int count, int x, int y, int box_width, font_t font, color_t color, int *was_ellipsized);
 
 int lang_text_concatenate_sequence(const lang_fragment *seq, int count, uint8_t *dst, int dst_size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_LANG_TEXT_H

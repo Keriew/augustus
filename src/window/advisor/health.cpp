@@ -1,3 +1,7 @@
+#include "graphics/advisor_text_button_widget.h"
+#include "graphics/ui_runtime.h"
+
+extern "C" {
 #include "health.h"
 
 #include "building/count.h"
@@ -11,7 +15,8 @@
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/text.h"
-#include "graphics/window.h" 
+#include "graphics/window.h"
+}
 
 #define ADVISOR_HEIGHT 26
 
@@ -19,6 +24,7 @@ static unsigned int focus_button_id;
 static int display_water_coverage = 0;
 
 static void button_water_buildings(const generic_button *button);
+static void draw_coverage_toggle_widgets(void);
 
 static generic_button generic_buttons[] = {
     {32, 104, 80, 20, button_water_buildings, 0, 0},
@@ -131,11 +137,6 @@ static int draw_background(void)
     lang_text_draw(56, 4, 312, 110, FONT_SMALL_PLAIN);                  // Care for
     lang_text_draw_centered(56, 5, 441, 110, 160, FONT_SMALL_PLAIN);    // City coverage
     
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ADVISOR_HEALTH_HEALTH_COVERAGE, generic_buttons[0].x,
-        generic_buttons[0].y + 5, generic_buttons[0].width, FONT_SMALL_PLAIN);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ADVISOR_HEALTH_WATER_COVERAGE, generic_buttons[1].x,
-        generic_buttons[1].y + 5, generic_buttons[1].width, FONT_SMALL_PLAIN);
-
     inner_panel_draw(32, 124, 36, 5);
 
     int population = city_population();
@@ -165,7 +166,7 @@ static int draw_background(void)
 
     lang_text_draw(CUSTOM_TRANSLATION, TR_ADVISOR_HEALTH_SURVEILLANCE, 45, 246 + text_height, FONT_NORMAL_BLACK);
     text_height += 16;
-    text_draw_multiline(translation_for(TR_ADVISOR_SICKNESS_LEVEL_LOW + sickness_level),
+    text_draw_multiline(translation_for(static_cast<translation_key>(TR_ADVISOR_SICKNESS_LEVEL_LOW + sickness_level)),
         45, 246 + text_height, 560, 0, FONT_NORMAL_BLACK, 0);
 
     return ADVISOR_HEIGHT;
@@ -173,10 +174,7 @@ static int draw_background(void)
 
 static void draw_foreground(void)
 {
-    button_border_draw(generic_buttons[0].x, generic_buttons[0].y, generic_buttons[0].width, generic_buttons[0].height,
-        focus_button_id == 1 && display_water_coverage);
-    button_border_draw(generic_buttons[1].x, generic_buttons[1].y, generic_buttons[1].width, generic_buttons[1].height,
-        focus_button_id == 2 && !display_water_coverage);
+    draw_coverage_toggle_widgets();
 }
 
 static int handle_mouse(const mouse *m)
@@ -188,6 +186,51 @@ static void button_water_buildings(const generic_button *button)
 {
     display_water_coverage = button->parameter1;
     window_invalidate();
+}
+
+static void draw_coverage_toggle_widgets(void)
+{
+    UiPrimitives &primitives = shared_ui_runtime().primitives();
+
+    UiTextSpec health_text = {};
+    health_text.content_type = UiTextContentType::Language;
+    health_text.alignment = UiTextAlignment::Center;
+    health_text.text_group = CUSTOM_TRANSLATION;
+    health_text.text_id = TR_ADVISOR_HEALTH_HEALTH_COVERAGE;
+    health_text.x = generic_buttons[0].x;
+    health_text.y = generic_buttons[0].y + 5;
+    health_text.box_width = generic_buttons[0].width;
+    health_text.font = FONT_SMALL_PLAIN;
+
+    AdvisorTextButtonWidget(
+        primitives,
+        generic_buttons[0].x,
+        generic_buttons[0].y,
+        generic_buttons[0].width,
+        generic_buttons[0].height,
+        focus_button_id == 1 && display_water_coverage,
+        health_text)
+        .draw();
+
+    UiTextSpec water_text = {};
+    water_text.content_type = UiTextContentType::Language;
+    water_text.alignment = UiTextAlignment::Center;
+    water_text.text_group = CUSTOM_TRANSLATION;
+    water_text.text_id = TR_ADVISOR_HEALTH_WATER_COVERAGE;
+    water_text.x = generic_buttons[1].x;
+    water_text.y = generic_buttons[1].y + 5;
+    water_text.box_width = generic_buttons[1].width;
+    water_text.font = FONT_SMALL_PLAIN;
+
+    AdvisorTextButtonWidget(
+        primitives,
+        generic_buttons[1].x,
+        generic_buttons[1].y,
+        generic_buttons[1].width,
+        generic_buttons[1].height,
+        focus_button_id == 2 && !display_water_coverage,
+        water_text)
+        .draw();
 }
 
 const advisor_window_type *window_advisor_health(void)

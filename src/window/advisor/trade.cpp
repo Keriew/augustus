@@ -1,3 +1,7 @@
+#include "graphics/advisor_text_button_widget.h"
+#include "graphics/ui_runtime.h"
+
+extern "C" {
 #include "trade.h"
 
 #include "assets/assets.h"
@@ -25,6 +29,7 @@
 #include "window/option_popup.h"
 #include "window/resource_settings.h"
 #include "window/trade_prices.h"
+}
 
 #include <string.h>
 
@@ -40,6 +45,7 @@ static void button_prices(const generic_button *button);
 static void button_empire(const generic_button *button);
 static void button_policy(const generic_button *button);
 static void button_resource(const grid_box_item *item);
+static void draw_footer_button_widgets(void);
 
 static grid_box_type resource_grid = {
     .x = 16,
@@ -48,8 +54,8 @@ static grid_box_type resource_grid = {
     .height = 21 * BLOCK_SIZE,
     .item_height = 40,
     .draw_inner_panel = 1,
-    .decorate_scrollbar = 1,
     .extend_to_hidden_scrollbar = 1,
+    .decorate_scrollbar = 1,
     .draw_item = draw_resource_info,
     .on_click = button_resource,
     .handle_tooltip = resource_item_tooltip
@@ -117,12 +123,6 @@ static int draw_background(void)
     int width = lang_text_get_width(54, 1, FONT_NORMAL_BLACK);
     lang_text_draw(54, 1, 575 - width, 38, FONT_NORMAL_BLACK);
 
-    button_border_draw(375, 392, 200, 24, data.focus_button_id == 1);
-    lang_text_draw_centered(54, 2, 375, 398, 200, FONT_NORMAL_BLACK);
-
-    button_border_draw(160, 392, 200, 24, data.focus_button_id == 2);
-    lang_text_draw_centered(54, 30, 160, 398, 200, FONT_NORMAL_BLACK);
-
     int land_policy_available = building_monument_working(BUILDING_CARAVANSERAI);
     int sea_policy_available = building_monument_working(BUILDING_LIGHTHOUSE);
 
@@ -150,7 +150,7 @@ static int draw_background(void)
     return ADVISOR_HEIGHT;
 }
 
-static void draw_resource_status_text(int resource, int x, int y, int box_width)
+static void draw_resource_status_text(resource_type resource, int x, int y, int box_width)
 {
     if (!resource_is_storable(resource)) {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ADVISOR_TRADE_RESOURCE_NOT_STORABLE,
@@ -258,8 +258,7 @@ static void draw_foreground(void)
 {
     grid_box_draw(&resource_grid);
 
-    button_border_draw(375, 392, 200, 24, data.focus_button_id == 1);
-    button_border_draw(160, 392, 200, 24, data.focus_button_id == 2);
+    draw_footer_button_widgets();
 
     int land_policy_available = building_monument_working(BUILDING_CARAVANSERAI);
     int sea_policy_available = building_monument_working(BUILDING_LIGHTHOUSE);
@@ -280,9 +279,38 @@ static void apply_policy(int selected_policy)
     if (selected_policy == NO_POLICY) {
         return;
     }
-    city_trade_policy_set(data.policy_type, selected_policy);
+    city_trade_policy_set(data.policy_type, static_cast<trade_policy>(selected_policy));
     sound_speech_play_file(policy_options[data.policy_type].wav_file);
     city_finance_process_sundry(TRADE_POLICY_COST);
+}
+
+static void draw_footer_button_widgets(void)
+{
+    UiPrimitives &primitives = shared_ui_runtime().primitives();
+
+    UiTextSpec prices_text = {};
+    prices_text.content_type = UiTextContentType::Language;
+    prices_text.alignment = UiTextAlignment::Center;
+    prices_text.text_group = 54;
+    prices_text.text_id = 2;
+    prices_text.x = 375;
+    prices_text.y = 398;
+    prices_text.box_width = 200;
+    prices_text.font = FONT_NORMAL_BLACK;
+
+    AdvisorTextButtonWidget(primitives, 375, 392, 200, 24, data.focus_button_id == 1, prices_text).draw();
+
+    UiTextSpec empire_text = {};
+    empire_text.content_type = UiTextContentType::Language;
+    empire_text.alignment = UiTextAlignment::Center;
+    empire_text.text_group = 54;
+    empire_text.text_id = 30;
+    empire_text.x = 160;
+    empire_text.y = 398;
+    empire_text.box_width = 200;
+    empire_text.font = FONT_NORMAL_BLACK;
+
+    AdvisorTextButtonWidget(primitives, 160, 392, 200, 24, data.focus_button_id == 2, empire_text).draw();
 }
 
 static void show_policy(trade_policy_type policy_type)
@@ -312,7 +340,7 @@ static void button_empire(const generic_button *button)
 
 static void button_policy(const generic_button *button)
 {
-    int policy_type = button->parameter1;
+    const trade_policy_type policy_type = static_cast<trade_policy_type>(button->parameter1);
     if ((policy_type == LAND_TRADE_POLICY && !building_monument_working(BUILDING_CARAVANSERAI)) ||
         (policy_type == SEA_TRADE_POLICY && !building_monument_working(BUILDING_LIGHTHOUSE))) {
         return;

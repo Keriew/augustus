@@ -2,6 +2,8 @@
 
 #include "graphics/ui_primitive.h"
 
+struct UiBorderedButtonSkin;
+
 class UiOneRowBorderPrimitive : public UiPrimitive {
 public:
     UiOneRowBorderPrimitive(
@@ -16,15 +18,12 @@ public:
     void draw() const;
 
 private:
-    int image_base() const;
-    int tile_width() const;
-    int tile_height() const;
     int width_blocks() const;
     int height_blocks() const;
     int right_edge_x(int block_width) const;
     int bottom_edge_y(int block_height) const;
-    void draw_horizontal_edges(int image_base, int block_width, int block_height) const;
-    void draw_vertical_edges(int image_base, int block_width, int block_height) const;
+    void draw_horizontal_edges(const UiBorderedButtonSkin &skin, int block_width, int block_height) const;
+    void draw_vertical_edges(const UiBorderedButtonSkin &skin, int block_width, int block_height) const;
 
     int x_;
     int y_;
