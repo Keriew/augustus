@@ -9,6 +9,7 @@
     <graphics>
         <default>
             <path value="Health_Culture\Example_Base" />
+            <image value="Image_0000" />
         </default>
         <variant>
             <condition type="desirability" operator="gt" threshold="50" />
@@ -45,4 +46,6 @@
             graphic_timing="before_delay_check" require_water_access="false" mark_problem_if_no_water="false"
             condition="always" block_on_success="true" />
     </spawn_group>
+
+    <!-- Graphics-only vertical slices may stop after <graphics> or <labor> when live runtime ownership is deferred -->
 </building>

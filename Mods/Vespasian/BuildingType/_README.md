@@ -62,13 +62,13 @@ Current supported `<spawn_group>` attributes:
 
 - `road_access="normal"`
 - `delay_bands="100:3,75:7,50:15,25:29,1:44"` as a comma-separated list of `worker_percentage:delay` pairs
-- `existing_figure="actor|barber|bathhouse_worker|doctor|gladiator|librarian|lion_tamer|school_child|surgeon|tax_collector|teacher|work_camp_architect|work_camp_worker"`
+- `existing_figure="actor|barber|bathhouse_worker|doctor|engineer|gladiator|librarian|lion_tamer|prefect|school_child|surgeon|tax_collector|teacher|work_camp_architect|work_camp_worker"`
 - `guard_timing="before_road_access|after_labor_seeker"`
 
 `delay_bands` sanity rules:
 
 - worker percentage must be an integer from `1` to `100`
-- delay must be a positive integer
+- delay must be a non-negative integer
 - pairs must be written in strictly descending worker-percentage order
 
 Current supported `<spawn>` mode:
@@ -78,7 +78,7 @@ Current supported `<spawn>` mode:
 Current supported `<spawn>` attributes:
 
 - `spawn_figure="..."` using the same identifiers
-- `action_state="roaming|tax_collector_created|entertainer_roaming|entertainer_school_created|work_camp_worker_created|work_camp_architect_created"`
+- `action_state="roaming|engineer_created|prefect_created|tax_collector_created|entertainer_roaming|entertainer_school_created|work_camp_worker_created|work_camp_architect_created"`
 - `direction="top|bottom"`
 - `figure_slot="primary|secondary|quaternary|none"`
 - `spawn_count="N"` for one policy spawning the same figure several times on one trigger
@@ -99,8 +99,9 @@ Current engine behavior:
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
 - Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them.
+- Graphics-only vertical-slice definitions are valid; current `wheat_farm` and `pottery_workshop` XMLs intentionally author graphics metadata before those live industry render paths move to runtime ownership.
 - Put shared derived state such as water access under `<state>` so graphics and spawn behavior read the same runtime facts.
 - Put BuildingType-authored employee defaults under `<labor><employees ... /></labor>` so the XML and live model table stay in sync.
-- Buildings with a validated runtime `BuildingType` graphics block now use the native runtime renderer path as the authoritative live path.
+- Buildings with a validated runtime `BuildingType` graphics block usually use the native runtime renderer path as the authoritative live path; current data-only vertical slices remain on legacy live rendering until their runtime rollout lands.
 
 See `_template.xml.example` here in `Mods\Vespasian\BuildingType` for a copy/paste starter.
