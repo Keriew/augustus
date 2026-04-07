@@ -26,7 +26,16 @@ AdvisorCardButtonWidget::AdvisorCardButtonWidget(
 void AdvisorCardButtonWidget::draw() const
 {
     ErrorContextScope error_scope("ui.advisor_card_button");
-    BorderedButtonWidget(primitives_, x_, y_, width_pixels_, height_pixels_, has_focus_, color_).draw();
+    BorderedButtonWidget(
+        primitives_,
+        x_,
+        y_,
+        width_pixels_,
+        height_pixels_,
+        has_focus_,
+        color_,
+        BorderedButtonFillStyle::Transparent)
+        .draw();
     for (int i = 0; i < text_spec_count_; ++i) {
         UiTextPrimitive(primitives_, text_specs_[i]).draw();
     }

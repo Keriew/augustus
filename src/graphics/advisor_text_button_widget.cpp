@@ -24,6 +24,15 @@ AdvisorTextButtonWidget::AdvisorTextButtonWidget(
 void AdvisorTextButtonWidget::draw() const
 {
     ErrorContextScope error_scope("ui.advisor_text_button");
-    BorderedButtonWidget(primitives_, x_, y_, width_pixels_, height_pixels_, has_focus_, color_).draw();
+    BorderedButtonWidget(
+        primitives_,
+        x_,
+        y_,
+        width_pixels_,
+        height_pixels_,
+        has_focus_,
+        color_,
+        BorderedButtonFillStyle::Transparent)
+        .draw();
     UiTextPrimitive(primitives_, text_spec_).draw();
 }

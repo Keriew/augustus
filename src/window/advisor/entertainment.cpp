@@ -34,6 +34,7 @@ static unsigned int focus_button_id;
 
 static void button_hold_games(const generic_button *button);
 static void draw_hold_games_button_widget(void);
+static void draw_games_banner_widget_assets(void);
 
 static generic_button hold_games_button[] = {
     {102, 370, 300, 20, button_hold_games},
@@ -97,8 +98,7 @@ static void draw_games_info(void)
 {
     inner_panel_draw(48, 302, 34, 6);
     text_draw(translation_for(TR_WINDOW_ADVISOR_ENTERTAINMENT_GAMES_HEADER), 52, 274, FONT_LARGE_BLACK, 0);
-    image_draw(assets_get_image_id("UI", "HoldGames Banner"), 460, 305, COLOR_MASK_NONE, SCALE_NONE);
-    image_draw_border(assets_get_image_id("UI", "HoldGames Banner Border"), 460, 305, COLOR_MASK_NONE);
+    draw_games_banner_widget_assets();
     window_entertainment_draw_games_text(56, 315, 0);
 }
 
@@ -234,6 +234,56 @@ static void draw_hold_games_button_widget(void)
     button_text.font = FONT_NORMAL_WHITE;
 
     AdvisorTextButtonWidget(primitives, 102, 370, 300, 20, focus_button_id == 1, button_text).draw();
+}
+
+static void draw_games_banner_widget_assets(void)
+{
+    UiPrimitives &primitives = shared_ui_runtime().primitives();
+    const int banner_image_id = assets_get_image_id("UI", "HoldGames Banner");
+    const int border_base_image_id = assets_get_image_id("UI", "HoldGames Banner Border");
+
+    const image *banner = primitives.resolve_image(banner_image_id);
+    if (banner) {
+        primitives.draw_image(
+            banner,
+            460.0f,
+            305.0f,
+            banner->width,
+            banner->height,
+            COLOR_MASK_NONE,
+            RENDER_SCALING_POLICY_PIXEL_ART);
+    }
+
+    const image *top_border = primitives.resolve_image(border_base_image_id);
+    const image *left_border = primitives.resolve_image(border_base_image_id + 1);
+    const image *bottom_border = primitives.resolve_image(border_base_image_id + 2);
+    const image *right_border = primitives.resolve_image(border_base_image_id + 3);
+    if (!top_border || !left_border || !bottom_border || !right_border) {
+        return;
+    }
+
+    const int x = 460;
+    const int y = 305;
+    const int top_y_offset = top_border->height + top_border->y_offset;
+
+    primitives.draw_image(top_border, static_cast<float>(x), static_cast<float>(y),
+        top_border->width, top_border->height, COLOR_MASK_NONE, RENDER_SCALING_POLICY_PIXEL_ART);
+    primitives.draw_image(left_border, static_cast<float>(x), static_cast<float>(y + top_y_offset),
+        left_border->width, left_border->height, COLOR_MASK_NONE, RENDER_SCALING_POLICY_PIXEL_ART);
+    primitives.draw_image(bottom_border,
+        static_cast<float>(x),
+        static_cast<float>(y + top_y_offset + left_border->height + left_border->y_offset),
+        bottom_border->width,
+        bottom_border->height,
+        COLOR_MASK_NONE,
+        RENDER_SCALING_POLICY_PIXEL_ART);
+    primitives.draw_image(right_border,
+        static_cast<float>(x + top_border->width + top_border->x_offset - right_border->width - right_border->y_offset),
+        static_cast<float>(y + top_y_offset),
+        right_border->width,
+        right_border->height,
+        COLOR_MASK_NONE,
+        RENDER_SCALING_POLICY_PIXEL_ART);
 }
 
 static void get_tooltip_text(advisor_tooltip_result *r)

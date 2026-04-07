@@ -25,7 +25,16 @@ EmpireTradeRouteButtonWidget::EmpireTradeRouteButtonWidget(
 void EmpireTradeRouteButtonWidget::draw() const
 {
     ErrorContextScope error_scope("ui.empire_trade_route_button");
-    BorderedButtonWidget(primitives_, x_, y_, width_pixels_, height_pixels_, has_focus_, color_).draw();
+    BorderedButtonWidget(
+        primitives_,
+        x_,
+        y_,
+        width_pixels_,
+        height_pixels_,
+        has_focus_,
+        color_,
+        BorderedButtonFillStyle::Transparent)
+        .draw();
     UiTextPrimitive(primitives_, spec_.cost_text).draw();
     if (spec_.draw_label) {
         UiTextPrimitive(primitives_, spec_.label_text).draw();
