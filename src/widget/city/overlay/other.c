@@ -69,7 +69,7 @@ static int show_building_tax_income(const building *b)
 
 static int show_building_water(const building *b)
 {
-    return b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN || b->type == BUILDING_RESERVOIR ||
+    return b->house_size > 0 || b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN || b->type == BUILDING_RESERVOIR ||
         (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE && building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER));
 }
 
@@ -627,130 +627,41 @@ const city_overlay *city_overlay_for_employment(void)
     return &overlay;
 }
 
-static int terrain_on_water_overlay(void)
+static int should_draw_graph(int grid_offset)
 {
-    return
-        TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_SHRUB | TERRAIN_MEADOW |
-        TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_AQUEDUCT | TERRAIN_ELEVATION |
-        TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE | TERRAIN_HIGHWAY;
+    if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
+        return map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset);
+    }
+    if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
+        return 0;
+    }
+    return !map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) ||
+        map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN);
 }
 
-static int draw_footprint_water(int x, int y, float scale, int grid_offset)
+static int draw_water_top(int x, int y, float scale, int grid_offset)
 {
-    if (!map_property_is_draw_tile(grid_offset)) {
-        return 1;
+    if (!should_draw_graph(grid_offset) || show_building_water(building_get(map_building_at(grid_offset)))) {
+        return 0;
     }
-    if (map_is_bridge(grid_offset)) {
-        int water_image = map_image_at(grid_offset);  // Get the water image for the bridge
-        if (!water_image) {
-            water_image = image_group(GROUP_TERRAIN_WATER);  // fallback - first image in water group
-        }
-        image_draw_isometric_footprint_from_draw_tile(water_image, x, y, 0, scale);
+
+    int image_base = image_group(GROUP_TERRAIN_OVERLAY);
+    if (map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE)) {
+        image_draw_isometric_footprint_from_draw_tile(image_base + 8, x, y,
+            ALPHA_FONT_SEMI_TRANSPARENT, scale);
     }
-    int is_building = map_terrain_is(grid_offset, TERRAIN_BUILDING);
-    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
-        city_draw_highway_footprint(x, y, scale, grid_offset, COLOR_MASK_NONE);
-    } else if (map_terrain_is(grid_offset, terrain_on_water_overlay()) && !is_building) {
-        image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
-    } else if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
-        // display grass
-        int image_id = image_group(GROUP_TERRAIN_GRASS_1) + (map_random_get(grid_offset) & 7);
-        image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
-    } else if (is_building) {
-        building *b = building_get(map_building_at(grid_offset));
-        int terrain = map_terrain_get(grid_offset);
-        if (b->id && (b->has_well_access || (b->house_size && b->has_water_access))) {
-            terrain |= TERRAIN_FOUNTAIN_RANGE;
-        }
-        int image_offset;
-        switch (terrain & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-            case TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE:
-                image_offset = 24;
-                break;
-            case TERRAIN_RESERVOIR_RANGE:
-                image_offset = 8;
-                break;
-            case TERRAIN_FOUNTAIN_RANGE:
-                image_offset = 16;
-                break;
-            default:
-                image_offset = 0;
-                break;
-        }
-        // TODO fix this to use the image offsets properly
-        city_draw_building_footprint(x, y, grid_offset, 0);
-    } else {
-        int image_id = image_group(GROUP_TERRAIN_OVERLAY);
-        switch (map_terrain_get(grid_offset) & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-            case TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE:
-                image_id += 27;
-                break;
-            case TERRAIN_RESERVOIR_RANGE:
-                image_id += 11;
-                break;
-            case TERRAIN_FOUNTAIN_RANGE:
-                image_id += 19;
-                break;
-            default:
-                image_id = map_image_at(grid_offset);
-                break;
-        }
-        image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
+
+    if (map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
+        image_draw_isometric_footprint_from_draw_tile(assets_lookup_image_id(ASSET_UI_WATER_RANGE), x, y,
+            COLOR_MASK_BLUE, scale);
     }
-    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
-                                    && !map_building_at(grid_offset) && scale <= 2.0f) {
-        //grid is drawn by the renderer directly at zoom > 200%
-        static int grid_id = 0;
-        if (!grid_id) {
-            grid_id = assets_get_image_id("UI", "Grid_Full");
-        }
-        image_draw(grid_id, x, y, COLOR_GRID, scale);
-    }
-    return 1;
+    return 0;
 }
 
-static int draw_top_water(int x, int y, float scale, int grid_offset)
+static int is_inhabited_building(int grid_offset)
 {
-    if (!map_property_is_draw_tile(grid_offset)) {
-        return 1;
-    }
-    if (map_terrain_is(grid_offset, terrain_on_water_overlay())) {
-        if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-            color_t color_mask = 0;
-            if (map_property_is_deleted(grid_offset) && map_property_multi_tile_size(grid_offset) == 1) {
-                color_mask = COLOR_MASK_RED;
-            }
-            image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
-        }
-    } else if (map_building_at(grid_offset)) {
-        city_draw_building_top(x, y, grid_offset, 0);
-    }
-    return 1;
-}
-
-const city_overlay *city_overlay_for_water(void)
-{
-    static city_overlay overlay = {
-        OVERLAY_WATER,
-        COLUMN_COLOR_GREEN,
-        show_building_water,
-        show_figure_none,
-        get_column_height_none,
-        get_tooltip_water,
-        0,
-        draw_footprint_water,
-        draw_top_water
-    };
-    return &overlay;
-}
-
-static color_t get_color_for_percentage(int percentage)
-{
-    static const color_t percentage_colors[] = {
-        0xccde4939, 0xccff695a, 0xccf7714a, 0xccf7aa52, 0xccf7d35a,
-        0xccdeeb4a, 0xccb5eb5a, 0xcc7beb73, 0xcc5adbce, 0xcc5ac3ef
-    };
-    return percentage_colors[calc_bound(percentage / 10, 0, 9)];
+    building *b = building_get(map_building_at(grid_offset));
+    return b && b->house_population > 0;
 }
 
 static void blend_color_to_footprint(int x, int y, int size, color_t color, float scale)
@@ -774,6 +685,68 @@ static void blend_color_to_footprint(int x, int y, int size, color_t color, floa
     }
 }
 
+static void draw_water_graph(int x, int y, float scale, int grid_offset)
+{
+    if (!should_draw_graph(grid_offset)) {
+        return;
+    }
+
+    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        return;
+    }
+
+    if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && is_inhabited_building(grid_offset)) {
+        if (map_property_is_draw_tile(grid_offset)) {
+            building *b = building_get(map_building_at(grid_offset));
+            color_t water_color = COLOR_MASK_GRAY;
+            
+            switch (model_get_house(b->subtype.house_level)->water) {
+                default:
+                case 1:
+                    if (b->has_well_access) {
+                        water_color = COLOR_MASK_BLUE;
+                    }
+                    // intentional fallthrough
+                case 2:
+                    if (b->house_size && b->has_water_access) {
+                        water_color = COLOR_MASK_BLUE;
+                    }
+                    break;
+            }
+
+            blend_color_to_footprint(x, y, b->house_size, water_color, scale);
+            city_draw_building_top(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 1));
+            image_draw_set_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, water_color, scale);
+        }
+    }
+}
+
+const city_overlay *city_overlay_for_water(void)
+{
+    static city_overlay overlay = {
+        OVERLAY_WATER,
+        COLUMN_COLOR_GREEN,
+        show_building_water,
+        show_figure_none,
+        get_column_height_none,
+        get_tooltip_water,
+        0,
+        0,
+        draw_water_top,
+        draw_water_graph
+    };
+    return &overlay;
+}
+
+static color_t get_color_for_percentage(int percentage)
+{
+    static const color_t percentage_colors[] = {
+        0xccde4939, 0xccff695a, 0xccf7714a, 0xccf7aa52, 0xccf7d35a,
+        0xccdeeb4a, 0xccb5eb5a, 0xcc7beb73, 0xcc5adbce, 0xcc5ac3ef
+    };
+    return percentage_colors[calc_bound(percentage / 10, 0, 9)];
+}
+
 static int draw_sentiment_footprint(int x, int y, float scale, int grid_offset)
 {
     if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
@@ -785,7 +758,7 @@ static int draw_sentiment_footprint(int x, int y, float scale, int grid_offset)
         return 0;
     }
     if (map_property_is_draw_tile(grid_offset)) {
-        city_draw_building_footprint(x, y, grid_offset, 0);
+        city_draw_building_footprint(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 0));
         blend_color_to_footprint(x, y, b->house_size, get_color_for_percentage(b->sentiment.house_happiness), scale);
     }
     return 1;
@@ -802,7 +775,7 @@ static int draw_sentiment_top(int x, int y, float scale, int grid_offset)
         return 0;
     }
     if (map_property_is_draw_tile(grid_offset)) {
-        city_draw_building_top(x, y, grid_offset, 0);
+        city_draw_building_top(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 1));
         color_t color = get_color_for_percentage(b->sentiment.house_happiness);
         image_draw_set_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color, scale);
     }
@@ -823,12 +796,6 @@ const city_overlay *city_overlay_for_sentiment(void)
         draw_sentiment_top,
     };
     return &overlay;
-}
-
-static int is_inhabited_building(int grid_offset)
-{
-    building *b = building_get(map_building_at(grid_offset));
-    return b && b->house_population > 0;
 }
 
 static int get_desirability_image_offset(int desirability)
@@ -856,18 +823,6 @@ static int get_desirability_image_offset(int desirability)
     }
 }
 
-static int should_draw_graph(int grid_offset)
-{
-    if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
-        return map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset);
-    }
-    if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
-        return 0;
-    }
-    return !map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) ||
-        map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN);
-}
-
 static void draw_desirability_graph(int x, int y, float scale, int grid_offset)
 {
     if (!should_draw_graph(grid_offset)) {
@@ -878,7 +833,7 @@ static void draw_desirability_graph(int x, int y, float scale, int grid_offset)
             building *b = building_get(map_building_at(grid_offset));
             color_t desirability_color = get_color_for_percentage(get_desirability_image_offset(b->desirability) * 10);
             blend_color_to_footprint(x, y, b->house_size, desirability_color, scale);
-            city_draw_building_top(x, y, grid_offset, 0);
+            city_draw_building_top(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 1));
             image_draw_set_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, desirability_color, scale);
         }
     } else {

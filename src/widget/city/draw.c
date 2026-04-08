@@ -1061,7 +1061,7 @@ static void draw_animation(int x, int y, int grid_offset)
             }
             image_draw(image_id, x + 81, y + 5, color_mask, draw_context.scale);
         }
-    } else if (b->type == BUILDING_GATEHOUSE) {
+    } else if (b->type == BUILDING_GATEHOUSE && should_draw) {
         int xy = map_property_multi_tile_xy(grid_offset);
         int orientation = city_view_orientation();
         if ((orientation == DIR_0_TOP && xy == EDGE_X1Y1) ||

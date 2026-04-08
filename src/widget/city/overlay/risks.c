@@ -459,7 +459,7 @@ static int draw_footprint_native(int x, int y, float scale, int grid_offset)
     }
     if (map_terrain_is(grid_offset, terrain_on_native_overlay())) {
         if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-            city_draw_building_footprint(x, y, grid_offset, 0);
+            city_draw_building_footprint(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 0));
         } else {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
         }
@@ -468,7 +468,7 @@ static int draw_footprint_native(int x, int y, float scale, int grid_offset)
         int image_id = image_group(GROUP_TERRAIN_OVERLAY);
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        city_draw_building_footprint(x, y, grid_offset, 0);
+        city_draw_building_footprint(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 0));
     } else {
         if (map_property_is_native_land(grid_offset)) {
             image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_DESIRABILITY) + 1, x, y, 0, scale);
@@ -495,17 +495,14 @@ static int draw_top_native(int x, int y, float scale, int grid_offset)
     if (!map_property_is_draw_tile(grid_offset)) {
         return 1;
     }
+    color_t color_mask = city_draw_get_color_mask(grid_offset, 1);
     if (map_terrain_is(grid_offset, terrain_on_native_overlay())) {
         if (!map_terrain_is(grid_offset, TERRAIN_BUILDING) || map_is_bridge(grid_offset)) {
-            color_t color_mask = 0;
-            if (map_property_is_deleted(grid_offset) && map_property_multi_tile_size(grid_offset) == 1) {
-                color_mask = COLOR_MASK_RED;
-            }
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
         }
 
     } else if (map_building_at(grid_offset)) {
-        city_draw_building_top(x, y, grid_offset, 0);
+        city_draw_building_top(x, y, grid_offset, color_mask);
     }
     return 1;
 }
