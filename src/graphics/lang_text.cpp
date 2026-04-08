@@ -1,4 +1,9 @@
 #include "lang_text.h"
+#include "text_runtime_internal.h"
+
+#include "translation/localization.h"
+
+#include <string>
 
 extern "C" {
 #include "core/lang.h"
@@ -9,30 +14,58 @@ extern "C" {
 
 int lang_text_get_width(int group, int number, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        std::string_view utf8 = localization::utf8_legacy_string(0, group, number);
+        return text_get_width_utf8(utf8, font) + font_definition_for(font)->space_width;
+    }
     const uint8_t *str = lang_get_string(group, number);
     return text_get_width(str, font) + font_definition_for(font)->space_width;
 }
 
 int lang_text_draw(int group, int number, int x_offset, int y_offset, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        return text_draw_utf8(localization::utf8_legacy_string(0, group, number), x_offset, y_offset, font, 0);
+    }
     const uint8_t *str = lang_get_string(group, number);
     return text_draw(str, x_offset, y_offset, font, 0);
 }
 
 int lang_text_draw_colored(int group, int number, int x_offset, int y_offset, font_t font, color_t color)
 {
+    if (font_uses_vector_runtime()) {
+        return text_draw_utf8(localization::utf8_legacy_string(0, group, number), x_offset, y_offset, font, color);
+    }
     const uint8_t *str = lang_get_string(group, number);
     return text_draw(str, x_offset, y_offset, font, color);
 }
 
 void lang_text_draw_centered(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        std::string_view utf8 = localization::utf8_legacy_string(0, group, number);
+        int offset = (box_width - text_get_width_utf8(utf8, font)) / 2;
+        if (offset < 0) {
+            offset = 0;
+        }
+        text_draw_utf8(utf8, x_offset + offset, y_offset, font, 0);
+        return;
+    }
     const uint8_t *str = lang_get_string(group, number);
     text_draw_centered(str, x_offset, y_offset, box_width, font, 0);
 }
 
 void lang_text_draw_right_aligned(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        std::string_view utf8 = localization::utf8_legacy_string(0, group, number);
+        int offset = box_width - text_get_width_utf8(utf8, font);
+        if (offset < 0) {
+            offset = 0;
+        }
+        text_draw_utf8(utf8, x_offset + offset, y_offset, font, 0);
+        return;
+    }
     const uint8_t *str = lang_get_string(group, number);
     text_draw_right_aligned(str, x_offset, y_offset, box_width, font, 0);
 }
@@ -40,12 +73,38 @@ void lang_text_draw_right_aligned(int group, int number, int x_offset, int y_off
 void lang_text_draw_centered_colored(
     int group, int number, int x_offset, int y_offset, int box_width, font_t font, color_t color)
 {
+    if (font_uses_vector_runtime()) {
+        std::string_view utf8 = localization::utf8_legacy_string(0, group, number);
+        int offset = (box_width - text_get_width_utf8(utf8, font)) / 2;
+        if (offset < 0) {
+            offset = 0;
+        }
+        text_draw_utf8(utf8, x_offset + offset, y_offset, font, color);
+        return;
+    }
     const uint8_t *str = lang_get_string(group, number);
     text_draw_centered(str, x_offset, y_offset, box_width, font, color);
 }
 
 void lang_text_draw_ellipsized(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        std::string_view utf8 = localization::utf8_legacy_string(0, group, number);
+        if (text_get_width_utf8(utf8, font) <= box_width) {
+            text_draw_utf8(utf8, x_offset, y_offset, font, 0);
+            return;
+        }
+        int ellipsis_width = text_get_width_utf8("...", font);
+        unsigned int prefix_bytes = text_get_max_utf8_bytes_for_width(
+            utf8,
+            font,
+            box_width > ellipsis_width ? box_width - ellipsis_width : 0,
+            0);
+        std::string truncated(utf8.substr(0, prefix_bytes));
+        truncated += "...";
+        text_draw_utf8(truncated, x_offset, y_offset, font, 0);
+        return;
+    }
     const uint8_t *str = lang_get_string(group, number);
     text_draw_ellipsized(str, x_offset, y_offset, box_width, font, 0);
 }
@@ -160,6 +219,10 @@ void lang_text_draw_month_year_max_width(
 
 int lang_text_draw_multiline(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        const uint8_t *legacy = lang_get_string(group, number);
+        return text_draw_multiline(legacy, x_offset, y_offset, box_width, 0, font, 0);
+    }
     const uint8_t *str = lang_get_string(group, number);
     return text_draw_multiline(str, x_offset, y_offset, box_width, 0, font, 0);
 }

@@ -1,4 +1,5 @@
 #include "font.h"
+#include "font_vector_runtime.h"
 
 extern "C" {
 #include "assets/assets.h"
@@ -254,6 +255,21 @@ static struct {
     const font_definition *font_definitions;
     int multibyte;
 } data;
+
+static font_definition runtime_definitions[FONT_TYPES_MAX];
+
+static void refresh_runtime_definitions(void)
+{
+    for (int i = 0; i < FONT_TYPES_MAX; ++i) {
+        const font_definition *legacy = &data.font_definitions[i];
+        runtime_definitions[i] = *legacy;
+        runtime_definitions[i].metric_scale_percentage = 100;
+        runtime_definitions[i].space_width = font_vector_runtime_space_width(static_cast<font_t>(i));
+        runtime_definitions[i].letter_spacing = font_vector_runtime_letter_spacing(static_cast<font_t>(i));
+        runtime_definitions[i].line_height = font_vector_runtime_line_height(static_cast<font_t>(i));
+        runtime_definitions[i].image_y_offset = image_y_offset_none;
+    }
+}
 
 static int image_y_offset_none(uint8_t c, int image_height, int line_height)
 {
@@ -539,15 +555,51 @@ void font_set_encoding(encoding_type encoding)
         data.font_mapping = CHAR_TO_FONT_IMAGE_DEFAULT;
         data.font_definitions = DEFINITIONS_DEFAULT;
     }
+    if (font_vector_runtime_is_active()) {
+        refresh_runtime_definitions();
+    }
+}
+
+int font_load_mod_font_pack(void)
+{
+    int loaded = font_vector_runtime_load_pack();
+    if (loaded && font_vector_runtime_is_active()) {
+        refresh_runtime_definitions();
+    }
+    return loaded;
+}
+
+void font_reset_mod_font_pack(void)
+{
+    font_vector_runtime_reset();
+}
+
+int font_uses_vector_runtime(void)
+{
+    return font_vector_runtime_is_active();
+}
+
+const char *font_get_failure_reason(void)
+{
+    return font_vector_runtime_failure_reason();
 }
 
 const font_definition *font_definition_for(font_t font)
 {
+    if (font_vector_runtime_is_active()) {
+        refresh_runtime_definitions();
+        return &runtime_definitions[font];
+    }
     return &data.font_definitions[font];
 }
 
 int font_can_display(const uint8_t *character)
 {
+    if (font_vector_runtime_is_active()) {
+        char utf8[16] = { 0 };
+        encoding_to_utf8(character, utf8, static_cast<int>(sizeof(utf8)), encoding_system_uses_decomposed());
+        return font_vector_runtime_can_display_utf8(utf8);
+    }
     int dummy;
     return font_letter_id(&data.font_definitions[FONT_NORMAL_BLACK], character, &dummy) >= 0;
 }

@@ -401,6 +401,7 @@
     <ClCompile Include="src\graphics\clouds.c" />
     <ClCompile Include="src\graphics\complex_button.c" />
     <ClCompile Include="src\graphics\font.cpp" />
+    <ClCompile Include="src\graphics\font_vector_runtime.cpp" />
     <ClCompile Include="src\graphics\generic_button.c" />
     <ClCompile Include="src\graphics\graphics.cpp" />
     <ClCompile Include="src\graphics\grid_box.c" />
@@ -414,7 +415,7 @@
     <ClCompile Include="src\graphics\menu.c" />
     <ClCompile Include="src\graphics\panel_widget.cpp" />
     <ClCompile Include="src\graphics\renderer.c" />
-    <ClCompile Include="src\graphics\rich_text.c" />
+    <ClCompile Include="src\graphics\rich_text.cpp" />
     <ClCompile Include="src\graphics\screen.cpp" />
     <ClCompile Include="src\graphics\screenshot.c" />
     <ClCompile Include="src\graphics\scrollbar.c" />
@@ -926,6 +927,8 @@
     <ClInclude Include="src\graphics\panel_widget.h" />
     <ClInclude Include="src\graphics\renderer.h" />
     <ClInclude Include="src\graphics\rich_text.h" />
+    <ClInclude Include="src\graphics\font_vector_runtime.h" />
+    <ClInclude Include="src\graphics\text_runtime_internal.h" />
     <ClInclude Include="src\graphics\screen.h" />
     <ClInclude Include="src\graphics\screenshot.h" />
     <ClInclude Include="src\graphics\scrollbar.h" />

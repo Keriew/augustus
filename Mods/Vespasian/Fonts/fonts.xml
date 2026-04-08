@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fonts>
+  <family id="latin_body">
+    <regular src="Latin/OldStandard-Regular.ttf" />
+    <bold src="Latin/OldStandard-Bold.ttf" />
+    <italic src="Latin/OldStandard-Italic.ttf" />
+    <bold_italic src="Latin/OldStandard-Bold.ttf" />
+    <fallback family="cyrillic_body" script="cyrillic" />
+    <fallback family="greek_display" script="greek" />
+    <fallback family="cjk_jp" script="hiragana" />
+    <fallback family="cjk_jp" script="katakana" />
+    <fallback family="cjk_kr" script="hangul" />
+    <fallback family="cjk_jp" locale="ja" script="han" />
+    <fallback family="cjk_kr" locale="ko" script="han" />
+    <fallback family="cjk_sc" locale="zh_CN" script="han" />
+    <fallback family="cjk_sc" locale="zh-Hans" script="han" />
+    <fallback family="cjk_tc" locale="zh_TW" script="han" />
+    <fallback family="cjk_tc" locale="zh-Hant" script="han" />
+    <fallback family="cjk_sc" script="han" />
+  </family>
+
+  <family id="latin_title">
+    <regular src="Latin/Marcellus-Regular.ttf" />
+    <fallback family="cyrillic_body" script="cyrillic" />
+    <fallback family="greek_display" script="greek" />
+    <fallback family="cjk_jp" script="hiragana" />
+    <fallback family="cjk_jp" script="katakana" />
+    <fallback family="cjk_kr" script="hangul" />
+    <fallback family="cjk_jp" locale="ja" script="han" />
+    <fallback family="cjk_kr" locale="ko" script="han" />
+    <fallback family="cjk_sc" locale="zh_CN" script="han" />
+    <fallback family="cjk_sc" locale="zh-Hans" script="han" />
+    <fallback family="cjk_tc" locale="zh_TW" script="han" />
+    <fallback family="cjk_tc" locale="zh-Hant" script="han" />
+    <fallback family="cjk_sc" script="han" />
+  </family>
+
+  <family id="cyrillic_body">
+    <regular src="Cyrillic/OldStandard-Regular.ttf" />
+    <bold src="Cyrillic/OldStandard-Bold.ttf" />
+    <italic src="Cyrillic/OldStandard-Italic.ttf" />
+    <bold_italic src="Cyrillic/OldStandard-Bold.ttf" />
+  </family>
+
+  <family id="greek_display">
+    <regular src="Greek/GFSDidot-Regular.ttf" />
+  </family>
+
+  <family id="cjk_jp">
+    <regular src="CJK/NotoSerifJP[wght].ttf" />
+  </family>
+
+  <family id="cjk_kr">
+    <regular src="CJK/NotoSerifKR[wght].ttf" />
+  </family>
+
+  <family id="cjk_sc">
+    <regular src="CJK/NotoSerifSC[wght].ttf" />
+  </family>
+
+  <family id="cjk_tc">
+    <regular src="CJK/NotoSerifTC[wght].ttf" />
+  </family>
+
+  <surface id="FONT_NORMAL_PLAIN" family="latin_body" logical_size="11" line_height="11" letter_spacing="1" baseline_offset="0" semantic="body" />
+  <surface id="FONT_NORMAL_BLACK" family="latin_body" logical_size="11" line_height="11" letter_spacing="0" baseline_offset="0" semantic="body" />
+  <surface id="FONT_NORMAL_WHITE" family="latin_body" logical_size="11" line_height="11" letter_spacing="0" baseline_offset="0" semantic="body" />
+  <surface id="FONT_NORMAL_RED" family="latin_body" logical_size="11" line_height="11" letter_spacing="0" baseline_offset="0" semantic="body" />
+  <surface id="FONT_LARGE_PLAIN" family="latin_title" logical_size="23" line_height="23" letter_spacing="1" baseline_offset="0" semantic="title" />
+  <surface id="FONT_LARGE_BLACK" family="latin_title" logical_size="23" line_height="23" letter_spacing="0" baseline_offset="0" semantic="header" />
+  <surface id="FONT_LARGE_BROWN" family="latin_title" logical_size="24" line_height="24" letter_spacing="0" baseline_offset="0" semantic="header" />
+  <surface id="FONT_SMALL_PLAIN" family="latin_body" logical_size="9" line_height="9" letter_spacing="1" baseline_offset="0" semantic="body" />
+  <surface id="FONT_NORMAL_GREEN" family="latin_body" logical_size="11" line_height="11" letter_spacing="0" baseline_offset="0" semantic="link" />
+  <surface id="FONT_NORMAL_BROWN" family="latin_body" logical_size="11" line_height="11" letter_spacing="0" baseline_offset="0" semantic="body" />
+</fonts>
