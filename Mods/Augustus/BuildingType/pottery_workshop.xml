@@ -9,4 +9,11 @@
     <labor>
         <employees count="10" />
     </labor>
+    <storages>
+        <storage path="clay_input_pottery_workshop" />
+        <storage path="pottery_output_pottery_workshop" />
+    </storages>
+    <production_methods>
+        <production_method path="pottery_workshop_basic" />
+    </production_methods>
 </building>

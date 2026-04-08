@@ -9,6 +9,7 @@ extern "C" {
 #include "building/granary.h"
 #include "building/image.h"
 #include "building/industry.h"
+#include "building/production_runtime_api.h"
 #include "building/market.h"
 #include "building/mess_hall.h"
 #include "building/monument.h"
@@ -868,6 +869,8 @@ static void spawn_figure_industry(building *b)
             return;
         }
         if (building_industry_has_produced_resource(b)) {
+            const int output_cart_loads = production_runtime_has_native_production(b) ?
+                production_runtime_get_output_cart_loads(b) : 1;
             building_industry_start_new_production(b);
             figure *f = figure_create(FIGURE_CART_PUSHER, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_20_CARTPUSHER_INITIAL;
@@ -875,7 +878,7 @@ static void spawn_figure_industry(building *b)
             f->building_id = b->id;
             b->figure_id = f->id;
             f->wait_ticks = 30;
-            f->loads_sold_or_carrying = 1;
+            f->loads_sold_or_carrying = static_cast<unsigned char>(output_cart_loads > 0 ? output_cart_loads : 1);
         }
     }
 }

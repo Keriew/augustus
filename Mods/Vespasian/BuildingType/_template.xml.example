@@ -38,6 +38,14 @@
         <seeker mode="spawn_if_below" min_houses="50" />
     </labor>
 
+    <!-- Optional native storage/production references -->
+    <storages>
+        <storage path="example_storage" />
+    </storages>
+    <production_methods>
+        <production_method path="example_production_method" />
+    </production_methods>
+
     <!-- Optional shared-delay spawn group -->
     <spawn_group road_access="normal" delay_bands="100:3,75:7,50:15,25:29,1:44" existing_figure="librarian"
         guard_timing="before_road_access">

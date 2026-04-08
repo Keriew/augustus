@@ -10,6 +10,8 @@ Current supported nodes:
 - `<state> ... </state>`
 - `<graphics> ... </graphics>`
 - `<labor> ... </labor>`
+- `<storages> ... </storages>`
+- `<production_methods> ... </production_methods>`
 - `<spawn_group ...>`
 - `<spawn ... />`
 
@@ -58,6 +60,21 @@ Current supported `<labor>` child nodes:
 - `<employees count="N" />`
 - `<seeker mode="none|spawn_if_below|generate_if_below" min_houses="N" />`
 
+Current supported `<storages>` child nodes:
+
+- `<storage path="..." />`
+
+Current supported `<production_methods>` child nodes:
+
+- `<production_method path="..." />`
+
+Shared definition path rules:
+
+- path is relative to the winning `StorageType` or `ProductionMethod` folder
+- do not include the folder prefix
+- do not include the `.xml` suffix
+- example: `Mods\Vespasian\ProductionMethod\pottery_workshop_basic.xml` becomes `pottery_workshop_basic`
+
 Current supported `<spawn_group>` attributes:
 
 - `road_access="normal"`
@@ -99,7 +116,8 @@ Current engine behavior:
 - Use `spawn_count="N"` when one successful policy should create several copies of the same figure at once.
 - Today a multi-spawn policy only writes one legacy tracked figure slot; extra spawned figures still exist, but they are not separately tracked by XML-defined slots yet.
 - Use `<image value="..."/>` only when a graphics group contains several named members and the building must lock to one of them.
-- Graphics-only vertical-slice definitions are valid; current `wheat_farm` and `pottery_workshop` XMLs intentionally author graphics metadata before those live industry render paths move to runtime ownership.
+- Graphics-only vertical-slice definitions are valid; runtime-owned production and storage references can be layered onto those same BuildingType files as they migrate.
+- BuildingType native storage and production references are resolved at load time; unresolved paths are hard load failures.
 - Put shared derived state such as water access under `<state>` so graphics and spawn behavior read the same runtime facts.
 - Put BuildingType-authored employee defaults under `<labor><employees ... /></labor>` so the XML and live model table stay in sync.
 - Buildings with a validated runtime `BuildingType` graphics block usually use the native runtime renderer path as the authoritative live path; current data-only vertical slices remain on legacy live rendering until their runtime rollout lands.

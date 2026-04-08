@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<production_method>
+    <kind value="farm" />
+    <output resource="wheat" />
+    <batch_size value="1" />
+    <climate_bonuses>
+        <bonus climate="northern" percent="-50" />
+    </climate_bonuses>
+</production_method>

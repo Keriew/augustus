@@ -1,4 +1,6 @@
 #include "building/building_type_registry_internal.h"
+#include "building/production_method_registry.h"
+#include "building/storage_type_registry.h"
 
 extern "C" {
 #include "building/properties.h"

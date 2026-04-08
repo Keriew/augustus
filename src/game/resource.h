@@ -149,6 +149,7 @@ resource_version_t resource_mapping_get_version(void);
 
 resource_type resource_map_legacy_inventory(int id);
 
+int resource_base_production_per_month(resource_type resource);
 int resource_production_per_month(resource_type);
 
 resource_type resource_remap(int id);

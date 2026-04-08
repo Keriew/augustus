@@ -1,5 +1,8 @@
 #include "building/building_type_registry_internal.h"
+#include "building/production_method_registry.h"
+#include "building/storage_type_registry.h"
 #include "assets/image_group_payload.h"
+#include "core/crash_context.h"
 
 extern "C" {
 #include "building/building_runtime_api.h"
@@ -375,6 +378,43 @@ static std::string normalize_graphics_path(const char *value)
         return std::string();
     }
 
+    return normalized;
+}
+
+static std::string normalize_runtime_definition_path(const char *value)
+{
+    std::string normalized = trim_copy(value ? value : "");
+    if (normalized.empty()) {
+        return std::string();
+    }
+
+    for (char &ch : normalized) {
+        if (ch == '/') {
+            ch = '\\';
+        }
+    }
+
+    std::string collapsed;
+    collapsed.reserve(normalized.size());
+    char previous = '\0';
+    for (char ch : normalized) {
+        if (ch == '\\' && previous == '\\') {
+            continue;
+        }
+        collapsed.push_back(ch);
+        previous = ch;
+    }
+    normalized = collapsed;
+
+    if (!normalized.empty() && normalized.front() == '\\') {
+        return std::string();
+    }
+    if (!normalized.empty() && normalized.back() == '\\') {
+        return std::string();
+    }
+    if (ends_with_ignore_case_ascii(normalized, ".xml")) {
+        normalized.resize(normalized.size() - 4);
+    }
     return normalized;
 }
 
@@ -879,6 +919,100 @@ static int parse_labor_seeker()
     return 1;
 }
 
+static int parse_storages()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered storages definition before building root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_storages) {
+        log_error("BuildingType xml contains duplicate storages nodes", g_parse_state.definition->attr(), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.saw_storages = 1;
+    g_parse_state.parsing_storages = 1;
+    return 1;
+}
+
+static void finish_storages()
+{
+    g_parse_state.parsing_storages = 0;
+}
+
+static int parse_storage_reference()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_storages) {
+        log_error("Encountered storage reference outside storages node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("path")) {
+        log_error("BuildingType storage reference is missing required attribute 'path'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    std::string normalized_path = normalize_runtime_definition_path(xml_parser_get_attribute_string("path"));
+    if (normalized_path.empty()) {
+        log_error("Unsupported BuildingType storage reference path", xml_parser_get_attribute_string("path"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->add_storage_reference(std::move(normalized_path));
+    return 1;
+}
+
+static int parse_production_methods()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered production_methods definition before building root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_production_methods) {
+        log_error("BuildingType xml contains duplicate production_methods nodes", g_parse_state.definition->attr(), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.saw_production_methods = 1;
+    g_parse_state.parsing_production_methods = 1;
+    return 1;
+}
+
+static void finish_production_methods()
+{
+    g_parse_state.parsing_production_methods = 0;
+}
+
+static int parse_production_method_reference()
+{
+    if (!g_parse_state.definition || !g_parse_state.parsing_production_methods) {
+        log_error("Encountered production_method reference outside production_methods node", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("path")) {
+        log_error("BuildingType production_method reference is missing required attribute 'path'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    std::string normalized_path = normalize_runtime_definition_path(xml_parser_get_attribute_string("path"));
+    if (normalized_path.empty()) {
+        log_error("Unsupported BuildingType production_method reference path", xml_parser_get_attribute_string("path"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->add_production_method_reference(std::move(normalized_path));
+    return 1;
+}
+
 static int parse_spawn_group()
 {
     if (!g_parse_state.definition) {
@@ -1096,6 +1230,10 @@ static const xml_parser_element XML_ELEMENTS[] = {
     { "labor", parse_labor, finish_labor, "building", nullptr },
     { "employees", parse_labor_employees, nullptr, "labor", nullptr },
     { "seeker", parse_labor_seeker, nullptr, "labor", nullptr },
+    { "storages", parse_storages, finish_storages, "building", nullptr },
+    { "storage", parse_storage_reference, nullptr, "storages", nullptr },
+    { "production_methods", parse_production_methods, finish_production_methods, "building", nullptr },
+    { "production_method", parse_production_method_reference, nullptr, "production_methods", nullptr },
     { "spawn_group", parse_spawn_group, nullptr, "building", nullptr },
     { "spawn", parse_spawn, nullptr, "spawn_group", nullptr }
 };
@@ -1226,8 +1364,51 @@ static void validate_runtime_graphics_or_clear(BuildingType &definition)
     }
 }
 
+static int resolve_runtime_references(BuildingType &definition, const char *filename)
+{
+    for (const std::string &storage_path : definition.storage_reference_paths()) {
+        const StorageType *storage_type = find_storage_type_definition(storage_path.c_str());
+        if (!storage_type) {
+            char detail[512];
+            snprintf(
+                detail,
+                sizeof(detail),
+                "building=%s storage_path=%s file=%s",
+                definition.attr(),
+                storage_path.c_str(),
+                filename ? filename : "");
+            error_context_report_error("Unable to resolve BuildingType storage reference.", detail);
+            log_error("Unable to resolve BuildingType storage reference", detail, 0);
+            return 0;
+        }
+        definition.add_storage_type(storage_type);
+    }
+
+    for (const std::string &production_path : definition.production_method_reference_paths()) {
+        const ProductionMethod *production_method = find_production_method_definition(production_path.c_str());
+        if (!production_method) {
+            char detail[512];
+            snprintf(
+                detail,
+                sizeof(detail),
+                "building=%s production_method_path=%s file=%s",
+                definition.attr(),
+                production_path.c_str(),
+                filename ? filename : "");
+            error_context_report_error("Unable to resolve BuildingType production_method reference.", detail);
+            log_error("Unable to resolve BuildingType production_method reference", detail, 0);
+            return 0;
+        }
+        definition.add_production_method(production_method);
+    }
+
+    return 1;
+}
+
 static int parse_definition_file(const char *filename)
 {
+    ErrorContextScope error_scope("building_type_registry.parse_definition", filename);
+
     std::vector<char> buffer;
     if (!load_file_to_buffer(filename, buffer)) {
         return 0;
@@ -1241,14 +1422,22 @@ static int parse_definition_file(const char *filename)
 
     int parsed = xml_parser_parse(buffer.data(), static_cast<unsigned int>(buffer.size()), 1);
     xml_parser_free();
-    if (!parsed || g_parse_state.error || !g_parse_state.definition || (!g_parse_state.saw_graphic && !g_parse_state.saw_spawn)) {
-        if (!g_parse_state.saw_graphic && !g_parse_state.saw_spawn) {
+    if (!parsed || g_parse_state.error || !g_parse_state.definition ||
+        (!g_parse_state.saw_graphic && !g_parse_state.saw_spawn &&
+            !g_parse_state.saw_storages && !g_parse_state.saw_production_methods &&
+            !g_parse_state.saw_labor && !g_parse_state.saw_state)) {
+        if (!g_parse_state.saw_graphic && !g_parse_state.saw_spawn &&
+            !g_parse_state.saw_storages && !g_parse_state.saw_production_methods &&
+            !g_parse_state.saw_labor && !g_parse_state.saw_state) {
             log_error("BuildingType xml is missing a supported node", filename, 0);
         }
         return 0;
     }
 
     validate_runtime_graphics_or_clear(*g_parse_state.definition);
+    if (!resolve_runtime_references(*g_parse_state.definition, filename)) {
+        return 0;
+    }
     g_building_types[g_parse_state.definition->type()] = std::move(g_parse_state.definition);
     return 1;
 }
@@ -1263,6 +1452,15 @@ extern "C" int building_type_registry_load(void)
 
     for (std::unique_ptr<BuildingType> &definition : g_building_types) {
         definition.reset();
+    }
+
+    if (!storage_type_registry_load()) {
+        log_error("Unable to load StorageType xml definitions", 0, 0);
+        return 0;
+    }
+    if (!production_method_registry_load()) {
+        log_error("Unable to load ProductionMethod xml definitions", 0, 0);
+        return 0;
     }
 
     const dir_listing *files = dir_find_files_with_extension(g_building_type_path.c_str(), "xml");

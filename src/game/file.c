@@ -225,7 +225,8 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     game_state_unpause();
 
     weather_reset();
-    // After new city/scenario init, every live building instance is rebound to its runtime wrapper and gets cached image-group bindings.
+    // After new city/scenario init, every live building instance is rebound to its runtime wrapper and rebuilds native
+    // graphics/storage/production state.
     building_runtime_initialize_city_graphics_cache();
 }
 
@@ -332,7 +333,7 @@ static void initialize_saved_game(void)
     game_state_unpause();
 
     weather_reset();
-    // This is where restored saved buildings become renderer-ready again after the world has finished loading.
+    // This is where restored saved buildings rebuild renderer/runtime state again after the world has finished loading.
     building_runtime_initialize_city_graphics_cache();
 }
 

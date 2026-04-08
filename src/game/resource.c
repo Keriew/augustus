@@ -334,9 +334,14 @@ resource_version_t resource_mapping_get_version(void)
     return mapping.version;
 }
 
+int resource_base_production_per_month(resource_type resource)
+{
+    return resource_info[resource].production_per_month;
+}
+
 int resource_production_per_month(resource_type resource)
 {
-    int production = resource_info[resource].production_per_month;
+    int production = resource_base_production_per_month(resource);
     if (resource == RESOURCE_WHEAT && scenario_property_climate() == CLIMATE_NORTHERN) {
         production /= 2;
     }
