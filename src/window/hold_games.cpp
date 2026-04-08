@@ -1,4 +1,5 @@
-#include "hold_games.h"
+extern "C" {
+#include "window/hold_games.h"
 
 #include "assets/assets.h"
 #include "building/count.h"
@@ -24,6 +25,7 @@
 #include "window/advisors.h"
 #include "window/city.h"
 #include "window/message_dialog.h"
+}
 
 static void button_game(const generic_button *button);
 static void button_help(int param1, int param2);
@@ -55,6 +57,20 @@ static struct {
     int game_possible;
 } data;
 
+static int game_icon_image_id(int index)
+{
+    static const char *const kGameIconNames[MAX_GAMES] = {
+        "Naumachia Icon",
+        "Image_0018",
+        "Image_0019",
+    };
+
+    if (index < 0 || index >= MAX_GAMES) {
+        return 0;
+    }
+    return assets_get_image_id("UI", kGameIconNames[index]);
+}
+
 static void draw_background(void)
 {
     int selected_game_id = city_data.games.selected_games_id;
@@ -68,10 +84,10 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(48, 48, 34, 22);
-    text_draw_centered(translation_for(game->header_key), 48, 60, 544, FONT_LARGE_BLACK, 0);
+    text_draw_centered(translation_for(static_cast<translation_key>(game->header_key)),
+        48, 60, 544, FONT_LARGE_BLACK, 0);
     int border_image_id = assets_get_image_id("UI", "Image Border Small");
     int highlight_image_id = assets_get_image_id("UI", "Highlight");
-    int base_image_id = assets_get_image_id("UI", "Naumachia Icon");
     for (int i = 0; i < MAX_GAMES; i++) {
         color_t border_color, highlight_color;
         if (i == game->id - 1) {
@@ -83,10 +99,11 @@ static void draw_background(void)
             highlight_color = COLOR_BLACK;
         }
         image_draw_border(border_image_id, 100 * i + 170, 96, border_color);
-        image_draw(base_image_id + i, 100 * i + 175, 101, COLOR_MASK_NONE, SCALE_NONE);
-        image_draw_border(highlight_image_id, 100 * i + 175, 101, highlight_color);
+        image_draw(game_icon_image_id(i), 100 * i + 175, 101, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(highlight_image_id, 100 * i + 175, 101, highlight_color, SCALE_NONE);
     }
-    text_draw_multiline(translation_for(game->description_key), 70, 215, 510, 0, FONT_NORMAL_BLACK, 0);
+    text_draw_multiline(translation_for(static_cast<translation_key>(game->description_key)),
+        70, 215, 510, 0, FONT_NORMAL_BLACK, 0);
 
     int width = text_draw(translation_for(TR_WINDOW_GAMES_COST), 120, 300, FONT_NORMAL_BLACK, 0);
     width += text_draw_money(city_games_money_cost(selected_game_id), 120 + width, 300, FONT_NORMAL_BLACK);
@@ -96,20 +113,22 @@ static void draw_background(void)
     int has_resources = 1;
     int resource_cost = 0;
     for (int resource = 0; resource < RESOURCE_MAX; ++resource) {
-        resource_cost = city_games_resource_cost(selected_game_id, resource);
+        const resource_type resource_type_id = static_cast<resource_type>(resource);
+        resource_cost = city_games_resource_cost(selected_game_id, resource_type_id);
         if (resource_cost) {
             width += text_draw_number(resource_cost, '@', "", 164 + width, 320, FONT_NORMAL_BLACK, 0);
-            if (city_resource_get_amount_including_granaries(resource, resource_cost, 0, 1) < resource_cost) {
+            if (city_resource_get_amount_including_granaries(resource_type_id, resource_cost, 0, 1) < resource_cost) {
                 has_resources = 0;
             }
-            image_draw(resource_get_data(resource)->image.icon, 164 + width, 316, COLOR_MASK_NONE, SCALE_NONE);
+            image_draw(resource_get_data(resource_type_id)->image.icon, 164 + width, 316, COLOR_MASK_NONE, SCALE_NONE);
             width += 32;
         }
     }
     data.game_possible = 0;
-    building *game_building = building_first_of_type(game->building_id_required);
+    const building_type required_building_type = static_cast<building_type>(game->building_id_required);
+    building *game_building = building_first_of_type(required_building_type);
 
-    if (!building_count_active(game->building_id_required)) {
+    if (!building_count_active(required_building_type)) {
         text_draw(translation_for(TR_WINDOW_GAMES_NO_VENUE), 120, 355, FONT_NORMAL_BLACK, 0);
     } else if (city_emperor_personal_savings() < city_games_money_cost(selected_game_id)) {
         text_draw(translation_for(TR_WINDOW_GAMES_NOT_ENOUGH_FUNDS), 120, 355, FONT_NORMAL_BLACK, 0);

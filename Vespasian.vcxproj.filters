@@ -107,7 +107,7 @@
     <ClCompile Include="src\window\advisors.c" />
     <ClCompile Include="src\window\asset_previewer.c" />
     <ClCompile Include="src\window\building\common.c" />
-    <ClCompile Include="src\window\building\culture.c" />
+    <ClCompile Include="src\window\building\culture.cpp" />
     <ClCompile Include="src\window\building\depot.c" />
     <ClCompile Include="src\window\building\distribution.c" />
     <ClCompile Include="src\window\building\figures.c" />
@@ -159,8 +159,8 @@
     <ClCompile Include="src\window\empire_sidebar_sort.c" />
     <ClCompile Include="src\window\file_dialog.cpp" />
     <ClCompile Include="src\window\gift_to_emperor.cpp" />
-    <ClCompile Include="src\window\hold_festival.c" />
-    <ClCompile Include="src\window\hold_games.c" />
+    <ClCompile Include="src\window\hold_festival.cpp" />
+    <ClCompile Include="src\window\hold_games.cpp" />
     <ClCompile Include="src\window\hotkey_config.c" />
     <ClCompile Include="src\window\hotkey_editor.c" />
     <ClCompile Include="src\window\intermezzo.c" />

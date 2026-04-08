@@ -134,7 +134,7 @@ int legacy_bytes_for_utf8_prefix(const LegacyUtf8View &view, unsigned int utf8_b
 
 int is_legacy_hidden_number_prefix(char prefix)
 {
-    return prefix == '@';
+    return prefix == '@' || prefix == '_';
 }
 
 } // namespace

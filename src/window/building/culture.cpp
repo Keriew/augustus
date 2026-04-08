@@ -1,4 +1,5 @@
-#include "culture.h"
+extern "C" {
+#include "window/building/culture.h"
 
 #include "assets/assets.h"
 #include "building/caravanserai.h"
@@ -24,6 +25,7 @@
 #include "window/hold_games.h"
 #include "window/option_popup.h"
 #include "window/race_bet.h"
+}
 
 #define GOD_PANTHEON 5
 #define MODULE_COST 1000
@@ -732,7 +734,8 @@ void window_building_draw_shrine_venus(building_info_context *c)
 }
 
 static void draw_grand_temple(building_info_context *c, const char *sound_file,
-    int name, int bonus_desc, int banner_id, int quote, int temple_god_id, int extra_y)
+    translation_key name, translation_key bonus_desc, int banner_id, translation_key quote,
+    int temple_god_id, int extra_y)
 {
     building *b = building_get(c->building_id);
     window_building_play_sound(c, sound_file);
@@ -745,7 +748,8 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
         window_building_draw_monument_temple_construction_process(c);
     }
     if (b->monument.upgrades) {
-        int module_name = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.header;
+        const translation_key module_name = static_cast<translation_key>(
+            temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.header);
         text_draw_centered(translation_for(module_name),
             c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
     } else {
@@ -761,7 +765,8 @@ static void draw_grand_temple(building_info_context *c, const char *sound_file,
             height = text_draw_multiline(translation_for(bonus_desc),
                 c->x_offset + 22, c->y_offset + 56 + extra_y, 15 * c->width_blocks, 0, FONT_NORMAL_BLACK, 0);
             if (b->monument.upgrades) {
-                int module_desc = temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.desc;
+                const translation_key module_desc = static_cast<translation_key>(
+                    temple_module_options[data.god_id * 2 + (b->monument.upgrades - 1)].option.desc);
                 height += text_draw_multiline(translation_for(module_desc),
                     c->x_offset + 22, c->y_offset + 66 + height + extra_y, 15 * c->width_blocks,
                     0, FONT_NORMAL_GREEN, 0);
@@ -944,14 +949,14 @@ void window_building_draw_tavern(building_info_context *c)
         text_draw_multiline(translation_for(TR_BUILDING_TAVERN_DESC_2),
             c->x_offset + 32, c->y_offset + 96, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
     } else if (!b->resources[RESOURCE_MEAT] && !b->resources[RESOURCE_FISH]) {
-        int string_key = TR_BUILDING_TAVERN_DESC_3;
+        translation_key string_key = TR_BUILDING_TAVERN_DESC_3;
         if (b->upgrade_level) {
             string_key = TR_BUILDING_TAVERN_DESC_UPGRADED_WINE_NO_FOOD;
         }
         text_draw_multiline(translation_for(string_key),
             c->x_offset + 32, c->y_offset + 96, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
     } else {
-        int string_key = TR_BUILDING_TAVERN_DESC_4;
+        translation_key string_key = TR_BUILDING_TAVERN_DESC_4;
         if (b->upgrade_level) {
             string_key = TR_BUILDING_TAVERN_DESC_UPGRADED_WINE_AND_FOOD;
         }
@@ -1081,6 +1086,8 @@ void window_building_draw_colosseum_foreground(building_info_context *c)
     if (!city_festival_games_active() && !city_festival_games_planning_time() && !city_festival_games_cooldown()) {
         button_border_draw(c->x_offset + 88, c->y_offset + (c->height_blocks > 27 ? 535 : 335),
             300, 20, data.focus_button_id == 1);
+        text_draw_centered(translation_for(TR_WINDOW_ADVISOR_ENTERTAINMENT_GAMES_BUTTON),
+            c->x_offset + 88, c->y_offset + (c->height_blocks > 27 ? 540 : 340), 300, FONT_NORMAL_BLACK, 0);
     }
 }
 
@@ -1165,6 +1172,8 @@ void window_building_draw_hippodrome_foreground(building_info_context *c)
     if (!city_data.games.chosen_horse) {
         button_border_draw(c->x_offset + 88, c->y_offset + (c->height_blocks > 27 ? 603 : 380),
                            300, 20, data.focus_button_id == 1);
+        text_draw_centered(translation_for(TR_WINDOW_RACE_BET_TITLE),
+            c->x_offset + 88, c->y_offset + (c->height_blocks > 27 ? 608 : 385), 300, FONT_NORMAL_BLACK, 0);
     }
 }
 
@@ -1218,8 +1227,9 @@ void window_building_draw_hippodrome_background(building_info_context *c)
 
             image_draw_border(border, c->x_offset + 32, c->y_offset + y_offset + 240, COLOR_BORDER_RED);
 
-            text_draw_multiline(translation_for(TR_WINDOW_RACE_BLUE_HORSE_DESCRIPTION +
-                city_data.games.chosen_horse - 1), c->x_offset + 125, c->y_offset + y_offset + 240, 320,
+            text_draw_multiline(translation_for(static_cast<translation_key>(
+                TR_WINDOW_RACE_BLUE_HORSE_DESCRIPTION + city_data.games.chosen_horse - 1)),
+                c->x_offset + 125, c->y_offset + y_offset + 240, 320,
                 0, FONT_NORMAL_BLACK, 0);
         }
         text_draw_centered(translation_for(city_data.games.chosen_horse ? TR_WINDOW_IN_PROGRESS_BET_BUTTON :

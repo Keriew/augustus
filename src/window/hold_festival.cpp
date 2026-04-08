@@ -1,4 +1,5 @@
-#include "hold_festival.h"
+extern "C" {
+#include "window/hold_festival.h"
 
 #include "assets/assets.h"
 #include "city/constants.h"
@@ -17,6 +18,7 @@
 #include "input/input.h"
 #include "window/advisors.h"
 #include "window/message_dialog.h"
+}
 
 static void button_god(const generic_button *button);
 static void button_size(const generic_button *button);
@@ -45,7 +47,7 @@ static generic_button buttons_gods_size[] = {
 static unsigned int focus_button_id;
 static unsigned int focus_image_button_id;
 
-static void draw_buttons(void)
+static void draw_button_labels(void)
 {
     font_t font;
     color_t color;
@@ -62,12 +64,10 @@ static void draw_buttons(void)
         wine_image_id = resource_get_data(RESOURCE_WINE)->image.icon;
     }
     // small festival
-    button_border_draw(82, 216, 477, 26, color == COLOR_MASK_NONE && focus_button_id == 6);
     int width = lang_text_draw_colored(58, 31, 92, 224, font, color);
     lang_text_draw_amount_colored(8, 0, city_festival_small_cost(), 92 + width, 224, font, color);
 
     // large festival
-    button_border_draw(82, 246, 477, 26, color == COLOR_MASK_NONE && focus_button_id == 7);
     width = lang_text_draw_colored(58, 32, 92, 254, font, color);
     lang_text_draw_amount_colored(8, 0, city_festival_large_cost(), 92 + width, 254, font, color);
 
@@ -78,11 +78,22 @@ static void draw_buttons(void)
     }
 
     // grand festival
-    button_border_draw(82, 276, 477, 26, color == COLOR_MASK_NONE && focus_button_id == 8);
     width = lang_text_draw_colored(58, 33, 92, 284, font, color);
     width += lang_text_draw_amount_colored(8, 0, city_festival_grand_cost(), 92 + width, 284, font, color);
     width += lang_text_draw_amount_colored(8, 10, city_festival_grand_wine(), 97 + width, 284, font, color);
     image_draw(wine_image_id, 97 + width, 279, COLOR_MASK_NONE, SCALE_NONE);
+}
+
+static void draw_buttons(void)
+{
+    const int can_select_size = !city_finance_out_of_money();
+    const int can_select_grand = can_select_size && !city_festival_out_of_wine();
+
+    button_border_draw(82, 216, 477, 26, can_select_size && focus_button_id == 6);
+    button_border_draw(82, 246, 477, 26, can_select_size && focus_button_id == 7);
+    button_border_draw(82, 276, 477, 26, can_select_grand && focus_button_id == 8);
+
+    draw_button_labels();
 }
 
 static void draw_background(void)
@@ -127,6 +138,7 @@ static void draw_foreground(void)
             button_border_draw(82, 276, 477, 26, focus_button_id == 8);
         }
     }
+    draw_button_labels();
     image_buttons_draw(0, 0, image_buttons_bottom, active_image_buttons());
     graphics_reset_dialog();
 }
