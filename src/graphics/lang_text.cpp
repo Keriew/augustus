@@ -1,9 +1,11 @@
 #include "lang_text.h"
 
+extern "C" {
 #include "core/lang.h"
 #include "core/locale.h"
 #include "core/string.h"
 #include "graphics/text.h"
+}
 
 int lang_text_get_width(int group, int number, font_t font)
 {

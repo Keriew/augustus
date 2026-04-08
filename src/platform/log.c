@@ -13,6 +13,7 @@ static struct {
     unsigned int count;
 } previous_log_messages[MAX_OLD_MESSAGES];
 static int old_message_index;
+static int debug_enabled;
 
 static const char *build_message(const char *msg, const char *param_str, int param_int)
 {
@@ -65,6 +66,16 @@ void log_info(const char *msg, const char *param_str, int param_int)
     if (!count_archived_message()) {
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", log_buffer);
     }
+}
+
+void log_set_debug_enabled(int enabled)
+{
+    debug_enabled = enabled ? 1 : 0;
+}
+
+int log_is_debug_enabled(void)
+{
+    return debug_enabled;
 }
 
 void log_warning(const char *msg, const char *param_str, int param_int)

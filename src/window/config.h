@@ -1,6 +1,10 @@
 #ifndef WINDOW_CONFIG_H
 #define WINDOW_CONFIG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     CONFIG_FIRST_PAGE = 0,
     CONFIG_PAGE_GENERAL = 0,
@@ -30,5 +34,9 @@ typedef enum {
 } city_management_category;
 
 void window_config_show(window_config_page page, unsigned int category, int show_background_image);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WINDOW_CONFIG_H

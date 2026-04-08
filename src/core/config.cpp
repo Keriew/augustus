@@ -131,6 +131,7 @@ static const char *ini_keys[] = {
 
 static const char *ini_string_keys[] = {
     "ui_language_dir",
+    "ui_locale",
 };
 
 static int values[CONFIG_MAX_ENTRIES];
@@ -335,7 +336,9 @@ void config_load(void)
             for (int i = 0; i < CONFIG_MAX_ENTRIES; i++) {
                 if (strcmp(ini_keys[i], line) == 0) {
                     int value = atoi(&equals[1]);
-                    log_info("Config key", ini_keys[i], value);
+                    if (log_is_debug_enabled()) {
+                        log_info("Config key", ini_keys[i], value);
+                    }
                     values[i] = value;
                     break;
                 }
@@ -343,8 +346,10 @@ void config_load(void)
             for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; i++) {
                 if (strcmp(ini_string_keys[i], line) == 0) {
                     const char *value = &equals[1];
-                    log_info("Config key", ini_string_keys[i], 0);
-                    log_info("Config value", value, 0);
+                    if (log_is_debug_enabled()) {
+                        log_info("Config key", ini_string_keys[i], 0);
+                        log_info("Config value", value, 0);
+                    }
                     snprintf(string_values[i], CONFIG_STRING_VALUE_MAX, "%s", value);
                     break;
                 }

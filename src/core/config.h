@@ -131,6 +131,7 @@ typedef enum {
 
 typedef enum {
     CONFIG_STRING_UI_LANGUAGE_DIR,
+    CONFIG_STRING_UI_LOCALE,
     CONFIG_STRING_MAX_ENTRIES
 } config_string_key;
 

@@ -73,7 +73,9 @@ double parse_factor(const char **s)
         if (**s == ',') {
             (*s)++;
             double val2 = parse_expr(s);
-            val = val1 < val2 ? random_between_from_stdlib(val1, val2) : random_between_from_stdlib(val2, val1);
+            int min_value = (int) floor(val1 < val2 ? val1 : val2);
+            int max_value = (int) floor(val1 < val2 ? val2 : val1);
+            val = random_between_from_stdlib(min_value, max_value);
             // random_between_from_stdlib does only work if min <= max otherwise it return min so the values have to be switched
         }
         if (**s == '}') {

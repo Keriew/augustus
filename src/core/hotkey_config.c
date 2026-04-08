@@ -171,7 +171,9 @@ static void set_layout_mapping(
 {
     key_type key = system_keyboard_key_for_symbol(name);
     if (key == KEY_TYPE_NONE) {
-        log_info("No key found on layout for", name, 0);
+        if (log_is_debug_enabled()) {
+            log_info("No key found on layout for", name, 0);
+        }
         key = default_key;
     }
     set_mapping(key, modifiers, action);

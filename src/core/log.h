@@ -24,6 +24,8 @@ extern "C" {
  * @param param_int Extra info (integer)
  */
 void log_info(const char *msg, const char *param_str, int param_int);
+void log_set_debug_enabled(int enabled);
+int log_is_debug_enabled(void);
 
 /**
  * Logs a warning message.

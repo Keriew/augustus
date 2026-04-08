@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file
  * Language functions for localizable strings and messages
@@ -86,6 +90,7 @@ int lang_dir_is_valid(const char *dir);
  */
 int lang_load(int is_editor);
 void load_augustus_messages(void);
+void lang_refresh_message_cache(void);
 
 /**
  * Gets a localized string
@@ -108,5 +113,9 @@ const uint8_t *lang_get_building_type_string(int type);
  * @return Message
  */
 const lang_message *lang_get_message(int id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CORE_LANG_H
