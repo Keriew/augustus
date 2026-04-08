@@ -16,6 +16,7 @@ int production_runtime_get_max_progress(building *b);
 int production_runtime_get_efficiency(building *b);
 int production_runtime_update_building(building *b, int new_day, int *out_is_striking);
 int production_runtime_has_produced_resource(building *b);
+int production_runtime_get_output_cart_loads(building *b);
 int production_runtime_start_new_production(building *b);
 void production_runtime_advance_stats(building *b);
 void production_runtime_bless_farm(building *b);

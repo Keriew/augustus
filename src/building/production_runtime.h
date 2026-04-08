@@ -40,6 +40,7 @@ public:
     int max_progress() const;
     int efficiency() const;
     int has_produced_resource() const;
+    int output_cart_loads() const;
     void start_new_production();
     void advance_stats();
     void bless_farm();
@@ -49,6 +50,9 @@ public:
 private:
     int can_start_cycle() const;
     int decrement_strike_if_needed(int new_day, int *out_is_striking);
+    int effective_monthly_production() const;
+    int pending_production_for_stats() const;
+    int scaled_input_amount(const building_type_registry_impl::ProductionResourceAmount &input) const;
     void refresh_images() const;
 
     ::building *building_ = nullptr;

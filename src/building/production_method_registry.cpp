@@ -13,6 +13,7 @@ extern "C" {
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <climits>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -29,6 +30,7 @@ struct ParseState {
     std::unique_ptr<ProductionMethod> definition;
     int saw_kind = 0;
     int saw_output = 0;
+    int saw_batch_size = 0;
     int error = 0;
 };
 
@@ -172,6 +174,74 @@ resource_type parse_resource_type_name(const char *name)
     return RESOURCE_NONE;
 }
 
+int parse_scenario_climate_name(const char *name, scenario_climate *out_climate)
+{
+    if (!name || !*name || !out_climate) {
+        return 0;
+    }
+
+    const std::string normalized_name = trim_copy(name);
+    if (normalized_name == "central") {
+        *out_climate = CLIMATE_CENTRAL;
+        return 1;
+    }
+    if (normalized_name == "northern") {
+        *out_climate = CLIMATE_NORTHERN;
+        return 1;
+    }
+    if (normalized_name == "desert") {
+        *out_climate = CLIMATE_DESERT;
+        return 1;
+    }
+    return 0;
+}
+
+int adjust_production_with_percent(int base_production, int percent_delta)
+{
+    return base_production + (base_production * percent_delta) / 100;
+}
+
+int validate_definition(const ProductionMethod &definition, const char *filename, const char *definition_path)
+{
+    if (definition.batch_size() <= 0) {
+        log_error("ProductionMethod batch_size must be positive", definition.path(), 0);
+        error_context_report_error("ProductionMethod batch_size must be positive.", filename);
+        return 0;
+    }
+    if (definition.batch_size() > UCHAR_MAX) {
+        char detail[512];
+        snprintf(detail, sizeof(detail), "file=%s path=%s batch_size=%d", filename, definition_path ? definition_path : "",
+            definition.batch_size());
+        log_error("ProductionMethod batch_size exceeds current cart load field", definition.path(), 0);
+        error_context_report_error("ProductionMethod batch_size exceeds current cart load field.", detail);
+        return 0;
+    }
+
+    const int base_output_production = resource_base_production_per_month(definition.output_resource());
+    if (base_output_production <= 0) {
+        char detail[512];
+        snprintf(detail, sizeof(detail), "file=%s path=%s output_resource=%d", filename, definition_path ? definition_path : "",
+            definition.output_resource());
+        log_error("ProductionMethod output resource has invalid base production", definition.path(), 0);
+        error_context_report_error("ProductionMethod output resource has invalid base production.", detail);
+        return 0;
+    }
+
+    for (const ClimateProductionBonus &bonus : definition.climate_bonuses()) {
+        const int adjusted_production = adjust_production_with_percent(base_output_production, bonus.percent_delta);
+        if (adjusted_production <= 0) {
+            char detail[512];
+            snprintf(detail, sizeof(detail), "file=%s path=%s climate=%d percent=%d", filename,
+                definition_path ? definition_path : "", bonus.climate, bonus.percent_delta);
+            log_error("ProductionMethod climate bonus produces non-positive throughput", definition.path(), 0);
+            error_context_report_error("ProductionMethod climate bonus produces non-positive throughput.", detail);
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 int parse_root()
 {
     if (!g_parse_state.definition) {
@@ -244,6 +314,84 @@ int parse_output()
     return 1;
 }
 
+int parse_batch_size()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered ProductionMethod batch_size before root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (g_parse_state.saw_batch_size) {
+        log_error("ProductionMethod xml contains duplicate batch_size nodes", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("value")) {
+        log_error("ProductionMethod batch_size is missing required attribute 'value'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    const int batch_size = xml_parser_get_attribute_int("value");
+    if (batch_size <= 0) {
+        log_error("Unsupported ProductionMethod batch_size", xml_parser_get_attribute_string("value"), 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    g_parse_state.definition->set_batch_size(batch_size);
+    g_parse_state.saw_batch_size = 1;
+    return 1;
+}
+
+int parse_climate_bonuses()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered ProductionMethod climate_bonuses before root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    return 1;
+}
+
+int parse_climate_bonus()
+{
+    if (!g_parse_state.definition) {
+        log_error("Encountered ProductionMethod climate bonus before root", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("climate")) {
+        log_error("ProductionMethod climate bonus is missing required attribute 'climate'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+    if (!xml_parser_has_attribute("percent")) {
+        log_error("ProductionMethod climate bonus is missing required attribute 'percent'", 0, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    scenario_climate climate = CLIMATE_CENTRAL;
+    const char *climate_text = xml_parser_get_attribute_string("climate");
+    if (!parse_scenario_climate_name(climate_text, &climate)) {
+        log_error("Unsupported ProductionMethod climate bonus climate", climate_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    ClimateProductionBonus bonus;
+    bonus.climate = climate;
+    bonus.percent_delta = xml_parser_get_attribute_int("percent");
+    if (!g_parse_state.definition->add_climate_bonus(bonus)) {
+        log_error("ProductionMethod xml contains duplicate climate bonus entries", climate_text, 0);
+        g_parse_state.error = 1;
+        return 0;
+    }
+
+    return 1;
+}
+
 int parse_input()
 {
     if (!g_parse_state.definition) {
@@ -285,6 +433,9 @@ const xml_parser_element XML_ELEMENTS[] = {
     { "production_method", parse_root, nullptr, nullptr, nullptr },
     { "kind", parse_kind, nullptr, "production_method", nullptr },
     { "output", parse_output, nullptr, "production_method", nullptr },
+    { "batch_size", parse_batch_size, nullptr, "production_method", nullptr },
+    { "climate_bonuses", parse_climate_bonuses, nullptr, "production_method", nullptr },
+    { "bonus", parse_climate_bonus, nullptr, "climate_bonuses", nullptr },
     { "input", parse_input, nullptr, "production_method", nullptr }
 };
 
@@ -312,6 +463,9 @@ int parse_definition_file(const char *filename, const char *definition_path)
         char detail[512];
         snprintf(detail, sizeof(detail), "file=%s path=%s", filename, definition_path ? definition_path : "");
         error_context_report_error("Unable to parse ProductionMethod xml.", detail);
+        return 0;
+    }
+    if (!validate_definition(*g_parse_state.definition, filename, definition_path)) {
         return 0;
     }
 

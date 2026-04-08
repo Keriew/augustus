@@ -6,7 +6,7 @@ Registry keys are the file path relative to this folder, without the `.xml` suff
 
 Example:
 
-- `Mods\Vespasian\ProductionMethod\pottery_workshop_basic.xml` is referenced as `pottery_workshop_basic`
+- `Mods\Augustus\ProductionMethod\pottery_workshop_basic.xml` is referenced as `pottery_workshop_basic`
 
 Current supported nodes:
 

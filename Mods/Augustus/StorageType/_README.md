@@ -6,7 +6,7 @@ Registry keys are the file path relative to this folder, without the `.xml` suff
 
 Example:
 
-- `Mods\Vespasian\StorageType\clay_input_pottery_workshop.xml` is referenced as `clay_input_pottery_workshop`
+- `Mods\Augustus\StorageType\clay_input_pottery_workshop.xml` is referenced as `clay_input_pottery_workshop`
 
 Prefer descriptive names that include both the resource and the owning building context.
 
@@ -22,4 +22,4 @@ Rules:
 - `<capacity>` is optional
 - `amount` is stored as raw resource units
 
-The current vertical slice uses StorageType as shared authored metadata for native building-owned storage slots.
+The current native vertical slice uses StorageType as shared authored metadata for native building-owned storage slots.

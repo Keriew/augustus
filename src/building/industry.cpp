@@ -70,11 +70,12 @@ int building_get_raw_materials_for_workshop(resource_supply_chain *chain, buildi
 {
     if (const building_type_registry_impl::ProductionMethod *method = primary_native_production_method(type)) {
         const std::vector<building_type_registry_impl::ProductionResourceAmount> &inputs = method->inputs();
+        const int batch_size = method->batch_size();
         if (chain) {
             for (size_t i = 0; i < inputs.size(); i++) {
                 chain[i].good = method->output_resource();
                 chain[i].raw_material = inputs[i].resource;
-                chain[i].raw_amount = inputs[i].amount;
+                chain[i].raw_amount = inputs[i].amount * batch_size;
             }
         }
         return static_cast<int>(inputs.size());
@@ -533,7 +534,7 @@ int building_get_required_raw_amount_for_production(building_type type, int raw_
     if (const building_type_registry_impl::ProductionMethod *method = primary_native_production_method(type)) {
         for (const building_type_registry_impl::ProductionResourceAmount &input : method->inputs()) {
             if (input.resource == static_cast<resource_type>(raw_material)) {
-                return input.amount;
+                return input.amount * method->batch_size();
             }
         }
         return 0;
@@ -573,8 +574,10 @@ int building_has_workshop_for_raw_material_with_room(int resource, int road_netw
     for (int i = 0; i < num_goods; i++) {
         building_type type = resource_get_data(chain[i].good)->industry;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            const int desired_stock = has_native_production_type(type) ?
+                2 * building_get_required_raw_amount_for_production(type, resource) : 2 * RESOURCE_ONE_LOAD;
             if (b->state == BUILDING_STATE_IN_USE && b->has_road_access && b->distance_from_entry > 0 &&
-                b->road_network_id == road_network_id && b->resources[resource] < 2 * RESOURCE_ONE_LOAD) {
+                b->road_network_id == road_network_id && b->resources[resource] < desired_stock) {
                 if (type == BUILDING_CITY_MINT) {
                     if (b->monument.phase != MONUMENT_FINISHED || b->output_resource_id == RESOURCE_GOLD) {
                         continue;
@@ -604,8 +607,10 @@ int building_get_workshop_for_raw_material_with_room(int x, int y, int resource,
     for (int i = 0; i < num_goods; i++) {
         building_type type = resource_get_data(chain[i].good)->industry;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            const int desired_stock = has_native_production_type(type) ?
+                2 * building_get_required_raw_amount_for_production(type, resource) : 2 * RESOURCE_ONE_LOAD;
             if (b->state != BUILDING_STATE_IN_USE || !b->has_road_access || b->distance_from_entry <= 0 ||
-                b->road_network_id != road_network_id || b->resources[resource] >= 2 * RESOURCE_ONE_LOAD) {
+                b->road_network_id != road_network_id || b->resources[resource] >= desired_stock) {
                 continue;
             }
             if (type == BUILDING_CITY_MINT) {
