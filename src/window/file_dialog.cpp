@@ -391,12 +391,12 @@ static void draw_file(const list_box_item *item)
 {
     uint8_t file[FILE_NAME_MAX];
     font_t font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-    encoding_from_utf8(data.filtered_file_list.files[item->index].name, file, FILE_NAME_MAX);
-    text_ellipsize(file, font, item->width);
-    text_draw(file, item->x, item->y + 2, font, 0);
     if (item->is_focused) {
         button_border_draw(item->x - 4, item->y - 4, item->width + 6, item->height + 4, 1);
     }
+    encoding_from_utf8(data.filtered_file_list.files[item->index].name, file, FILE_NAME_MAX);
+    text_ellipsize(file, font, item->width);
+    text_draw(file, item->x, item->y + 2, font, 0);
 }
 
 static void draw_foreground(void)

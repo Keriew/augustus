@@ -119,11 +119,11 @@
     <ClCompile Include="src\window\building\utility.c" />
     <ClCompile Include="src\window\building_info.c" />
     <ClCompile Include="src\window\build_menu.cpp" />
-    <ClCompile Include="src\window\cck_selection.c" />
+    <ClCompile Include="src\window\cck_selection.cpp" />
     <ClCompile Include="src\window\city.cpp" />
     <ClCompile Include="src\window\config.cpp" />
     <ClCompile Include="src\window\console.c" />
-    <ClCompile Include="src\window\donate_to_city.c" />
+    <ClCompile Include="src\window\donate_to_city.cpp" />
     <ClCompile Include="src\window\editor\allowed_buildings.c" />
     <ClCompile Include="src\window\editor\attributes.c" />
     <ClCompile Include="src\window\editor\build_menu.c" />
@@ -158,7 +158,7 @@
     <ClCompile Include="src\window\empire.cpp" />
     <ClCompile Include="src\window\empire_sidebar_sort.c" />
     <ClCompile Include="src\window\file_dialog.cpp" />
-    <ClCompile Include="src\window\gift_to_emperor.c" />
+    <ClCompile Include="src\window\gift_to_emperor.cpp" />
     <ClCompile Include="src\window\hold_festival.c" />
     <ClCompile Include="src\window\hold_games.c" />
     <ClCompile Include="src\window\hotkey_config.c" />

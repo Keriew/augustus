@@ -1,4 +1,5 @@
-#include "donate_to_city.h"
+extern "C" {
+#include "window/donate_to_city.h"
 
 #include "city/emperor.h"
 #include "core/calc.h"
@@ -13,6 +14,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "window/advisors.h"
+}
 
 static void button_increase_amount(const generic_button *button);
 static void button_donate(const generic_button *button);
@@ -39,6 +41,18 @@ static struct {
     unsigned int focus_arrow_button_id;
 } data;
 
+static void draw_button_labels(void)
+{
+    text_draw_number_centered(0, 124, 221, 64, FONT_NORMAL_WHITE);
+    text_draw_number_centered(500, 204, 221, 64, FONT_NORMAL_WHITE);
+    text_draw_number_centered(2000, 284, 221, 64, FONT_NORMAL_WHITE);
+    text_draw_number_centered(5000, 364, 221, 64, FONT_NORMAL_WHITE);
+    lang_text_draw_centered(52, 19, 444, 221, 64, FONT_NORMAL_WHITE);
+
+    lang_text_draw_centered(13, 4, 336, 288, 160, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(52, 18, 144, 288, 160, FONT_NORMAL_BLACK);
+}
+
 static void draw_background(void)
 {
     window_advisors_draw_dialog_background();
@@ -51,12 +65,6 @@ static void draw_background(void)
 
     inner_panel_draw(112, 208, 26, 4);
 
-    text_draw_number_centered(0, 124, 221, 64, FONT_NORMAL_WHITE);
-    text_draw_number_centered(500, 204, 221, 64, FONT_NORMAL_WHITE);
-    text_draw_number_centered(2000, 284, 221, 64, FONT_NORMAL_WHITE);
-    text_draw_number_centered(5000, 364, 221, 64, FONT_NORMAL_WHITE);
-    lang_text_draw_centered(52, 19, 444, 221, 64, FONT_NORMAL_WHITE);
-
     int width = lang_text_draw(52, 17, 128, 248, FONT_NORMAL_WHITE);
 
     int button_start = 128 + width + 10;
@@ -67,9 +75,6 @@ static void draw_background(void)
     arrow_buttons[1].x_offset = arrow_buttons[0].x_offset + arrow_buttons[0].size;
 
     text_draw_number(city_emperor_donate_amount(), '@', " ", button_start + 76, 248, FONT_NORMAL_WHITE, 0);
-
-    lang_text_draw_centered(13, 4, 336, 288, 160, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(52, 18, 144, 288, 160, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
 }
@@ -88,6 +93,7 @@ static void draw_foreground(void)
     button_border_draw(144, 283, 160, 20, data.focus_button_id == 2);
 
     arrow_buttons_draw(0, 0, arrow_buttons, 2);
+    draw_button_labels();
 
     graphics_reset_dialog();
 }

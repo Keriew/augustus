@@ -1,4 +1,5 @@
-#include "cck_selection.h"
+extern "C" {
+#include "window/cck_selection.h"
 
 #include "assets/assets.h"
 #include "core/dir.h"
@@ -23,6 +24,7 @@
 #include "window/mission_briefing.h"
 
 #include <string.h>
+}
 
 #define MAX_SCENARIOS 15
 
@@ -86,13 +88,13 @@ static void draw_scenario_item(const list_box_item *item)
 {
     uint8_t displayable_file[FILE_NAME_MAX];
     font_t font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
+    if (item->is_focused) {
+        button_border_draw(item->x - 4, item->y - 4, item->width + 6, item->height + 4, 1);
+    }
     encoding_from_utf8(data.scenarios->files[item->index].name, displayable_file, FILE_NAME_MAX);
     file_remove_extension((char *) displayable_file);
     text_ellipsize(displayable_file, font, item->width);
     text_draw(displayable_file, item->x, item->y, font, 0);
-    if (item->is_focused) {
-        button_border_draw(item->x - 4, item->y - 4, item->width + 6, item->height + 4, 1);
-    }
 }
 
 static void draw_scenario_info(void)
@@ -111,19 +113,7 @@ static void draw_scenario_info(void)
 
     if (data.show_minimap) {
         widget_minimap_draw(332, 119, 286, 300);
-        // minimap button: draw mission instructions image
-        image_draw(image_group(GROUP_SIDEBAR_BRIEFING_ROTATE_BUTTONS),
-            toggle_minimap_button.x + 3, toggle_minimap_button.y + 3, COLOR_MASK_NONE, SCALE_NONE);
     } else {
-        // minimap button: draw minimap
-        int minimap_side = toggle_minimap_button.width < toggle_minimap_button.height ?
-            toggle_minimap_button.width : toggle_minimap_button.height;
-        int minimap_x_offset = (toggle_minimap_button.width - minimap_side) / 2;
-        widget_minimap_draw(
-            toggle_minimap_button.x + 3 + minimap_x_offset, toggle_minimap_button.y + 3,
-            minimap_side - 6, minimap_side - 6
-        );
-
         lang_text_draw_centered(44, 77 + data.info.climate,
             scenario_info_x, 150, scenario_info_width, FONT_NORMAL_BLACK);
 
@@ -203,6 +193,23 @@ static void draw_scenario_info(void)
     lang_text_draw_centered(44, 136, scenario_info_x, 446, scenario_info_width, FONT_NORMAL_BLACK);
 }
 
+static void draw_toggle_minimap_button_contents(void)
+{
+    if (data.show_minimap) {
+        image_draw(image_group(GROUP_SIDEBAR_BRIEFING_ROTATE_BUTTONS),
+            toggle_minimap_button.x + 3, toggle_minimap_button.y + 3, COLOR_MASK_NONE, SCALE_NONE);
+        return;
+    }
+
+    int minimap_side = toggle_minimap_button.width < toggle_minimap_button.height ?
+        toggle_minimap_button.width : toggle_minimap_button.height;
+    int minimap_x_offset = (toggle_minimap_button.width - minimap_side) / 2;
+    widget_minimap_draw(
+        toggle_minimap_button.x + 3 + minimap_x_offset, toggle_minimap_button.y + 3,
+        minimap_side - 6, minimap_side - 6
+    );
+}
+
 static void draw_background(void)
 {
     image_draw_fullscreen_background(image_group(GROUP_INTERMEZZO_BACKGROUND) + 25);
@@ -227,6 +234,7 @@ static void draw_foreground(void)
         toggle_minimap_button.x, toggle_minimap_button.y,
         toggle_minimap_button.width, toggle_minimap_button.height,
         data.focus_toggle_button);
+    draw_toggle_minimap_button_contents();
     list_box_draw(&list_box);
     graphics_reset_dialog();
 }

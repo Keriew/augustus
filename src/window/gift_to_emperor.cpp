@@ -1,4 +1,5 @@
-#include "gift_to_emperor.h"
+extern "C" {
+#include "window/gift_to_emperor.h"
 
 #include "city/emperor.h"
 #include "game/resource.h"
@@ -11,6 +12,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "window/advisors.h"
+}
 
 static void button_set_gift(const generic_button *button);
 static void button_send_gift(const generic_button *button);
@@ -43,7 +45,6 @@ static void draw_background(void)
 
     int width = lang_text_draw(52, 50, 144, 304, FONT_NORMAL_BLACK);
     lang_text_draw_amount(8, 4, city_emperor_months_since_gift(), 144 + width, 304, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(13, 4, 400, 341, 160, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
 }
@@ -56,42 +57,43 @@ static void draw_foreground(void)
 
     if (city_emperor_can_send_gift(GIFT_MODEST)) {
         const emperor_gift *gift = city_emperor_get_gift(GIFT_MODEST);
+        if (current_gift == GIFT_MODEST) {
+            button_border_draw(120, 211, 428, 24, 1);
+        }
         lang_text_draw(52, 63, 128, 218, FONT_NORMAL_WHITE);
         font_t font = focus_button_id == 1 ? FONT_NORMAL_RED : FONT_NORMAL_WHITE;
         int width = lang_text_draw(52, 51 + gift->id, 224, 218, font);
         text_draw_money(gift->cost, 224 + width, 218, font);
-        if (current_gift == GIFT_MODEST) {
-            button_border_draw(120, 211, 428, 24, 1);
-        }
     } else {
         lang_text_draw_multiline(52, 70, 160, 224, 352, FONT_NORMAL_WHITE);
     }
     if (city_emperor_can_send_gift(GIFT_GENEROUS)) {
         const emperor_gift *gift = city_emperor_get_gift(GIFT_GENEROUS);
+        if (current_gift == GIFT_GENEROUS) {
+            button_border_draw(120, 231, 428, 24, 1);
+        }
         lang_text_draw(52, 64, 128, 238, FONT_NORMAL_WHITE);
         font_t font = focus_button_id == 2 ? FONT_NORMAL_RED : FONT_NORMAL_WHITE;
         int width = lang_text_draw(52, 55 + gift->id, 224, 238, font);
         text_draw_money(gift->cost, 224 + width, 238, font);
-        if (current_gift == GIFT_GENEROUS) {
-            button_border_draw(120, 231, 428, 24, 1);
-        }
     }
     if (city_emperor_can_send_gift(GIFT_LAVISH)) {
         const emperor_gift *gift = city_emperor_get_gift(GIFT_LAVISH);
+        if (current_gift == GIFT_LAVISH) {
+            button_border_draw(120, 251, 428, 24, 1);
+        }
         lang_text_draw(52, 65, 128, 258, FONT_NORMAL_WHITE);
         font_t font = focus_button_id == 3 ? FONT_NORMAL_RED : FONT_NORMAL_WHITE;
         int width = lang_text_draw(52, 59 + gift->id, 224, 258, font);
         text_draw_money(gift->cost, 224 + width, 258, font);
-        if (current_gift == GIFT_LAVISH) {
-            button_border_draw(120, 251, 428, 24, 1);
-        }
     }
     // can give at least one type
     if (city_emperor_can_send_gift(GIFT_MODEST)) {
-        lang_text_draw_centered(52, 66 + city_emperor_selected_gift_size(), 118, 341, 260, FONT_NORMAL_BLACK);
         button_border_draw(118, 336, 260, 20, focus_button_id == 4);
+        lang_text_draw_centered(52, 66 + city_emperor_selected_gift_size(), 118, 341, 260, FONT_NORMAL_BLACK);
     }
     button_border_draw(400, 336, 160, 20, focus_button_id == 5);
+    lang_text_draw_centered(13, 4, 400, 341, 160, FONT_NORMAL_BLACK);
 
     graphics_reset_dialog();
 }
