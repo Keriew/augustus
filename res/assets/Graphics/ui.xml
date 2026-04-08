@@ -1428,4 +1428,29 @@
     <image src="LandWaypoint" id="LandWaypoint"/>
     <image src="SeaWaypoint" id="SeaWaypoint"/>
     <image src="LandWaypoint" id="BorderWaypoint"/>
+    <image id="Water_Range">
+        <layer group="135" image="4" mask="grayscale"/>
+    </image>
+    <!-- Note: Empire map icon for the City of Alexandria -->
+    <image id="Empire_Icon_Roman_06" src="Empire_Icon_Roman_06">
+        <animation speed="6" reversible="false" x="16" y="6">
+            <frame group="this" image="Empire_Icon_Flag_01"/>
+            <frame group="this" image="Empire_Icon_Flag_02"/>
+            <frame group="this" image="Empire_Icon_Flag_03"/>
+            <frame group="this" image="Empire_Icon_Flag_04"/>
+            <frame group="this" image="Empire_Icon_Flag_05"/>
+            <frame group="this" image="Empire_Icon_Flag_06"/>
+        </animation>
+    </image>
+    <!-- Note: Empire map icon for the City of Constantinople -->
+    <image id="Empire_Icon_Roman_07" src="Empire_Icon_Roman_07">
+        <animation speed="6" reversible="false" x="16" y="6">
+            <frame group="this" image="Empire_Icon_Flag_01"/>
+            <frame group="this" image="Empire_Icon_Flag_02"/>
+            <frame group="this" image="Empire_Icon_Flag_03"/>
+            <frame group="this" image="Empire_Icon_Flag_04"/>
+            <frame group="this" image="Empire_Icon_Flag_05"/>
+            <frame group="this" image="Empire_Icon_Flag_06"/>
+        </animation>
+    </image>
 </assetlist>

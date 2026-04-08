@@ -619,8 +619,8 @@ static void draw_first_reservoir_range(int x, int y, int grid_offset)
         data.reservoir_range.offsets[data.reservoir_range.total] = grid_offset;
         data.reservoir_range.total++;
     }
-    int color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color_mask, data.scale);
+    color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
+    image_draw(assets_lookup_image_id(ASSET_UI_WATER_RANGE), x, y, color_mask, data.scale);
 }
 
 static void draw_second_reservoir_range(int x, int y, int grid_offset)
@@ -630,8 +630,8 @@ static void draw_second_reservoir_range(int x, int y, int grid_offset)
             return;
         }
     }
-    int color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, color_mask, data.scale);
+    color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
+    image_draw(assets_lookup_image_id(ASSET_UI_WATER_RANGE), x, y, color_mask, data.scale);
 }
 
 static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
@@ -1325,7 +1325,8 @@ static void draw_highway(const map_tile *tile, int x, int y)
 
 static void draw_grand_temple_neptune_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, data.scale);
+    color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
+    image_draw(assets_lookup_image_id(ASSET_UI_WATER_RANGE), x, y, color_mask, data.scale);
 }
 
 static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
@@ -1333,9 +1334,19 @@ static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
     const building_properties *props = building_properties_for_type(BUILDING_GRAND_TEMPLE_NEPTUNE);
     int num_tiles = props->size * props->size;
     int blocked[MAX_TILES];
-    if (city_finance_out_of_money() || is_blocked_for_building(tile->grid_offset, props->size, blocked, 1)) {
+    int blocked_state = 0;
+    if (city_finance_out_of_money()) {
+        blocked_state = 1;
+        for (int i = 0; i < num_tiles; ++i) {
+            blocked[i] = 1;
+        }
+    } else {
+        blocked_state = is_blocked_for_building(tile->grid_offset, props->size, blocked, 1);
+    }
+    if (blocked_state) {
         image_blend_footprint_color(x, y, COLOR_MASK_RED, data.scale);
     }
+    data.reservoir_range.blocked = has_blocked_tiles(num_tiles, blocked);
     int radius = map_water_supply_reservoir_radius();
     // need to add 2 for the bonus the Neptune GT will add
     if (!building_monument_working(BUILDING_GRAND_TEMPLE_NEPTUNE)) {
@@ -1344,7 +1355,7 @@ static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)
     city_view_foreach_tile_in_range(tile->grid_offset, props->size, radius, draw_grand_temple_neptune_range);
     int image_id = get_new_building_image_id(tile->grid_offset, BUILDING_GRAND_TEMPLE_NEPTUNE);
     draw_regular_building(BUILDING_GRAND_TEMPLE_NEPTUNE, image_id, x, y, tile->grid_offset, num_tiles, blocked);
-    set_roamer_path(BUILDING_GRAND_TEMPLE_NEPTUNE, props->size, tile, has_blocked_tiles(num_tiles, blocked));
+    set_roamer_path(BUILDING_GRAND_TEMPLE_NEPTUNE, props->size, tile, data.reservoir_range.blocked);
 }
 
 static void draw_concrete_maker(const map_tile *tile, int x, int y)
