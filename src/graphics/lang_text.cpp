@@ -1,4 +1,5 @@
 #include "lang_text.h"
+#include "text_runtime_internal.h"
 
 extern "C" {
 #include "core/lang.h"
@@ -160,6 +161,10 @@ void lang_text_draw_month_year_max_width(
 
 int lang_text_draw_multiline(int group, int number, int x_offset, int y_offset, int box_width, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        const uint8_t *legacy = lang_get_string(group, number);
+        return text_draw_multiline(legacy, x_offset, y_offset, box_width, 0, font, 0);
+    }
     const uint8_t *str = lang_get_string(group, number);
     return text_draw_multiline(str, x_offset, y_offset, box_width, 0, font, 0);
 }

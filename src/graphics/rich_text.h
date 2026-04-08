@@ -5,6 +5,10 @@
 #include "graphics/font.h"
 #include "input/mouse.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initializes the rich text
  * @param text Text to show
@@ -103,5 +107,9 @@ int rich_text_scroll_position(void);
 * Gets the line height
 */
 int rich_text_get_line_height(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GRAPHICS_RICH_TEXT_H

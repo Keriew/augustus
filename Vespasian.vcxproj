@@ -230,6 +230,7 @@
     <ClCompile Include="src\graphics\clouds.c" />
     <ClCompile Include="src\graphics\complex_button.c" />
     <ClCompile Include="src\graphics\font.cpp" />
+    <ClCompile Include="src\graphics\font_vector_runtime.cpp" />
     <ClCompile Include="src\graphics\generic_button.c" />
     <ClCompile Include="src\graphics\graphics.cpp" />
     <ClCompile Include="src\graphics\grid_box.c" />
@@ -243,7 +244,7 @@
     <ClCompile Include="src\graphics\menu.c" />
     <ClCompile Include="src\graphics\panel_widget.cpp" />
     <ClCompile Include="src\graphics\renderer.c" />
-    <ClCompile Include="src\graphics\rich_text.c" />
+    <ClCompile Include="src\graphics\rich_text.cpp" />
     <ClCompile Include="src\graphics\screen.cpp" />
     <ClCompile Include="src\graphics\screenshot.c" />
     <ClCompile Include="src\graphics\scrollbar.c" />
@@ -426,7 +427,7 @@
     <ClCompile Include="src\window\advisor\trade.cpp" />
     <ClCompile Include="src\window\asset_previewer.c" />
     <ClCompile Include="src\window\building\common.c" />
-    <ClCompile Include="src\window\building\culture.c" />
+    <ClCompile Include="src\window\building\culture.cpp" />
     <ClCompile Include="src\window\building\depot.c" />
     <ClCompile Include="src\window\building\distribution.c" />
     <ClCompile Include="src\window\building\figures.c" />
@@ -438,11 +439,11 @@
     <ClCompile Include="src\window\building\utility.c" />
     <ClCompile Include="src\window\building_info.c" />
     <ClCompile Include="src\window\build_menu.cpp" />
-    <ClCompile Include="src\window\cck_selection.c" />
+    <ClCompile Include="src\window\cck_selection.cpp" />
     <ClCompile Include="src\window\city.cpp" />
     <ClCompile Include="src\window\config.cpp" />
     <ClCompile Include="src\window\console.c" />
-    <ClCompile Include="src\window\donate_to_city.c" />
+    <ClCompile Include="src\window\donate_to_city.cpp" />
     <ClCompile Include="src\window\editor\allowed_buildings.c" />
     <ClCompile Include="src\window\editor\attributes.c" />
     <ClCompile Include="src\window\editor\build_menu.c" />
@@ -477,9 +478,9 @@
     <ClCompile Include="src\window\empire.cpp" />
     <ClCompile Include="src\window\empire_sidebar_sort.c" />
     <ClCompile Include="src\window\file_dialog.cpp" />
-    <ClCompile Include="src\window\gift_to_emperor.c" />
-    <ClCompile Include="src\window\hold_festival.c" />
-    <ClCompile Include="src\window\hold_games.c" />
+    <ClCompile Include="src\window\gift_to_emperor.cpp" />
+    <ClCompile Include="src\window\hold_festival.cpp" />
+    <ClCompile Include="src\window\hold_games.cpp" />
     <ClCompile Include="src\window\hotkey_config.c" />
     <ClCompile Include="src\window\hotkey_editor.c" />
     <ClCompile Include="src\window\intermezzo.c" />
@@ -743,6 +744,7 @@
     <ClInclude Include="src\graphics\color.h" />
     <ClInclude Include="src\graphics\complex_button.h" />
     <ClInclude Include="src\graphics\font.h" />
+    <ClInclude Include="src\graphics\font_vector_runtime.h" />
     <ClInclude Include="src\graphics\generic_button.h" />
     <ClInclude Include="src\graphics\graphics.h" />
     <ClInclude Include="src\graphics\grid_box.h" />
@@ -761,6 +763,7 @@
     <ClInclude Include="src\graphics\scrollbar.h" />
     <ClInclude Include="src\graphics\scrollbar_widget.h" />
     <ClInclude Include="src\graphics\text.h" />
+    <ClInclude Include="src\graphics\text_runtime_internal.h" />
     <ClInclude Include="src\graphics\top_menu_panel_widget.h" />
     <ClInclude Include="src\graphics\tooltip.h" />
     <ClInclude Include="src\graphics\ui_border_primitive.h" />
@@ -1080,11 +1083,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <TargetName>Vespasian</TargetName>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>out\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemGroup>
-    <ModsContent Include="Mods\**\*" />
+    <Content Include="Mods\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Mods\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+    </Content>
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -1118,14 +1124,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)ext;$(ProjectDir)ext\dirent;$(ProjectDir)vendor\SDL2-2.32.10\include;$(ProjectDir)vendor\SDL2_mixer-2.8.1\include;$(ProjectDir)ext\easyav1_dummy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)ext;$(ProjectDir)ext\dirent;$(ProjectDir)vendor\SDL2-2.32.10\include;$(ProjectDir)vendor\SDL2_mixer-2.8.1\include;$(ProjectDir)vendor\SDL2_ttf-2.24.0\include;$(ProjectDir)ext\easyav1_dummy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\SDL2-2.32.10\lib\x64;$(ProjectDir)vendor\SDL2_mixer-2.8.1\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;dbghelp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\SDL2-2.32.10\lib\x64;$(ProjectDir)vendor\SDL2_mixer-2.8.1\lib\x64;$(ProjectDir)vendor\SDL2_ttf-2.24.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;SDL2_ttf.lib;dbghelp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -1140,28 +1146,21 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)ext;$(ProjectDir)ext\dirent;$(ProjectDir)vendor\SDL2-2.32.10\include;$(ProjectDir)vendor\SDL2_mixer-2.8.1\include;$(ProjectDir)ext\easyav1_dummy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)ext;$(ProjectDir)ext\dirent;$(ProjectDir)vendor\SDL2-2.32.10\include;$(ProjectDir)vendor\SDL2_mixer-2.8.1\include;$(ProjectDir)vendor\SDL2_ttf-2.24.0\include;$(ProjectDir)ext\easyav1_dummy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\SDL2-2.32.10\lib\x64;$(ProjectDir)vendor\SDL2_mixer-2.8.1\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;dbghelp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\SDL2-2.32.10\lib\x64;$(ProjectDir)vendor\SDL2_mixer-2.8.1\lib\x64;$(ProjectDir)vendor\SDL2_ttf-2.24.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;SDL2_ttf.lib;dbghelp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Target Name="CopyModsToOutput" AfterTargets="Build">
-    <MakeDir Directories="$(OutDir)Mods" />
-    <Copy
-      SourceFiles="@(ModsContent)"
-      DestinationFiles="@(ModsContent->'$(OutDir)Mods\%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
-  </Target>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>

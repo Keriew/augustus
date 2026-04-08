@@ -386,23 +386,39 @@ static int update_senate_data(void)
     return 0;
 }
 
+static void draw_senate_tooltip_row(int label_text_id, int primary_value, const char *primary_postfix, int secondary_value, int show_secondary, int y)
+{
+    const int primary_column_x = 140;
+    const int secondary_column_x = 176;
+
+    lang_text_draw_colored(68, label_text_id, 5, y, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+    text_draw_number(primary_value, '@', primary_postfix, primary_column_x, y, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+    if (show_secondary) {
+        text_draw_number(secondary_value, '(', ")", secondary_column_x, y, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+    }
+}
+
 static void draw_senate_tooltip(tooltip_context *c)
 {
-    const render_domain domain = RENDER_DOMAIN_PIXEL;
+    const render_domain domain = c->domain;
+    const int uses_ui_scale = domain == RENDER_DOMAIN_UI || domain == RENDER_DOMAIN_TOOLTIP_UI;
+    const int mouse_x = uses_ui_scale ? screen_pixel_to_ui(c->mouse_x) : c->mouse_x;
+    const int mouse_y = uses_ui_scale ? screen_pixel_to_ui(c->mouse_y) : c->mouse_y;
+    const int screen_height_for_domain = uses_ui_scale ? screen_height() : screen_pixel_height();
     int x, y;
-    int width = 220;
+    int width = 236;
     int height = 80;
-    if (c->mouse_x < width + 20) {
-        x = c->mouse_x + 20;
+    if (mouse_x < width + 20) {
+        x = mouse_x + 20;
     } else {
-        x = c->mouse_x - width - 20;
+        x = mouse_x - width - 20;
     }
-    if (c->mouse_y < 200) {
-        y = c->mouse_y + 10;
-    } else if (c->mouse_y + height - 32 > screen_pixel_height()) {
-        y = screen_pixel_height() - height;
+    if (mouse_y < 200) {
+        y = mouse_y + 10;
+    } else if (mouse_y + height - 32 > screen_height_for_domain) {
+        y = screen_height_for_domain - height;
     } else {
-        y = c->mouse_y - 32;
+        y = mouse_y - 32;
     }
 
     graphics_renderer()->set_tooltip_position_for_domain(domain, x, y);
@@ -423,36 +439,15 @@ static void draw_senate_tooltip(tooltip_context *c)
     graphics_draw_rect(0, 0, width, height, COLOR_BLACK);
     graphics_fill_rect(1, 1, width - 2, height - 2, COLOR_WHITE);
 
-    // unemployment
-    lang_text_draw_colored(68, 148, 5, 5, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    width = text_draw_number(senate_data.unemployment_percentage, '@', "%", 140, 5, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    text_draw_number(senate_data.workers_unemployed - senate_data.workers_needed, '(', ")",
-        140 + width, 5, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-
-    // ratings
-    lang_text_draw_colored(68, 149, 5, 19, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    text_draw_number(senate_data.rating_culture, '@', " ", 140, 19, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    if (!scenario_is_open_play() && scenario_criteria_culture_enabled()) {
-        text_draw_number(senate_data.criteria_culture, '(', ")", 140 + width, 19, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    }
-
-    lang_text_draw_colored(68, 150, 5, 33, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    text_draw_number(senate_data.rating_prosperity, '@', " ", 140, 33, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    if (!scenario_is_open_play() && scenario_criteria_prosperity_enabled()) {
-        text_draw_number(senate_data.criteria_prosperity, '(', ")", 140 + width, 33, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    }
-
-    lang_text_draw_colored(68, 151, 5, 47, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    text_draw_number(senate_data.rating_peace, '@', " ", 140, 47, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    if (!scenario_is_open_play() && scenario_criteria_peace_enabled()) {
-        text_draw_number(senate_data.criteria_peace, '(', ")", 140 + width, 47, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    }
-
-    lang_text_draw_colored(68, 152, 5, 61, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    text_draw_number(senate_data.rating_favor, '@', " ", 140, 61, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    if (!scenario_is_open_play() && scenario_criteria_favor_enabled()) {
-        text_draw_number(senate_data.criteria_favor, '(', ")", 140 + width, 61, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-    }
+    draw_senate_tooltip_row(148, senate_data.unemployment_percentage, "%", senate_data.workers_unemployed - senate_data.workers_needed, 1, 5);
+    draw_senate_tooltip_row(149, senate_data.rating_culture, " ", senate_data.criteria_culture,
+        !scenario_is_open_play() && scenario_criteria_culture_enabled(), 19);
+    draw_senate_tooltip_row(150, senate_data.rating_prosperity, " ", senate_data.criteria_prosperity,
+        !scenario_is_open_play() && scenario_criteria_prosperity_enabled(), 33);
+    draw_senate_tooltip_row(151, senate_data.rating_peace, " ", senate_data.criteria_peace,
+        !scenario_is_open_play() && scenario_criteria_peace_enabled(), 47);
+    draw_senate_tooltip_row(152, senate_data.rating_favor, " ", senate_data.criteria_favor,
+        !scenario_is_open_play() && scenario_criteria_favor_enabled(), 61);
 
     graphics_renderer()->finish_tooltip_creation();
 }

@@ -1,6 +1,9 @@
 #include "text.h"
+#include "font_vector_runtime.h"
+#include "text_runtime_internal.h"
 
 extern "C" {
+#include "core/encoding.h"
 #include "core/config.h"
 #include "core/lang.h"
 #include "core/locale.h"
@@ -11,6 +14,8 @@ extern "C" {
 }
 
 #include <string.h>
+#include <string>
+#include <vector>
 
 #define ELLIPSIS_LENGTH 4
 #define NUMBER_BUFFER_LENGTH 100
@@ -35,6 +40,149 @@ static struct {
     const uint8_t string[ELLIPSIS_LENGTH];
     int width[FONT_TYPES_MAX];
 } ellipsis = { {'.', '.', '.', 0} };
+
+namespace {
+
+struct LegacyUtf8View {
+    std::string utf8;
+    std::vector<int> legacy_offsets;
+    std::vector<unsigned int> utf8_offsets;
+};
+
+int legacy_character_num_bytes(const uint8_t *str)
+{
+    if (!str || !*str) {
+        return 0;
+    }
+    int num_bytes = 1;
+    font_letter_id(font_definition_for(FONT_NORMAL_BLACK), str, &num_bytes);
+    return num_bytes > 0 ? num_bytes : 1;
+}
+
+LegacyUtf8View legacy_to_utf8_view(const uint8_t *str, int start_offset = 0, int end_offset = -1)
+{
+    LegacyUtf8View view;
+    view.legacy_offsets.push_back(0);
+    view.utf8_offsets.push_back(0);
+
+    if (!str) {
+        return view;
+    }
+
+    int legacy_position = 0;
+    while (*str) {
+        int num_bytes = legacy_character_num_bytes(str);
+        if (num_bytes <= 0) {
+            break;
+        }
+
+        int next_position = legacy_position + num_bytes;
+        if (next_position <= start_offset) {
+            str += num_bytes;
+            legacy_position = next_position;
+            continue;
+        }
+        if (end_offset >= 0 && legacy_position >= end_offset) {
+            break;
+        }
+
+        int copy_bytes = num_bytes;
+        if (end_offset >= 0 && legacy_position + copy_bytes > end_offset) {
+            copy_bytes = end_offset - legacy_position;
+        }
+        if (copy_bytes <= 0) {
+            break;
+        }
+
+        uint8_t encoded[8] = { 0 };
+        memcpy(encoded, str, static_cast<size_t>(copy_bytes));
+        char utf8[16] = { 0 };
+        encoding_to_utf8(encoded, utf8, static_cast<int>(sizeof(utf8)), encoding_system_uses_decomposed());
+        view.utf8 += utf8;
+        view.legacy_offsets.push_back(view.legacy_offsets.back() + copy_bytes);
+        view.utf8_offsets.push_back(static_cast<unsigned int>(view.utf8.size()));
+
+        str += num_bytes;
+        legacy_position = next_position;
+        if (end_offset >= 0 && legacy_position >= end_offset) {
+            break;
+        }
+    }
+
+    return view;
+}
+
+unsigned int utf8_bytes_for_legacy_prefix(const LegacyUtf8View &view, int legacy_bytes)
+{
+    for (size_t i = 0; i < view.legacy_offsets.size(); ++i) {
+        if (view.legacy_offsets[i] >= legacy_bytes) {
+            return view.utf8_offsets[i];
+        }
+    }
+    return view.utf8_offsets.empty() ? 0 : view.utf8_offsets.back();
+}
+
+int legacy_bytes_for_utf8_prefix(const LegacyUtf8View &view, unsigned int utf8_bytes)
+{
+    for (size_t i = 0; i < view.utf8_offsets.size(); ++i) {
+        if (view.utf8_offsets[i] >= utf8_bytes) {
+            return view.legacy_offsets[i];
+        }
+    }
+    return view.legacy_offsets.empty() ? 0 : view.legacy_offsets.back();
+}
+
+int is_legacy_hidden_number_prefix(char prefix)
+{
+    return prefix == '@' || prefix == '_';
+}
+
+} // namespace
+
+int text_get_width_utf8(std::string_view text, font_t font)
+{
+    if (!font_uses_vector_runtime()) {
+        return 0;
+    }
+    return font_vector_runtime_measure_utf8(text, font, FONT_INLINE_STYLE_NONE, SCALE_NONE);
+}
+
+unsigned int text_get_max_utf8_bytes_for_width(
+    std::string_view text,
+    font_t font,
+    unsigned int requested_width,
+    int invert)
+{
+    if (!font_uses_vector_runtime()) {
+        return 0;
+    }
+    return font_vector_runtime_fit_utf8_bytes(text, font, requested_width, invert, FONT_INLINE_STYLE_NONE);
+}
+
+int text_draw_utf8(std::string_view text, int x, int y, font_t font, color_t color)
+{
+    return text_draw_utf8_scaled(text, x, y, font, color, SCALE_NONE);
+}
+
+int text_draw_utf8_scaled(std::string_view text, int x, int y, font_t font, color_t color, float scale)
+{
+    return text_draw_utf8_styled(text, x, y, font, color, scale, FONT_INLINE_STYLE_NONE);
+}
+
+int text_draw_utf8_styled(
+    std::string_view text,
+    int x,
+    int y,
+    font_t font,
+    color_t color,
+    float scale,
+    unsigned style_flags)
+{
+    if (!font_uses_vector_runtime()) {
+        return 0;
+    }
+    return font_vector_runtime_draw_utf8(text, x, y, font, color, scale, style_flags);
+}
 
 static int get_ellipsis_width(font_t font)
 {
@@ -91,6 +239,11 @@ void text_draw_cursor(int x_offset, int y_offset, int is_insert)
 
 int text_get_width(const uint8_t *str, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        LegacyUtf8View view = legacy_to_utf8_view(str);
+        return text_get_width_utf8(view.utf8, font);
+    }
+
     const font_definition *def = font_definition_for(font);
     int maxlen = 10000;
     int width = 0;
@@ -112,11 +265,40 @@ int text_get_width(const uint8_t *str, font_t font)
 
 int text_get_number_width(int value, char prefix, const char *postfix, font_t font)
 {
+    if (font_uses_vector_runtime()) {
+        int width = 0;
+        if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
+            char prefix_str[2] = { prefix, 0 };
+            width += text_get_width_utf8(prefix_str, font);
+        }
+        uint8_t buffer[NUMBER_BUFFER_LENGTH];
+        int length = string_from_int(buffer, value, 0);
+        uint8_t *digits = buffer;
+        int separator_pixels = config_get(CONFIG_UI_DIGIT_SEPARATOR) * 3;
+        while (length > 0) {
+            if (*digits >= ' ') {
+                char utf8_digit[2] = { static_cast<char>(*digits), 0 };
+                width += text_get_width_utf8(utf8_digit, font);
+                if (length == 4 || length == 7) {
+                    width += separator_pixels;
+                }
+            }
+            ++digits;
+            --length;
+        }
+        if (postfix && *postfix) {
+            width += text_get_width(string_from_ascii(postfix), font);
+        } else {
+            width += font_definition_for(font)->space_width;
+        }
+        return width;
+    }
+
     const font_definition *def = font_definition_for(font);
 
     int width = 0;
 
-    if (prefix) {
+    if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
         uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
         width += text_get_width(prefix_str, font);
     }
@@ -171,6 +353,19 @@ static int get_letter_width(const uint8_t *str, const font_definition *def, int 
 unsigned int text_get_max_length_for_width(
     const uint8_t *str, int length, font_t font, unsigned int requested_width, int invert)
 {
+    if (font_uses_vector_runtime()) {
+        LegacyUtf8View view = legacy_to_utf8_view(str, 0, length > 0 ? length : -1);
+        unsigned int utf8_bytes = text_get_max_utf8_bytes_for_width(view.utf8, font, requested_width, invert);
+        if (!invert) {
+            return static_cast<unsigned int>(legacy_bytes_for_utf8_prefix(view, utf8_bytes));
+        }
+        int prefix_legacy = legacy_bytes_for_utf8_prefix(
+            view,
+            view.utf8_offsets.empty() ? 0 : view.utf8_offsets.back() - utf8_bytes);
+        int total_legacy = view.legacy_offsets.empty() ? 0 : view.legacy_offsets.back();
+        return static_cast<unsigned int>(total_legacy - prefix_legacy);
+    }
+
     const font_definition *def = font_definition_for(font);
     if (!length) {
         length = string_length(str);
@@ -212,6 +407,17 @@ unsigned int text_get_max_length_for_width(
 
 void text_ellipsize(uint8_t *str, font_t font, int requested_width)
 {
+    if (font_uses_vector_runtime()) {
+        LegacyUtf8View view = legacy_to_utf8_view(str);
+        int ellipsis_width = get_ellipsis_width(font);
+        unsigned int max_utf8 = text_get_max_utf8_bytes_for_width(view.utf8, font, requested_width - ellipsis_width, 0);
+        int keep_legacy_bytes = legacy_bytes_for_utf8_prefix(view, max_utf8);
+        if (keep_legacy_bytes < string_length(str)) {
+            string_copy(ellipsis.string, str + keep_legacy_bytes, ELLIPSIS_LENGTH);
+        }
+        return;
+    }
+
     uint8_t *orig_str = str;
     const font_definition *def = font_definition_for(font);
     int ellipsis_width = get_ellipsis_width(font);
@@ -244,6 +450,60 @@ void text_ellipsize(uint8_t *str, font_t font, int requested_width)
 
 static int get_word_width(const uint8_t *str, font_t font, int *out_num_chars, int max_width)
 {
+    if (font_uses_vector_runtime()) {
+        uint8_t buffer[256] = { 0 };
+        int width = 0;
+        int guard = 0;
+        int word_char_seen = 0;
+        int num_chars = 0;
+        int buffer_index = 0;
+        while (*str && ++guard < 200) {
+            int num_bytes = legacy_character_num_bytes(str);
+            if (*str == ' ' || *str == '\n') {
+                if (word_char_seen) {
+                    break;
+                }
+                if (buffer_index + 1 >= static_cast<int>(sizeof(buffer))) {
+                    break;
+                }
+                buffer[buffer_index++] = *str;
+                buffer[buffer_index] = 0;
+                int next_width = text_get_width(buffer, font);
+                if (max_width && next_width >= max_width) {
+                    break;
+                }
+                width = next_width;
+            } else if (*str == '$') {
+                if (word_char_seen) {
+                    break;
+                }
+            } else if (*str > ' ') {
+                if (buffer_index + num_bytes >= static_cast<int>(sizeof(buffer))) {
+                    break;
+                }
+                memcpy(&buffer[buffer_index], str, static_cast<size_t>(num_bytes));
+                buffer_index += num_bytes;
+                buffer[buffer_index] = 0;
+                int next_width = text_get_width(buffer, font);
+                if (max_width && next_width >= max_width) {
+                    buffer_index -= num_bytes;
+                    buffer[buffer_index] = 0;
+                    break;
+                }
+                width = next_width;
+                word_char_seen = 1;
+                if (num_bytes > 1) {
+                    num_chars += num_bytes;
+                    break;
+                }
+            }
+            str += num_bytes;
+            num_chars += num_bytes;
+        }
+        *out_num_chars = num_chars;
+        return width;
+    }
+
     const font_definition *def = font_definition_for(font);
     int width = 0;
     int guard = 0;
@@ -328,6 +588,53 @@ int text_draw_centered_ellipsized(const uint8_t *str, int x, int y, int box_widt
 
 int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t color, float scale)
 {
+    if (font_uses_vector_runtime()) {
+        int length = string_length(str);
+        int start_offset = 0;
+        int end_offset = length;
+        if (input_cursor.capture) {
+            start_offset = input_cursor.text_offset_start;
+            end_offset = input_cursor.text_offset_end;
+        }
+
+        LegacyUtf8View view = legacy_to_utf8_view(str, start_offset, end_offset);
+        int width = text_draw_utf8_scaled(view.utf8, x, y, font, color, scale);
+
+        if (input_cursor.capture) {
+            int relative_cursor = input_cursor.cursor_position - start_offset;
+            if (relative_cursor < 0) {
+                relative_cursor = 0;
+            }
+            int total_legacy = view.legacy_offsets.empty() ? 0 : view.legacy_offsets.back();
+            if (relative_cursor > total_legacy) {
+                relative_cursor = total_legacy;
+            }
+
+            unsigned int cursor_utf8 = utf8_bytes_for_legacy_prefix(view, relative_cursor);
+            input_cursor.x_offset = font_vector_runtime_measure_utf8(
+                view.utf8.substr(0, cursor_utf8),
+                font,
+                FONT_INLINE_STYLE_NONE,
+                scale);
+            input_cursor.width = 4;
+
+            for (size_t i = 1; i < view.legacy_offsets.size(); ++i) {
+                if (view.legacy_offsets[i - 1] == relative_cursor) {
+                    unsigned int next_utf8 = view.utf8_offsets[i];
+                    input_cursor.width = font_vector_runtime_measure_utf8(
+                        view.utf8.substr(cursor_utf8, next_utf8 - cursor_utf8),
+                        font,
+                        FONT_INLINE_STYLE_NONE,
+                        scale);
+                    break;
+                }
+            }
+            input_cursor.seen = 1;
+        }
+
+        return width + font_definition_for(font)->space_width;
+    }
+
     const font_definition *def = font_definition_for(font);
 
     int length = string_length(str);
@@ -385,7 +692,7 @@ int text_draw(const uint8_t *str, int x, int y, font_t font, color_t color)
 static int number_to_string(uint8_t *str, int value, char prefix, const char *postfix)
 {
     int offset = 0;
-    if (prefix) {
+    if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
         str[offset++] = prefix;
     }
     offset += string_from_int(&str[offset], value, 0);
@@ -400,10 +707,46 @@ static int number_to_string(uint8_t *str, int value, char prefix, const char *po
 int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
     int x, int y, font_t font, color_t color, float scale)
 {
+    if (font_uses_vector_runtime()) {
+        int current_x = x;
+        int space_width = font_definition_for(font)->space_width;
+
+        if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
+            uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
+            current_x += text_draw_scaled(prefix_str, current_x, y, font, color, scale) - space_width;
+        }
+
+        uint8_t buffer[NUMBER_BUFFER_LENGTH];
+        int length = string_from_int(buffer, value, 0);
+        uint8_t *digits = buffer;
+        int separator_pixels = config_get(CONFIG_UI_DIGIT_SEPARATOR) * 3;
+
+        while (length > 0) {
+            if (*digits >= ' ') {
+                char utf8_digit[2] = { static_cast<char>(*digits), 0 };
+                current_x += text_draw_utf8_scaled(utf8_digit, current_x, y, font, color, scale);
+                if (length == 4 || length == 7) {
+                    current_x += separator_pixels;
+                }
+            }
+            ++digits;
+            --length;
+        }
+
+        if (postfix && *postfix) {
+            LegacyUtf8View postfix_view = legacy_to_utf8_view(postfix);
+            current_x += text_draw_utf8_scaled(postfix_view.utf8, current_x, y, font, color, scale);
+        } else {
+            current_x += space_width;
+        }
+
+        return current_x - x;
+    }
+
     const font_definition *def = font_definition_for(font);
     int current_x = x;
 
-    if (prefix) {
+    if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
         uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
         current_x += text_draw_scaled(prefix_str, current_x, y, font, color, scale) - def->space_width;
     }
@@ -452,6 +795,33 @@ int text_draw_number(int value, char prefix, const char *postfix, int x, int y, 
 
 void text_draw_number_finances(int value, int x, int y, font_t font, color_t color)
 {
+    if (font_uses_vector_runtime()) {
+        int number_width = 10;
+        int current_x = x - number_width;
+
+        uint8_t buffer[NUMBER_BUFFER_LENGTH];
+        int length = string_from_int(buffer, value, 0);
+        uint8_t *str = &buffer[length - 1];
+        int inverted_length = 0;
+        int separator_pixels = config_get(CONFIG_UI_DIGIT_SEPARATOR) * 4;
+
+        while (length > 0) {
+            if (*str >= ' ') {
+                if (*str != '-') {
+                    current_x -= !(inverted_length % 3) ? separator_pixels : 0;
+                }
+                char utf8_digit[2] = { static_cast<char>(*str), 0 };
+                int digit_width = text_get_width_utf8(utf8_digit, font);
+                text_draw_utf8(utf8_digit, current_x + (number_width - digit_width) / 2, y, font, color);
+                current_x -= number_width;
+            }
+            --str;
+            --length;
+            ++inverted_length;
+        }
+        return;
+    }
+
     const font_definition *def = font_definition_for(font);
     int number_width = 10;
     int current_x = x - number_width;

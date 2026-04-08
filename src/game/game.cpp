@@ -140,6 +140,12 @@ int game_init(void)
             return 0;
         }
     }
+    if (!font_load_mod_font_pack()) {
+        const char *font_failure_reason = font_get_failure_reason();
+        set_init_failure_message("Failed to load mod font pack.", font_failure_reason && *font_failure_reason ? font_failure_reason : 0);
+        errlog("unable to load mod font pack");
+        return 0;
+    }
 
     model_reset();
     resource_init();
@@ -213,6 +219,10 @@ static int reload_language(int is_editor, int reload_images)
 
     if (!image_load_fonts(encoding)) {
         errlog("unable to load font graphics");
+        return 0;
+    }
+    if (!font_load_mod_font_pack()) {
+        errlog("unable to load mod font pack");
         return 0;
     }
     if (!image_load_climate(scenario_property_climate(), is_editor, reload_images, 0)) {
@@ -296,6 +306,7 @@ void game_exit(void)
     tile_runtime_reset();
     image_group_payload_clear_all();
     image_payload_clear_all();
+    font_reset_mod_font_pack();
 
     video_shutdown();
     settings_save();

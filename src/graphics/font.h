@@ -48,6 +48,11 @@ typedef struct {
  */
 void font_set_encoding(encoding_type encoding);
 
+int font_load_mod_font_pack(void);
+void font_reset_mod_font_pack(void);
+int font_uses_vector_runtime(void);
+const char *font_get_failure_reason(void);
+
 /**
  * Gets the font definition for the specified font
  * @param font Font
