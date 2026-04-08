@@ -132,6 +132,11 @@ int legacy_bytes_for_utf8_prefix(const LegacyUtf8View &view, unsigned int utf8_b
     return view.legacy_offsets.empty() ? 0 : view.legacy_offsets.back();
 }
 
+int is_legacy_hidden_number_prefix(char prefix)
+{
+    return prefix == '@';
+}
+
 } // namespace
 
 int text_get_width_utf8(std::string_view text, font_t font)
@@ -262,7 +267,7 @@ int text_get_number_width(int value, char prefix, const char *postfix, font_t fo
 {
     if (font_uses_vector_runtime()) {
         int width = 0;
-        if (prefix) {
+        if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
             char prefix_str[2] = { prefix, 0 };
             width += text_get_width_utf8(prefix_str, font);
         }
@@ -293,7 +298,7 @@ int text_get_number_width(int value, char prefix, const char *postfix, font_t fo
 
     int width = 0;
 
-    if (prefix) {
+    if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
         uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
         width += text_get_width(prefix_str, font);
     }
@@ -687,7 +692,7 @@ int text_draw(const uint8_t *str, int x, int y, font_t font, color_t color)
 static int number_to_string(uint8_t *str, int value, char prefix, const char *postfix)
 {
     int offset = 0;
-    if (prefix) {
+    if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
         str[offset++] = prefix;
     }
     offset += string_from_int(&str[offset], value, 0);
@@ -706,7 +711,7 @@ int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
         int current_x = x;
         int space_width = font_definition_for(font)->space_width;
 
-        if (prefix) {
+        if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
             uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
             current_x += text_draw_scaled(prefix_str, current_x, y, font, color, scale) - space_width;
         }
@@ -741,7 +746,7 @@ int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
     const font_definition *def = font_definition_for(font);
     int current_x = x;
 
-    if (prefix) {
+    if (prefix && !is_legacy_hidden_number_prefix(prefix)) {
         uint8_t prefix_str[2] = { static_cast<uint8_t>(prefix), 0 };
         current_x += text_draw_scaled(prefix_str, current_x, y, font, color, scale) - def->space_width;
     }

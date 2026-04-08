@@ -872,10 +872,18 @@ float glyph_left_logical_offset(const GlyphCacheEntry &glyph, float scale)
     return glyph.minx / raster_multiplier_for(scale);
 }
 
-float glyph_top_logical_offset(const GlyphCacheEntry &glyph, const SizedFont &font, font_t surface_font, float scale)
+float line_top_logical_offset(font_t surface_font)
 {
-    float logical_ascent = font.ascent / raster_multiplier_for(scale);
-    return logical_ascent + font_vector_runtime_baseline_offset(surface_font) - glyph.maxy / raster_multiplier_for(scale);
+    return static_cast<float>(font_vector_runtime_baseline_offset(surface_font));
+}
+
+float snap_logical_to_raster(float logical_value, float scale)
+{
+    const float multiplier = raster_multiplier_for(scale);
+    if (multiplier <= 0.0f) {
+        return logical_value;
+    }
+    return std::round(logical_value * multiplier) / multiplier;
 }
 
 float glyph_logical_width(const GlyphCacheEntry &glyph, float scale)
@@ -1320,8 +1328,14 @@ int font_vector_runtime_draw_utf8(
             current_x += kerning_logical_width(resolved, previous_codepoint, codepoint, scale);
         }
 
-        const float draw_x = current_x + glyph_left_logical_offset(*glyph, scale);
-        const float draw_y = static_cast<float>(y) + glyph_top_logical_offset(*glyph, *resolved.font, font, scale);
+        const float draw_x = snap_logical_to_raster(
+            current_x + glyph_left_logical_offset(*glyph, scale),
+            scale);
+        // Match the legacy sprite-font contract: the provided y is the shared line-top
+        // anchor for normal Latin text, not a typographic baseline per glyph.
+        const float draw_y = snap_logical_to_raster(
+            static_cast<float>(y) + line_top_logical_offset(font),
+            scale);
         const float logical_width = glyph_logical_width(*glyph, scale);
         const float logical_height = glyph_logical_height(*glyph, scale);
 
