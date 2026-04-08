@@ -1,8 +1,10 @@
 #include "config.h"
 
+#include "translation/localization.h"
+
+extern "C" {
 #include "core/calc.h"
 #include "core/config.h"
-#include "core/dir.h"
 #include "core/image_group.h"
 #include "core/lang.h"
 #include "core/log.h"
@@ -36,9 +38,11 @@
 #include "window/select_list.h"
 #include "window/text_input.h"
 #include "window/user_path_setup.h"
+}
 
 #include <stdio.h>
 #include <string.h>
+#include <vector>
 #include <SDL_mouse.h>
 
 #define MAX_LANGUAGE_DIRS 20
@@ -141,7 +145,7 @@ enum {
 typedef struct {
     int type;
     int subtype;
-    translation_key description;          //  label / header text key
+    int description;          //  label / header text key
     const uint8_t *(*get_display_text)(void);
     int y_offset; //  kept for compatibility 
     int enabled; //  runtime on/off
@@ -465,11 +469,10 @@ static const resolution resolutions[] = {
 static resolution available_resolutions[sizeof(resolutions) / sizeof(resolution) + 2];
 
 static const unsigned char page_is_category_helper[CONFIG_PAGES] = {
-    // pages with category submenu
-    [CONFIG_PAGE_GENERAL] = 0,
-    [CONFIG_PAGE_UI_CHANGES] = 1,
-    [CONFIG_PAGE_GAMEPLAY_CHANGES] = 0,
-    [CONFIG_PAGE_CITY_MANAGEMENT_CHANGES] = 1,
+    0,
+    1,
+    0,
+    1,
 };
 
 // buttons helpers
@@ -640,7 +643,7 @@ static uint8_t *percentage_string(uint8_t *s, int p)
 static int config_change_basic(int key)
 {
     if (key < CONFIG_MAX_ENTRIES) {
-        config_set(key, data.config_values[key].new_value);
+        config_set(static_cast<config_key>(key), data.config_values[key].new_value);
     }
     data.config_values[key].original_value = data.config_values[key].new_value;
     return 1;
@@ -648,7 +651,7 @@ static int config_change_basic(int key)
 
 static int config_change_string_basic(int key)
 {
-    config_set_string(key, data.config_string_values[key].new_value);
+    config_set_string(static_cast<config_string_key>(key), data.config_string_values[key].new_value);
     memcpy(data.config_string_values[key].original_value, data.config_string_values[key].new_value,
            CONFIG_STRING_VALUE_MAX);
     return 1;
@@ -862,9 +865,11 @@ static int config_enable_gods_effects(int key)
 
 static int config_change_string_language(int key)
 {
-    config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].new_value);
+    config_set_string(CONFIG_STRING_UI_LOCALE, data.config_string_values[key].new_value);
+    config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, "");
     if (!game_reload_language()) {
-        config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].original_value);
+        config_set_string(CONFIG_STRING_UI_LOCALE, data.config_string_values[key].original_value);
+        config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, "");
         game_reload_language();
         window_plain_message_dialog_show(TR_INVALID_LANGUAGE_TITLE, TR_INVALID_LANGUAGE_MESSAGE, 1);
         return 0;
@@ -1096,7 +1101,7 @@ static void set_custom_config_changes(void)
 
     //  strings
 
-    data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].change_action = config_change_string_language;
+    data.config_string_values[CONFIG_STRING_UI_LOCALE].change_action = config_change_string_language;
     data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].change_action = config_change_string_player_name;
 
     //  display / input
@@ -1297,8 +1302,9 @@ static inline void update_has_changes(void)
 
 static void set_language(int index)
 {
-    const char *dir = index == 0 ? "" : data.language_options.data_utf8[index];
-    snprintf(data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].new_value, CONFIG_STRING_VALUE_MAX, "%s", dir);
+    const char *locale_code = index == 0 ? "" : data.language_options.data_utf8[index];
+    snprintf(data.config_string_values[CONFIG_STRING_UI_LOCALE].new_value, CONFIG_STRING_VALUE_MAX, "%s", locale_code);
+    snprintf(data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].new_value, CONFIG_STRING_VALUE_MAX, "%s", "");
     data.language_options.selected = index;
 }
 static void button_language_select(const generic_button *button)
@@ -1338,10 +1344,9 @@ static category_page_properties current_category_properties(void)
 {
     category_page_properties properties;
     if (data.page == CONFIG_PAGE_UI_CHANGES) {
-        properties = (category_page_properties) { &ui_list_box, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES, 1 };
+        properties = { &ui_list_box, CATEGORY_UI_COUNT, CONFIG_PAGE_UI_CHANGES, 1 };
     } else {
-        properties = (category_page_properties) { &city_mgmt_list_box, CATEGORY_CITY_COUNT,
-             CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, 0 };
+        properties = { &city_mgmt_list_box, CATEGORY_CITY_COUNT, CONFIG_PAGE_CITY_MANAGEMENT_CHANGES, 0 };
     }
     return properties;
 }
@@ -1365,7 +1370,7 @@ static void init_list_boxes(void)
     //  City management
     city_mgmt_list_box = ui_list_box; //  copy layout
     list_box_init(&city_mgmt_list_box, CATEGORY_CITY_COUNT);
-    window_config_page original_page = data.page;
+    window_config_page original_page = static_cast<window_config_page>(data.page);
     data.page = CONFIG_PAGE_UI_CHANGES;
     list_box_select_index(&ui_list_box, selected_categories.ui_category);
     data.page = CONFIG_PAGE_CITY_MANAGEMENT_CHANGES;
@@ -1412,9 +1417,9 @@ static void handle_list_box_select(unsigned int index, int is_double_click)
     category_page_properties properties = current_category_properties();
     if (index < (unsigned) properties.count) {
         if (properties.is_ui) {
-            selected_categories.ui_category = index;
+            selected_categories.ui_category = static_cast<ui_config_category>(index);
         } else {
-            selected_categories.city_mgmt_category = index;
+            selected_categories.city_mgmt_category = static_cast<city_management_category>(index);
         }
         scrollbar.scroll_position = 0;
         int count = get_widget_count_for(data.page);
@@ -1442,7 +1447,7 @@ static const uint8_t *checkbox_text(const config_widget *w)
     if (w->get_display_text) {
         return w->get_display_text();
     }
-    return translation_for(w->description);
+    return translation_for(static_cast<translation_key>(w->description));
 }
 
 static void op_measure_checkbox(const config_widget *w, int avail_text_w, int *out_h)
@@ -1502,7 +1507,7 @@ static void op_measure_select(const config_widget *w, int avail_text_w, int *out
 }
 static void op_draw_bg_select(const config_widget *w, int x, int y, int avail_text_w)
 {
-    text_draw(translation_for(w->description), x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
+    text_draw(translation_for(static_cast<translation_key>(w->description)), x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
     const generic_button *btn = &select_buttons[w->subtype];
     text_draw_centered(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
                        btn->width - 16, FONT_NORMAL_BLACK, 0);
@@ -1534,7 +1539,7 @@ static void op_measure_desc(const config_widget *w, int avail_text_w, int *out_h
 }
 static void op_draw_bg_desc(const config_widget *w, int x, int y, int avail_text_w)
 {
-    text_draw(translation_for(w->description), x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
+    text_draw(translation_for(static_cast<translation_key>(w->description)), x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
 }
 static void op_draw_fg_desc(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {
@@ -1641,7 +1646,7 @@ static void op_draw_bg_header(const config_widget *w, int x, int y, int avail_te
     int header_text_margins_sum = 30 + font_definition_for(FONT_NORMAL_BLACK)->space_width; // 30 is the sum of both sides' margins, minus one space to account for the fact that the text is drawn flush with the left margin
     int header_text_width = lang_text_get_width(CUSTOM_TRANSLATION, w->description, FONT_NORMAL_BLACK) + header_text_margins_sum;
     int new_x = x + avail_text_w / 2 - (header_text_width - header_text_margins_sum) / 2;
-    text_draw(translation_for(w->description ? w->description : w->subtype), new_x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
+    text_draw(translation_for(static_cast<translation_key>(w->description ? w->description : w->subtype)), new_x, y + w->y_offset, FONT_NORMAL_BLACK, 0);
     int line_width = (avail_text_w - header_text_width) / 2;
     // y is constant - if y+5 works, keep it this way, it should be right in the middle of the text's y axis
     // Draw lines on either side of the header text, with a small gap
@@ -1665,13 +1670,13 @@ static int  op_input_header(const config_widget *w, int x, int y, int avail_text
 //  Ops table
 
 static const widget_ops ops_by_type[] = {
-    [TYPE_NONE] = {0},
-    [TYPE_SPACE] = {op_measure_space, 0, 0, 0},
-    [TYPE_HEADER] = {op_measure_header, op_draw_bg_header, op_draw_fg_header, op_input_header},
-    [TYPE_CHECKBOX] = {op_measure_checkbox, op_draw_bg_checkbox, op_draw_fg_checkbox, op_input_checkbox},
-    [TYPE_SELECT] = {op_measure_select, op_draw_bg_select, op_draw_fg_select, op_input_select},
-    [TYPE_NUMERICAL_DESC] = {op_measure_desc, op_draw_bg_desc, op_draw_fg_desc, op_input_desc},
-    [TYPE_NUMERICAL_RANGE] = {op_measure_range, op_draw_bg_range, op_draw_fg_range, op_input_range},
+    {0},
+    {op_measure_space, 0, 0, 0},
+    {op_measure_header, op_draw_bg_header, op_draw_fg_header, op_input_header},
+    {op_measure_checkbox, op_draw_bg_checkbox, op_draw_fg_checkbox, op_input_checkbox},
+    {op_measure_select, op_draw_bg_select, op_draw_fg_select, op_input_select},
+    {op_measure_desc, op_draw_bg_desc, op_draw_fg_desc, op_input_desc},
+    {op_measure_range, op_draw_bg_range, op_draw_fg_range, op_input_range},
 };
 
 //   widget lookups
@@ -1899,7 +1904,7 @@ static void draw_background(void)
     //  bottom buttons text
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         int disabled = i == NUM_BOTTOM_BUTTONS - 1 && !data.has_changes;
-        text_draw_centered(translation_for(bottom_buttons[i].parameter2),
+        text_draw_centered(translation_for(static_cast<translation_key>(bottom_buttons[i].parameter2)),
             bottom_buttons[i].x, bottom_buttons[i].y + 9, bottom_buttons[i].width,
             disabled ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK,
             disabled ? COLOR_FONT_LIGHT_GRAY : 0);
@@ -2024,11 +2029,11 @@ static void button_hotkeys(const generic_button *button)
 static void button_reset_defaults(const generic_button *button)
 {
     for (int i = 0; i < CONFIG_MAX_ENTRIES; i++) {
-        data.config_values[i].new_value = config_get_default_value(i);
+        data.config_values[i].new_value = config_get_default_value(static_cast<config_key>(i));
     }
 
     for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; i++) {
-        snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", config_get_default_string_value(i));
+        snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", config_get_default_string_value(static_cast<config_string_key>(i)));
     }
     set_language(0);
     window_invalidate();
@@ -2194,12 +2199,12 @@ static void init(unsigned int page, unsigned int category, int show_background_i
         if (category >= CATEGORY_UI_COUNT) {
             category = 0;
         }
-        selected_categories.ui_category = category;
+        selected_categories.ui_category = static_cast<ui_config_category>(category);
     } else if (page == CONFIG_PAGE_CITY_MANAGEMENT_CHANGES) {
         if (category >= CATEGORY_CITY_COUNT) {
             category = 0;
         }
-        selected_categories.city_mgmt_category = category;
+        selected_categories.city_mgmt_category = static_cast<city_management_category>(category);
     }
     data.show_background_image = show_background_image;
 
@@ -2211,37 +2216,52 @@ static void init(unsigned int page, unsigned int category, int show_background_i
     //  prime numeric configs from core config
 
     for (int i = 0; i < CONFIG_MAX_ENTRIES; i++) {
-        data.config_values[i].original_value = config_get(i);
-        data.config_values[i].new_value = config_get(i);
+        data.config_values[i].original_value = config_get(static_cast<config_key>(i));
+        data.config_values[i].new_value = config_get(static_cast<config_key>(i));
     }
     for (int i = 0; i < CONFIG_STRING_MAX_ENTRIES; i++) {
-        const char *v = config_get_string(i);
+        const char *v = config_get_string(static_cast<config_string_key>(i));
         snprintf(data.config_string_values[i].original_value, CONFIG_STRING_VALUE_MAX, "%s", v);
         snprintf(data.config_string_values[i].new_value, CONFIG_STRING_VALUE_MAX, "%s", v);
     }
+
+    const char *normalized_locale = localization::normalize_locale_code_for_config(
+        data.config_string_values[CONFIG_STRING_UI_LOCALE].original_value,
+        data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].original_value);
+    snprintf(data.config_string_values[CONFIG_STRING_UI_LOCALE].original_value, CONFIG_STRING_VALUE_MAX, "%s", normalized_locale);
+    snprintf(data.config_string_values[CONFIG_STRING_UI_LOCALE].new_value, CONFIG_STRING_VALUE_MAX, "%s", normalized_locale);
+    snprintf(data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].original_value, CONFIG_STRING_VALUE_MAX, "%s", "");
+    snprintf(data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].new_value, CONFIG_STRING_VALUE_MAX, "%s", "");
+
     fetch_original_config_values();
     set_custom_config_changes();
     set_range_values();
     reset_weather_previews();
 
-    //  language options (default + dirs)
+    //  language options (default + available locales)
 
     string_copy(translation_for(TR_CONFIG_LANGUAGE_DEFAULT), data.language_options.data[0], CONFIG_STRING_VALUE_MAX);
     data.language_options.options[0] = data.language_options.data[0];
     data.language_options.total = 1;
     data.language_options.selected = 0;
 
-    const dir_listing *subdirs = dir_find_all_subdirectories(".");
-    const char *original_value = data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].original_value;
-    for (int i = 0; i < subdirs->num_files; i++) {
-        if (data.language_options.total < MAX_LANGUAGE_DIRS && lang_dir_is_valid(subdirs->files[i].name)) {
-            int opt = data.language_options.total;
-            snprintf(data.language_options.data_utf8[opt], CONFIG_STRING_VALUE_MAX, "%s", subdirs->files[i].name);
-            encoding_from_utf8(subdirs->files[i].name, data.language_options.data[opt], CONFIG_STRING_VALUE_MAX);
-            data.language_options.options[opt] = data.language_options.data[opt];
-            if (strcmp(original_value, subdirs->files[i].name) == 0) data.language_options.selected = opt;
-            data.language_options.total++;
+    const char *original_value = localization::normalize_locale_code_for_config(
+        data.config_string_values[CONFIG_STRING_UI_LOCALE].original_value,
+        data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].original_value);
+    std::vector<localization::locale_info> available_locales;
+    localization::enumerate_available_locales(available_locales);
+    for (const localization::locale_info &locale : available_locales) {
+        if (data.language_options.total >= MAX_LANGUAGE_DIRS) {
+            break;
         }
+        const int opt = data.language_options.total;
+        snprintf(data.language_options.data_utf8[opt], CONFIG_STRING_VALUE_MAX, "%s", locale.code.c_str());
+        encoding_from_utf8(locale.display_name.c_str(), data.language_options.data[opt], CONFIG_STRING_VALUE_MAX);
+        data.language_options.options[opt] = data.language_options.data[opt];
+        if (strcmp(original_value, locale.code.c_str()) == 0) {
+            data.language_options.selected = opt;
+        }
+        data.language_options.total++;
     }
 
     //  system constraints
@@ -2261,7 +2281,7 @@ static void init(unsigned int page, unsigned int category, int show_background_i
 
     init_list_boxes();
 }
-void window_config_show(window_config_page page, unsigned int category, int show_background_image)
+extern "C" void window_config_show(window_config_page page, unsigned int category, int show_background_image)
 {
     window_type window = {
         WINDOW_CONFIG,

@@ -64,7 +64,7 @@ static void draw_foreground(void)
     lang_text_draw_centered(1, 3, 192, 188, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(1, 4, 192, 228, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(1, 6, 192, 268, 192, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(1, 7, 192, 308, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(2, 0, 192, 308, 192, FONT_NORMAL_GREEN);
     text_draw_centered(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 192, 348, 192, FONT_NORMAL_GREEN, 0);
     lang_text_draw_centered(1, 5, 192, 388, 192, FONT_NORMAL_GREEN);
     

@@ -1036,6 +1036,8 @@ int main(int argc, char **argv)
 #endif
     }
 
+    log_set_debug_enabled(args.debug);
+
     setup(&args);
 
 
