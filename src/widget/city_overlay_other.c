@@ -819,9 +819,17 @@ const city_overlay *city_overlay_for_sentiment(void)
         0,
         draw_sentiment_footprint,
         draw_sentiment_top,
-        0
     };
     return &overlay;
+}
+
+static int is_inhabited_building(int grid_offset)
+{
+    if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        return 0;
+    }
+    building *b = building_get(map_building_at(grid_offset));
+    return b && b->house_population > 0 && !b->is_deleted && !map_property_is_deleted(b->grid_offset);
 }
 
 static int get_desirability_image_offset(int desirability)
@@ -847,15 +855,6 @@ static int get_desirability_image_offset(int desirability)
     } else {
         return 9;
     }
-}
-
-static int is_inhabited_building(int grid_offset)
-{
-    if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        return 0;
-    }
-    building *b = building_get(map_building_at(grid_offset));
-    return b && b->house_population > 0 && !b->is_deleted && !map_property_is_deleted(b->grid_offset);
 }
 
 static void draw_desirability_graph(int x, int y, float scale, int grid_offset)
