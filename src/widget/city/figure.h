@@ -2,7 +2,7 @@
 #define WIDGET_CITY_FIGURE_H
 
 #include "figure/figure.h"
-#include "widget/city.h"
+#include "widget/city/city.h"
 
 enum {
     FIGURE_HIGHLIGHT_NONE = 0,

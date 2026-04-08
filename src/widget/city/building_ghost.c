@@ -1,4 +1,4 @@
-#include "city_building_ghost.h"
+#include "building_ghost.h"
 
 #include "assets/assets.h"
 #include "building/connectable.h"
@@ -43,9 +43,9 @@
 #include "map/water.h"
 #include "map/water_supply.h"
 #include "scenario/property.h"
-#include "widget/city.h"
-#include "widget/city_bridge.h"
-#include "widget/city_water_ghost.h"
+#include "widget/city/city.h"
+#include "widget/city/bridge.h"
+#include "widget/city/water_ghost.h"
 
 #include <stdlib.h>
 

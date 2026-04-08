@@ -1,4 +1,4 @@
-#include "city_bridge.h"
+#include "bridge.h"
 
 #include "graphics/image.h"
 #include "map/bridge.h"

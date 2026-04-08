@@ -194,7 +194,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->is_close_to_water);
     buffer_write_u8(buf, b->storage_id);
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
-    buffer_write_u8(buf, b->show_on_problem_overlay);
+    buffer_write_u8(buf, b->has_problem);
 
     // expanded building data
     // Monuments
@@ -542,7 +542,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->is_close_to_water = buffer_read_u8(buf);
     b->storage_id = buffer_read_u8(buf);
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
-    b->show_on_problem_overlay = buffer_read_u8(buf);
+    b->has_problem = buffer_read_u8(buf);
 
     // Wharves produce fish and don't need any progress
     if (b->type == BUILDING_WHARF) {

@@ -1,4 +1,4 @@
-#include "city_water_ghost.h"
+#include "water_ghost.h"
 
 #include "building/building.h"
 #include "building/construction.h"
@@ -7,7 +7,7 @@
 #include "city/view.h"
 #include "map/grid.h"
 #include "map/water_supply.h"
-#include "widget/city_building_ghost.h"
+#include "widget/city/building_ghost.h"
 
 #include <string.h>
 

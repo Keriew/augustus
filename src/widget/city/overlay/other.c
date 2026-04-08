@@ -1,4 +1,4 @@
-#include "city_overlay_other.h"
+#include "other.h"
 
 #include "assets/assets.h"
 #include "building/animation.h"
@@ -29,7 +29,8 @@
 #include "map/terrain.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
-#include "widget/city_draw_highway.h"
+#include "widget/city/draw.h"
+#include "widget/city/highway.h"
 
 #include <stdio.h>
 
@@ -676,7 +677,8 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
                 image_offset = 0;
                 break;
         }
-        city_with_overlay_draw_building_footprint(x, y, grid_offset, image_offset);
+        // TODO fix this to use the image offsets properly
+        city_draw_building_footprint(x, y, grid_offset, 0);
     } else {
         int image_id = image_group(GROUP_TERRAIN_OVERLAY);
         switch (map_terrain_get(grid_offset) & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
@@ -721,7 +723,7 @@ static int draw_top_water(int x, int y, float scale, int grid_offset)
             image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
         }
     } else if (map_building_at(grid_offset)) {
-        city_with_overlay_draw_building_top(x, y, grid_offset);
+        city_draw_building_top(x, y, grid_offset, 0);
     }
     return 1;
 }
@@ -783,7 +785,7 @@ static int draw_sentiment_footprint(int x, int y, float scale, int grid_offset)
         return 0;
     }
     if (map_property_is_draw_tile(grid_offset)) {
-        city_with_overlay_draw_building_footprint(x, y, grid_offset, 0);
+        city_draw_building_footprint(x, y, grid_offset, 0);
         blend_color_to_footprint(x, y, b->house_size, get_color_for_percentage(b->sentiment.house_happiness), scale);
     }
     return 1;
@@ -800,7 +802,7 @@ static int draw_sentiment_top(int x, int y, float scale, int grid_offset)
         return 0;
     }
     if (map_property_is_draw_tile(grid_offset)) {
-        city_with_overlay_draw_building_top(x, y, grid_offset);
+        city_draw_building_top(x, y, grid_offset, 0);
         color_t color = get_color_for_percentage(b->sentiment.house_happiness);
         image_draw_set_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color, scale);
     }
@@ -854,11 +856,21 @@ static int get_desirability_image_offset(int desirability)
     }
 }
 
+static int should_draw_graph(int grid_offset)
+{
+    if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
+        return map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset);
+    }
+    if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
+        return 0;
+    }
+    return !map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) ||
+        map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN);
+}
+
 static void draw_desirability_graph(int x, int y, float scale, int grid_offset)
 {
-    if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP) ||
-        (!map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN) &&
-            map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset))) {
+    if (!should_draw_graph(grid_offset)) {
         return;
     }
     if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && is_inhabited_building(grid_offset)) {
@@ -866,7 +878,7 @@ static void draw_desirability_graph(int x, int y, float scale, int grid_offset)
             building *b = building_get(map_building_at(grid_offset));
             color_t desirability_color = get_color_for_percentage(get_desirability_image_offset(b->desirability) * 10);
             blend_color_to_footprint(x, y, b->house_size, desirability_color, scale);
-            city_with_overlay_draw_building_top(x, y, grid_offset);
+            city_draw_building_top(x, y, grid_offset, 0);
             image_draw_set_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, desirability_color, scale);
         }
     } else {

@@ -1,4 +1,4 @@
-#include "city_overlay_risks.h"
+#include "risks.h"
 
 #include "assets/assets.h"
 #include "building/industry.h"
@@ -13,7 +13,8 @@
 #include "map/random.h"
 #include "map/terrain.h"
 #include "translation/translation.h"
-#include "widget/city_draw_highway.h"
+#include "widget/city/draw.h"
+#include "widget/city/highway.h"
 
 enum crime_level {
     NO_CRIME = 0,
@@ -35,57 +36,6 @@ static int is_problem_cartpusher(int figure_id)
     }
 }
 
-void city_overlay_problems_prepare_building(building *b)
-{
-    b = building_main(b);
-
-    if (b->strike_duration_days > 0) {
-        b->show_on_problem_overlay = 1;
-        return;
-    }
-
-    if (b->has_plague) {
-        b->show_on_problem_overlay = 1;
-    } else if (b->state == BUILDING_STATE_MOTHBALLED) {
-        b->show_on_problem_overlay = 1;
-    } else if (!b->num_workers && building_get_laborers(b->type)) {
-        b->show_on_problem_overlay = 1;
-    } else if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE ||
-         b->type == BUILDING_LARGE_POND || b->type == BUILDING_SMALL_POND) {
-        if (!b->has_water_access) {
-            b->show_on_problem_overlay = 1;
-        }
-    } else if (b->type >= BUILDING_WHEAT_FARM && b->type <= BUILDING_CLAY_PIT) {
-        if (is_problem_cartpusher(b->figure_id)) {
-            b->show_on_problem_overlay = 1;
-        }
-    } else if (building_is_workshop(b->type)) {
-        if (b->type == BUILDING_CONCRETE_MAKER && !b->has_water_access) {
-            b->show_on_problem_overlay = 1;
-        }
-        if (is_problem_cartpusher(b->figure_id)) {
-            b->show_on_problem_overlay = 1;
-        } else if (!building_industry_has_raw_materials_for_production(b)) {
-            b->show_on_problem_overlay = 1;
-        }
-    } else if ((b->type == BUILDING_THEATER || b->type == BUILDING_AMPHITHEATER || b->type == BUILDING_ARENA ||
-        b->type == BUILDING_COLOSSEUM || b->type == BUILDING_HIPPODROME) && !b->data.entertainment.days1) {
-        b->show_on_problem_overlay = 1;
-    } else if ((b->type == BUILDING_ARENA || b->type == BUILDING_COLOSSEUM) && !b->data.entertainment.days2) {
-        b->show_on_problem_overlay = 1;
-    } else if (b->has_road_access == 0 &&
-        building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
-        b->show_on_problem_overlay = 1;
-    }
-
-    if (b->show_on_problem_overlay) {
-        while (b->next_part_building_id) {
-            b = building_get(b->next_part_building_id);
-            b->show_on_problem_overlay = 1;
-        }
-    }
-}
-
 static int show_building_fire_crime(const building *b)
 {
     return b->type == BUILDING_PREFECTURE || b->type == BUILDING_BURNING_RUIN;
@@ -98,7 +48,53 @@ static int show_building_damage(const building *b)
 
 static int show_building_problems(const building *b)
 {
-    return b->show_on_problem_overlay;
+    if (b->has_problem) {
+        return 1;
+    }
+
+    if (b->strike_duration_days > 0) {
+        return 1;
+    }
+
+    if (b->has_plague || b->state == BUILDING_STATE_MOTHBALLED) {
+        return 1;
+    }
+    
+    if (!b->num_workers && building_get_laborers(b->type)) {
+        return 1;
+    }
+    
+    if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE ||
+         b->type == BUILDING_LARGE_POND || b->type == BUILDING_SMALL_POND) {
+        if (!b->has_water_access) {
+            return 1;
+        }
+    } else if (b->type >= BUILDING_WHEAT_FARM && b->type <= BUILDING_CLAY_PIT) {
+        if (is_problem_cartpusher(b->figure_id)) {
+            return 1;
+        }
+    } else if (building_is_workshop(b->type)) {
+        if (b->type == BUILDING_CONCRETE_MAKER && !b->has_water_access) {
+            return 1;
+        }
+        if (is_problem_cartpusher(b->figure_id) || !building_industry_has_raw_materials_for_production(b)) {
+            return 1;
+        }
+    } else if ((b->type == BUILDING_THEATER || b->type == BUILDING_AMPHITHEATER || b->type == BUILDING_ARENA ||
+        b->type == BUILDING_COLOSSEUM || b->type == BUILDING_HIPPODROME)) {
+        if (!b->data.entertainment.days1) {
+            return 1;
+        }
+    } else if (b->type == BUILDING_ARENA || b->type == BUILDING_COLOSSEUM) {
+        if (!b->data.entertainment.days2) {
+            return 1;
+        }
+    } else if (b->has_road_access == 0 &&
+        building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
+        return 1;
+    }
+
+    return 0;
 }
 
 static int show_building_native(const building *b)
@@ -170,7 +166,8 @@ static int show_figure_crime(const figure *f)
 static int show_figure_problems(const figure *f)
 {
     if (f->type == FIGURE_LABOR_SEEKER) {
-        return building_get(f->building_id)->show_on_problem_overlay;
+        building *b = building_get(f->building_id);
+        return (!b->num_workers && building_get_laborers(b->type)) || b->has_problem;
     } else if (f->type == FIGURE_CART_PUSHER) {
         return f->action_state == FIGURE_ACTION_20_CARTPUSHER_INITIAL || f->min_max_seen;
     } else if (f->type == FIGURE_PROTESTER || f->type == FIGURE_BEGGAR) {
@@ -462,7 +459,7 @@ static int draw_footprint_native(int x, int y, float scale, int grid_offset)
     }
     if (map_terrain_is(grid_offset, terrain_on_native_overlay())) {
         if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-            city_with_overlay_draw_building_footprint(x, y, grid_offset, 0);
+            city_draw_building_footprint(x, y, grid_offset, 0);
         } else {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
         }
@@ -471,7 +468,7 @@ static int draw_footprint_native(int x, int y, float scale, int grid_offset)
         int image_id = image_group(GROUP_TERRAIN_OVERLAY);
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        city_with_overlay_draw_building_footprint(x, y, grid_offset, 0);
+        city_draw_building_footprint(x, y, grid_offset, 0);
     } else {
         if (map_property_is_native_land(grid_offset)) {
             image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_DESIRABILITY) + 1, x, y, 0, scale);
@@ -508,7 +505,7 @@ static int draw_top_native(int x, int y, float scale, int grid_offset)
         }
 
     } else if (map_building_at(grid_offset)) {
-        city_with_overlay_draw_building_top(x, y, grid_offset);
+        city_draw_building_top(x, y, grid_offset, 0);
     }
     return 1;
 }

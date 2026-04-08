@@ -1,4 +1,4 @@
-#include "city_overlay_housing.h"
+#include "housing.h"
 
 #include "assets/assets.h"
 #include "building/animation.h"
@@ -28,7 +28,7 @@
 #include "map/terrain.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
-#include "widget/city_draw_highway.h"
+#include "widget/city/highway.h"
 
 #include <stdio.h>
 

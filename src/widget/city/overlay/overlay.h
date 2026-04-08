@@ -27,8 +27,8 @@ typedef struct {
     void (*draw_custom_layer)(int x, int y, float scale, int grid_offset);
 } city_overlay;
 
-void city_with_overlay_draw_building_footprint(int x, int y, int grid_offset, int image_offset);
+const city_overlay *city_overlay_get(void);
 
-void city_with_overlay_draw_building_top(int x, int y, int grid_offset);
+int city_overlay_get_tooltip_text(tooltip_context *c, int grid_offset);
 
 #endif // WIDGET_CITY_OVERLAY_H

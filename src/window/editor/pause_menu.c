@@ -1,4 +1,4 @@
-#include "map_editor_pause_menu.h"
+#include "pause_menu.h"
 
 #include "game/file.h"
 #include "game/game.h"

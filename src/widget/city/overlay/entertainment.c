@@ -1,4 +1,4 @@
-#include "city_overlay_entertainment.h"
+#include "entertainment.h"
 
 #include "game/state.h"
 #include "translation/translation.h"

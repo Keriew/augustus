@@ -1,4 +1,4 @@
-#include "city_overlay_health.h"
+#include "health.h"
 
 #include "city/health.h"
 #include "game/state.h"

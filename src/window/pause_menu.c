@@ -1,4 +1,4 @@
-#include "city_pause_menu.h"
+#include "pause_menu.h"
 
 #include "building/construction.h"
 #include "building/properties.h"
@@ -145,7 +145,7 @@ static void button_click(const generic_button *button)
     }
 }
 
-void window_city_pause_menu_show(void)
+void window_pause_menu_show(void)
 {
     window_type window = {
             WINDOW_CITY_MAIN_MENU,

@@ -1,7 +1,7 @@
 #ifndef WIGET_CITY_OVERLAY_RISKS_H
 #define WIGET_CITY_OVERLAY_RISKS_H
 
-#include "city_overlay.h"
+#include "overlay.h"
 
 void city_overlay_problems_prepare_building(building *b);
 

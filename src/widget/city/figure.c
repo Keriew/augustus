@@ -1,4 +1,4 @@
-#include "city_figure.h"
+#include "figure.h"
 
 #include "city/view.h"
 #include "figure/formation.h"

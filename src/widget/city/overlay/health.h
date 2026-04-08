@@ -1,7 +1,7 @@
 #ifndef WIGET_CITY_OVERLAY_HEALTH_H
 #define WIGET_CITY_OVERLAY_HEALTH_H
 
-#include "city_overlay.h"
+#include "overlay.h"
 
 const city_overlay *city_overlay_for_health(void);
 

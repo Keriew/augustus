@@ -1,4 +1,4 @@
-#include "city_draw_highway.h"
+#include "highway.h"
 
 #include "assets/assets.h"
 #include "building/building.h"

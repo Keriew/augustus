@@ -35,13 +35,13 @@
 #include "sound/speech.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
-#include "widget/city_with_overlay.h"
-#include "widget/city_without_overlay.h"
-#include "widget/city_pause_menu.h"
+#include "widget/city/draw.h"
+#include "widget/city/overlay/overlay.h"
 #include "widget/minimap.h"
 #include "widget/sidebar/extra.h"
 #include "window/building_info.h"
 #include "window/city.h"
+#include "window/pause_menu.h"
 
 #define NO_POSITION ((unsigned int)-1)
 
@@ -92,11 +92,7 @@ void widget_city_draw(void)
 {
     update_zoom_level();
     set_city_clip_rectangle();
-    if (game_state_overlay()) {
-        city_with_overlay_draw(&data.current_tile, data.selected_building_id);
-    } else {
-        city_without_overlay_draw(0, 0, &data.current_tile, data.selected_building_id);
-    }
+    city_draw(0, 0, &data.current_tile, data.selected_building_id);
     graphics_reset_clip_rectangle();
 }
 
@@ -104,7 +100,7 @@ void widget_city_draw_for_figure(int figure_id, pixel_coordinate *coord)
 {
     set_city_clip_rectangle();
 
-    city_without_overlay_draw(figure_id, coord, &data.current_tile, 0);
+    city_draw(figure_id, coord, &data.current_tile, 0);
 
     graphics_reset_clip_rectangle();
 }
@@ -682,7 +678,7 @@ void widget_city_handle_input(const mouse *m, const hotkeys *h)
             window_request_refresh();
         } else {
             video_stop();
-            window_city_pause_menu_show();
+            window_pause_menu_show();
         }
     }
 }
@@ -791,7 +787,7 @@ void widget_city_get_tooltip(tooltip_context *c)
     // overlay tooltips
     if (overlay != OVERLAY_NONE) {
         c->text_group = 66;
-        c->text_id = city_with_overlay_get_tooltip_text(c, grid_offset);
+        c->text_id = city_overlay_get_tooltip_text(c, grid_offset);
         if (c->text_id || c->translation_key) {
             c->type = TOOLTIP_OVERLAY;
             c->high_priority = 1;
