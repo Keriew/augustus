@@ -187,7 +187,8 @@ static int show_figure_enemy(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
     return props->category & FIGURE_CATEGORY_HOSTILE || props->category & FIGURE_CATEGORY_AGGRESSIVE_ANIMAL
-        || props->category & FIGURE_CATEGORY_ARMED || props->category & FIGURE_CATEGORY_PROJECTILE;
+        || props->category & FIGURE_CATEGORY_ARMED || props->category & FIGURE_CATEGORY_PROJECTILE
+        || f->type == FIGURE_FORT_STANDARD;
 }
 
 static int get_column_height_fire(const building *b)
