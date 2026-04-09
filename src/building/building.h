@@ -183,7 +183,7 @@ typedef struct building {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
-    unsigned char show_on_problem_overlay;
+    unsigned char has_problem;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
     unsigned char house_arena_gladiator;

@@ -1603,7 +1603,7 @@ static translation_string all_strings[] = {
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "All messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Common messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Custom messages"},
-    {TR_BUILDING_LATRINES, "Latrines"},
+    {TR_BUILDING_LATRINES, "Latrine"}, //building name on right-click
     {TR_BUILDING_LATRINES_DESC_1, "A place of comfort appreciated by the population to talk about the news of the day or their business."},
     {TR_BUILDING_LATRINES_DESC_2, "Latrines are used by citizens having only access to a well, and help to slightly improve the housing and health levels. Houses in range of a fountain won't make use of public latrines."},
     {TR_BUILDING_LATRINES_MISSING_EVOLVE, "This house cannot evolve, as it does not have access to a latrine or a clean water supply from a fountain."},
@@ -2049,7 +2049,7 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_HEALTH_HEALTH_COVERAGE, "Health"},
     {TR_BUILDING_FOUNTAINS, "Fountains"},
     {TR_BUILDING_WELLS, "Wells"},
-    {TR_BUILDING_LATRINE, "Latrine"},
+    {TR_BUILDING_LATRINE, "Latrines"}, //building name in plural for health advisor
     {TR_ADVISOR_CHIEF_WATER_COVERAGE, "Water coverage"},
     {TR_ADVISOR_CHIEF_CLEAN_WATER, "A Majority of your population has access to clean fountain water."},
     {TR_ADVISOR_CHIEF_LATRINE_AND_WELL, "A Majority of your population has access to well water and a latrine."},
