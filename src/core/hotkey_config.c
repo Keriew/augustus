@@ -133,6 +133,7 @@ static const char *ini_keys[] = {
     "editor_empire_delete_object",
     "editor_empire_tool_our_city",
     "editor_empire_tool_trade_city",
+    "editor_empire_tool_roman_city",
     "editor_empire_tool_vulnerable_city",
     "editor_empire_tool_future_trade_city",
     "editor_empire_tool_distant_city",

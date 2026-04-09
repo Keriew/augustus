@@ -1,5 +1,6 @@
 #ifndef MAP_BRIDGE_H
 #define MAP_BRIDGE_H
+
 #include "building/type.h"
 #include "map/grid.h"
 

@@ -20,7 +20,7 @@
 #include "map/orientation.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
-#include "widget/city.h"
+#include "widget/city/city.h"
 #include "widget/minimap.h"
 #include "widget/sidebar/common.h"
 #include "widget/sidebar/extra.h"
