@@ -1250,19 +1250,12 @@ void window_building_draw_storage_foreground(building_info_context *c)
     int focused = index >= 2 && index <= 3;
     button_border_draw(x_border, y_border, 20, 20, focused);
 
-    for (int i = 2; i <= 3; i++) {
-        if (!storage_image_buttons[i].dont_draw) {
-            image_buttons_draw(c->x_offset + 4, c->y_offset + 4, &storage_image_buttons[i], 1);
-        }
-    }
-
     for (int i = 0; i < 5; i++) {
-        if (i == 2 || i == 3) {
+        if (storage_image_buttons[i].dont_draw) {
             continue;
         }
-        if (!storage_image_buttons[i].dont_draw) {
-            image_buttons_draw(c->x_offset, c->y_offset, &storage_image_buttons[i], 1);
-        }
+        int offset = (i == 2 || i == 3) ? 4 : 0;
+        image_buttons_draw(c->x_offset + offset, c->y_offset + offset, &storage_image_buttons[i], 1);
     }
 }
 
