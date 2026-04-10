@@ -222,6 +222,9 @@ extern struct city_data_t {
             int32_t clinic;
             int32_t barber;
             int32_t baths;
+            int32_t wells;
+            int32_t latrines;
+            int32_t fountains;
         } population_access;
     } health;
     struct {

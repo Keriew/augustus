@@ -31,10 +31,10 @@
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
-#include "widget/city_figure.h"
-#include "widget/map_editor_pause_menu.h"
+#include "widget/city/figure.h"
 #include "widget/map_editor_tool.h"
 #include "window/editor/empire.h"
+#include "window/editor/pause_menu.h"
 
 #include <stdio.h>
 #include <string.h>

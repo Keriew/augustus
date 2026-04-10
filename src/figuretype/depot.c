@@ -320,7 +320,7 @@ void figure_depot_cartpusher_action(figure *f)
                 int condition_type = b->data.depot.current_order.condition.condition_type;
                 int threshold = b->data.depot.current_order.condition.threshold;
                 if ((condition_type == ORDER_CONDITION_SOURCE_HAS_MORE_THAN && src_amount < threshold) ||
-                    (condition_type == ORDER_CONDITION_DESTINATION_HAS_LESS_THAN && src_amount < threshold)) {
+                    (condition_type == ORDER_CONDITION_DESTINATION_HAS_LESS_THAN && src_amount < 4)) {
                     break; // wait at source
                 }
 

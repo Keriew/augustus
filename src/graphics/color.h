@@ -31,6 +31,7 @@ typedef uint32_t color_t;
 
 #define COLOR_INSET_LIGHT 0xffffffff
 #define COLOR_INSET_DARK 0xff848484
+#define COLOR_INSET_BLACK 0xff000000
 
 #define COLOR_RISK_ICON_BORDER_DARK 0xf0000000
 #define COLOR_RISK_ICON_BORDER_LIGHT 0xf0ffffff
@@ -48,7 +49,7 @@ typedef uint32_t color_t;
 #define COLOR_MASK_DARK_GREEN 0xff005100
 #define COLOR_MASK_DARK_BLUE 0x66001199
 #define COLOR_MASK_DARK_PINK 0x88402060
-#define COLOR_MASK_BLUE 0x663377ff
+#define COLOR_MASK_BLUE 0x6642a7ef
 #define COLOR_MASK_GRAY 0x66aaaaaa
 #define COLOR_MASK_LIGHT_GRAY 0xbbaaaaaa
 #define COLOR_MASK_HOVER 0xeee0e0e0
@@ -99,10 +100,6 @@ typedef uint32_t color_t;
 #define COLOR_MASK_PASTEL_GRAY        0xffc0c0c0  // balanced neutral gray
 #define COLOR_MASK_PASTEL_BLACK       0xff3a3a3a  // soft black 
 #define COLOR_MASK_PASTEL_DARK_BLUE   0xff6d87b8  // desaturated navy blue
-
-#define COLOR_OVERLAY_NEUTRAL 0xccffffff
-#define COLOR_OVERLAY_NEGATIVE_STEP 0x00040505
-#define COLOR_OVERLAY_POSITIVE_STEP 0x00050504
 
 #define COLOR_MOUSE_DARK_GRAY 0xff3f3f3f
 #define COLOR_MOUSE_MEDIUM_GRAY 0xff737373

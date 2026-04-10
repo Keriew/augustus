@@ -33,6 +33,7 @@ int text_draw_money(int value, int x_offset, int y_offset, font_t font);
 void text_draw_with_money(const uint8_t *text, int value, const char *prefix, const char *postfix,
     int x_offset, int y_offset, int box_width, font_t font, color_t color);
 int text_draw_percentage(int value, int x_offset, int y_offset, font_t font);
+void text_draw_percentage_centered(int value, int x_offset, int y_offset, int box_width, font_t font);
 
 int text_draw_label_and_number(const uint8_t *label, int value, const char *postfix,
     int x_offset, int y_offset, font_t font, color_t color);

@@ -15,7 +15,7 @@ typedef struct {
     int is_open;
     int buys_resource[RESOURCE_MAX];
     int sells_resource[RESOURCE_MAX];
-    int cost_to_open;
+    unsigned int cost_to_open;
     int trader_entry_delay;
     int empire_object_id;
     int is_sea_trade;

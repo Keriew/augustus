@@ -30,6 +30,7 @@
 #include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
+#include "graphics/weather.h"
 #include "graphics/window.h"
 #include "map/bookmark.h"
 #include "map/building.h"
@@ -39,8 +40,7 @@
 #include "scenario/allowed_building.h"
 #include "scenario/criteria.h"
 #include "scenario/custom_variable.h"
-#include "widget/city.h"
-#include "widget/city_with_overlay.h"
+#include "widget/city/city.h"
 #include "widget/top_menu.h"
 #include "widget/sidebar/city.h"
 #include "widget/sidebar/extra.h"
@@ -61,6 +61,20 @@ static int time_left_label_shown;
 
 
 static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font, color_t color_ver);
+
+int window_city_simulated_weather(weather_type weather)
+{
+    switch (weather) {
+        case WEATHER_RAIN:
+            return config_get(CONFIG_UI_WT_PREVIEW_RAIN) || config_get(CONFIG_UI_WT_PREVIEW_HEAVY_RAIN);
+        case WEATHER_SNOW:
+            return config_get(CONFIG_UI_WT_ENABLE_SNOW_CENTRAL);
+        case WEATHER_SAND:
+            return config_get(CONFIG_UI_WT_PREVIEW_SANDSTORM);
+        default:
+            return 0;
+    }
+}
 
 int window_city_is_window_cityview(void)
 {
@@ -390,7 +404,6 @@ static void show_overlay(int overlay)
         overlay = OVERLAY_NONE;
     }
     game_state_set_overlay(overlay);
-    city_with_overlay_update();
     show_roamers_for_overlay(overlay);
     window_invalidate();
 }
@@ -719,7 +732,6 @@ static void handle_hotkeys(const hotkeys *h)
         exit_military_command();
         game_state_toggle_overlay();
         show_roamers_for_overlay(game_state_overlay());
-        city_with_overlay_update();
         window_overlay_menu_update();
         window_invalidate();
     }

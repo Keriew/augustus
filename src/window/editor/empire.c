@@ -800,7 +800,7 @@ static void draw_city_info(const empire_city *city)
                 // if the change trade route cost button isn't hidden draw it
                 button_border_draw(data.panel.x_max - 500 + trade_city_buttons[1].x, data.y_max - 93,
                     120, 24, data.focus_city_button_id == 2);
-                const uint8_t cost_text[32];
+                const uint8_t cost_text[32] = "";
                 snprintf((char *)cost_text, 32, "%i %s", city->cost_to_open, lang_get_string(6, 0));
                 text_draw_centered(cost_text, data.panel.x_max - 500 + trade_city_buttons[1].x, data.y_max - 85,
                     120, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
