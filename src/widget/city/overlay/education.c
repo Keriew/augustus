@@ -121,9 +121,7 @@ const city_overlay *city_overlay_for_education(void)
         show_figure_education,
         get_column_height_education,
         0,
-        get_tooltip_education,
-        0,
-        0
+        get_tooltip_education
     };
     return &overlay;
 }
@@ -137,9 +135,7 @@ const city_overlay *city_overlay_for_school(void)
         show_figure_school,
         get_column_height_school,
         0,
-        get_tooltip_school,
-        0,
-        0
+        get_tooltip_school
     };
     return &overlay;
 }
@@ -153,9 +149,7 @@ const city_overlay *city_overlay_for_library(void)
         show_figure_library,
         get_column_height_library,
         0,
-        get_tooltip_library,
-        0,
-        0
+        get_tooltip_library
     };
     return &overlay;
 }
@@ -169,9 +163,7 @@ const city_overlay *city_overlay_for_academy(void)
         show_figure_academy,
         get_column_height_academy,
         0,
-        get_tooltip_academy,
-        0,
-        0
+        get_tooltip_academy
     };
     return &overlay;
 }

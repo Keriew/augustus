@@ -255,9 +255,7 @@ const city_overlay *city_overlay_for_entertainment(void)
         show_figure_entertainment,
         get_column_height_entertainment,
         0,
-        get_tooltip_entertainment,
-        0,
-        0
+        get_tooltip_entertainment
     };
     return &overlay;
 }
@@ -271,9 +269,7 @@ const city_overlay *city_overlay_for_theater(void)
         show_figure_theater,
         get_column_height_theater,
         0,
-        get_tooltip_theater,
-        0,
-        0
+        get_tooltip_theater
     };
     return &overlay;
 }
@@ -287,9 +283,7 @@ const city_overlay *city_overlay_for_amphitheater(void)
         show_figure_amphitheater,
         get_column_height_amphitheater,
         0,
-        get_tooltip_amphitheater,
-        0,
-        0
+        get_tooltip_amphitheater
     };
     return &overlay;
 }
@@ -303,9 +297,7 @@ const city_overlay *city_overlay_for_arena(void)
         show_figure_arena,
         get_column_height_arena,
         0,
-        get_tooltip_colosseum,
-        0,
-        0
+        get_tooltip_colosseum
     };
     return &overlay;
 }
@@ -319,9 +311,7 @@ const city_overlay *city_overlay_for_colosseum(void)
         show_figure_colosseum,
         get_column_height_colosseum,
         0,
-        get_tooltip_colosseum,
-        0,
-        0
+        get_tooltip_colosseum
     };
     return &overlay;
 }
@@ -335,9 +325,7 @@ const city_overlay *city_overlay_for_hippodrome(void)
         show_figure_hippodrome,
         get_column_height_hippodrome,
         0,
-        get_tooltip_hippodrome,
-        0,
-        0
+        get_tooltip_hippodrome
     };
     return &overlay;
 }
@@ -351,9 +339,7 @@ const city_overlay *city_overlay_for_tavern(void)
         show_figure_tavern,
         get_column_height_tavern,
         0,
-        get_tooltip_tavern,
-        0,
-        0
+        get_tooltip_tavern
     };
     return &overlay;
 }

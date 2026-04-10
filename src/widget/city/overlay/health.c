@@ -243,9 +243,7 @@ const city_overlay *city_overlay_for_health(void)
         show_figure_health,
         get_column_height_health,
         0,
-        get_tooltip_health,
-        0,
-        0
+        get_tooltip_health
     };
     return &overlay;
 }
@@ -259,9 +257,7 @@ const city_overlay *city_overlay_for_barber(void)
         show_figure_barber,
         get_column_height_barber,
         0,
-        get_tooltip_barber,
-        0,
-        0
+        get_tooltip_barber
     };
     return &overlay;
 }
@@ -275,9 +271,7 @@ const city_overlay *city_overlay_for_bathhouse(void)
         show_figure_bathhouse,
         get_column_height_bathhouse,
         0,
-        get_tooltip_bathhouse,
-        0,
-        0
+        get_tooltip_bathhouse
     };
     return &overlay;
 }
@@ -291,9 +285,7 @@ const city_overlay *city_overlay_for_clinic(void)
         show_figure_clinic,
         get_column_height_clinic,
         0,
-        get_tooltip_clinic,
-        0,
-        0
+        get_tooltip_clinic
     };
     return &overlay;
 }
@@ -307,9 +299,7 @@ const city_overlay *city_overlay_for_hospital(void)
         show_figure_hospital,
         get_column_height_hospital,
         0,
-        get_tooltip_hospital,
-        0,
-        0
+        get_tooltip_hospital
     };
     return &overlay;
 }
@@ -317,15 +307,13 @@ const city_overlay *city_overlay_for_hospital(void)
 const city_overlay *city_overlay_for_sickness(void)
 {
     static city_overlay overlay = {
-            OVERLAY_SICKNESS,
-            COLUMN_COLOR_RED_TO_GREEN,
-            show_building_sickness,
-            show_figure_sickness,
-            get_column_height_sickness,
-            0,
-            get_tooltip_sickness,
-            0,
-            0
+        OVERLAY_SICKNESS,
+        COLUMN_COLOR_RED_TO_GREEN,
+        show_building_sickness,
+        show_figure_sickness,
+        get_column_height_sickness,
+        0,
+        get_tooltip_sickness
     };
     return &overlay;
 }

@@ -132,13 +132,14 @@ building *building_first_of_type(building_type type)
     return data.first_of_type[type];
 }
 
-building *building_main(building *b)
+building *building_main(const building *b)
 {
+    building *part = array_item(data.buildings, b->id);
     for (int guard = 0; guard < 9; guard++) {
-        if (b->prev_part_building_id <= 0) {
-            return b;
+        if (part->prev_part_building_id <= 0) {
+            return part;
         }
-        b = array_item(data.buildings, b->prev_part_building_id);
+        part = array_item(data.buildings, part->prev_part_building_id);
     }
     return array_first(data.buildings);
 }

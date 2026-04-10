@@ -48,6 +48,8 @@ static int show_building_damage(const building *b)
 
 static int show_building_problems(const building *b)
 {
+    b = building_main(b);
+
     if (b->has_problem) {
         return 1;
     }
@@ -105,42 +107,10 @@ static int show_building_native(const building *b)
         b->type == BUILDING_NATIVE_WATCHTOWER;
 }
 
-static int draw_footprint_enemy(int x, int y, float scale, int grid_offset)
-{
-    if (!map_property_is_draw_tile(grid_offset)) {
-        return 0;
-    }
-    int drawn = 0;
-    // 1. If there is a highway, draw it
-    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) &&
-        !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
-        city_draw_highway_footprint(x, y, scale, grid_offset, COLOR_MASK_NONE);
-        drawn = 1;
-    }
-    // 2. On top: an aqueduct / wall
-    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
-        image_draw_isometric_footprint_from_draw_tile(
-            map_image_at(grid_offset), x, y, 0, scale
-        );
-        drawn = 1;
-    }
-    // If nothing was drawn, let the engine draw the ground itself
-    return drawn;
-}
-
-static int draw_top_enemy(int x, int y, float scale, int grid_offset)
-{
-    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
-        image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
-        return 1;
-    }
-    return 0;
-}
-
 static int show_building_enemy(const building *b)
 {
     return b->type == BUILDING_PREFECTURE
-        || b->type == BUILDING_WATCHTOWER || b->type == BUILDING_TOWER
+        || b->type == BUILDING_WATCHTOWER || b->type == BUILDING_TOWER || b->type == BUILDING_WALL
         || (building_is_fort(b->type)) || b->type == BUILDING_FORT_GROUND
         || b->type == BUILDING_BARRACKS || b->type == BUILDING_MILITARY_ACADEMY
         || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE;
@@ -385,8 +355,6 @@ const city_overlay *city_overlay_for_fire(void)
         get_column_height_fire,
         0,
         get_tooltip_fire,
-        0,
-        0
     };
     return &overlay;
 }
@@ -401,8 +369,6 @@ const city_overlay *city_overlay_for_damage(void)
         get_column_height_damage,
         0,
         get_tooltip_damage,
-        0,
-        0
     };
     return &overlay;
 }
@@ -416,9 +382,7 @@ const city_overlay *city_overlay_for_crime(void)
         show_figure_crime,
         get_column_height_crime,
         0,
-        get_tooltip_crime,
-        0,
-        0
+        get_tooltip_crime
     };
     return &overlay;
 }
@@ -432,80 +396,23 @@ const city_overlay *city_overlay_for_problems(void)
         show_figure_problems,
         get_column_height_none,
         0,
-        get_tooltip_problems,
-        0,
-        0
+        get_tooltip_problems
     };
     return &overlay;
 }
 
-static int terrain_on_native_overlay(void)
+static void draw_graph_native(int x, int y, float scale, int grid_offset)
 {
-    return
-        TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_SHRUB |
-        TERRAIN_GARDEN | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE;
-}
+    building *b = building_get(map_building_at(grid_offset));
 
-static int draw_footprint_native(int x, int y, float scale, int grid_offset)
-{
-    if (!map_property_is_draw_tile(grid_offset)) {
-        return 1;
+    if (map_property_is_native_land(grid_offset) && !show_building_native(b)) {
+        image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_DESIRABILITY) + 1, x, y,
+            ALPHA_FONT_SEMI_TRANSPARENT, scale);
     }
-    if (map_is_bridge(grid_offset)) {
-        int water_image = map_image_at(grid_offset);  // Get the water image for the bridge
-        if (!water_image) {
-            water_image = image_group(GROUP_TERRAIN_WATER);  // fallback - first image in water group
-        }
-        image_draw_isometric_footprint_from_draw_tile(water_image, x, y, 0, scale);
-    }
-    if (map_terrain_is(grid_offset, terrain_on_native_overlay())) {
-        if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-            city_draw_building_footprint(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 0));
-        } else {
-            image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
-        }
-    } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT | TERRAIN_WALL)) {
-        //display flattened building tile 
-        int image_id = image_group(GROUP_TERRAIN_OVERLAY);
-        image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
-    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        city_draw_building_footprint(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 0));
-    } else {
-        if (map_property_is_native_land(grid_offset)) {
-            image_draw_isometric_footprint_from_draw_tile(image_group(GROUP_TERRAIN_DESIRABILITY) + 1, x, y, 0, scale);
-        } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
-            city_draw_highway_footprint(x, y, scale, grid_offset, COLOR_MASK_NONE);
-        } else {
-            image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
-        }
-    }
-    if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
-                                        && !map_building_at(grid_offset) && scale <= 2.0f) {
-        //grid is drawn by the renderer directly at zoom > 200%
-        static int grid_id = 0;
-        if (!grid_id) {
-            grid_id = assets_get_image_id("UI", "Grid_Full");
-        }
-        image_draw(grid_id, x, y, COLOR_GRID, scale);
-    }
-    return 1;
-}
 
-static int draw_top_native(int x, int y, float scale, int grid_offset)
-{
-    if (!map_property_is_draw_tile(grid_offset)) {
-        return 1;
+    if (show_building_native(b) && map_property_is_draw_tile(grid_offset)) {
+        city_draw_building_top(x, y, grid_offset, city_draw_get_color_mask(grid_offset, 1));
     }
-    color_t color_mask = city_draw_get_color_mask(grid_offset, 1);
-    if (map_terrain_is(grid_offset, terrain_on_native_overlay())) {
-        if (!map_terrain_is(grid_offset, TERRAIN_BUILDING) || map_is_bridge(grid_offset)) {
-            image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, scale);
-        }
-
-    } else if (map_building_at(grid_offset)) {
-        city_draw_building_top(x, y, grid_offset, color_mask);
-    }
-    return 1;
 }
 
 const city_overlay *city_overlay_for_native(void)
@@ -518,8 +425,9 @@ const city_overlay *city_overlay_for_native(void)
         get_column_height_none,
         0,
         0,
-        draw_footprint_native,
-        draw_top_native
+        0,
+        0,
+        draw_graph_native
     };
     return &overlay;
 }
@@ -531,11 +439,7 @@ const city_overlay *city_overlay_for_enemy(void)
         COLUMN_COLOR_RED,
         show_building_enemy,
         show_figure_enemy,
-        get_column_height_none,
-        0,
-        0,
-        draw_footprint_enemy,
-        draw_top_enemy
+        get_column_height_none
     };
     return &overlay;
 }

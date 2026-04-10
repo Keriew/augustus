@@ -1453,4 +1453,8 @@
 			<frame group="this" image="Empire_Icon_Flag_06"/>
 		</animation>
 	</image>
+	<image id="Reservoir_Range_Overlay_Icon" isometric="true">
+		<layer group="20" image="11"/>
+		<layer src="reservoir_range_mask" mask="alpha"/>
+	</image>
 </assetlist>
