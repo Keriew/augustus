@@ -91,6 +91,12 @@ static int show_building_problems(const building *b)
         if (!b->data.entertainment.days2) {
             return 1;
         }
+
+    } else if (b->type == BUILDING_DEPOT &&
+        (!b->data.depot.current_order.src_storage_id ||
+         !b->data.depot.current_order.dst_storage_id)) {
+        return 1;
+
     } else if (b->has_road_access == 0 &&
         building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
         return 1;
@@ -130,7 +136,8 @@ static int show_figure_crime(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
     return props->category & FIGURE_CATEGORY_ARMED || props->category & FIGURE_CATEGORY_CRIMINAL
-        || props->category & FIGURE_CATEGORY_PROJECTILE;
+        || props->category & FIGURE_CATEGORY_PROJECTILE
+        || f->type == FIGURE_FORT_STANDARD;
 }
 
 static int show_figure_problems(const figure *f)
@@ -334,6 +341,12 @@ static int get_tooltip_problems(tooltip_context *c, int grid_offset)
     } else if (b->type == BUILDING_HIPPODROME && !b->data.entertainment.days1) {
         c->text_group = 73;
         return 5;
+
+    } else if (b->type == BUILDING_DEPOT &&
+        (!b->data.depot.current_order.src_storage_id ||
+            !b->data.depot.current_order.dst_storage_id)) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS;
+
     } else if (b->has_road_access == 0 &&
         building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
         c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS;

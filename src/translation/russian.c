@@ -2055,6 +2055,7 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_CHIEF_LATRINE_AND_WELL, "Большая часть населения пользуется колодцами и латринами"},
     {TR_ADVISOR_CHIEF_WELL_WATER, "Большинство жителей получает воду из колодцев"},
     {TR_ADVISOR_CHIEF_NO_WATER, "Большинство жителей не имеет доступа к нормальному водоснабжению"},
+    {TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS, "Нет указаний"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
