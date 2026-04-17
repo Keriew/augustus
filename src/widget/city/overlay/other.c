@@ -73,7 +73,8 @@ static int show_building_tax_income(const building *b)
 
 static int show_building_water(const building *b)
 {
-    return b->house_size > 0 || b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN || b->type == BUILDING_RESERVOIR ||
+    return b->house_size > 0 || b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN ||
+        b->type == BUILDING_RESERVOIR || b->type == BUILDING_AQUEDUCT ||
         (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE && building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER));
 }
 
@@ -653,15 +654,20 @@ static void blend_color_to_footprint(int x, int y, int size, color_t color, floa
     }
 }
 
-static void redraw_water_building(building *b, int x, int y, float scale, int grid_offset)
+static int redraw_water_building(building *b, int x, int y, float scale, int grid_offset)
 {
     if (!water_building_ghost_settings.show_reservoir_range &&
-        (b->type == BUILDING_RESERVOIR || b->type == BUILDING_GRAND_TEMPLE_NEPTUNE)) {
-        return;
+        (b->type == BUILDING_RESERVOIR || b->type == BUILDING_GRAND_TEMPLE_NEPTUNE || b->type == BUILDING_AQUEDUCT)) {
+        return 0;
     }
     if (!water_building_ghost_settings.show_fountain_well_range &&
         (b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN)) {
-        return;
+        return 0;
+    }
+
+    // We still return as drawn if it's not draw tile, to avoid drawing the range on top of the building footprint.
+    if (!map_property_is_draw_tile(grid_offset)) {
+        return 1;
     }
 
     int image_id = map_image_at(grid_offset);
@@ -676,14 +682,15 @@ static void redraw_water_building(building *b, int x, int y, float scale, int gr
             animation_offset = img->animation->num_sprites;
         }
         if (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE) {
-            int image_id = assets_get_image_id("Monuments", "Neptune Module 2 Fountain");
-            image_draw(image_id + ((animation_offset - 1) % 5), x + 98, y + 87 - y_offset, color_mask, scale);
+            image_draw(assets_get_image_id("Monuments", "Neptune Module 2 Fountain") + ((animation_offset - 1) % 5),
+                x + 98, y + 87 - y_offset, color_mask, scale);
         }
         image_draw(image_id + img->animation->start_offset + animation_offset,
             x + img->animation->sprite_offset_x,
             y + img->animation->sprite_offset_y - y_offset,
             color_mask, scale);
     }
+    return 1;
 }
 
 static void draw_water_graph(int x, int y, float scale, int grid_offset)
@@ -699,23 +706,16 @@ static void draw_water_graph(int x, int y, float scale, int grid_offset)
     building *b = building_get(map_building_at(grid_offset));
 
     if (show_building_water(b) && !is_inhabited_building(grid_offset)) {
-        if (map_property_is_draw_tile(grid_offset)) {
-            redraw_water_building(b, x, y, scale, grid_offset);
+        if (redraw_water_building(b, x, y, scale, grid_offset)) {
+            return;
         }
-        return;
     }
 
     if (water_building_ghost_settings.show_reservoir_range &&
         (!show_building_water(b) || (is_inhabited_building(grid_offset) && !water_building_ghost_settings.show_fountain_well_range)) &&
-        map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE) && !map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE)) {
         image_draw_isometric_footprint_from_draw_tile(assets_lookup_image_id(ASSET_UI_RESERVOIR_RANGE), x, y,
             water_building_ghost_settings.reservoir_range_color, scale);
-    }
-
-    if (water_building_ghost_settings.show_reservoir_range && map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
-        int image_id = map_image_at(grid_offset);
-        color_t color_mask = city_draw_get_color_mask(grid_offset, 1);
-        image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, scale);
     }
 
     if (!water_building_ghost_settings.show_fountain_well_range) {
