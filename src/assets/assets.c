@@ -88,7 +88,8 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.font_lookup[ASSET_FONT_CRLY_BRACKET_RIGHT] = assets_get_image_id("UI", "curlybracket_white_right");
 
     // Tile data assets
-    data.asset_lookup[ASSET_UI_WATER_RANGE] = assets_get_image_id("UI", "Water_Range");
+    data.asset_lookup[ASSET_UI_FOUNTAIN_RANGE] = assets_get_image_id("UI", "Water_Range");
+    data.asset_lookup[ASSET_UI_RESERVOIR_RANGE] = assets_get_image_id("UI", "Reservoir_Range_Overlay_Icon");
     data.asset_lookup[ASSET_UI_GRID] = assets_get_image_id("UI", "Grid_Full");
 }
 

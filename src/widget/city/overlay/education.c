@@ -1,6 +1,7 @@
 #include "education.h"
 
 #include "game/state.h"
+#include "map/building.h"
 
 static int show_building_education(const building *b)
 {
@@ -62,8 +63,12 @@ static int get_column_height_academy(const building *b)
     return b->house_size && b->data.house.academy ? b->data.house.academy / 10 : NO_COLUMN;
 }
 
-static int get_tooltip_education(tooltip_context *c, const building *b)
+static int get_tooltip_education(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     switch (b->data.house.education) {
         case 0: return 100;
         case 1: return 101;
@@ -73,8 +78,12 @@ static int get_tooltip_education(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_school(tooltip_context *c, const building *b)
+static int get_tooltip_school(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.school <= 0) {
         return 19;
     } else if (b->data.house.school >= 80) {
@@ -86,8 +95,12 @@ static int get_tooltip_school(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_library(tooltip_context *c, const building *b)
+static int get_tooltip_library(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.library <= 0) {
         return 23;
     } else if (b->data.house.library >= 80) {
@@ -99,8 +112,12 @@ static int get_tooltip_library(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_academy(tooltip_context *c, const building *b)
+static int get_tooltip_academy(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.academy <= 0) {
         return 27;
     } else if (b->data.house.academy >= 80) {
@@ -115,15 +132,12 @@ static int get_tooltip_academy(tooltip_context *c, const building *b)
 const city_overlay *city_overlay_for_education(void)
 {
     static city_overlay overlay = {
-        OVERLAY_EDUCATION,
-        COLUMN_COLOR_GREEN,
-        show_building_education,
-        show_figure_education,
-        get_column_height_education,
-        0,
-        get_tooltip_education,
-        0,
-        0
+        .type = OVERLAY_EDUCATION,
+        .column_type = COLUMN_COLOR_GREEN,
+        .show_building = show_building_education,
+        .show_figure = show_figure_education,
+        .get_column_height = get_column_height_education,
+        .get_tooltip = get_tooltip_education
     };
     return &overlay;
 }
@@ -131,15 +145,12 @@ const city_overlay *city_overlay_for_education(void)
 const city_overlay *city_overlay_for_school(void)
 {
     static city_overlay overlay = {
-        OVERLAY_SCHOOL,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_school,
-        show_figure_school,
-        get_column_height_school,
-        0,
-        get_tooltip_school,
-        0,
-        0
+        .type = OVERLAY_SCHOOL,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_school,
+        .show_figure = show_figure_school,
+        .get_column_height = get_column_height_school,
+        .get_tooltip = get_tooltip_school
     };
     return &overlay;
 }
@@ -147,15 +158,12 @@ const city_overlay *city_overlay_for_school(void)
 const city_overlay *city_overlay_for_library(void)
 {
     static city_overlay overlay = {
-        OVERLAY_LIBRARY,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_library,
-        show_figure_library,
-        get_column_height_library,
-        0,
-        get_tooltip_library,
-        0,
-        0
+        .type = OVERLAY_LIBRARY,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_library,
+        .show_figure = show_figure_library,
+        .get_column_height = get_column_height_library,
+        .get_tooltip = get_tooltip_library
     };
     return &overlay;
 }
@@ -163,15 +171,12 @@ const city_overlay *city_overlay_for_library(void)
 const city_overlay *city_overlay_for_academy(void)
 {
     static city_overlay overlay = {
-        OVERLAY_ACADEMY,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_academy,
-        show_figure_academy,
-        get_column_height_academy,
-        0,
-        get_tooltip_academy,
-        0,
-        0
+        .type = OVERLAY_ACADEMY,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_academy,
+        .show_figure = show_figure_academy,
+        .get_column_height = get_column_height_academy,
+        .get_tooltip = get_tooltip_academy
     };
     return &overlay;
 }

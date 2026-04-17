@@ -608,7 +608,6 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/other.c
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/overlay.c
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/risks.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city/water_ghost.c
     ${PROJECT_SOURCE_DIR}/src/widget/dropdown_button.c
     ${PROJECT_SOURCE_DIR}/src/widget/input_box.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor.c

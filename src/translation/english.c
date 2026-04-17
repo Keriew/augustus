@@ -62,8 +62,9 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, "Disable dragging with right mouse button"},
     {TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE, "Improve visual feedback when clearing land"},
     {TR_CONFIG_ALLOW_CYCLING_TEMPLES, "Allow building each temple in succession"},
-    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "Show range when building reservoirs, fountains and wells"},
-    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, "Show range of fountains and wells when building houses"},
+    {TR_CONFIG_HEADER_WATER_STRUCTURE_RANGE, "Show range of fountains and wells"},
+    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "When building reservoirs, fountains and wells"},
+    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, "When building houses"},
     {TR_CONFIG_SHOW_MARKET_RANGE, "Show range when building markets"},
     {TR_CONFIG_SHOW_CONSTRUCTION_SIZE, "Show area of construction when dragging the cursor"},
     {TR_CONFIG_HIGHLIGHT_LEGIONS, "Highlight legion on cursor hover"},
@@ -1908,7 +1909,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HOUSE_MEDIUM_PALACE, "Medium Palace"},
     {TR_BUILDING_HOUSE_LARGE_PALACE,  "Large Palace"},
     {TR_BUILDING_HOUSE_LUXURY_PALACE, "Luxury Palace"},
-    {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Show reservoir range when building fountains"},
+    {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Show reservoir range when building other reservoirs and buildings that require its coverage"},
     {TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, "Always allow removal of bridges"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION, "Destruction"},
     {TR_CHEAT_DESTROYED_BUILDING, "Destroyed building"},
@@ -2054,7 +2055,8 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_CHIEF_CLEAN_WATER, "A Majority of your population has access to clean fountain water."},
     {TR_ADVISOR_CHIEF_LATRINE_AND_WELL, "A Majority of your population has access to well water and a latrine."},
     {TR_ADVISOR_CHIEF_WELL_WATER, "Most of your people have to recieve their water from wells."},
-    {TR_ADVISOR_CHIEF_NO_WATER, "Most of your people don't have any access to a proper water supply."}
+    {TR_ADVISOR_CHIEF_NO_WATER, "Most of your people don't have any access to a proper water supply."},
+    {TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS, "No instructions"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

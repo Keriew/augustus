@@ -165,10 +165,10 @@ void trade_routes_load_state(buffer *trade_routes)
     }
     for (int i = 0; i < routes_to_load; i++) {
         trade_route *route = array_next(routes);
-        for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
             for (int r = 0; r < resource_total_mapped(); r++) {
                 resource_type remapped = resource_remap(r);
-                if (i) {
+                if (j) {
                     route->buys.limit[remapped] = buffer_read_i32(trade_routes);
                     route->buys.traded[remapped] = buffer_read_i32(trade_routes);
                 } else {

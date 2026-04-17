@@ -2,6 +2,7 @@
 
 #include "city/health.h"
 #include "game/state.h"
+#include "map/building.h"
 #include "translation/translation.h"
 
 static int show_building_health(const building *b)
@@ -121,8 +122,9 @@ static int get_column_height_sickness(const building *b)
     return b->sickness_level ? b->sickness_level / 10 : NO_COLUMN;
 }
 
-static int get_tooltip_health(tooltip_context *c, const building *b)
+static int get_tooltip_health(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
     if (building_is_house(b->type)) {
         int house_health = city_health_get_house_health_level(b, 0);
 
@@ -163,8 +165,13 @@ static int get_tooltip_health(tooltip_context *c, const building *b)
     return 0;
 }
 
-static int get_tooltip_barber(tooltip_context *c, const building *b)
+static int get_tooltip_barber(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
+
     if (b->data.house.barber <= 0) {
         return 31;
     } else if (b->data.house.barber >= 80) {
@@ -176,8 +183,12 @@ static int get_tooltip_barber(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_bathhouse(tooltip_context *c, const building *b)
+static int get_tooltip_bathhouse(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.bathhouse <= 0) {
         return 8;
     } else if (b->data.house.bathhouse >= 80) {
@@ -189,8 +200,12 @@ static int get_tooltip_bathhouse(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_clinic(tooltip_context *c, const building *b)
+static int get_tooltip_clinic(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.clinic <= 0) {
         return 35;
     } else if (b->data.house.clinic >= 80) {
@@ -202,8 +217,12 @@ static int get_tooltip_clinic(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_hospital(tooltip_context *c, const building *b)
+static int get_tooltip_hospital(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.hospital <= 0) {
         return 39;
     } else if (b->data.house.hospital >= 80) {
@@ -215,8 +234,9 @@ static int get_tooltip_hospital(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_sickness(tooltip_context *c, const building *b)
+static int get_tooltip_sickness(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
     if (building_is_house(b->type) ||
         b->type == BUILDING_DOCK || b->type == BUILDING_WAREHOUSE || b->type == BUILDING_GRANARY) {
         if (b->sickness_level < 1) {
@@ -237,15 +257,12 @@ static int get_tooltip_sickness(tooltip_context *c, const building *b)
 const city_overlay *city_overlay_for_health(void)
 {
     static city_overlay overlay = {
-        OVERLAY_HEALTH,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_health,
-        show_figure_health,
-        get_column_height_health,
-        0,
-        get_tooltip_health,
-        0,
-        0
+        .type = OVERLAY_HEALTH,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_health,
+        .show_figure = show_figure_health,
+        .get_column_height = get_column_height_health,
+        .get_tooltip = get_tooltip_health
     };
     return &overlay;
 }
@@ -253,15 +270,12 @@ const city_overlay *city_overlay_for_health(void)
 const city_overlay *city_overlay_for_barber(void)
 {
     static city_overlay overlay = {
-        OVERLAY_BARBER,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_barber,
-        show_figure_barber,
-        get_column_height_barber,
-        0,
-        get_tooltip_barber,
-        0,
-        0
+        .type = OVERLAY_BARBER,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_barber,
+        .show_figure = show_figure_barber,
+        .get_column_height = get_column_height_barber,
+        .get_tooltip = get_tooltip_barber
     };
     return &overlay;
 }
@@ -269,15 +283,12 @@ const city_overlay *city_overlay_for_barber(void)
 const city_overlay *city_overlay_for_bathhouse(void)
 {
     static city_overlay overlay = {
-        OVERLAY_BATHHOUSE,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_bathhouse,
-        show_figure_bathhouse,
-        get_column_height_bathhouse,
-        0,
-        get_tooltip_bathhouse,
-        0,
-        0
+        .type = OVERLAY_BATHHOUSE,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_bathhouse,
+        .show_figure = show_figure_bathhouse,
+        .get_column_height = get_column_height_bathhouse,
+        .get_tooltip = get_tooltip_bathhouse
     };
     return &overlay;
 }
@@ -285,15 +296,12 @@ const city_overlay *city_overlay_for_bathhouse(void)
 const city_overlay *city_overlay_for_clinic(void)
 {
     static city_overlay overlay = {
-        OVERLAY_CLINIC,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_clinic,
-        show_figure_clinic,
-        get_column_height_clinic,
-        0,
-        get_tooltip_clinic,
-        0,
-        0
+        .type = OVERLAY_CLINIC,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_clinic,
+        .show_figure = show_figure_clinic,
+        .get_column_height = get_column_height_clinic,
+        .get_tooltip = get_tooltip_clinic
     };
     return &overlay;
 }
@@ -301,15 +309,12 @@ const city_overlay *city_overlay_for_clinic(void)
 const city_overlay *city_overlay_for_hospital(void)
 {
     static city_overlay overlay = {
-        OVERLAY_HOSPITAL,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_hospital,
-        show_figure_hospital,
-        get_column_height_hospital,
-        0,
-        get_tooltip_hospital,
-        0,
-        0
+        .type = OVERLAY_HOSPITAL,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_hospital,
+        .show_figure = show_figure_hospital,
+        .get_column_height = get_column_height_hospital,
+        .get_tooltip = get_tooltip_hospital
     };
     return &overlay;
 }
@@ -317,15 +322,12 @@ const city_overlay *city_overlay_for_hospital(void)
 const city_overlay *city_overlay_for_sickness(void)
 {
     static city_overlay overlay = {
-            OVERLAY_SICKNESS,
-            COLUMN_COLOR_RED_TO_GREEN,
-            show_building_sickness,
-            show_figure_sickness,
-            get_column_height_sickness,
-            0,
-            get_tooltip_sickness,
-            0,
-            0
+        .type = OVERLAY_SICKNESS,
+        .column_type = COLUMN_COLOR_RED_TO_GREEN,
+        .show_building = show_building_sickness,
+        .show_figure = show_figure_sickness,
+        .get_column_height = get_column_height_sickness,
+        .get_tooltip = get_tooltip_sickness
     };
     return &overlay;
 }

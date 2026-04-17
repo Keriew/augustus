@@ -148,25 +148,8 @@ const city_overlay *city_overlay_get(void)
 int city_overlay_get_tooltip_text(tooltip_context *c, int grid_offset)
 {
     const city_overlay *overlay = city_overlay_get();
-    int overlay_type = overlay->type;
-    int building_id = map_building_at(grid_offset);
-    if (overlay->get_tooltip_for_building && !building_id) {
-        return 0;
-    }
-    int overlay_requires_house =
-        overlay_type != OVERLAY_WATER && overlay_type != OVERLAY_FIRE && overlay_type != OVERLAY_LEVY &&
-        overlay_type != OVERLAY_DAMAGE && overlay_type != OVERLAY_NATIVE && overlay_type != OVERLAY_DESIRABILITY &&
-        overlay_type != OVERLAY_PROBLEMS && overlay_type != OVERLAY_MOTHBALL && overlay_type != OVERLAY_ENEMY &&
-        overlay_type != OVERLAY_LOGISTICS && overlay_type != OVERLAY_SICKNESS && overlay_type != OVERLAY_EFFICIENCY &&
-        overlay_type != OVERLAY_HEALTH && overlay_type != OVERLAY_EMPLOYMENT;
-    building *b = building_get(building_id);
-    if (overlay_requires_house && !b->house_size) {
-        return 0;
-    }
-    if (overlay->get_tooltip_for_building) {
-        return overlay->get_tooltip_for_building(c, b);
-    } else if (overlay->get_tooltip_for_grid_offset) {
-        return overlay->get_tooltip_for_grid_offset(c, grid_offset);
+    if (overlay->get_tooltip) {
+        return overlay->get_tooltip(c, grid_offset);
     }
     return 0;
 }

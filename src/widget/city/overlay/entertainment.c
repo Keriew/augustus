@@ -1,6 +1,7 @@
 #include "entertainment.h"
 
 #include "game/state.h"
+#include "map/building.h"
 #include "translation/translation.h"
 
 static int show_building_entertainment(const building *b)
@@ -141,8 +142,13 @@ static int get_column_height_tavern(const building *b)
     return (((b->house_tavern_wine_access / 10) * 2) + (b->house_tavern_food_access / 10)) / 3;
 }
 
-static int get_tooltip_entertainment(tooltip_context *c, const building *b)
+static int get_tooltip_entertainment(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
+
     if (b->data.house.entertainment <= 0) {
         return 64;
     } else if (b->data.house.entertainment < 10) {
@@ -168,8 +174,12 @@ static int get_tooltip_entertainment(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_theater(tooltip_context *c, const building *b)
+static int get_tooltip_theater(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.theater <= 0) {
         return 75;
     } else if (b->data.house.theater >= 80) {
@@ -181,8 +191,12 @@ static int get_tooltip_theater(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_amphitheater(tooltip_context *c, const building *b)
+static int get_tooltip_amphitheater(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.amphitheater_actor <= 0) {
         return 79;
     } else if (b->data.house.amphitheater_actor >= 80) {
@@ -194,8 +208,12 @@ static int get_tooltip_amphitheater(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_colosseum(tooltip_context *c, const building *b)
+static int get_tooltip_colosseum(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.colosseum_gladiator && b->data.house.colosseum_lion) {
         c->translation_key = TR_TOOLTIP_OVERLAY_ARENA_COL_5;
     } else if (b->data.house.colosseum_gladiator) {
@@ -210,8 +228,12 @@ static int get_tooltip_colosseum(tooltip_context *c, const building *b)
     return 0;
 }
 
-static int get_tooltip_hippodrome(tooltip_context *c, const building *b)
+static int get_tooltip_hippodrome(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->data.house.hippodrome <= 0) {
         return 87;
     } else if (b->data.house.hippodrome >= 80) {
@@ -223,8 +245,12 @@ static int get_tooltip_hippodrome(tooltip_context *c, const building *b)
     }
 }
 
-static int get_tooltip_tavern(tooltip_context *c, const building *b)
+static int get_tooltip_tavern(tooltip_context *c, int grid_offset)
 {
+    building *b = building_get(map_building_at(grid_offset));
+    if (!b->house_size) {
+        return 0;
+    }
     if (b->house_tavern_wine_access <= 0) {
         c->translation_key = TR_TOOLTIP_OVERLAY_TAVERN_1;
     } else if (b->house_tavern_wine_access <= 20) {
@@ -249,15 +275,12 @@ static int get_tooltip_tavern(tooltip_context *c, const building *b)
 const city_overlay *city_overlay_for_entertainment(void)
 {
     static city_overlay overlay = {
-        OVERLAY_ENTERTAINMENT,
-        COLUMN_COLOR_GREEN,
-        show_building_entertainment,
-        show_figure_entertainment,
-        get_column_height_entertainment,
-        0,
-        get_tooltip_entertainment,
-        0,
-        0
+        .type = OVERLAY_ENTERTAINMENT,
+        .column_type = COLUMN_COLOR_GREEN,
+        .show_building = show_building_entertainment,
+        .show_figure = show_figure_entertainment,
+        .get_column_height = get_column_height_entertainment,
+        .get_tooltip = get_tooltip_entertainment
     };
     return &overlay;
 }
@@ -265,15 +288,12 @@ const city_overlay *city_overlay_for_entertainment(void)
 const city_overlay *city_overlay_for_theater(void)
 {
     static city_overlay overlay = {
-        OVERLAY_THEATER,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_theater,
-        show_figure_theater,
-        get_column_height_theater,
-        0,
-        get_tooltip_theater,
-        0,
-        0
+        .type = OVERLAY_THEATER,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_theater,
+        .show_figure = show_figure_theater,
+        .get_column_height = get_column_height_theater,
+        .get_tooltip = get_tooltip_theater
     };
     return &overlay;
 }
@@ -281,15 +301,12 @@ const city_overlay *city_overlay_for_theater(void)
 const city_overlay *city_overlay_for_amphitheater(void)
 {
     static city_overlay overlay = {
-        OVERLAY_AMPHITHEATER,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_amphitheater,
-        show_figure_amphitheater,
-        get_column_height_amphitheater,
-        0,
-        get_tooltip_amphitheater,
-        0,
-        0
+        .type = OVERLAY_AMPHITHEATER,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_amphitheater,
+        .show_figure = show_figure_amphitheater,
+        .get_column_height = get_column_height_amphitheater,
+        .get_tooltip = get_tooltip_amphitheater
     };
     return &overlay;
 }
@@ -297,15 +314,12 @@ const city_overlay *city_overlay_for_amphitheater(void)
 const city_overlay *city_overlay_for_arena(void)
 {
     static city_overlay overlay = {
-        OVERLAY_ARENA,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_arena,
-        show_figure_arena,
-        get_column_height_arena,
-        0,
-        get_tooltip_colosseum,
-        0,
-        0
+        .type = OVERLAY_ARENA,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_arena,
+        .show_figure = show_figure_arena,
+        .get_column_height = get_column_height_arena,
+        .get_tooltip = get_tooltip_colosseum
     };
     return &overlay;
 }
@@ -313,15 +327,12 @@ const city_overlay *city_overlay_for_arena(void)
 const city_overlay *city_overlay_for_colosseum(void)
 {
     static city_overlay overlay = {
-        OVERLAY_COLOSSEUM,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_colosseum,
-        show_figure_colosseum,
-        get_column_height_colosseum,
-        0,
-        get_tooltip_colosseum,
-        0,
-        0
+        .type = OVERLAY_COLOSSEUM,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_colosseum,
+        .show_figure = show_figure_colosseum,
+        .get_column_height = get_column_height_colosseum,
+        .get_tooltip = get_tooltip_colosseum
     };
     return &overlay;
 }
@@ -329,15 +340,12 @@ const city_overlay *city_overlay_for_colosseum(void)
 const city_overlay *city_overlay_for_hippodrome(void)
 {
     static city_overlay overlay = {
-        OVERLAY_HIPPODROME,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_hippodrome,
-        show_figure_hippodrome,
-        get_column_height_hippodrome,
-        0,
-        get_tooltip_hippodrome,
-        0,
-        0
+        .type = OVERLAY_HIPPODROME,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_hippodrome,
+        .show_figure = show_figure_hippodrome,
+        .get_column_height = get_column_height_hippodrome,
+        .get_tooltip = get_tooltip_hippodrome
     };
     return &overlay;
 }
@@ -345,15 +353,12 @@ const city_overlay *city_overlay_for_hippodrome(void)
 const city_overlay *city_overlay_for_tavern(void)
 {
     static city_overlay overlay = {
-        OVERLAY_TAVERN,
-        COLUMN_COLOR_GREEN_TO_RED,
-        show_building_tavern,
-        show_figure_tavern,
-        get_column_height_tavern,
-        0,
-        get_tooltip_tavern,
-        0,
-        0
+        .type = OVERLAY_TAVERN,
+        .column_type = COLUMN_COLOR_GREEN_TO_RED,
+        .show_building = show_building_tavern,
+        .show_figure = show_figure_tavern,
+        .get_column_height = get_column_height_tavern,
+        .get_tooltip = get_tooltip_tavern
     };
     return &overlay;
 }

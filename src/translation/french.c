@@ -62,8 +62,9 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, "Désactiver le clic droit pour déplacer la vue de la cité"},
     {TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE, "Améliore le retour visuel durant le dégagement du terrain"},
     {TR_CONFIG_ALLOW_CYCLING_TEMPLES, "Permet de construire tous les temples successivement"},
-    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "Voir la portée en plaçant les réservoirs, fontaines, et puits"},
-    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, "Voir la portée des fontaines et puits en plaçant les logements"},
+    {TR_CONFIG_HEADER_WATER_STRUCTURE_RANGE, "Voir la portée des fontaines et puits"},
+    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "En plaçant les réservoirs, fontaines, et puits"},
+    {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, "En plaçant les logements"},
     {TR_CONFIG_SHOW_MARKET_RANGE, "Voir la zone de couverture en plaçant les marchés"},
     {TR_CONFIG_SHOW_CONSTRUCTION_SIZE, "Voir la taille des constructions durant le glissement de la souris"},
     {TR_CONFIG_HIGHLIGHT_LEGIONS, "Mettre en surbrillance les légions au survol du curseur"},
@@ -1603,7 +1604,7 @@ static translation_string all_strings[] = {
     {TR_WINDOW_MESSAGE_LIST_SELECTED_ALL, "Tous les messages"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_COMMON, "Messages communs"},
     {TR_WINDOW_MESSAGE_LIST_SELECTED_CUSTOM, "Messages personnalisés"},
-    {TR_BUILDING_LATRINES, "Latrines"},
+    {TR_BUILDING_LATRINES, "Latrines"}, // building name on right-click
     {TR_BUILDING_LATRINES_DESC_1, "Lieu d'aisance apprécié de la population pour discuter des nouvelles du jour ou de leurs affaires."},
     {TR_BUILDING_LATRINES_DESC_2, "Les latrines sont utilisées par les citoyens n'ayant accès qu'à un puits, et améliorent le rang et l'hygiène de leur logement. Les citoyens ayant accès à une fontaine ne font pas usage des latrines publiques."},
     {TR_BUILDING_LATRINES_MISSING_EVOLVE, "Cette maison ne peut pas évoluer, car elle n'a pas accès à des latrines ou à l'eau propre d'une fontaine."},
@@ -1750,7 +1751,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_FULL, "Complet"},
     {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Clic droit pour fermer les bandeaux d'alerte"},
     {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Les requêtes de César respectent l'ordre 'Conserver'"},
-    {TR_CONFIG_ENABLE_MARKET_RANGE, "Zone de couverture par défaut des marchés"},
+    {TR_CONFIG_ENABLE_MARKET_RANGE, "Activer la zone de couverture des marchés"},
     {TR_PARAMETER_TYPE_FORMULA, "Formule" },
     {TR_CONDITION_TYPE_CHECK_FORMULA, "Evaluation de formules" },
     {TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA, "Modif. valeur variable perso. (formule)" },
@@ -1908,7 +1909,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HOUSE_MEDIUM_PALACE, "Palais moyen"},
     {TR_BUILDING_HOUSE_LARGE_PALACE,  "Grand palais"},
     {TR_BUILDING_HOUSE_LUXURY_PALACE, "Palais luxueux"},
-    {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Voir la portée des réservoirs en plaçant les fontaines"},
+    {TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, "Voir la portée des réservoirs en plaçant les bâtiments nécessitant un accès aux canalisations"},
     {TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, "Toujours permettre la suppression des ponts"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION, "Destruction"},
     {TR_CHEAT_DESTROYED_BUILDING, "Bâtiment détruit"},
@@ -2024,7 +2025,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_WT_PREVIEW_RAIN, "Aperçu de la pluie"},
     {TR_CONFIG_UI_WT_PREVIEW_SNOW, "Aperçu de la neige"},
     {TR_CONFIG_UI_WT_PREVIEW_SANDSTORM, "Aperçu de la tempête de sable" },
-    {TR_CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, "Aperçu de la forte pluie" },
+    {TR_CONFIG_UI_WT_PREVIEW_HEAVY_RAIN, "Aperçu de l'orage" },
     {TR_CONFIG_WT_RAIN_SPEED, "Vitesse des gouttes" },
     {TR_CONFIG_WT_RAIN_LENGTH, "Taille des gouttes" },
     {TR_CONFIG_WT_RAIN_INTENSITY, "Intensité du rendu" },
@@ -2049,12 +2050,13 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_HEALTH_HEALTH_COVERAGE, "Hygiène"},
     {TR_BUILDING_FOUNTAINS, "Fontaines"},
     {TR_BUILDING_WELLS, "Puits"},
-    {TR_BUILDING_LATRINE, "Latrines"},
+    {TR_BUILDING_LATRINE, "Latrines"}, // building name in plural for health advisor
     {TR_ADVISOR_CHIEF_WATER_COVERAGE, "Accès à l'eau"},
     {TR_ADVISOR_CHIEF_CLEAN_WATER, "Accès majoritaire à l'eau propre des fontaines"},
     {TR_ADVISOR_CHIEF_LATRINE_AND_WELL, "Accès majoritaire à l'eau des puits et aux latrines"},
     {TR_ADVISOR_CHIEF_WELL_WATER, "La plupart des citoyens tirent leur eau des puits"},
-    {TR_ADVISOR_CHIEF_NO_WATER, "La plupart des citoyens n'ont pas accès à un point d'eau"}
+    {TR_ADVISOR_CHIEF_NO_WATER, "La plupart des citoyens n'ont pas accès à un point d'eau"},
+    {TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS, "Pas d'instructions"},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

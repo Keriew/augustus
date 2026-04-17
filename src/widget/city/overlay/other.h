@@ -13,6 +13,10 @@ const city_overlay *city_overlay_for_food_stocks(void);
 
 const city_overlay *city_overlay_for_water(void);
 
+const city_overlay *city_overlay_for_water_building_ghost(int show_reservoir_range, int show_fountain_well_ranges);
+
+const city_overlay *city_overlay_for_water_building_ghost_house(void);
+
 const city_overlay *city_overlay_for_sentiment(void);
 
 const city_overlay *city_overlay_for_desirability(void);

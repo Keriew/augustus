@@ -107,6 +107,13 @@ static void init_draw_context(int selected_figure_id, pixel_coordinate *figure_c
     draw_context.scale = city_view_get_scale() / 100.0f;
     draw_context.overlay = city_overlay_get();
 
+    if (draw_context.overlay->type == OVERLAY_NONE) {
+        const city_overlay *ghost_overlay = city_building_ghost_get_overlay();
+        if (ghost_overlay) {
+            draw_context.overlay = ghost_overlay;
+        }
+    }
+
     // Determine hovered building - only if config enabled and not scrolling
     draw_context.hovered_building_id = 0;
     if (config_get(CONFIG_UI_CV_CURSOR_SHADOW) && draw_context.cursor_tile && draw_context.cursor_tile->grid_offset &&
@@ -274,23 +281,6 @@ static int is_drawable_farm_corner(int grid_offset)
     return 0;
 }
 
-void city_draw_building_footprint(int x, int y, int grid_offset, color_t color_mask)
-{
-    int building_id = map_building_at(grid_offset);
-    if (!building_id) {
-        return;
-    }
-    building *b = building_get(building_id);
-
-    if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
-        image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
-    } else {
-        if (!building_is_farm(b->type) || is_drawable_farm_corner(grid_offset)) {
-            draw_flattened_building_footprint(b, x, y, color_mask);
-        }
-    }
-}
-
 color_t city_draw_get_color_mask(int grid_offset, int is_top)
 {
     color_t color_mask = COLOR_MASK_NONE;
@@ -333,9 +323,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     if (grid_offset < 0) {
         return;
     }
-    if ((draw_context.overlay->draw_custom_footprint &&
-        draw_context.overlay->draw_custom_footprint(x, y, draw_context.scale, grid_offset)) ||
-        !map_property_is_draw_tile(grid_offset)) {
+    if (!map_property_is_draw_tile(grid_offset)) {
         draw_roamer_frequency(x, y, grid_offset);
         return;
     }
@@ -388,7 +376,15 @@ static void draw_footprint(int x, int y, int grid_offset)
     if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !map_terrain_is(grid_offset, TERRAIN_GATEHOUSE)) {
         city_draw_highway_footprint(x, y, draw_context.scale, grid_offset, color_mask);
     } else if (building_id && !map_is_bridge(grid_offset)) {
-        city_draw_building_footprint(x, y, grid_offset, color_mask);
+        building *b = building_get(building_id);
+
+        if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
+            image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
+        } else {
+            if (!building_is_farm(b->type) || is_drawable_farm_corner(grid_offset)) {
+                draw_flattened_building_footprint(b, x, y, color_mask);
+            }
+        }
     } else {
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     }
@@ -662,7 +658,7 @@ static void draw_senate_rating_flags(const building *b, int x, int y, color_t co
     }
 }
 
-void city_draw_building_top(int x, int y, int grid_offset, color_t color_mask)
+static void draw_building_top(int x, int y, int grid_offset, color_t color_mask)
 {
     building *b = building_get(map_building_at(grid_offset));
 
@@ -694,11 +690,6 @@ void city_draw_building_top(int x, int y, int grid_offset, color_t color_mask)
 
 static void draw_top(int x, int y, int grid_offset)
 {
-    if (draw_context.overlay->draw_custom_top &&
-        draw_context.overlay->draw_custom_top(x, y, draw_context.scale, grid_offset)) {
-        return;
-    }
-
     if (!map_property_is_draw_tile(grid_offset)) {
         return;
     }
@@ -706,7 +697,7 @@ static void draw_top(int x, int y, int grid_offset)
     color_t color_mask = city_draw_get_color_mask(grid_offset, 1);
 
     if (map_building_at(grid_offset)) {
-        city_draw_building_top(x, y, grid_offset, color_mask);
+        draw_building_top(x, y, grid_offset, color_mask);
     } else {
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
     }
@@ -1187,9 +1178,9 @@ static void deletion_draw_remaining(int x, int y, int grid_offset)
     draw_hippodrome_ornaments(x, y, grid_offset);
 }
 
-static void draw_custom_layer(int x, int y, int grid_offset)
+static void draw_overlay(int x, int y, int grid_offset)
 {
-    draw_context.overlay->draw_custom_layer(x, y, draw_context.scale, grid_offset);
+    draw_context.overlay->draw_layer(x, y, draw_context.scale, grid_offset);
 }
 
 static void draw_connectable_construction_ghost(int x, int y, int grid_offset)
@@ -1249,79 +1240,6 @@ static void update_clouds(void)
     clouds_draw(camera_x, camera_y, GRID_SIZE * 60, GRID_SIZE * 30, draw_context.scale);
 }
 
-/***
- * TODO:
- *
- * The following code should be executed, depending on a new "console window" output
- *
- * For now, we'll leave it commented out so it's added in the future.
- */
-
- /**
- static void draw_routing(int x, int y, int grid_offset)
- {
-     int tx = map_grid_offset_to_x(grid_offset);
-     int ty = map_grid_offset_to_y(grid_offset);
-     map_routing_distance_grid *distance = map_routing_get_distance_grid();
-     int16_t dist = distance->determined.items[grid_offset];
-     if (!dist) {
-         return;
-     }
-     if (tx == distance->dst_x && ty == distance->dst_y) {
-         int dst_image_id = assets_get_image_id("UI", "Happy God Icon");
-         image_draw(dst_image_id, x + 29 - 10, y + 15 - 10, 0, 1);
-     }
-     uint8_t text[20];
-     string_from_int(text, dist, 0);
-     text_draw_centered(text, x, y, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
- }
-
- static void draw_highway_terrain(int x, int y, int grid_offset)
- {
-     int offset = -8;
-     int terrain = map_terrain_get(grid_offset);
-     if (terrain & TERRAIN_HIGHWAY_TOP_LEFT) {
-         text_draw_centered("TL", x + offset, y + 6, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-         offset += 16;
-     }
-     if (terrain & TERRAIN_HIGHWAY_TOP_RIGHT) {
-         text_draw_centered("TR", x + offset, y + 6, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-         offset += 16;
-     }
-     if (terrain & TERRAIN_HIGHWAY_BOTTOM_LEFT) {
-         text_draw_centered("BL", x + offset, y + 6, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-         offset += 16;
-     }
-     if (terrain & TERRAIN_HIGHWAY_BOTTOM_RIGHT) {
-         text_draw_centered("BR", x + offset, y + 6, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-         offset += 16;
-     }
- }
-
- static void draw_tile_coords(int x, int y, int grid_offset)
- {
-     int tx = map_grid_offset_to_x(grid_offset);
-     int ty = map_grid_offset_to_y(grid_offset);
-     uint8_t text[20];
-     string_from_int(text, tx, 0);
-     int len = string_length(text);
-     string_copy(",", text + len, 2);
-     len++;
-     //string_from_int(text + len, ty, 0);
-     //text_draw_centered(text, x, y + 4, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
-     string_from_int(text, grid_offset, 0);
-     text_draw_centered(text, x, y + 10, 58, FONT_SMALL_PLAIN, COLOR_WHITE);
- }
-
- static void draw_road_network_id(int x, int y, int grid_offset)
- {
-     int road_network_id = map_road_network_get(grid_offset);
-     uint8_t text[20];
-     string_from_int(text, road_network_id, 0);
-     text_draw_centered(text, x, y + 4, 58, FONT_NORMAL_BLACK, COLOR_WHITE);
- }
- ***/
-
 void city_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map_tile *tile, unsigned int roamer_preview_building_id)
 {
     int highlighted_formation_id = get_highlighted_formation_id(tile);
@@ -1342,6 +1260,9 @@ void city_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map
             draw_figures,
             draw_animation
         );
+        if (draw_context.overlay->draw_layer) {
+            city_view_foreach_valid_map_tile(draw_overlay);
+        }
         if (!selected_figure_id) {
             if (building_is_connectable(building_construction_type())) {
                 city_view_foreach_valid_map_tile(draw_connectable_construction_ghost);
@@ -1357,9 +1278,9 @@ void city_draw(int selected_figure_id, pixel_coordinate *figure_coord, const map
         city_view_foreach_valid_map_tile(deletion_draw_terrain_top);
         city_view_foreach_valid_map_tile(deletion_draw_figures_animations);
         city_view_foreach_valid_map_tile(deletion_draw_remaining);
-    }
-    if (draw_context.overlay->draw_custom_layer) {
-        city_view_foreach_valid_map_tile(draw_custom_layer);
+        if (draw_context.overlay->draw_layer) {
+            city_view_foreach_valid_map_tile(draw_overlay);
+        }
     }
     update_clouds();
     update_weather();
