@@ -2057,6 +2057,8 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_CHIEF_WELL_WATER, "Most of your people have to recieve their water from wells."},
     {TR_ADVISOR_CHIEF_NO_WATER, "Most of your people don't have any access to a proper water supply."},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS, "No instructions"},
+    {TR_CONFIG_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS, "Granaries do not allow walkers by default"},
+    {TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS, "Warehouses do not allow walkers by default"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
