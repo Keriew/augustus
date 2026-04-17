@@ -124,7 +124,9 @@ static const char *ini_keys[] = {
     [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = "ui_wt_preview_heavy_rain",
     [CONFIG_UI_WT_SANDSTORM_SIZE] = "ui_wt_sandstorm_size",
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = "ui_wt_snowflake_size",
-    [CONFIG_UI_WT_WEATHER_DURATION] = "ui_wt_weather_duration"
+    [CONFIG_UI_WT_WEATHER_DURATION] = "ui_wt_weather_duration",
+    [CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_granary_do_not_allow_walkers",
+    [CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_warehouse_do_not_allow_walkers",
 };
 
 static const char *ini_string_keys[] = {

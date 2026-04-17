@@ -714,8 +714,10 @@ static void draw_water_graph(int x, int y, float scale, int grid_offset)
     if (water_building_ghost_settings.show_reservoir_range &&
         (!show_building_water(b) || (is_inhabited_building(grid_offset) && !water_building_ghost_settings.show_fountain_well_range)) &&
         map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE)) {
+        color_t color_to_use = map_terrain_is(grid_offset, TERRAIN_ROAD) ?
+            ALPHA_MASK_SEMI_TRANSPARENT : water_building_ghost_settings.reservoir_range_color;
         image_draw_isometric_footprint_from_draw_tile(assets_lookup_image_id(ASSET_UI_RESERVOIR_RANGE), x, y,
-            water_building_ghost_settings.reservoir_range_color, scale);
+            color_to_use, scale);
     }
 
     if (!water_building_ghost_settings.show_fountain_well_range) {

@@ -1823,6 +1823,16 @@ static translation_string all_strings[] = {
     {TR_CITY_PROPERTY_COVERAGE_ACADEMY, "Academy coverage"},
     {TR_CITY_PROPERTY_CHOOSE_PROPERTY, "Choose City property"},
     {TR_BUTTON_INFO_RETURN_ALL_LEGIONS, "Recall all legions"},
+    {TR_WARNING_DEPOT_RECALL_ALL, "All Depot cartpusher recalled!"},
+    {TR_WARNING_DEPOT_RESOURCE_CHANGE, "Cannot change resource while there are active cart pushers!"},
+    {TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_WAIT_LOAD, "Our cart is waiting to be loaded."},
+    {TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_WAIT_UNLOAD, "Our cart is waiting to be unloaded."},
+    {TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_GETTING_FOOD, "Our cart is off to the granary for food."},
+    {TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_GETTING_GOODS, "Our cart is off to the warehouse for goods."},
+    {TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_DELIVER, "Our cart is delivering goods."},
+    {TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_WAIT, "Our cart is waiting for new instructions."},
+    {TR_TOOLTIP_DEPOT_CLEAR_SRC, "Clear source"},
+    {TR_TOOLTIP_DEPOT_CLEAR_DST, "Clear destination"},
     {TR_CITY_PROPERTY_QUOTA_FILL, "Quota fill"},
     {TR_EDITOR_BUYS, "(Buys)"},
     {TR_EDITOR_SELLS, "(Sells)"},
@@ -2057,6 +2067,8 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_CHIEF_WELL_WATER, "Most of your people have to recieve their water from wells."},
     {TR_ADVISOR_CHIEF_NO_WATER, "Most of your people don't have any access to a proper water supply."},
     {TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS, "No instructions"},
+    {TR_CONFIG_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS, "Granaries do not allow walkers by default"},
+    {TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS, "Warehouses do not allow walkers by default"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
