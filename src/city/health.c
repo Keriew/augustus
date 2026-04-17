@@ -4,8 +4,8 @@
 #include "building/destruction.h"
 #include "building/granary.h"
 #include "building/house.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "building/warehouse.h"
 #include "city/culture.h"
 #include "city/data_private.h"
@@ -54,16 +54,16 @@ static void cause_disease_in_building(int building_id)
         // Remove half the granary's food
         if (b->type == BUILDING_GRANARY) {
             for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-                building_granary_remove_resource(b, r, building_granary_resource_amount(r, b) / 2);
+                building_granary_try_remove_resource(b, r, building_granary_get_amount(b, r) / 2);
             }
         } else if (b->type == BUILDING_WAREHOUSE) {
             // Remove all food from warehouse
             for (int r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-                building_warehouse_remove_resource(b, r, FULL_WAREHOUSE);
+                building_warehouse_try_remove_resource(b, r, FULL_WAREHOUSE);
             }
             // Remove half of oil and wine from warehouse
             for (int r = RESOURCE_WINE; r <= RESOURCE_OIL; r++) {
-                building_warehouse_remove_resource(b, r, building_warehouse_get_amount(b, r) / 2);
+                building_warehouse_try_remove_resource(b, r, building_warehouse_get_amount(b, r) / 2);
             }
         }
 
@@ -295,61 +295,81 @@ static void adjust_sickness_level_in_plague_buildings(int hospital_coverage_bonu
     }
 }
 
-int city_health_get_house_health_level(const building *b, int update_city_data) 
+// House Health Calculation
+int city_health_get_house_health_level(const building *b, int update_city_data)
 {
     int house_health = 0;
 
     if (building_is_house(b->type)) {
+        // House Level: What is the level of the house?
         house_health = calc_bound(b->subtype.house_level, 0, 10);
-        if (b->data.house.clinic && b->data.house.hospital) {
-            house_health += 50;
-            if (update_city_data) {
-                city_data.health.population_access.clinic += b->house_population;
-            }
-        } else if (b->data.house.hospital) {
-            house_health += 40;
-        } else if (b->data.house.clinic) {
-            house_health += 30;
-            if (update_city_data) {
-                city_data.health.population_access.clinic += b->house_population;
-            }
-        }
         
+        // Healthcare: Do they have access to a Clinic and/or Hospital?
+        if (b->data.house.clinic && b->data.house.hospital) {
+            house_health += 50; // Hospital + Clinic is best
+        } else if (b->data.house.hospital) {
+            house_health += 40; // Hospital alone is still good
+        } else if (b->data.house.clinic) {
+            house_health += 30; // Clinics are better than nothing
+        }
+
         if (b->data.house.bathhouse) {
             house_health += 15;
-            if (update_city_data) {
-                city_data.health.population_access.baths += b->house_population;
-            }
         }
+
         if (b->data.house.barber) {
             house_health += 10;
-            if (update_city_data) {
-                city_data.health.population_access.barber += b->house_population;
-            }
         }
-        if (b->has_latrines_access || b->has_water_access) {
+
+        // Hygiene: Do they have access to clean water or latrines?
+        if (b->has_water_access || b->has_latrines_access) {
             house_health += 10;
         }
-        house_health += b->data.house.num_foods * 10;
 
         int mausoleum_health = building_count_active(BUILDING_SMALL_MAUSOLEUM) * 2;
         mausoleum_health += building_count_active(BUILDING_LARGE_MAUSOLEUM) * 5;
-
+        // Sums the combined health from all Mausoleums and clamps it between 0 and 10
         house_health += calc_bound(mausoleum_health, 0, 10);
 
+        // Diet: How many foods do they have access to?
+        house_health += b->data.house.num_foods * 10;
+        // Cap health to 40 if their house level requires food but they don't have any
         int health_cap = (model_get_house(b->subtype.house_level)->food_types && !b->data.house.num_foods) ?
             40 : 100;
         house_health = calc_bound(house_health, 0, health_cap);
+
+        // Update city_data
+        if (update_city_data) {
+            if (b->data.house.clinic) {
+                city_data.health.population_access.clinic += b->house_population;
+            }
+            if (b->data.house.barber) {
+                city_data.health.population_access.barber += b->house_population;
+            }
+            if (b->data.house.bathhouse) {
+                city_data.health.population_access.baths += b->house_population;
+            }
+            if (b->has_well_access) {
+                city_data.health.population_access.wells += b->house_population;
+            }
+            if (b->has_latrines_access) {
+                city_data.health.population_access.latrines += b->house_population;
+            }
+            if (b->has_water_access) {
+                city_data.health.population_access.fountains += b->house_population;
+            }
+        }
     }
     return house_health;
 }
 
 void city_health_update(void)
 {
+    int only_gather_stats = 0;
     if (city_data.population.population < 200 || scenario_is_tutorial_1() || scenario_is_tutorial_2()) {
         city_data.health.value = 50;
         city_data.health.target_value = 50;
-        return;
+        only_gather_stats = 1;
     }
     int total_population = 0;
     int healthy_population = 0;
@@ -358,6 +378,9 @@ void city_health_update(void)
     city_data.health.population_access.clinic = 0;
     city_data.health.population_access.barber = 0;
     city_data.health.population_access.baths = 0;
+    city_data.health.population_access.wells = 0;
+    city_data.health.population_access.latrines = 0;
+    city_data.health.population_access.fountains = 0;
 
     for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -371,9 +394,14 @@ void city_health_update(void)
             int house_health = city_health_get_house_health_level(b, 1);
 
             total_population += b->house_population;
-            healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
-            adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
+            if (!only_gather_stats) {
+                healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
+                adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
+            }
         }
+    }
+    if (only_gather_stats) {
+        return;
     }
     city_data.health.target_value = calc_percentage(healthy_population, total_population);
     if (city_data.health.value < city_data.health.target_value) {
@@ -465,4 +493,19 @@ int city_health_get_population_with_barber_access(void)
 int city_health_get_population_with_baths_access(void)
 {
     return city_data.health.population_access.baths;
+}
+
+int city_health_get_population_with_well_access(void)
+{
+    return city_data.health.population_access.wells;
+}
+
+int city_health_get_population_with_latrines_access(void)
+{
+    return city_data.health.population_access.latrines;
+}
+
+int city_health_get_population_with_water_access(void)
+{
+    return city_data.health.population_access.fountains;
 }

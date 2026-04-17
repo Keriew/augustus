@@ -76,7 +76,7 @@ static void limit_and_sort_list(void)
 
 static void update_price_changes_list(void)
 {
-    int current_price_changes = scenario_price_change_count_total();
+    unsigned int current_price_changes = scenario_price_change_count_total();
     if (current_price_changes != data.total_price_changes) {
         free(data.price_changes);
         data.price_changes = 0;

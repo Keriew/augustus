@@ -5,18 +5,26 @@
 
 typedef enum {
     FIGURE_CATEGORY_INACTIVE = 0,
-    FIGURE_CATEGORY_CITIZEN = 1,
-    FIGURE_CATEGORY_ARMED = 2,
-    FIGURE_CATEGORY_HOSTILE = 3,
-    FIGURE_CATEGORY_CRIMINAL = 4,
-    FIGURE_CATEGORY_NATIVE = 5,
-    FIGURE_CATEGORY_ANIMAL = 6,
-    FIGURE_CATEGORY_AGGRESSIVE_ANIMAL = 7
+    FIGURE_CATEGORY_CITIZEN = 1 << 0,
+    FIGURE_CATEGORY_ARMED = 1 << 1,
+    FIGURE_CATEGORY_HOSTILE = 1 << 2,
+    FIGURE_CATEGORY_CRIMINAL = 1 << 3,
+    FIGURE_CATEGORY_NATIVE = 1 << 4,
+    FIGURE_CATEGORY_ANIMAL = 1 << 5,
+    FIGURE_CATEGORY_AGGRESSIVE_ANIMAL = 1 << 6,
+    FIGURE_CATEGORY_PROJECTILE = 1 << 7,
+    FIGURE_CATEGORY_EFFECT = 1 << 8,
+    FIGURE_CATEGORY_INDUSTRY = 1 << 9,
+    FIGURE_CATEGORY_ENTERTAINMENT = 1 << 10,
+    FIGURE_CATEGORY_EDUCATION = 1 << 11,
+    FIGURE_CATEGORY_HEALTH = 1 << 12,
+        
+    FIGURE_CATEGORY_ALL = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_ANIMAL
 } figure_category;
 
 typedef struct {
     figure_category category;
-    int max_damage;
+    int max_damage; //health points - 1 (this is maximum damage that can be taken without dying)
     int attack_value;
     int defense_value;
     int missile_defense_value;

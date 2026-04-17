@@ -37,7 +37,7 @@ static const building_type CONVERSION_FROM_ORIGINAL[MAX_ORIGINAL_ALLOWED_BUILDIN
     { BUILDING_ACADEMY },
     { BUILDING_LIBRARY },
     { BUILDING_PREFECTURE },
-    { BUILDING_FORT, BUILDING_MESS_HALL, BUILDING_FORT_LEGIONARIES, BUILDING_FORT_JAVELIN, BUILDING_FORT_MOUNTED, BUILDING_FORT_AUXILIA_INFANTRY, BUILDING_FORT_ARCHERS },
+    { BUILDING_MENU_FORT, BUILDING_MESS_HALL, BUILDING_FORT_LEGIONARIES, BUILDING_FORT_JAVELIN, BUILDING_FORT_MOUNTED, BUILDING_FORT_AUXILIA_INFANTRY, BUILDING_FORT_ARCHERS },
     { BUILDING_GATEHOUSE, BUILDING_PALISADE_GATE },
     { BUILDING_TOWER, BUILDING_WATCHTOWER },
     { BUILDING_SMALL_TEMPLE_CERES, BUILDING_SMALL_TEMPLE_NEPTUNE, BUILDING_SMALL_TEMPLE_MERCURY, BUILDING_SMALL_TEMPLE_MARS, BUILDING_SMALL_TEMPLE_VENUS },
@@ -70,12 +70,13 @@ int scenario_allowed_building(building_type type)
 
 static int enable_submenu_buildings(building_type type, int allowed)
 {
+    //used for enabling entire submenu, not just one building
     int submenu = building_menu_get_submenu_for_type(type);
     if (!submenu) {
         return 0;
     }
     int all_items = building_menu_count_all_items(submenu);
-    for (unsigned int i = 0; i < all_items; i++) {
+    for (unsigned int i = 0; (int) i < all_items; i++) {
         building_type item = building_menu_type(submenu, i);
         if (item == type) {
             continue;
@@ -115,9 +116,9 @@ void scenario_allowed_building_load_state(buffer *buf)
 {
     scenario_allowed_building_enable_all();
 
-    unsigned int buildings = buffer_load_dynamic_array(buf);
+    size_t buildings = buffer_load_dynamic_array(buf);
 
-    for (unsigned int i = 0; i < buildings; i++) {
+    for (size_t i = 0; i < buildings; i++) {
         allowed_buildings[i] = buffer_read_i8(buf);
     }
 }

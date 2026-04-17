@@ -16,7 +16,22 @@
 static void button_accept(int param1, int param2);
 static void button_cancel(int param1, int param2);
 
-static input_box text_input = { 160, 0, 20, 2, FONT_NORMAL_WHITE, 1 };
+static input_box text_input = {
+    .x = 160,
+    .y = 0,
+    .width_blocks = 20,
+    .height_blocks = 2,
+    .font = FONT_NORMAL_WHITE,
+    .allow_punctuation = 1,
+    .text = NULL,
+    .text_length = 0,
+    .put_clear_button_outside_box = 0,
+    .placeholder = NULL,
+    .on_change = NULL,
+    .old_text = NULL,
+    .allowed_chars = NULL    // new field at the end
+};
+
 
 static image_button buttons[] = {
     {288, 74, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 0, button_accept, button_none, 1, 0, 1},
@@ -38,11 +53,12 @@ static struct {
     unsigned int focus_button_id;
 } data;
 
-static void init(const uint8_t *title, const uint8_t *placeholder, const uint8_t *text, int max_length,
-    void (*callback)(const uint8_t *))
+static void init(const uint8_t *title, const uint8_t *placeholder, const uint8_t *text,
+     int max_length, const char *allowed_chars, void (*callback)(const uint8_t *))
 {
     data.callback = callback;
     data.focus_button_id = 0;
+
     if (max_length > data.text_buffer_size) {
         uint8_t *new_text = realloc(data.text, max_length * sizeof(uint8_t));
         if (!new_text) {
@@ -52,13 +68,24 @@ static void init(const uint8_t *title, const uint8_t *placeholder, const uint8_t
         data.text_buffer_size = max_length;
         text_input.text = data.text;
     }
+
     data.max_length = max_length;
     memset(data.text, 0, data.max_length);
     if (text) {
         string_copy(text, data.text, data.max_length);
     }
+
     text_input.placeholder = placeholder;
     text_input.text_length = data.max_length;
+    // If allowed_chars is provided and not empty, use it.
+    // Otherwise, fallback to legacy allow_punctuation behavior.
+    if (allowed_chars && allowed_chars[0] != '\0') {
+        text_input.allowed_chars = allowed_chars;
+        text_input.allow_punctuation = 0; // ignored in this mode
+    } else {
+        text_input.allowed_chars = NULL;
+        text_input.allow_punctuation = 1; // legacy default
+    }
     data.title = title;
 
     data.x_offset = 128;
@@ -132,6 +159,23 @@ void window_text_input_show(const uint8_t *title, const uint8_t *placeholder, co
         draw_foreground,
         handle_input,
     };
-    init(title, placeholder, text, max_length, callback);
+
+    // EXACT previous behavior — uses allow_punctuation = 1, no whitelist
+    init(title, placeholder, text, max_length, NULL, callback);
+    window_show(&window);
+}
+
+void window_text_input_expanded_show(const uint8_t *title, const uint8_t *placeholder, const uint8_t *text, int max_length,
+    void (*callback)(const uint8_t *), const char *allowed_chars)
+{
+    window_type window = {
+        WINDOW_TEXT_INPUT,
+        draw_background,
+        draw_foreground,
+        handle_input,
+    };
+
+    // New mode — caller provides allowed character list
+    init(title, placeholder, text, max_length, allowed_chars, callback);
     window_show(&window);
 }

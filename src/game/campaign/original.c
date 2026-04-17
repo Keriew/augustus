@@ -53,8 +53,8 @@ static uint8_t *find_in_string(uint8_t *text, uint8_t value)
 
 static campaign_scenario *new_scenario(int rank)
 {
-    campaign_scenario *scenario = campaign_mission_new_scenario();
-    if (!scenario) {
+    campaign_scenario *camp_scenario = campaign_mission_new_scenario();
+    if (!camp_scenario) {
         log_error("Problem generating original campaign data - memory full", 0, 0);
         return 0;
     }
@@ -63,7 +63,7 @@ static campaign_scenario *new_scenario(int rank)
     if (rank < FIRST_RANK_WITH_MULTIPLE_SCENARIOS) {
         name = copy_new_string(lang_get_string(CUSTOM_TRANSLATION, TR_ORIGINAL_CAMPAIGN_FIRST_MISSION + rank));
     } else {
-        name = copy_new_string(lang_get_string(144, 2 + 3 * rank + (scenario->id % SCENARIOS_PER_RANK)));
+        name = copy_new_string(lang_get_string(144, 2 + 3 * rank + (camp_scenario->id % SCENARIOS_PER_RANK)));
     }
     if (!name) {
         log_error("Problem generating original campaign data - memory full", 0, 0);
@@ -81,17 +81,17 @@ static campaign_scenario *new_scenario(int rank)
         if (description[0] >= 'a' && description[0] <= 'z') {
             description[0] -= 32;
         }
-        scenario->description = description;
+        camp_scenario->description = description;
     }
-    scenario->name = name;
-    scenario->fanfare = scenario->id % SCENARIOS_PER_RANK == 0 ? "wavs/fanfare_nu1.wav" : "wavs/fanfare_nu5.wav";
+    camp_scenario->name = name;
+    camp_scenario->fanfare = camp_scenario->id % SCENARIOS_PER_RANK == 0 ? "wavs/fanfare_nu1.wav" : "wavs/fanfare_nu5.wav";
     if (rank >= FIRST_RANK_WITH_MULTIPLE_SCENARIOS) {
-        scenario->x = ORIGINAL_SCENARIO_MAP_POSITIONS[scenario->id].x;
-        scenario->y = ORIGINAL_SCENARIO_MAP_POSITIONS[scenario->id].y;
+        camp_scenario->x = ORIGINAL_SCENARIO_MAP_POSITIONS[camp_scenario->id].x;
+        camp_scenario->y = ORIGINAL_SCENARIO_MAP_POSITIONS[camp_scenario->id].y;
     }
-    scenario->path = MISSION_PACK_FILE;
+    camp_scenario->path = MISSION_PACK_FILE;
 
-    return scenario;
+    return camp_scenario;
 }
 
 int campaign_original_setup(void)
@@ -111,21 +111,21 @@ int campaign_original_setup(void)
         mission->next_rank = rank + 1;
         mission->max_personal_savings = INT_MAX;
 
-        campaign_scenario *scenario = new_scenario(rank);
-        if (!scenario) {
+        campaign_scenario *camp_scenario = new_scenario(rank);
+        if (!camp_scenario) {
             return 0;
         }
-        mission->first_scenario = scenario->id;
+        mission->first_scenario = camp_scenario->id;
 
         if (rank >= FIRST_RANK_WITH_MULTIPLE_SCENARIOS) {
-            scenario = new_scenario(rank);
-            if (!scenario) {
+            camp_scenario = new_scenario(rank);
+            if (!camp_scenario) {
                 return 0;
             }
             mission->background_image.id = image_group(GROUP_SELECT_MISSION) + rank - FIRST_RANK_WITH_MULTIPLE_SCENARIOS;
         }
 
-        mission->last_scenario = scenario->id;
+        mission->last_scenario = camp_scenario->id;
     }
     return 1;
 }

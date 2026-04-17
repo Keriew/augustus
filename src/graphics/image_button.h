@@ -32,6 +32,8 @@ typedef struct {
     char pressed;
     char focused;
     time_millis pressed_since;
+    char dont_draw; // use for skipping buttons dynamically when drawing an array
+    char static_image; // use for buttons that do not need handling of focused or pressed state
 } image_button;
 
 void image_buttons_draw(int x, int y, image_button *buttons, unsigned int num_buttons);

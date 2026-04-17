@@ -91,4 +91,8 @@
 	<image id="Marshland_06" src="Marshland_06" isometric="true"/>
 	<image id="Marshland_07" src="Marshland_07" isometric="true"/>
 	<image id="Marshland_08" src="Marshland_08" isometric="true"/>
+	<!-- Note: Native Well variants (Assets created by Areldir) -->
+	<image id="Native_Well_Central" src="Native_Well_Central" isometric="true"/>
+	<image id="Native_Well_Northern" src="Native_Well_Northern" isometric="true"/>
+	<image id="Native_Well_Southern" src="Native_Well_Southern" isometric="true"/>
 </assetlist>

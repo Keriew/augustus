@@ -14,11 +14,11 @@
 
 #define RANKS 11
 
-static const int SALARY_PERCENTAGE_FOR_RANK[11] = {0, 2, 5, 8, 12, 20, 30, 40, 60, 80, 100};
+static const int SALARY_PERCENTAGE_FOR_RANK[11] = { 0, 2, 5, 8, 12, 20, 30, 40, 60, 80, 100 };
 
 static const struct {
     int base;
-    int savings_divisor ;
+    int savings_divisor;
 } GIFT_DATA[GIFT_MAX] = {
     {20, 8},
     {50, 4},
@@ -216,7 +216,7 @@ int city_emperor_can_send_gift(int size)
 void city_emperor_calculate_gift_costs(void)
 {
     int savings = city_data.emperor.personal_savings;
-    city_data.emperor.gifts[GIFT_MODEST].cost = savings/ GIFT_DATA[GIFT_MODEST].savings_divisor + calc_adjust_with_percentage(GIFT_DATA[GIFT_MODEST].base, city_data.emperor.caesar_salary);
+    city_data.emperor.gifts[GIFT_MODEST].cost = savings / GIFT_DATA[GIFT_MODEST].savings_divisor + calc_adjust_with_percentage(GIFT_DATA[GIFT_MODEST].base, city_data.emperor.caesar_salary);
     city_data.emperor.gifts[GIFT_GENEROUS].cost = savings / GIFT_DATA[GIFT_GENEROUS].savings_divisor + calc_adjust_with_percentage(GIFT_DATA[GIFT_GENEROUS].base, city_data.emperor.caesar_salary);
     city_data.emperor.gifts[GIFT_LAVISH].cost = savings / GIFT_DATA[GIFT_LAVISH].savings_divisor + calc_adjust_with_percentage(GIFT_DATA[GIFT_LAVISH].base, city_data.emperor.caesar_salary);
 }
@@ -291,10 +291,57 @@ int city_emperor_salary_for_rank(int rank)
     return calc_adjust_with_percentage(city_data.emperor.caesar_salary, SALARY_PERCENTAGE_FOR_RANK[rank]);
 }
 
+void city_emperor_change_rank(int change)
+{
+    int old_rank = city_data.emperor.player_rank;
+    int new_rank = 0;
+    if (change == 11) { // +1 promotion
+        new_rank = old_rank + 1;
+    } else if (change == 12) { // -1 demotion
+        new_rank = old_rank - 1;
+    } else {
+        new_rank = change;
+    }
+    new_rank = calc_bound(new_rank, 0, RANKS - 1);
+    city_emperor_set_rank(new_rank);
+}
+
+void city_emperor_set_rank(int new_rank)
+{
+    if (new_rank < 0 || new_rank >= RANKS) {
+        return;
+    }
+    int old_rank = city_data.emperor.player_rank;
+    if (new_rank == old_rank) {
+        return;
+    }
+    city_data.emperor.player_rank = new_rank;
+    city_emperor_set_salary_rank(new_rank);
+    city_message_post(1, MESSAGE_GOVERNOR_RANK_CHANGE, old_rank, new_rank);
+}
+
 void city_emperor_set_salary_rank(int rank)
 {
     city_data.emperor.salary_rank = rank;
     city_data.emperor.salary_amount = city_emperor_salary_for_rank(rank);
+}
+
+int city_emperor_promote_rank(void)
+{
+    int old_rank = city_data.emperor.player_rank;
+    int new_rank = old_rank + 1;
+    new_rank = calc_bound(new_rank, 0, RANKS - 1);
+    city_emperor_set_rank(new_rank);
+    return (new_rank > old_rank) ? 1 : 0;
+}
+
+int city_emperor_demote_rank(void)
+{
+    int old_rank = city_data.emperor.player_rank;
+    int new_rank = old_rank - 1;
+    new_rank = calc_bound(new_rank, 0, RANKS - 1);
+    city_emperor_set_rank(new_rank);
+    return (new_rank < old_rank) ? 1 : 0;
 }
 
 int city_emperor_salary_rank(void)
@@ -370,7 +417,8 @@ void city_emperor_mark_soldier_killed(void)
     city_data.emperor.invasion.soldiers_killed++;
 }
 
-void city_emperor_force_attack(int size){
+void city_emperor_force_attack(int size)
+{
     if (scenario_invasion_start_from_caesar(size)) {
         cheated_invasion = 1;
         city_data.emperor.invasion.count++;

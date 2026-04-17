@@ -15,13 +15,13 @@ void city_trade_update(void)
     city_data.trade.num_sea_routes = 0;
     city_data.trade.num_land_routes = 0;
     // Wine types
-    city_data.resource.wine_types_available = building_count_total(resource_get_data(RESOURCE_WINE)->industry) > 0 ? 1 : 0;
+    city_data.resource.wine_types_available = building_count_active(resource_get_data(RESOURCE_WINE)->industry) > 0 ? 1 : 0;
     if (building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) {
         city_data.resource.wine_types_available += 1;
     }
 
     city_data.resource.wine_types_available += empire_city_count_wine_sources();
-    
+
     // Update trade problems
     if (city_data.trade.land_trade_problem_duration > 0) {
         city_data.trade.land_trade_problem_duration--;
@@ -36,7 +36,7 @@ void city_trade_update(void)
         if (building_lighthouse_is_fully_functional()) {
             city_data.trade.sea_trade_problem_duration--;
         }
-    } 
+    }
     if (city_data.trade.sea_trade_problem_duration <= 0) {
         city_data.trade.sea_trade_problem_duration = 0;
     }
@@ -88,33 +88,6 @@ int city_trade_has_sea_trade_problems(void)
     return city_data.trade.sea_trade_problem_duration > 0;
 }
 
-int city_trade_current_caravan_import_resource(void)
-{
-    return city_data.trade.caravan_import_resource;
-}
-
-int city_trade_next_caravan_import_resource(void)
-{
-    do {
-        city_data.trade.caravan_import_resource++;
-        if (city_data.trade.caravan_import_resource >= RESOURCE_MAX) {
-            city_data.trade.caravan_import_resource = RESOURCE_MIN;
-        }
-    } while (!resource_is_storable(city_data.trade.caravan_import_resource));
-    return city_data.trade.caravan_import_resource;
-}
-
-int city_trade_next_caravan_backup_import_resource(void)
-{
-    do {
-        city_data.trade.caravan_backup_import_resource++;
-        if (city_data.trade.caravan_backup_import_resource >= RESOURCE_MAX) {
-            city_data.trade.caravan_backup_import_resource = RESOURCE_MIN;
-        }
-    } while (!resource_is_storable(city_data.trade.caravan_backup_import_resource));
-    return city_data.trade.caravan_backup_import_resource;
-}
-
 int city_trade_next_docker_import_resource(void)
 {
     do {
@@ -140,7 +113,7 @@ int city_trade_next_docker_export_resource(void)
 int trade_caravan_count(void)
 {
     int count = 0;
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->type == FIGURE_TRADE_CARAVAN || f->type == FIGURE_TRADE_CARAVAN_DONKEY || f->type == FIGURE_NATIVE_TRADER) {
             count++;

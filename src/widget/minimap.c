@@ -137,14 +137,14 @@ static struct {
     .trade_ship = COLOR_MINIMAP_TRADE_SHIP,
     .wall = {0xffd6d3c6, 0xfff7f3de},
     .aqueduct = {0xff84baff, 0xff5282bd},
-    .water_structure = { .edges = {0xff5282bd, 0xff5282bd}, .center = {0xff84baff, 0xff84baff} },
-    .house           = { .edges = {0xffffb28c, 0xffd65110}, .center = {0xffef824a, 0xffffa273} },
-    .building        = { .edges = {0xfffffbde, 0xffefd34a}, .center = {0xfffff3c6, 0xffffebb5} },
-    .monument        = { .edges = {0xfff5deff, 0xffb84aef}, .center = {0xffe9c6ff, 0xffdfb5ff} },
-    .farm            = { .edges = {0xff81ef4a, 0xffe8ffde}, .center = {0xffdcffc6, 0xffd5ffb5} },
-    .industry        = { .edges = {0xff6b2900, 0xffb6896d}, .center = {0xffb2602e, 0xff9d3c01} },
-    .aesthetics      = { .edges = {0xff019d7a, 0xffc4e1da}, .center = {0xff81d5c2, 0xff1ac6a0} },
-    .military        = { .edges = {0xff4e4e4e, 0xffb6b8b8}, .center = {0xff8c8c8c, 0xff6d6e6e} }
+    .water_structure = {.edges = {0xff5282bd, 0xff5282bd}, .center = {0xff84baff, 0xff84baff} },
+    .house = {.edges = {0xffffb28c, 0xffd65110}, .center = {0xffef824a, 0xffffa273} },
+    .building = {.edges = {0xfffffbde, 0xffefd34a}, .center = {0xfffff3c6, 0xffffebb5} },
+    .monument = {.edges = {0xfff5deff, 0xffb84aef}, .center = {0xffe9c6ff, 0xffdfb5ff} },
+    .farm = {.edges = {0xff81ef4a, 0xffe8ffde}, .center = {0xffdcffc6, 0xffd5ffb5} },
+    .industry = {.edges = {0xff6b2900, 0xffb6896d}, .center = {0xffb2602e, 0xff9d3c01} },
+    .aesthetics = {.edges = {0xff019d7a, 0xffc4e1da}, .center = {0xff81d5c2, 0xff1ac6a0} },
+    .military = {.edges = {0xff4e4e4e, 0xffb6b8b8}, .center = {0xff8c8c8c, 0xff6d6e6e} }
 };
 
 static struct {
@@ -343,7 +343,7 @@ static int building_is_industry(building_type type)
 
 static int building_is_military(building_type type)
 {
-    return building_is_fort(type) || type == BUILDING_FORT_GROUND || type == BUILDING_FORT ||
+    return building_is_fort(type) || type == BUILDING_FORT_GROUND ||
         type == BUILDING_BARRACKS || type == BUILDING_MILITARY_ACADEMY || type == BUILDING_MESS_HALL ||
         type == BUILDING_TOWER || type == BUILDING_WATCHTOWER || type == BUILDING_GATEHOUSE ||
         type == BUILDING_PALISADE_GATE;

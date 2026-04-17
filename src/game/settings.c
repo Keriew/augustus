@@ -3,9 +3,11 @@
 #include "city/constants.h"
 #include "core/buffer.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/dir.h"
 #include "core/file.h"
 #include "core/string.h"
+#include "game/speed.h"
 #include "sound/device.h"
 
 #define INF_SIZE 560
@@ -264,29 +266,34 @@ int setting_game_speed(void)
     return data.game_speed;
 }
 
-void setting_increase_game_speed(void)
+int setting_set_game_speed(int speed)
 {
-    if (data.game_speed >= 100) {
-        if (data.game_speed < 500) {
-            data.game_speed += 100;
-        }
-    } else {
-        data.game_speed = calc_bound(data.game_speed + 10, 10, 100);
-    }
+    game_speed_get_index(speed); // validate speed
+    data.game_speed = speed;
+    return 1;
 }
 
 void setting_decrease_game_speed(void)
 {
-    if (data.game_speed > 100) {
-        data.game_speed -= 100;
-    } else {
-        data.game_speed = calc_bound(data.game_speed - 10, 10, 100);
+    int index = game_speed_get_index(data.game_speed);
+    if (index > 0) {
+        index--;
     }
+    data.game_speed = game_speed_get_speed(index);
+}
+
+void setting_increase_game_speed(void)
+{
+    int index = game_speed_get_index(data.game_speed);
+    if (index < TOTAL_GAME_SPEEDS - 1) {
+        index++;
+    }
+    data.game_speed = game_speed_get_speed(index);
 }
 
 void setting_set_default_game_speed(void)
 {
-    data.game_speed = 70;
+    data.game_speed = game_speed_get_speed(config_get(CONFIG_GP_CH_DEFAULT_GAME_SPEED)); //previously hardcoded 70
 }
 
 int setting_scroll_speed(void)
@@ -318,9 +325,9 @@ set_tooltips setting_tooltips(void)
 void setting_cycle_tooltips(void)
 {
     switch (data.tooltips) {
-    case TOOLTIPS_NONE: data.tooltips = TOOLTIPS_SOME; break;
-    case TOOLTIPS_SOME: data.tooltips = TOOLTIPS_FULL; break;
-    default: data.tooltips = TOOLTIPS_NONE; break;
+        case TOOLTIPS_NONE: data.tooltips = TOOLTIPS_SOME; break;
+        case TOOLTIPS_SOME: data.tooltips = TOOLTIPS_FULL; break;
+        default: data.tooltips = TOOLTIPS_NONE; break;
     }
 }
 

@@ -30,7 +30,7 @@ void scenario_price_change_delete(int id);
 
 void scenario_price_change_remap_resource(void);
 
-int scenario_price_change_count_total(void);
+unsigned int scenario_price_change_count_total(void);
 
 void scenario_price_change_process(void);
 

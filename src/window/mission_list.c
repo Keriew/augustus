@@ -74,6 +74,15 @@ static struct {
     saved_game_info info;
     int savegame_info_status;
     int campaign_finished;
+    struct {
+        const uint8_t *name;
+        int x;
+        int y;
+        int width;
+        int height;
+        int is_hovered;
+        int is_ellipsized;
+    } title;
 } data;
 
 static generic_button bottom_buttons[] = {
@@ -141,8 +150,8 @@ static void generate_list(void)
     memset(data.items, 0, sizeof(campaign_item) * data.total_items);
     int mission_id = 1;
     int rank = info->starting_rank;
-    
-    for (int item = 0, mission = 0; mission < missions_to_show; mission++, item++) {
+
+    for (unsigned int item = 0, mission = 0; mission < missions_to_show; mission++, item++) {
         int scenarios_on_last_mission = mission_info ? mission_info->total_scenarios : 0;
 
         mission_info = game_campaign_get_current_mission(current_scenario_id);
@@ -202,18 +211,18 @@ static void init(void)
     }
 }
 
-static void draw_scenario_selection_button(const campaign_scenario *scenario, int x_offset, int y_offset, float scale)
+static void draw_scenario_selection_button(const campaign_scenario *camp_scenario, int x_offset, int y_offset, float scale)
 {
-    if (!scenario) {
+    if (!camp_scenario) {
         return;
     }
 
-    if (scenario->x == 0 && scenario->y == 0) {
+    if (camp_scenario->x == 0 && camp_scenario->y == 0) {
         return;
     }
 
     image_draw(image_group(GROUP_SELECT_MISSION_BUTTON),
-        x_offset * scale + scenario->x, y_offset * scale + scenario->y, COLOR_MASK_NONE, scale);
+        x_offset * scale + camp_scenario->x, y_offset * scale + camp_scenario->y, COLOR_MASK_NONE, scale);
 }
 
 static int draw_mission_selection_map(void)
@@ -273,7 +282,9 @@ static void draw_background(void)
 
     graphics_in_dialog();
     outer_panel_draw(0, 0, 40, 30);
-    text_draw_centered(game_campaign_get_info()->name, 32, 14, 554, FONT_LARGE_BLACK, 0);
+    text_draw_centered_ellipsized(game_campaign_get_info()->name, 32, 14, 554, FONT_LARGE_BLACK, 0);
+
+
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_MISSION_LIST_CAMPAIGN_NOT_FINISHED - data.campaign_finished,
         16, 446, SELECTED_ITEM_INFO_X_OFFSET - 48, FONT_NORMAL_BLACK);
 
@@ -281,9 +292,15 @@ static void draw_background(void)
         draw_scenario_map();
         int y_offset = data.savegame_info_status == 1 && data.info.map_size <= 136 ? data.info.map_size * 2 : 272;
         y_offset += MISSION_LIST_Y_POSITION + 10;
-        text_draw_centered(data.selected_item->scenario->name, SELECTED_ITEM_INFO_X_OFFSET, y_offset,
+        text_draw_centered_ellipsized(data.selected_item->scenario->name, SELECTED_ITEM_INFO_X_OFFSET, y_offset,
             SELECTED_ITEM_INFO_WIDTH, FONT_LARGE_BLACK, 0);
-
+        data.title.name = data.selected_item->scenario->name;
+        data.title.x = SELECTED_ITEM_INFO_X_OFFSET;
+        data.title.y = y_offset;
+        data.title.width = SELECTED_ITEM_INFO_WIDTH;
+        data.title.height = font_definition_for(FONT_LARGE_BLACK)->line_height;
+        data.title.is_hovered = 0;
+        data.title.is_ellipsized = text_get_width(data.title.name, FONT_LARGE_BLACK) > data.title.width - 10;
         if (data.selected_item->type == ITEM_TYPE_MISSION) {
             draw_rank(y_offset + 34);
             y_offset += 20;
@@ -366,17 +383,27 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
     list_box_draw(&list_box);
-    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+    for (unsigned int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
             data.bottom_button_focus_id == i + 1);
     }
     graphics_reset_dialog();
 }
 
+static int is_in_title_area(const mouse *m_dialog)
+{
+    return m_dialog->x >= data.title.x && m_dialog->x <= data.title.x + data.title.width &&
+        m_dialog->y >= data.title.y && m_dialog->y <= data.title.y + data.title.height;
+}
+
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
-
+    if (is_in_title_area(m_dialog)) {
+        data.title.is_hovered = 1;
+    } else {
+        data.title.is_hovered = 0;
+    }
     if (generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons, NUM_BOTTOM_BUTTONS, &data.bottom_button_focus_id) ||
         list_box_handle_input(&list_box, m_dialog, 1)) {
         list_box_request_refresh(&list_box);
@@ -456,7 +483,7 @@ static void item_tooltip(const list_box_item *item, tooltip_context *c)
     }
 
     static uint8_t text[300];
-    static int last_selection;
+    static unsigned int last_selection;
 
     if (last_selection != item->index + 1) {
         uint8_t *cursor = string_copy(lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_MISSION), text, 300);
@@ -475,6 +502,11 @@ static void item_tooltip(const list_box_item *item, tooltip_context *c)
 
 static void handle_tooltip(tooltip_context *c)
 {
+    if (data.title.is_hovered && data.title.is_ellipsized) {
+        c->precomposed_text = data.title.name;
+        c->type = TOOLTIP_BUTTON;
+        return;
+    }
     list_box_handle_tooltip(&list_box, c);
 }
 

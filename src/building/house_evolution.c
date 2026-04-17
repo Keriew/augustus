@@ -1,11 +1,12 @@
 #include "house_evolution.h"
 
 #include "building/house.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/houses.h"
 #include "city/resource.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/time.h"
 #include "game/resource.h"
 #include "game/time.h"
@@ -218,8 +219,11 @@ static int has_devolve_delay(building *house, evolve_status status)
 
 static int evolve_small_tent(building *house, house_demands *demands)
 {
-    if (house->house_population > 0) {
+    int premerge = config_get(CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS);
+    if (premerge || house->house_population > 0) {
         building_house_merge(house);
+    }
+    if (house->house_population > 0) {
         evolve_status status = check_requirements(house, demands);
         if (status == EVOLVE) {
             building_house_change_to(house, BUILDING_HOUSE_LARGE_TENT);
@@ -428,7 +432,11 @@ static int evolve_large_villa(building *house, house_demands *demands)
             building_house_change_to(house, BUILDING_HOUSE_GRAND_VILLA);
         } else if (status == DEVOLVE) {
             game_undo_disable();
-            building_house_devolve_from_large_villa(house);
+            if (config_get(CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX)) {
+                building_house_desize_patrician(house);
+            } else {
+                building_house_devolve_from_large_villa(house);
+            }
         }
     }
     return 0;
@@ -486,7 +494,11 @@ static int evolve_large_palace(building *house, house_demands *demands)
             building_house_change_to(house, BUILDING_HOUSE_LUXURY_PALACE);
         } else if (status == DEVOLVE) {
             game_undo_disable();
-            building_house_devolve_from_large_palace(house);
+            if (config_get(CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX)) {
+                building_house_desize_patrician(house);
+            } else {
+                building_house_devolve_from_large_palace(house);
+            }
         }
     }
     return 0;
@@ -916,10 +928,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
 static building_type get_building_type_at_tile(const building *house, int x, int y)
 {
     int grid_offset = map_grid_offset(x, y);
-    int building_id = map_building_at(grid_offset);
+    unsigned int building_id = (unsigned int) map_building_at(grid_offset);
     if (building_id <= 0) {
         if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
             return BUILDING_HIGHWAY;
+        } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+            return BUILDING_DRAGGABLE_RESERVOIR;
         } else {
             return BUILDING_NONE;
         }

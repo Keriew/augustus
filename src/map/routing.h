@@ -10,6 +10,7 @@ typedef enum {
     ROUTED_BUILDING_AQUEDUCT = 2,
     ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC = 4,
     ROUTED_BUILDING_HIGHWAY = 5,
+    ROUTED_BUILDING_DRAGGABLE_RESERVOIR = 6
 } routed_building_type;
 
 typedef struct map_routing_distance_grid {

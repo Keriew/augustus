@@ -238,6 +238,18 @@ static void handle_mouse_button(SDL_MouseButtonEvent *event, int is_down)
         mouse_set_middle_down(is_down);
     } else if (event->button == SDL_BUTTON_RIGHT) {
         mouse_set_right_down(is_down);
+    } else if (event->button == SDL_BUTTON_X1) {
+        if (is_down) {
+            hotkey_key_pressed(KEY_TYPE_MOUSE_BUTTON_4, hotkey_get_modifiers(), 0);
+        } else {
+            hotkey_key_released(KEY_TYPE_MOUSE_BUTTON_4, hotkey_get_modifiers());
+        }
+    } else if (event->button == SDL_BUTTON_X2) {
+        if (is_down) {
+            hotkey_key_pressed(KEY_TYPE_MOUSE_BUTTON_5, hotkey_get_modifiers(), 0);
+        } else {
+            hotkey_key_released(KEY_TYPE_MOUSE_BUTTON_5, hotkey_get_modifiers());
+        }
     }
 }
 

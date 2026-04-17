@@ -15,11 +15,16 @@ typedef enum {
     DATA_TYPE_RAW_RESOURCE_PRODUCER
 } building_data_type;
 
-int building_data_transfer_copy(building *b);
+void building_data_transfer_clear(int backup);
+void building_data_transfer_backup(void);
+void building_data_transfer_restore(void);
+void building_data_transfer_restore_and_clear_backup(void);
 
-int building_data_transfer_paste(building *b);
+int building_data_transfer_copy(building *b, int supress_warnings);
 
-int building_data_transfer_possible(building *b);
+int building_data_transfer_paste(building *b, int supress_warnings);
+
+int building_data_transfer_possible(building *b, int supress_warnings);
 
 building_data_type building_data_transfer_data_type_from_building_type(building_type type);
 

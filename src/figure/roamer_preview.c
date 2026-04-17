@@ -188,9 +188,7 @@ static int determine_road_access(int x, int y, int size, building_type type, map
     int building_orientation = 0;
     switch (type) {
         case BUILDING_WAREHOUSE:
-            building_orientation = building_rotation_get_building_orientation(building_rotation_get_rotation());
-            return map_has_road_access_rotation(building_orientation, x, y, size, road) ||
-                map_has_road_access_rotation(building_orientation, x, y, 3, road);
+            return map_has_road_access_warehouse(x, y, road);
         case BUILDING_HIPPODROME:
             building_orientation = building_rotation_get_building_orientation(building_rotation_get_rotation());
             return map_has_road_access_hippodrome_rotation(x, y, road, building_orientation);
@@ -247,9 +245,9 @@ void figure_roamer_preview_create(building_type b_type, int x, int y)
 
     for (int i = 0; i < TOTAL_ROAMERS; i++) {
         figure roamer;
-        
+
         memset(&roamer, 0, sizeof(figure));
-        
+
         roamer.source_x = roamer.destination_x = roamer.previous_tile_x = road.x;
         roamer.source_y = roamer.destination_y = roamer.previous_tile_y = road.y;
         roamer.terrain_usage = TERRAIN_USAGE_ROADS;

@@ -272,7 +272,7 @@ static int get_structures_on_native_land(int *dst_x, int *dst_y)
     int meeting_x, meeting_y;
     city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
 
-    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER, 
+    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER,
         BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT };
     int min_distance = INFINITE;
 
@@ -324,7 +324,11 @@ static void set_native_target_building(formation *m)
             case BUILDING_NATIVE_WATCHTOWER:
             case BUILDING_NATIVE_DECORATION:
             case BUILDING_WAREHOUSE:
-            case BUILDING_FORT:
+            case BUILDING_FORT_ARCHERS:
+            case BUILDING_FORT_LEGIONARIES:
+            case BUILDING_FORT_JAVELIN:
+            case BUILDING_FORT_MOUNTED:
+            case BUILDING_FORT_AUXILIA_INFANTRY:
             case BUILDING_FORT_GROUND:
             case BUILDING_ROADBLOCK:
             case BUILDING_ROOFED_GARDEN_WALL_GATE:
@@ -332,16 +336,18 @@ static void set_native_target_building(formation *m)
             case BUILDING_LOOPED_GARDEN_GATE:
             case BUILDING_HEDGE_GATE_DARK:
             case BUILDING_HEDGE_GATE_LIGHT:
+            case BUILDING_LOW_BRIDGE:
+            case BUILDING_SHIP_BRIDGE:
                 break;
             default:
-                {
-                    int distance = calc_maximum_distance(meeting_x, meeting_y, b->x, b->y);
-                    if (distance < min_distance) {
-                        min_building = b;
-                        min_distance = distance;
-                    }
+            {
+                int distance = calc_maximum_distance(meeting_x, meeting_y, b->x, b->y);
+                if (distance < min_distance) {
+                    min_building = b;
+                    min_distance = distance;
                 }
-                break;
+            }
+            break;
         }
     }
     if (min_building) {
@@ -372,16 +378,24 @@ static void set_figures_to_initial(const formation *m)
     }
 }
 
-int formation_enemy_next_formation_move(const formation *m, int* figure_offsets, int from_x, int from_y, int to_x, int to_y, int check_depth, int *x_tile, int *y_tile) {
+int formation_enemy_move_formation_to(const formation *m, int x, int y, int *x_tile, int *y_tile)
+{
+    int base_offset = map_grid_offset(
+        formation_layout_position_x(m->layout, 0),
+        formation_layout_position_y(m->layout, 0));
+    int figure_offsets[50];
+    figure_offsets[0] = 0;
+    for (int i = 1; i < m->num_figures; i++) {
+        figure_offsets[i] = map_grid_offset(
+            formation_layout_position_x(m->layout, i),
+            formation_layout_position_y(m->layout, i)) - base_offset;
+    }
+    map_routing_noncitizen_can_travel_over_land(x, y, -1, -1, 8, 0, 600);
     for (int r = 0; r <= 10; r++) {
         int x_min, y_min, x_max, y_max;
-        map_grid_get_area(to_x, to_y, 1, r, &x_min, &y_min, &x_max, &y_max);
+        map_grid_get_area(x, y, 1, r, &x_min, &y_min, &x_max, &y_max);
         for (int yy = y_min; yy <= y_max; yy++) {
             for (int xx = x_min; xx <= x_max; xx++) {
-                if (from_x == xx && from_y == yy) {
-                    // Do not check place where we are coming from
-                    continue;
-                }
                 int can_move = 1;
                 for (int fig = 0; fig < m->num_figures; fig++) {
                     int grid_offset = map_grid_offset(xx, yy) + figure_offsets[fig];
@@ -404,17 +418,6 @@ int formation_enemy_next_formation_move(const formation *m, int* figure_offsets,
                     }
                 }
                 if (can_move) {
-                    int x_next, y_next;
-                    if (check_depth > 0) {
-                        // Check if next move is possible
-                        if (!formation_enemy_next_formation_move(m, figure_offsets, xx, yy, to_x, to_y, check_depth - 1, &x_next, &y_next)) {
-                            continue;
-                        }
-                        // Do not allow to return on previous position
-                        if (x_next == from_x && y_next == from_y) {
-                            continue;
-                        }
-                    }
                     *x_tile = xx;
                     *y_tile = yy;
                     return 1;
@@ -425,25 +428,6 @@ int formation_enemy_next_formation_move(const formation *m, int* figure_offsets,
     return 0;
 }
 
-int formation_enemy_move_formation_to(const formation *m, int x, int y, int *x_tile, int *y_tile)
-{
-    int base_offset = map_grid_offset(
-        formation_layout_position_x(m->layout, 0),
-        formation_layout_position_y(m->layout, 0));
-    int figure_offsets[50];
-    figure_offsets[0] = 0;
-    for (int i = 1; i < m->num_figures; i++) {
-        figure_offsets[i] = map_grid_offset(
-            formation_layout_position_x(m->layout, i),
-            formation_layout_position_y(m->layout, i)) - base_offset;
-    }
-    map_routing_noncitizen_can_travel_over_land(x, y, -1, -1, 8, 0, 600);
-
-    // Find next move position and check if we will not stay
-    // on the same place or return to previous position afterwards
-    return formation_enemy_next_formation_move(m, figure_offsets, m->x_home, m->y_home, x, y, 1, x_tile, y_tile);
-}
-
 static void mars_kill_enemies(void)
 {
     int to_kill = city_god_spirit_of_mars_power();
@@ -451,7 +435,7 @@ static void mars_kill_enemies(void)
         return;
     }
     int grid_offset = 0;
-    for (int i = 1; i < figure_count() && to_kill > 0; i++) {
+    for (unsigned int i = 1; i < figure_count() && to_kill > 0; i++) {
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) {
             continue;

@@ -10,28 +10,30 @@
 #include "game/save_version.h"
 #include "empire/city.h"
 #include "figure/name.h"
+#include "figure/properties.h"
 #include "figure/route.h"
 #include "figure/trader.h"
 #include "figure/visited_buildings.h"
 #include "map/figure.h"
 #include "map/grid.h"
+#include "figure.h"
 
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
 #define FIGURE_ORIGINAL_BUFFER_SIZE 128
-#define FIGURE_CURRENT_BUFFER_SIZE 130
-
+#define FIGURE_CURRENT_BUFFER_SIZE 170
+// around 12 bytes left free in the current buffer size - save version 0xa7, August 2025
 static struct {
     int created_sequence;
     array(figure) figures;
 } data;
 
-figure *figure_get(int id)
+figure *figure_get(unsigned int id)
 {
     return array_item(data.figures, id);
 }
 
-int figure_count(void)
+unsigned int figure_count(void)
 {
     return data.figures.size;
 }
@@ -64,8 +66,8 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
     f->destination_building_id = 0;
     f->wait_ticks = 0;
     random_generate_next();
-    f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     f->name = figure_name_get(type, 0);
+    f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     map_figure_add(f);
     if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP || type == FIGURE_NATIVE_TRADER) {
         f->trader_id = trader_create();
@@ -185,7 +187,7 @@ void figure_delete(figure *f)
             building_monument_remove_delivery(f->id);
             // intentional fallthrough
         default:
-            if (f->building_id) {
+            if (f->building_id && b) { //building can be already deleted
                 b->figure_id = 0;
             }
             break;
@@ -217,6 +219,71 @@ int figure_is_enemy(const figure *f)
     return (f->type >= FIGURE_ENEMY43_SPEAR && f->type <= FIGURE_ENEMY_CAESAR_LEGIONARY) || f->type == FIGURE_ENEMY_CATAPULT;
 }
 
+int figure_is_melee_enemy(const figure *f)
+{
+    switch (f->type) { //only invading melee types, no gladiators or caesars troops
+        case FIGURE_ENEMY44_SWORD:
+        case FIGURE_ENEMY45_SWORD:
+        case FIGURE_ENEMY49_FAST_SWORD:
+        case FIGURE_ENEMY50_SWORD:
+        case FIGURE_ENEMY53_AXE:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_ranged_enemy(const figure *f)
+{
+    switch (f->type) {
+        /* Spear-throwers / javelin / bows / siege */
+        case FIGURE_ENEMY43_SPEAR:
+        case FIGURE_ENEMY51_SPEAR:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_mounted_enemy(const figure *f)
+{
+    switch (f->type) {
+        /* Animal-mounted or vehicle types */
+        case FIGURE_ENEMY46_CAMEL:
+        case FIGURE_ENEMY47_ELEPHANT:
+        case FIGURE_ENEMY48_CHARIOT:
+        case FIGURE_ENEMY52_MOUNTED_ARCHER:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_is_caesar_enemy(const figure *f)
+{
+    switch (f->type) {
+        case FIGURE_ENEMY_CAESAR_JAVELIN:
+        case FIGURE_ENEMY_CAESAR_MOUNTED:
+        case FIGURE_ENEMY_CAESAR_LEGIONARY:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int figure_enemy_class(const figure *f)
+{
+    if (figure_is_melee_enemy(f)) {
+        return ENEMY_CLASS_MELEE;
+    } else if (figure_is_ranged_enemy(f)) {
+        return ENEMY_CLASS_RANGED;
+    } else if (figure_is_mounted_enemy(f)) {
+        return ENEMY_CLASS_MOUNTED;
+    } else { //not an enemy or unknown type
+        return ENEMY_CLASS_ALL;
+    }
+}
+
 int figure_is_legion(const figure *f)
 {
     return (f->type >= FIGURE_FORT_JAVELIN && f->type <= FIGURE_FORT_LEGIONARY) || f->type == FIGURE_FORT_INFANTRY || f->type == FIGURE_FORT_ARCHER;
@@ -225,6 +292,12 @@ int figure_is_legion(const figure *f)
 int figure_is_herd(const figure *f)
 {
     return f->type >= FIGURE_SHEEP && f->type <= FIGURE_ZEBRA;
+}
+
+int figure_is_category(figure *f, figure_category category)
+{
+    const figure_properties *f_props = figure_properties_for_type(f->type);
+    return f_props->category & category;
 }
 
 static void initialize_new_figure(figure *f, unsigned int position)
@@ -249,7 +322,8 @@ void figure_init_scenario(void)
 void figure_kill_all(void)
 {
     figure *f;
-    array_foreach(data.figures, f) {
+    array_foreach(data.figures, f)
+    {
         switch (f->type) {
             default:
                 f->state = FIGURE_STATE_DEAD;
@@ -260,7 +334,7 @@ void figure_kill_all(void)
             case FIGURE_SHIPWRECK:
             case FIGURE_FORT_STANDARD:
                 continue;
-        }  
+        }
     }
 }
 
@@ -282,8 +356,8 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->image_offset);
     buffer_write_u8(buf, f->is_enemy_image);
     buffer_write_u8(buf, f->flotsam_visible);
-    buffer_write_i16(buf, f->image_id);
-    buffer_write_i16(buf, f->cart_image_id);
+    buffer_write_i32(buf, f->image_id);
+    buffer_write_i32(buf, f->cart_image_id);
     buffer_write_i16(buf, f->next_figure_id_on_same_tile);
     buffer_write_u8(buf, f->type);
     buffer_write_u8(buf, f->resource_id);
@@ -313,9 +387,9 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->wait_ticks);
     buffer_write_u8(buf, f->action_state);
     buffer_write_u8(buf, f->progress_on_tile);
-    buffer_write_i16(buf, f->routing_path_id);
-    buffer_write_i16(buf, f->routing_path_current_tile);
-    buffer_write_i16(buf, f->routing_path_length);
+    buffer_write_u32(buf, f->routing_path_id);
+    buffer_write_u32(buf, f->routing_path_current_tile);
+    buffer_write_u32(buf, f->routing_path_length);
     buffer_write_u8(buf, f->in_building_wait_ticks);
     buffer_write_u8(buf, f->is_on_road);
     buffer_write_i16(buf, f->max_roam_length);
@@ -333,10 +407,10 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_i16(buf, f->cc_delta_xy);
     buffer_write_u8(buf, f->cc_direction);
     buffer_write_u8(buf, f->speed_multiplier);
-    buffer_write_i16(buf, f->building_id);
-    buffer_write_i16(buf, f->immigrant_building_id);
-    buffer_write_i16(buf, f->destination_building_id);
-    buffer_write_i16(buf, f->formation_id);
+    buffer_write_u32(buf, f->building_id);
+    buffer_write_u32(buf, f->immigrant_building_id);
+    buffer_write_u32(buf, f->destination_building_id);
+    buffer_write_u32(buf, f->formation_id);
     buffer_write_u8(buf, f->index_in_formation);
     buffer_write_u8(buf, f->formation_at_rest);
     buffer_write_u8(buf, f->migrant_num_people);
@@ -365,21 +439,22 @@ static void figure_save(buffer *buf, const figure *f)
     buffer_write_u8(buf, f->trader_id);
     buffer_write_u8(buf, f->wait_ticks_next_target);
     buffer_write_u8(buf, f->dont_draw_elevated);
-    buffer_write_i16(buf, f->target_figure_id);
-    buffer_write_i16(buf, f->targeted_by_figure_id);
+    buffer_write_u16(buf, f->target_figure_id);
+    buffer_write_u16(buf, f->targeted_by_figure_id);
     buffer_write_u16(buf, f->created_sequence);
     buffer_write_u16(buf, f->target_figure_created_sequence);
     buffer_write_u8(buf, f->figures_on_same_tile_index);
     buffer_write_u8(buf, f->num_attackers);
-    buffer_write_i16(buf, f->attacker_id1);
-    buffer_write_i16(buf, f->attacker_id2);
-    buffer_write_i16(buf, f->opponent_id);
+    buffer_write_i32(buf, f->attacker_id1);
+    buffer_write_i32(buf, f->attacker_id2);
+    buffer_write_i32(buf, f->opponent_id);
     buffer_write_i16(buf, f->last_visited_index);
+    buffer_write_i16(buf, f->last_destinatation_id);
 }
 
 static int get_resource_id(figure_type type, int resource)
 {
-    
+
     switch (type) {
         case FIGURE_PRIEST_SUPPLIER:
         case FIGURE_BARKEEP_SUPPLIER:
@@ -402,8 +477,13 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->image_offset = buffer_read_u8(buf);
     f->is_enemy_image = buffer_read_u8(buf);
     f->flotsam_visible = buffer_read_u8(buf);
-    f->image_id = buffer_read_i16(buf);
-    f->cart_image_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        f->image_id = buffer_read_i16(buf);
+        f->cart_image_id = buffer_read_i16(buf);
+    } else {
+        f->image_id = buffer_read_i32(buf);
+        f->cart_image_id = buffer_read_i32(buf);
+    }
     f->next_figure_id_on_same_tile = buffer_read_i16(buf);
     f->type = buffer_read_u8(buf);
     int resource = buffer_read_u8(buf);
@@ -438,9 +518,15 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->wait_ticks = buffer_read_i16(buf);
     f->action_state = buffer_read_u8(buf);
     f->progress_on_tile = buffer_read_u8(buf);
-    f->routing_path_id = buffer_read_i16(buf);
-    f->routing_path_current_tile = buffer_read_i16(buf);
-    f->routing_path_length = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_STATIC_PATHS_AND_ROUTES) {
+        f->routing_path_id = buffer_read_i16(buf);
+        f->routing_path_current_tile = buffer_read_i16(buf);
+        f->routing_path_length = buffer_read_i16(buf);
+    } else {
+        f->routing_path_id = buffer_read_u32(buf);
+        f->routing_path_current_tile = buffer_read_u32(buf);
+        f->routing_path_length = buffer_read_u32(buf);
+    }
     f->in_building_wait_ticks = buffer_read_u8(buf);
     f->is_on_road = buffer_read_u8(buf);
     f->max_roam_length = buffer_read_i16(buf);
@@ -458,10 +544,17 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->cc_delta_xy = buffer_read_i16(buf);
     f->cc_direction = buffer_read_u8(buf);
     f->speed_multiplier = buffer_read_u8(buf);
-    f->building_id = buffer_read_i16(buf);
-    f->immigrant_building_id = buffer_read_i16(buf);
-    f->destination_building_id = buffer_read_i16(buf);
-    f->formation_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        f->building_id = buffer_read_i16(buf);
+        f->immigrant_building_id = buffer_read_i16(buf);
+        f->destination_building_id = buffer_read_i16(buf);
+        f->formation_id = buffer_read_i16(buf);
+    } else {
+        f->building_id = buffer_read_u32(buf);
+        f->immigrant_building_id = buffer_read_u32(buf);
+        f->destination_building_id = buffer_read_u32(buf);
+        f->formation_id = buffer_read_u32(buf);
+    }
     f->index_in_formation = buffer_read_u8(buf);
     f->formation_at_rest = buffer_read_u8(buf);
     f->migrant_num_people = buffer_read_u8(buf);
@@ -491,19 +584,27 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->trader_id = buffer_read_u8(buf);
     f->wait_ticks_next_target = buffer_read_u8(buf);
     f->dont_draw_elevated = buffer_read_u8(buf);
-    f->target_figure_id = buffer_read_i16(buf);
-    f->targeted_by_figure_id = buffer_read_i16(buf);
+    f->target_figure_id = buffer_read_u16(buf);
+    f->targeted_by_figure_id = buffer_read_u16(buf);
     f->created_sequence = buffer_read_u16(buf);
     f->target_figure_created_sequence = buffer_read_u16(buf);
     f->figures_on_same_tile_index = buffer_read_u8(buf);
     f->num_attackers = buffer_read_u8(buf);
-    f->attacker_id1 = buffer_read_i16(buf);
-    f->attacker_id2 = buffer_read_i16(buf);
-    f->opponent_id = buffer_read_i16(buf);
+    if (version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        f->attacker_id1 = buffer_read_i16(buf);
+        f->attacker_id2 = buffer_read_i16(buf);
+        f->opponent_id = buffer_read_i16(buf);
+    } else {
+        f->attacker_id1 = buffer_read_i32(buf);
+        f->attacker_id2 = buffer_read_i32(buf);
+        f->opponent_id = buffer_read_i32(buf);
+    }
     if (version > SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
         f->last_visited_index = buffer_read_i16(buf);
     }
-
+    if (version > SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
+        f->last_destinatation_id = buffer_read_i16(buf);
+    }
     // The following code should only be executed if the savegame includes figure information that is not 
     // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next figure
@@ -522,7 +623,8 @@ void figure_save_state(buffer *list, buffer *seq)
     buffer_write_i32(list, FIGURE_CURRENT_BUFFER_SIZE);
 
     figure *f;
-    array_foreach(data.figures, f) {
+    array_foreach(data.figures, f)
+    {
         figure_save(list, f);
     }
 }

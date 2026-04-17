@@ -260,7 +260,7 @@ int map_water_get_wharf_for_new_fishing_boat(figure *boat, map_point *tile)
     for (building *b = building_first_of_type(BUILDING_WHARF); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE) {
             int wharf_boat_id = b->data.industry.fishing_boat_id;
-            if (!wharf_boat_id || wharf_boat_id == boat->id) {
+            if (!wharf_boat_id || wharf_boat_id == (int) boat->id) {
                 wharf = b;
                 break;
             }
@@ -282,7 +282,7 @@ int map_water_get_wharf_for_new_fishing_boat(figure *boat, map_point *tile)
 
 int map_water_find_alternative_fishing_boat_tile(figure *boat, map_point *tile)
 {
-    if (map_figure_at(boat->grid_offset) == boat->id) {
+    if (map_figure_at(boat->grid_offset) == (int) boat->id) {
         return 0;
     }
     for (int radius = 1; radius <= 5; radius++) {
@@ -304,7 +304,7 @@ int map_water_find_alternative_fishing_boat_tile(figure *boat, map_point *tile)
 
 int map_water_find_shipwreck_tile(figure *wreck, map_point *tile)
 {
-    if (map_terrain_is(wreck->grid_offset, TERRAIN_WATER) && map_figure_at(wreck->grid_offset) == wreck->id) {
+    if (map_terrain_is(wreck->grid_offset, TERRAIN_WATER) && map_figure_at(wreck->grid_offset) == (int) wreck->id) {
         return 0;
     }
     for (int radius = 1; radius <= 5; radius++) {
@@ -314,7 +314,7 @@ int map_water_find_shipwreck_tile(figure *wreck, map_point *tile)
         for (int yy = y_min; yy <= y_max; yy++) {
             for (int xx = x_min; xx <= x_max; xx++) {
                 int grid_offset = map_grid_offset(xx, yy);
-                if (!map_has_figure_at(grid_offset) || map_figure_at(grid_offset) == wreck->id) {
+                if (!map_has_figure_at(grid_offset) || map_figure_at(grid_offset) == (int) wreck->id) {
                     if (map_terrain_is(grid_offset, TERRAIN_WATER) &&
                         map_terrain_is(map_grid_offset(xx, yy - 2), TERRAIN_WATER) &&
                         map_terrain_is(map_grid_offset(xx, yy + 2), TERRAIN_WATER) &&

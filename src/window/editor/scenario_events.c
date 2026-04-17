@@ -122,7 +122,7 @@ static color_t color_from_state(event_state state)
         } else if (state == EVENT_STATE_PAUSED) {
             return COLOR_MASK_RED;
         } else if (state == EVENT_STATE_DISABLED) {
-            return COLOR_MASK_GREY;
+            return COLOR_MASK_GRAY;
         }
     }
     return COLOR_MASK_NONE;

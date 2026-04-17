@@ -342,15 +342,16 @@ static void button_year(const generic_button *button)
 static void set_amount_min(int value)
 {
     data.invasion.amount.min = value;
-    if (data.invasion.amount.max < value) {
+    if (data.invasion.amount.max < (unsigned int) value) {
         data.invasion.amount.max = value;
     }
 }
 
 static void set_amount_max(int value)
 {
+
     data.invasion.amount.max = value;
-    if (data.invasion.amount.min > value) {
+    if (data.invasion.amount.min > (unsigned int) value) {
         data.invasion.amount.min = value;
     }
 }
@@ -427,6 +428,7 @@ static void button_repeat_type(const generic_button *button)
 
 static void set_repeat_times(int value)
 {
+    value = (unsigned int) value;
     if (value == 0) {
         data.repeat_type = INVASION_REPEAT_NEVER;
     } else {
@@ -447,7 +449,7 @@ static void set_repeat_interval_min(int value)
         value = 5;
     }
     data.invasion.repeat.interval.min = value;
-    if (data.invasion.repeat.interval.max < value) {
+    if (data.invasion.repeat.interval.max < (unsigned int) value) {
         data.invasion.repeat.interval.max = value;
     }
 }
@@ -455,7 +457,7 @@ static void set_repeat_interval_min(int value)
 static void set_repeat_interval_max(int value)
 {
     data.invasion.repeat.interval.max = value;
-    if (data.invasion.repeat.interval.min > value) {
+    if (data.invasion.repeat.interval.min > (unsigned int) value) {
         data.invasion.repeat.interval.min = value;
     }
 }

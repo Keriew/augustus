@@ -15,4 +15,6 @@ void sound_music_resume(void);
 
 void sound_music_stop(void);
 
+void sound_music_next_track(void);
+
 #endif // SOUND_MUSIC_H

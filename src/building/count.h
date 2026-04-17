@@ -11,11 +11,11 @@
  * Building totals
  */
 
-/**
- * Returns the active building count for the type
- * @param type Building type
- * @return Number of active buildings
- */
+ /**
+  * Returns the active building count for the type
+  * @param type Building type
+  * @return Number of active buildings
+  */
 int building_count_active(building_type type);
 
 /**
@@ -71,7 +71,7 @@ int building_count_in_area(building_type type, int minx, int miny, int maxx, int
  * @param type Figure type
  * @return Total number of buildings
  */
-int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, figure_type type);
+int building_count_fort_type_in_area(int minx, int miny, int maxx, int maxy, building_type type);
 
 /**
  * Returns the total number of buildings (where the type is from the set of buildings)
@@ -111,17 +111,19 @@ int building_set_area_count_deco_paths(int minx, int miny, int maxx, int maxy);
 int building_set_area_count_deco_statues(int minx, int miny, int maxx, int maxy);
 
 /**
- * Returns the active building count for forts based on the assigned soldier (figure) type
- * @param type Figure type
- * @return Number of active forts of that type
+ * Returns the figure type according to a building type for forts
+ * @param type The building type (a fort)
+ * @return The figure type (soldier)
  */
-int building_count_active_fort_type(figure_type type);
+figure_type building_count_forts_get_figure_type_from_building(building_type type);
 
 /**
- * Returns the building count for forts based on the assigned soldier (figure) type
- * @param type Figure type
- * @return Total number of forts of that type
+ * Special counting functions for buildings which are special
  */
-int building_count_fort_type_total(figure_type type);
+int building_count_terrain_in_area(int minx, int miny, int maxx, int maxy, int terrain, int (*condition)(int));
+int building_count_terrain(int terrain, int (*condition)(int));
+
+int building_count_bridges(int ship);
+int building_count_bridges_in_area(int minx, int miny, int maxx, int maxy, int ship);
 
 #endif // BUILDING_COUNT_H

@@ -39,7 +39,7 @@ void formation_legion_delete_for_fort(building *fort)
                 figure_delete(figure_get(m->standard_figure_id));
             }
             for (int i = 0; i < m->num_figures; ++i) {
-                figure_get(m->figures[i])->action_state = FIGURE_ACTION_149_CORPSE;
+                figure_get(m->figures[i])->state = FIGURE_STATE_DEAD;
             }
             formation_clear(fort->formation_id);
             formation_calculate_legion_totals();
@@ -189,6 +189,16 @@ void formation_legion_return_home(formation *m)
     }
 }
 
+void formation_legion_return_home_all(void)
+{
+    for (int i = 1; i < formation_count(); i++) {
+        formation *m = formation_get(i);
+        if (m->in_use && m->is_legion && !m->is_at_fort && !m->in_distant_battle) {
+            formation_legion_return_home(m);
+        }
+    }
+}
+
 static int dispatch_soldiers(formation *m)
 {
     m->in_distant_battle = 1;
@@ -237,15 +247,7 @@ void formation_legions_dispatch_to_distant_battle(void)
 static void kill_soldiers(formation *m, int kill_percentage)
 {
     formation_change_morale(m, -75);
-    int soldiers_total = 0;
-    for (int fig = 0; fig < m->num_figures; fig++) {
-        if (m->figures[fig] > 0) {
-            figure *f = figure_get(m->figures[fig]);
-            if (!figure_is_dead(f)) {
-                soldiers_total++;
-            }
-        }
-    }
+    int soldiers_total = formation_legion_count_alive_soldiers(m->id);
     int soldiers_to_kill = calc_adjust_with_percentage(soldiers_total, kill_percentage);
     if (soldiers_to_kill >= soldiers_total) {
         m->is_at_fort = 1;
@@ -363,7 +365,7 @@ int formation_legion_at_building(int grid_offset)
     int building_id = map_building_at(grid_offset);
     if (building_id > 0) {
         building *b = building_get(building_id);
-        if (b->state == BUILDING_STATE_IN_USE && (b->type == BUILDING_FORT || b->type == BUILDING_FORT_GROUND)) {
+        if (b->state == BUILDING_STATE_IN_USE && (building_is_fort(b->type) || b->type == BUILDING_FORT_GROUND)) {
             return b->formation_id;
         }
     }
@@ -419,7 +421,7 @@ void formation_legion_update(void)
 
 void formation_legion_decrease_damage(void)
 {
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state == FIGURE_STATE_ALIVE && figure_is_legion(f)) {
             if (f->action_state == FIGURE_ACTION_80_SOLDIER_AT_REST) {

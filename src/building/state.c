@@ -15,6 +15,25 @@ static int is_industry_type(const building *b)
         || b->type == BUILDING_SHIPYARD || b->type == BUILDING_WHARF;
 }
 
+static building_type get_fort_type(building *b)
+{
+    switch (b->subtype.fort_figure_type) {
+        case FIGURE_FORT_JAVELIN:
+            return BUILDING_FORT_JAVELIN;
+        case FIGURE_FORT_MOUNTED:
+            return BUILDING_FORT_MOUNTED;
+        case FIGURE_FORT_LEGIONARY:
+            return BUILDING_FORT_LEGIONARIES;
+        case FIGURE_FORT_INFANTRY:
+            return BUILDING_FORT_AUXILIA_INFANTRY;
+        case FIGURE_FORT_ARCHER:
+            return BUILDING_FORT_ARCHERS;
+        default:
+            return BUILDING_NONE;
+    }
+
+}
+
 static void write_type_data(buffer *buf, const building *b)
 {
     // This function should ALWAYS write 26 bytes.
@@ -76,6 +95,12 @@ static void write_type_data(buffer *buf, const building *b)
         buffer_write_i16(buf, b->data.dock.trade_ship_id);
     } else if (building_type_is_roadblock(b->type)) {
         buffer_write_u16(buf, b->data.roadblock.exceptions);
+        if (b->type == BUILDING_WAREHOUSE) {
+            buffer_write_u16(buf, b->data.rubble.og_type);
+            buffer_write_u16(buf, b->data.rubble.og_grid_offset);
+            buffer_write_u8(buf, b->data.rubble.og_size);
+            buffer_write_u8(buf, b->data.rubble.og_orientation);
+        }
     } else if (is_industry_type(b)) {
         buffer_write_i16(buf, b->data.industry.progress);
         buffer_write_u8(buf, b->data.industry.is_stockpiling);
@@ -90,6 +115,11 @@ static void write_type_data(buffer *buf, const building *b)
             buffer_write_i16(buf, b->data.industry.production_current_month);
         }
         buffer_write_i16(buf, b->data.industry.fishing_boat_id);
+    } else if (b->type == BUILDING_BURNING_RUIN || b->type == BUILDING_WAREHOUSE_SPACE) {
+        buffer_write_u16(buf, b->data.rubble.og_type);
+        buffer_write_u16(buf, b->data.rubble.og_grid_offset);
+        buffer_write_u8(buf, b->data.rubble.og_size);
+        buffer_write_u8(buf, b->data.rubble.og_orientation);
     } else {
         buffer_write_u8(buf, b->data.entertainment.num_shows);
         buffer_write_u8(buf, b->data.entertainment.days1);
@@ -139,7 +169,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->house_tavern_food_access);
     buffer_write_i16(buf, b->prev_part_building_id);
     buffer_write_i16(buf, b->next_part_building_id);
-    buffer_write_i16(buf, 0);
+    buffer_write_i16(buf, 0); // Q: what was here and why was it removed? can we replace it with something useful?
     buffer_write_u8(buf, b->house_sentiment_message);
     buffer_write_u8(buf, b->has_well_access);
     buffer_write_i16(buf, b->num_workers);
@@ -164,7 +194,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->is_close_to_water);
     buffer_write_u8(buf, b->storage_id);
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
-    buffer_write_u8(buf, b->show_on_problem_overlay);
+    buffer_write_u8(buf, b->has_problem);
 
     // expanded building data
     // Monuments
@@ -320,12 +350,25 @@ static void read_type_data(buffer *buf, building *b, int version)
         }
         b->data.market.fetch_inventory_id = resource_map_legacy_inventory(buffer_read_u8(buf));
         b->data.market.is_mess_hall = buffer_read_u8(buf);
-    } else if (b->type == BUILDING_GRANARY) {
+    } else if (b->type == BUILDING_GRANARY && version <= SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
             buffer_skip(buf, 2);
             for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
                 b->resources[resource_remap(i)] = buffer_read_i16(buf);
             }
+        }
+        b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+    } else if (b->type == BUILDING_WAREHOUSE || b->type == BUILDING_GRANARY) {
+        if (version <= SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
+            b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+        } else {
+            b->data.roadblock.exceptions = buffer_read_u16(buf);
+        }
+        if (b->type == BUILDING_WAREHOUSE) {
+            b->data.rubble.og_type = buffer_read_u16(buf);
+            b->data.rubble.og_grid_offset = buffer_read_u16(buf);
+            b->data.rubble.og_size = buffer_read_u8(buf);
+            b->data.rubble.og_orientation = buffer_read_u8(buf);
         }
     } else if (building_monument_is_monument(b) && version <= SAVE_GAME_LAST_MONUMENT_TYPE_DATA) {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
@@ -397,6 +440,11 @@ static void read_type_data(buffer *buf, building *b, int version)
             buffer_skip(buf, 6);
         }
         b->data.industry.fishing_boat_id = buffer_read_i16(buf);
+    } else if ((b->type == BUILDING_BURNING_RUIN || b->type == BUILDING_WAREHOUSE_SPACE) && version > SAVE_GAME_LAST_U16_GRIDS) {
+        b->data.rubble.og_type = buffer_read_u16(buf);
+        b->data.rubble.og_grid_offset = buffer_read_u16(buf);
+        b->data.rubble.og_size = buffer_read_u8(buf);
+        b->data.rubble.og_orientation = buffer_read_u8(buf);
     } else {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
             buffer_skip(buf, 26);
@@ -439,6 +487,9 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     } else if (save_version <= SAVE_GAME_LAST_STATIC_RESOURCES &&
         (b->type == BUILDING_DOCK || building_has_supplier_inventory(b->type))) {
         migrate_accepted_goods(b, buffer_read_i16(buf));
+    } else if (b->type == BUILDING_MENU_FORT) { // Forts used to use a generic type for the main building
+        b->subtype.fort_figure_type = buffer_read_i16(buf);// union field, written as fort_figure_type for clarity
+        b->type = get_fort_type(b); // get the correct fort type to ensure compatibility
     } else {
         b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter        
     }
@@ -491,7 +542,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->is_close_to_water = buffer_read_u8(buf);
     b->storage_id = buffer_read_u8(buf);
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
-    b->show_on_problem_overlay = buffer_read_u8(buf);
+    b->has_problem = buffer_read_u8(buf);
 
     // Wharves produce fish and don't need any progress
     if (b->type == BUILDING_WHARF) {
@@ -593,7 +644,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->fumigation_frame = buffer_read_u8(buf);
         b->fumigation_direction = buffer_read_u8(buf);
     }
-    
+
     if (save_version > SAVE_GAME_LAST_STATIC_RESOURCES) {
         for (int i = 0; i < resource_total_mapped(); i++) {
             b->resources[resource_remap(i)] = buffer_read_i16(buf);

@@ -29,9 +29,11 @@ typedef uint32_t color_t;
 #define COLOR_FONT_LIGHT_GRAY 0xffb3b3b3
 #define COLOR_FONT_GRAY 0xff888888
 #define COLOR_FONT_PLAIN 0xff180800
+#define COLOR_FONT_GREEN 0xff00cc00
 
 #define COLOR_INSET_LIGHT 0xffffffff
 #define COLOR_INSET_DARK 0xff848484
+#define COLOR_INSET_BLACK 0xff000000
 
 #define COLOR_RISK_ICON_BORDER_DARK 0xf0000000
 #define COLOR_RISK_ICON_BORDER_LIGHT 0xf0ffffff
@@ -40,14 +42,19 @@ typedef uint32_t color_t;
 #define COLOR_RISK_ICON_HIGH 0xfff7a142
 #define COLOR_RISK_ICON_EXTREME 0xffff603a
 
+#define COLOR_MAINTAIN_ICON 0xfffbf0f5
+
 #define COLOR_MASK_NONE 0xffffffff
 #define COLOR_MASK_RED 0xffff0818
 #define COLOR_MASK_GREEN 0xff18ff18
 #define COLOR_MASK_PURPLE 0xff7f0000
 #define COLOR_MASK_DARK_GREEN 0xff005100
 #define COLOR_MASK_DARK_BLUE 0x66001199
-#define COLOR_MASK_BLUE 0x663377ff
-#define COLOR_MASK_GREY 0x66aaaaaa
+#define COLOR_MASK_DARK_PINK 0x88402060
+#define COLOR_MASK_BLUE 0x6642a7ef
+#define COLOR_MASK_GRAY 0x66aaaaaa
+#define COLOR_MASK_LIGHT_GRAY 0xbbaaaaaa
+#define COLOR_MASK_HOVER 0xeee0e0e0
 #define COLOR_MASK_PINK 0x99fa94ff
 #define COLOR_MASK_LEGION_HIGHLIGHT 0xffff6633
 #define COLOR_MASK_FOOTPRINT_GHOST 0x22ffffff
@@ -70,6 +77,8 @@ typedef uint32_t color_t;
 #define COLOR_MASK_SKY_BLUE 0xff90aaff
 #define COLOR_MASK_POSITIVE_RANGE 0x80005100    //50% transparent DARK_GREEN
 #define COLOR_MASK_NEGATIVE_RANGE 0x40ff0000    //25% transparent COLOR_RED
+#define COLOR_MASK_REPAIR_RANGE 0x4000ff00      //25% transparent COLOR_GREEN
+#define COLOR_MASK_RESERVOIR_RANGE 0x6633ddff   //40% transparent cyan blue
 
 #define COLOR_MINIMAP_VIEWPORT 0xffe7e75a
 #define COLOR_MINIMAP_DARK 0xff424242
@@ -83,9 +92,16 @@ typedef uint32_t color_t;
 #define COLOR_MINIMAP_TRADE_CARAVAN COLOR_FONT_ORANGE_LIGHT
 #define COLOR_MINIMAP_TRADE_SHIP COLOR_FONT_ORANGE_LIGHT
 
-#define COLOR_OVERLAY_NEUTRAL 0xccffffff
-#define COLOR_OVERLAY_NEGATIVE_STEP 0x00040505
-#define COLOR_OVERLAY_POSITIVE_STEP 0x00050504
+#define COLOR_MASK_PASTEL_BLUE        0xffa8c5ff  // calm sky blue
+#define COLOR_MASK_PASTEL_GREEN       0xffb7e0a5  // soft mint green
+#define COLOR_MASK_PASTEL_PURPLE      0xffc8b5e1  // gentle lavender
+#define COLOR_MASK_PASTEL_ORANGE      0xfff6c79a  // peachy orange
+#define COLOR_MASK_PASTEL_OLIVE       0xffc1c08a  // muted olive green
+#define COLOR_MASK_PASTEL_TURQUOISE   0xffa9e5dc  // cool aqua pastel
+#define COLOR_MASK_PASTEL_CORAL       0xfff7a89e  // light coral
+#define COLOR_MASK_PASTEL_GRAY        0xffc0c0c0  // balanced neutral gray
+#define COLOR_MASK_PASTEL_BLACK       0xff3a3a3a  // soft black 
+#define COLOR_MASK_PASTEL_DARK_BLUE   0xff6d87b8  // desaturated navy blue
 
 #define COLOR_MOUSE_DARK_GRAY 0xff3f3f3f
 #define COLOR_MOUSE_MEDIUM_GRAY 0xff737373
@@ -94,12 +110,20 @@ typedef uint32_t color_t;
 #define ALPHA_OPAQUE 0xff000000
 #define ALPHA_FONT_SEMI_TRANSPARENT 0x99ffffff
 #define ALPHA_MASK_SEMI_TRANSPARENT 0x48ffffff
+#define ALPHA_MASK_CUSTOM_EARTHQUAKE 0x80ffffff
 #define ALPHA_TRANSPARENT 0x00000000
 
 #define COLOR_BITSHIFT_ALPHA 24
 #define COLOR_BITSHIFT_RED 16
 #define COLOR_BITSHIFT_GREEN 8
 #define COLOR_BITSHIFT_BLUE 0
+
+#define COLOR_WEATHER_SAND 0xffe6b85c
+#define COLOR_WEATHER_SNOW 0xffddeeff
+#define COLOR_WEATHER_RAIN 0xff000000
+#define COLOR_WEATHER_SNOWFLAKE 0x88ffffff
+#define COLOR_WEATHER_SAND_PARTICLE 0xe1a65e2e
+#define COLOR_WEATHER_DROPS 0xccffffff
 
 #define COLOR_CHANNEL_ALPHA 0xff000000
 #define COLOR_CHANNEL_RED 0x00ff0000

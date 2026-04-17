@@ -10,8 +10,8 @@
 #include "building/lighthouse.h"
 #include "building/market.h"
 #include "building/mess_hall.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "building/tavern.h"
 #include "building/temple.h"
 #include "building/warehouse.h"
@@ -54,7 +54,7 @@ static int worker_percentage(const building *b)
 static void check_labor_problem(building *b)
 {
     if (b->houses_covered <= 0) {
-        b->show_on_problem_overlay = 2;
+        b->has_problem = 2;
     }
 }
 
@@ -211,12 +211,11 @@ static void spawn_figure_warehouse(building *b)
     for (int i = 0; i < 8; i++) {
         space = building_next(space);
         if (space->id) {
-            space->show_on_problem_overlay = b->show_on_problem_overlay;
+            space->has_problem = b->has_problem;
         }
     }
     map_point road;
-    if (map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, b->size, &road) ||
-        map_has_road_access_rotation(b->subtype.orientation, b->x, b->y, 3, &road)) {
+    if (map_has_road_access_warehouse(b->x, b->y, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 100);
         if (has_figure_of_type(b, FIGURE_WAREHOUSEMAN)) {
             return;
@@ -226,7 +225,8 @@ static void spawn_figure_warehouse(building *b)
         if (task != WAREHOUSE_TASK_NONE) {
             figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
-            f->loads_sold_or_carrying = 1;
+            f->loads_sold_or_carrying = 0; // spawn with 0, load is decided by the action. 
+            //this way we transfer resources from buildings to figures directly, without having to keep track
             if (task == WAREHOUSE_TASK_GETTING) {
                 f->resource_id = RESOURCE_NONE;
                 f->collecting_item_id = resource;
@@ -242,6 +242,7 @@ static void spawn_figure_warehouse(building *b)
 static void spawn_figure_granary(building *b)
 {
     check_labor_problem(b);
+    map_update_granary_internal_roads(b); //internal roads updated basing on surrounding terrain
     map_point road;
     if (map_has_road_access_granary(b->x, b->y, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 100);
@@ -250,9 +251,10 @@ static void spawn_figure_granary(building *b)
         }
         int task = building_granary_determine_worker_task(b);
         if (task != GRANARY_TASK_NONE) {
-            figure *f = figure_create(FIGURE_WAREHOUSEMAN, road.x, road.y, DIR_4_BOTTOM);
+            figure *f = figure_create(FIGURE_WAREHOUSEMAN, b->x + 1, b->y + 1, DIR_4_BOTTOM);
+            //spawn in the center of the granary
             f->action_state = FIGURE_ACTION_50_WAREHOUSEMAN_CREATED;
-            f->loads_sold_or_carrying = 1;
+            //f->loads_sold_or_carrying = 1; //set loads at action, not spawn
             f->resource_id = task;
             b->figure_id = f->id;
             f->building_id = b->id;
@@ -392,7 +394,6 @@ static void spawn_figure_gladiator_school(building *b)
 
 static void spawn_figure_lion_house(building *b)
 {
-    check_labor_problem(b);
     check_labor_problem(b);
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
@@ -564,7 +565,7 @@ static void spawn_figure_hippodrome(building *b)
     for (int i = 0; i < 2; i++) {
         part = building_next(part);
         if (part->id) {
-            part->show_on_problem_overlay = b->show_on_problem_overlay;
+            part->has_problem = b->has_problem;
         }
     }
     if (has_figure_of_type(b, FIGURE_CHARIOTEER)) {
@@ -704,15 +705,36 @@ static void set_market_graphic(building *b)
 
 static void send_supplier_to_destination(figure *f, int dst_building_id)
 {
+    if (f->destination_building_id) {
+        f->last_destinatation_id = f->destination_building_id; //store last destination
+    }
     f->destination_building_id = dst_building_id;
     building *b_dst = building_get(dst_building_id);
     map_point road;
-    if (map_has_road_access_rotation(b_dst->subtype.orientation, b_dst->x, b_dst->y, b_dst->size, &road) ||
-        map_has_road_access_rotation(b_dst->subtype.orientation, b_dst->x, b_dst->y, 3, &road)) {
-        f->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
-        f->destination_x = road.x;
-        f->destination_y = road.y;
-    } else {
+    int destination_found = 0;
+    if (b_dst->type == BUILDING_WAREHOUSE) {
+        if (map_has_road_access_warehouse(b_dst->x, b_dst->y, &road)) {
+            destination_found = 1;
+            f->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
+            f->destination_x = road.x;
+            f->destination_y = road.y;
+        }
+    } else if (b_dst->type == BUILDING_GRANARY) {
+        if (map_has_road_access_granary(b_dst->x, b_dst->y, &road)) {
+            destination_found = 1;
+            f->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
+            f->destination_x = road.x;
+            f->destination_y = road.y;
+        }
+    } else if (b_dst->type == BUILDING_GRAND_TEMPLE_VENUS) {
+        if (map_has_road_access(b_dst->x, b_dst->y, b_dst->size, &road)) {
+            destination_found = 1;
+            f->action_state = FIGURE_ACTION_145_SUPPLIER_GOING_TO_STORAGE;
+            f->destination_x = road.x;
+            f->destination_y = road.y;
+        }
+    }
+    if (!destination_found) {
         f->action_state = FIGURE_ACTION_146_SUPPLIER_RETURNING;
         f->destination_x = f->x;
         f->destination_y = f->y;
@@ -905,7 +927,7 @@ static void spawn_figure_bathhouse(building *b)
     set_bathhouse_graphic(b);
     check_labor_problem(b);
     if (!b->has_water_access) {
-        b->show_on_problem_overlay = 2;
+        b->has_problem = 2;
     }
     if (has_figure_of_type(b, FIGURE_BATHHOUSE_WORKER)) {
         return;
@@ -1961,7 +1983,7 @@ void building_figure_generate(void)
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
         if (b->state != BUILDING_STATE_IN_USE) {
-            b->show_on_problem_overlay = 1;
+            b->has_problem = 1;
             continue;
         }
         if (b->type == BUILDING_WAREHOUSE_SPACE || (b->type == BUILDING_HIPPODROME && b->prev_part_building_id) ||
@@ -1969,7 +1991,7 @@ void building_figure_generate(void)
             continue;
         }
 
-        b->show_on_problem_overlay = 0;
+        b->has_problem = 0;
         // range of building types
         if (b->type >= BUILDING_HOUSE_SMALL_TENT && b->type <= BUILDING_HOUSE_GRAND_INSULA) {
             if (city_labor_unemployment_percentage() > BEGGAR_UNEMPLOYMENT_THRESHOLD) {
@@ -2078,7 +2100,11 @@ void building_figure_generate(void)
                 case BUILDING_NATIVE_CROPS:
                     update_native_crop_progress(b);
                     break;
-                case BUILDING_FORT:
+                case BUILDING_FORT_LEGIONARIES:
+                case BUILDING_FORT_JAVELIN:
+                case BUILDING_FORT_ARCHERS:
+                case BUILDING_FORT_AUXILIA_INFANTRY:
+                case BUILDING_FORT_MOUNTED:
                     formation_legion_update_recruit_status(b);
                     spawn_figure_fort_supplier(b);
                     break;

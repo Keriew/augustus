@@ -16,8 +16,8 @@ typedef enum order_condition_type {
 
 typedef struct order {
     resource_type resource_type;
-    int src_storage_id;
-    int dst_storage_id;
+    unsigned int src_storage_id; //this is actually building_id, not storage_id
+    unsigned int dst_storage_id; //this is actually building_id, not storage_id
     struct {
         order_condition_type condition_type;
         int threshold;
@@ -38,14 +38,14 @@ typedef struct building {
     unsigned char size;
     unsigned char house_is_merged;
     unsigned char house_size;
-    unsigned char x;
+    unsigned char x; //these are not grid coordinates but image coordinates
     unsigned char y;
     short grid_offset;
     building_type type;
     union {
         short house_level;
         short warehouse_resource_id;
-        short orientation;
+        short orientation; // rotation of the building, in number of turns. Used for statues, warehouses, etc.
         short fort_figure_type;
         short native_meeting_center_id;
         short barracks_priority;
@@ -61,10 +61,10 @@ typedef struct building {
     short house_unreachable_ticks;
     unsigned char road_access_x;
     unsigned char road_access_y;
-    short figure_id;
-    short figure_id2; // labor seeker or market supplier
-    short immigrant_figure_id;
-    short figure_id4; // tower ballista, burning ruin prefect, doctor healing plague
+    unsigned int figure_id;
+    unsigned int figure_id2; // labor seeker or market supplier
+    unsigned int immigrant_figure_id;
+    unsigned int figure_id4; // tower ballista, burning ruin prefect, doctor healing plague
     unsigned char figure_spawn_delay;
     unsigned char days_since_offering;
     unsigned char figure_roam_direction;
@@ -97,7 +97,7 @@ typedef struct building {
             int accepted_route_ids;
         } dock;
         struct {
-            short cartpusher_ids[3];
+            unsigned int cartpusher_ids[3]; //changed from short to match f->id
         } distribution;
         struct {
             unsigned char fetch_inventory_id;
@@ -111,7 +111,7 @@ typedef struct building {
             unsigned char has_fish;
             unsigned char is_stockpiling;
             unsigned char orientation;
-            short fishing_boat_id;
+            unsigned int fishing_boat_id; // in line with f->id
             unsigned char age_months;
             unsigned char average_production_per_month;
             short production_current_month;
@@ -151,7 +151,10 @@ typedef struct building {
             unsigned char evolve_text_id;
         } house;
         struct {
-            unsigned char was_tent;
+            unsigned short og_type;
+            unsigned short og_grid_offset;
+            unsigned char og_size;
+            unsigned char og_orientation;
         } rubble;
         struct {
             unsigned short exceptions;
@@ -175,12 +178,12 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_close_to_water;
-    unsigned char storage_id;
+    unsigned char storage_id; //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
     union {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
-    unsigned char show_on_problem_overlay;
+    unsigned char has_problem;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
     unsigned char house_arena_gladiator;
@@ -202,7 +205,7 @@ typedef struct building {
     unsigned char accepted_goods[RESOURCE_MAX];
 } building;
 
-building *building_get(int id);
+building *building_get(unsigned int id);
 
 int building_dist(int x, int y, int w, int h, building *b);
 
@@ -213,15 +216,37 @@ int building_count(void);
 
 int building_find(building_type type);
 
+int building_find_with_mothballed(building_type type);
+
+int building_can_repair_type(building_type type);
+
 building *building_first_of_type(building_type type);
 
 void building_change_type(building *b, building_type type);
 
-building *building_main(building *b);
+building *building_main(const building *b);
 
 building *building_next(building *b);
 
 building *building_create(building_type type, int x, int y);
+
+int building_was_tent(const building *b);
+
+int building_is_storage(building_type b_type);
+/**
+ * @brief Repairs a building using it's entry in the buildings array. In cases of warehouses and burning ruins,
+ * some information is removed or reset, so data from b->data.rubble is used to help restore the building.
+ * in the future, we should implement a more general system for saving and restoring building state.
+ * Keeping a building in the array is helpful because it holds the building's ID, and allows keeping the storage structure.
+ */
+
+int building_repair(building *b);
+
+int building_is_still_burning(building *b);
+
+int building_can_repair(building *b);
+
+int building_repair_cost(building *b);
 
 void building_clear_related_data(building *b);
 
@@ -235,6 +260,8 @@ void building_update_desirability(void);
 
 int building_is_house(building_type type);
 
+int building_get_house_group(building_type type);
+
 int building_is_ceres_temple(building_type type);
 
 int building_is_neptune_temple(building_type type);
@@ -246,6 +273,8 @@ int building_is_mars_temple(building_type type);
 int building_is_venus_temple(building_type type);
 
 int building_has_supplier_inventory(building_type type);
+
+int building_is_house_group(house_groups group, building_type type);
 
 int building_is_statue_garden_temple(building_type type);
 
@@ -265,7 +294,7 @@ int building_get_laborers(building_type type);
 
 unsigned char building_stockpiling_toggle(building *b);
 
-int building_get_tourism(const building* b);
+int building_get_tourism(const building *b);
 
 int building_get_levy(const building *b);
 

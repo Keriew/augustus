@@ -90,10 +90,10 @@ static void loot_storage(figure *f, int resource, int building_id)
     building *storage = building_get(building_id);
 
     if (storage->type == BUILDING_GRANARY) {
-        building_granary_remove_resource(storage, resource, 100);
+        building_granary_try_remove_resource(storage, resource, 100);
         city_warning_show(WARNING_GRANARY_BREAKIN, NEW_WARNING_SLOT);
     } else {
-        building_warehouse_remove_resource(storage, resource, 1);
+        building_warehouse_try_remove_resource(storage, resource, 1);
         city_warning_show(WARNING_WAREHOUSE_BREAKIN, NEW_WARNING_SLOT);
     }
 
@@ -499,8 +499,12 @@ int figure_rioter_collapse_building(figure *f)
         switch (b->type) {
             case BUILDING_WAREHOUSE_SPACE:
             case BUILDING_WAREHOUSE:
+            case BUILDING_FORT_ARCHERS:
+            case BUILDING_FORT_LEGIONARIES:
+            case BUILDING_FORT_JAVELIN:
+            case BUILDING_FORT_MOUNTED:
+            case BUILDING_FORT_AUXILIA_INFANTRY:
             case BUILDING_FORT_GROUND:
-            case BUILDING_FORT:
             case BUILDING_BURNING_RUIN:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_NATIVE_HUT:

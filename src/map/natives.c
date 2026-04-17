@@ -51,7 +51,8 @@ static int has_building_on_native_land(int x, int y, int size, int radius)
                     type != BUILDING_NATIVE_MONUMENT &&
                     type != BUILDING_NATIVE_WATCHTOWER &&
                     (!building_type_is_roadblock(type) || type == BUILDING_PALISADE_GATE ||
-                        type == BUILDING_TRIUMPHAL_ARCH || type == BUILDING_GATEHOUSE)) {
+                        type == BUILDING_TRIUMPHAL_ARCH || type == BUILDING_GATEHOUSE ||
+                        type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE)) {
                     return 1;
                 }
             } else if (map_terrain_is(map_grid_offset(xx, yy), TERRAIN_AQUEDUCT | TERRAIN_WALL | TERRAIN_GARDEN)) {
@@ -86,7 +87,7 @@ static void determine_meeting_center(void)
     }
 }
 
-int native_hut_alt_get_image_id() {
+static int native_hut_alt_get_image_id(void) {
     switch (scenario_property_climate()) {
         case CLIMATE_NORTHERN:
             return assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");

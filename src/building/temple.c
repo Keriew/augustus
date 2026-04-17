@@ -12,7 +12,7 @@
 int building_temple_get_storage_destination(building *temple)
 {
     if (building_is_venus_temple(temple->type)) {
-        if (!building_distribution_is_good_accepted(RESOURCE_WINE, temple) ||
+        if (!building_distribution_is_good_accepted(temple, RESOURCE_WINE) ||
             temple->accepted_goods[RESOURCE_WINE] <= 1) {
             return 0;
         }
@@ -22,7 +22,7 @@ int building_temple_get_storage_destination(building *temple)
             temple->data.market.fetch_inventory_id = RESOURCE_WINE;
             return grand_temple->id;
         }
-        return 0;  
+        return 0;
     }
 
     if (!building_is_ceres_temple(temple->type)) { // Ceres module 2

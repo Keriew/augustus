@@ -6,16 +6,65 @@
 #include "map/bridge.h"
 #include "map/building.h"
 #include "map/grid.h"
+#include "map/property.h"
 #include "map/ring.h"
 #include "map/routing.h"
 #include "map/sprite.h"
 
+#include <string.h>
+
 static grid_u32 terrain_grid;
 static grid_u32 terrain_grid_backup;
+
+
+const terrain_flags_array *map_terrain_to_array(int grid_offset)
+{
+    static const char *names[TERRAIN_NUM_FLAGS] = {
+        "TREE", "ROCK", "WATER", "BUILDING", "SHRUB", "GARDEN", "ROAD", "RESERVOIR_R", "AQUEDUCT", "ELEVATION",
+        "ACCESS_RAMP", "MEADOW", "RUBBLE", "FOUNTAIN_R", "WALL", "GATEHOUSE", "ORG_TREE", "HIGHWAY1", "HIGHWAY2",
+        "HIGHWAY3", "HIGHWAY4"
+    };
+    static terrain_flags_array result;
+    unsigned int terrain_value = terrain_grid.items[grid_offset];
+
+    // Reset everything to zero to avoid stale data
+    memset(&result, 0, sizeof(result));
+
+    if (terrain_value == 0) {
+        // No bits set: represent as CLEAR
+        strncpy(result.key[0], "CLEAR", KEY_MAX_LEN - 1);
+        result.key[0][KEY_MAX_LEN - 1] = '\0';
+        result.count = 1;
+        return &result;
+    }
+
+    for (int i = 0; i < TERRAIN_NUM_FLAGS; i++) {
+        if ((terrain_value >> i) & 1) {
+            if (result.count >= TERRAIN_NUM_FLAGS) {
+                // Safety: avoid buffer overflow
+                break;
+            }
+            result.bits[i] = 1;
+
+            strncpy(result.key[result.count], names[i], KEY_MAX_LEN - 1);
+            result.key[result.count][KEY_MAX_LEN - 1] = '\0';
+
+            result.count++;
+        }
+    }
+
+    return &result;
+}
 
 int map_terrain_is(int grid_offset, int terrain)
 {
     return map_grid_is_valid_offset(grid_offset) && terrain_grid.items[grid_offset] & terrain;
+}
+
+int map_terrain_is_roadblock(int grid_offset)
+{
+    int terrain = map_terrain_get(grid_offset);
+    return (terrain & TERRAIN_BUILDING) && (terrain & TERRAIN_ROAD);
 }
 
 int map_terrain_is_superset(int grid_offset, unsigned int terrain_sum)
@@ -314,7 +363,7 @@ int map_terrain_get_adjacent_road_or_clear_land(int x, int y, int size, int *x_t
     int base_offset = map_grid_offset(x, y);
     for (const int *tile_delta = map_grid_adjacent_offsets(size); *tile_delta; tile_delta++) {
         int grid_offset = base_offset + *tile_delta;
-        if (map_terrain_is(grid_offset, TERRAIN_ROAD) ||
+        if (map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_RUBBLE | TERRAIN_GARDEN | TERRAIN_HIGHWAY) ||
             !map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
             *x_tile = map_grid_offset_to_x(grid_offset);
             *y_tile = map_grid_offset_to_y(grid_offset);
@@ -567,7 +616,33 @@ void map_terrain_migrate_old_bridges(void)
     }
 }
 
-
+void map_terrain_migrate_old_walls(void)
+{
+    for (int y = 0; y < GRID_SIZE; y++) {
+        for (int x = 0; x < GRID_SIZE; x++) {
+            int grid_offset = map_grid_offset(x, y);
+            if (!map_grid_is_valid_offset(grid_offset)) {
+                continue;
+            }
+            if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
+                if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+                    // Create wall building for each wall tile
+                    building *wall = building_create(BUILDING_WALL, x, y);
+                    map_building_set(grid_offset, wall->id);
+                    map_terrain_add(grid_offset, TERRAIN_BUILDING);
+                } else {
+                    building *wall = building_get(map_building_at(grid_offset));
+                    // Recreate the wall if pointing to a wrong building
+                    if (!wall || wall->type != BUILDING_WALL) {
+                        wall = building_create(BUILDING_WALL, x, y);
+                        map_building_set(grid_offset, wall->id);
+                    }
+                }
+                map_property_clear_multi_tile_xy(grid_offset);
+            }
+        }
+    }
+}
 
 void map_terrain_load_state(buffer *buf, int expanded_terrain_data, buffer *images, int legacy_image_buffer)
 {

@@ -59,19 +59,23 @@ typedef enum {
     REQUESTS_OLD_STATE_SECTIONS_ONGOING_INFO = 4
 } requests_old_state_sections;
 
+int scenario_request_can_comply(int id);
+
 void scenario_request_clear_all(void);
 
 void scenario_request_init(void);
 
 int scenario_request_new(void);
 
+void scenario_request_show_ready_message(scenario_request *request);
+
 void scenario_request_process(void);
 
 void scenario_request_dispatch(int id);
 
-int scenario_request_count_total(void);
+unsigned int scenario_request_count_total(void);
 
-int scenario_request_count_active(void);
+unsigned int scenario_request_count_active(void);
 
 int scenario_request_count_visible(void);
 

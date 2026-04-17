@@ -1,5 +1,6 @@
 #include "panel.h"
 
+#include "assets/assets.h"
 #include "graphics/image.h"
 
 void outer_panel_draw(int x, int y, int width_blocks, int height_blocks)
@@ -51,7 +52,7 @@ void outer_panel_draw(int x, int y, int width_blocks, int height_blocks)
     }
 }
 
-void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
+void unbordered_panel_draw_colored(int x, int y, int width_blocks, int height_blocks, color_t color)
 {
     int image_base = image_group(GROUP_DIALOG_BACKGROUND);
     int image_y = 0;
@@ -59,7 +60,7 @@ void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
         int image_x = 0;
         for (int xx = 0; xx < width_blocks; xx++) {
             int image_id = 13 + image_y + image_x++;
-            image_draw(image_base + image_id, x + BLOCK_SIZE * xx, y + BLOCK_SIZE * yy, COLOR_MASK_NONE, SCALE_NONE);
+            image_draw(image_base + image_id, x + BLOCK_SIZE * xx, y + BLOCK_SIZE * yy, color, SCALE_NONE);
             if (image_x >= 10) {
                 image_x = 0;
             }
@@ -69,6 +70,11 @@ void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
             image_y = 0;
         }
     }
+}
+
+void unbordered_panel_draw(int x, int y, int width_blocks, int height_blocks)
+{
+    unbordered_panel_draw_colored(x, y, width_blocks, height_blocks, COLOR_MASK_NONE);
 }
 
 void inner_panel_draw(int x, int y, int width_blocks, int height_blocks)
@@ -150,4 +156,28 @@ void large_label_draw(int x, int y, int width_blocks, int type)
         }
         image_draw(image_base + image_id, x + BLOCK_SIZE * i, y, COLOR_MASK_NONE, SCALE_NONE);
     }
+}
+
+int top_menu_black_panel_draw(int x, int y, int width)
+{
+    int blocks = ((width + BLACK_PANEL_BLOCK_WIDTH - 1) / BLACK_PANEL_BLOCK_WIDTH) - 2;
+    if (blocks < BLACK_PANEL_MIDDLE_BLOCKS) {
+        blocks = BLACK_PANEL_MIDDLE_BLOCKS;
+    }
+    int actual_width = (blocks + 2) * BLACK_PANEL_BLOCK_WIDTH;
+
+    image_draw(image_group(GROUP_TOP_MENU) + 14, x, y, COLOR_MASK_NONE, SCALE_NONE);
+    x += BLACK_PANEL_BLOCK_WIDTH;
+
+    int black_panel_base_id = assets_get_image_id("UI", "Top_UI_Panel");
+
+    for (int i = 0; i < blocks; i++) {
+        image_draw(black_panel_base_id + (i % BLACK_PANEL_MIDDLE_BLOCKS) + 1, x, y,
+            COLOR_MASK_NONE, SCALE_NONE);
+        x += BLACK_PANEL_BLOCK_WIDTH;
+    }
+
+    image_draw(black_panel_base_id + 5, x, y, COLOR_MASK_NONE, SCALE_NONE);
+
+    return actual_width;
 }

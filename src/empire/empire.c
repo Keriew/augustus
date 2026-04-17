@@ -33,7 +33,7 @@ static struct {
     int initial_scroll_y;
     int scroll_x;
     int scroll_y;
-    int selected_object;
+    unsigned int selected_object;
     int viewport_width;
     int viewport_height;
     struct {
@@ -85,6 +85,10 @@ static void set_image_id(const char *path)
 
 void empire_set_custom_map(const char *path, int offset_x, int offset_y, int width, int height)
 {
+    char log_message[196];
+    snprintf(log_message, 196, "Loading empire background image %s with x: %i, y: %i, width: %i, height: %i",
+        path, offset_x, offset_y, width, height);
+    log_info(log_message, NULL, 0);
     set_image_id(path);
     if (offset_x < 0) {
         offset_x = 0;
@@ -223,6 +227,17 @@ void empire_get_map_size(int *width, int *height)
     *height = data.image.height;
 }
 
+void empire_get_coordinates(int *x_offset, int *y_offset)
+{
+    *x_offset = data.image.offset_x;
+    *y_offset = data.image.offset_y;
+}
+
+char *empire_get_image_path(void)
+{
+    return data.image.path;
+}
+
 void empire_set_coordinates(int relative, int x_offset, int y_offset)
 {
     data.coordinates.relative = relative;
@@ -263,9 +278,9 @@ void empire_scroll_map(int x, int y)
     check_scroll_boundaries();
 }
 
-int empire_selected_object(void)
+unsigned int empire_selected_object(void)
 {
-    return data.selected_object;
+    return data.selected_object; // id is an unsigned int
 }
 
 void empire_clear_selected_object(void)
@@ -289,7 +304,7 @@ int empire_get_hovered_object(int x, int y)
 }
 void empire_select_object_by_id(int object_id)
 {
-    object_id +=1 ;// index 0 means no selection, so increase by 1
+    object_id += 1;// index 0 means no selection, so increase by 1
     if (object_id <= 0) {
         data.selected_object = 0;
         return;
@@ -314,21 +329,23 @@ int empire_can_export_resource_to_city(int city_id, int resource)
         return 0;
     }
     empire_city *city = empire_city_get(city_id);
-    if (city_id && trade_route_limit_reached(city->route_id, resource)) {
+    if (city_id && trade_route_limit_reached(city->route_id, resource, 1)) {
         // quota reached
         return 0;
     }
-    int in_stock = city_resource_count(resource);
-    if (resource_is_food(resource) && config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
-        in_stock += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
+    int in_stock = 0;
+    if (!resource_is_food(resource) || config_get(CONFIG_GP_CH_ALLOW_EXPORTING_FROM_GRANARIES)) {
+        in_stock = city_resource_get_total_amount(resource, 1); //non food or allowed export from granaries
+    } else {
+        in_stock = city_resource_count_warehouses_amount(resource); // count warehouses only
     }
 
-    if (in_stock <= city_resource_export_over(resource)) {
+    if (in_stock <= city_resource_export_over(resource)) { // 0 means any amount can be exported
         // stocks too low
         return 0;
     }
     if (city_id == 0 || city->buys_resource[resource]) {
-        return (city_resource_trade_status(resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
+        return (city_resource_trade_status((resource_type) resource) & TRADE_STATUS_EXPORT) == TRADE_STATUS_EXPORT;
     } else {
         return 0;
     }
@@ -360,18 +377,15 @@ int empire_can_import_resource_from_city(int city_id, int resource)
     if (!(city_resource_trade_status(resource) & TRADE_STATUS_IMPORT)) {
         return 0;
     }
-    if (trade_route_limit_reached(city->route_id, resource)) {
+    if (trade_route_limit_reached(city->route_id, resource, 0)) {
         return 0;
     }
 
-    int in_stock = city_resource_count(resource);
-    if (resource_is_food(resource)) {
-        in_stock += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
-    }
+    int in_stock = city_resource_get_total_amount(resource, 0); // dont respect maintaining, this is full count.
     int max_in_stock = 0;
     /* NOTE: don't forget to uncomment function get_max_stock_for_population
-    
-    int finished_good = RESOURCE_NONE; 
+
+    int finished_good = RESOURCE_NONE;
     switch (resource) {
         // food and finished materials
         case RESOURCE_WHEAT:

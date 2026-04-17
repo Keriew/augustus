@@ -16,19 +16,35 @@
 #include "game/settings.h"
 #include "game/time.h"
 #include "map/grid.h"
+#include "map/property.h"
+#include "map/terrain.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/condition_comparison_helper.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/formula.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
+
+#define BUILDING_RUBBLE -1
+
+static int count_no_condition(int grid_offset)
+{
+    return 1;
+}
+
+static int count_not_overgrown(int grid_offset)
+{
+    return !map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset);
+}
 
 int scenario_condition_type_building_count_active_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
-    building_type type = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
+    int type = condition->parameter3;
 
     int total_active_count = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             total_active_count = building_set_count_farms(1);
             break;
@@ -59,14 +75,29 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
         case BUILDING_ANY:
             total_active_count = building_count_any_total(1);
             break;
-        case BUILDING_FORT_LEGIONARIES:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_LEGIONARY);
+        case BUILDING_ROAD:
+            total_active_count = building_count_terrain(TERRAIN_ROAD, count_no_condition);
             break;
-        case BUILDING_FORT_JAVELIN:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_JAVELIN);
+        case BUILDING_HIGHWAY:
+            total_active_count = building_count_terrain(TERRAIN_HIGHWAY, count_no_condition);
             break;
-        case BUILDING_FORT_MOUNTED:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
+        case BUILDING_PLAZA:
+            total_active_count = building_count_terrain(TERRAIN_ROAD, map_property_is_plaza_earthquake_or_overgrown_garden);
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_terrain(TERRAIN_GARDEN, count_not_overgrown);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_terrain(TERRAIN_GARDEN, map_property_is_plaza_earthquake_or_overgrown_garden);
+            break;
+        case BUILDING_RUBBLE:
+            total_active_count = building_count_terrain(TERRAIN_RUBBLE, count_no_condition);
+            break;
+        case BUILDING_LOW_BRIDGE:
+            total_active_count = building_count_bridges(0);
+            break;
+        case BUILDING_SHIP_BRIDGE:
+            total_active_count = building_count_bridges(1);
             break;
         default:
             total_active_count = building_count_active(type);
@@ -79,11 +110,11 @@ int scenario_condition_type_building_count_active_met(const scenario_condition_t
 int scenario_condition_type_building_count_any_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
-    building_type type = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
+    int type = condition->parameter3;
 
     int total_active_count = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             total_active_count = building_set_count_farms(0);
             break;
@@ -114,14 +145,29 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
         case BUILDING_ANY:
             total_active_count = building_count_any_total(0);
             break;
-        case BUILDING_FORT_LEGIONARIES:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_LEGIONARY);
+        case BUILDING_ROAD:
+            total_active_count = building_count_terrain(TERRAIN_ROAD, count_no_condition);
             break;
-        case BUILDING_FORT_JAVELIN:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_JAVELIN);
+        case BUILDING_HIGHWAY:
+            total_active_count = building_count_terrain(TERRAIN_HIGHWAY, count_no_condition);
             break;
-        case BUILDING_FORT_MOUNTED:
-            total_active_count += building_count_fort_type_total(FIGURE_FORT_MOUNTED);
+        case BUILDING_PLAZA:
+            total_active_count = building_count_terrain(TERRAIN_ROAD, map_property_is_plaza_earthquake_or_overgrown_garden);
+            break;
+        case BUILDING_GARDENS:
+            total_active_count = building_count_terrain(TERRAIN_GARDEN, count_not_overgrown);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            total_active_count = building_count_terrain(TERRAIN_GARDEN, map_property_is_plaza_earthquake_or_overgrown_garden);
+            break;
+        case BUILDING_RUBBLE:
+            total_active_count = building_count_terrain(TERRAIN_RUBBLE, count_no_condition);
+            break;
+        case BUILDING_LOW_BRIDGE:
+            total_active_count = building_count_bridges(0);
+            break;
+        case BUILDING_SHIP_BRIDGE:
+            total_active_count = building_count_bridges(1);
             break;
         default:
             total_active_count = building_count_total(type);
@@ -131,24 +177,50 @@ int scenario_condition_type_building_count_any_met(const scenario_condition_t *c
     return comparison_helper_compare_values(comparison, total_active_count, value);
 }
 
+int scenario_condition_type_check_formulas(const scenario_condition_t *condition)
+{
+    int formula_id1 = condition->parameter1;
+    int comparison = condition->parameter2;
+    int formula_id2 = condition->parameter3;
+    int formula_evaluation1 = scenario_formula_evaluate_formula(formula_id1);
+    int formula_evaluation2 = scenario_formula_evaluate_formula(formula_id2);
+
+    return comparison_helper_compare_values(comparison, formula_evaluation1, formula_evaluation2);
+}
+
+int scenario_condition_type_terrain_count_area_met(const scenario_condition_t *condition)
+{
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
+    int terrain_type = condition->parameter3;
+    int comparison = condition->parameter4;
+    int value = scenario_formula_evaluate_formula(condition->parameter5);
+
+    int current_count = 0;
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        if (map_terrain_is(grid_offset, terrain_type)) {
+            current_count++;
+        }
+    }
+    return comparison_helper_compare_values(comparison, current_count, value);
+}
+
 int scenario_condition_type_building_count_area_met(const scenario_condition_t *condition)
 {
-    int grid_offset = condition->parameter1;
-    int block_radius = condition->parameter2;
-    building_type type = condition->parameter3;
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
+    int type = condition->parameter3;
     int comparison = condition->parameter4;
-    int value = condition->parameter5;
+    int value = scenario_formula_evaluate_formula(condition->parameter5);
 
-    if (!map_grid_is_valid_offset(grid_offset)) {
-        return 0;
-    }
-
-    int minx = map_grid_offset_to_x(grid_offset) - block_radius;
-    int miny = map_grid_offset_to_y(grid_offset) - block_radius;
-    int maxx = map_grid_offset_to_x(grid_offset) + block_radius;
-    int maxy = map_grid_offset_to_y(grid_offset) + block_radius;
+    int minx = map_grid_offset_to_x(grid_offset1);
+    int miny = map_grid_offset_to_y(grid_offset1);
+    int maxx = map_grid_offset_to_x(grid_offset2);
+    int maxy = map_grid_offset_to_y(grid_offset2);
     int buildings_in_area = 0;
-    switch(type) {
+    switch (type) {
         case BUILDING_MENU_FARMS:
             buildings_in_area = building_set_area_count_farms(minx, miny, maxx, maxy);
             break;
@@ -176,14 +248,35 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
         case BUILDING_MENU_PARKS:
             buildings_in_area = building_set_area_count_deco_statues(minx, miny, maxx, maxy);
             break;
-        case BUILDING_FORT_LEGIONARIES:
-            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_LEGIONARY);
+        case BUILDING_ROAD:
+            buildings_in_area = building_count_terrain_in_area(minx, miny, maxx + 1, maxy + 1,
+                TERRAIN_ROAD, count_no_condition);
             break;
-        case BUILDING_FORT_JAVELIN:
-            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_JAVELIN);
+        case BUILDING_HIGHWAY:
+            buildings_in_area = building_count_terrain_in_area(minx, miny, maxx + 1, maxy + 1,
+                TERRAIN_HIGHWAY, count_no_condition);
             break;
-        case BUILDING_FORT_MOUNTED:
-            buildings_in_area = building_count_fort_type_in_area(minx, miny, maxx, maxy, FIGURE_FORT_MOUNTED);
+        case BUILDING_PLAZA:
+            buildings_in_area = building_count_terrain_in_area(minx, miny, maxx + 1, maxy + 1,
+                TERRAIN_ROAD, map_property_is_plaza_earthquake_or_overgrown_garden);
+            break;
+        case BUILDING_GARDENS:
+            buildings_in_area = building_count_terrain_in_area(minx, miny, maxx + 1, maxy + 1,
+                TERRAIN_GARDEN, count_not_overgrown);
+            break;
+        case BUILDING_OVERGROWN_GARDENS:
+            buildings_in_area = building_count_terrain_in_area(minx, miny, maxx + 1, maxy + 1,
+                TERRAIN_GARDEN, map_property_is_plaza_earthquake_or_overgrown_garden);
+            break;
+        case BUILDING_RUBBLE:
+            buildings_in_area = building_count_terrain_in_area(minx, miny, maxx + 1, maxy + 1,
+                TERRAIN_RUBBLE, count_no_condition);
+            break;
+        case BUILDING_LOW_BRIDGE:
+            buildings_in_area = building_count_bridges_in_area(minx, miny, maxx + 1, maxy + 1, 0);
+            break;
+        case BUILDING_SHIP_BRIDGE:
+            buildings_in_area = building_count_bridges_in_area(minx, miny, maxx + 1, maxy + 1, 1);
             break;
         default:
             buildings_in_area = building_count_in_area(type, minx, miny, maxx, maxy);
@@ -196,7 +289,7 @@ int scenario_condition_type_building_count_area_met(const scenario_condition_t *
 int scenario_condition_type_city_population_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
     int class = condition->parameter3;
 
     int population_value_to_use = city_data.population.population;
@@ -214,7 +307,7 @@ int scenario_condition_type_city_population_met(const scenario_condition_t *cond
 int scenario_condition_type_count_own_troops_met(const scenario_condition_t *condition)
 {
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
     int in_city_only = condition->parameter3;
 
     int soldier_count = in_city_only ? city_military_total_soldiers_in_city() : city_military_total_soldiers();
@@ -226,7 +319,7 @@ int scenario_condition_type_custom_variable_check_met(const scenario_condition_t
 {
     int target_variable = scenario_custom_variable_get_value(condition->parameter1);
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     return comparison_helper_compare_values(comparison, target_variable, value);
 }
@@ -244,7 +337,7 @@ int scenario_condition_type_money_met(const scenario_condition_t *condition)
 {
     int funds = city_finance_treasury();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, funds, value);
 }
@@ -253,7 +346,7 @@ int scenario_condition_type_population_unemployed_met(const scenario_condition_t
 {
     int use_percentage = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     int unemployed_total = use_percentage ? city_labor_unemployment_percentage() : city_labor_workers_unemployed();
 
@@ -273,25 +366,24 @@ int scenario_condition_type_resource_storage_available_met(const scenario_condit
 {
     int resource = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
     storage_types storage_type = condition->parameter4;
-    int respect_settings = condition->parameter5;
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
 
     int storage_available = 0;
-    switch(storage_type) {
+    switch (storage_type) {
         case STORAGE_TYPE_ALL:
-            storage_available += city_resource_get_available_empty_space_warehouses(resource, respect_settings);
-            storage_available += city_resource_get_available_empty_space_granaries(resource, respect_settings) / RESOURCE_ONE_LOAD;
+            storage_available += city_resource_get_available_empty_space_warehouses(resource);
+            storage_available += city_resource_get_available_empty_space_granaries(resource);
             break;
         case STORAGE_TYPE_GRANARIES:
-            storage_available += city_resource_get_available_empty_space_granaries(resource, respect_settings) / RESOURCE_ONE_LOAD;
+            storage_available += city_resource_get_available_empty_space_granaries(resource);
             break;
         case STORAGE_TYPE_WAREHOUSES:
-            storage_available += city_resource_get_available_empty_space_warehouses(resource, respect_settings);
+            storage_available += city_resource_get_available_empty_space_warehouses(resource);
             break;
         default:
             break;
@@ -304,7 +396,7 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
 {
     int resource = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
     storage_types storage_type = condition->parameter4;
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
@@ -312,9 +404,9 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
     }
 
     int amount_stored = 0;
-    switch(storage_type) {
+    switch (storage_type) {
         case STORAGE_TYPE_ALL:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             if (resource_is_food(resource)) {
                 amount_stored += city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
             }
@@ -325,7 +417,7 @@ int scenario_condition_type_resource_stored_count_met(const scenario_condition_t
             }
             break;
         case STORAGE_TYPE_WAREHOUSES:
-            amount_stored += city_resource_count(resource);
+            amount_stored += city_resource_count_warehouses_amount(resource);
             break;
         default:
             break;
@@ -338,7 +430,7 @@ int scenario_condition_type_rome_wages_met(const scenario_condition_t *condition
 {
     int wages = city_labor_wages_rome();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, wages, value);
 }
@@ -347,7 +439,7 @@ int scenario_condition_type_savings_met(const scenario_condition_t *condition)
 {
     int funds = city_emperor_personal_savings();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, funds, value);
 }
@@ -356,7 +448,7 @@ int scenario_condition_type_stats_city_health_met(const scenario_condition_t *co
 {
     int stat_value = city_health();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -365,7 +457,7 @@ int scenario_condition_type_stats_culture_met(const scenario_condition_t *condit
 {
     int stat_value = city_rating_culture();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -374,7 +466,7 @@ int scenario_condition_type_stats_favor_met(const scenario_condition_t *conditio
 {
     int stat_value = city_rating_favor();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -383,7 +475,7 @@ int scenario_condition_type_stats_peace_met(const scenario_condition_t *conditio
 {
     int stat_value = city_rating_peace();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -392,7 +484,7 @@ int scenario_condition_type_stats_prosperity_met(const scenario_condition_t *con
 {
     int stat_value = city_rating_prosperity();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
@@ -436,7 +528,7 @@ int scenario_condition_type_trade_route_price_met(const scenario_condition_t *co
 {
     int route_id = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     if (!trade_route_is_valid(route_id)) {
         return 0;
@@ -451,12 +543,12 @@ int scenario_condition_type_trade_sell_price_met(const scenario_condition_t *con
 {
     int resource = condition->parameter1;
     int comparison = condition->parameter2;
-    int value = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
 
     if (resource < RESOURCE_MIN || resource > RESOURCE_MAX) {
         return 0;
     }
-    
+
     int trade_sell_price = trade_price_base_sell(resource);
     return comparison_helper_compare_values(comparison, trade_sell_price, value);
 }
@@ -465,7 +557,7 @@ int scenario_condition_type_tax_rate_met(const scenario_condition_t *condition)
 {
     int tax_rate = city_finance_tax_percentage();
     int comparison = condition->parameter1;
-    int value = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, tax_rate, value);
 }

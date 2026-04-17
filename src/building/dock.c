@@ -84,7 +84,7 @@ int building_dock_accepts_ship(int ship_id, int dock_id)
     }
     for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
         if (city->sells_resource[resource] || city->buys_resource[resource]) {
-            if (building_distribution_is_good_accepted(resource, dock)) {
+            if (building_distribution_is_good_accepted(dock, resource)) {
                 return 1;
             }
         }
@@ -105,7 +105,7 @@ int building_dock_can_import_from_ship(const building *dock, int ship_id)
     }
 
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        if (building_distribution_is_good_accepted(r, dock)) {
+        if (building_distribution_is_good_accepted(dock, r)) {
             return 1;
         }
     }
@@ -125,7 +125,7 @@ int building_dock_can_export_to_ship(const building *dock, int ship_id)
     }
 
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        if (building_distribution_is_good_accepted(r, dock)) {
+        if (building_distribution_is_good_accepted(dock, r)) {
             return 1;
         }
     }
@@ -171,7 +171,7 @@ static void get_already_handled_goods(handled_goods *handled, int ship_id)
         // assign the road network (in case this is a new one) and add the goods this dock handles
         network->road_network_id = dock->road_network_id;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            if (building_distribution_is_good_accepted(r, dock)) {
+            if (building_distribution_is_good_accepted(dock, r)) {
                 network->goods[r] = 1;
             }
         }
@@ -192,7 +192,7 @@ static int all_dock_goods_already_handled(const handled_goods *handled, const bu
                 // the ship doesn't buy or sell this good
                 continue;
             }
-            if (building_distribution_is_good_accepted(r, dock) && !network->goods[r]) {
+            if (building_distribution_is_good_accepted(dock, r) && !network->goods[r]) {
                 // this dock accepts a good that all previous docks on this road network did not accept
                 return 0;
             }
@@ -216,7 +216,7 @@ static int get_free_destination(int ship_id, int exclude_dock_id, map_point *til
             continue;
         }
 
-        if (dock->id == exclude_dock_id ||
+        if ((int) dock->id == exclude_dock_id ||
             figure_visited_building_in_list(ship->last_visited_index, dock->id) ||
             !building_dock_accepts_ship(ship_id, dock->id)) {
             continue;
@@ -259,7 +259,7 @@ static int get_queue_destination(int ship_id, int exclude_dock_id, ship_dock_req
         if (!building_is_active(dock)) {
             continue;
         }
-        if (dock->id == exclude_dock_id ||
+        if ((int) dock->id == exclude_dock_id ||
             figure_visited_building_in_list(ship->last_visited_index, dock->id) ||
             !building_dock_accepts_ship(ship_id, dock->id)) {
             continue;
@@ -296,7 +296,7 @@ static int destination_dock_ready_for_ship(figure *ship)
 {
     building *destination_dock = building_get(ship->destination_building_id);
     if (destination_dock->data.dock.trade_ship_id &&
-        destination_dock->data.dock.trade_ship_id != ship->id) {
+        destination_dock->data.dock.trade_ship_id != (int) ship->id) {
         return 0;
     }
 
@@ -350,7 +350,7 @@ int building_dock_get_closer_free_destination(int ship_id, ship_dock_request_typ
         }
 
         if (dock->data.dock.trade_ship_id ||
-            dock->id == ship->destination_building_id ||
+            (int) dock->id == ship->destination_building_id ||
             figure_visited_building_in_list(ship->last_visited_index, dock->id) ||
             !building_dock_accepts_ship(ship_id, dock->id)) {
             continue;
@@ -522,7 +522,7 @@ int building_dock_reposition_anchored_ship(int ship_id, map_point *tile)
     map_point tile_second_queue;
     building_dock_get_ship_request_tile(dock, SHIP_DOCK_REQUEST_2_FIRST_QUEUE, &tile_first_queue);
     building_dock_get_ship_request_tile(dock, SHIP_DOCK_REQUEST_4_SECOND_QUEUE, &tile_second_queue);
-    if (map_figure_at(ship->grid_offset) != ship->id) {
+    if (map_figure_at(ship->grid_offset) != (int) ship->id) {
         if (ship->grid_offset == map_grid_offset(tile_first_queue.x, tile_first_queue.y) && !map_has_figure_at(map_grid_offset(tile_second_queue.x, tile_second_queue.y))) {
             map_point_store_result(tile_second_queue.x, tile_second_queue.y, tile);
             return ship->destination_building_id;

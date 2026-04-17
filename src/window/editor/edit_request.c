@@ -340,7 +340,7 @@ static void button_year(const generic_button *button)
 static void set_amount_min(int value)
 {
     data.request.amount.min = value;
-    if (data.request.amount.max < value) {
+    if (data.request.amount.max < (unsigned int) value) {
         data.request.amount.max = value;
     }
 }
@@ -348,7 +348,7 @@ static void set_amount_min(int value)
 static void set_amount_max(int value)
 {
     data.request.amount.max = value;
-    if (data.request.amount.min > value) {
+    if (data.request.amount.min > (unsigned int) value) {
         data.request.amount.min = value;
     }
 }
@@ -482,7 +482,7 @@ static void button_repeat_times(const generic_button *button)
 static void set_repeat_interval_min(int value)
 {
     data.request.repeat.interval.min = value;
-    if (data.request.repeat.interval.max < value) {
+    if (data.request.repeat.interval.max < (unsigned int) value) {
         data.request.repeat.interval.max = value;
     }
 }
@@ -490,7 +490,7 @@ static void set_repeat_interval_min(int value)
 static void set_repeat_interval_max(int value)
 {
     data.request.repeat.interval.max = value;
-    if (data.request.repeat.interval.min > value) {
+    if (data.request.repeat.interval.min > (unsigned int) value) {
         data.request.repeat.interval.min = value;
     }
 }

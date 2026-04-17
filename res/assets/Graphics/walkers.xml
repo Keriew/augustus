@@ -4997,4 +4997,7 @@
 	<image id="deer_eat_n_03" src="deer_eat_n_03"/>
 	<image id="deer_eat_n_04" src="deer_eat_n_04"/>
 	<image id="deer_eat_n_05" src="deer_eat_n_05"/-->
+	<!-- Note: Caesar Static frames -->
+	<image id="caesar_static_sw_01" src="caesar_static_sw_01"/>
+	<image id="caesar_static_sw_02" src="caesar_static_sw_02"/>
 </assetlist>

@@ -88,6 +88,9 @@ typedef enum {
     SOUND_CITY_CONCRETE_MAKER,
     SOUND_CITY_CONSTRUCTION_SITE,
     SOUND_CITY_NATIVE_HUT,
+    SOUND_CITY_AQUEDUCT,
+    SOUND_CITY_ARENA,
+    SOUND_CITY_NATIVE_DECORATION,
     SOUND_CITY_MAX
 } sound_city_type;
 
@@ -95,7 +98,7 @@ void sound_city_init(void);
 
 void sound_city_set_volume(int percentage);
 
-void sound_city_mark_building_view(building_type type, int num_workers, int direction);
+void sound_city_mark_building_view(building_type type, int num_workers, int direction, int has_water_access);
 
 void sound_city_mark_construction_site_view(int direction);
 

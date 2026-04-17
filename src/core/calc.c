@@ -1,5 +1,7 @@
 #include "core/calc.h"
 
+#include <math.h>
+
 int calc_digits_in_number(int value)
 {
     if (value == 0) {
@@ -51,6 +53,11 @@ int calc_maximum_distance(int x1, int y1, int x2, int y2)
     int distance_x = get_delta(x1, x2);
     int distance_y = get_delta(y1, y2);
     return distance_x > distance_y ? distance_x : distance_y;
+}
+
+int calc_euclidean_distance(int x1, int y1, int x2, int y2)
+{
+  return (int) sqrt((double) ((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)));
 }
 
 int calc_box_distance(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
