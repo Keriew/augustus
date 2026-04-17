@@ -40,6 +40,8 @@
 #define MAX_VISIBLE_ROWS 10
 #define MAX_TEXT_LENGTH 120
 
+#define GROUP_NOT_FOUND -1
+
 enum {
     REPEAT_MIN = 0,
     REPEAT_MAX = 1
@@ -108,6 +110,7 @@ static struct {
     uint8_t event_name[EVENT_NAME_LENGTH];
     scenario_event_t *event;
     scenario_event_t copied_event;
+    array(int) copied_group_ids;
     int did_copy_event;
     array(scenario_condition_group_t) copied_condition_groups;
     array(scenario_action_t) copied_actions;
@@ -198,7 +201,7 @@ static dropdown_button repeat_interval_dropdown;
 static generic_button bottom_buttons[] = {
     {16, 379, 192, 25, button_add_new_condition},
     {432, 379, 192, 25, button_add_new_action},
-    {16, 409, 192, 25, button_copy_selected},
+    {16, 409, 192, 25, button_copy_selected, 0, 0, DISABLE_ON_NO_SELECTION},
     {224, 409, 192, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
     {432, 409, 192, 25, button_paste_selected},
     {16, 439, 192, 25, button_delete_event},
@@ -567,16 +570,17 @@ static void draw_background(void)
         bottom_buttons[1].x, bottom_buttons[1].y + 6, bottom_buttons[1].width, FONT_NORMAL_BLACK);
 
     // Selected operation buttons
+    color_t color_paste = data.did_copy_selected ? 0 : COLOR_FONT_LIGHT_GRAY;
     color_t color_copy = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
         data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : 0;
     color_t color_delete = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
         data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_COPY_SELECTED,
-        bottom_buttons[2].x, bottom_buttons[2].y + 6, bottom_buttons[2].width, FONT_NORMAL_PLAIN, color_delete);
+        bottom_buttons[2].x, bottom_buttons[2].y + 6, bottom_buttons[2].width, FONT_NORMAL_PLAIN, color_copy);
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED,
         bottom_buttons[3].x, bottom_buttons[3].y + 6, bottom_buttons[3].width, FONT_NORMAL_PLAIN, color_delete);
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_PASTE_SELECTED,
-        bottom_buttons[4].x, bottom_buttons[4].y + 6, bottom_buttons[4].width, FONT_NORMAL_PLAIN, color_delete);
+        bottom_buttons[4].x, bottom_buttons[4].y + 6, bottom_buttons[4].width, FONT_NORMAL_PLAIN, color_paste);
 
     // Bottom buttons
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE, bottom_buttons[5].x, bottom_buttons[5].y + 6,
@@ -1000,6 +1004,18 @@ static void copy_formulas_condition(scenario_condition_t *condition, int **param
     }
 }
 
+static int index_of_copied_group_id(unsigned int group_id)
+{
+    int *group_id_ptr;
+    array_foreach(data.copied_group_ids, group_id_ptr) {
+        if (*group_id_ptr == group_id) {
+            return array_index;
+        }
+    }
+
+    return GROUP_NOT_FOUND;
+}
+
 static void button_copy_selected(const generic_button *button)
 {
     array_init(data.copied_actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.event->actions.constructor,
@@ -1017,22 +1033,42 @@ static void button_copy_selected(const generic_button *button)
         scenario_parameters_foreach_in_action(action, copy_formulas_action);
     }
 
-    for (unsigned int i = 0; i < data.event->condition_groups.size; i++) {
-        scenario_condition_group_t *group;
-        array_new_item(data.copied_event.condition_groups, group);
-        scenario_condition_group_t *original_group = array_item(data.event->condition_groups, i);
-        group->type = original_group->type;
-        array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
-            original_group->conditions.in_use);
-        for (unsigned int j = 0; j < original_group->conditions.size; j++) {
+    if (data.conditions.selection_type != CHECKBOX_NO_SELECTION) {
+        array_init(data.copied_group_ids, 4, NULL, NULL);
+        for (unsigned int i = 0; i < data.conditions.active; i++) {
+            if (!data.conditions.selected[i] || !data.conditions.list[i].condition) {
+                continue;
+            }
+
+            scenario_condition_group_t *group;
+            // try finding the current group in the array of already copied group ids
+            int current_group_id = data.conditions.list[i].group_id;
+            int found_group_id = index_of_copied_group_id(current_group_id);
+            if (found_group_id == GROUP_NOT_FOUND) {
+                // create new group if the current group hasn't been found
+                // add group id of current group to the copied group ids
+                int *group_id_ptr;
+                array_new_item(data.copied_group_ids, group_id_ptr);
+                *group_id_ptr = current_group_id;
+                array_new_item(data.copied_condition_groups, group);
+                scenario_condition_group_t *original_group = array_item(data.event->condition_groups, current_group_id);
+                group->type = original_group->type;
+                array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP,
+                    original_group->conditions.constructor, original_group->conditions.in_use);
+            } else {
+                // else point to the found group
+                group = array_item(data.copied_condition_groups, found_group_id);
+            }
             scenario_condition_t *condition;
             array_new_item(group->conditions, condition);
-            *condition = *array_item(original_group->conditions, j);
+            *condition = *data.conditions.list[i].condition;
 
             scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
         }
     }
     data.did_copy_selected = 1;
+    // refresh needed to draw text in the right color
+    window_request_refresh();
 }
 
 static void button_paste_selected(const generic_button *button)
@@ -1048,7 +1084,34 @@ static void button_paste_selected(const generic_button *button)
 
         scenario_parameters_foreach_in_action(action, copy_formulas_action);
     }
-    
+
+    for (unsigned int i = 0; i < data.copied_condition_groups.size; i++) {
+        scenario_condition_group_t *group;
+        scenario_condition_group_t *original_group = array_item(data.copied_condition_groups, i);
+        // if it's the main group
+        if (original_group->type == FULFILLMENT_TYPE_ALL) {
+            // point to the main group of the current event instead of creating new group
+            group = array_item(data.event->condition_groups, 0);
+        } else {
+            array_new_item(data.event->condition_groups, group);
+            group->type = original_group->type;
+            array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
+                original_group->conditions.in_use);
+        }
+        for (unsigned int j = 0; j < original_group->conditions.size; j++) {
+            scenario_condition_t *condition;
+            array_new_item(group->conditions, condition);
+            *condition = *array_item(original_group->conditions, j);
+
+            scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+        }
+    }
+
+    scenario_events_assign_parent_single_event_ids(data.event);
+    select_no_conditions();
+    select_no_actions();
+    update_groups();
+    window_request_refresh();
 }
 
 static void button_copy_event(const generic_button *button)
