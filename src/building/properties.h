@@ -142,6 +142,7 @@ typedef struct {
     int sound_id;
     int draw_desirability_range;
     int venus_gt_bonus; // indicator of whether building is part of the 'garden/statue/temple' group
+    int shared; // Whether all buildings of this type share the same building instance data
     struct {
         const char *group;
         const char *id;

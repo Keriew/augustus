@@ -49,6 +49,7 @@ typedef struct building {
         short fort_figure_type;
         short native_meeting_center_id;
         short barracks_priority;
+        unsigned short instances;
     } subtype;
     unsigned char road_network_id;
     unsigned short created_sequence;
@@ -183,7 +184,7 @@ typedef struct building {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
-    unsigned char show_on_problem_overlay;
+    unsigned char has_problem;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
     unsigned char house_arena_gladiator;
@@ -224,7 +225,7 @@ building *building_first_of_type(building_type type);
 
 void building_change_type(building *b, building_type type);
 
-building *building_main(building *b);
+building *building_main(const building *b);
 
 building *building_next(building *b);
 
@@ -240,15 +241,17 @@ int building_is_storage(building_type b_type);
  * Keeping a building in the array is helpful because it holds the building's ID, and allows keeping the storage structure.
  */
 
-int building_repair(building *b);
+int building_repair_at(int grid_offset);
 
 int building_is_still_burning(building *b);
 
 int building_can_repair(building *b);
 
-int building_repair_cost(building *b);
+int building_repair_cost_at(int grid_offset);
 
 void building_clear_related_data(building *b);
+
+void building_delete(building *b);
 
 building *building_restore_from_undo(building *to_restore);
 

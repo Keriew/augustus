@@ -504,7 +504,7 @@ int building_warehouses_count_available_resource(int resource, int respect_maint
             continue;
         }
         if (!respect_maintaining ||
-            building_storage_get_state(b, resource, 1) != BUILDING_STORAGE_STATE_MAINTAINING ||
+            building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_MAINTAINING ||
             building_storage_get_empty_all(b->id)) {
             total += building_warehouse_get_amount(b, resource);
         }
@@ -526,10 +526,11 @@ static void try_create_cart_to_rome(building *b, int resource, int loads)
 
 int building_warehouses_send_resources_to_rome(int resource, int amount)
 {
-    // first go for non-getting, non-maintaining warehouses with caesar permission
+    // first go for emptying or non-getting, non-maintaining warehouses with caesar permission
     for (building *b = building_first_of_type(BUILDING_WAREHOUSE); b && amount; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE) {
-            if (building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_GETTING &&
+            if ((building_storage_get_empty_all(b->id) ||
+                 building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_GETTING) &&
                 building_storage_get_permission(BUILDING_STORAGE_PERMISSION_CAESAR, b)) {
                 int taken_loads = building_warehouse_try_remove_resource(b, resource, amount);
                 amount -= taken_loads;

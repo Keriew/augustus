@@ -2,6 +2,7 @@
 
 #include "building/data_transfer.h"
 #include "building/image.h"
+#include "building/properties.h"
 #include "city/message.h"
 #include "city/population.h"
 #include "city/ratings.h"
@@ -200,6 +201,10 @@ static void destroy_linked_parts(building *b, int destruction_method, int plague
 
 void building_destroy_by_collapse(building *b)
 {
+    if (building_properties_for_type(b->type)->shared) {
+        return;
+    }
+    game_undo_disable();
     b->state = BUILDING_STATE_RUBBLE;
     if (b->type == BUILDING_TOWER) {
         figure_kill_tower_sentries_in_building(b);
@@ -208,17 +213,23 @@ void building_destroy_by_collapse(building *b)
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);
     figure_create_explosion_cloud(b->x, b->y, b->size, 0);
     destroy_linked_parts(b, DESTROY_COLLAPSE, 0);
-
 }
 
 void building_destroy_by_fire(building *b)
 {
+    if (building_properties_for_type(b->type)->shared) {
+        return;
+    }
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
 
 void building_destroy_by_earthquake(building *b)
 {
+    if (building_properties_for_type(b->type)->shared) {
+        return;
+    }
+    game_undo_disable();
     int grid_offset = b->grid_offset; // save before destroying building
     int size = b->size;
     b->state = BUILDING_STATE_DELETED_BY_GAME;
@@ -229,6 +240,9 @@ void building_destroy_by_earthquake(building *b)
 
 void building_destroy_by_plague(building *b)
 {
+    if (building_properties_for_type(b->type)->shared) {
+        return;
+    }
     destroy_on_fire(b, 1);
     destroy_linked_parts(b, DESTROY_FIRE, 1);
 }
@@ -241,18 +255,23 @@ void building_destroy_without_rubble(building *b)
 
 void building_destroy_by_rioter(building *b)
 {
+    if (building_properties_for_type(b->type)->shared) {
+        return;
+    }
     destroy_on_fire(b, 0);
     destroy_linked_parts(b, DESTROY_FIRE, 0);
 }
 
 int building_destroy_first_of_type(building_type type)
 {
+    if (building_properties_for_type(type)->shared) {
+        return 0;
+    }
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
         if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) {
             continue;
         }
         int grid_offset = b->grid_offset;
-        game_undo_disable();
         building_destroy_by_collapse(b);
         map_routing_update_land();
         return grid_offset;
@@ -266,7 +285,8 @@ void building_destroy_last_placed(void)
     building *last_building = 0;
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
-        if (b->state == BUILDING_STATE_CREATED || b->state == BUILDING_STATE_IN_USE) {
+        if ((b->state == BUILDING_STATE_CREATED || b->state == BUILDING_STATE_IN_USE) &&
+            !building_properties_for_type(b->type)->shared) {
             if (b->created_sequence > highest_sequence) {
                 highest_sequence = b->created_sequence;
                 last_building = b;
@@ -305,17 +325,24 @@ static void set_rubble_grid_info_for_all_parts(building *b)
 
 void building_destroy_by_enemy(int x, int y, int grid_offset)
 {
+    game_undo_disable();
     int building_id = map_building_at(grid_offset);
     if (building_id > 0) {
         building *b = building_get(building_id);
-        if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
+        if (building_properties_for_type(b->type)->shared) {
+            if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
+                figure_kill_tower_sentries_at(x, y);
+            }
+            if (b->subtype.instances > 0) {
+                b->subtype.instances--;
+            }
+            map_building_tiles_set_rubble(b->id, x, y, b->size);
+            figure_create_explosion_cloud(x, y, b->size, 0);
+        } else if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
             city_ratings_peace_building_destroyed(b->type);
             building_destroy_by_collapse(b);
         }
     } else {
-        if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
-            figure_kill_tower_sentries_at(x, y);
-        }
         if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
             map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
             map_tiles_update_region_empty_land(x, y, x, y);

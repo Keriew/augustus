@@ -21,14 +21,13 @@
 #include "translation/translation.h"
 
 
-#define ADVISOR_HEIGHT 24
+#define ADVISOR_HEIGHT 26
 #define X_OFFSET 225
 
 static void draw_title(int y, int text_id)
 {
     image_draw(image_group(GROUP_BULLET), 32, y + 1, COLOR_MASK_NONE, SCALE_NONE);
     lang_text_draw(61, text_id, 52, y, FONT_NORMAL_WHITE);
-
 }
 
 static int draw_background(void)
@@ -39,7 +38,7 @@ static int draw_background(void)
     image_draw(image_group(GROUP_ADVISOR_ICONS) + 11, 10, 10, COLOR_MASK_NONE, SCALE_NONE);
 
     lang_text_draw(61, 0, 60, 12, FONT_LARGE_BLACK);
-    inner_panel_draw(24, 60, 37, 17);
+    inner_panel_draw(24, 60, 37, 19);
 
     // workers
     draw_title(66, 1);
@@ -242,7 +241,23 @@ static int draw_background(void)
     } else {
         lang_text_draw(61, sentiment / 10 + 51, X_OFFSET, 306, FONT_NORMAL_GREEN);
     }
+    // water coverage
+    image_draw(image_group(GROUP_BULLET), 32, 326 + 1, COLOR_MASK_NONE, SCALE_NONE);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_ADVISOR_CHIEF_WATER_COVERAGE, 52, 326, FONT_NORMAL_WHITE);
 
+    int population = city_population();
+    int box_width = 37 * BLOCK_SIZE - X_OFFSET;
+    if (calc_percentage(city_health_get_population_with_water_access(), population) > 50) {
+        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_ADVISOR_CHIEF_CLEAN_WATER, X_OFFSET, 326, box_width, FONT_NORMAL_GREEN);
+    } else if (calc_percentage(city_health_get_population_with_latrines_access(), population) > 50 &&
+        calc_percentage(city_health_get_population_with_well_access(), population) > 50) {
+        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_ADVISOR_CHIEF_LATRINE_AND_WELL, X_OFFSET, 326, box_width, FONT_NORMAL_GREEN);
+    } else if (calc_percentage(city_health_get_population_with_well_access(), population) > 50) {
+        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_ADVISOR_CHIEF_WELL_WATER, X_OFFSET, 326, box_width, FONT_NORMAL_GREEN);
+    } else {
+        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_ADVISOR_CHIEF_NO_WATER, X_OFFSET, 326, box_width, FONT_NORMAL_RED);
+    }
+    
     return ADVISOR_HEIGHT;
 }
 

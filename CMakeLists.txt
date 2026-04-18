@@ -595,35 +595,32 @@ set(SOUND_FILES
     ${PROJECT_SOURCE_DIR}/src/sound/system.c
 )
 set(WIDGET_FILES
-    ${PROJECT_SOURCE_DIR}/src/widget/city.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_bridge.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_building_ghost.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_figure.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_draw_highway.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_education.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_entertainment.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_health.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_housing.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_other.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_risks.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_pause_menu.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_water_ghost.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_with_overlay.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_without_overlay.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/city.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/bridge.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/building_ghost.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/draw.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/figure.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/highway.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/education.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/entertainment.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/health.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/housing.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/other.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/overlay.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/risks.c
     ${PROJECT_SOURCE_DIR}/src/widget/dropdown_button.c
     ${PROJECT_SOURCE_DIR}/src/widget/input_box.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_tool.c
-    ${PROJECT_SOURCE_DIR}/src/widget/map_editor_pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/minimap.c
-    ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
-    ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/city.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/common.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/extra.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/military.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/slide.c
+    ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
+    ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
 )
 set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisors.c
@@ -670,6 +667,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/map.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/model_data.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/house_model_data.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/price_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/requests.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_events.c
@@ -714,6 +712,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/numeric_input.c
     ${PROJECT_SOURCE_DIR}/src/window/option_popup.c
     ${PROJECT_SOURCE_DIR}/src/window/overlay_menu.c
+    ${PROJECT_SOURCE_DIR}/src/window/pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/plain_message_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/popup_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/race_bet.c

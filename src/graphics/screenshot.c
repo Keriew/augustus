@@ -15,7 +15,7 @@
 #include "graphics/window.h"
 #include "map/grid.h"
 #include "translation/translation.h"
-#include "widget/city_without_overlay.h"
+#include "widget/city/draw.h"
 #include "widget/minimap.h"
 
 #include "spng/spng.h"
@@ -314,7 +314,7 @@ static void create_full_city_screenshot(void)
                 x_offset = canvas_width - image_section_width - TILE_X_SIZE * 2;
             }
             city_view_set_camera_from_pixel_position(min_width + width, current_height);
-            city_without_overlay_draw(0, 0, &dummy_tile, 0);
+            city_draw(0, 0, &dummy_tile, 0);
             graphics_renderer()->save_screen_buffer(&canvas[width], x_offset, TOP_MENU_HEIGHT + y_offset,
                 image_section_width, IMAGE_HEIGHT_CHUNK - y_offset, city_width_pixels);
         }

@@ -94,13 +94,11 @@ static void export_city(const empire_object *obj)
         return;
     }
     xml_exporter_new_element("city");
-    uint8_t city_name[50];
     if (string_length(city->city_custom_name)) {
-        string_copy(city->city_custom_name, city_name, 50);
+        xml_exporter_add_attribute_text("name", (const char *)city->city_custom_name);
     } else {
-        string_copy(lang_get_string(21, city->city_name_id), city_name, 50);
+        xml_exporter_add_attribute_int("name_id", city->city_name_id);
     }
-    xml_exporter_add_attribute_encoded_text("name", city_name);
     xml_exporter_add_attribute_int("x", obj->x + obj->width / 2);
     xml_exporter_add_attribute_int("y", obj->y + obj->height / 2);
     xml_exporter_add_attribute_text("type", city_types[city->city_type]);

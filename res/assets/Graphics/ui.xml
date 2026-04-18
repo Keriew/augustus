@@ -257,60 +257,60 @@
 	</image>
 	<!-- Note: City flags for map icons -->
 	<!-- Red flags - Trade-->
-	<image id="city_flag_red_01" width="19" height="12" >
+	<image id="city_flag_red_01" width="19" height="12">
 		<layer group="175" image="1"/>
 	</image>
-	<image id="city_flag_red_02" width="19" height="12" >
+	<image id="city_flag_red_02" width="19" height="12">
 		<layer group="175" image="2"/>
 	</image>
-	<image id="city_flag_red_03" width="18" height="12" >
+	<image id="city_flag_red_03" width="18" height="12">
 		<layer group="175" image="3"/>
 	</image>
-	<image id="city_flag_red_04" width="19" height="12" >
+	<image id="city_flag_red_04" width="19" height="12">
 		<layer group="175" image="4"/>
 	</image>
-	<image id="city_flag_red_05" width="18" height="12" >
+	<image id="city_flag_red_05" width="18" height="12">
 		<layer group="175" image="5"/>
 	</image>
-	<image id="city_flag_red_06" width="18" height="12" >
+	<image id="city_flag_red_06" width="18" height="12">
 		<layer group="175" image="6"/>
 	</image>
 	<!-- Blue flags - Roman-->
-	<image id="city_flag_blue_01" width="19" height="12" >
+	<image id="city_flag_blue_01" width="19" height="12">
 		<layer group="176" image="1"/>
 	</image>
-	<image id="city_flag_blue_02" width="19" height="12" >
+	<image id="city_flag_blue_02" width="19" height="12">
 		<layer group="176" image="2"/>
 	</image>
-	<image id="city_flag_blue_03" width="18" height="12" >
+	<image id="city_flag_blue_03" width="18" height="12">
 		<layer group="176" image="3"/>
 	</image>
-	<image id="city_flag_blue_04" width="19" height="12" >
+	<image id="city_flag_blue_04" width="19" height="12">
 		<layer group="176" image="4"/>
 	</image>
-	<image id="city_flag_blue_05" width="18" height="12" >
+	<image id="city_flag_blue_05" width="18" height="12">
 		<layer group="176" image="5"/>
 	</image>
-	<image id="city_flag_blue_06" width="18" height="12" >
+	<image id="city_flag_blue_06" width="18" height="12">
 		<layer group="176" image="6"/>
 	</image>
 	<!-- Yellow flags - Distant -->
-	<image id="city_flag_yellow_01" width="19" height="12" >
+	<image id="city_flag_yellow_01" width="19" height="12">
 		<layer group="223" image="1"/>
 	</image>
-	<image id="city_flag_yellow_02" width="19" height="12" >
+	<image id="city_flag_yellow_02" width="19" height="12">
 		<layer group="223" image="2"/>
 	</image>
-	<image id="city_flag_yellow_03" width="18" height="12" >
+	<image id="city_flag_yellow_03" width="18" height="12">
 		<layer group="223" image="3"/>
 	</image>
-	<image id="city_flag_yellow_04" width="19" height="12" >
+	<image id="city_flag_yellow_04" width="19" height="12">
 		<layer group="223" image="4"/>
 	</image>
-	<image id="city_flag_yellow_05" width="18" height="12" >
+	<image id="city_flag_yellow_05" width="18" height="12">
 		<layer group="223" image="5"/>
 	</image>
-	<image id="city_flag_yellow_06" width="18" height="12" >
+	<image id="city_flag_yellow_06" width="18" height="12">
 		<layer group="223" image="6"/>
 	</image>
 	<!-- Note: Empire map flag for the City of Rome -->
@@ -476,7 +476,7 @@
 			<frame group="this" image="city_flag_red_06"/>
 		</animation>
 	</image>
-	<image id="Empire_Icon_Watchtower" width="13" height="25" >
+	<image id="Empire_Icon_Watchtower" width="13" height="25">
 		<layer group="176" image="60"/>
 		<animation speed="6" reversible="false" x="1" y="1">
 			<frame group="this" image="Empire_Icon_Flag_01"/>
@@ -1401,10 +1401,10 @@
 	<image src="Button_Asclepius_Hover"/>
 	<image src="Button_Asclepius_Click"/>
 	<image src="Button_Asclepius_Disable"/>
-	<image id="Maintain_Goods_Icon" width ="27" height="16">
+	<image id="Maintain_Goods_Icon" width="27" height="16">
 		<layer group="134" image="8" x="-1" y="-2"/>
 	</image>
-	<image id="Maintain_Goods_Icon_2" width ="27" height="16">
+	<image id="Maintain_Goods_Icon_2" width="27" height="16">
 		<layer group="134" image="9" x="-1" y="-2"/>
 	</image>
 	<image id="Mothball_Sprite" src="Mothball_Sprite"/>
@@ -1419,6 +1419,7 @@
 	<image id="rightbracket_white_l" src="rightbracket_white_l"/>
 	<image id="curlybracket_white_left" src="curlybracket_white_left"/>
 	<image id="curlybracket_white_right" src="curlybracket_white_right"/>
+<<<<<<< HEAD
   <image id="abstract_caret_symbol" src="abstract_caret_symbol"/>
   <image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
   <image group="this" image="Plus_Button_Idle"/>
@@ -1430,3 +1431,44 @@
   <image src="SeaWaypoint" id="SeaWaypoint"/>
   <image src="LandWaypoint" id="BorderWaypoint"/>
 </assetlist>
+=======
+	<image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
+	<image group="this" image="Plus_Button_Idle"/>
+	<image src="Plus_Button_Click"/>
+	<image src="Edit_Button_Idle" id="Edit_Button_Idle"/>
+	<image group="this" image="Edit_Button_Idle"/>
+	<image src="Edit_Button_Click"/>
+	<image src="LandWaypoint" id="LandWaypoint"/>
+	<image src="SeaWaypoint" id="SeaWaypoint"/>
+	<image src="LandWaypoint" id="BorderWaypoint"/>
+	<image id="Water_Range">
+		<layer group="135" image="4" mask="grayscale"/>
+	</image>
+	<!-- Note: Empire map icon for the City of Alexandria -->
+	<image id="Empire_Icon_Roman_06" src="Empire_Icon_Roman_06">
+		<animation speed="6" reversible="false" x="16" y="6">
+			<frame group="this" image="Empire_Icon_Flag_01"/>
+			<frame group="this" image="Empire_Icon_Flag_02"/>
+			<frame group="this" image="Empire_Icon_Flag_03"/>
+			<frame group="this" image="Empire_Icon_Flag_04"/>
+			<frame group="this" image="Empire_Icon_Flag_05"/>
+			<frame group="this" image="Empire_Icon_Flag_06"/>
+		</animation>
+	</image>
+	<!-- Note: Empire map icon for the City of Constantinople -->
+	<image id="Empire_Icon_Roman_07" src="Empire_Icon_Roman_07">
+		<animation speed="6" reversible="false" x="16" y="6">
+			<frame group="this" image="Empire_Icon_Flag_01"/>
+			<frame group="this" image="Empire_Icon_Flag_02"/>
+			<frame group="this" image="Empire_Icon_Flag_03"/>
+			<frame group="this" image="Empire_Icon_Flag_04"/>
+			<frame group="this" image="Empire_Icon_Flag_05"/>
+			<frame group="this" image="Empire_Icon_Flag_06"/>
+		</animation>
+	</image>
+	<image id="Reservoir_Range_Overlay_Icon" isometric="true">
+		<layer group="20" image="11"/>
+		<layer src="reservoir_range_mask" mask="alpha"/>
+	</image>
+</assetlist>
+>>>>>>> master

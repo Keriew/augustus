@@ -30,7 +30,7 @@
 #include "scenario/criteria.h"
 #include "scenario/event/controller.h"
 #include "scenario/property.h"
-#include "widget/city.h"
+#include "widget/city/city.h"
 #include "window/advisors.h"
 #include "window/advisor/health.h"
 #include "window/city.h"

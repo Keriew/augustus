@@ -231,6 +231,7 @@ static int get_height_id(void)
             case BUILDING_TRIUMPHAL_ARCH:
             case BUILDING_SHIP_BRIDGE:
             case BUILDING_LOW_BRIDGE:
+            case BUILDING_DEPOT:
                 return HEIGHT_5_24_BLOCKS;
 
                 //608px
@@ -336,6 +337,7 @@ static void init(int grid_offset)
     context.show_special_orders = 0;
     context.depot_selection = 0;
     context.advisor_button = ADVISOR_NONE;
+    context.grid_offset = grid_offset;
     context.building_id = map_building_at(grid_offset);
     context.rubble_building_id = map_building_rubble_building_id(grid_offset);
     context.has_reservoir_pipes = map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE);

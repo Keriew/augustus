@@ -273,8 +273,7 @@ void window_building_draw_burning_ruin(building_info_context *c)
 
 static void trigger_building_repair(const complex_button *button)
 {
-    building *b = building_get(button->parameters[0]);
-    building_repair(b);
+    building_repair_at(button->parameters[0]);
     window_invalidate();
     window_go_back();
 }
@@ -287,7 +286,7 @@ static void init_repair_building_button(building_info_context *c)
     repair_building_button->y = c->y_offset + BLOCK_SIZE * c->height_blocks - 30;
     repair_building_button->width = button_width;
     repair_building_button->height = 20;
-    repair_building_button->parameters[0] = c->rubble_building_id;
+    repair_building_button->parameters[0] = c->grid_offset;
     building *b = building_get(c->rubble_building_id);
     if (b->type == BUILDING_WAREHOUSE_SPACE) { // swap the b pointer for the main warehouse building
         b = building_get(map_building_rubble_building_id(b->data.rubble.og_grid_offset));
@@ -320,7 +319,7 @@ void window_building_draw_rubble(building_info_context *c)
     building_type type = og_type == BUILDING_NONE ? b->type : og_type;
     int is_burning_ruins = (b->type == BUILDING_BURNING_RUIN);
 
-    if (building_can_repair_type(type) || building_can_repair_type(type)) {
+    if (building_can_repair_type(type) || building_can_repair_type(og_type)) {
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
     } else if (building_clone_type_from_building_type(type) != BUILDING_NONE) {

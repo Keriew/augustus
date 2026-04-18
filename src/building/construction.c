@@ -359,6 +359,8 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end, int measur
                     map_terrain_add(grid_offset, TERRAIN_BUILDING);
                     map_terrain_add(grid_offset, TERRAIN_WALL);
                     map_property_clear_multi_tile_xy(grid_offset);
+                    game_undo_add_building(wall);
+                    wall->subtype.instances++;
                 }
             }
         }
@@ -525,7 +527,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
             int dx_end = aqueduct_offsets_x[dir_end];
             int dy_end = aqueduct_offsets_y[dir_end];
             int dist;
-            if (building_construction_place_aqueduct_for_reservoir(1,
+            if (building_construction_place_aqueduct_for_reservoir(1, 0,
                 x_start + dx_start, y_start + dy_start, x_end + dx_end, y_end + dy_end, &dist)) {
                 if (dist && dist < min_dist) {
                     min_dist = dist;
@@ -543,7 +545,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     int x_aq_end = aqueduct_offsets_x[min_dir_end];
     int y_aq_end = aqueduct_offsets_y[min_dir_end];
     int aq_items;
-    building_construction_place_aqueduct_for_reservoir(0, x_start + x_aq_start, y_start + y_aq_start,
+    building_construction_place_aqueduct_for_reservoir(measure_only, 1, x_start + x_aq_start, y_start + y_aq_start,
         x_end + x_aq_end, y_end + y_aq_end, &aq_items);
     if (info->place_reservoir_at_start == PLACE_RESERVOIR_YES) {
         info->cost += model_get_building(BUILDING_RESERVOIR)->cost;
@@ -818,7 +820,7 @@ void building_construction_update(int x, int y, int grid_offset)
     int current_cost = model_get_building(type)->cost;
     int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
-        int items_placed = last_items_cleared = building_construction_clear_land(1, data.start.x, data.start.y, x, y);
+        int items_placed = last_items_cleared = building_construction_clear_select(data.start.x, data.start.y, x, y);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
@@ -919,7 +921,7 @@ void building_construction_update(int x, int y, int grid_offset)
             current_cost *= length;
         }
     } else if (type == BUILDING_AQUEDUCT) {
-        building_construction_place_aqueduct(data.start.x, data.start.y, x, y, &current_cost);
+        building_construction_place_aqueduct(1, data.start.x, data.start.y, x, y, &current_cost);
         map_tiles_update_all_aqueducts(0);
     } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
         struct reservoir_info info;
@@ -1074,8 +1076,8 @@ void building_construction_place(void)
         // the previous cost is deducted from treasury and if user chooses 'no', they still pay for removal.
         // If we don't do it this way, the user doesn't pay for the removal at all since we don't come back
         // here when the user says yes.
-        int items_placed = building_construction_clear_land(0, x_start, y_start, x_end, y_end);
-        if (items_placed < 0) {
+        int items_placed = building_construction_clear_land(x_start, y_start, x_end, y_end);
+        if (items_placed == BUILDING_CONSTRUCTION_CLEAR_LAND_INTERRUPTED) {
             items_placed = last_items_cleared;
         }
         placement_cost *= items_placed;
@@ -1115,7 +1117,7 @@ void building_construction_place(void)
         placement_cost *= length;
     } else if (type == BUILDING_AQUEDUCT) {
         int cost;
-        if (!building_construction_place_aqueduct(x_start, y_start, x_end, y_end, &cost)) {
+        if (!building_construction_place_aqueduct(0, x_start, y_start, x_end, y_end, &cost)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return;
         }

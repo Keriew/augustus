@@ -54,7 +54,7 @@ static int worker_percentage(const building *b)
 static void check_labor_problem(building *b)
 {
     if (b->houses_covered <= 0) {
-        b->show_on_problem_overlay = 2;
+        b->has_problem = 2;
     }
 }
 
@@ -211,7 +211,7 @@ static void spawn_figure_warehouse(building *b)
     for (int i = 0; i < 8; i++) {
         space = building_next(space);
         if (space->id) {
-            space->show_on_problem_overlay = b->show_on_problem_overlay;
+            space->has_problem = b->has_problem;
         }
     }
     map_point road;
@@ -395,7 +395,6 @@ static void spawn_figure_gladiator_school(building *b)
 static void spawn_figure_lion_house(building *b)
 {
     check_labor_problem(b);
-    check_labor_problem(b);
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
         spawn_labor_seeker(b, road.x, road.y, 50);
@@ -566,7 +565,7 @@ static void spawn_figure_hippodrome(building *b)
     for (int i = 0; i < 2; i++) {
         part = building_next(part);
         if (part->id) {
-            part->show_on_problem_overlay = b->show_on_problem_overlay;
+            part->has_problem = b->has_problem;
         }
     }
     if (has_figure_of_type(b, FIGURE_CHARIOTEER)) {
@@ -928,7 +927,7 @@ static void spawn_figure_bathhouse(building *b)
     set_bathhouse_graphic(b);
     check_labor_problem(b);
     if (!b->has_water_access) {
-        b->show_on_problem_overlay = 2;
+        b->has_problem = 2;
     }
     if (has_figure_of_type(b, FIGURE_BATHHOUSE_WORKER)) {
         return;
@@ -1986,7 +1985,7 @@ void building_figure_generate(void)
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
         if (b->state != BUILDING_STATE_IN_USE) {
-            b->show_on_problem_overlay = 1;
+            b->has_problem = 1;
             continue;
         }
         if (b->type == BUILDING_WAREHOUSE_SPACE || (b->type == BUILDING_HIPPODROME && b->prev_part_building_id) ||
@@ -1994,7 +1993,7 @@ void building_figure_generate(void)
             continue;
         }
 
-        b->show_on_problem_overlay = 0;
+        b->has_problem = 0;
         // range of building types
         if (b->type >= BUILDING_HOUSE_SMALL_TENT && b->type <= BUILDING_HOUSE_GRAND_INSULA) {
             if (city_labor_unemployment_percentage() > BEGGAR_UNEMPLOYMENT_THRESHOLD) {

@@ -154,6 +154,7 @@ static const translation_key speed_labels[] = {
     TR_CONFIG_WT_SIZE_MINIMUM, TR_CONFIG_WT_SPEED_SLOW, TR_CONFIG_WT_SIZE_REGULAR,
     TR_CONFIG_WT_SPEED_FAST, TR_CONFIG_WT_SIZE_MAXIMUM
 };
+
 static const translation_key size_labels[] = {
     TR_CONFIG_WT_SIZE_MINIMUM, TR_CONFIG_WT_SIZE_SMALL, TR_CONFIG_WT_SIZE_REGULAR,
     TR_CONFIG_WT_SIZE_LARGE, TR_CONFIG_WT_SIZE_MAXIMUM
@@ -279,10 +280,11 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_ROAMING_PATH, TR_CONFIG_SHOW_ROAMING_PATH, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE, TR_CONFIG_SHOW_DESIRABILITY_RANGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL, TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE_HOUSES, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES, TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANARIES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_HEADER, 0, TR_CONFIG_HEADER_WATER_STRUCTURE_RANGE, NULL, 0, 1, ITEM_BASE_H, 14},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE_HOUSES, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE_HOUSES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // CityView
@@ -397,6 +399,8 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
     // Roadblock
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS, TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Housing
@@ -462,6 +466,7 @@ static const resolution resolutions[] = {
     { 1920, 1080 }, { 1920, 1200 }, { 2048, 1152 }, { 2560, 1080 },
     { 2560, 1440 }, { 3440, 1440 }, { 3840, 2160 }
 };
+
 static resolution available_resolutions[sizeof(resolutions) / sizeof(resolution) + 2];
 
 static const unsigned char page_is_category_helper[CONFIG_PAGES] = {
@@ -628,6 +633,7 @@ static int one_line_ml_height(font_t font)
     return h + 5; //  matches text_draw_multiline() per-line advance
 
 }
+
 static uint8_t *percentage_string(uint8_t *s, int p)
 {
     int o = string_from_int(s, p, 0);
@@ -690,11 +696,13 @@ static int config_change_display_resolution(int key)
     }
     return 1;
 }
+
 static int config_change_display_scale(int key)
 {
     data.config_values[key].new_value = system_scale_display(data.config_values[key].new_value);
     return config_change_basic(key);
 }
+
 static void restart_cursors(void)
 {
     if (data.reload_cursors) {
@@ -702,6 +710,7 @@ static void restart_cursors(void)
         data.reload_cursors = 0;
     }
 }
+
 static int config_change_cursors(int key)
 {
     config_change_basic(key);
@@ -727,6 +736,7 @@ static int config_enable_audio(int key)
     }
     return 1;
 }
+
 static int config_set_master_volume(int key)
 {
     config_change_basic(key);
@@ -736,6 +746,7 @@ static int config_set_master_volume(int key)
     sound_city_set_volume(setting_sound(SOUND_TYPE_CITY)->volume);
     return 1;
 }
+
 static int config_enable_music(int key)
 {
     config_change_basic(key);
@@ -755,12 +766,14 @@ static int config_enable_music(int key)
     }
     return 1;
 }
+
 static int config_enable_music_randomise(int key)
 {
     int ok = config_change_basic(key);
     sound_music_update(1);
     return ok;
 }
+
 static int config_set_music_volume(int key)
 {
     config_change_basic(key);
@@ -768,6 +781,7 @@ static int config_set_music_volume(int key)
     sound_music_set_volume(setting_sound(SOUND_TYPE_MUSIC)->volume);
     return 1;
 }
+
 static int config_enable_speech(int key)
 {
     config_change_basic(key);
@@ -780,6 +794,7 @@ static int config_enable_speech(int key)
     }
     return 1;
 }
+
 static int config_set_speech_volume(int key)
 {
     config_change_basic(key);
@@ -787,6 +802,7 @@ static int config_set_speech_volume(int key)
     sound_speech_set_volume(setting_sound(SOUND_TYPE_SPEECH)->volume);
     return 1;
 }
+
 static int config_enable_effects(int key)
 {
     config_change_basic(key);
@@ -796,6 +812,7 @@ static int config_enable_effects(int key)
 
     return 1;
 }
+
 static int config_set_effects_volume(int key)
 {
     config_change_basic(key);
@@ -803,6 +820,7 @@ static int config_set_effects_volume(int key)
     sound_effect_set_volume(setting_sound(SOUND_TYPE_EFFECTS)->volume);
     return 1;
 }
+
 static int config_enable_city_sounds(int key)
 {
     config_change_basic(key);
@@ -812,6 +830,7 @@ static int config_enable_city_sounds(int key)
 
     return 1;
 }
+
 static int config_set_city_sounds_volume(int key)
 {
     config_change_basic(key);
@@ -851,6 +870,7 @@ static int config_set_difficulty(int key)
     while (setting_difficulty() < data.config_values[key].new_value) setting_increase_difficulty();
     return 1;
 }
+
 static int config_enable_gods_effects(int key)
 {
     config_change_basic(key);
@@ -880,6 +900,7 @@ static int config_change_string_language(int key)
                                      (int) (data.volume_offset - data.volume_text - 1));
     return 1;
 }
+
 static int config_change_string_player_name(int key)
 {
     uint8_t player_name[PLAYER_NAME_LENGTH];
@@ -896,50 +917,62 @@ static uint8_t *percent_buf(int key)
 {
     return percentage_string(data.display_text, data.config_values[key].new_value);
 }
+
 static const uint8_t *display_text_display_scale(void)
 {
     return percent_buf(CONFIG_SCREEN_DISPLAY_SCALE);
 }
+
 static const uint8_t *display_text_cursor_scale(void)
 {
     return percent_buf(CONFIG_SCREEN_CURSOR_SCALE);
 }
+
 static const uint8_t *display_text_scroll_speed(void)
 {
     return percent_buf(CONFIG_ORIGINAL_SCROLL_SPEED);
 }
+
 static const uint8_t *display_text_master_volume(void)
 {
     percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_MASTER_VOLUME].new_value); return data.volume_text;
 }
+
 static const uint8_t *display_text_music_volume(void)
 {
     percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_MUSIC_VOLUME].new_value); return data.volume_text;
 }
+
 static const uint8_t *display_text_speech_volume(void)
 {
     percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SPEECH_VOLUME].new_value); return data.volume_text;
 }
+
 static const uint8_t *display_text_sound_effects_volume(void)
 {
     percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_SOUND_EFFECTS_VOLUME].new_value); return data.volume_text;
 }
+
 static const uint8_t *display_text_city_sounds_volume(void)
 {
     percentage_string(data.volume_offset, data.config_values[CONFIG_ORIGINAL_CITY_SOUNDS_VOLUME].new_value); return data.volume_text;
 }
+
 static const uint8_t *display_text_video_volume(void)
 {
     percentage_string(data.volume_offset, data.config_values[CONFIG_GENERAL_VIDEO_VOLUME].new_value); return data.volume_text;
 }
+
 static const uint8_t *display_text_language(void)
 {
     return data.language_options.options[data.language_options.selected];
 }
+
 static const uint8_t *display_text_user_directory(void)
 {
     return translation_for(TR_USER_DIRECTORIES_WINDOW_TITLE);
 }
+
 static const uint8_t *display_text_player_name(void)
 {
     return data.player_name;
@@ -948,6 +981,7 @@ static const uint8_t *display_text_game_speed(void)
 {
     return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value));
 }
+
 static const uint8_t *display_text_resolution(void)
 {
     uint8_t *str = data.display_text;
@@ -957,28 +991,34 @@ static const uint8_t *display_text_resolution(void)
     string_from_int(str, r->height, 0);
     return data.display_text;
 }
+
 static const uint8_t *display_text_difficulty(void)
 {
     return lang_get_string(153, data.config_values[CONFIG_ORIGINAL_DIFFICULTY].new_value + 1);
 }
+
 static const uint8_t *display_text_max_grand_temples(void)
 {
     string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_GRAND_TEMPLES].new_value, 0);
     return data.display_text;
 }
+
 static const uint8_t *display_text_autosave_slots(void)
 {
     string_from_int(data.display_text, data.config_values[CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS].new_value, 0);
     return data.display_text;
 }
+
 static const uint8_t *display_text_default_game_speed(void)
 {
     return percentage_string(data.display_text, game_speed_get_speed(data.config_values[CONFIG_GP_CH_DEFAULT_GAME_SPEED].new_value));
 }
+
 static const uint8_t *display_text_rain_intensity(void)
 {
     return percent_buf(CONFIG_WT_RAIN_INTENSITY);
 }
+
 static const uint8_t *display_text_rain_speed(void)
 {
 
@@ -987,6 +1027,7 @@ static const uint8_t *display_text_rain_speed(void)
     if (idx > 4) idx = 4;
     return translation_for(speed_labels[idx]);
 }
+
 static const uint8_t *display_text_rain_length(void)
 {
 
@@ -995,10 +1036,12 @@ static const uint8_t *display_text_rain_length(void)
     if (idx > 4) idx = 4;
     return translation_for(size_labels[idx]);
 }
+
 static const uint8_t *display_text_snow_intensity(void)
 {
     return percent_buf(CONFIG_WT_SNOW_INTENSITY);
 }
+
 static const uint8_t *display_text_snow_speed(void)
 {
 
@@ -1007,10 +1050,12 @@ static const uint8_t *display_text_snow_speed(void)
     if (idx > 4) idx = 4;
     return translation_for(speed_labels[idx]);
 }
+
 static const uint8_t *display_text_sandstorm_intensity(void)
 {
     return percent_buf(CONFIG_WT_SANDSTORM_INTENSITY);
 }
+
 static const uint8_t *display_text_sandstorm_speed(void)
 {
     int idx = data.config_values[CONFIG_WT_SANDSTORM_SPEED].new_value;
@@ -1206,6 +1251,7 @@ static void update_scale(void)
 
     }
 }
+
 static void calculate_available_resolutions_and_fullscreen(void)
 {
     if (system_is_fullscreen_only()) {
@@ -1265,12 +1311,13 @@ static inline int config_changed(int key)
 {
     return data.config_values[key].original_value != data.config_values[key].new_value;
 }
+
 static inline int config_string_changed(int key)
 {
     return strcmp(data.config_string_values[key].original_value, data.config_string_values[key].new_value) != 0;
 }
 
-static inline void update_has_changes(void)
+static inline void check_for_changes(void)
 {
     update_scale();
     calculate_available_resolutions_and_fullscreen();
@@ -1295,12 +1342,14 @@ static void set_language(int index)
     snprintf(data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].new_value, CONFIG_STRING_VALUE_MAX, "%s", dir);
     data.language_options.selected = index;
 }
+
 static void button_language_select(const generic_button *button)
 {
     int height = button->parameter1;
     window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y() + height, button,
         data.language_options.options, data.language_options.total, set_language);
 }
+
 static void set_player_name(const uint8_t *name)
 {
     if (!string_length(name)) {
@@ -1311,12 +1360,14 @@ static void set_player_name(const uint8_t *name)
     set_player_name_width();
     window_invalidate();
 }
+
 static void button_edit_player_name(const generic_button *button)
 {
     uint8_t player_name[PLAYER_NAME_LENGTH];
     encoding_from_utf8(data.config_string_values[CONFIG_STRING_ORIGINAL_PLAYER_NAME].new_value, player_name, PLAYER_NAME_LENGTH);
     window_text_input_show(lang_get_string(31, 0), lang_get_string(9, 5), player_name, PLAYER_NAME_LENGTH, set_player_name);
 }
+
 static void button_change_user_directory(const generic_button *button)
 {
     window_user_path_setup_show(0);
@@ -1385,7 +1436,6 @@ static void draw_list_box_item(const list_box_item *item)
     text_draw_ellipsized(txt, item->x + 5, item->y + 4, item->width - 10, f, 0);
 }
 
-
 static void list_box_tooltip(const list_box_item *item, tooltip_context *c)
 {
     const translation_key *keys = (data.page == CONFIG_PAGE_UI_CHANGES) ? ui_category_keys : city_mgmt_category_keys;
@@ -1399,7 +1449,6 @@ static void list_box_tooltip(const list_box_item *item, tooltip_context *c)
         }
     }
 }
-
 
 static void handle_list_box_select(unsigned int index, int is_double_click)
 {
@@ -1430,6 +1479,7 @@ static int checkbox_text_height(const uint8_t *txt, int w)
     int lines = text_measure_multiline(txt, w, FONT_NORMAL_BLACK, &largest);
     return lines * one_line_ml_height(FONT_NORMAL_BLACK);
 }
+
 static void op_measure_checkbox(const config_widget *w, int avail_text_w, int *out_h)
 {
     const uint8_t *txt = translation_for(w->description);
@@ -1440,6 +1490,7 @@ static void op_measure_checkbox(const config_widget *w, int avail_text_w, int *o
     }
     *out_h = h;
 }
+
 static void op_draw_bg_checkbox(const config_widget *w, int x, int y, int avail_text_w)
 {
     const uint8_t *txt = translation_for(w->description);
@@ -1451,6 +1502,7 @@ static void op_draw_bg_checkbox(const config_widget *w, int x, int y, int avail_
         text_draw(string_from_ascii("x"), x + 6, box_y + 3, FONT_NORMAL_BLACK, 0);
     }
 }
+
 static void op_draw_fg_checkbox(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {
     if (!focused) {
@@ -1462,6 +1514,7 @@ static void op_draw_fg_checkbox(const config_widget *w, int x, int y, int avail_
     int box_y = text_center_y - (CHECKBOX_CHECK_SIZE / 2);
     button_border_draw(x, box_y, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, 1);
 }
+
 static int op_input_checkbox(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
     int width = avail_text_w + 30; //  30 includes checkbox + gap
@@ -1485,6 +1538,7 @@ static void op_measure_select(const config_widget *w, int avail_text_w, int *out
 {
     *out_h = ITEM_BASE_H;
 }
+
 static void op_draw_bg_select(const config_widget *w, int x, int y, int avail_text_w)
 {
     text_draw(translation_for(w->description), x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
@@ -1492,11 +1546,13 @@ static void op_draw_bg_select(const config_widget *w, int x, int y, int avail_te
     text_draw_centered(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
                        btn->width - 16, FONT_NORMAL_BLACK, 0);
 }
+
 static void op_draw_fg_select(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {
     const generic_button *btn = &select_buttons[w->subtype];
     button_border_draw(btn->x, y + btn->y + w->y_offset, btn->width, btn->height, focused);
 }
+
 static int op_input_select(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
     generic_button *btn = &select_buttons[w->subtype];
@@ -1511,10 +1567,12 @@ static void op_measure_desc(const config_widget *w, int avail_text_w, int *out_h
 {
     *out_h = ITEM_BASE_H;
 }
+
 static void op_draw_bg_desc(const config_widget *w, int x, int y, int avail_text_w)
 {
     text_draw(translation_for(w->description), x, y + 10 + w->y_offset, FONT_NORMAL_BLACK, 0);
 }
+
 static void op_draw_fg_desc(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {
     (void) w;
@@ -1523,6 +1581,7 @@ static void op_draw_fg_desc(const config_widget *w, int x, int y, int avail_text
     (void) avail_text_w;
     (void) focused;
 }
+
 static int  op_input_desc(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
     return 0;
@@ -1538,6 +1597,7 @@ static void numerical_range_draw(const numerical_range_widget *r, int x, int y, 
     int pos = (r->min != r->max) ? ((*r->value - r->min) * width / (r->max - r->min)) : width / 2;
     image_draw(image_group(GROUP_PANEL_BUTTON) + 37, x + r->x + NUMERICAL_SLIDER_PADDING + pos, y + 2, COLOR_MASK_NONE, SCALE_NONE);
 }
+
 static int is_over_slider(const numerical_range_widget *r, const mouse *m, int x, int y, int extra_w)
 {
     if (x + r->x <= m->x && x + r->width_blocks * BLOCK_SIZE + r->x + extra_w >= m->x &&
@@ -1546,6 +1606,7 @@ static int is_over_slider(const numerical_range_widget *r, const mouse *m, int x
     }
     return 0;
 }
+
 static int handle_slider_mouse(const numerical_range_widget *r, const mouse *m, int x, int y, int id, int extra_w)
 {
     if (data.active_numerical_range) {
@@ -1583,12 +1644,14 @@ static void op_measure_range(const config_widget *w, int avail_text_w, int *out_
 {
     *out_h = ITEM_BASE_H;
 }
+
 static void op_draw_bg_range(const config_widget *w, int x, int y, int avail_text_w)
 {
     int extra_w = data.layout.has_scrollbar ? 0 : 64;
     // content_span_for_page already accounts for category shift; don't offset again.
     numerical_range_draw(&ranges[w->subtype], x, y + w->y_offset, w->get_display_text(), extra_w);
 }
+
 static void op_draw_fg_range(const config_widget *w, int x, int y, int avail_text_w, int focused)
 {    // We don't need to draw any foreground for range widgets,
     // but the function must exist to satisfy the ops table, therefore the void casts.
@@ -1598,6 +1661,7 @@ static void op_draw_fg_range(const config_widget *w, int x, int y, int avail_tex
     (void) avail_text_w;
     (void) focused;
 }
+
 static int op_input_range(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
     int extra_w = data.layout.has_scrollbar ? 0 : 64;
@@ -1633,6 +1697,7 @@ static void op_draw_fg_header(const config_widget *w, int x, int y, int avail_te
     (void) avail_text_w;
     (void) focused;
 }
+
 static int  op_input_header(const config_widget *w, int x, int y, int avail_text_w, const mouse *m, unsigned *focused)
 {
     return 0;
@@ -1679,6 +1744,7 @@ static const config_widget *get_widget_row_for(unsigned int page, int index)
     }
     return 0;
 }
+
 static int get_widget_count_for(unsigned int page)
 {
     const config_widget *src = 0;
@@ -1758,7 +1824,7 @@ static void build_layout_for_current_page(void)
         content_span span_sb = content_span_for_page(data.page, 1);
         int current_y = ITEM_Y_OFFSET;
         int count_fit_from_top = 0;
-        for (int i = 0; i < widget_count && i < MAX_WIDGETS; ++i) {
+        for (int i = scrollbar.scroll_position; i < widget_count && i < MAX_WIDGETS; ++i) {
             const config_widget *w = get_widget_row_for(data.page, i);
             if (!w) {
                 break;
@@ -1795,7 +1861,7 @@ static void build_layout_for_current_page(void)
     int visible_widget_index = 0;
 
     for (int i = start_widget_index; i < widget_count && visible_widget_index < MAX_WIDGETS; ++i) {
-        const config_widget *w = get_widget_row_for((int) data.page, i);
+        const config_widget *w = get_widget_row_for(data.page, i);
         if (!w) {
             break;
         }
@@ -1820,7 +1886,7 @@ static void build_layout_for_current_page(void)
 
 static void draw_background(void)
 {
-    update_has_changes();
+    check_for_changes();
 
     if (data.show_background_image) {
         image_draw_fullscreen_background(image_group(GROUP_INTERMEZZO_BACKGROUND) + 5);
@@ -1954,6 +2020,7 @@ static void cancel_values(void)
         memcpy(data.config_string_values[i].new_value, data.config_string_values[i].original_value, CONFIG_STRING_VALUE_MAX);
     }
 }
+
 static int apply_changed_configs(void)
 {
     if (!data.has_changes) {
@@ -2010,6 +2077,7 @@ static void button_close(const generic_button *button)
     }
     window_request_refresh();
 }
+
 static void button_page(const generic_button *button)
 {
     set_page((unsigned) button->parameter1);
@@ -2222,6 +2290,7 @@ static void init(unsigned int page, unsigned int category, int show_background_i
 
     init_list_boxes();
 }
+
 void window_config_show(window_config_page page, unsigned int category, int show_background_image)
 {
     window_type window = {

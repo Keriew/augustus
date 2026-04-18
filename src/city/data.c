@@ -366,6 +366,9 @@ static void save_main_data(buffer *main)
     buffer_write_i32(main, city_data.health.population_access.clinic);
     buffer_write_i32(main, city_data.health.population_access.baths);
     buffer_write_i32(main, city_data.health.population_access.barber);
+    buffer_write_i32(main, city_data.health.population_access.wells);
+    buffer_write_i32(main, city_data.health.population_access.latrines);
+    buffer_write_i32(main, city_data.health.population_access.fountains);
     buffer_write_i32(main, city_data.health.months_since_last_contaminated_water);
     buffer_write_i32(main, city_data.emperor.selected_gift_size);
     buffer_write_i32(main, city_data.emperor.months_since_gift);
@@ -863,6 +866,11 @@ static void load_main_data(buffer *main, int version)
     city_data.health.population_access.clinic = buffer_read_i32(main);
     city_data.health.population_access.baths = buffer_read_i32(main);
     city_data.health.population_access.barber = buffer_read_i32(main);
+    if (version > SAVE_GAME_LAST_NO_WATER_IN_ADVISORS) {
+        city_data.health.population_access.wells = buffer_read_i32(main);
+        city_data.health.population_access.latrines = buffer_read_i32(main);
+        city_data.health.population_access.fountains = buffer_read_i32(main);
+    }
     city_data.health.months_since_last_contaminated_water = buffer_read_i32(main);
     city_data.emperor.selected_gift_size = buffer_read_i32(main);
     city_data.emperor.months_since_gift = buffer_read_i32(main);
