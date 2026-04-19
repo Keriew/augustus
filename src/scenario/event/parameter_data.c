@@ -152,9 +152,10 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "terrain_type",        .type = PARAMETER_TYPE_TERRAIN,          .key = TR_PARAMETER_TERRAIN },
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
-
-
-
+    [CONDITION_TYPE_ENEMIES_IN_CITY] = {.type = CONDITION_TYPE_ENEMIES_IN_CITY,
+                                        .xml_attr = {.name = "enemies_in_city",      .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_ENEMIES_IN_CITY}, 
+                                        .xml_parm1 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm2 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
 };
 
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes(condition_types type)

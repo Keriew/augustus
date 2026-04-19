@@ -56,4 +56,6 @@ int scenario_condition_type_check_formulas(const scenario_condition_t *condition
 
 int scenario_condition_type_terrain_count_area_met(const scenario_condition_t *condition);
 
+int scenario_condition_type_count_enemies_in_city_met(const scenario_condition_t *condition);
+
 #endif // CONDITION_TYPES_H
