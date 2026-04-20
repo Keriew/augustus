@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 78
+#define XML_TOTAL_ELEMENTS 81
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -142,7 +142,10 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "change_rank", xml_import_create_action, 0, "actions"},
     { "change_production_rate", xml_import_create_action, 0, "actions"},
     { "lock_trade_route", xml_import_create_action, 0, "actions"},
-    { "change_goal", xml_import_create_action, 0, "actions"}
+    { "change_goal", xml_import_create_action, 0, "actions"},
+    { "enemies_in_city", xml_import_create_condition, 0, "conditions|group"},
+    { "land_trade_problem_duration", xml_import_create_condition, 0, "conditions|group"},
+    { "sea_trade_problem_duration", xml_import_create_condition, 0, "conditions|group"}
 };
 
 static int xml_import_start_scenario_events(void)

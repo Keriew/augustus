@@ -571,3 +571,21 @@ int scenario_condition_type_count_enemies_in_city_met(const scenario_condition_t
     
     return comparison_helper_compare_values(comparison, enemies_in_city, value);
 }
+
+int scenario_condition_type_land_trade_problems_met(const scenario_condition_t *condition)
+{
+    int trade_problem_duration = city_data.trade.land_trade_problem_duration;
+    int comparison = condition->parameter1;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
+    
+    return comparison_helper_compare_values(comparison, trade_problem_duration, value);
+}
+
+int scenario_condition_type_sea_trade_problems_met(const scenario_condition_t *condition)
+{
+    int trade_problem_duration = city_data.trade.sea_trade_problem_duration;
+    int comparison = condition->parameter1;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
+    
+    return comparison_helper_compare_values(comparison, trade_problem_duration, value);
+}
