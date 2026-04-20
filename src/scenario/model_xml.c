@@ -231,7 +231,7 @@ static int start_building_model(void)
     
     for (building_model_data_type data_type = MODEL_COST; data_type < MODEL_BUILDING_MAX; data_type++) {
         if (!xml_parser_has_attribute(string_for_building_data_type(data_type))) {
-            char *error_msg;
+            char *error_msg = "";
             snprintf(error_msg, 256, "Attribute missing. '%s' not given", string_for_building_data_type(data_type));
             xml_import_log_error(error_msg);
             return 0;
@@ -263,7 +263,7 @@ static int start_house_model(void)
     
     for (house_model_data_type data_type = MODEL_DEVOLVE_DESIRABILITY; data_type < MODEL_HOUSE_MAX; data_type++) {
         if (!xml_parser_has_attribute(string_for_house_data_type(data_type))) {
-            char *error_msg;
+            char *error_msg = "";
             snprintf(error_msg, 256, "Attribute missing. '%s' not given", string_for_house_data_type(data_type));
             xml_import_log_error(error_msg);
             return 0;

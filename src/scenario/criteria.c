@@ -18,6 +18,7 @@ int scenario_criteria_get_max_value(scenario_win_condition_type condition)
         case SCENARIO_WIN_CONDITION_POPULATION:
             return 99999;
     }
+    return 0;
 }
 
 int scenario_criteria_population_enabled(void)
