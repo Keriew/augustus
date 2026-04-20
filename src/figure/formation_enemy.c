@@ -283,7 +283,7 @@ static int get_structures_on_native_land(int *dst_x, int *dst_y)
     for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]) && min_distance == INFINITE; i++) {
         building_type type = native_buildings[i];
         int size = building_properties_for_type(type)->size;
-        int radius = (type == BUILDING_NATIVE_MEETING) ? 6 : 3;
+        int radius = size * 3;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state != BUILDING_STATE_IN_USE ||
                 building_properties_for_type(b->type)->shared ||
