@@ -102,6 +102,7 @@ static int show_building_roads(const building *b)
 
 static int show_building_mothball(const building *b)
 {
+    b = building_main(b);
     return b->state == BUILDING_STATE_MOTHBALLED;
 }
 
@@ -253,6 +254,10 @@ static int get_column_height_tax_income(const building *b)
 
 static int get_column_height_employment(const building *b)
 {
+    if (b->prev_part_building_id) {
+        return NO_COLUMN;
+    }
+
     int full_staff = building_get_laborers(b->type);
     int pct_staff = calc_percentage(b->num_workers, full_staff);
 
@@ -392,6 +397,10 @@ static int get_tooltip_employment(tooltip_context *c, int grid_offset)
     building *b = building_get(map_building_at(grid_offset));
     int full = building_get_laborers(b->type);
     int missing = full - b->num_workers;
+
+    if (b->prev_part_building_id) {
+        return 0;
+    }
 
     if (full >= 1) {
         if (missing == 0) {
