@@ -161,10 +161,17 @@ static void draw_model_item(const grid_box_item *item)
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
         
         model_house *model = model_get_house(h_level);
+        model_house *default_model = (model_house *)&building_properties_for_type(h_level + 10)->house_model_data;
         int value = *model_get_ptr_for_house_data_type(model, i);
-
+        int default_value = *model_get_ptr_for_house_data_type(default_model, i);
+        color_t color = 0;
+        if (value > default_value) {
+            color = COLOR_FONT_GREEN;
+        } else if (value < default_value) {
+            color = COLOR_FONT_RED;
+        }
         text_draw_number(value, 0, NULL, item->x + data_buttons[i].x + 8, item->y + data_buttons[i].y + 6,
-            FONT_SMALL_PLAIN, 0);
+            FONT_SMALL_PLAIN, color);
     }
 
 }
