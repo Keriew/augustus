@@ -166,7 +166,7 @@ static void draw_model_item(const grid_box_item *item)
         int default_value = *model_get_ptr_for_house_data_type(default_model, i);
         color_t color = 0;
         if (value > default_value) {
-            color = COLOR_FONT_GREEN;
+            color = COLOR_MASK_DARK_GREEN;
         } else if (value < default_value) {
             color = COLOR_FONT_RED;
         }

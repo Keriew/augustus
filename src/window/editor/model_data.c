@@ -202,7 +202,7 @@ static void draw_model_item(const grid_box_item *item)
         }
         color_t color = 0;
         if (value > default_value) {
-            color = COLOR_FONT_GREEN;
+            color = COLOR_MASK_DARK_GREEN;
         } else if (value < default_value) {
             color = COLOR_FONT_RED;
         }

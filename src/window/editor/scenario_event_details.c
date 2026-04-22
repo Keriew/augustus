@@ -1035,6 +1035,7 @@ static void button_copy_selected(const generic_button *button)
 
     if (data.conditions.selection_type != CHECKBOX_NO_SELECTION) {
         array_init(data.copied_group_ids, 4, NULL, NULL);
+        // init an array of already copied group ids which is used to avoid copying the same condition group twice
         for (unsigned int i = 0; i < data.conditions.active; i++) {
             if (!data.conditions.selected[i] || !data.conditions.list[i].condition) {
                 continue;
