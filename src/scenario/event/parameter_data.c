@@ -361,7 +361,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "change_house_model_data",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA},
                                         .xml_parm1 = {.name = "housing_level",       .type = PARAMETER_TYPE_HOUSING_TYPE,   .key = TR_PARAMETER_TYPE_HOUSING_TYPE },
                                         .xml_parm2 = {.name = "house_data_type",     .type = PARAMETER_TYPE_HOUSE_DATA_TYPE, .key = TR_PARAMETER_DATA_TYPE},
-                                        .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
+                                        .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = NEGATIVE_UNLIMITED,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
