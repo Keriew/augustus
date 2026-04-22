@@ -3,6 +3,7 @@
 #include "city/entertainment.h"
 #include "city/figures.h"
 #include "figure/figure.h"
+#include "figure/figure_runtime_api.h"
 #include "figuretype/animal.h"
 #include "figuretype/cartpusher.h"
 #include "figuretype/crime.h"
@@ -143,7 +144,9 @@ void figure_action_handle(void)
                     f->targeted_by_figure_id = 0;
                 }
             }
-            figure_action_callbacks[f->type](f);
+            if (!figure_runtime_execute(f)) {
+                figure_action_callbacks[f->type](f);
+            }
             if (f->state == FIGURE_STATE_DEAD) {
                 figure_delete(f);
             }

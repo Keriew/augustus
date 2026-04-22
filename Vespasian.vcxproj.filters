@@ -333,7 +333,9 @@
     <ClCompile Include="src\figure\action.c" />
     <ClCompile Include="src\figure\combat.c" />
     <ClCompile Include="src\figure\enemy_army.c" />
-    <ClCompile Include="src\figure\figure.c" />
+    <ClCompile Include="src\figure\figure.cpp" />
+    <ClCompile Include="src\figure\figure_runtime.cpp" />
+    <ClCompile Include="src\figure\figure_type_registry.cpp" />
     <ClCompile Include="src\figure\formation.c" />
     <ClCompile Include="src\figure\formation_enemy.c" />
     <ClCompile Include="src\figure\formation_herd.c" />
@@ -842,6 +844,9 @@
     <ClInclude Include="src\figure\combat.h" />
     <ClInclude Include="src\figure\enemy_army.h" />
     <ClInclude Include="src\figure\figure.h" />
+    <ClInclude Include="src\figure\figure_runtime_api.h" />
+    <ClInclude Include="src\figure\figure_type_registry.h" />
+    <ClInclude Include="src\figure\figure_type_registry_internal.h" />
     <ClInclude Include="src\figure\formation.h" />
     <ClInclude Include="src\figure\formation_enemy.h" />
     <ClInclude Include="src\figure\formation_herd.h" />
