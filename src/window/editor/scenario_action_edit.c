@@ -306,6 +306,20 @@ static void set_param_value(int value)
                 resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 5);
                 data.action->parameter5 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
             }
+            if (data.formula_index) {
+                if (data.action->type == ACTION_TYPE_CHANGE_MODEL_DATA) {
+                    data.formula_min_limit = model_get_min_for_data_type(data.action->parameter2);
+                    data.formula_max_limit = model_get_max_for_data_type(data.action->parameter2);
+                }
+                if (data.action->type == ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA) {
+                    data.formula_min_limit = model_get_min_for_house_data_type(data.action->parameter2);
+                    data.formula_max_limit = model_get_max_for_house_data_type(data.action->parameter2);
+                }
+                if (data.action->type == ACTION_TYPE_CHANGE_GOAL) {
+                    data.formula_max_limit = scenario_criteria_get_max_value(data.action->parameter1);
+                }
+                scenario_formula_change(data.formula_index, data.formula, data.formula_min_limit, data.formula_max_limit);
+            }
             return;
         case 3:
             data.action->parameter3 = value;

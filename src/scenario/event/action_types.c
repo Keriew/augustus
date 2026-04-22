@@ -771,12 +771,11 @@ int scenario_action_type_change_model_data_execute(scenario_action_t *action)
     int amount = scenario_formula_evaluate_formula(action->parameter3);
     int set_to_value = action->parameter4;
 
-    amount = calc_bound(amount, model_get_min_for_data_type(data_type), model_get_max_for_data_type(data_type));
-
     model_building *model_ptr = model_get_building(model);
 
     int *value = model_get_ptr_for_building_data_type(model_ptr, data_type);
-    *value = amount + (set_to_value ? 0 : *value);
+    *value = calc_bound(amount + (set_to_value ? 0 : *value), model_get_min_for_data_type(data_type),
+        model_get_max_for_data_type(data_type));
     
     return 1;
 }
@@ -853,12 +852,11 @@ int scenario_action_type_change_house_model_data_execute(scenario_action_t *acti
     int amount = scenario_formula_evaluate_formula(action->parameter3);
     int set_to_value = action->parameter4;
 
-    amount = calc_bound(amount, model_get_min_for_house_data_type(data_type), model_get_max_for_house_data_type(data_type));
-
     model_house *model_ptr = model_get_house(model - 10); // convert from building type to housing
 
     int *value = model_get_ptr_for_house_data_type(model_ptr, data_type);
-    *value = amount + (set_to_value ? 0 : *value);
+    *value = calc_bound(amount + (set_to_value ? 0 : *value), model_get_min_for_house_data_type(data_type),
+        model_get_max_for_house_data_type(data_type));
 
     return 1;
 }
