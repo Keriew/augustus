@@ -275,14 +275,7 @@ void map_water_supply_update_reservoir_fountain(void)
 
     // Large statues, to check if they should play the animation
     for (building *b = building_first_of_type(BUILDING_LARGE_STATUE); b; b = b->next_of_type) {
-        if (b->state != BUILDING_STATE_IN_USE) {
-            continue;
-        }
-        if (map_terrain_exists_tile_in_area_with_type(b->x, b->y, b->size, TERRAIN_RESERVOIR_RANGE)) {
-            b->has_water_access = 1;
-        } else {
-            b->has_water_access = 0;
-        }
+        map_water_supply_refresh_large_statue(b);
     }
 
     for (building *b = building_first_of_type(BUILDING_COLOSSEUM); b; b = b->next_of_type) {
@@ -319,6 +312,19 @@ int map_water_supply_has_aqueduct_access(int grid_offset)
         }
     }
     return 0;
+}
+
+void map_water_supply_refresh_large_statue(building *b)
+{
+    if (!b || b->type != BUILDING_LARGE_STATUE) {
+        return;
+    }
+
+    b->has_water_access = map_terrain_exists_tile_in_area_with_type(b->x, b->y, b->size, TERRAIN_RESERVOIR_RANGE) ? 1 : 0;
+
+    if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED || b->state == BUILDING_STATE_CREATED) {
+        map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+    }
 }
 
 int map_water_supply_is_building_unnecessary(int building_id, int radius)

@@ -263,7 +263,11 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
 
     int image_id = map_image_at(grid_offset);
-    if (map_property_is_constructing(grid_offset)) { //&&
+    const int use_custom_ghost_preview =
+        map_property_is_constructing(grid_offset) &&
+        building_construction_uses_custom_ghost_preview() &&
+        !building_construction_draw_as_constructing();
+    if (map_property_is_constructing(grid_offset) && !use_custom_ghost_preview) { //&&
         //  !building_is_connectable(building_construction_type())) {
         image_id = image_group(GROUP_TERRAIN_OVERLAY);
     }
@@ -281,7 +285,8 @@ static void draw_footprint(int x, int y, int grid_offset)
     } else if (building_id &&
         city_draw_runtime_building_footprint(building_get(building_id), x, y, grid_offset, color_mask, draw_context.scale)) {
         // Runtime-managed buildings draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
-    } else if (!building_id && city_draw_runtime_tile_footprint(grid_offset, x, y, color_mask, draw_context.scale)) {
+    } else if (!building_id && !use_custom_ghost_preview &&
+        city_draw_runtime_tile_footprint(grid_offset, x, y, color_mask, draw_context.scale)) {
         // Runtime-managed terrain tiles draw from ImageGroupPayload here; legacy tile image ids remain as compatibility state.
     } else {
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);

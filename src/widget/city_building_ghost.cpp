@@ -220,17 +220,22 @@ static void city_building_ghost_draw_bonus_range(int x, int y, int grid_offset)
 
 void city_building_ghost_draw_well_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_DARK_BLUE, data.scale);
+    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, COLOR_MASK_DARK_BLUE, data.scale);
 }
 
 void city_building_ghost_draw_fountain_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_BLUE, data.scale);
+    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, COLOR_MASK_BLUE, data.scale);
+}
+
+static void city_building_ghost_draw_reservoir_range_colored(int x, int y, color_t color)
+{
+    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, color, data.scale);
 }
 
 void city_building_ghost_draw_reservoir_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_RESERVOIR_RANGE, data.scale);
+    city_building_ghost_draw_reservoir_range_colored(x, y, COLOR_MASK_RESERVOIR_RANGE);
 }
 
 void city_building_ghost_draw_latrines_range(int x, int y, int grid_offset)
@@ -619,8 +624,14 @@ static void draw_first_reservoir_range(int x, int y, int grid_offset)
         data.reservoir_range.offsets[data.reservoir_range.total] = grid_offset;
         data.reservoir_range.total++;
     }
-    color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
-    image_draw(assets_lookup_image_id(ASSET_UI_WATER_RANGE), x, y, color_mask, data.scale);
+    color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_RESERVOIR_RANGE;
+    if (!map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE) ||
+        map_terrain_is(grid_offset, TERRAIN_WATER | TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP) ||
+        (map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) &&
+            map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN))) {
+        color_t color_to_use = map_terrain_is(grid_offset, TERRAIN_ROAD) ? (color_mask & ALPHA_MASK_SEMI_TRANSPARENT) : color_mask;
+        city_building_ghost_draw_reservoir_range_colored(x, y, color_to_use);
+    }
 }
 
 static void draw_second_reservoir_range(int x, int y, int grid_offset)
@@ -630,8 +641,14 @@ static void draw_second_reservoir_range(int x, int y, int grid_offset)
             return;
         }
     }
-    color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
-    image_draw(assets_lookup_image_id(ASSET_UI_WATER_RANGE), x, y, color_mask, data.scale);
+    color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_RESERVOIR_RANGE;
+    if (!map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE) ||
+        map_terrain_is(grid_offset, TERRAIN_WATER | TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP) ||
+        (map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) &&
+            map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN))) {
+        color_t color_to_use = map_terrain_is(grid_offset, TERRAIN_ROAD) ? (color_mask & ALPHA_MASK_SEMI_TRANSPARENT) : color_mask;
+        city_building_ghost_draw_reservoir_range_colored(x, y, color_to_use);
+    }
 }
 
 static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
@@ -647,7 +664,7 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
     } else {
         if (map_building_is_reservoir(map_x, map_y)) {
             blocked = 0;
-        } else if (!map_tiles_are_clear(map_x, map_y, 3, TERRAIN_ALL & ~TERRAIN_AQUEDUCT, 1)) {
+        } else if (!map_tiles_are_clear_with_terrain_exception(map_x, map_y, 3, TERRAIN_ALL, TERRAIN_AQUEDUCT, 1)) {
             //reservoir allowed over aqueducts
             blocked = 1;
         }
@@ -722,11 +739,15 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
             int discouraged_terrain = terrain & TERRAIN_NOT_CLEAR;
 
             // Reservoir is allowed over aqueducts
-            forbidden_terrain &= ~TERRAIN_AQUEDUCT;
+            if (forbidden_terrain & TERRAIN_AQUEDUCT) {
+                forbidden_terrain &= ~(TERRAIN_AQUEDUCT | TERRAIN_BUILDING);
+            }
 
             // Allow discouraged placement over aqueduct tiles on the aqueduct-connector corners
             if (building_construction_is_granary_cross_tile(i)) {
-                discouraged_terrain &= ~TERRAIN_AQUEDUCT;
+                if (discouraged_terrain & TERRAIN_AQUEDUCT) {
+                    discouraged_terrain &= ~(TERRAIN_AQUEDUCT | TERRAIN_BUILDING);
+                }
             }
 
             if (forbidden_terrain) {
@@ -1311,8 +1332,9 @@ static void draw_highway(const map_tile *tile, int x, int y)
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
         int terrain = map_terrain_get(tile_offset);
-        int has_forbidden_terrain = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD;
-        if (fully_blocked || has_forbidden_terrain || !map_can_place_highway_under_aqueduct(tile_offset, 0)) {
+        int has_forbidden_terrain = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_ROAD;
+        if (fully_blocked || (has_forbidden_terrain && !(terrain & TERRAIN_AQUEDUCT)) ||
+            !map_can_place_highway_under_aqueduct(tile_offset, 0)) {
             blocked_tiles[i] = 1;
         } else {
             blocked_tiles[i] = 0;
@@ -1326,7 +1348,7 @@ static void draw_highway(const map_tile *tile, int x, int y)
 static void draw_grand_temple_neptune_range(int x, int y, int grid_offset)
 {
     color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
-    image_draw(assets_lookup_image_id(ASSET_UI_WATER_RANGE), x, y, color_mask, data.scale);
+    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, color_mask, data.scale);
 }
 
 static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)

@@ -33,9 +33,20 @@
 
 #include <stdio.h>
 
+#define TOOLTIP_WITH_PREFIX_MAX_LENGTH 128
 #define HIGHWAY_LEVY_MONTHLY 1
 
 static void draw_storage_ids(int x, int y, float scale, int grid_offset);
+
+static const uint8_t *prefix_value_to_tooltip_text(int value, const uint8_t *message)
+{
+    static uint8_t text[TOOLTIP_WITH_PREFIX_MAX_LENGTH];
+    uint8_t *cursor = text;
+    cursor += string_from_int(cursor, value, 0);
+    cursor = string_copy(string_from_ascii(" - "), cursor, TOOLTIP_WITH_PREFIX_MAX_LENGTH - (cursor - text));
+    string_copy(message, cursor, TOOLTIP_WITH_PREFIX_MAX_LENGTH - (cursor - text));
+    return text;
+}
 
 static int show_building_religion(const building *b)
 {
@@ -126,7 +137,7 @@ static int show_building_logistics(const building *b)
 
 static int show_building_storages(const building *b)
 {
-    b = building_main((building *) b);
+    b = building_main(b);
     return (b->storage_id > 0 && building_storage_get(b->storage_id))
         || b->type == BUILDING_DEPOT || b->type == BUILDING_DOCK;
 }
@@ -335,20 +346,22 @@ static int get_tooltip_efficiency(tooltip_context *c, const building *b)
     if (efficiency == -1) {
         return 0;
     }
+    int key;
     if (efficiency == 0) {
-        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_0;
+        key = TR_TOOLTIP_OVERLAY_EFFICIENCY_0;
     } else if (efficiency < 25) {
-        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_1;
+        key = TR_TOOLTIP_OVERLAY_EFFICIENCY_1;
     } else if (efficiency < 50) {
-        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_2;
+        key = TR_TOOLTIP_OVERLAY_EFFICIENCY_2;
     } else if (efficiency < 80) {
-        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_3;
+        key = TR_TOOLTIP_OVERLAY_EFFICIENCY_3;
     } else if (efficiency < 95) {
-        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_4;
+        key = TR_TOOLTIP_OVERLAY_EFFICIENCY_4;
     } else {
-        c->translation_key = TR_TOOLTIP_OVERLAY_EFFICIENCY_5;
+        key = TR_TOOLTIP_OVERLAY_EFFICIENCY_5;
     }
-    return 0;
+    c->precomposed_text = prefix_value_to_tooltip_text(efficiency, translation_for(key));
+    return 1;
 }
 
 static int get_tooltip_food_stocks(tooltip_context *c, const building *b)
@@ -380,6 +393,9 @@ static int get_tooltip_food_stocks(tooltip_context *c, const building *b)
 
 static int get_tooltip_tax_income(tooltip_context *c, const building *b)
 {
+    if (b->house_population <= 0) {
+        return 0;
+    }
     int denarii = calc_adjust_with_percentage(b->tax_income_or_storage / 2, city_finance_tax_percentage());
     if (denarii > 0) {
         c->has_numeric_prefix = 1;
@@ -444,13 +460,16 @@ static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
     } else {
         desirability = map_desirability_get(grid_offset);
     }
+    const uint8_t *text;
     if (desirability < 0) {
-        return 91;
+        text = lang_get_string(66, 91);
     } else if (desirability == 0) {
-        return 92;
+        text = lang_get_string(66, 92);
     } else {
-        return 93;
+        text = lang_get_string(66, 93);
     }
+    c->precomposed_text = prefix_value_to_tooltip_text(desirability, text);
+    return 1;
 }
 
 static int get_tooltip_none(tooltip_context *c, int grid_offset)
@@ -541,7 +560,7 @@ static int get_tooltip_sentiment(tooltip_context *c, int grid_offset)
     if (happiness > 0) {
         sentiment_text_id = happiness / 10 + TR_BUILDING_WINDOW_HOUSE_SENTIMENT_2;
     }
-    c->translation_key = sentiment_text_id;
+    c->precomposed_text = prefix_value_to_tooltip_text(happiness, translation_for(sentiment_text_id));
     return 1;
 }
 
@@ -834,23 +853,23 @@ static int is_inhabited_building(int grid_offset)
 
 static int get_desirability_image_offset(int desirability)
 {
-    if (desirability < -10) {
+    if (desirability <= 0) {
         return 0;
-    } else if (desirability < -5) {
-        return 1;
-    } else if (desirability < 0) {
-        return 2;
-    } else if (desirability == 1) {
-        return 3;
-    } else if (desirability < 5) {
-        return 4;
     } else if (desirability < 10) {
-        return 5;
-    } else if (desirability < 15) {
-        return 6;
-    } else if (desirability < 20) {
-        return 7;
+        return 1;
     } else if (desirability < 25) {
+        return 2;
+    } else if (desirability < 40) {
+        return 3;
+    } else if (desirability < 50) {
+        return 4;
+    } else if (desirability < 60) {
+        return 5;
+    } else if (desirability < 70) {
+        return 6;
+    } else if (desirability < 80) {
+        return 7;
+    } else if (desirability < 90) {
         return 8;
     } else {
         return 9;

@@ -332,7 +332,9 @@ static int xml_start_city(void)
                                           "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
     const char *name = xml_parser_get_attribute_string("name");
     if (name) {
-        string_copy(string_from_ascii(name), city_obj->city_custom_name, sizeof(city_obj->city_custom_name));
+        string_copy((const uint8_t *) name, city_obj->city_custom_name, sizeof(city_obj->city_custom_name));
+    } else {
+        city_obj->city_name_id = xml_parser_get_attribute_int("name_id");
     }
 
     int city_type = xml_parser_get_attribute_enum("type", city_types, 6, EMPIRE_CITY_DISTANT_ROMAN);

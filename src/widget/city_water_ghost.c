@@ -5,7 +5,11 @@
 #include "building/count.h"
 #include "building/monument.h"
 #include "city/view.h"
+#include "map/bridge.h"
+#include "map/building.h"
 #include "map/grid.h"
+#include "map/property.h"
+#include "map/terrain.h"
 #include "map/water_supply.h"
 #include "widget/city_building_ghost.h"
 
@@ -77,8 +81,31 @@ static void update_reservoir_access(void)
     }
 }
 
+static int should_draw_graph(int grid_offset)
+{
+    if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
+        return map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset);
+    }
+    if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP | TERRAIN_AQUEDUCT)) {
+        return 0;
+    }
+    if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        const building *b = building_get(map_building_at(grid_offset));
+        if (b->type == BUILDING_WELL || b->type == BUILDING_FOUNTAIN || b->type == BUILDING_RESERVOIR ||
+            (b->type == BUILDING_GRAND_TEMPLE_NEPTUNE && building_monument_gt_module_is_active(NEPTUNE_MODULE_2_CAPACITY_AND_WATER))) {
+            return 0;
+        }
+    }
+
+    return !map_property_is_plaza_earthquake_or_overgrown_garden(grid_offset) ||
+        map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_GARDEN);
+}
+
 static void draw_water_access(int x, int y, int grid_offset)
 {
+    if (!should_draw_graph(grid_offset)) {
+        return;
+    }
     uint8_t water_access = has_water_access[grid_offset];
     if (water_access & WATER_ACCESS_FOUNTAIN) {
         city_building_ghost_draw_fountain_range(x, y, grid_offset);
@@ -89,6 +116,9 @@ static void draw_water_access(int x, int y, int grid_offset)
 
 static void draw_reservoir_access(int x, int y, int grid_offset)
 {
+    if (!should_draw_graph(grid_offset)) {
+        return;
+    }
     if (has_reservoir_access[grid_offset]) {
         city_building_ghost_draw_reservoir_range(x, y, grid_offset);
     }

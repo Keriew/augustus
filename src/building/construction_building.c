@@ -33,6 +33,7 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "map/water.h"
+#include "map/water_supply.h"
 #include "scenario/property.h"
 
 
@@ -643,5 +644,8 @@ int building_construction_place_building(building_type type, int x, int y, int e
         return 0;
     }
     add_to_map(type, b, size, building_orientation, waterside_orientation_abs);
+    if (type == BUILDING_LARGE_STATUE) {
+        map_water_supply_refresh_large_statue(b);
+    }
     return 1;
 }

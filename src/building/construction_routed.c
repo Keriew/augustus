@@ -108,12 +108,12 @@ int building_construction_place_road(int measure_only, int x_start, int y_start,
         TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ELEVATION |
         TERRAIN_RUBBLE | TERRAIN_BUILDING | TERRAIN_WALL;
     if (map_terrain_is(start_offset, forbidden_terrain_mask)) {
-        if (!(map_routing_is_gate_transformable(start_offset))) {
+        if (!(map_routing_is_gate_transformable(start_offset)) && !map_terrain_is(start_offset, TERRAIN_AQUEDUCT)) {
             return 0;
         }
     }
     if (map_terrain_is(end_offset, forbidden_terrain_mask)) {
-        if (!(map_routing_is_gate_transformable(end_offset))) {
+        if (!(map_routing_is_gate_transformable(end_offset)) && !map_terrain_is(end_offset, TERRAIN_AQUEDUCT)) {
             return 0;
         }
     }
@@ -141,10 +141,10 @@ int building_construction_place_highway(int measure_only, int x_start, int y_sta
         TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING |
         TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ELEVATION |
         TERRAIN_RUBBLE | TERRAIN_ACCESS_RAMP;
-    if (map_terrain_is(start_offset, forbidden_terrain_mask)) {
+    if (map_terrain_is(start_offset, forbidden_terrain_mask) && !map_terrain_is(start_offset, TERRAIN_AQUEDUCT)) {
         return 0;
     }
-    if (map_terrain_is(end_offset, forbidden_terrain_mask)) {
+    if (map_terrain_is(end_offset, forbidden_terrain_mask) && !map_terrain_is(end_offset, TERRAIN_AQUEDUCT)) {
         return 0;
     }
 

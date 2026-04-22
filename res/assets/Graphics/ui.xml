@@ -1428,10 +1428,14 @@
     <image src="LandWaypoint" id="LandWaypoint"/>
     <image src="SeaWaypoint" id="SeaWaypoint"/>
     <image src="LandWaypoint" id="BorderWaypoint"/>
-    <image id="Water_Range">
-        <layer group="135" image="4" mask="grayscale"/>
-    </image>
-    <!-- Note: Empire map icon for the City of Alexandria -->
+	<image id="Water_Range">
+		<layer group="135" image="4" mask="grayscale"/>
+	</image>
+	<image id="Reservoir_Range_Overlay_Icon" isometric="true">
+		<layer group="20" image="11"/>
+		<layer src="reservoir_range_mask" mask="alpha"/>
+	</image>
+	<!-- Note: Empire map icon for the City of Alexandria -->
     <image id="Empire_Icon_Roman_06" src="Empire_Icon_Roman_06">
         <animation speed="6" reversible="false" x="16" y="6">
             <frame group="this" image="Empire_Icon_Flag_01"/>

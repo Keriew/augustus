@@ -38,6 +38,7 @@
 #include "map/bridge.h"
 #include "map/desirability.h"
 #include "map/elevation.h"
+#include "map/water_supply.h"
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/random.h"
@@ -133,13 +134,14 @@ building *building_first_of_type(building_type type)
     return data.first_of_type[type];
 }
 
-building *building_main(building *b)
+building *building_main(const building *b)
 {
+    building *part = array_item(data.buildings, b->id);
     for (int guard = 0; guard < 9; guard++) {
-        if (b->prev_part_building_id <= 0) {
-            return b;
+        if (part->prev_part_building_id <= 0) {
+            return part;
         }
-        b = array_item(data.buildings, b->prev_part_building_id);
+        part = array_item(data.buildings, part->prev_part_building_id);
     }
     return array_first(data.buildings);
 }
@@ -266,12 +268,25 @@ building *building_create(building_type type, int x, int y)
     }
 
     // Most roadblock-like buildings should allow everything by default
-    if (building_type_is_roadblock(b->type) && b->type != BUILDING_ROADBLOCK && b->type != BUILDING_GATEHOUSE &&
-        b->type != BUILDING_PALISADE_GATE && config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
+    if (building_type_is_roadblock(b->type) &&
+        b->type != BUILDING_ROADBLOCK &&
+        b->type != BUILDING_GATEHOUSE &&
+        b->type != BUILDING_PALISADE_GATE &&
+        b->type != BUILDING_GRANARY &&
+        b->type != BUILDING_WAREHOUSE &&
+        config_get(CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS)) {
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
-    if (building_type_is_bridge(b->type) || b->type == BUILDING_GRANARY || b->type == BUILDING_WAREHOUSE) {
-        //bridges and other passable buildings should allow all walkers by default
+    if (building_type_is_bridge(b->type)) {
+        // Bridges should allow all walkers by default.
+        b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+    }
+    if (b->type == BUILDING_GRANARY &&
+        !config_get(CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS)) {
+        b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
+    }
+    if (b->type == BUILDING_WAREHOUSE &&
+        !config_get(CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS)) {
         b->data.roadblock.exceptions = ROADBLOCK_PERMISSION_ALL;
     }
 
@@ -642,6 +657,7 @@ void building_update_state(void)
     {
         if (b->state == BUILDING_STATE_CREATED) {
             b->state = BUILDING_STATE_IN_USE;
+            map_water_supply_refresh_large_statue(b);
             // When a created building becomes live, rebuild its cached native image-group bindings immediately.
             building_runtime_apply_graphic(b);
         }

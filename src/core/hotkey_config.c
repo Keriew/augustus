@@ -4,6 +4,7 @@
 #include "core/log.h"
 #include "game/system.h"
 #include "input/hotkey.h"
+#include "platform/file_manager.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -307,7 +308,23 @@ static void load_defaults(void)
 static void load_file(void)
 {
     hotkey_config_clear();
-    FILE *fp = file_open(INI_FILENAME, "rt");
+    const char *file_name = INI_FILENAME;
+    if (file_exists(INI_FILENAME, NOT_LOCALIZED)) {
+        const char *new_file_name = dir_append_location(INI_FILENAME, PATH_LOCATION_CONFIG);
+        if (new_file_name && strcmp(file_name, new_file_name) != 0) {
+            if (platform_file_manager_copy_file(INI_FILENAME, new_file_name)) {
+                platform_file_manager_remove_file(INI_FILENAME);
+                file_name = new_file_name;
+                log_info("Copied hotkey configuration file from default path to config path", 0, 0);
+            }
+        }
+    } else {
+        file_name = dir_get_file_at_location(INI_FILENAME, PATH_LOCATION_CONFIG);
+    }
+    if (!file_name) {
+        return;
+    }
+    FILE *fp = file_open(file_name, "rt");
     if (!fp) {
         return;
     }
@@ -366,7 +383,11 @@ void hotkey_config_load(void)
 void hotkey_config_save(void)
 {
     hotkey_install_mapping(data.mappings, data.num_mappings);
-    FILE *fp = file_open(INI_FILENAME, "wt");
+    const char *file_name = dir_append_location(INI_FILENAME, PATH_LOCATION_CONFIG);
+    if (!file_name) {
+        return;
+    }
+    FILE *fp = file_open(file_name, "wt");
     if (!fp) {
         log_error("Unable to write hotkey configuration file", INI_FILENAME, 0);
         return;
