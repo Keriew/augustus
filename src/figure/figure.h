@@ -7,6 +7,10 @@
 #include "figure/properties.h"
 #include "figure/type.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FIGURE_FACTION_ROAMER_PREVIEW 2
 
 typedef struct {
@@ -168,5 +172,9 @@ int figure_target_is_alive(const figure *f);
 void figure_save_state(buffer *list, buffer *seq);
 
 void figure_load_state(buffer *list, buffer *seq, int version);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FIGURE_FIGURE_H

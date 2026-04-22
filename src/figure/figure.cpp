@@ -1,5 +1,6 @@
 #include "figure/figure.h"
 
+extern "C" {
 #include "building/building.h"
 #include "building/monument.h"
 #include "core/array.h"
@@ -17,6 +18,12 @@
 #include "map/figure.h"
 #include "map/grid.h"
 #include "figure.h"
+}
+
+#include "figure/figure_runtime_api.h"
+
+#include <cstdlib>
+#include <cstring>
 
 #define FIGURE_ARRAY_SIZE_STEP 1000
 
@@ -66,12 +73,13 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
     f->destination_building_id = 0;
     f->wait_ticks = 0;
     random_generate_next();
-    f->name = figure_name_get(type, 0);
+    f->name = figure_name_get(type, static_cast<enemy_type_t>(0));
     f->phrase_sequence_city = f->phrase_sequence_exact = random_byte() & 3;
     map_figure_add(f);
     if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP || type == FIGURE_NATIVE_TRADER) {
         f->trader_id = trader_create();
     }
+    figure_runtime_on_created(f);
     return f;
 }
 
@@ -201,6 +209,7 @@ void figure_delete(figure *f)
     figure_visited_buildings_remove_list(f->last_visited_index);
     figure_route_remove(f);
     map_figure_delete(f);
+    figure_runtime_on_deleted(f);
 
     int figure_id = f->id;
     memset(f, 0, sizeof(figure));
@@ -296,7 +305,7 @@ int figure_is_herd(const figure *f)
 
 int figure_is_category(figure *f, figure_category category)
 {
-    const figure_properties *f_props = figure_properties_for_type(f->type);
+    const figure_properties *f_props = figure_properties_for_type(static_cast<figure_type>(f->type));
     return f_props->category & category;
 }
 
@@ -312,6 +321,7 @@ static int figure_is_active(const figure *f)
 
 void figure_init_scenario(void)
 {
+    figure_runtime_reset();
     if (!array_init(data.figures, FIGURE_ARRAY_SIZE_STEP, initialize_new_figure, figure_is_active) ||
         !array_next(data.figures)) { // Ignore first figure
         log_error("Unable to create figures array. The game will now crash.", 0, 0);
@@ -576,7 +586,7 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     f->current_height = buffer_read_u8(buf);
     f->target_height = buffer_read_u8(buf);
     f->collecting_item_id = (version <= SAVE_GAME_LAST_STATIC_RESOURCES) ?
-        get_resource_id(f->type, buffer_read_u8(buf)) : resource_remap(buffer_read_u8(buf));
+        get_resource_id(static_cast<figure_type>(f->type), buffer_read_u8(buf)) : resource_remap(buffer_read_u8(buf));
     f->trade_ship_failed_dock_attempts = buffer_read_u8(buf);
     f->phrase_sequence_exact = buffer_read_u8(buf);
     f->phrase_id = buffer_read_i8(buf);
@@ -618,7 +628,7 @@ void figure_save_state(buffer *list, buffer *seq)
     buffer_write_i32(seq, data.created_sequence);
 
     int buf_size = 4 + data.figures.size * FIGURE_CURRENT_BUFFER_SIZE;
-    uint8_t *buf_data = malloc(buf_size);
+    uint8_t *buf_data = static_cast<uint8_t *>(malloc(buf_size));
     buffer_init(list, buf_data, buf_size);
     buffer_write_i32(list, FIGURE_CURRENT_BUFFER_SIZE);
 
@@ -631,6 +641,7 @@ void figure_save_state(buffer *list, buffer *seq)
 
 void figure_load_state(buffer *list, buffer *seq, int version)
 {
+    figure_runtime_reset();
     data.created_sequence = buffer_read_i32(seq);
 
     int figure_buf_size = FIGURE_ORIGINAL_BUFFER_SIZE;

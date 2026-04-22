@@ -15,7 +15,7 @@
     If you are unsure, it's best to add them after all the other properties, unless you know a reason why it would be better
     to include them earlier.
     Properties need to be added in two places: Loading and Saving functions. These are usually located in the same file
-    as the .c file of structure, e.g. building state functions are in src/building/state.c; figure functions are in src/figure/figure.c.
+    as the structure file, e.g. building state functions are in src/building/state.c; figure functions are in src/figure/figure.cpp.
 4.  When adding new properties to these functions, you may need to update the buffer size used in the function, which is
     defined on top of the file, e.g. FIGURE_ORIGINAL_BUFFER_SIZE or FIGURE_CURRENT_BUFFER_SIZE.
     *_ORIGINAL_BUFFER_SIZE is used to maintain backward compatibility with old savegames, so it shouldn't be changed.

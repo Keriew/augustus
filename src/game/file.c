@@ -26,6 +26,7 @@
 #include "empire/empire.h"
 #include "empire/trade_prices.h"
 #include "figure/enemy_army.h"
+#include "figure/figure_runtime_api.h"
 #include "figure/formation.h"
 #include "figure/name.h"
 #include "figure/route.h"
@@ -228,6 +229,7 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     // After new city/scenario init, every live building instance is rebound to its runtime wrapper and rebuilds native
     // graphics/storage/production state.
     building_runtime_initialize_city_graphics_cache();
+    figure_runtime_initialize_city();
 }
 
 static void load_empire_data(int is_custom_scenario, int empire_id)
@@ -335,6 +337,7 @@ static void initialize_saved_game(void)
     weather_reset();
     // This is where restored saved buildings rebuild renderer/runtime state again after the world has finished loading.
     building_runtime_initialize_city_graphics_cache();
+    figure_runtime_initialize_city();
 }
 
 static int start_scenario(const uint8_t *scenario_name, const char *scenario_file)

@@ -16,6 +16,7 @@
 #include "empire/object.h"
 #include "figure/enemy_army.h"
 #include "figure/figure.h"
+#include "figure/figure_runtime_api.h"
 #include "figure/formation.h"
 #include "figure/name.h"
 #include "figure/route.h"
@@ -126,6 +127,7 @@ static void prepare_map_for_editing(void)
     figure_init_scenario();
     figure_create_editor_flags();
     figure_create_flotsam();
+    figure_runtime_initialize_city();
 
     map_tiles_update_all_elevation_editor();
     map_tiles_update_all_water();

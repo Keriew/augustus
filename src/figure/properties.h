@@ -3,6 +3,10 @@
 
 #include "figure/type.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     FIGURE_CATEGORY_INACTIVE = 0,
     FIGURE_CATEGORY_CITIZEN = 1 << 0,
@@ -33,5 +37,9 @@ typedef struct {
 } figure_properties;
 
 const figure_properties *figure_properties_for_type(figure_type type);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FIGURE_PROPERTIES_H

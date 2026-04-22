@@ -181,7 +181,7 @@
     <ClCompile Include="src\figure\action.c" />
     <ClCompile Include="src\figure\combat.c" />
     <ClCompile Include="src\figure\enemy_army.c" />
-    <ClCompile Include="src\figure\figure.c" />
+    <ClCompile Include="src\figure\figure.cpp" />
     <ClCompile Include="src\figure\formation.c" />
     <ClCompile Include="src\figure\formation_enemy.c" />
     <ClCompile Include="src\figure\formation_herd.c" />
@@ -194,9 +194,11 @@
     <ClCompile Include="src\figure\properties.c" />
     <ClCompile Include="src\figure\roamer_preview.c" />
     <ClCompile Include="src\figure\route.c" />
+    <ClCompile Include="src\figure\figure_runtime.cpp" />
     <ClCompile Include="src\figure\service.c" />
     <ClCompile Include="src\figure\sound.c" />
     <ClCompile Include="src\figure\trader.c" />
+    <ClCompile Include="src\figure\figure_type_registry.cpp" />
     <ClCompile Include="src\figure\visited_buildings.c" />
     <ClCompile Include="src\game\animation.c" />
     <ClCompile Include="src\game\campaign\campaign.c" />
@@ -690,6 +692,9 @@
     <ClInclude Include="src\figure\combat.h" />
     <ClInclude Include="src\figure\enemy_army.h" />
     <ClInclude Include="src\figure\figure.h" />
+    <ClInclude Include="src\figure\figure_runtime_api.h" />
+    <ClInclude Include="src\figure\figure_type_registry.h" />
+    <ClInclude Include="src\figure\figure_type_registry_internal.h" />
     <ClInclude Include="src\figure\formation.h" />
     <ClInclude Include="src\figure\formation_enemy.h" />
     <ClInclude Include="src\figure\formation_herd.h" />

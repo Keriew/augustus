@@ -2,6 +2,7 @@
 
 #include "building/building_type_registry.h"
 #include "core/image_payload.h"
+#include "figure/figure_type_registry.h"
 #include "game/defines.h"
 
 extern "C" {
@@ -160,6 +161,11 @@ int game_init(void)
     if (!building_type_registry_load()) {
         set_init_failure_message("Failed to load BuildingType definitions.", 0);
         errlog("unable to load BuildingType xml definitions");
+        return 0;
+    }
+    if (!figure_type_registry_load()) {
+        set_init_failure_message("Failed to load FigureType definitions.", figure_type_registry_get_failure_reason());
+        errlog("unable to load FigureType xml definitions");
         return 0;
     }
     if (!tile_type_registry_load()) {
