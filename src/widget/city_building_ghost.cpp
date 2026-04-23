@@ -27,6 +27,7 @@ extern "C" {
 #include "game/state.h"
 #include "graphics/image.h"
 #include "graphics/renderer.h"
+#include "graphics/runtime_overlay_images.h"
 #include "input/scroll.h"
 #include "map/bridge.h"
 #include "map/building.h"
@@ -223,19 +224,27 @@ static void city_building_ghost_draw_bonus_range(int x, int y, int grid_offset)
     image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_POSITIVE_RANGE, data.scale);
 }
 
+static void draw_water_range_overlay(int x, int y, color_t color)
+{
+    const image *overlay = runtime_overlay_image_get(RUNTIME_OVERLAY_IMAGE_WATER_RANGE);
+    if (overlay) {
+        image_draw_image(overlay, x, y, color, data.scale);
+    }
+}
+
 void city_building_ghost_draw_well_range(int x, int y, int grid_offset)
 {
-    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, COLOR_MASK_DARK_BLUE, data.scale);
+    draw_water_range_overlay(x, y, COLOR_MASK_DARK_BLUE);
 }
 
 void city_building_ghost_draw_fountain_range(int x, int y, int grid_offset)
 {
-    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, COLOR_MASK_BLUE, data.scale);
+    draw_water_range_overlay(x, y, COLOR_MASK_BLUE);
 }
 
 static void city_building_ghost_draw_reservoir_range_colored(int x, int y, color_t color)
 {
-    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, color, data.scale);
+    draw_water_range_overlay(x, y, color);
 }
 
 void city_building_ghost_draw_reservoir_range(int x, int y, int grid_offset)
@@ -1305,7 +1314,7 @@ static void draw_highway(const map_tile *tile, int x, int y)
 static void draw_grand_temple_neptune_range(int x, int y, int grid_offset)
 {
     color_t color_mask = data.reservoir_range.blocked ? COLOR_MASK_GRAY : COLOR_MASK_BLUE;
-    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, color_mask, data.scale);
+    draw_water_range_overlay(x, y, color_mask);
 }
 
 static void draw_grand_temple_neptune(const map_tile *tile, int x, int y)

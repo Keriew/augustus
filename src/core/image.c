@@ -12,6 +12,7 @@
 #include "core/log.h"
 #include "graphics/font.h"
 #include "graphics/renderer.h"
+#include "graphics/runtime_overlay_images.h"
 #include "map/building_tiles.h"
 #include "map/image.h"
 #include "map/terrain.h"
@@ -790,6 +791,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
         graphics_renderer()->has_image_atlas(ATLAS_MAIN)) {
         return 1;
     }
+    runtime_overlay_images_reset();
     graphics_renderer()->get_max_image_size(&data.max_image_width, &data.max_image_height);
 
     for (int i = 0; i < IMAGE_MAIN_ENTRIES; i++) {
@@ -879,6 +881,9 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     }
     graphics_renderer()->create_image_atlas(atlas_data, !keep_atlas_buffers);
     image_packer_free(&data.packer);
+    if (!runtime_overlay_images_init_or_reload()) {
+        return 0;
+    }
 
     // Fix engineer's post animation offset
     if (!is_editor) {

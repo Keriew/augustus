@@ -315,14 +315,13 @@ void collect_reservoirs(SimulationResult &result, const SimulationInput &input)
     }
 }
 
-ReservoirInstance *find_dry_reservoir_with_node_at(SimulationResult &result, int grid_offset)
+void mark_dry_reservoirs_with_node_at(SimulationResult &result, int grid_offset)
 {
     for (ReservoirInstance &reservoir : result.reservoirs) {
         if (!reservoir.water_state && reservoir_has_node_at(reservoir, grid_offset)) {
-            return &reservoir;
+            reservoir.water_state = 2;
         }
     }
-    return nullptr;
 }
 
 void fill_aqueducts_from_connection(int grid_offset, const SimulationInput &input, SimulationResult &result)
@@ -341,16 +340,13 @@ void fill_aqueducts_from_connection(int grid_offset, const SimulationInput &inpu
             return;
         }
         if (is_aqueduct_tile_for_simulation(offset, input)) {
+            // A reservoir connection is made by the aqueduct tile occupying a
+            // declared node, not by an empty node next to a wet aqueduct.
+            mark_dry_reservoirs_with_node_at(result, offset);
             if (!result.wet_aqueduct[offset]) {
                 result.wet_aqueduct[offset] = 1;
                 pending.push_back(offset);
             }
-            return;
-        }
-
-        ReservoirInstance *reservoir = find_dry_reservoir_with_node_at(result, offset);
-        if (reservoir) {
-            reservoir->water_state = 2;
         }
     };
 
@@ -959,10 +955,7 @@ extern "C" int water_access_runtime_should_draw_overlay_at(int grid_offset)
     if (!map_grid_is_valid_offset(grid_offset)) {
         return 0;
     }
-    if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
-        return map_terrain_is(grid_offset, TERRAIN_BUILDING) && !map_is_bridge(grid_offset);
-    }
-    if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP | TERRAIN_AQUEDUCT)) {
+    if (map_terrain_is(grid_offset, TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP | TERRAIN_AQUEDUCT)) {
         return 0;
     }
     if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {

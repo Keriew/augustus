@@ -409,6 +409,7 @@
     <ClCompile Include="src\graphics\graphics.cpp" />
     <ClCompile Include="src\graphics\grid_box.c" />
     <ClCompile Include="src\graphics\image.cpp" />
+    <ClCompile Include="src\graphics\runtime_overlay_images.cpp" />
     <ClCompile Include="src\graphics\runtime_texture.cpp" />
     <ClCompile Include="src\graphics\image_button.c" />
     <ClCompile Include="src\graphics\image_button_widget.cpp" />
@@ -934,6 +935,7 @@
     <ClInclude Include="src\graphics\panel_widget.h" />
     <ClInclude Include="src\graphics\renderer.h" />
     <ClInclude Include="src\graphics\rich_text.h" />
+    <ClInclude Include="src\graphics\runtime_overlay_images.h" />
     <ClInclude Include="src\graphics\font_vector_runtime.h" />
     <ClInclude Include="src\graphics\text_runtime_internal.h" />
     <ClInclude Include="src\graphics\screen.h" />
