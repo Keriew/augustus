@@ -129,10 +129,10 @@ unsigned int scenario_demand_change_count_total(void)
 int scenario_demand_change_count_active(void)
 {
     int count = 0;
-    unsigned int total = scenario_demand_change_count_total();
-    for (unsigned int i = 0; i < total; i++) {
-        const demand_change_t *dc = scenario_demand_change_get(i);
-        if (dc->year) {
+    demand_change_t *demand_change;
+    array_foreach(demand_changes, demand_change)
+    {
+        if (demand_change_in_use(demand_change)) {
             count++;
         }
     }
