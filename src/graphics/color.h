@@ -17,7 +17,9 @@ typedef uint32_t color_t;
 #define COLOR_SIDEBAR 0xffbdb592
 
 #define COLOR_BORDER_GREEN 0xfffae094   //light yellow
+#define COLOR_BORDER_ORANGE 0xffffb584
 #define COLOR_BORDER_RED 0xffac5446
+#define COLOR_BORDER_BROWN 0xff684a34
 
 #define COLOR_FONT_RED COLOR_RED
 #define COLOR_FONT_BLUE 0xff0055ff
