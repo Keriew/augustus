@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="well">
+    <water_access>
+        <type value="well" />
+        <range value="2" />
+        <requirement value="none" />
+    </water_access>
     <graphics>
         <default>
             <path value="Admin_Logistics\Well" />

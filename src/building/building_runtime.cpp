@@ -1,5 +1,6 @@
 #include "building/building_runtime_internal.h"
 #include "building/building_type_registry_internal.h"
+#include "building/water_access_runtime.h"
 
 #include "assets/image_group_payload.h"
 #include "building/building_runtime_graphics.h"
@@ -190,16 +191,19 @@ building_runtime *get_or_create_instance(::building *building_data)
 
 void building_runtime::refresh_runtime_state()
 {
-    if (!building_ || !definition_ || !definition_->has_graphic()) {
+    if (!building_ || !definition_) {
         return;
     }
 
     if (definition_->water_access_mode() == building_type_registry_impl::WaterAccessMode::ReservoirRange) {
-        building_->has_water_access =
-            map_terrain_exists_tile_in_area_with_type(building_->x, building_->y, building_->size, TERRAIN_RESERVOIR_RANGE);
+        building_->has_water_access = water_access_runtime_building_area_has_access(
+            building_,
+            WATER_ACCESS_RUNTIME_TYPE_RESERVOIR) ? 1 : 0;
     }
 
-    building_->upgrade_level = definition_->upgrade_level_for(*building_);
+    if (definition_->has_graphic()) {
+        building_->upgrade_level = definition_->upgrade_level_for(*building_);
+    }
 }
 
 void building_runtime::clear_cached_graphics_bindings()

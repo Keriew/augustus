@@ -7,6 +7,7 @@ Templates and examples are maintained only in `Mods\Vespasian\BuildingType`.
 
 Current supported nodes:
 
+- `<water_access> ... </water_access>`
 - `<state> ... </state>`
 - `<graphics> ... </graphics>`
 - `<labor> ... </labor>`
@@ -18,6 +19,22 @@ Current supported nodes:
 Current supported `<state>` child nodes:
 
 - `<water_access mode="reservoir_range" />`
+
+Current supported root-level `<water_access>` child nodes:
+
+- `<type value="well|fountain|reservoir" />`
+- `<range value="N" />`
+- `<requirement value="none|reservoir_network|water_source_any|water_source_fresh_only" />`
+- `<node kind="aqueduct_connection" x="N" y="N" />`
+
+Root-level `<water_access>` rules:
+
+- `<type>` and `<range>` are required
+- `<requirement>` is optional and defaults to `none`
+- `<node>` is optional and may appear more than once
+- `x` and `y` are local tile coordinates relative to the building's top-left footprint tile
+- node coordinates may sit outside the footprint
+- `kind="aqueduct_connection"` is the only supported node kind in this slice
 
 Current supported `<graphics>` child nodes:
 
@@ -46,6 +63,7 @@ Structured `<graphics>` rules:
 - the `<default>` target is used when no variant matches
 - `<path>` and optional `<image>` must live inside `<default>` or `<variant>`
 - put water refresh rules under `<state>`, not under `<graphics>`
+- put provider-side water radius/network data under the root `<water_access>` block, not under `<graphics>`
 
 Current supported graphics conditions:
 
@@ -119,6 +137,7 @@ Current engine behavior:
 - Graphics-only vertical-slice definitions are valid; runtime-owned production and storage references can be layered onto those same BuildingType files as they migrate.
 - BuildingType native storage and production references are resolved at load time; unresolved paths are hard load failures.
 - Put shared derived state such as water access under `<state>` so graphics and spawn behavior read the same runtime facts.
+- Put provider-side water coverage and connection-node data under the root `<water_access>` block so the native water runtime stays data-driven.
 - Put BuildingType-authored employee defaults under `<labor><employees ... /></labor>` so the XML and live model table stay in sync.
 - Buildings with a validated runtime `BuildingType` graphics block usually use the native runtime renderer path as the authoritative live path; current data-only vertical slices remain on legacy live rendering until their runtime rollout lands.
 

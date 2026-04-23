@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="reservoir">
+    <water_access>
+        <type value="reservoir" />
+        <range value="10" />
+        <requirement value="water_source_any" />
+        <node kind="aqueduct_connection" x="1" y="-1" />
+        <node kind="aqueduct_connection" x="3" y="1" />
+        <node kind="aqueduct_connection" x="1" y="3" />
+        <node kind="aqueduct_connection" x="-1" y="1" />
+    </water_access>
+    <labor>
+        <employees count="0" />
+    </labor>
+</building>
