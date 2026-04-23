@@ -2070,10 +2070,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS, "Амбары по умолчанию не пропускают пешеходов"},
     {TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS, "Склады по умолчанию не пропускают пешеходов"},
     {TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA, "Изменить характеристики зданий"},
-    {TR_EDITOR_PRICE_CHANGE, "Изменение цены"},
-    {TR_EDITOR_PRICE_CHANGES, "Изменений цен"},
-    {TR_EDITOR_DEMAND_CHANGE, "Изменение спроса"},
-    {TR_EDITOR_DEMAND_CHANGES, "Изменений спроса"},
+    {TR_EDITOR_PRICE_CHANGE, "изменение цены"},
+    {TR_EDITOR_PRICE_CHANGES, "изменений цен"},
+    {TR_EDITOR_DEMAND_CHANGE, "изменение спроса"},
+    {TR_EDITOR_DEMAND_CHANGES, "изменений спроса"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

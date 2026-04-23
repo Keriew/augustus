@@ -2070,10 +2070,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS, "Granaries do not allow walkers by default"},
     {TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS, "Warehouses do not allow walkers by default"},
     {TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA, "Change model data"},     // window/attributes
-    {TR_EDITOR_PRICE_CHANGE, "Price change"},
-    {TR_EDITOR_PRICE_CHANGES, "Price changes"},
-    {TR_EDITOR_DEMAND_CHANGE, "Demand change"},
-    {TR_EDITOR_DEMAND_CHANGES, "Demand changes"},
+    {TR_EDITOR_PRICE_CHANGE, "price change"},
+    {TR_EDITOR_PRICE_CHANGES, "price changes"},
+    {TR_EDITOR_DEMAND_CHANGE, "demand change"},
+    {TR_EDITOR_DEMAND_CHANGES, "demand changes"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
