@@ -107,6 +107,19 @@ unsigned int scenario_price_change_count_total(void)
     return price_changes.size;
 }
 
+int scenario_price_change_count_active(void)
+{
+    int count = 0;
+    unsigned int total = scenario_price_change_count_total();
+    for (unsigned int i = 0; i < total; i++) {
+        const price_change_t *pc = scenario_price_change_get(i);
+        if (pc->year) {
+            count++;
+        }
+    }
+    return count;
+}
+
 void scenario_price_change_save_state(buffer *buf)
 {
     buffer_init_dynamic_array(buf, price_changes.size, PRICE_CHANGES_STRUCT_SIZE_CURRENT);

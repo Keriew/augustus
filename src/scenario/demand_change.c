@@ -126,6 +126,19 @@ unsigned int scenario_demand_change_count_total(void)
     return demand_changes.size;
 }
 
+int scenario_demand_change_count_active(void)
+{
+    int count = 0;
+    unsigned int total = scenario_demand_change_count_total();
+    for (unsigned int i = 0; i < total; i++) {
+        const demand_change_t *dc = scenario_demand_change_get(i);
+        if (dc->year) {
+            count++;
+        }
+    }
+    return count;
+}
+
 void scenario_demand_change_save_state(buffer *buf)
 {
     buffer_init_dynamic_array(buf, demand_changes.size, DEMAND_CHANGES_STRUCT_SIZE_CURRENT);
