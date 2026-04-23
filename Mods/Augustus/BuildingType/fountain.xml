@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="fountain">
+    <water_access>
+        <type value="fountain" />
+        <range value="4" />
+        <requirement value="reservoir_network" />
+    </water_access>
+    <labor>
+        <employees count="4" />
+    </labor>
+</building>

@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <building type="replace_with_building_attr">
+    <!-- Optional provider-side water access definition -->
+    <water_access>
+        <type value="reservoir" />
+        <range value="10" />
+        <requirement value="water_source_any" />
+        <node kind="aqueduct_connection" x="1" y="-1" />
+        <node kind="aqueduct_connection" x="3" y="1" />
+        <node kind="aqueduct_connection" x="1" y="3" />
+        <node kind="aqueduct_connection" x="-1" y="1" />
+    </water_access>
+
     <!-- Optional runtime state definition -->
     <state>
         <water_access mode="reservoir_range" />

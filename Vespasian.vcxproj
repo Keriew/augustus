@@ -39,6 +39,7 @@
     <ClCompile Include="src\building\building_type.cpp" />
     <ClCompile Include="src\building\building_type_registry.cpp" />
     <ClCompile Include="src\building\building_type_registry_xml.cpp" />
+    <ClCompile Include="src\building\water_access_runtime.cpp" />
     <ClCompile Include="src\building\caravanserai.c" />
     <ClCompile Include="src\building\clone.c" />
     <ClCompile Include="src\building\connectable.c" />
@@ -237,6 +238,7 @@
     <ClCompile Include="src\graphics\graphics.cpp" />
     <ClCompile Include="src\graphics\grid_box.c" />
     <ClCompile Include="src\graphics\image.cpp" />
+    <ClCompile Include="src\graphics\runtime_overlay_images.cpp" />
     <ClCompile Include="src\graphics\runtime_texture.cpp" />
     <ClCompile Include="src\graphics\image_button.c" />
     <ClCompile Include="src\graphics\image_button_widget.cpp" />
@@ -280,7 +282,7 @@
     <ClCompile Include="src\input\scroll.c" />
     <ClCompile Include="src\input\touch.c" />
     <ClCompile Include="src\input\zoom.c" />
-    <ClCompile Include="src\map\aqueduct.c" />
+    <ClCompile Include="src\map\aqueduct.cpp" />
     <ClCompile Include="src\map\bookmark.c" />
     <ClCompile Include="src\map\bridge.c" />
     <ClCompile Include="src\map\building.c" />
@@ -312,7 +314,7 @@
     <ClCompile Include="src\map\tile_type_registry_xml.cpp" />
     <ClCompile Include="src\map\tiles.cpp" />
     <ClCompile Include="src\map\water.c" />
-    <ClCompile Include="src\map\water_supply.c" />
+    <ClCompile Include="src\map\water_supply.cpp" />
     <ClCompile Include="src\platform\arguments.c" />
     <ClCompile Include="src\platform\augustus.cpp" />
     <ClCompile Include="src\platform\crash_handler.c" />
@@ -396,7 +398,7 @@
     <ClCompile Include="src\widget\city_overlay_other.c" />
     <ClCompile Include="src\widget\city_overlay_risks.c" />
     <ClCompile Include="src\widget\city_pause_menu.cpp" />
-    <ClCompile Include="src\widget\city_water_ghost.c" />
+    <ClCompile Include="src\widget\city_water_ghost.cpp" />
     <ClCompile Include="src\widget\city_without_overlay.cpp" />
     <ClCompile Include="src\widget\city_with_overlay.cpp" />
     <ClCompile Include="src\widget\dropdown_button.c" />
@@ -552,6 +554,7 @@
     <ClInclude Include="src\building\construction_warning.h" />
     <ClInclude Include="src\building\count.h" />
     <ClInclude Include="src\building\data_transfer.h" />
+    <ClInclude Include="src\building\water_access_runtime.h" />
     <ClInclude Include="src\building\destruction.h" />
     <ClInclude Include="src\building\distribution.h" />
     <ClInclude Include="src\building\dock.h" />
@@ -763,6 +766,7 @@
     <ClInclude Include="src\graphics\panel_widget.h" />
     <ClInclude Include="src\graphics\renderer.h" />
     <ClInclude Include="src\graphics\rich_text.h" />
+    <ClInclude Include="src\graphics\runtime_overlay_images.h" />
     <ClInclude Include="src\graphics\screen.h" />
     <ClInclude Include="src\graphics\screenshot.h" />
     <ClInclude Include="src\graphics\scrollbar.h" />

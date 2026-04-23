@@ -27,7 +27,12 @@ struct ParseState {
     int saw_storages = 0;
     int saw_production_methods = 0;
     int saw_state = 0;
+    int saw_provider_water_access = 0;
+    int saw_provider_water_access_type = 0;
+    int saw_provider_water_access_range = 0;
+    int saw_provider_water_access_requirement = 0;
     int parsing_state = 0;
+    int parsing_provider_water_access = 0;
     int parsing_graphics = 0;
     int parsing_labor = 0;
     int parsing_storages = 0;

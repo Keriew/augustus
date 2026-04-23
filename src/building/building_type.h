@@ -28,6 +28,25 @@ enum class GraphicComparison {
     GreaterThanOrEqual
 };
 
+enum class WaterAccessType {
+    None,
+    Well,
+    Fountain,
+    Reservoir
+};
+
+enum class WaterAccessRequirement {
+    None,
+    ReservoirNetwork,
+    WaterSourceAny,
+    WaterSourceFreshOnly
+};
+
+enum class WaterAccessNodeKind {
+    None,
+    AqueductConnection
+};
+
 enum class WaterAccessMode {
     None,
     ReservoirRange
@@ -144,6 +163,34 @@ struct GraphicsCondition {
     int matches(const ::building &building) const;
 };
 
+struct WaterAccessNode {
+    WaterAccessNodeKind kind = WaterAccessNodeKind::None;
+    int x = 0;
+    int y = 0;
+};
+
+class WaterAccessDefinition {
+public:
+    void set_type(WaterAccessType type);
+    void set_range(int range);
+    void set_requirement(WaterAccessRequirement requirement);
+    void add_node(WaterAccessNode node);
+
+    int has_provider() const;
+    WaterAccessType type() const;
+    int range() const;
+    WaterAccessRequirement requirement() const;
+    const std::vector<WaterAccessNode> &nodes() const;
+
+private:
+    int has_type_ = 0;
+    int has_range_ = 0;
+    WaterAccessType type_ = WaterAccessType::None;
+    int range_ = 0;
+    WaterAccessRequirement requirement_ = WaterAccessRequirement::None;
+    std::vector<WaterAccessNode> nodes_;
+};
+
 class LaborDefinition {
 public:
     void set_employee_count(int count);
@@ -207,6 +254,10 @@ public:
     BuildingType(building_type type, std::string attr);
 
     void set_state_water_access_mode(WaterAccessMode mode);
+    void set_water_access_type(WaterAccessType type);
+    void set_water_access_range(int range);
+    void set_water_access_requirement(WaterAccessRequirement requirement);
+    void add_water_access_node(WaterAccessNode node);
     void mark_graphics_default_node();
     void clear_graphics();
     GraphicsTarget &default_graphics_target();
@@ -227,9 +278,11 @@ public:
     building_type type() const;
     const char *attr() const;
     const StateDefinition &state() const;
+    const WaterAccessDefinition &water_access() const;
     const GraphicsDefinition &graphics() const;
     const GraphicsTarget *resolve_graphics_target(const ::building &building) const;
     WaterAccessMode water_access_mode() const;
+    int has_water_access_provider() const;
     int has_graphic() const;
     int has_labor() const;
     const LaborDefinition &labor() const;
@@ -246,6 +299,7 @@ private:
     building_type type_;
     std::string attr_;
     StateDefinition state_;
+    WaterAccessDefinition water_access_;
     GraphicsDefinition graphics_;
     LaborDefinition labor_;
     std::vector<SpawnDelayGroup> spawn_groups_;
