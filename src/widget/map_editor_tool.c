@@ -134,9 +134,13 @@ static void draw_terrain_preview(int x, int y, tool_type type, int ring)
     switch (type) {
         case TOOL_TREES:
             image_id = image_group(GROUP_TERRAIN_TREE);
-            if (ring >= 3) image_id += 24;
-            else if (ring >= 2) image_id += 16;
-            else if (ring >= 1) image_id += 8;
+            if (ring >= 3) {
+                image_id += 24;
+            } else if (ring >= 2) {
+                image_id += 16;
+            } else if (ring >= 1) {
+                image_id += 8;
+            }
             break;
         case TOOL_ROCKS:
             image_id = image_group(GROUP_TERRAIN_ROCK);
@@ -146,13 +150,19 @@ static void draw_terrain_preview(int x, int y, tool_type type, int ring)
             break;
         case TOOL_MEADOW:
             image_id = image_group(GROUP_TERRAIN_MEADOW);
-            if (ring >= 2) image_id += 8;
-            else if (ring >= 1) image_id += 4;
+            if (ring >= 2) {
+                image_id += 8;
+            } else if (ring >= 1) {
+                image_id += 4;
+            }
             break;
         case TOOL_EARTHQUAKE_CUSTOM:
             image_id = image_group(GROUP_TERRAIN_EARTHQUAKE);
-            if (ring >= 1) image_id += 29;
-            else image_id += 24;
+            if (ring >= 1) {
+                image_id += 29;
+            } else {
+                image_id += 24;
+            }
             break;
         default:
             draw_flat_tile(x, y, COLOR_MASK_GREEN);
