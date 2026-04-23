@@ -126,6 +126,8 @@ static const char *ini_keys[] = {
     "ui_wt_sandstorm_size",
     "ui_wt_snowflake_size",
     "ui_wt_weather_duration",
+    "gameplay_change_granary_do_not_allow_walkers",
+    "gameplay_change_warehouse_do_not_allow_walkers",
     "ui_scale_filter"
 };
 
@@ -249,6 +251,8 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     0,
     2,
     1,
+    0,
+    0,
     CONFIG_UI_SCALE_FILTER_AUTO
 };
 

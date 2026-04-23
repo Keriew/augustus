@@ -334,7 +334,8 @@ static int can_build_highway(int next_offset, int check_highway_routing)
         for (int y = 0; y < size; y++) {
             int offset = next_offset + map_grid_delta(x, y);
             int terrain = map_terrain_get(offset);
-            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
+            if ((terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_ROAD) &&
+                !(terrain & TERRAIN_AQUEDUCT)) {
                 return 0;
             } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
                 return 0;

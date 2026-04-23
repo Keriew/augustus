@@ -31,6 +31,7 @@ extern "C" {
 #include "game/tick.h"
 #include "graphics/font.h"
 #include "graphics/graphics.h"
+#include "graphics/runtime_overlay_images.h"
 #include "graphics/text.h"
 #include "graphics/video.h"
 #include "graphics/window.h"
@@ -311,6 +312,7 @@ void game_exit(void)
     building_runtime_reset();
     tile_runtime_reset();
     image_group_payload_clear_all();
+    runtime_overlay_images_reset();
     image_payload_clear_all();
     font_reset_mod_font_pack();
 

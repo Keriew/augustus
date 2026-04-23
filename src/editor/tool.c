@@ -208,7 +208,9 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             map_building_tiles_remove(0, x, y);
             terrain = map_terrain_get(grid_offset);
         }
-        map_property_clear_multi_tile_xy(grid_offset);
+        if (!(terrain & (TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP))) {
+            map_property_clear_multi_tile_xy(grid_offset);
+        }
     }
     if (terrain & TERRAIN_RUBBLE) {
         map_terrain_remove(grid_offset, TERRAIN_RUBBLE);

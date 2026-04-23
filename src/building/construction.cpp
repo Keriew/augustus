@@ -594,7 +594,6 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     info->place_reservoir_at_end = PLACE_RESERVOIR_NO;
 
     game_undo_restore_map(0);
-    int terrain_mask = TERRAIN_NOT_CLEAR & ~TERRAIN_AQUEDUCT; //allow reservoir over aqueducts
     int distance = calc_maximum_distance(x_start, y_start, x_end, y_end);
     if (measure_only && !data.in_progress) {
         distance = 0;
@@ -602,7 +601,8 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     if (distance > 0) {
         if (map_building_is_reservoir(x_start - 1, y_start - 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_EXISTS;
-        } else if (map_tiles_are_clear(x_start - 1, y_start - 1, 3, terrain_mask, 1)) {
+        } else if (map_tiles_are_clear_with_terrain_exception(x_start - 1, y_start - 1, 3,
+            TERRAIN_NOT_CLEAR, TERRAIN_AQUEDUCT, 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_YES;
         } else {
             info->place_reservoir_at_start = PLACE_RESERVOIR_BLOCKED;
@@ -610,7 +610,8 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     }
     if (map_building_is_reservoir(x_end - 1, y_end - 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_EXISTS;
-    } else if (map_tiles_are_clear(x_end - 1, y_end - 1, 3, terrain_mask, 1)) {
+    } else if (map_tiles_are_clear_with_terrain_exception(x_end - 1, y_end - 1, 3,
+        TERRAIN_NOT_CLEAR, TERRAIN_AQUEDUCT, 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_YES;
     } else {
         info->place_reservoir_at_end = PLACE_RESERVOIR_BLOCKED;
@@ -632,6 +633,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     if (!map_routing_calculate_distances_for_building(ROUTED_BUILDING_AQUEDUCT, x_start, y_start)) {
         return 0;
     }
+    int terrain_mask = TERRAIN_NOT_CLEAR & ~TERRAIN_AQUEDUCT & ~TERRAIN_BUILDING;
     if (info->place_reservoir_at_start != PLACE_RESERVOIR_NO) {
         map_routing_block(x_start - 1, y_start - 1, 3);
         mark_construction(x_start - 1, y_start - 1, 3, terrain_mask, 1);
@@ -681,6 +683,21 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
         info->cost += aq_items * model_get_building(BUILDING_AQUEDUCT)->cost;
     }
     return 1;
+}
+
+static unsigned int remove_aqueduct_tiles_for_reservoir(int x, int y)
+{
+    unsigned int removed_aqueduct_tiles = 0;
+    for (int yy = y; yy < y + 3; yy++) {
+        for (int xx = x; xx < x + 3; xx++) {
+            int grid_offset = map_grid_offset(xx, yy);
+            if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+                map_aqueduct_remove(grid_offset);
+                removed_aqueduct_tiles++;
+            }
+        }
+    }
+    return removed_aqueduct_tiles;
 }
 
 void building_construction_set_cost(int cost)
@@ -1267,24 +1284,28 @@ void building_construction_place(void)
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return;
         }
+        unsigned int removed_aqueduct_tiles = 0;
         if (info.place_reservoir_at_start == PLACE_RESERVOIR_YES) {
             building *reservoir = building_create(BUILDING_RESERVOIR, x_start - 1, y_start - 1);
             game_undo_add_building(reservoir);
+            removed_aqueduct_tiles += remove_aqueduct_tiles_for_reservoir(x_start - 1, y_start - 1);
             map_building_tiles_add(reservoir->id, x_start - 1, y_start - 1, 3,
                 image_group(GROUP_BUILDING_RESERVOIR), TERRAIN_BUILDING);
-            map_aqueduct_remove(map_grid_offset(x_start - 1, y_start - 1));
         }
         if (info.place_reservoir_at_end == PLACE_RESERVOIR_YES) {
             building *reservoir = building_create(BUILDING_RESERVOIR, x_end - 1, y_end - 1);
             game_undo_add_building(reservoir);
+            removed_aqueduct_tiles += remove_aqueduct_tiles_for_reservoir(x_end - 1, y_end - 1);
             map_building_tiles_add(reservoir->id, x_end - 1, y_end - 1, 3,
                 image_group(GROUP_BUILDING_RESERVOIR), TERRAIN_BUILDING);
-            map_aqueduct_remove(map_grid_offset(x_end - 1, y_end - 1));
             if (!map_terrain_exists_tile_in_area_with_type(x_start - 2, y_start - 2, 5, TERRAIN_WATER)
                 && info.place_reservoir_at_start == PLACE_RESERVOIR_NO &&
                 !map_water_supply_has_aqueduct_access(reservoir->grid_offset)) {
                 building_construction_warning_check_reservoir(BUILDING_RESERVOIR);
             }
+        }
+        if (removed_aqueduct_tiles) {
+            game_undo_disable();
         }
         placement_cost = info.cost;
         map_tiles_update_all_aqueducts(0);
@@ -1409,4 +1430,9 @@ void building_construction_reset_draw_as_constructing(void)
 int building_construction_draw_as_constructing(void)
 {
     return data.draw_as_constructing;
+}
+
+int building_construction_uses_custom_ghost_preview(void)
+{
+    return building_construction_type() == BUILDING_DRAGGABLE_RESERVOIR;
 }

@@ -120,12 +120,15 @@ void widget_city_draw_construction_cost_and_size(void)
     if (!cost && !has_size) {
         return;
     }
-    set_city_clip_rectangle();
+    int clip_x, clip_y, clip_width, clip_height;
+    city_view_get_viewport(&clip_x, &clip_y, &clip_width, &clip_height);
+    graphics_set_clip_rectangle(screen_pixel_to_ui(clip_x), screen_pixel_to_ui(clip_y),
+        screen_pixel_to_ui(clip_width), screen_pixel_to_ui(clip_height));
     int x, y;
     city_view_get_selected_tile_pixels(&x, &y);
     int inverted_scale = calc_percentage(100, city_view_get_scale());
-    x = calc_adjust_with_percentage(x, inverted_scale);
-    y = calc_adjust_with_percentage(y, inverted_scale);
+    x = screen_pixel_to_ui(calc_adjust_with_percentage(x, inverted_scale));
+    y = screen_pixel_to_ui(calc_adjust_with_percentage(y, inverted_scale));
 
     if (cost) {
         color_t color;

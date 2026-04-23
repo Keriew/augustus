@@ -39,6 +39,7 @@ static void update_anchor(dropdown_button *dd)
     anchor->color_mask = selected->color_mask;
     anchor->font = selected->font;
     anchor->style = selected->style;
+    memcpy((void *) &anchor->tooltip_c, (void *) &selected->tooltip_c, sizeof(tooltip_context));
 }
 
 /* --- Default left click handler for dropdown options --- */
@@ -192,6 +193,13 @@ void dropdown_button_draw(const dropdown_button *dd)
     }
 }
 
+static void unfocuse_all(const dropdown_button *dd)
+{
+    for (unsigned int i = 0; i < dd->num_buttons; i++) {
+        dd->buttons[i].is_focused = 0;
+    }
+}
+
 int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
 {
     int handled = 0; // indicator if returning 1 - means rest of the input handling should stop
@@ -216,10 +224,11 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
         for (unsigned int i = 1; i < dd->num_buttons; i++) { //handle option buttons
             if (complex_button_handle_mouse(m, &dd->buttons[i])) {
                 dd->expanded = 0; // collapse
-                dd->selected_index = i; // This is  the best place to set selected_index
-                if (dd->selected_callback && i) {// activate the callback if dropdown state changed. 
+                dd->selected_index = i; // This is the best place to set selected_index
+                if (dd->selected_callback && i) { // activate the callback if dropdown state changed.
                     dd->selected_callback((dropdown_button *) dd); // pass dd as parameter, with selected index set
                 }
+                unfocuse_all(dd); // remove focus from all buttons so the tooltip functions
                 window_request_refresh();
                 return handled;
             }
@@ -228,12 +237,14 @@ int dropdown_button_handle_mouse(const mouse *m, dropdown_button *dd)
             if (dd->rightclick_expanded_callback) {
                 dd->rightclick_expanded_callback((dropdown_button *) dd);
                 dd->expanded = 0; // collapse
+                unfocuse_all(dd); // remove focus from all buttons so the tooltip functions
                 window_request_refresh();
                 return handled;
             }
         }
         if (m->left.went_up) { // collapse if clicked outside
             dd->expanded = 0;
+            unfocuse_all(dd); // remove focus from all buttons so the tooltip functions
             window_request_refresh();
         }
     }

@@ -73,6 +73,10 @@ void city_overlay_problems_prepare_building(building *b)
         b->show_on_problem_overlay = 1;
     } else if ((b->type == BUILDING_ARENA || b->type == BUILDING_COLOSSEUM) && !b->data.entertainment.days2) {
         b->show_on_problem_overlay = 1;
+    } else if (b->type == BUILDING_DEPOT &&
+        (!b->data.depot.current_order.src_storage_id ||
+         !b->data.depot.current_order.dst_storage_id)) {
+        b->show_on_problem_overlay = 1;
     } else if (b->has_road_access == 0 &&
         building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
         b->show_on_problem_overlay = 1;
@@ -190,7 +194,8 @@ static int show_figure_enemy(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
     return props->category & FIGURE_CATEGORY_HOSTILE || props->category & FIGURE_CATEGORY_AGGRESSIVE_ANIMAL
-        || props->category & FIGURE_CATEGORY_ARMED || props->category & FIGURE_CATEGORY_PROJECTILE;
+        || props->category & FIGURE_CATEGORY_ARMED || props->category & FIGURE_CATEGORY_PROJECTILE
+        || f->type == FIGURE_FORT_STANDARD;
 }
 
 static int get_column_height_fire(const building *b)
@@ -367,6 +372,10 @@ static int get_tooltip_problems(tooltip_context *c, const building *b)
     } else if (b->type == BUILDING_HIPPODROME && !b->data.entertainment.days1) {
         c->text_group = 73;
         return 5;
+    } else if (b->type == BUILDING_DEPOT &&
+        (!b->data.depot.current_order.src_storage_id ||
+         !b->data.depot.current_order.dst_storage_id)) {
+        c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS;
     } else if (b->has_road_access == 0 &&
         building_get_laborers(b->type) && b->type != BUILDING_LATRINES && b->type != BUILDING_FOUNTAIN) {
         c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_NO_ROAD_ACCESS;

@@ -27,6 +27,7 @@ typedef enum {
     SOUND_AMBIENT_EMPTY_TERRAIN01,
     SOUND_AMBIENT_EMPTY_TERRAIN02,
     SOUND_AMBIENT_EMPTY_LAND,
+    SOUND_AMBIENT_WHEAT,
     SOUND_AMBIENT_MAX
 } sound_ambient_type;
 
@@ -64,7 +65,7 @@ static struct {
         [SOUND_CITY_LION_PIT]           = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/lion_pit.wav" } },
         [SOUND_CITY_ACTOR_COLONY]       = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/art_pit.wav" } },
         [SOUND_CITY_CHARIOT_MAKER]      = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/char_pit.wav" } },
-        [SOUND_CITY_GARDEN]             = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/gardens1.wav" } },
+        [SOUND_CITY_GARDEN]             = { .filenames.total = 4, .filenames.list = (sound_filenames[]) { "wavs/gardens1.wav", "wavs/gardens2.wav", "wavs/gardens3.wav", "wavs/gardens4.wav" } },
         [SOUND_CITY_CLINIC]             = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/clinic.wav" } },
         [SOUND_CITY_HOSPITAL]           = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/hospital.wav" } },
         [SOUND_CITY_BATHHOUSE]          = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/baths.wav" } },
@@ -137,6 +138,7 @@ static struct {
         [SOUND_AMBIENT_EMPTY_TERRAIN01] = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Terrain01.ogg" } },
         [SOUND_AMBIENT_EMPTY_TERRAIN02] = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { ASSETS_DIRECTORY "/Sounds/Terrain02.ogg" } },
         [SOUND_AMBIENT_EMPTY_LAND]      = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/empty_land.wav" } },
+        [SOUND_AMBIENT_WHEAT]           = { .filenames.total = 1, .filenames.list = (sound_filenames[]) { "wavs/wheat.wav" } },
     }
 };
 
@@ -356,7 +358,7 @@ static void sound_city_play_ambient(void)
     time_millis now = time_get_millis();
 
     // Skip if ambient interval not reached or too soon after a city sound
-    if (now - data.ambient_last_played_time < AMBIENT_PLAY_INTERVAL_MILLIS * 2) {
+    if (now - data.ambient_last_played_time < AMBIENT_PLAY_INTERVAL_MILLIS * 3) {
         return;
     }
     if (now - data.last_update_time < SOUND_PLAY_INTERVAL_MILLIS) {

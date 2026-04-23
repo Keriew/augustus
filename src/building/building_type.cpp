@@ -79,6 +79,53 @@ int GraphicsCondition::matches(const ::building &building) const
     }
 }
 
+void WaterAccessDefinition::set_type(WaterAccessType type)
+{
+    has_type_ = 1;
+    type_ = type;
+}
+
+void WaterAccessDefinition::set_range(int range)
+{
+    has_range_ = 1;
+    range_ = range;
+}
+
+void WaterAccessDefinition::set_requirement(WaterAccessRequirement requirement)
+{
+    requirement_ = requirement;
+}
+
+void WaterAccessDefinition::add_node(WaterAccessNode node)
+{
+    nodes_.push_back(std::move(node));
+}
+
+int WaterAccessDefinition::has_provider() const
+{
+    return has_type_ && has_range_;
+}
+
+WaterAccessType WaterAccessDefinition::type() const
+{
+    return has_type_ ? type_ : WaterAccessType::None;
+}
+
+int WaterAccessDefinition::range() const
+{
+    return has_range_ ? range_ : 0;
+}
+
+WaterAccessRequirement WaterAccessDefinition::requirement() const
+{
+    return requirement_;
+}
+
+const std::vector<WaterAccessNode> &WaterAccessDefinition::nodes() const
+{
+    return nodes_;
+}
+
 void LaborDefinition::set_employee_count(int count)
 {
     has_employee_count_ = 1;
@@ -229,6 +276,26 @@ void BuildingType::set_state_water_access_mode(WaterAccessMode mode)
     state_.set_water_access_mode(mode);
 }
 
+void BuildingType::set_water_access_type(WaterAccessType type)
+{
+    water_access_.set_type(type);
+}
+
+void BuildingType::set_water_access_range(int range)
+{
+    water_access_.set_range(range);
+}
+
+void BuildingType::set_water_access_requirement(WaterAccessRequirement requirement)
+{
+    water_access_.set_requirement(requirement);
+}
+
+void BuildingType::add_water_access_node(WaterAccessNode node)
+{
+    water_access_.add_node(std::move(node));
+}
+
 void BuildingType::mark_graphics_default_node()
 {
     graphics_.mark_default_node();
@@ -325,6 +392,11 @@ const StateDefinition &BuildingType::state() const
     return state_;
 }
 
+const WaterAccessDefinition &BuildingType::water_access() const
+{
+    return water_access_;
+}
+
 const GraphicsDefinition &BuildingType::graphics() const
 {
     return graphics_;
@@ -338,6 +410,11 @@ const GraphicsTarget *BuildingType::resolve_graphics_target(const ::building &bu
 WaterAccessMode BuildingType::water_access_mode() const
 {
     return state_.water_access_mode();
+}
+
+int BuildingType::has_water_access_provider() const
+{
+    return water_access_.has_provider();
 }
 
 int BuildingType::has_graphic() const

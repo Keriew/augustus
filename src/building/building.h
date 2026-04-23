@@ -224,7 +224,7 @@ building *building_first_of_type(building_type type);
 
 void building_change_type(building *b, building_type type);
 
-building *building_main(building *b);
+building *building_main(const building *b);
 
 building *building_next(building *b);
 

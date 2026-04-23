@@ -304,9 +304,7 @@ static void draw_foreground(void)
             draw_paused_banner();
         }
     }
-    screen_set_pixel_render_scale();
     widget_city_draw_construction_cost_and_size();
-    screen_set_ui_render_scale();
     if (window_is(WINDOW_CITY)) {
         city_message_process_queue();
     }

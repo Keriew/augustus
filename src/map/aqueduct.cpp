@@ -1,6 +1,7 @@
+extern "C" {
 #include "aqueduct.h"
-
 #include "map/grid.h"
+}
 
 #define WATER_ACCESS_OFFSET 7
 #define IMAGE_MASK 0x7f
@@ -20,12 +21,13 @@ int map_aqueduct_image_at(int grid_offset)
 
 void map_aqueduct_set_water_access(int grid_offset, int value)
 {
-    aqueduct.items[grid_offset] = (value << WATER_ACCESS_OFFSET) | (aqueduct.items[grid_offset] & IMAGE_MASK);
+    aqueduct.items[grid_offset] = static_cast<uint8_t>(
+        (value << WATER_ACCESS_OFFSET) | (aqueduct.items[grid_offset] & IMAGE_MASK));
 }
 
 void map_aqueduct_set_image(int grid_offset, int value)
 {
-    aqueduct.items[grid_offset] = (aqueduct.items[grid_offset] & ~IMAGE_MASK) | value;
+    aqueduct.items[grid_offset] = static_cast<uint8_t>((aqueduct.items[grid_offset] & ~IMAGE_MASK) | value);
 }
 
 void map_aqueduct_remove(int grid_offset)

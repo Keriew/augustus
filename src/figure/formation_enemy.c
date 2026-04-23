@@ -267,21 +267,30 @@ static int set_enemy_target_building(formation *m)
 }
 
 
+static int native_target_can_anchor_search(const building *b)
+{
+    return b->state == BUILDING_STATE_IN_USE;
+}
+
 static int get_structures_on_native_land(int *dst_x, int *dst_y)
 {
     int meeting_x, meeting_y;
     city_buildings_main_native_meeting_center(&meeting_x, &meeting_y);
 
-    building_type native_buildings[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_WATCHTOWER,
-        BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT };
+    building_type native_buildings[] = {
+        BUILDING_NATIVE_MEETING,
+        BUILDING_NATIVE_WATCHTOWER,
+        BUILDING_NATIVE_HUT,
+        BUILDING_NATIVE_HUT_ALT
+    };
     int min_distance = INFINITE;
 
     for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]) && min_distance == INFINITE; i++) {
         building_type type = native_buildings[i];
         int size = building_properties_for_type(type)->size;
-        int radius = size * 2;
+        int radius = size * 3;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
-            if (b->state != BUILDING_STATE_IN_USE) {
+            if (!native_target_can_anchor_search(b)) {
                 continue;
             }
             int x_min, y_min, x_max, y_max;
@@ -311,7 +320,7 @@ static void set_native_target_building(formation *m)
     int min_distance = INFINITE;
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
-        if (b->state != BUILDING_STATE_IN_USE) {
+        if (b->state != BUILDING_STATE_IN_USE || b->type == BUILDING_GARDENS) {
             continue;
         }
         switch (b->type) {
