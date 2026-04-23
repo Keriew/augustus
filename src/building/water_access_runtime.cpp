@@ -520,11 +520,14 @@ void build_water_masks(const SimulationInput &input, SimulationResult &result)
 void set_aqueduct_to_no_water(int grid_offset)
 {
     map_aqueduct_set_water_access(grid_offset, 0);
+    if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+        map_image_set(grid_offset, map_tiles_highway_get_aqueduct_image(grid_offset));
+        return;
+    }
+
     int image_id = map_image_at(grid_offset);
     if (image_id < image_group(GROUP_BUILDING_AQUEDUCT_NO_WATER)) {
         map_image_set(grid_offset, image_id + kNoWaterImageOffset);
-    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
-        map_image_set(grid_offset, map_tiles_highway_get_aqueduct_image(grid_offset));
     }
 }
 
@@ -645,6 +648,29 @@ void project_building_state(const SimulationResult &result)
     for (building *b = building_first_of_type(BUILDING_LATRINES); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE) {
             mark_latrines_access(b, water_access_runtime_range_for_building(BUILDING_LATRINES));
+        }
+    }
+
+    for (building *b = building_first_of_type(BUILDING_CONCRETE_MAKER); b; b = b->next_of_type) {
+        b->has_water_access = 0;
+        if (b->state != BUILDING_STATE_IN_USE) {
+            continue;
+        }
+        if (area_has_access(
+                result.masks.access,
+                b->x,
+                b->y,
+                b->size,
+                access_bit(building_type_registry_impl::WaterAccessType::Reservoir))) {
+            b->has_water_access = 2;
+        } else if (area_has_access(
+                result.masks.access,
+                b->x,
+                b->y,
+                b->size,
+                access_bit(building_type_registry_impl::WaterAccessType::Fountain)) ||
+                b->has_well_access) {
+            b->has_water_access = 1;
         }
     }
 

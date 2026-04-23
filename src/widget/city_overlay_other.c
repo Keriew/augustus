@@ -9,6 +9,7 @@
 #include "building/roadblock.h"
 #include "building/rotation.h"
 #include "building/storage.h"
+#include "building/water_access_runtime.h"
 #include "city/constants.h"
 #include "city/finance.h"
 #include "core/calc.h"
@@ -19,6 +20,7 @@
 #include "game/state.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/runtime_overlay_images.h"
 #include "graphics/text.h"
 #include "map/bridge.h"
 #include "map/building.h"
@@ -438,13 +440,17 @@ static int get_tooltip_employment(tooltip_context *c, const building *b)
 
 static int get_tooltip_water(tooltip_context *c, int grid_offset)
 {
-    if (map_terrain_is(grid_offset, TERRAIN_RESERVOIR_RANGE)) {
-        if (map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
+    int has_reservoir_access = water_access_runtime_tile_has_access(grid_offset, WATER_ACCESS_RUNTIME_TYPE_RESERVOIR);
+    int has_fountain_access = water_access_runtime_tile_has_access(grid_offset, WATER_ACCESS_RUNTIME_TYPE_FOUNTAIN);
+    int has_well_access = water_access_runtime_tile_has_access(grid_offset, WATER_ACCESS_RUNTIME_TYPE_WELL);
+
+    if (has_reservoir_access) {
+        if (has_fountain_access || has_well_access) {
             return 2;
         } else {
             return 1;
         }
-    } else if (map_terrain_is(grid_offset, TERRAIN_FOUNTAIN_RANGE)) {
+    } else if (has_fountain_access || has_well_access) {
         return 3;
     }
     return 0;
@@ -675,44 +681,9 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
         int image_id = image_group(GROUP_TERRAIN_GRASS_1) + (map_random_get(grid_offset) & 7);
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
     } else if (is_building) {
-        building *b = building_get(map_building_at(grid_offset));
-        int terrain = map_terrain_get(grid_offset);
-        if (b->id && (b->has_well_access || (b->house_size && b->has_water_access))) {
-            terrain |= TERRAIN_FOUNTAIN_RANGE;
-        }
-        int image_offset;
-        switch (terrain & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-            case TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE:
-                image_offset = 24;
-                break;
-            case TERRAIN_RESERVOIR_RANGE:
-                image_offset = 8;
-                break;
-            case TERRAIN_FOUNTAIN_RANGE:
-                image_offset = 16;
-                break;
-            default:
-                image_offset = 0;
-                break;
-        }
-        city_with_overlay_draw_building_footprint(x, y, grid_offset, image_offset);
+        city_with_overlay_draw_building_footprint(x, y, grid_offset, 0);
     } else {
-        int image_id = image_group(GROUP_TERRAIN_OVERLAY);
-        switch (map_terrain_get(grid_offset) & (TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE)) {
-            case TERRAIN_RESERVOIR_RANGE | TERRAIN_FOUNTAIN_RANGE:
-                image_id += 27;
-                break;
-            case TERRAIN_RESERVOIR_RANGE:
-                image_id += 11;
-                break;
-            case TERRAIN_FOUNTAIN_RANGE:
-                image_id += 19;
-                break;
-            default:
-                image_id = map_image_at(grid_offset);
-                break;
-        }
-        image_draw_isometric_footprint_from_draw_tile(image_id, x, y, 0, scale);
+        image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, 0, scale);
     }
     if (config_get(CONFIG_UI_SHOW_GRID) && map_property_is_draw_tile(grid_offset)
                                     && !map_building_at(grid_offset) && scale <= 2.0f) {
@@ -724,6 +695,37 @@ static int draw_footprint_water(int x, int y, float scale, int grid_offset)
         image_draw(grid_id, x, y, COLOR_GRID, scale);
     }
     return 1;
+}
+
+static color_t water_overlay_runtime_color(int grid_offset)
+{
+    if (water_access_runtime_tile_has_access(grid_offset, WATER_ACCESS_RUNTIME_TYPE_FOUNTAIN)) {
+        return COLOR_MASK_BLUE;
+    }
+    if (water_access_runtime_tile_has_access(grid_offset, WATER_ACCESS_RUNTIME_TYPE_WELL)) {
+        return COLOR_MASK_DARK_BLUE;
+    }
+    if (water_access_runtime_tile_has_access(grid_offset, WATER_ACCESS_RUNTIME_TYPE_RESERVOIR)) {
+        return map_terrain_is(grid_offset, TERRAIN_ROAD) ? ALPHA_MASK_SEMI_TRANSPARENT : COLOR_MASK_RESERVOIR_RANGE;
+    }
+    return ALPHA_TRANSPARENT;
+}
+
+static void draw_water_runtime_overlay(int x, int y, float scale, int grid_offset)
+{
+    if (!water_access_runtime_should_draw_overlay_at(grid_offset)) {
+        return;
+    }
+
+    color_t color = water_overlay_runtime_color(grid_offset);
+    if (color == ALPHA_TRANSPARENT) {
+        return;
+    }
+
+    const image *overlay = runtime_overlay_image_get(RUNTIME_OVERLAY_IMAGE_WATER_RANGE);
+    if (overlay) {
+        image_draw_image(overlay, x, y, color, scale);
+    }
 }
 
 static int draw_top_water(int x, int y, float scale, int grid_offset)
@@ -756,7 +758,8 @@ const city_overlay *city_overlay_for_water(void)
         get_tooltip_water,
         0,
         draw_footprint_water,
-        draw_top_water
+        draw_top_water,
+        draw_water_runtime_overlay
     };
     return &overlay;
 }
