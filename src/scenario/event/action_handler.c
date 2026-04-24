@@ -101,6 +101,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_goal_execute(action);
         case ACTION_TYPE_MOVE_CAMERA:
             return scenario_action_type_move_camera_execute(action);
+        case ACTION_TYPE_CHANGE_WEATHER:
+            return scenario_action_type_change_weather_execute(action);
         default:
             return 0;
     }

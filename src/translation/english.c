@@ -2147,7 +2147,16 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FOURTH_FOODTYPE_MISSING_DEVOLVE, "This house will devolve soon, as it currently only has access to 3 types of food from its local market."},
     {TR_BUILDING_FIFTH_FOODTYPE_MISSING_EVOLVE, "This house cannot evolve, as it needs a fifth type of food, supplied from a local market."},
     {TR_BUILDING_FIFTH_FOODTYPE_MISSING_DEVOLVE, "This house will devolve soon, as it currently only has access to 4 types of food from its local market."},
-    {TR_ACTION_TYPE_MOVE_CAMERA, "Move camera"}
+    {TR_ACTION_TYPE_MOVE_CAMERA, "Move camera"},
+    {TR_ACTION_TYPE_CHANGE_WEATHER, "Change weather"},
+    {TR_PARAMETER_INTENSITY, "Intensity"},
+    {TR_PARAMETER_TYPE_WEATHER, "Weather type"},
+    {TR_PARAMETER_CLEAN_WEATHER, "Clear"},
+    {TR_CITY_PROPERTY_OPENED_ROUTES, "Opened trade routes"},
+    {TR_PARAMETER_TYPE_ROUTE_TYPE, "Route type"},
+    {TR_PARAMETER_ROUTE_TYPE_ALL, "All"},
+    {TR_PARAMETER_ROUTE_TYPE_LAND, "Land"},
+    {TR_PARAMETER_ROUTE_TYPE_SEA, "Sea"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

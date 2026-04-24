@@ -153,7 +153,7 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm5 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_ENEMIES_IN_CITY] = {.type = CONDITION_TYPE_ENEMIES_IN_CITY,
-                                        .xml_attr = {.name = "enemies_in_city",      .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_ENEMIES_IN_CITY}, 
+                                        .xml_attr = {.name = "enemies_in_city",      .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_ENEMIES_IN_CITY},
                                         .xml_parm1 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm2 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_LAND_TRADE_PROBLEMS] = {.type = CONDITION_TYPE_LAND_TRADE_PROBLEMS,
@@ -367,10 +367,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_LOCK_TRADE_ROUTE]     = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
                                         .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
-                                        .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE }, 
+                                        .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "lock",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_LOCK },
                                         .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE }, },
-    [ACTION_TYPE_CHANGE_GOAL]          = {.type = ACTION_TYPE_CHANGE_GOAL, 
+    [ACTION_TYPE_CHANGE_GOAL]          = {.type = ACTION_TYPE_CHANGE_GOAL,
                                         .xml_attr = {.name = "change_goal",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_GOAL},
                                         .xml_parm1 = {.name = "win_condition",   .type = PARAMETER_TYPE_WIN_CONDITION,    .key = TR_PARAMETER_TYPE_WIN_CONDITION},
                                         .xml_parm2 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
@@ -380,6 +380,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
     [ACTION_TYPE_MOVE_CAMERA]          = {.type = ACTION_TYPE_MOVE_CAMERA,
                                         .xml_attr = {.name = "move_camera",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_MOVE_CAMERA},
                                         .xml_parm1 = {.name = "grid_offset",   .type = PARAMETER_TYPE_GRID_OFFSET,    .min_limit = 0,    .max_limit = UNLIMITED,    .key = TR_PARAMETER_GRID_OFFSET}, },
+    [ACTION_TYPE_CHANGE_WEATHER]       = {.type = ACTION_TYPE_CHANGE_WEATHER,
+                                        .xml_attr = {.name = "change_weather", .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_WEATHER},
+                                        .xml_parm1 = {.name = "weather_type",    .type = PARAMETER_TYPE_WEATHER, .key = TR_PARAMETER_TYPE_WEATHER},
+                                        .xml_parm2 = {.name = "intensity",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_INTENSITY}, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -870,7 +875,8 @@ static special_attribute_mapping_t special_attribute_mappings_city_property[] = 
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_player",     .value = CITY_PROPERTY_TROOPS_COUNT_PLAYER,     .key = TR_CITY_PROPERTY_TROOPS_COUNT_PLAYER },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "troops_count_enemy",      .value = CITY_PROPERTY_TROOPS_COUNT_ENEMY,      .key = TR_CITY_PROPERTY_TROOPS_COUNT_ENEMY },
     {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "terrain_count_tiles",     .value = CITY_PROPERTY_TERRAIN_COUNT_TILES,     .key = TR_CITY_PROPERTY_TERRAIN_COUNT_TILES },
-    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill",       .value = CITY_PROPERTY_QUOTA_FILL,              .key = TR_CITY_PROPERTY_QUOTA_FILL },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "quota_fill",              .value = CITY_PROPERTY_QUOTA_FILL,              .key = TR_CITY_PROPERTY_QUOTA_FILL },
+    {.type = PARAMETER_TYPE_CITY_PROPERTY, .text = "opened_trade_routes",     .value = CITY_PROPERTY_OPENED_ROUTES,           .key = TR_CITY_PROPERTY_OPENED_ROUTES },
 
 };
 
@@ -940,6 +946,21 @@ static special_attribute_mapping_t special_attribute_mappings_win_condition[] = 
     {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "population",      .value = SCENARIO_WIN_CONDITION_POPULATION,     .key = TR_SCENARIO_WIN_CONDITION_POPULATION },
 };
 #define SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE (sizeof(special_attribute_mappings_win_condition) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_weather_type[] = {
+    {.type = PARAMETER_TYPE_WEATHER, .text = "clear",          .value = 0,        .key = TR_PARAMETER_CLEAN_WEATHER },
+    {.type = PARAMETER_TYPE_WEATHER, .text = "rain",           .value = 1,        .key = TR_CONFIG_HEADER_RAIN },
+    {.type = PARAMETER_TYPE_WEATHER, .text = "snow",           .value = 2,        .key = TR_CONFIG_HEADER_SNOW },
+    {.type = PARAMETER_TYPE_WEATHER, .text = "sand",           .value = 3,        .key = TR_CONFIG_HEADER_SAND },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_WEATHER_TYPE_SIZE (sizeof(special_attribute_mappings_weather_type) / sizeof(special_attribute_mapping_t))
+
+static special_attribute_mapping_t special_attribute_mappings_route_type[] = {
+    {.type = PARAMETER_TYPE_ROUTE_TYPE, .text = "all",          .value = 0,        .key = TR_PARAMETER_ROUTE_TYPE_ALL },
+    {.type = PARAMETER_TYPE_ROUTE_TYPE, .text = "land",         .value = 1,        .key = TR_PARAMETER_ROUTE_TYPE_LAND },
+    {.type = PARAMETER_TYPE_ROUTE_TYPE, .text = "sea",          .value = 2,        .key = TR_PARAMETER_ROUTE_TYPE_SEA },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_ROUTE_TYPE_SIZE (sizeof(special_attribute_mappings_route_type) / sizeof(special_attribute_mapping_t))
 
 static void generate_building_type_mappings(void)
 {
@@ -1085,6 +1106,10 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_rank[index];
         case PARAMETER_TYPE_WIN_CONDITION:
             return &special_attribute_mappings_win_condition[index];
+        case PARAMETER_TYPE_WEATHER:
+            return &special_attribute_mappings_weather_type[index];
+        case PARAMETER_TYPE_ROUTE_TYPE:
+            return &special_attribute_mappings_route_type[index];
         default:
             return 0;
     }
@@ -1153,6 +1178,10 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE;
         case PARAMETER_TYPE_WIN_CONDITION:
             return SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE;
+        case PARAMETER_TYPE_WEATHER:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_WEATHER_TYPE_SIZE;
+        case PARAMETER_TYPE_ROUTE_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_ROUTE_TYPE_SIZE;
         default:
             return 0;
     }

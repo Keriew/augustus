@@ -26,6 +26,7 @@
 #include "empire/trade_route.h"
 #include "game/time.h"
 #include "game/resource.h"
+#include "graphics/weather.h"
 #include "map/building.h"
 #include "map/grid.h"
 #include "map/property.h"
@@ -39,7 +40,7 @@
 #include "scenario/event/controller.h"
 #include "scenario/event/formula.h"
 #include "scenario/event/parameter_city.h"
-#include "scenario/gladiator_revolt.h"  
+#include "scenario/gladiator_revolt.h"
 #include "scenario/custom_messages.h"
 #include "scenario/invasion.h"
 #include "scenario/property.h"
@@ -115,7 +116,7 @@ int scenario_action_type_change_custom_variable_visibility(scenario_action_t *ac
 int scenario_action_type_custom_variable_formula_execute(scenario_action_t *action)
 {
     int variable_id = action->parameter1;
-    unsigned int formula_id = (unsigned int) action->parameter2; //cast 
+    unsigned int formula_id = (unsigned int) action->parameter2; //cast
 
     int evaluation = scenario_formula_evaluate_formula(formula_id);
     scenario_custom_variable_set_value(variable_id, evaluation);
@@ -740,7 +741,7 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
                     building *b = building_main(building_get(building_id));
                     building_destroy_without_rubble(b);
                 }
-                // Since the engine only supports one blocking terrain per tile, 
+                // Since the engine only supports one blocking terrain per tile,
                 // remove all others before adding a new one
                 map_terrain_remove(current_grid_offset, TERRAIN_NOT_CLEAR);
             }
@@ -873,7 +874,7 @@ int scenario_action_type_lock_trade_route_execute(scenario_action_t *action)
     }
 
     int city_id = empire_city_get_for_trade_route(route_id);
-    
+
     if (show_message) {
         if (lock && empire_city_is_trade_route_open(route_id)) {
             city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, RESOURCE_NONE);
@@ -945,6 +946,16 @@ int scenario_action_type_move_camera_execute(scenario_action_t *action)
     int grid_offset = action->parameter1;
 
     city_view_go_to_grid_offset(grid_offset);
+
+    return 1;
+}
+
+int scenario_action_type_change_weather_execute(scenario_action_t *action)
+{
+    int weather_type = action->parameter1;
+    int intensity = action->parameter2;
+
+    set_weather(1, intensity, weather_type);
 
     return 1;
 }

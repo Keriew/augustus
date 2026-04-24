@@ -519,6 +519,8 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_CITY_PROPERTY:
         case PARAMETER_TYPE_MEDIA_TYPE:
         case PARAMETER_TYPE_WIN_CONDITION:
+        case PARAMETER_TYPE_WEATHER:
+        case PARAMETER_TYPE_ROUTE_TYPE:
             return xml_import_special_parse_type(attr, resolved_type, target);
         case PARAMETER_TYPE_ROUTE_RESOURCE:
             return xml_import_special_parse_number(attr, target);
