@@ -627,7 +627,7 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
 
     if (water == 2 && !house->has_water_access) {
         if (!house->has_latrines_access) {
-            house->data.house.evolve_text_id = 67;
+            house->data.house.evolve_text_id = TR_BUILDING_LATRINES_MISSING_DEVOLVE;
             return;
         }
     }
@@ -671,6 +671,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             return;
         } else if (foodtypes_required == 3) {
             house->data.house.evolve_text_id = 11;
+            return;
+        } else if (foodtypes_required == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_FOODTYPE_MISSING_DEVOLVE;
+            return;
+        } else if (foodtypes_required == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_FOODTYPE_MISSING_DEVOLVE;
             return;
         }
     }
@@ -785,7 +791,7 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
 
     if (water == 2 && !house->has_water_access) {
         if (!house->has_latrines_access || !house->has_well_access) {
-            house->data.house.evolve_text_id = 68;        
+            house->data.house.evolve_text_id = TR_BUILDING_LATRINES_MISSING_EVOLVE;        
             return;
         }
     }
@@ -827,6 +833,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             return;
         } else if (foodtypes_required == 3) {
             house->data.house.evolve_text_id = 41;
+            return;
+        } else if (foodtypes_required == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_FOODTYPE_MISSING_EVOLVE;
+            return;
+        } else if (foodtypes_required == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_FOODTYPE_MISSING_EVOLVE;
             return;
         }
     }

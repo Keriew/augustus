@@ -17,6 +17,7 @@
 #include "city/sentiment.h"
 #include "city/trade.h"
 #include "city/victory.h"
+#include "city/view.h"
 #include "core/random.h"
 #include "core/calc.h"
 #include "empire/city.h"
@@ -776,7 +777,7 @@ int scenario_action_type_change_model_data_execute(scenario_action_t *action)
     int *value = model_get_ptr_for_building_data_type(model_ptr, data_type);
     *value = calc_bound(amount + (set_to_value ? 0 : *value), model_get_min_for_data_type(data_type),
         model_get_max_for_data_type(data_type));
-    
+
     return 1;
 }
 
@@ -866,11 +867,11 @@ int scenario_action_type_lock_trade_route_execute(scenario_action_t *action)
     int route_id = action->parameter1;
     int lock = action->parameter2;
     int show_message = action->parameter3;
-    
+
     if (!trade_route_is_valid(route_id)) {
         return 0;
     }
-    
+
     int city_id = empire_city_get_for_trade_route(route_id);
     
     if (show_message) {
@@ -896,7 +897,7 @@ int scenario_action_type_change_goal_execute(scenario_action_t *action)
     int win_condition = action->parameter1;
     int value = scenario_formula_evaluate_formula(action->parameter2);
     int set_to_value = action->parameter3;
-    
+
     value = calc_bound(value, 0, scenario_criteria_get_max_value(win_condition));
     switch(win_condition) {
         case SCENARIO_WIN_CONDITION_CULTURE:
@@ -935,6 +936,15 @@ int scenario_action_type_change_goal_execute(scenario_action_t *action)
             }
             break;
     }
+
+    return 1;
+}
+
+int scenario_action_type_move_camera_execute(scenario_action_t *action)
+{
+    int grid_offset = action->parameter1;
+
+    city_view_go_to_grid_offset(grid_offset);
 
     return 1;
 }

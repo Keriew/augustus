@@ -41,8 +41,9 @@ static struct {
     map_tile start_tile;
     grid_slice *land_selection; // selection being edited right now
     void (*selection_callback)(grid_slice *selection);
+    void (*single_selection_callback)(int grid_offset);
     int found_custom_earthquake;
-} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, 0, 0 };
+} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, 0, 0, 0 };
 
 tool_type editor_tool_type(void)
 {
@@ -79,6 +80,7 @@ void editor_tool_set_type(tool_type type)
 void editor_tool_clear_selection_callback(void)
 {
     data.selection_callback = 0;
+    data.single_selection_callback = 0;
 }
 
 void editor_tool_set_with_id(tool_type type, int id)
@@ -575,6 +577,11 @@ void editor_tool_end_use(const map_tile *tile)
             if (data.selection_callback && data.land_selection) {
                 data.selection_callback(data.land_selection);
             }
+            data.active = 0;
+            break;
+        case TOOL_SELECT_OFFSET:
+            data.single_selection_callback(tile->grid_offset);
+            data.active = 0;
             break;
         default:
             break;
@@ -584,6 +591,11 @@ void editor_tool_end_use(const map_tile *tile)
 void editor_tool_set_selection_callback(void (*callback)(grid_slice *selection))
 {
     data.selection_callback = callback;
+}
+
+void editor_tool_set_single_selection_callback(void (*callback)(int grid_offset))
+{
+    data.single_selection_callback = callback;
 }
 
 grid_slice *editor_tool_get_land_selection(void)

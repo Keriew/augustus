@@ -563,6 +563,22 @@ static void start_grid_slice_selection(void)
     window_editor_map_show();
 }
 
+static void on_grid_offset_selected(int grid_offset)
+{
+    data.action->parameter1 = grid_offset;
+    widget_map_editor_add_draw_context_event_tile(grid_offset, data.action->parent_event_id);
+    scenario_events_fetch_event_tiles_to_editor();
+    editor_tool_clear_selection_callback();
+    window_go_back();
+}
+
+static void start_grid_offset_selection(void)
+{
+    editor_tool_set_single_selection_callback(on_grid_offset_selected);
+    editor_tool_set_type(TOOL_SELECT_OFFSET);
+    window_editor_map_show();
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -634,6 +650,9 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             return;
         case PARAMETER_TYPE_RESOURCE_ALL:
             all_resource_selection(button);
+            return;
+        case PARAMETER_TYPE_GRID_OFFSET:
+            start_grid_offset_selection();
             return;
         default:
             return;

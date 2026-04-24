@@ -2142,7 +2142,12 @@ static translation_string all_strings[] = {
     {TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS, "Warehouses do not allow walkers by default"},
     {TR_CONDITION_TYPE_ENEMIES_IN_CITY, "Enemy count in city"},
     {TR_CONDITION_TYPE_LAND_TRADE_PROBLEMS, "Land trade problem duration"},
-    {TR_CONDITION_TYPE_SEA_TRADE_PROBLEMS, "Sea trade problem duration"}
+    {TR_CONDITION_TYPE_SEA_TRADE_PROBLEMS, "Sea trade problem duration"},
+    {TR_BUILDING_FOURTH_FOODTYPE_MISSING_EVOLVE, "This house cannot evolve, as it needs a fourth type of food, supplied from a local market."},
+    {TR_BUILDING_FOURTH_FOODTYPE_MISSING_DEVOLVE, "This house will devolve soon, as it currently only has access to 3 types of food from its local market."},
+    {TR_BUILDING_FIFTH_FOODTYPE_MISSING_EVOLVE, "This house cannot evolve, as it needs a fifth type of food, supplied from a local market."},
+    {TR_BUILDING_FIFTH_FOODTYPE_MISSING_DEVOLVE, "This house will devolve soon, as it currently only has access to 4 types of food from its local market."},
+    {TR_ACTION_TYPE_MOVE_CAMERA, "Move camera"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

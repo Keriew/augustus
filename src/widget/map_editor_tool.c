@@ -254,5 +254,10 @@ void map_editor_tool_draw(const map_tile *tile)
                 draw_flat_tile(x, y, COLOR_MASK_AMBER);
             }
             break;
+
+        case TOOL_SELECT_OFFSET:
+            draw_flat_tile(x, y, COLOR_MASK_AMBER);
+            break;
+
     }
 }

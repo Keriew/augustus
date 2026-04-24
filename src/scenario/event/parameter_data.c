@@ -353,7 +353,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
     [ACTION_TYPE_CHANGE_PRODUCTION_RATE] = {.type = ACTION_TYPE_CHANGE_PRODUCTION_RATE,
                                         .xml_attr = {.name = "change_production_rate",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_PRODUCTION_RATE},
                                         .xml_parm1 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE_ALL,   .key = TR_PARAMETER_TYPE_RESOURCE },
-                                        .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
+                                        .xml_parm2 = {.name = "rate",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = NEGATIVE_UNLIMITED,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
@@ -361,7 +361,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "change_house_model_data",  .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA},
                                         .xml_parm1 = {.name = "housing_level",       .type = PARAMETER_TYPE_HOUSING_TYPE,   .key = TR_PARAMETER_TYPE_HOUSING_TYPE },
                                         .xml_parm2 = {.name = "house_data_type",     .type = PARAMETER_TYPE_HOUSE_DATA_TYPE, .key = TR_PARAMETER_DATA_TYPE},
-                                        .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = NEGATIVE_UNLIMITED,
+                                        .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
@@ -376,7 +376,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
-                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, }
+                                            .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
+    [ACTION_TYPE_MOVE_CAMERA]          = {.type = ACTION_TYPE_MOVE_CAMERA,
+                                        .xml_attr = {.name = "move_camera",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_MOVE_CAMERA},
+                                        .xml_parm1 = {.name = "grid_offset",   .type = PARAMETER_TYPE_GRID_OFFSET,    .min_limit = 0,    .max_limit = UNLIMITED,    .key = TR_PARAMETER_GRID_OFFSET}, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -1188,6 +1191,7 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
     switch (attribute_data->type) {
         case PARAMETER_TYPE_NUMBER:
         case PARAMETER_TYPE_GRID_SLICE:
+        case PARAMETER_TYPE_GRID_OFFSET:
             if (attribute_data->min_limit > 0) {
                 return attribute_data->min_limit;
             } else {
@@ -1333,6 +1337,7 @@ const uint8_t *scenario_events_parameter_data_get_display_string(special_attribu
             }
             break;
         case PARAMETER_TYPE_GRID_SLICE:
+        case PARAMETER_TYPE_GRID_OFFSET:
         {
             static uint8_t buffer[16];
             string_from_int(buffer, entry->value, 0);
@@ -1406,6 +1411,7 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
         case PARAMETER_TYPE_NUMBER:
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
         case PARAMETER_TYPE_GRID_SLICE:
+        case PARAMETER_TYPE_GRID_OFFSET:
             string_from_int(result_text, value, 0);
             return;
         case PARAMETER_TYPE_CUSTOM_VARIABLE:

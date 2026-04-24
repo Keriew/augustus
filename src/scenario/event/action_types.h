@@ -92,4 +92,6 @@ int scenario_action_type_lock_trade_route_execute(scenario_action_t *action);
 
 int scenario_action_type_change_goal_execute(scenario_action_t *action);
 
+int scenario_action_type_move_camera_execute(scenario_action_t *action);
+
 #endif // ACTION_TYPES_H

@@ -67,7 +67,8 @@ static void write_type_data(buffer *buf, const building *b)
         buffer_write_u8(buf, b->data.house.health);
         buffer_write_u8(buf, b->data.house.num_gods);
         buffer_write_u8(buf, b->data.house.devolve_delay);
-        buffer_write_u8(buf, b->data.house.evolve_text_id);
+        buffer_write_u16(buf, b->data.house.evolve_text_id);
+        // has to be u16 since custom translation keys are stored in there too
     } else if (b->type == BUILDING_CARAVANSERAI || b->type == BUILDING_LARGE_TEMPLE_CERES ||
         b->type == BUILDING_LARGE_TEMPLE_VENUS) {
         buffer_write_u8(buf, b->data.market.fetch_inventory_id);
@@ -294,7 +295,11 @@ static void read_type_data(buffer *buf, building *b, int version)
         b->data.house.health = buffer_read_u8(buf);
         b->data.house.num_gods = buffer_read_u8(buf);
         b->data.house.devolve_delay = buffer_read_u8(buf);
-        b->data.house.evolve_text_id = buffer_read_u8(buf);
+        if (version > SAVE_GAME_TESTING_VERSION_BUMP_1) {
+            b->data.house.evolve_text_id = buffer_read_u16(buf);
+        } else {
+            b->data.house.evolve_text_id = buffer_read_u8(buf);
+        }
         // Do not place this after if (building_has_supplier_inventory(b->type) or after if (building_monument_is_monument(b))
         // Because Caravanserai is monument AND supplier building and resources_needed / inventory is same memory spot
     } else if (b->type == BUILDING_CARAVANSERAI) {
