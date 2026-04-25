@@ -47,6 +47,7 @@ extern "C" {
 #include "map/image.h"
 #include "map/property.h"
 #include "map/random.h"
+#include "map/road_service_history.h"
 #include "map/routing.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
@@ -239,6 +240,7 @@ typedef struct {
     buffer *building_model_data;
     buffer *rubble_grid;
     buffer *production_rates;
+    buffer *road_service_history;
 } savegame_state;
 
 typedef struct {
@@ -300,6 +302,7 @@ typedef struct {
         int rubble_grid;
         int custom_production_rates;
         int mod_metadata;
+        int road_service_history;
     } features;
 } savegame_version_data;
 
@@ -620,6 +623,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
     version_data->features.custom_production_rates = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.mod_metadata = version > SAVE_GAME_LAST_NO_MOD_METADATA;
+    version_data->features.road_service_history = version > SAVE_GAME_LAST_NO_ROAD_SERVICE_HISTORY;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -800,6 +804,9 @@ static void init_savegame_data(savegame_version_t version)
     }
     if (version_data.features.custom_production_rates) {
         state->production_rates = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+    if (version_data.features.road_service_history) {
+        state->road_service_history = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
     }
 }
 
@@ -1005,6 +1012,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         production_rates_load(state->production_rates);
     }
+    map_road_service_history_load_state(
+        state->road_service_history,
+        version > SAVE_GAME_LAST_NO_ROAD_SERVICE_HISTORY);
 
     scenario_emperor_change_load_state(state->emperor_change_time, state->emperor_change_state);
     empire_load_state(state->empire);
@@ -1171,6 +1181,7 @@ static void savegame_save_to_state(savegame_state *state)
     figure_visited_buildings_save_state(state->visited_buildings);
 
     production_rates_save(state->production_rates);
+    map_road_service_history_save_state(state->road_service_history);
 }
 
 static scenario_version_t get_scenario_version(FILE *fp)
@@ -1430,7 +1441,11 @@ static int scenario_terrain_at(int grid_offset)
 
 static int scenario_tile_size_at(int grid_offset)
 {
-    return map_property_multi_tile_size_from_buffer(scenario_data.state.bitfields, grid_offset);
+    if (scenario_data.version <= SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        return map_property_multi_tile_size_from_buffer_8(scenario_data.state.bitfields, grid_offset);
+    } else {
+        return map_property_multi_tile_size_from_buffer_16(scenario_data.state.bitfields, grid_offset);
+    }
 }
 
 static int scenario_is_draw_tile_at(int grid_offset)
@@ -1774,7 +1789,11 @@ static int savegame_terrain_at(int grid_offset)
 
 static int savegame_tile_size_at(int grid_offset)
 {
-    return map_property_multi_tile_size_from_buffer(savegame_data.state.bitfields_grid, grid_offset);
+    if (minimap_data.version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        return map_property_multi_tile_size_from_buffer_8(savegame_data.state.bitfields_grid, grid_offset);
+    } else {
+        return map_property_multi_tile_size_from_buffer_16(savegame_data.state.bitfields_grid, grid_offset);
+    }
 }
 
 static int savegame_is_draw_tile_at(int grid_offset)
@@ -1789,7 +1808,11 @@ static int savegame_random_at(int grid_offset)
 
 static unsigned int savegame_get_building_id(int grid_offset)
 {
-    return map_building_from_buffer(savegame_data.state.building_grid, grid_offset);
+    if (minimap_data.version <= SAVE_GAME_LAST_U16_GRIDS) {
+        return map_building_from_buffer_16(savegame_data.state.building_grid, grid_offset);
+    } else {
+        return map_building_from_buffer_32(savegame_data.state.building_grid, grid_offset);
+    }
 }
 
 static building *savegame_building(unsigned int id)

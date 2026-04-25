@@ -32,6 +32,8 @@ void scenario_price_change_remap_resource(void);
 
 unsigned int scenario_price_change_count_total(void);
 
+int scenario_price_change_count_active(void);
+
 void scenario_price_change_process(void);
 
 void scenario_price_change_save_state(buffer *buf);

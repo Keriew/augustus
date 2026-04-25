@@ -205,11 +205,10 @@ static void window_building_draw_monument_resources_needed(building_info_context
             int resource_delivered_amount = resource_needed_amount - b->resources[r];
             image_draw(resource_get_data(r)->image.icon, c->x_offset + 32, c->y_offset + y_offset + 10,
                 COLOR_MASK_NONE, SCALE_NONE);
-            int width = text_draw_number(resource_delivered_amount, '@', "/",
-                c->x_offset + 64, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
-            width += text_draw_number(resource_needed_amount, '@', " ",
-                c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
-            text_draw(resource_get_data(r)->text, c->x_offset + 54 + width, c->y_offset + y_offset + 15,
+            // Keep delivered/needed in measured columns; the resource label starts after the full pair.
+            int width = text_draw_number_pair(resource_delivered_amount, resource_needed_amount, '@', "/",
+                c->x_offset + 64, c->y_offset + y_offset + 15, 0, 0, 0, FONT_NORMAL_WHITE, 0);
+            text_draw(resource_get_data(r)->text, c->x_offset + 68 + width, c->y_offset + y_offset + 15,
                 FONT_NORMAL_WHITE, 0);
             y_offset += 20;
         }
@@ -234,10 +233,8 @@ void window_building_draw_monument_construction_process(building_info_context *c
         }
         int width = text_draw(translation_for(TR_CONSTRUCTION_PHASE),
             c->x_offset + 32, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(b->monument.phase, '@', "/",
-            c->x_offset + 32 + width, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(building_monument_phases(b->type) - 1, '@', "",
-            c->x_offset + 32 + width, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
+        width += text_draw_number_pair(b->monument.phase, building_monument_phases(b->type) - 1, '@', "/",
+            c->x_offset + 32 + width, c->y_offset + 50, 0, 0, 0, FONT_NORMAL_BLACK, 0);
         text_draw(translation_for(tr_phase_name + b->monument.phase - 1),
             c->x_offset + 32 + width, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
         text_draw(translation_for(TR_REQUIRED_RESOURCES), c->x_offset + 32, c->y_offset + 80, FONT_NORMAL_BLACK, 0);

@@ -830,6 +830,14 @@ static int parse_graphics_condition()
             return 0;
         }
         condition.type = GraphicsConditionType::ResourcePositive;
+    } else if (type_text && strcmp(type_text, "days1_positive") == 0) {
+        condition.type = GraphicsConditionType::Days1Positive;
+    } else if (type_text && strcmp(type_text, "days1_not_positive") == 0) {
+        condition.type = GraphicsConditionType::Days1NotPositive;
+    } else if (type_text && strcmp(type_text, "days2_positive") == 0) {
+        condition.type = GraphicsConditionType::Days2Positive;
+    } else if (type_text && strcmp(type_text, "days1_or_days2_positive") == 0) {
+        condition.type = GraphicsConditionType::Days1OrDays2Positive;
     } else if (type_text && strcmp(type_text, "desirability") == 0) {
         if (!xml_parser_has_attribute("operator")) {
             log_error("BuildingType graphics desirability condition is missing required attribute 'operator'", 0, 0);

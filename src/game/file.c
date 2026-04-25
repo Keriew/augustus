@@ -86,18 +86,18 @@
 #include <string.h>
 
 static const char MISSION_SAVED_GAMES[][32] = {
-    "Citizen.savf",
-    "Clerk.savf",
-    "Engineer.savf",
-    "Architect.savf",
-    "Quaestor.savf",
-    "Procurator.savf",
-    "Aedile.savf",
-    "Praetor.savf",
-    "Consul.savf",
-    "Proconsul.savf",
-    "Caesar.savf",
-    "Caesar2.savf"
+    "Citizen.svv",
+    "Clerk.svv",
+    "Engineer.svv",
+    "Architect.svv",
+    "Quaestor.svv",
+    "Procurator.svv",
+    "Aedile.svv",
+    "Praetor.svv",
+    "Consul.svv",
+    "Proconsul.svv",
+    "Caesar.svv",
+    "Caesar2.svv"
 };
 
 void game_file_show_loaded_save_mod_mismatch_warning(void)
@@ -499,10 +499,10 @@ int game_file_make_yearly_autosave(void)
     char backup_save_name[FILE_NAME_MAX];
 
     snprintf(current_save_name, FILE_NAME_MAX, "%s%s",
-        platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year.savf");
+        platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year.svv");
     snprintf(backup_save_name, FILE_NAME_MAX, "%s%s%d%s",
         platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), "autosave-year-bak-",
-        next_autosave_slot, ".savf");
+        next_autosave_slot, ".svv");
 
     platform_file_manager_copy_file(current_save_name, backup_save_name);
     int result = game_file_write_saved_game(current_save_name);
@@ -537,7 +537,7 @@ void game_file_write_mission_saved_game(void)
         if (locale_translate_rank_autosaves()) {
             encoding_to_utf8(lang_get_string(32, rank), localized_filename, FILE_NAME_MAX,
                 encoding_system_uses_decomposed());
-            strncat_s(localized_filename, FILE_NAME_MAX, ".savf", _TRUNCATE);
+            strncat_s(localized_filename, FILE_NAME_MAX, ".svv", _TRUNCATE);
             filename = localized_filename;
         }
     } else {
@@ -548,7 +548,7 @@ void game_file_write_mission_saved_game(void)
         cursor = string_copy(string_from_ascii(" - "), cursor, FILE_NAME_MAX - (cursor - encoded_filename));
         cursor = string_copy(game_campaign_get_scenario(scenario_campaign_mission())->name, cursor,
             FILE_NAME_MAX - (cursor - encoded_filename));
-        string_copy(string_from_ascii(".savf"), cursor, FILE_NAME_MAX - (cursor - encoded_filename));
+        string_copy(string_from_ascii(".svv"), cursor, FILE_NAME_MAX - (cursor - encoded_filename));
         encoding_to_utf8(encoded_filename, localized_filename, FILE_NAME_MAX, encoding_system_uses_decomposed());
         filename = localized_filename;
     }

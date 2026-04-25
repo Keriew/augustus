@@ -18,6 +18,7 @@ namespace {
 constexpr int kMaxCrashScopes = 32;
 
 enum class ErrorReportSeverity {
+    Info,
     Warning,
     Error,
     Fatal
@@ -147,6 +148,8 @@ void CrashContextScope::set_callback(crash_context_log_callback callback, void *
 static const char *severity_label(ErrorReportSeverity severity)
 {
     switch (severity) {
+        case ErrorReportSeverity::Info:
+            return "Info";
         case ErrorReportSeverity::Warning:
             return "Warning";
         case ErrorReportSeverity::Error:
@@ -188,6 +191,9 @@ static void ensure_issue_count_flush_registered(void)
 static void log_issue_message(ErrorReportSeverity severity, const char *message, const char *detail)
 {
     switch (severity) {
+        case ErrorReportSeverity::Info:
+            log_info(message ? message : "Info", detail, 0);
+            break;
         case ErrorReportSeverity::Warning:
             log_warning(message ? message : "Warning", detail, 0);
             break;
@@ -197,6 +203,64 @@ static void log_issue_message(ErrorReportSeverity severity, const char *message,
             log_error(message ? message : "Error", detail, 0);
             break;
     }
+}
+
+static int active_scope_count(void)
+{
+    int count = 0;
+    for (int i = 0; i < g_scope_depth; ++i) {
+        if (g_scopes[i].active) {
+            count++;
+        }
+    }
+    return count;
+}
+
+static std::string build_context_report(void)
+{
+    const int scope_count = active_scope_count();
+    if (scope_count <= 0) {
+        return "";
+    }
+
+    char header[64];
+    snprintf(header, sizeof(header), "Context scopes  %d:", scope_count);
+
+    std::string report = header;
+    for (int i = 0; i < g_scope_depth; ++i) {
+        ScopeState &scope = g_scopes[i];
+        if (!scope.active) {
+            continue;
+        }
+
+        char label[32];
+        snprintf(label, sizeof(label), "\n-scope %d", i);
+        report += label;
+        if (scope.stage[0]) {
+            report += "  ";
+            report += scope.stage;
+        }
+        if (scope.context[0]) {
+            report += "\n-context ";
+            report += std::to_string(i);
+            report += "  ";
+            report += scope.context;
+        }
+    }
+    return report;
+}
+
+static std::string detail_with_context(const char *detail)
+{
+    std::string full_detail = detail ? detail : "";
+    const std::string context_report = build_context_report();
+    if (!context_report.empty()) {
+        if (!full_detail.empty()) {
+            full_detail += "\n";
+        }
+        full_detail += context_report;
+    }
+    return full_detail;
 }
 
 static void flush_issue_counts_internal(void)
@@ -259,8 +323,13 @@ static void report_issue_internal(
     record.count++;
 
     if (first_report) {
-        log_issue_message(severity, message ? message : severity_label(severity), detail);
-        error_context_log_current();
+        const std::string full_detail = severity == ErrorReportSeverity::Info ?
+            std::string(detail ? detail : "") :
+            detail_with_context(detail);
+        log_issue_message(
+            severity,
+            message ? message : severity_label(severity),
+            full_detail.empty() ? nullptr : full_detail.c_str());
     }
 
     if (!show_dialog) {
@@ -347,25 +416,18 @@ extern "C" void crash_context_set_stage(const char *stage, const char *context)
 
 extern "C" void error_context_log_current(void)
 {
-    if (g_scope_depth <= 0) {
+    const std::string context_report = build_context_report();
+    if (context_report.empty()) {
         return;
     }
 
-    log_info("Error context scopes", 0, g_scope_depth);
+    log_info(context_report.c_str(), nullptr, 0);
     for (int i = 0; i < g_scope_depth; ++i) {
         ScopeState &scope = g_scopes[i];
         if (!scope.active) {
             continue;
         }
 
-        char label[32];
-        snprintf(label, sizeof(label), "Error scope %d", i);
-        if (scope.stage[0]) {
-            log_info(label, scope.stage, 0);
-        }
-        if (scope.context[0]) {
-            log_info("Error context", scope.context, 0);
-        }
         if (scope.callback) {
             scope.callback(scope.userdata);
         }
@@ -380,6 +442,11 @@ extern "C" void error_context_flush_report_counts(void)
 extern "C" void crash_context_log_current(void)
 {
     error_context_log_current();
+}
+
+extern "C" void error_context_report_info(const char *message, const char *detail)
+{
+    report_issue_internal(ErrorReportSeverity::Info, "Vespasian Info", message, detail, 0);
 }
 
 extern "C" void error_context_report_warning(const char *message, const char *detail)

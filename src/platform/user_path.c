@@ -81,7 +81,7 @@ void platform_user_path_copy_files(const char *original_user_path, int overwrite
             case PATH_LOCATION_SAVEGAME:
                 listing = dir_find_files_with_extension(original_directory, "sav");
                 listing = dir_append_files_with_extension("svx");
-                listing = dir_append_files_with_extension("savf");
+                listing = dir_append_files_with_extension("svv");
                 break;
             case PATH_LOCATION_SCENARIO:
                 listing = dir_find_files_with_extension(original_directory, "map");

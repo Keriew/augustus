@@ -1,2 +1,2 @@
-# Prevent some header files from being detected as C++ or Objective-C
-*.h linguist-language=C
+# Normalize text files in the repository to CRLF.
+* text=auto eol=crlf

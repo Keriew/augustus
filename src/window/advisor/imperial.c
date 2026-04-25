@@ -52,13 +52,38 @@ static unsigned int selected_request_id;
 static unsigned int selected_resource;
 static uint8_t tooltip_resource_info[RESOURCE_INFO_MAX_TEXT];
 
-static void draw_request(int index, const scenario_request *request)
+static void draw_troop_request(int index, int focused)
+{
+    int y_offset = 96 + 42 * index;
+    button_border_draw(38, y_offset, 560, 40, focused);
+    image_draw(resource_get_data(RESOURCE_WEAPONS)->image.icon, 50, y_offset + 10, COLOR_MASK_NONE, SCALE_NONE);
+
+    int width = lang_text_draw(52, 72, 80, y_offset + 6, FONT_NORMAL_WHITE);
+    empire_city *city = empire_city_get(city_military_distant_battle_city());
+    const uint8_t *city_name = empire_city_get_name(city);
+    text_draw(city_name, 80 + width, y_offset + 6, FONT_NORMAL_WHITE, 0);
+
+    int strength_text_id;
+    int enemy_strength = city_military_distant_battle_enemy_strength();
+    if (enemy_strength < 46) {
+        strength_text_id = 73;
+    } else if (enemy_strength < 89) {
+        strength_text_id = 74;
+    } else {
+        strength_text_id = 75;
+    }
+    width = lang_text_draw(52, strength_text_id, 80, y_offset + 24, FONT_NORMAL_WHITE);
+    lang_text_draw_amount(8, 4, city_military_months_until_distant_battle(), 80 + width, y_offset + 24,
+        FONT_NORMAL_WHITE);
+}
+
+static void draw_request_row(int index, const scenario_request *request, int focused)
 {
     if (index >= 5) {
         return;
     }
 
-    button_border_draw(38, 96 + 42 * index, 560, 40, 0);
+    button_border_draw(38, 96 + 42 * index, 560, 40, focused);
     text_draw_number(request->amount.requested, '@', " ", 40, 102 + 42 * index, FONT_NORMAL_WHITE, 0);
     image_draw(resource_get_data(request->resource)->image.icon, 110, 100 + 42 * index, COLOR_MASK_NONE, SCALE_NONE);
     text_draw(resource_get_data(request->resource)->text, 150, 102 + 42 * index, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
@@ -96,6 +121,11 @@ static void draw_request(int index, const scenario_request *request)
     }
 }
 
+static void draw_request(int index, const scenario_request *request)
+{
+    draw_request_row(index, request, 0);
+}
+
 static int draw_background(void)
 {
     city_emperor_calculate_gift_costs();
@@ -115,23 +145,7 @@ static int draw_background(void)
     int num_requests = 0;
     if (city_request_has_troop_request()) {
         // can send to distant battle
-        button_border_draw(38, 96, 560, 40, 0);
-        image_draw(resource_get_data(RESOURCE_WEAPONS)->image.icon, 50, 106, COLOR_MASK_NONE, SCALE_NONE);
-        width = lang_text_draw(52, 72, 80, 102, FONT_NORMAL_WHITE);
-        empire_city *city = empire_city_get(city_military_distant_battle_city());
-        const uint8_t *city_name = empire_city_get_name(city);
-        text_draw(city_name, 80 + width, 102, FONT_NORMAL_WHITE, 0);
-        int strength_text_id;
-        int enemy_strength = city_military_distant_battle_enemy_strength();
-        if (enemy_strength < 46) {
-            strength_text_id = 73;
-        } else if (enemy_strength < 89) {
-            strength_text_id = 74;
-        } else {
-            strength_text_id = 75;
-        }
-        width = lang_text_draw(52, strength_text_id, 80, 120, FONT_NORMAL_WHITE);
-        lang_text_draw_amount(8, 4, city_military_months_until_distant_battle(), 80 + width, 120, FONT_NORMAL_WHITE);
+        draw_troop_request(0, 0);
         num_requests = 1;
     }
     num_requests = scenario_request_foreach_visible(num_requests, draw_request);
@@ -165,7 +179,16 @@ static void draw_foreground(void)
     // Request buttons
     for (unsigned int i = 0; i < CITY_REQUEST_MAX_ACTIVE; i++) {
         if (city_request_get_status(i)) {
-            button_border_draw(38, 96 + i * 42, 560, 40, focus_button_id == i + 4);
+            int focused = focus_button_id == i + 4;
+            if (!i && city_request_has_troop_request()) {
+                draw_troop_request(i, focused);
+            } else {
+                int visible_index = (int) i - city_request_has_troop_request();
+                const scenario_request *request = scenario_request_get_visible(visible_index);
+                if (request) {
+                    draw_request_row(i, request, focused);
+                }
+            }
         }
     }
 }

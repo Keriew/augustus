@@ -45,6 +45,7 @@ Current supported `<graphics>` child nodes:
 - `<condition type="figure_slot_occupied" slot="primary|secondary|quaternary" />`
 - `<condition type="resource_positive" resource="wine" />`
 - `<condition type="desirability" operator="lt|lte|eq|gt|gte" threshold="N" />`
+- `<condition type="days1_positive|days1_not_positive|days2_positive|days1_or_days2_positive" />`
 
 `<path value="...">` rules:
 
@@ -72,6 +73,7 @@ Current supported graphics conditions:
 - `type="figure_slot_occupied" slot="primary|secondary|quaternary"` means the named tracked legacy figure slot is occupied
 - `type="resource_positive" resource="wine"` means the building has at least one unit of that resource
 - `type="desirability" operator="lt|lte|eq|gt|gte" threshold="N"` compares the building desirability against `N`
+- `type="days1_positive|days1_not_positive|days2_positive|days1_or_days2_positive"` checks the entertainment visit-day counters used by entertainers
 
 Current supported `<labor>` child nodes:
 

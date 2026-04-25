@@ -30,6 +30,10 @@ int text_draw_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t
 int text_draw_centered_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color);
 
 int text_draw_number(int value, char prefix, const char *postfix, int x, int y, font_t font, color_t color);
+int text_get_number_pair_width(int left_value, int right_value, char prefix, const char *separator,
+    int left_min_width, int right_min_width, int separator_padding, font_t font);
+int text_draw_number_pair(int left_value, int right_value, char prefix, const char *separator,
+    int x, int y, int left_min_width, int right_min_width, int separator_padding, font_t font, color_t color);
 void text_draw_number_finances(int value, int x, int y, font_t font, color_t color);
 int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
         int x, int y, font_t font, color_t color, float scale);

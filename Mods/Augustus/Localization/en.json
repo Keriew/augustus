@@ -627,7 +627,7 @@
     "TR_SAVEGAME_NOT_ABLE_TO_SAVE_TITLE": "Unable to save the game",
     "TR_SAVEGAME_NOT_ABLE_TO_SAVE_MESSAGE": "It was not possible to save the game.\nIt may be because the folder where Caesar 3 keeps the savegames requires administrator access.\nPlease either change the Caesar 3 folder to a place which doesn't require administrator access or run Augustus as administrator (not recommended).",
     "TR_SAVEGAME_MOD_MISMATCH_TITLE": "Mod mismatch detected",
-    "TR_SAVEGAME_MOD_MISMATCH_MESSAGE": "This .savf file was created with a different active mod. Vespasian will continue loading it, but data-driven behavior may differ.",
+    "TR_SAVEGAME_MOD_MISMATCH_MESSAGE": "This .svv file was created with a different active mod. Vespasian will continue loading it, but data-driven behavior may differ.",
     "TR_BUILDING_COLONNADE": "Colonnade",
     "TR_BUILDING_LARARIUM": "Lararium",
     "TR_WINDOW_BUILDING_LARARIUM_DESC": "This small shrine is dedicated to the 'Lares', the ancestral spirits of the Roman people. Small sacrifices and prayers may be made here.",
@@ -2058,6 +2058,11 @@
     "TR_ADVISOR_CHIEF_NO_WATER": "Most of your people don't have any access to a proper water supply.",
     "TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS": "No instructions",
     "TR_CONFIG_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS": "Granaries do not allow walkers by default",
-    "TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS": "Warehouses do not allow walkers by default"
+    "TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS": "Warehouses do not allow walkers by default",
+    "TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA": "Change model data",
+    "TR_EDITOR_PRICE_CHANGE": "price change",
+    "TR_EDITOR_PRICE_CHANGES": "price changes",
+    "TR_EDITOR_DEMAND_CHANGE": "demand change",
+    "TR_EDITOR_DEMAND_CHANGES": "demand changes"
   }
 }

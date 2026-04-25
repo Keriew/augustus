@@ -142,11 +142,12 @@ void widget_city_draw_construction_cost_and_size(void)
         text_draw_number(cost, '@', " ", x + 58, y, FONT_NORMAL_PLAIN, color);
     }
     if (has_size) {
-        int width = -text_get_width(string_from_ascii("  "), FONT_SMALL_PLAIN);
-        width += text_draw_number(size_x, '@', "x", x - 15 + 1, y + 25 + 1, FONT_SMALL_PLAIN, COLOR_BLACK);
-        text_draw_number(size_x, '@', "x", x - 15, y + 25, FONT_SMALL_PLAIN, COLOR_FONT_YELLOW);
-        text_draw_number(size_y, '@', " ", x - 15 + width + 1, y + 25 + 1, FONT_SMALL_PLAIN, COLOR_BLACK);
-        text_draw_number(size_y, '@', " ", x - 15 + width, y + 25, FONT_SMALL_PLAIN, COLOR_FONT_YELLOW);
+        int width = text_get_number_pair_width(size_x, size_y, '@', "x", 0, 0, 0, FONT_SMALL_PLAIN);
+        int size_x_offset = x - width / 2;
+        text_draw_number_pair(size_x, size_y, '@', "x",
+            size_x_offset + 1, y + 25 + 1, 0, 0, 0, FONT_SMALL_PLAIN, COLOR_BLACK);
+        text_draw_number_pair(size_x, size_y, '@', "x",
+            size_x_offset, y + 25, 0, 0, 0, FONT_SMALL_PLAIN, COLOR_FONT_YELLOW);
     }
     graphics_reset_clip_rectangle();
 }

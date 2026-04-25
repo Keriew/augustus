@@ -8,6 +8,7 @@
         <variant>
             <condition type="desirability" operator="gt" threshold="45" />
             <condition type="has_workers" />
+            <condition type="days1_positive" />
             <path value="Health_Culture\Theatre_ON_01" />
             <image value="Theatre Upgrade ON" />
         </variant>
@@ -18,6 +19,7 @@
         </variant>
         <variant>
             <condition type="has_workers" />
+            <condition type="days1_positive" />
             <path value="Health_Culture\Theatre_ON_01" />
             <image value="Theatre ON" />
         </variant>

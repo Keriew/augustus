@@ -36,6 +36,8 @@ static int cartpusher_carries_food(figure *f)
     return resource_is_food(f->resource_id);
 }
 
+static int storage_add_resource(building *b, int resource, int amount);
+
 static void set_cart_graphic(figure *f)
 {
     int carried = f->loads_sold_or_carrying;

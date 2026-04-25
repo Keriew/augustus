@@ -15,8 +15,10 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/demand_change.h"
 #include "scenario/editor.h"
 #include "scenario/invasion.h"
+#include "scenario/price_change.h"
 #include "scenario/property.h"
 #include "scenario/request.h"
 #include "widget/input_box.h"
@@ -170,10 +172,22 @@ static void draw_foreground(void)
     lang_text_draw_centered(44, 49, 212, 365, 250, FONT_NORMAL_BLACK);
 
     button_border_draw(212, 396, 250, 30, data.focus_button_id == 9);
-    lang_text_draw_centered(44, 95, 212, 405, 250, FONT_NORMAL_BLACK);
+    int price_changes = scenario_price_change_count_active();
+    if (price_changes == 0) {
+        lang_text_draw_centered(44, 95, 212, 405, 250, FONT_NORMAL_BLACK);
+    } else {
+        lang_text_draw_amount_centered(CUSTOM_TRANSLATION, TR_EDITOR_PRICE_CHANGE, price_changes, 212, 405, 250,
+            FONT_NORMAL_BLACK);
+    }
 
     button_border_draw(212, 436, 250, 30, data.focus_button_id == 10);
-    lang_text_draw_centered(44, 94, 212, 445, 250, FONT_NORMAL_BLACK);
+    int demand_changes = scenario_demand_change_count_active();
+    if (demand_changes == 0) {
+        lang_text_draw_centered(44, 94, 212, 445, 250, FONT_NORMAL_BLACK);
+    } else {
+        lang_text_draw_amount_centered(CUSTOM_TRANSLATION, TR_EDITOR_DEMAND_CHANGE, demand_changes, 212, 445, 250,
+            FONT_NORMAL_BLACK);
+    }
 
     button_border_draw(470, 76, 250, 30, data.focus_button_id == 11);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_TITLE, 470, 85, 250, FONT_NORMAL_BLACK);
@@ -200,7 +214,7 @@ static void draw_foreground(void)
     }
     
     button_border_draw(470, 236, 250, 30, data.focus_button_id == 15);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_MODEL_DATA, 470, 245, 250, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA, 470, 245, 250, FONT_NORMAL_BLACK);
 
     if (!editor_is_active()) {
         button_border_draw(470, 436, 250, 30, data.focus_button_id == 16);

@@ -305,6 +305,15 @@ static void load_defaults(void)
     }
 }
 
+static void add_mapping(int hotkey_id, const char *value)
+{
+    hotkey_mapping mapping;
+    if (key_combination_from_name(value, &mapping.key, &mapping.modifiers)) {
+        mapping.action = hotkey_id;
+        hotkey_config_add_mapping(&mapping);
+    }
+}
+
 static void load_file(void)
 {
     hotkey_config_clear();
@@ -356,6 +365,12 @@ static void load_file(void)
                 }
                 break;
             }
+        }
+        // Migrate swapped action keys from older configs without losing the user's binding.
+        if (strcmp("build_clear_land", line) == 0) {
+            add_mapping(HOTKEY_BUILD_VACANT_HOUSE, value);
+        } else if (strcmp("build_vacant_house", line) == 0) {
+            add_mapping(HOTKEY_BUILD_CLEAR_LAND, value);
         }
     }
     file_close(fp);

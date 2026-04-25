@@ -1,5 +1,8 @@
-#include "movement.h"
+#include "figure/movement.h"
 
+#include "figure/figure_runtime_api.h"
+
+extern "C" {
 #include "building/building.h"
 #include "building/destruction.h"
 #include "building/roadblock.h"
@@ -18,11 +21,16 @@
 #include "map/road_access.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
+}
 
-#define PALISADE_HP   60
-#define BUILDING_HP   10
-#define WALL_HP      200
-#define GATEHOUSE_HP 150
+namespace {
+
+constexpr int kPalisadeHp = 60;
+constexpr int kBuildingHp = 10;
+constexpr int kWallHp = 200;
+constexpr int kGatehouseHp = 150;
+
+} // namespace
 
 static void advance_tick(figure *f)
 {
@@ -90,20 +98,16 @@ static roadblock_permission get_permission_for_figure_type(figure *f)
         case FIGURE_ENGINEER:
         case FIGURE_PREFECT:
             return PERMISSION_MAINTENANCE;
-            break;
         case FIGURE_PRIEST:
             return PERMISSION_PRIEST;
-            break;
         case FIGURE_MARKET_TRADER:
             return PERMISSION_MARKET;
-            break;
         case FIGURE_GLADIATOR:
         case FIGURE_CHARIOTEER:
         case FIGURE_ACTOR:
         case FIGURE_LION_TAMER:
         case FIGURE_BARKEEP:
             return PERMISSION_ENTERTAINER;
-            break;
         case FIGURE_SURGEON:
         case FIGURE_DOCTOR:
         case FIGURE_BARBER:
@@ -123,7 +127,6 @@ static roadblock_permission get_permission_for_figure_type(figure *f)
             return PERMISSION_WATCHMAN;
         default:
             return PERMISSION_NONE;
-            break;
     }
 }
 
@@ -221,10 +224,10 @@ static void advance_route_tile(figure *f, int roaming_enabled)
                     switch (b->type) {
                         case BUILDING_PALISADE:
                         case BUILDING_PALISADE_GATE:
-                            max_damage = PALISADE_HP;
+                            max_damage = kPalisadeHp;
                             break;
                         default:
-                            max_damage = BUILDING_HP;
+                            max_damage = kBuildingHp;
                             break;
                     }
                     break;
@@ -233,14 +236,14 @@ static void advance_route_tile(figure *f, int roaming_enabled)
                     if (map_terrain_is(target_grid_offset, TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE)) {
                         cause_damage = 0;
                     } else {
-                        max_damage = BUILDING_HP;
+                        max_damage = kBuildingHp;
                     }
                     break;
                 case DESTROYABLE_WALL:
-                    max_damage = WALL_HP;
+                    max_damage = kWallHp;
                     break;
                 case DESTROYABLE_GATEHOUSE:
-                    max_damage = GATEHOUSE_HP;
+                    max_damage = kGatehouseHp;
                     break;
             }
             if (cause_damage) {
@@ -265,7 +268,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
             }
             if (building_type_is_roadblock(b->type)) {
                 // do not allow roaming through roadblock without permissions
-                int permission = get_permission_for_figure_type(f);
+                roadblock_permission permission = get_permission_for_figure_type(f);
                 if (!building_roadblock_get_permission(permission, b)) {
                     f->direction = DIR_FIGURE_REROUTE;
                 }
@@ -278,7 +281,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         }
         building *b = building_get(map_building_at(target_grid_offset));
         if (building_type_is_roadblock(b->type) && roaming_enabled) { //only block roaming
-            int permission = get_permission_for_figure_type(f);
+            roadblock_permission permission = get_permission_for_figure_type(f);
             if (!building_roadblock_get_permission(permission, b)) {
                 f->direction = DIR_FIGURE_REROUTE;
             }
@@ -306,6 +309,7 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
             advance_tick(f);
         } else {
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
+                figure_runtime_record_road_service_visit(f);
                 figure_service_provide_coverage(f);
             }
             f->progress_on_tile = 15;
@@ -362,35 +366,35 @@ void figure_movement_init_roaming(figure *f)
     }
 }
 
-static int is_valid_road_for_roaming(int grid_offset, int permission)
+static bool is_valid_road_for_roaming(int grid_offset, roadblock_permission permission)
 {
-    int valid = 0;
     if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-        return 0;
+        return false;
     }
     if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        return 1;
+        return true;
     }
+
     building *b = building_get(map_building_at(grid_offset));
     if (!building_type_is_roadblock(b->type)) {
-        return 0;
-    } else {
-        valid = building_roadblock_get_permission(permission, b);
-        if (valid) {
-            if (b->type == BUILDING_GRANARY) { // granary has road and non-road tiles
-                if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
-                    valid = 0; // do not roam outside of granary cross
-                } else if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
-                    valid = 0; // do not roam into dead-end granaries
-                }
-            }
-        }
-
+        return false;
     }
-    return valid;
+
+    const bool permitted = building_roadblock_get_permission(permission, b) != 0;
+    if (!permitted) {
+        return false;
+    }
+
+    // Granaries mix road and non-road building tiles; walkers should only roam
+    // across the internal cross when it connects to at least two exits.
+    if (b->type == BUILDING_GRANARY) {
+        return map_terrain_is(grid_offset, TERRAIN_ROAD) &&
+            map_road_get_granary_inner_road_tiles_count(b) >= 3;
+    }
+    return true;
 }
 
-static void roam_set_direction(figure *f, int permission)
+static void roam_set_direction(figure *f, roadblock_permission permission)
 {
     int grid_offset = map_grid_offset(f->x, f->y);
     int direction = calc_general_direction(f->x, f->y, f->destination_x, f->destination_y);
@@ -449,7 +453,7 @@ void figure_movement_move_ticks_with_percentage(figure *f, int num_ticks, int ti
         progress += 100;
         num_ticks--;
     }
-    f->progress_to_next_tick = (char) progress;
+    f->progress_to_next_tick = static_cast<char>(progress);
 
     walk_ticks(f, num_ticks, 0);
 }
@@ -507,7 +511,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
         progress += 100;
         num_ticks--;
     }
-    f->progress_to_next_tick = (char) progress;
+    f->progress_to_next_tick = static_cast<char>(progress);
 
     const figure *leader = figure_get(f->leading_figure_id);
     if (f->x == f->source_x && f->y == f->source_y) {
@@ -565,12 +569,15 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
             f->roam_random_counter++;
             int came_from_direction = (f->previous_tile_direction + 4) % 8;
             if (f->faction_id != FIGURE_FACTION_ROAMER_PREVIEW) {
+                // Service history is recorded before coverage so this road tile
+                // becomes less attractive to later smart walkers immediately.
+                figure_runtime_record_road_service_visit(f);
                 if (figure_service_provide_coverage(f)) {
                     return;
                 }
             }
             int road_tiles[8];
-            int permission = get_permission_for_figure_type(f);
+            roadblock_permission permission = get_permission_for_figure_type(f);
             int adjacent_road_tiles = map_get_adjacent_road_tiles_for_roaming(f->grid_offset, road_tiles, permission);
             if (adjacent_road_tiles == 3 && map_get_diagonal_road_tiles_for_roaming(f->grid_offset, road_tiles) >= 5) {
                 // go in the straight direction of a double-wide road
@@ -626,6 +633,8 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
                         f->direction = 6;
                     }
                 } while (dir++ < 4);
+                f->direction = figure_runtime_choose_roaming_direction(
+                    f, road_tiles, came_from_direction, f->direction);
             } else { // > 2 road tiles
                 f->direction = (f->roam_random_counter + map_random_get(f->grid_offset)) & 6;
                 if (!road_tiles[f->direction] || f->direction == came_from_direction) {
@@ -647,6 +656,8 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
                         }
                     } while (dir++ < 4);
                 }
+                f->direction = figure_runtime_choose_roaming_direction(
+                    f, road_tiles, came_from_direction, f->direction);
             }
             f->routing_path_current_tile++;
             figure_route_advance_tile(f->routing_path_id);
@@ -773,7 +784,7 @@ static void cross_country_advance(figure *f)
 int figure_movement_move_ticks_cross_country(figure *f, int num_ticks)
 {
     map_figure_delete(f);
-    int is_at_destination = 0;
+    bool is_at_destination = false;
     while (num_ticks > 0) {
         num_ticks--;
         if (f->missile_height > 0) {
@@ -782,7 +793,7 @@ int figure_movement_move_ticks_cross_country(figure *f, int num_ticks)
             f->missile_height = 0;
         }
         if (f->cc_delta_x + f->cc_delta_y <= 0) {
-            is_at_destination = 1;
+            is_at_destination = true;
             break;
         }
         cross_country_advance(f);
@@ -796,7 +807,7 @@ int figure_movement_move_ticks_cross_country(figure *f, int num_ticks)
         f->in_building_wait_ticks--;
     }
     map_figure_add(f);
-    return is_at_destination;
+    return is_at_destination ? 1 : 0;
 }
 
 int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x_dst, int y_dst)
@@ -811,7 +822,8 @@ int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x
     }
     figure_movement_set_cross_country_direction(f, 15 * x_src, 15 * y_src, 15 * x_dst, 15 * y_dst, 0);
 
-    for (int guard = 0; guard < 1000; guard++) {
+    constexpr int kMissilePathGuardLimit = 1000;
+    for (int guard = 0; guard < kMissilePathGuardLimit; guard++) {
         for (int i = 0; i < 8; i++) {
             if (f->cc_delta_x + f->cc_delta_y <= 0) {
                 return 1;

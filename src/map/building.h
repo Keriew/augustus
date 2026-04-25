@@ -19,7 +19,8 @@ unsigned int map_building_at(int grid_offset);
  */
 building_type map_building_type_at(int grid_offset);
 
-unsigned int map_building_from_buffer(buffer *buildings, int grid_offset);
+unsigned int map_building_from_buffer_16(buffer *buildings, int grid_offset);
+unsigned int map_building_from_buffer_32(buffer *buildings, int grid_offset);
 
 void map_building_set(int grid_offset, unsigned int building_id);
 

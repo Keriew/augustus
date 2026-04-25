@@ -406,6 +406,34 @@ static int get_text_offset_for_force_size(int force_size)
     }
 }
 
+static void draw_request_action_label(unsigned int slot, int button_y_offset)
+{
+    const request *r = &data.requests[slot];
+    color_t color = FONT_NORMAL_GREEN;
+    const uint8_t *label = translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND);
+
+    if (r->resource != RESOURCE_TROOPS) {
+        int request_index = data.requests[slot].index;
+        if (city_request_has_troop_request() && slot != 0) {
+            request_index++;
+        }
+
+        int status = city_request_get_status(request_index);
+        if (!status) {
+            return;
+        }
+
+        if (r->resource == RESOURCE_DENARII) {
+            color = status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
+        } else if (status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES) {
+            label = translation_for(city_resource_is_stockpiled(r->resource) ?
+                TR_SIDEBAR_EXTRA_REQUESTS_UNSTOCK : TR_SIDEBAR_EXTRA_REQUESTS_STOCK);
+        }
+    }
+
+    text_draw_centered(label, data.x_offset + 2, button_y_offset + 5, 158, color, 0);
+}
+
 static int draw_request_buttons(int y_offset)
 {
     int original_offset = y_offset;
@@ -444,8 +472,7 @@ static int draw_request_buttons(int y_offset)
             lang_text_draw_amount(8, 4, r->time, data.x_offset + 26, y_offset + 6,
                 r->time <= REQUEST_MONTHS_LEFT_FOR_RED_WARNING ? FONT_NORMAL_RED : FONT_NORMAL_GREEN);
 
-            text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND),
-                data.x_offset + 2, y_offset + 25, 158, FONT_NORMAL_GREEN, 0);
+            draw_request_action_label(i, y_offset + 20);
         } else {
             int image_id = resource_get_data(r->resource)->image.icon;
             const image *img = image_get(image_id);
@@ -469,38 +496,29 @@ static int draw_request_buttons(int y_offset)
                         if (is_stockpiled) {
                             image_draw(assets_get_image_id("UI", "Store Icon"),
                                 data.x_offset + 5, y_offset + 10, COLOR_MASK_NONE, SCALE_NONE);
-                            text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_UNSTOCK),
-                                data.x_offset + 2, y_offset + 25, 158, FONT_NORMAL_GREEN, 0);
-                        } else {
-                            text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_STOCK),
-                                data.x_offset + 2, y_offset + 25, 158, FONT_NORMAL_GREEN, 0);
                         }
                     } else {
                         enough_resource = 1;
-                        text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND),
-                            data.x_offset + 2, y_offset + 25, 158, FONT_NORMAL_GREEN, 0);
                     }
+                    draw_request_action_label(i, y_offset + 20);
                 }
 
-                // request current / total
-                width += text_draw_number(r->available, 0, "/", width, y_offset + 2,
-                    enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
-                width += text_draw_number(r->amount, 0, "",
-                    width - 5, y_offset + 2, enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
+                // Draw current and required amounts as measured columns so large values do not overlap.
+                width += text_draw_number_pair(r->available, r->amount, 0, "/",
+                    width, y_offset + 2, 0, 0, 0, enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
 
             } else {
                 color_t color = status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
                 width += text_draw_number(r->amount, 0, "",
                     width, y_offset + 2, color, 0);
 
-                text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND),
-                    data.x_offset + 2, y_offset + 25, 158, color, 0);
+                draw_request_action_label(i, y_offset + 20);
             }
 
             font_t font_color = r->time <= REQUEST_MONTHS_LEFT_FOR_RED_WARNING ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
 
             // request time left
-            text_draw(string_from_ascii(","), width - 12, y_offset + 2, FONT_NORMAL_GREEN, 0);
+            width += text_draw(string_from_ascii(","), width, y_offset + 2, FONT_NORMAL_GREEN, 0);
             width += text_draw_number(r->time, 0, "", width, y_offset + 2, font_color, 0);
             lang_text_draw_ellipsized(8, 4 + (r->time != 1), width, y_offset + 2,
                 data.width - (width - data.x_offset) - 4, font_color);
@@ -641,8 +659,15 @@ static void draw_extra_info_buttons(void)
     }
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS && data.active_requests) {
         for (unsigned int i = 0; i < data.visible_requests; i++) {
-            button_border_draw(data.x_offset + 2, data.request_buttons_y_offset + buttons_emperor_requests[i].y,
-                data.width - 4, buttons_emperor_requests[i].height, i == data.focused_request_button_id - 1);
+            int button_y_offset = data.request_buttons_y_offset + buttons_emperor_requests[i].y;
+            button_border_draw(data.x_offset + 2, button_y_offset, data.width - 4,
+                buttons_emperor_requests[i].height, i == data.focused_request_button_id - 1);
+            if (buttons_emperor_requests[i].height == 30) {
+                text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_VIEW_ALL),
+                    data.x_offset, button_y_offset + 10, data.width, FONT_NORMAL_GREEN, 0);
+            } else {
+                draw_request_action_label(i, button_y_offset);
+            }
         }
     }
 }

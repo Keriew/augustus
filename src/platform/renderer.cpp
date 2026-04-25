@@ -147,7 +147,7 @@ static struct {
     render_domain active_render_domain;
     int should_correct_texture_offset;
     int disable_linear_filter;
-} data;
+} data = {};
 
 static render_state tooltip_render_state;
 static int tooltip_render_state_valid;
@@ -713,7 +713,11 @@ static SDL_Texture *get_texture(int texture_id)
 {
     atlas_type type = static_cast<atlas_type>(texture_id >> IMAGE_ATLAS_BIT_OFFSET);
     if (type == ATLAS_CUSTOM) {
-        return data.custom_textures[texture_id & IMAGE_ATLAS_BIT_MASK].texture;
+        int custom_image_id = texture_id & IMAGE_ATLAS_BIT_MASK;
+        if (custom_image_id < 0 || custom_image_id >= CUSTOM_IMAGE_MAX) {
+            return 0;
+        }
+        return data.custom_textures[custom_image_id].texture;
     } else if (type == ATLAS_EXTERNAL) {
         return data.custom_textures[CUSTOM_IMAGE_EXTERNAL].texture;
     } else if (type == ATLAS_UNPACKED_EXTRA_ASSET) {
@@ -860,7 +864,7 @@ static void draw_image_request(const render_2d_request *request)
     if (!texture) {
         return;
     }
-    draw_texture_request(request, texture, !request->use_silhouette);
+    draw_texture_request(request, texture, request->use_silhouette ? 0 : 1);
 }
 
 static void draw_texture_advanced(const image *img, float x, float y, color_t color,
@@ -1259,9 +1263,17 @@ static void create_blend_texture(custom_image_type type)
         return;
     }
     const image *img = image_get(image_group(GROUP_TERRAIN_FLAT_TILE));
-    SDL_Texture *flat_tile = get_managed_texture(img ? img->resource_handle : 0);
+    if (!img) {
+        SDL_DestroyTexture(texture);
+        return;
+    }
+    SDL_Texture *flat_tile = get_managed_texture(img->resource_handle);
     if (!flat_tile) {
         flat_tile = get_texture(img->atlas.id);
+    }
+    if (!flat_tile) {
+        SDL_DestroyTexture(texture);
+        return;
     }
     render_state current_state;
     save_render_state(&current_state);
@@ -1299,7 +1311,7 @@ static void create_blend_texture(custom_image_type type)
 
 static SDL_Texture *get_silhouette_texture(const image *img)
 {
-    if (data.paused) {
+    if (data.paused || !img) {
         return 0;
     }
     silhouette_texture *last_silhouette = 0;
@@ -1316,9 +1328,13 @@ static SDL_Texture *get_silhouette_texture(const image *img)
         return 0;
     }
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-    SDL_Texture *original_texture = get_managed_texture(img ? img->resource_handle : 0);
+    SDL_Texture *original_texture = get_managed_texture(img->resource_handle);
     if (!original_texture) {
         original_texture = get_texture(img->atlas.id);
+    }
+    if (!original_texture) {
+        SDL_DestroyTexture(texture);
+        return 0;
     }
     render_state current_state;
     save_render_state(&current_state);

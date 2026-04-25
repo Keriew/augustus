@@ -793,6 +793,49 @@ int text_draw_number(int value, char prefix, const char *postfix, int x, int y, 
     return text_draw_number_scaled(value, prefix, ascii_postfix, x, y, font, color, SCALE_NONE);
 }
 
+static int text_get_number_width_without_trailing_space(int value, char prefix, font_t font)
+{
+    int width = text_get_number_width(value, prefix, "", font) - font_definition_for(font)->space_width;
+    return width > 0 ? width : 0;
+}
+
+static int text_get_ascii_width(const char *text, font_t font)
+{
+    return text_get_width(string_from_ascii(text), font);
+}
+
+int text_get_number_pair_width(int left_value, int right_value, char prefix, const char *separator,
+    int left_min_width, int right_min_width, int separator_padding, font_t font)
+{
+    const char *separator_text = separator && *separator ? separator : "/";
+    int left_width = text_get_number_width_without_trailing_space(left_value, prefix, font);
+    int right_width = text_get_number_width_without_trailing_space(right_value, prefix, font);
+    int natural_column_width = left_width > right_width ? left_width : right_width;
+    int left_column_width = natural_column_width > left_min_width ? natural_column_width : left_min_width;
+    int right_column_width = natural_column_width > right_min_width ? natural_column_width : right_min_width;
+    int separator_width = text_get_ascii_width(separator_text, font);
+    return left_column_width + separator_padding + separator_width + separator_padding + right_column_width;
+}
+
+int text_draw_number_pair(int left_value, int right_value, char prefix, const char *separator,
+    int x, int y, int left_min_width, int right_min_width, int separator_padding, font_t font, color_t color)
+{
+    const char *separator_text = separator && *separator ? separator : "/";
+    int left_width = text_get_number_width_without_trailing_space(left_value, prefix, font);
+    int right_width = text_get_number_width_without_trailing_space(right_value, prefix, font);
+    int natural_column_width = left_width > right_width ? left_width : right_width;
+    int left_column_width = natural_column_width > left_min_width ? natural_column_width : left_min_width;
+    int right_column_width = natural_column_width > right_min_width ? natural_column_width : right_min_width;
+    int separator_width = text_get_ascii_width(separator_text, font);
+
+    text_draw_number(left_value, prefix, "", x + left_column_width - left_width, y, font, color);
+    text_draw(string_from_ascii(separator_text), x + left_column_width + separator_padding, y, font, color);
+    text_draw_number(right_value, prefix, "",
+        x + left_column_width + separator_padding + separator_width + separator_padding, y, font, color);
+
+    return left_column_width + separator_padding + separator_width + separator_padding + right_column_width;
+}
+
 void text_draw_number_finances(int value, int x, int y, font_t font, color_t color)
 {
     if (font_uses_vector_runtime()) {
@@ -1011,7 +1054,9 @@ int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_
 int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *largest_width)
 {
     // \n is not counted as a word and is only caught it directly after a word: "word \n" won't work correctly
-    *largest_width = 0;
+    if (largest_width) {
+        *largest_width = 0;
+    }
     int has_more_characters = 1;
     int guard = 0;
     int num_lines = 0;
@@ -1045,7 +1090,7 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *
                 }
             }
         }
-        if (current_width > *largest_width) {
+        if (largest_width && current_width > *largest_width) {
             *largest_width = current_width;
         }
         num_lines += 1;

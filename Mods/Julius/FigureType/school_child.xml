@@ -3,5 +3,6 @@
     <native class="roaming_service" />
     <owner slot="none" building="school" state="in_use" />
     <movement terrain_usage="roads" roam_ticks="2" max_roam_length="192" return_mode="die_at_limit" />
+    <pathing mode="vanilla_roaming" />
     <graphics image_group="school_child" max_image_offset="12" />
 </figure>

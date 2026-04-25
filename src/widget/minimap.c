@@ -454,7 +454,7 @@ static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
     }
     int terrain = data.functions->offset.terrain(grid_offset);
 
-    if (terrain & TERRAIN_BUILDING) {
+    if (terrain & TERRAIN_BUILDING && !(terrain & (TERRAIN_AQUEDUCT | TERRAIN_WALL))) {
         draw_building(x_view, y_view, grid_offset);
         return;
     }

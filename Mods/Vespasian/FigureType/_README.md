@@ -15,11 +15,14 @@ Current supported nodes:
 - `<native class="..." />`
 - `<owner ... />`
 - `<movement ... />`
+- `<pathing ... />`
 - `<graphics ... />`
 
 Current supported figure ids:
 
 - `labor_seeker`
+- `engineer`
+- `prefect`
 - `teacher`
 - `librarian`
 - `barber`
@@ -29,6 +32,8 @@ Current supported figure ids:
 Current supported native classes:
 
 - `roaming_service`
+- `engineer_service`
+- `prefect_service`
 
 Current supported `<owner>` attributes:
 
@@ -43,13 +48,27 @@ Current supported `<movement>` attributes:
 - `max_roam_length="N"`
 - `return_mode="return_to_owner_road|die_at_limit"`
 
+Current supported `<pathing>` attributes:
+
+- `mode="vanilla_roaming|smart_service"`
+- `effect="damage_risk|fire_risk|barber|bathhouse|school|academy|library|labor"`
+
 Current supported `<graphics>` attributes:
 
-- `image_group="labor_seeker|teacher_librarian|barber|bathhouse_worker|school_child"`
+- `image_group="labor_seeker|engineer|prefect|teacher_librarian|barber|bathhouse_worker|school_child"`
 - `max_image_offset="N"`
 
 Current engine behavior:
 
 - FigureType v1 is native-subset only; all other figure types stay on legacy behavior.
-- The runtime writes state back into the legacy `figure` struct and does not change save format.
+- The runtime writes state back into the legacy `figure` struct.
 - If a native figure hits an unsupported action state, the runtime can decline and the legacy action path will still run.
+- `vanilla_roaming` preserves the existing random roaming policy.
+- `smart_service` chooses the least recently serviced road branch at intersections and requires road movement plus an effect.
+- Smart service visit history is pathing telemetry only; building coverage and risk resets still use the normal service callbacks.
+- Road service history is saved separately from figures. Old saves start with zeroed history and a crash-context warning.
+
+Related implementation notes:
+
+- `docs/walker_pathing_runtime.md` explains runtime flow, save compatibility, and effect-id rules.
+- `codex_augustus_repo_map_memory.md` indexes the native walker chokepoints for future sessions.
