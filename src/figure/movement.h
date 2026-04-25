@@ -3,6 +3,10 @@
 
 #include "figure/figure.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FIGURE_REROUTE_DESTINATION_TICKS 120
 
 void figure_movement_init_roaming(figure *f);
@@ -29,5 +33,9 @@ void figure_movement_set_cross_country_destination(figure *f, int x_dst, int y_d
 int figure_movement_move_ticks_cross_country(figure *f, int num_ticks);
 
 int figure_movement_can_launch_cross_country_missile(int x_src, int y_src, int x_dst, int y_dst);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FIGURE_MOVEMENT_H

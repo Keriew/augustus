@@ -6,6 +6,8 @@ extern "C" {
 #include "figure/type.h"
 }
 
+#include "map/road_service_history.h"
+
 #include <array>
 #include <memory>
 #include <string>
@@ -15,7 +17,14 @@ namespace figure_type_registry_impl {
 
 enum class NativeClassId {
     None,
-    RoamingService
+    RoamingService,
+    EngineerService,
+    PrefectService
+};
+
+enum class PathingMode {
+    VanillaRoaming,
+    SmartService
 };
 
 enum class FigureSlot {
@@ -54,6 +63,11 @@ struct GraphicsPolicy {
     int max_image_offset = 12;
 };
 
+struct PathingPolicy {
+    PathingMode mode = PathingMode::VanillaRoaming;
+    road_service_effect effect = ROAD_SERVICE_EFFECT_NONE;
+};
+
 class FigureTypeDefinition {
 public:
     FigureTypeDefinition(figure_type type, std::string attr);
@@ -73,6 +87,9 @@ public:
     void set_graphics_policy(const GraphicsPolicy &graphics_policy);
     const GraphicsPolicy &graphics_policy() const;
 
+    void set_pathing_policy(const PathingPolicy &pathing_policy);
+    const PathingPolicy &pathing_policy() const;
+
 private:
     figure_type type_ = FIGURE_NONE;
     std::string attr_;
@@ -80,6 +97,7 @@ private:
     OwnerBinding owner_binding_;
     MovementProfile movement_profile_;
     GraphicsPolicy graphics_policy_;
+    PathingPolicy pathing_policy_;
 };
 
 extern std::array<std::unique_ptr<FigureTypeDefinition>, FIGURE_TYPE_MAX> g_figure_types;

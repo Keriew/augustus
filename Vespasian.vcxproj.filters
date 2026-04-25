@@ -343,7 +343,7 @@
     <ClCompile Include="src\figure\formation_layout.c" />
     <ClCompile Include="src\figure\formation_legion.c" />
     <ClCompile Include="src\figure\image.c" />
-    <ClCompile Include="src\figure\movement.c" />
+    <ClCompile Include="src\figure\movement.cpp" />
     <ClCompile Include="src\figure\name.c" />
     <ClCompile Include="src\figure\phrase.c" />
     <ClCompile Include="src\figure\properties.c" />
@@ -361,7 +361,7 @@
     <ClCompile Include="src\figuretype\editor.c" />
     <ClCompile Include="src\figuretype\enemy.c" />
     <ClCompile Include="src\figuretype\entertainer.c" />
-    <ClCompile Include="src\figuretype\maintenance.c" />
+    <ClCompile Include="src\figuretype\maintenance.cpp" />
     <ClCompile Include="src\figuretype\migrant.c" />
     <ClCompile Include="src\figuretype\missile.c" />
     <ClCompile Include="src\figuretype\native.c" />
@@ -473,6 +473,7 @@
     <ClCompile Include="src\map\road_access.c" />
     <ClCompile Include="src\map\road_aqueduct.c" />
     <ClCompile Include="src\map\road_network.c" />
+    <ClCompile Include="src\map\road_service_history.cpp" />
     <ClCompile Include="src\map\routing.c" />
     <ClCompile Include="src\map\routing_data.c" />
     <ClCompile Include="src\map\routing_path.c" />
@@ -996,6 +997,7 @@
     <ClInclude Include="src\map\road_access.h" />
     <ClInclude Include="src\map\road_aqueduct.h" />
     <ClInclude Include="src\map\road_network.h" />
+    <ClInclude Include="src\map\road_service_history.h" />
     <ClInclude Include="src\map\routing.h" />
     <ClInclude Include="src\map\routing_data.h" />
     <ClInclude Include="src\map\routing_path.h" />

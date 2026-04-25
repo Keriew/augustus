@@ -1,5 +1,8 @@
 #include "figure/figure.h"
 
+#include "figure/figure_runtime_api.h"
+#include "map/road_service_history.h"
+
 extern "C" {
 #include "building/building.h"
 #include "building/monument.h"
@@ -17,19 +20,20 @@ extern "C" {
 #include "figure/visited_buildings.h"
 #include "map/figure.h"
 #include "map/grid.h"
-#include "figure.h"
 }
-
-#include "figure/figure_runtime_api.h"
 
 #include <cstdlib>
 #include <cstring>
 
-#define FIGURE_ARRAY_SIZE_STEP 1000
+namespace {
 
-#define FIGURE_ORIGINAL_BUFFER_SIZE 128
-#define FIGURE_CURRENT_BUFFER_SIZE 170
+constexpr int kFigureArraySizeStep = 1000;
+constexpr int kFigureOriginalBufferSize = 128;
+constexpr int kFigureCurrentBufferSize = 170;
 // around 12 bytes left free in the current buffer size - save version 0xa7, August 2025
+
+} // namespace
+
 static struct {
     int created_sequence;
     array(figure) figures;
@@ -322,7 +326,8 @@ static int figure_is_active(const figure *f)
 void figure_init_scenario(void)
 {
     figure_runtime_reset();
-    if (!array_init(data.figures, FIGURE_ARRAY_SIZE_STEP, initialize_new_figure, figure_is_active) ||
+    map_road_service_history_clear();
+    if (!array_init(data.figures, kFigureArraySizeStep, initialize_new_figure, figure_is_active) ||
         !array_next(data.figures)) { // Ignore first figure
         log_error("Unable to create figures array. The game will now crash.", 0, 0);
     }
@@ -615,11 +620,11 @@ static void figure_load(buffer *buf, figure *f, int figure_buf_size, int version
     if (version > SAVE_GAME_LAST_GRANARY_WAREHOUSE_NON_ROADBLOCKS) {
         f->last_destinatation_id = buffer_read_i16(buf);
     }
-    // The following code should only be executed if the savegame includes figure information that is not 
+    // The following code should only be executed if the savegame includes figure information that is not
     // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next figure
-    if (figure_buf_size > FIGURE_CURRENT_BUFFER_SIZE) {
-        buffer_skip(buf, figure_buf_size - FIGURE_CURRENT_BUFFER_SIZE);
+    if (figure_buf_size > kFigureCurrentBufferSize) {
+        buffer_skip(buf, figure_buf_size - kFigureCurrentBufferSize);
     }
 }
 
@@ -627,10 +632,10 @@ void figure_save_state(buffer *list, buffer *seq)
 {
     buffer_write_i32(seq, data.created_sequence);
 
-    int buf_size = 4 + data.figures.size * FIGURE_CURRENT_BUFFER_SIZE;
+    int buf_size = 4 + data.figures.size * kFigureCurrentBufferSize;
     uint8_t *buf_data = static_cast<uint8_t *>(malloc(buf_size));
     buffer_init(list, buf_data, buf_size);
-    buffer_write_i32(list, FIGURE_CURRENT_BUFFER_SIZE);
+    buffer_write_i32(list, kFigureCurrentBufferSize);
 
     figure *f;
     array_foreach(data.figures, f)
@@ -644,7 +649,7 @@ void figure_load_state(buffer *list, buffer *seq, int version)
     figure_runtime_reset();
     data.created_sequence = buffer_read_i32(seq);
 
-    int figure_buf_size = FIGURE_ORIGINAL_BUFFER_SIZE;
+    int figure_buf_size = kFigureOriginalBufferSize;
     size_t buf_size = list->size;
 
     if (version > SAVE_GAME_LAST_STATIC_VERSION) {
@@ -654,7 +659,7 @@ void figure_load_state(buffer *list, buffer *seq, int version)
 
     int figures_to_load = (int) buf_size / figure_buf_size;
 
-    if (!array_init(data.figures, FIGURE_ARRAY_SIZE_STEP, initialize_new_figure, figure_is_active) ||
+    if (!array_init(data.figures, kFigureArraySizeStep, initialize_new_figure, figure_is_active) ||
         !array_expand(data.figures, figures_to_load)) {
         log_error("Unable to create figures array. The game will now crash.", 0, 0);
     }

@@ -3,5 +3,6 @@
     <native class="roaming_service" />
     <owner slot="primary" building="any" state="in_use" />
     <movement terrain_usage="roads" roam_ticks="1" max_roam_length="384" return_mode="return_to_owner_road" />
+    <pathing mode="vanilla_roaming" />
     <graphics image_group="barber" max_image_offset="12" />
 </figure>

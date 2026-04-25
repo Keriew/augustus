@@ -3,7 +3,14 @@
 
 #include "graphics/color.h"
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 26819)
+#endif
 #include "SDL.h"
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #ifdef __cplusplus
 extern "C" {

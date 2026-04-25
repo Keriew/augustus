@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<figure type="engineer">
+    <native class="engineer_service" />
+    <owner slot="primary" building="engineers_post" state="in_use" />
+    <movement terrain_usage="roads" roam_ticks="1" max_roam_length="640" return_mode="return_to_owner_road" />
+    <pathing mode="vanilla_roaming" />
+    <graphics image_group="engineer" max_image_offset="12" />
+</figure>
