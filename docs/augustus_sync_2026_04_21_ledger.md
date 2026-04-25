@@ -15,6 +15,7 @@ This ledger tracks the current hand-port batch from upstream `Augustus` into the
   - `Mods/*/BuildingType/{reservoir,fountain,well}.xml`
 - That rework supersedes the older "partial water overlay parity" notes below. Treat the water-related commit dispositions in this ledger as a revision target, not as final parity proof, until the new runtime is tested in-engine.
 - Follow-up audit on 2026-04-23 found no observed regressions after porting `9d550e322` and tightening water overlay/access runtime parity. The branch now uses the generated native runtime overlay image for live water coverage and construction preview tinting.
+- Follow-up audit on 2026-04-24 found GitHub's 64-behind count is graph-correct: upstream `2de6361d8` pulls 50 side-parent commits into `Augustus`. For manual Vespasian sync purposes, the remaining queue after the prior 50-commit hand merge is the 14 upstream first-parent commits listed below.
 
 ## Applied In This Working Tree
 
@@ -82,10 +83,33 @@ This ledger tracks the current hand-port batch from upstream `Augustus` into the
 | --- | --- | --- | --- |
 | `9d550e322` | `adapt to fork seam` | applied | Editor terrain placement fix for issue `#1741` ported through the current `src/editor/tool.c` seam: terrain painting now preserves multi-tile XY metadata on elevation/access-ramp terrain. |
 
+## Remaining Upstream First-Parent Commits After 2026-04-23 Sync
+
+GitHub currently reports Vespasian as 64 commits behind `Augustus` because upstream commit `2de6361d8` merges a side branch containing 50 reachable commits. The operational manual-sync queue is the 14 first-parent commits after `9d550e322`.
+
+| Upstream commit | Disposition | Status | Notes |
+| --- | --- | --- | --- |
+| `2de6361d8` Merge remote-tracking branch `upstream/master` into `augustus-master` | selective audit | partially ported/adapted | Ported fork-relevant runtime fixes: hotkey migration, animation offset fixes, multiline text null guard, mouse window-focus scrolling, and stale storage enum removal. Android SDK/theme/insets, Flatpak metadata, and legacy Czech C-table edits were not ported; this fork uses JSON localization and root MSBuild as the active workflow. |
+| `7ed31fd6d` Fix flatpak build | build/CI | intentionally not ported | Flatpak dependency maintenance remains out of scope unless the fork revives upstream Flatpak packaging. |
+| `6131809cd` Fix flatpak build again | build/CI | intentionally not ported | Same Flatpak packaging-only rationale as `7ed31fd6d`. |
+| `07c9631ef` Yet another attempt at fixing flatpak | build/CI | intentionally not ported | Flatpak install script and workflow changes remain deferred with the inactive packaging workflow. |
+| `fe9637540` Fix road/highway under aqueduct images not updating when cancelling build/using undo | runtime fix | ported | `src/game/undo.cpp` now restores map images on empty tiles and aqueduct terrain so roads/highways under aqueducts redraw after cancel/undo. |
+| `49301fc45` Update github actions dependencies | CI | intentionally not ported | GitHub Actions dependency refresh is not part of the active root Visual Studio/MSBuild workflow. |
+| `93978ac12` Update codeql action dependencies | CI | intentionally not ported | CodeQL dependency refresh remains deferred with CI maintenance. |
+| `cbd181ae1` feat(editor): preview terrain (#1692) | editor feature | ported | `src/widget/map_editor_tool.c` now previews trees, rocks, shrubs, meadow, and custom earthquake terrain with representative ghosted terrain images. |
+| `bb56ac880` Add active counters for price and demand changes (#1745) | editor/scenario feature | ported/adapted | Added active price/demand counters, editor attribute display, model-data label key, key-table entries, and JSON localization entries for `en`, `fr`, and `ru`. Other locale catalog translations remain a known divergence unless they receive localized strings later. |
+| `d58d3c403` Update easyav1 | dependency | intentionally not ported | Only updates the `ext/easyav1` submodule pointer; no local encoder dependency need was identified. |
+| `7931b9e22` Allow reservoirs over any aqueducts | runtime rule fix | ported | Routing now allows draggable reservoirs to start on aqueduct terrain while preserving the existing guard against covering nearby aqueducts from non-aqueduct source tiles. |
+| `b8923f053` Fix minimap | runtime/UI fix | ported/adapted | Save/scenario minimap readers now choose 8/16-bit bitfield and 16/32-bit building-id readers by version, matching the fork's `.cpp` file-IO seam. |
+| `4e81f5af3` Fix aqueduct and wall colors on minimap (#1746) | runtime/UI fix | superseded by final minimap port | The intermediate aqueduct/wall building-color branch was not copied because `caa61f5ce` corrects it. |
+| `caa61f5ce` Properly fix minimap | runtime/UI fix | ported | Minimap drawing now lets aqueduct and wall terrain color paths run before generic building rendering while palisades still render like walls. |
+
 ## Validation Completed
 
 - 2026-04-23 water overlay/access runtime audit: no observed regressions for reservoir/fountain/well preview behavior, aqueduct preview, reservoir side-connection rules, road/highway under aqueducts, dry aqueduct images, concrete maker/well coverage, and Neptune module coverage.
 - 2026-04-23 editor terrain audit: `9d550e322` is ported; elevation/access-ramp multi-tile XY metadata is preserved during terrain painting.
+- 2026-04-24 manual port pass: applicable runtime/editor/minimap fixes from the 14 remaining upstream first-parent commits were ported or explicitly marked as intentionally unported above.
+- 2026-04-24 static checks: `git diff --check` passed; touched JSON catalogs parsed successfully; no stale calls remain to the replaced minimap buffer helper names.
 
 ## Validation To Run Later
 
@@ -93,3 +117,7 @@ This ledger tracks the current hand-port batch from upstream `Augustus` into the
 - Depot regression sweep: clear source/destination, recall all carts, change instructions mid-route, change resource while carts are out.
 - Storage dispatch sweep: granary/warehouse emptying and Caesar request behavior.
 - Pathing sweep: roads and highways under aqueducts and reservoir placement over aqueduct footprints.
+- Undo/cancel image invalidation: verify roads/highways under aqueducts redraw correctly after cancelled build previews and undo operations.
+- Editor preview: verify terrain preview behavior if `cbd181ae1` is ported.
+- Scenario editor counters: verify price/demand active counters if `bb56ac880` is ported.
+- Minimap rendering: verify aqueducts, walls, reservoirs, and overlay-adjacent water features after any minimap fix-set port.

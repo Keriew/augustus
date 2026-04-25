@@ -1,6 +1,9 @@
 # Visual Studio generated .editorconfig file with C++ settings.
 root = true
 
+[*]
+end_of_line = crlf
+
 [*.{c++,c,cc,cpp,cppm,cxx,h,h++,hh,hpp,hxx,inl,ipp,ixx,tlh,tli}]
 
 # Visual C++ Code Style settings

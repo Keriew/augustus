@@ -26,10 +26,16 @@ building_type map_building_type_at(int grid_offset)
     return building_id ? building_get(building_id)->type : BUILDING_NONE;
 }
 
-unsigned int map_building_from_buffer(buffer *buildings, int grid_offset)
+unsigned int map_building_from_buffer_16(buffer *buildings, int grid_offset)
 {
     buffer_set(buildings, grid_offset * sizeof(uint16_t));
     return buffer_read_u16(buildings);
+}
+
+unsigned int map_building_from_buffer_32(buffer *buildings, int grid_offset)
+{
+    buffer_set(buildings, grid_offset * sizeof(uint32_t));
+    return buffer_read_u32(buildings);
 }
 
 void map_building_set(int grid_offset, unsigned int building_id)

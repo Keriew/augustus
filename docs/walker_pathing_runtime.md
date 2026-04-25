@@ -74,5 +74,5 @@ records before doing removals or reordering.
 Start new sessions with the four core Codex files, then read this file for walker
 runtime work and `Mods/Vespasian/FigureType/_README.md` for XML details.
 Renderer or overlay work that visualizes recency should also read
-`codex_augustus_repo_map_memory.md` for renderer/widget chokepoints before
+`../codex_augustus_repo_map_memory.md` for renderer/widget chokepoints before
 touching `src/widget/city_with_overlay.cpp`.

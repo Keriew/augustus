@@ -2057,6 +2057,11 @@
     "TR_ADVISOR_CHIEF_NO_WATER": "La plupart des citoyens n'ont pas acc\u00e8s \u00e0 un point d'eau",
     "TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS": "Pas d'instructions",
     "TR_CONFIG_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS": "Les greniers n'autorisent pas les passants par d\u00e9faut",
-    "TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS": "Les entrep\u00f4ts n'autorisent pas les passants par d\u00e9faut"
+    "TR_CONFIG_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS": "Les entrep\u00f4ts n'autorisent pas les passants par d\u00e9faut",
+    "TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA": "Change model data",
+    "TR_EDITOR_PRICE_CHANGE": "price change",
+    "TR_EDITOR_PRICE_CHANGES": "price changes",
+    "TR_EDITOR_DEMAND_CHANGE": "demand change",
+    "TR_EDITOR_DEMAND_CHANGES": "demand changes"
   }
 }

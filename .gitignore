@@ -57,19 +57,6 @@ ext/SDL2/*.tar.gz
 
 res/augustus.icns
 /vendor
-/codex_augustus_vs2022_cpp_migration_memory.md
-/codex_augustus_long_term_memory.md
-/codex_augustus_repo_map_memory.md
-/codex_augustus_handoff.md
-/codex_augustus_localization_memory.md
-/_codex_renderer_resource_working_memory.md
-/_codex_building_graphics_runtime_working_memory.md
-/_codex_tile_graphics_runtime_working_memory.md
-/tree_clear_known_bug.md
-/tool_mode_state_known_bug.md
-/hold_games_icons_known_bug.md
-/graphics_upscale_pipeline_notes.md
-/roman_early_medieval_mortality_research.md
 /augustus.97d2cb33
 /x64
 /Win32
@@ -77,7 +64,3 @@ res/augustus.icns
 /Mods/Julius/Graphics/
 /Mods/Vespasian/Graphics/
 /extracted_graphics_sample
-micro_stutters_known_bug.md
-codex_augustus_upstream_merge_conflicts_memory.md
-augustus_fonts_runtime_notes.md
-renderer_ui_vertical_slice_design.md

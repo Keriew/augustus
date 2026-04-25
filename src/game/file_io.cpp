@@ -1441,7 +1441,11 @@ static int scenario_terrain_at(int grid_offset)
 
 static int scenario_tile_size_at(int grid_offset)
 {
-    return map_property_multi_tile_size_from_buffer(scenario_data.state.bitfields, grid_offset);
+    if (scenario_data.version <= SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        return map_property_multi_tile_size_from_buffer_8(scenario_data.state.bitfields, grid_offset);
+    } else {
+        return map_property_multi_tile_size_from_buffer_16(scenario_data.state.bitfields, grid_offset);
+    }
 }
 
 static int scenario_is_draw_tile_at(int grid_offset)
@@ -1785,7 +1789,11 @@ static int savegame_terrain_at(int grid_offset)
 
 static int savegame_tile_size_at(int grid_offset)
 {
-    return map_property_multi_tile_size_from_buffer(savegame_data.state.bitfields_grid, grid_offset);
+    if (minimap_data.version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+        return map_property_multi_tile_size_from_buffer_8(savegame_data.state.bitfields_grid, grid_offset);
+    } else {
+        return map_property_multi_tile_size_from_buffer_16(savegame_data.state.bitfields_grid, grid_offset);
+    }
 }
 
 static int savegame_is_draw_tile_at(int grid_offset)
@@ -1800,7 +1808,11 @@ static int savegame_random_at(int grid_offset)
 
 static unsigned int savegame_get_building_id(int grid_offset)
 {
-    return map_building_from_buffer(savegame_data.state.building_grid, grid_offset);
+    if (minimap_data.version <= SAVE_GAME_LAST_U16_GRIDS) {
+        return map_building_from_buffer_16(savegame_data.state.building_grid, grid_offset);
+    } else {
+        return map_building_from_buffer_32(savegame_data.state.building_grid, grid_offset);
+    }
 }
 
 static building *savegame_building(unsigned int id)

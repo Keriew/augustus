@@ -220,8 +220,8 @@ void scenario_earthquake_process(void)
                 custom_delay = 0;
                 // Generate new random delay for next tile
                 data.next_delay = 10 + (random_byte() % (scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? 15 : 90) + 1); // 10 to 25 or 100 ticks
-                
-                if (!(scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? custom_earthquake_advance_next_tile() : 
+
+                if (!(scenario.earthquake.pattern == EARTHQUAKE_PATTERN_RIGHT_LEFT ? custom_earthquake_advance_next_tile() :
                     custom_earthquake_advance_random_tiles())) { // If no tiles left, finish the event
                     data.state = EVENT_FINISHED;
                 }

@@ -37,6 +37,8 @@ void scenario_demand_change_remap_resource(void);
 
 unsigned int scenario_demand_change_count_total(void);
 
+int scenario_demand_change_count_active(void);
+
 void scenario_demand_change_save_state(buffer *buf);
 
 void scenario_demand_change_load_state(buffer *buf, scenario_version_t version);

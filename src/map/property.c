@@ -127,9 +127,22 @@ int map_property_multi_tile_size(int grid_offset)
     }
 }
 
-int map_property_multi_tile_size_from_buffer(buffer *bitfields, int grid_offset)
+int map_property_multi_tile_size_from_buffer_8(buffer *bitfields, int grid_offset)
 {
     buffer_set(bitfields, grid_offset);
+    switch (buffer_read_u8(bitfields) & BIT_SIZES) {
+        case BIT_SIZE2: return 2;
+        case BIT_SIZE3: return 3;
+        case BIT_SIZE4: return 4;
+        case BIT_SIZE5: return 5;
+        case BIT_SIZE7: return 7;
+        default: return 1;
+    }
+}
+
+int map_property_multi_tile_size_from_buffer_16(buffer *bitfields, int grid_offset)
+{
+    buffer_set(bitfields, grid_offset * sizeof(uint16_t));
     switch (buffer_read_u16(bitfields) & BIT_SIZES) {
         case BIT_SIZE2: return 2;
         case BIT_SIZE3: return 3;
