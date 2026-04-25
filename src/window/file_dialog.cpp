@@ -137,7 +137,7 @@ static const int MISSION_ID_TO_CITY_ID[] = {
 
 static file_type_data saved_game_data = { "sav", PATH_LOCATION_SAVEGAME };
 static file_type_data saved_game_data_expanded = { "svx", PATH_LOCATION_SAVEGAME };
-static file_type_data saved_game_data_vespasian = { "savf", PATH_LOCATION_SAVEGAME };
+static file_type_data saved_game_data_vespasian = { "svv", PATH_LOCATION_SAVEGAME };
 static file_type_data scenario_data = { "map", PATH_LOCATION_SCENARIO };
 static file_type_data scenario_data_expanded = { "mapx", PATH_LOCATION_SCENARIO };
 static file_type_data empire_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EMPIRES };

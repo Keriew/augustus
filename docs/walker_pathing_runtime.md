@@ -69,6 +69,12 @@ The current save format writes grids in ordinal enum order. If frequent effect
 schema changes become likely, move the payload to explicit `(effect_id, grid)`
 records before doing removals or reordering.
 
+Loading a save from before road service history existed is expected compatibility
+behavior. It should clear the history and emit a concise `Info` report with no
+context scope. Invalid or unsupported road service history is recoverable but
+unintended, so it remains a `Warning` while still resetting the history to zero
+and appending neutral context in the same log entry.
+
 ## Related Context
 
 Start new sessions with the four core Codex files, then read this file for walker

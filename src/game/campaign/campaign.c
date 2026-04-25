@@ -220,7 +220,7 @@ int game_campaign_load_scenario(int scenario_id)
     }
     int is_save_game = game_campaign_is_original() ||
         file_has_extension(camp_scenario->path, "sav") || file_has_extension(camp_scenario->path, "svx")
-            || file_has_extension(camp_scenario->path, "savf");
+            || file_has_extension(camp_scenario->path, "svv");
     int result = game_file_start_scenario_from_buffer(scenario_data, (int) length, is_save_game);
     free(scenario_data);
     return result;
@@ -251,7 +251,7 @@ int game_campaign_load_scenario_info(int scenario_id, saved_game_info *info)
 
     if (game_campaign_is_original() ||
         file_has_extension(camp_scenario->path, "sav") || file_has_extension(camp_scenario->path, "svx")
-            || file_has_extension(camp_scenario->path, "savf")) {
+            || file_has_extension(camp_scenario->path, "svv")) {
         result = game_file_io_read_saved_game_info_from_buffer(&buf, info);
     } else {
         result = game_file_io_read_scenario_info_from_buffer(&buf, info);

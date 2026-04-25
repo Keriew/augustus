@@ -94,7 +94,7 @@ extern "C" void map_road_service_history_load_state(buffer *buf, int has_saved_s
 
     if (!has_saved_state || !buf || !buf->data || !buf->size) {
         const ErrorContextScope scope("Savegame road service history");
-        error_context_report_warning(
+        error_context_report_info(
             "Savegame has no road service history; smart walker pathing history will start at zero.",
             "This is expected when loading saves created before road service history was added.");
         return;

@@ -39,6 +39,15 @@ Primary design goals remain:
 - Broken critical assets or invalid definitions should fail at load, not halfway through gameplay.
 - Startup errors should retain a precise user-facing reason whenever practical.
 
+## Runtime reporting doctrine
+- Use `Info` for expected compatibility or diagnostic notes, `Warning` for probably unintended but safe recovery, `Error` for definitely unintended survivable failures, and `Fatal error` only when the process must stop.
+- Reserve the word "Error" in user-facing logs for actual error/fatal reports. Context scopes are neutral location breadcrumbs and should be labeled "Context", not "Error context", when printed.
+- `Info` reports should omit context scopes. Warning/error/fatal reports should log the message, detail, and active context scopes as one log entry. Avoid emitting a report line followed by separate scope-count/scope-name lines.
+
+## Save file doctrine
+- Vespasian-owned save files use `.svv`. This replaced the temporary `.savf` extension so the fork has a standard three-letter extension while remaining distinct from legacy Caesar/Julius/Augustus `.sav` and expanded `.svx` saves.
+- Existing `.savf` saves can be renamed to `.svv`; the on-disk payload format did not change with the extension rename.
+
 ## Text / UTF doctrine
 - Do not attempt a blanket UTF-native storage migration during unrelated renderer or widget work.
 - Use boundary-first modernization instead:
