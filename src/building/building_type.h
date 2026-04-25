@@ -102,7 +102,11 @@ enum class GraphicsConditionType {
     WaterAccess,
     FigureSlotOccupied,
     ResourcePositive,
-    Desirability
+    Desirability,
+    Days1Positive,
+    Days1NotPositive,
+    Days2Positive,
+    Days1OrDays2Positive
 };
 
 struct LaborSeekerPolicy {

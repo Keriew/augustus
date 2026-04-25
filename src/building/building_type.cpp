@@ -57,6 +57,14 @@ int GraphicsCondition::matches(const ::building &building) const
             }
         case GraphicsConditionType::ResourcePositive:
             return resource > RESOURCE_NONE && resource < RESOURCE_MAX && building.resources[resource] > 0;
+        case GraphicsConditionType::Days1Positive:
+            return building.data.entertainment.days1 > 0;
+        case GraphicsConditionType::Days1NotPositive:
+            return building.data.entertainment.days1 <= 0;
+        case GraphicsConditionType::Days2Positive:
+            return building.data.entertainment.days2 > 0;
+        case GraphicsConditionType::Days1OrDays2Positive:
+            return building.data.entertainment.days1 > 0 || building.data.entertainment.days2 > 0;
         case GraphicsConditionType::Desirability:
             switch (comparison) {
                 case GraphicComparison::LessThan:

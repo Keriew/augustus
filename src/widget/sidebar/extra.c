@@ -482,11 +482,9 @@ static int draw_request_buttons(int y_offset)
                     }
                 }
 
-                // request current / total
-                width += text_draw_number(r->available, 0, "/", width, y_offset + 2,
-                    enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
-                width += text_draw_number(r->amount, 0, "",
-                    width - 5, y_offset + 2, enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
+                // Draw current and required amounts as measured columns so large values do not overlap.
+                width += text_draw_number_pair(r->available, r->amount, 0, "/",
+                    width, y_offset + 2, 0, 0, 0, enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
 
             } else {
                 color_t color = status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
@@ -500,7 +498,7 @@ static int draw_request_buttons(int y_offset)
             font_t font_color = r->time <= REQUEST_MONTHS_LEFT_FOR_RED_WARNING ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
 
             // request time left
-            text_draw(string_from_ascii(","), width - 12, y_offset + 2, FONT_NORMAL_GREEN, 0);
+            width += text_draw(string_from_ascii(","), width, y_offset + 2, FONT_NORMAL_GREEN, 0);
             width += text_draw_number(r->time, 0, "", width, y_offset + 2, font_color, 0);
             lang_text_draw_ellipsized(8, 4 + (r->time != 1), width, y_offset + 2,
                 data.width - (width - data.x_offset) - 4, font_color);
