@@ -26,10 +26,10 @@
 #include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
 #include "window/select_campaign.h"
+#include "window/terrain_generator.h"
 #include "window/video.h"
 
-#define MAX_BUTTONS 6
-
+#define MAX_BUTTONS 7
 static void button_click(const generic_button *button);
 
 static struct {
@@ -39,11 +39,12 @@ static struct {
 
 static generic_button buttons[] = {
     {192, 130, 256, 25, button_click, 0, 1},
-    {192, 170, 256, 25, button_click, 0, 2},
-    {192, 210, 256, 25, button_click, 0, 3},
-    {192, 250, 256, 25, button_click, 0, 4},
-    {192, 290, 256, 25, button_click, 0, 5},
-    {192, 330, 256, 25, button_click, 0, 6},
+    {192, 164, 256, 25, button_click, 0, 2},
+    {192, 198, 256, 25, button_click, 0, 3},
+    {192, 232, 256, 25, button_click, 0, 4},
+    {192, 266, 256, 25, button_click, 0, 5},
+    {192, 300, 256, 25, button_click, 0, 6},
+    {192, 334, 256, 25, button_click, 0, 7},
 };
 
 static void draw_version_string(void)
@@ -89,11 +90,12 @@ static void draw_foreground(void)
     }
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_SELECT_CAMPAIGN, 192, 137, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 2, 192, 177, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 3, 192, 217, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(9, 8, 192, 257, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(2, 0, 192, 297, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 5, 192, 337, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 2, 192, 171, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 3, 192, 205, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(9, 8, 192, 239, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_TERRAIN_GENERATOR, 192, 273, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(2, 0, 192, 307, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 5, 192, 341, 256, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
 }
@@ -138,8 +140,11 @@ static void button_click(const generic_button *button)
             sound_music_play_editor();
         }
     } else if (type == 5) {
-        window_config_show(CONFIG_FIRST_PAGE, 0, 1);
+        (void) button;
+        window_terrain_generator_show();
     } else if (type == 6) {
+        window_config_show(CONFIG_FIRST_PAGE, 0, 1);
+    } else if (type == 7) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
 }
