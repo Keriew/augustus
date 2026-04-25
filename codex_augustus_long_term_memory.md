@@ -19,6 +19,7 @@ Primary design goals remain:
 - Do not broaden a rewrite just because a subsystem is old; center the work on the best control point.
 - Comment functions consistently when touching code. Prefer concise contract comments that explain ownership, invariants, save/load behavior, validation, or surprising legacy interactions; avoid comments that merely restate assignments.
 - Update the relevant markdown whenever behavior, XML contracts, save formats, new runtime classes, or major chokepoints change, unless the user explicitly says not to. Add cross-references so future sessions can find the information from the four core Codex files without crowding those files with every detail.
+- Always update save versioning and migration gates when changing any data that is stored in save files; do this even when the loader can technically tolerate the new shape.
 
 ## Renderer doctrine
 - Native window pixels, logical UI size, user UI scale, and world zoom are separate concepts and should stay separate.

@@ -1,6 +1,9 @@
 #include "ui_runtime.h"
 
+#include "graphics/advisor_card_button_widget.h"
+#include "graphics/advisor_text_button_widget.h"
 #include "graphics/bordered_button_widget.h"
+#include "graphics/empire_trade_route_button_widget.h"
 #include "graphics/image_button_widget.h"
 #include "graphics/label_widget.h"
 #include "graphics/panel_widget.h"
@@ -74,6 +77,57 @@ int SharedUiRuntime::draw_top_menu_black_panel(int x, int y, int width)
 void SharedUiRuntime::draw_image_button(int x, int y, const image_button &button)
 {
     ImageButtonWidget(primitives_, x, y, button).draw();
+}
+
+void SharedUiRuntime::draw_bordered_icon_button(
+    int x,
+    int y,
+    int width_pixels,
+    int height_pixels,
+    int has_focus,
+    BorderedButtonIconSpec icon,
+    color_t color,
+    BorderedButtonFillStyle fill_style)
+{
+    BorderedButtonWidget(primitives_, x, y, width_pixels, height_pixels, has_focus, color, fill_style, icon).draw();
+}
+
+void SharedUiRuntime::draw_advisor_text_button(
+    int x,
+    int y,
+    int width_pixels,
+    int height_pixels,
+    int has_focus,
+    const UiTextSpec &text_spec,
+    color_t color)
+{
+    AdvisorTextButtonWidget(primitives_, x, y, width_pixels, height_pixels, has_focus, text_spec, color).draw();
+}
+
+void SharedUiRuntime::draw_advisor_card_button(
+    int x,
+    int y,
+    int width_pixels,
+    int height_pixels,
+    int has_focus,
+    const UiTextSpec *text_specs,
+    int text_spec_count,
+    color_t color)
+{
+    AdvisorCardButtonWidget(primitives_, x, y, width_pixels, height_pixels, has_focus, text_specs, text_spec_count, color)
+        .draw();
+}
+
+void SharedUiRuntime::draw_empire_trade_route_button(
+    int x,
+    int y,
+    int width_pixels,
+    int height_pixels,
+    int has_focus,
+    const EmpireTradeRouteButtonSpec &spec,
+    color_t color)
+{
+    EmpireTradeRouteButtonWidget(primitives_, x, y, width_pixels, height_pixels, has_focus, spec, color).draw();
 }
 
 void SharedUiRuntime::draw_scrollbar_dot(const scrollbar_type &scrollbar)

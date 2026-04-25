@@ -3,6 +3,10 @@
 
 #include "figure/figure.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum {
     TRADE_SHIP_NONE = 0,
     TRADE_SHIP_BUYING = 1,
@@ -40,5 +44,9 @@ int figure_trader_ship_get_distance_to_dock(const figure *ship, unsigned int doc
 int figure_trader_ship_other_ship_closer_to_dock(unsigned int dock_id, int distance);
 
 #define IMAGE_CAMEL 4922
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FIGURETYPE_TRADER_H

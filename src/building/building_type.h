@@ -54,7 +54,12 @@ enum class WaterAccessMode {
 
 enum class SpawnMode {
     None,
-    ServiceRoamer
+    ServiceRoamer,
+    TempleSupplier,
+    TempleDestinationPriest,
+    TempleMarsMessHallPriest,
+    TempleNeptuneChariot,
+    GrandTempleMarsRecruit
 };
 
 enum class RoadAccessMode {

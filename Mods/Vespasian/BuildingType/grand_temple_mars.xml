@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="grand_temple_mars">
+    <labor>
+        <employees count="50" />
+        <seeker mode="spawn_if_below" min_houses="100" />
+    </labor>
+    <spawn_group road_access="normal" delay_bands="100:0,1:0">
+        <spawn mode="grand_temple_mars_recruit" />
+    </spawn_group>
+    <spawn_group road_access="normal" delay_bands="100:0,1:0">
+        <spawn mode="temple_destination_priest" />
+    </spawn_group>
+</building>

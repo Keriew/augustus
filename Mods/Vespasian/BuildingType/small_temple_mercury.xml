@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<building type="small_temple_mercury">
+    <labor>
+        <employees count="2" />
+        <seeker mode="spawn_if_below" min_houses="50" />
+    </labor>
+    <spawn_group road_access="normal" delay_bands="100:3,75:7,50:10,25:15,1:20">
+        <spawn mode="service_roamer" spawn_figure="priest"
+            action_state="roaming" direction="top" figure_slot="primary" init_roaming="true" />
+    </spawn_group>
+    <spawn_group road_access="normal" delay_bands="100:0,1:0">
+        <spawn mode="temple_destination_priest" />
+    </spawn_group>
+</building>

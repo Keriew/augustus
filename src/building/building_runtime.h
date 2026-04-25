@@ -96,6 +96,11 @@ private:
     void send_supplier_to_destination(figure *supplier, int destination_building_id);
     int spawn_caravanserai_supplier(const map_point &road);
     int spawn_lighthouse_supplier(const map_point &road);
+    int spawn_temple_supplier(const map_point &road);
+    int spawn_temple_destination_priest(const map_point &road);
+    int spawn_temple_mars_mess_hall_priest(const map_point &road);
+    int spawn_temple_neptune_chariot(const map_point &road);
+    int spawn_grand_temple_mars_recruit(const map_point &road);
     void spawn_architect_guild();
     void spawn_caravanserai();
     void spawn_lighthouse();
@@ -112,7 +117,10 @@ private:
     void assign_figure_slot(building_type_registry_impl::FigureSlot slot, unsigned int figure_id);
     int create_spawned_figure(const building_type_registry_impl::SpawnPolicy &policy, const map_point &road);
     int try_spawn_policy(const building_type_registry_impl::SpawnPolicy &policy, const map_point &road);
-    void spawn_service_roamer_group(const building_type_registry_impl::SpawnDelayGroup &group, size_t group_index);
+    void spawn_service_roamer_group(
+        const building_type_registry_impl::SpawnDelayGroup &group,
+        size_t group_index,
+        int run_labor);
 
     ::building *building_;
     const building_type_registry_impl::BuildingType *definition_;

@@ -1,3 +1,6 @@
+#include "graphics/ui_runtime.h"
+
+extern "C" {
 #include "military.h"
 
 #include "city/data_private.h"
@@ -17,6 +20,7 @@
 #include "scenario/invasion.h"
 #include "translation/translation.h"
 #include "window/city.h"
+}
 
 #define ADVISOR_HEIGHT 27
 
@@ -61,6 +65,40 @@ static unsigned int focus_button_id;
 static unsigned int focus_additional_button_id;
 static unsigned int num_legions;
 
+static void draw_fort_icon_button(int x, int y, int image_id, int has_focus)
+{
+    BorderedButtonIconSpec icon = {};
+    icon.image_id = image_id;
+    icon.placement = BorderedButtonIconPlacement::ExplicitOffset;
+    icon.x_offset = 3;
+    icon.y_offset = 3;
+    shared_ui_runtime().draw_bordered_icon_button(x, y, 30, 30, has_focus, icon);
+}
+
+static void draw_legion_action_buttons(
+    const formation *m,
+    unsigned int row,
+    int go_to_focus,
+    int return_focus,
+    int empire_service_focus)
+{
+    int y = 83 + 44 * row;
+    int image_id = image_group(GROUP_FORT_ICONS);
+    draw_fort_icon_button(384, y, image_id, go_to_focus);
+
+    if (m->is_at_fort || m->in_distant_battle) {
+        draw_fort_icon_button(464, y, image_id + 2, return_focus);
+    } else {
+        draw_fort_icon_button(464, y, image_id + 1, return_focus);
+    }
+
+    if (m->empire_service) {
+        draw_fort_icon_button(544, y, image_id + 3, empire_service_focus);
+    } else {
+        draw_fort_icon_button(544, y, image_id + 4, empire_service_focus);
+    }
+}
+
 static void init(void)
 {
     num_legions = formation_get_num_legions();
@@ -103,7 +141,7 @@ static int draw_background(void)
     }
     int bullet_x = 60;
     int text_x = 80;
-    int food_text;
+    translation_key food_text;
     int food_stress = city_data.mess_hall.food_stress_cumulative;
 
     if (food_stress > 50 && !city_mess_hall_months_food_stored()) {
@@ -175,23 +213,7 @@ static int draw_background(void)
         }
         lang_text_draw_centered(138, 37 + morale_offset, 224, 91 + 44 * i, 150, FONT_NORMAL_GREEN);
 
-        int image_id = image_group(GROUP_FORT_ICONS);
-        button_border_draw(384, 83 + 44 * i, 30, 30, 0);
-        image_draw(image_id, 387, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
-
-        button_border_draw(464, 83 + 44 * i, 30, 30, 0);
-        if (m->is_at_fort || m->in_distant_battle) {
-            image_draw(image_id + 2, 467, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
-        } else {
-            image_draw(image_id + 1, 467, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
-        }
-
-        button_border_draw(544, 83 + 44 * i, 30, 30, 0);
-        if (m->empire_service) {
-            image_draw(image_id + 3, 547, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
-        } else {
-            image_draw(image_id + 4, 547, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
-        }
+        draw_legion_action_buttons(m, i, 0, 0, 0);
     }
 
     return ADVISOR_HEIGHT;
@@ -214,9 +236,13 @@ static void draw_foreground(void)
     scrollbar_draw(&scrollbar);
     num_legions = formation_get_num_legions();
     for (unsigned int i = 0; i < 6 && i < num_legions; i++) {
-        button_border_draw(384, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 1);
-        button_border_draw(464, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 2);
-        button_border_draw(544, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 3);
+        const formation *m = formation_get(formation_for_legion(i + 1 + scrollbar.scroll_position));
+        draw_legion_action_buttons(
+            m,
+            i,
+            focus_button_id == 3 * i + 1,
+            focus_button_id == 3 * i + 2,
+            focus_button_id == 3 * i + 3);
     }
 
     int num_legions_not_at_fort = get_num_legions_not_at_fort();

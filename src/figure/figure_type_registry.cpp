@@ -188,10 +188,11 @@ static figure_type parse_figure_type_name(const char *name)
         figure_type type;
     };
 
-    static constexpr std::array<NamedFigure, 8> kFigureNames = { {
+    static constexpr std::array<NamedFigure, 9> kFigureNames = { {
         { "labor_seeker", FIGURE_LABOR_SEEKER },
         { "engineer", FIGURE_ENGINEER },
         { "prefect", FIGURE_PREFECT },
+        { "priest", FIGURE_PRIEST },
         { "teacher", FIGURE_TEACHER },
         { "librarian", FIGURE_LIBRARIAN },
         { "barber", FIGURE_BARBER },
@@ -330,10 +331,11 @@ static int parse_image_group_name(const char *name)
         int image_group_id;
     };
 
-    static constexpr std::array<NamedGroup, 7> kImageGroups = { {
+    static constexpr std::array<NamedGroup, 8> kImageGroups = { {
         { "labor_seeker", GROUP_FIGURE_LABOR_SEEKER },
         { "engineer", GROUP_FIGURE_ENGINEER },
         { "prefect", GROUP_FIGURE_PREFECT },
+        { "priest", GROUP_FIGURE_PRIEST },
         { "teacher_librarian", GROUP_FIGURE_TEACHER_LIBRARIAN },
         { "barber", GROUP_FIGURE_BARBER },
         { "bathhouse_worker", GROUP_FIGURE_BATHHOUSE_WORKER },
@@ -392,6 +394,24 @@ static road_service_effect parse_service_effect_name(const char *name)
     if (text_equals(name, "fire_risk")) {
         return ROAD_SERVICE_EFFECT_FIRE_RISK;
     }
+    if (text_equals(name, "religion_ceres")) {
+        return ROAD_SERVICE_EFFECT_RELIGION_CERES;
+    }
+    if (text_equals(name, "religion_neptune")) {
+        return ROAD_SERVICE_EFFECT_RELIGION_NEPTUNE;
+    }
+    if (text_equals(name, "religion_mercury")) {
+        return ROAD_SERVICE_EFFECT_RELIGION_MERCURY;
+    }
+    if (text_equals(name, "religion_mars")) {
+        return ROAD_SERVICE_EFFECT_RELIGION_MARS;
+    }
+    if (text_equals(name, "religion_venus")) {
+        return ROAD_SERVICE_EFFECT_RELIGION_VENUS;
+    }
+    if (text_equals(name, "religion_pantheon")) {
+        return ROAD_SERVICE_EFFECT_RELIGION_PANTHEON;
+    }
     return ROAD_SERVICE_EFFECT_NONE;
 }
 
@@ -406,7 +426,14 @@ static bool is_known_service_effect_name(const char *name)
         text_equals(name, "bathhouse") ||
         text_equals(name, "school") ||
         text_equals(name, "damage_risk") ||
-        text_equals(name, "fire_risk");
+        text_equals(name, "fire_risk") ||
+        text_equals(name, "religion_owner") ||
+        text_equals(name, "religion_ceres") ||
+        text_equals(name, "religion_neptune") ||
+        text_equals(name, "religion_mercury") ||
+        text_equals(name, "religion_mars") ||
+        text_equals(name, "religion_venus") ||
+        text_equals(name, "religion_pantheon");
 }
 
 static bool is_road_only_terrain_usage(int terrain_usage)
@@ -653,12 +680,17 @@ static int parse_pathing_node()
 
     PathingPolicy pathing_policy;
     pathing_policy.mode = parse_pathing_mode_name(xml_parser_get_attribute_string("mode"));
-    pathing_policy.effect = parse_service_effect_name(xml_parser_get_attribute_string("effect"));
+    const char *effect_text = xml_parser_get_attribute_string("effect");
+    if (text_equals(effect_text, "religion_owner")) {
+        pathing_policy.effect_from_religion_owner = 1;
+    } else {
+        pathing_policy.effect = parse_service_effect_name(effect_text);
+    }
 
     if (pathing_policy.mode == PathingMode::SmartService) {
         // Smart service pathing compares road-tile history for one service effect,
-        // so it is only valid for road walkers with an explicit effect id.
-        if (pathing_policy.effect == ROAD_SERVICE_EFFECT_NONE) {
+        // so it is only valid for road walkers with an explicit or owner-derived effect id.
+        if (pathing_policy.effect == ROAD_SERVICE_EFFECT_NONE && !pathing_policy.effect_from_religion_owner) {
             g_parse_state.error = true;
             error_context_report_error("FigureType smart_service pathing requires a service effect",
                 g_parse_state.definition->attr());

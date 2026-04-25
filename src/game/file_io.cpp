@@ -1014,7 +1014,8 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     }
     map_road_service_history_load_state(
         state->road_service_history,
-        version > SAVE_GAME_LAST_NO_ROAD_SERVICE_HISTORY);
+        version > SAVE_GAME_LAST_NO_ROAD_SERVICE_HISTORY,
+        version > SAVE_GAME_LAST_NO_RELIGION_ROAD_SERVICE_HISTORY);
 
     scenario_emperor_change_load_state(state->emperor_change_time, state->emperor_change_state);
     empire_load_state(state->empire);

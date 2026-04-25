@@ -87,6 +87,7 @@ static figure_type parse_figure_type_name(const char *name)
         { "librarian", FIGURE_LIBRARIAN },
         { "lion_tamer", FIGURE_LION_TAMER },
         { "prefect", FIGURE_PREFECT },
+        { "priest", FIGURE_PRIEST },
         { "school_child", FIGURE_SCHOOL_CHILD },
         { "surgeon", FIGURE_SURGEON },
         { "teacher", FIGURE_TEACHER },
@@ -1297,6 +1298,16 @@ static int parse_spawn()
     SpawnPolicy policy;
     if (mode_text && strcmp(mode_text, "service_roamer") == 0) {
         policy.mode = SpawnMode::ServiceRoamer;
+    } else if (mode_text && strcmp(mode_text, "temple_supplier") == 0) {
+        policy.mode = SpawnMode::TempleSupplier;
+    } else if (mode_text && strcmp(mode_text, "temple_destination_priest") == 0) {
+        policy.mode = SpawnMode::TempleDestinationPriest;
+    } else if (mode_text && strcmp(mode_text, "temple_mars_mess_hall_priest") == 0) {
+        policy.mode = SpawnMode::TempleMarsMessHallPriest;
+    } else if (mode_text && strcmp(mode_text, "temple_neptune_chariot") == 0) {
+        policy.mode = SpawnMode::TempleNeptuneChariot;
+    } else if (mode_text && strcmp(mode_text, "grand_temple_mars_recruit") == 0) {
+        policy.mode = SpawnMode::GrandTempleMarsRecruit;
     } else {
         log_error("Unsupported BuildingType spawn mode", mode_text, 0);
         g_parse_state.error = 1;
@@ -1312,28 +1323,32 @@ static int parse_spawn()
         return 0;
     }
 
-    if (!xml_parser_has_attribute("spawn_figure")) {
+    if (policy.mode == SpawnMode::ServiceRoamer && !xml_parser_has_attribute("spawn_figure")) {
         log_error("BuildingType spawn is missing required attribute 'spawn_figure'", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
-    policy.spawn_figure = parse_figure_type_name(xml_parser_get_attribute_string("spawn_figure"));
-    if (policy.spawn_figure == FIGURE_NONE) {
-        log_error("Unsupported BuildingType spawn spawn_figure", xml_parser_get_attribute_string("spawn_figure"), 0);
-        g_parse_state.error = 1;
-        return 0;
+    if (xml_parser_has_attribute("spawn_figure")) {
+        policy.spawn_figure = parse_figure_type_name(xml_parser_get_attribute_string("spawn_figure"));
+        if (policy.spawn_figure == FIGURE_NONE) {
+            log_error("Unsupported BuildingType spawn spawn_figure", xml_parser_get_attribute_string("spawn_figure"), 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
     }
 
-    if (!xml_parser_has_attribute("action_state")) {
+    if (policy.mode == SpawnMode::ServiceRoamer && !xml_parser_has_attribute("action_state")) {
         log_error("BuildingType spawn is missing required attribute 'action_state'", 0, 0);
         g_parse_state.error = 1;
         return 0;
     }
-    policy.action_state = parse_action_state_name(xml_parser_get_attribute_string("action_state"));
-    if (!policy.action_state) {
-        log_error("Unsupported BuildingType spawn action_state", xml_parser_get_attribute_string("action_state"), 0);
-        g_parse_state.error = 1;
-        return 0;
+    if (xml_parser_has_attribute("action_state")) {
+        policy.action_state = parse_action_state_name(xml_parser_get_attribute_string("action_state"));
+        if (!policy.action_state) {
+            log_error("Unsupported BuildingType spawn action_state", xml_parser_get_attribute_string("action_state"), 0);
+            g_parse_state.error = 1;
+            return 0;
+        }
     }
 
     if (xml_parser_has_attribute("direction")) {

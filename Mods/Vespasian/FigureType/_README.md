@@ -23,6 +23,7 @@ Current supported figure ids:
 - `labor_seeker`
 - `engineer`
 - `prefect`
+- `priest`
 - `teacher`
 - `librarian`
 - `barber`
@@ -51,11 +52,11 @@ Current supported `<movement>` attributes:
 Current supported `<pathing>` attributes:
 
 - `mode="vanilla_roaming|smart_service"`
-- `effect="damage_risk|fire_risk|barber|bathhouse|school|academy|library|labor"`
+- `effect="damage_risk|fire_risk|barber|bathhouse|school|academy|library|labor|religion_ceres|religion_neptune|religion_mercury|religion_mars|religion_venus|religion_pantheon|religion_owner"`
 
 Current supported `<graphics>` attributes:
 
-- `image_group="labor_seeker|engineer|prefect|teacher_librarian|barber|bathhouse_worker|school_child"`
+- `image_group="labor_seeker|engineer|prefect|priest|teacher_librarian|barber|bathhouse_worker|school_child"`
 - `max_image_offset="N"`
 
 Current engine behavior:
@@ -65,6 +66,7 @@ Current engine behavior:
 - If a native figure hits an unsupported action state, the runtime can decline and the legacy action path will still run.
 - `vanilla_roaming` preserves the existing random roaming policy.
 - `smart_service` chooses the least recently serviced road branch at intersections and requires road movement plus an effect.
+- `religion_owner` is a smart-service effect resolver for priests. The runtime derives the concrete god effect from the owning temple; Pantheon priests record all five god effects plus the Pantheon effect.
 - Smart service visit history is pathing telemetry only; building coverage and risk resets still use the normal service callbacks.
 - Road service history is saved separately from figures. Old saves start with zeroed history and a crash-context warning.
 

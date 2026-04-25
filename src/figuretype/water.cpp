@@ -1,5 +1,6 @@
 #include "water.h"
 
+extern "C" {
 #include "building/building.h"
 #include "building/monument.h"
 #include "building/properties.h"
@@ -11,10 +12,12 @@
 #include "figure/image.h"
 #include "figure/movement.h"
 #include "figure/route.h"
+#include "game/time.h"
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/water.h"
 #include "scenario/map.h"
+}
 
 static const int FLOTSAM_RESOURCE_IDS[] = {
     3, 1, 3, 2, 1, 3, 2, 3, 2, 1, 3, 3, 2, 3, 3, 3, 1, 2, 0, 1
@@ -204,7 +207,7 @@ void figure_fishing_boat_action(figure *f)
     switch (f->action_state) {
         case FIGURE_ACTION_190_FISHING_BOAT_CREATED:
             f->wait_ticks++;
-            if (f->wait_ticks >= 50) {
+            if (f->wait_ticks >= game_time_scale_legacy_day_ticks(50)) {
                 f->wait_ticks = 0;
                 map_point tile;
                 int wharf_id = map_water_get_wharf_for_new_fishing_boat(f, &tile);

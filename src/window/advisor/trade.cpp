@@ -1,4 +1,3 @@
-#include "graphics/advisor_text_button_widget.h"
 #include "graphics/ui_runtime.h"
 
 extern "C" {
@@ -130,14 +129,17 @@ static int draw_background(void)
 
 static void draw_policy_button(int x, int y, int is_available, int has_focus, int active_image_id, const char *inactive_asset_name)
 {
-    button_border_draw(x, y, 40, 30, has_focus);
-
     int image_id = active_image_id;
     if (!is_available) {
         image_id = assets_get_image_id("UI", inactive_asset_name);
     }
 
-    image_draw(image_id, x + 6, y + 4, COLOR_MASK_NONE, SCALE_NONE);
+    BorderedButtonIconSpec icon = {};
+    icon.image_id = image_id;
+    icon.placement = BorderedButtonIconPlacement::ExplicitOffset;
+    icon.x_offset = 6;
+    icon.y_offset = 4;
+    shared_ui_runtime().draw_bordered_icon_button(x, y, 40, 30, has_focus, icon);
 }
 
 static void draw_resource_status_text(resource_type resource, int x, int y, int box_width)
@@ -288,8 +290,6 @@ static void apply_policy(int selected_policy)
 
 static void draw_footer_button_widgets(void)
 {
-    UiPrimitives &primitives = shared_ui_runtime().primitives();
-
     UiTextSpec prices_text = {};
     prices_text.content_type = UiTextContentType::Language;
     prices_text.alignment = UiTextAlignment::Center;
@@ -300,7 +300,7 @@ static void draw_footer_button_widgets(void)
     prices_text.box_width = 200;
     prices_text.font = FONT_NORMAL_BLACK;
 
-    AdvisorTextButtonWidget(primitives, 375, 392, 200, 24, data.focus_button_id == 1, prices_text).draw();
+    shared_ui_runtime().draw_advisor_text_button(375, 392, 200, 24, data.focus_button_id == 1, prices_text);
 
     UiTextSpec empire_text = {};
     empire_text.content_type = UiTextContentType::Language;
@@ -312,7 +312,7 @@ static void draw_footer_button_widgets(void)
     empire_text.box_width = 200;
     empire_text.font = FONT_NORMAL_BLACK;
 
-    AdvisorTextButtonWidget(primitives, 160, 392, 200, 24, data.focus_button_id == 2, empire_text).draw();
+    shared_ui_runtime().draw_advisor_text_button(160, 392, 200, 24, data.focus_button_id == 2, empire_text);
 }
 
 static void show_policy(trade_policy_type policy_type)

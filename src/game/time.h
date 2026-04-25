@@ -52,6 +52,8 @@ int game_time_ticks_per_month(int month);
 int game_time_ticks_per_year(void);
 int game_time_is_last_day_of_month(void);
 int game_time_is_last_day_of_year(void);
+int game_time_scale_legacy_day_ticks(int legacy_ticks);
+int game_time_scale_legacy_day_tick_index(int legacy_tick);
 
 /**
  * Increases tick

@@ -30,6 +30,7 @@ extern "C" {
 #include "figure/formation_legion.h"
 #include "figure/movement.h"
 #include "game/resource.h"
+#include "game/time.h"
 #include "map/building_tiles.h"
 #include "map/desirability.h"
 #include "map/image.h"
@@ -126,15 +127,15 @@ static int default_spawn_delay(building *b)
 {
     int pct_workers = worker_percentage(b);
     if (pct_workers >= 100) {
-        return 3;
+        return game_time_scale_legacy_day_ticks(3);
     } else if (pct_workers >= 75) {
-        return 7;
+        return game_time_scale_legacy_day_ticks(7);
     } else if (pct_workers >= 50) {
-        return 15;
+        return game_time_scale_legacy_day_ticks(15);
     } else if (pct_workers >= 25) {
-        return 29;
+        return game_time_scale_legacy_day_ticks(29);
     } else if (pct_workers >= 1) {
-        return 44;
+        return game_time_scale_legacy_day_ticks(44);
     } else {
         return 0;
     }
@@ -175,7 +176,7 @@ static void spawn_beggar(building *b)
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
         b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > 16) {
+        if (b->figure_spawn_delay > game_time_scale_legacy_day_ticks(16)) {
             b->figure_spawn_delay = 0;
             if (data.beggar_counter > data.houses_needed_per_beggar) {
                 data.beggar_counter = 0;
@@ -195,7 +196,7 @@ static int spawn_patrician(building *b, int spawned)
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
         b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > 40 && !spawned) {
+        if (b->figure_spawn_delay > game_time_scale_legacy_day_ticks(40) && !spawned) {
             b->figure_spawn_delay = 0;
             figure *f = figure_create(FIGURE_PATRICIAN, road.x, road.y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_125_ROAMING;
@@ -304,15 +305,15 @@ static void spawn_figure_chariot_maker(building *b)
         int pct_workers = worker_percentage(b);
         int spawn_delay;
         if (pct_workers >= 100) {
-            spawn_delay = 7;
+            spawn_delay = game_time_scale_legacy_day_ticks(7);
         } else if (pct_workers >= 75) {
-            spawn_delay = 15;
+            spawn_delay = game_time_scale_legacy_day_ticks(15);
         } else if (pct_workers >= 50) {
-            spawn_delay = 30;
+            spawn_delay = game_time_scale_legacy_day_ticks(30);
         } else if (pct_workers >= 25) {
-            spawn_delay = 60;
+            spawn_delay = game_time_scale_legacy_day_ticks(60);
         } else if (pct_workers >= 1) {
-            spawn_delay = 90;
+            spawn_delay = game_time_scale_legacy_day_ticks(90);
         } else {
             return;
         }
@@ -348,15 +349,15 @@ static void spawn_figure_hippodrome(building *b)
         int pct_workers = worker_percentage(b);
         int spawn_delay;
         if (pct_workers >= 100) {
-            spawn_delay = 7;
+            spawn_delay = game_time_scale_legacy_day_ticks(7);
         } else if (pct_workers >= 75) {
-            spawn_delay = 15;
+            spawn_delay = game_time_scale_legacy_day_ticks(15);
         } else if (pct_workers >= 50) {
-            spawn_delay = 30;
+            spawn_delay = game_time_scale_legacy_day_ticks(30);
         } else if (pct_workers >= 25) {
-            spawn_delay = 50;
+            spawn_delay = game_time_scale_legacy_day_ticks(50);
         } else if (pct_workers >= 1) {
-            spawn_delay = 80;
+            spawn_delay = game_time_scale_legacy_day_ticks(80);
         } else {
             return;
         }
@@ -407,15 +408,15 @@ static void spawn_figure_colosseum(building *b)
         int pct_workers = worker_percentage(b);
         int spawn_delay;
         if (pct_workers >= 100) {
-            spawn_delay = 6;
+            spawn_delay = game_time_scale_legacy_day_ticks(6);
         } else if (pct_workers >= 75) {
-            spawn_delay = 12;
+            spawn_delay = game_time_scale_legacy_day_ticks(12);
         } else if (pct_workers >= 50) {
-            spawn_delay = 20;
+            spawn_delay = game_time_scale_legacy_day_ticks(20);
         } else if (pct_workers >= 25) {
-            spawn_delay = 40;
+            spawn_delay = game_time_scale_legacy_day_ticks(40);
         } else if (pct_workers >= 1) {
-            spawn_delay = 70;
+            spawn_delay = game_time_scale_legacy_day_ticks(70);
         } else {
             return;
         }
@@ -590,15 +591,15 @@ static void spawn_figure_market(building *b)
         int pct_workers = worker_percentage(b);
         int spawn_delay;
         if (pct_workers >= 100) {
-            spawn_delay = 2;
+            spawn_delay = game_time_scale_legacy_day_ticks(2);
         } else if (pct_workers >= 75) {
-            spawn_delay = 5;
+            spawn_delay = game_time_scale_legacy_day_ticks(5);
         } else if (pct_workers >= 50) {
-            spawn_delay = 10;
+            spawn_delay = game_time_scale_legacy_day_ticks(10);
         } else if (pct_workers >= 25) {
-            spawn_delay = 20;
+            spawn_delay = game_time_scale_legacy_day_ticks(20);
         } else if (pct_workers >= 1) {
-            spawn_delay = 30;
+            spawn_delay = game_time_scale_legacy_day_ticks(30);
         } else {
             return;
         }
@@ -642,6 +643,7 @@ static void spawn_figure_grand_temple_mars(building *b)
         if (city_data.mess_hall.food_stress_cumulative > 20) {
             spawn_delay += city_data.mess_hall.food_stress_cumulative - 20;
         }
+        spawn_delay = game_time_scale_legacy_day_ticks(spawn_delay);
 
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
@@ -716,17 +718,17 @@ static void spawn_figure_temple(building *b)
         int pct_workers = worker_percentage(b);
         int spawn_delay;
         if (model_get_building(b->type)->laborers <= 0) {
-            spawn_delay = 7;
+            spawn_delay = game_time_scale_legacy_day_ticks(7);
         } else if (pct_workers >= 100) {
-            spawn_delay = 3;
+            spawn_delay = game_time_scale_legacy_day_ticks(3);
         } else if (pct_workers >= 75) {
-            spawn_delay = 7;
+            spawn_delay = game_time_scale_legacy_day_ticks(7);
         } else if (pct_workers >= 50) {
-            spawn_delay = 10;
+            spawn_delay = game_time_scale_legacy_day_ticks(10);
         } else if (pct_workers >= 25) {
-            spawn_delay = 15;
+            spawn_delay = game_time_scale_legacy_day_ticks(15);
         } else if (pct_workers >= 1) {
-            spawn_delay = 20;
+            spawn_delay = game_time_scale_legacy_day_ticks(20);
         } else {
             return;
         }
@@ -809,15 +811,15 @@ static void spawn_figure_senate_forum(building *b)
         int pct_workers = worker_percentage(b);
         int spawn_delay;
         if (pct_workers >= 100) {
-            spawn_delay = 0;
+            spawn_delay = game_time_scale_legacy_day_ticks(0);
         } else if (pct_workers >= 75) {
-            spawn_delay = 1;
+            spawn_delay = game_time_scale_legacy_day_ticks(1);
         } else if (pct_workers >= 50) {
-            spawn_delay = 3;
+            spawn_delay = game_time_scale_legacy_day_ticks(3);
         } else if (pct_workers >= 25) {
-            spawn_delay = 7;
+            spawn_delay = game_time_scale_legacy_day_ticks(7);
         } else if (pct_workers >= 1) {
-            spawn_delay = 15;
+            spawn_delay = game_time_scale_legacy_day_ticks(15);
         } else {
             return;
         }
@@ -841,7 +843,7 @@ static void spawn_figure_mission_post(building *b)
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
         if (city_population() > 0) {
             b->figure_spawn_delay++;
-            if (b->figure_spawn_delay > 1) {
+            if (b->figure_spawn_delay > game_time_scale_legacy_day_ticks(1)) {
                 b->figure_spawn_delay = 0;
                 create_roaming_figure(b, road.x, road.y, FIGURE_MISSIONARY);
             }
@@ -877,7 +879,7 @@ static void spawn_figure_industry(building *b)
             f->resource_id = b->output_resource_id;
             f->building_id = b->id;
             b->figure_id = f->id;
-            f->wait_ticks = 30;
+            f->wait_ticks = game_time_scale_legacy_day_ticks(30);
             f->loads_sold_or_carrying = static_cast<unsigned char>(output_cart_loads > 0 ? output_cart_loads : 1);
         }
     }
@@ -906,7 +908,7 @@ static void spawn_figure_wharf(building *b)
             f->resource_id = RESOURCE_FISH;
             f->building_id = b->id;
             b->figure_id = f->id;
-            f->wait_ticks = 30;
+            f->wait_ticks = game_time_scale_legacy_day_ticks(30);
             f->loads_sold_or_carrying = 1;
         }
     }
@@ -1022,7 +1024,7 @@ static void spawn_figure_native_hut(building *b)
     if (b->subtype.native_meeting_center_id > 0
         && map_terrain_get_adjacent_road_or_clear_land(b->x, b->y, b->size, &x_out, &y_out)) {
         b->figure_spawn_delay++;
-        if (b->figure_spawn_delay > 4) {
+        if (b->figure_spawn_delay > game_time_scale_legacy_day_ticks(4)) {
             b->figure_spawn_delay = 0;
             figure *f = figure_create(FIGURE_INDIGENOUS_NATIVE, x_out, y_out, DIR_0_TOP);
             f->action_state = FIGURE_ACTION_158_NATIVE_CREATED;
@@ -1040,7 +1042,7 @@ static void spawn_figure_native_meeting(building *b)
         int x_out, y_out;
         if (map_terrain_get_adjacent_road_or_clear_land(b->x, b->y, b->size, &x_out, &y_out)) {
             b->figure_spawn_delay++;
-            if (b->figure_spawn_delay > 8) {
+            if (b->figure_spawn_delay > game_time_scale_legacy_day_ticks(8)) {
                 b->figure_spawn_delay = 0;
                 figure *f = figure_create(FIGURE_NATIVE_TRADER, x_out, y_out, DIR_0_TOP);
                 f->action_state = FIGURE_ACTION_162_NATIVE_TRADER_CREATED;
@@ -1077,6 +1079,7 @@ static void spawn_figure_barracks(building *b)
         if (city_data.mess_hall.food_stress_cumulative > 20) {
             spawn_delay += city_data.mess_hall.food_stress_cumulative - 20;
         }
+        spawn_delay = game_time_scale_legacy_day_ticks(spawn_delay);
 
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
@@ -1132,7 +1135,7 @@ static void spawn_figure_fort_supplier(building *fort)
         return;
     }
 
-    int spawn_delay = 20;
+    int spawn_delay = game_time_scale_legacy_day_ticks(20);
     fort->figure_spawn_delay++;
     if (fort->figure_spawn_delay <= spawn_delay) {
         return;
@@ -1163,15 +1166,15 @@ static void spawn_figure_mess_hall(building *b)
         int spawn_delay;
         int pct_workers = worker_percentage(b);
         if (pct_workers >= 100) {
-            spawn_delay = 7;
+            spawn_delay = game_time_scale_legacy_day_ticks(7);
         } else if (pct_workers >= 75) {
-            spawn_delay = 15;
+            spawn_delay = game_time_scale_legacy_day_ticks(15);
         } else if (pct_workers >= 50) {
-            spawn_delay = 29;
+            spawn_delay = game_time_scale_legacy_day_ticks(29);
         } else if (pct_workers >= 25) {
-            spawn_delay = 44;
+            spawn_delay = game_time_scale_legacy_day_ticks(44);
         } else if (pct_workers >= 1) {
-            spawn_delay = 59;
+            spawn_delay = game_time_scale_legacy_day_ticks(59);
         } else {
             return;
         }
@@ -1289,7 +1292,7 @@ void building_figure_generate(void)
             spawn_figure_senate_forum(b);
         } else if (b->type >= BUILDING_SMALL_TEMPLE_CERES &&
             b->type <= BUILDING_LARGE_TEMPLE_VENUS && b->monument.phase <= 0) {
-            spawn_figure_temple(b);
+            runtime_building->spawn_figure();
         } else {
             // single building type
             switch (b->type) {
@@ -1386,15 +1389,13 @@ void building_figure_generate(void)
                 case BUILDING_MESS_HALL:
                     spawn_figure_mess_hall(b);
                     break;
-                case BUILDING_GRAND_TEMPLE_MARS:
-                    spawn_figure_grand_temple_mars(b);
-                    break;
                 case BUILDING_GRAND_TEMPLE_CERES:
                 case BUILDING_GRAND_TEMPLE_NEPTUNE:
                 case BUILDING_GRAND_TEMPLE_MERCURY:
+                case BUILDING_GRAND_TEMPLE_MARS:
                 case BUILDING_GRAND_TEMPLE_VENUS:
                 case BUILDING_PANTHEON:
-                    spawn_figure_temple(b);
+                    runtime_building->spawn_figure();
                     break;
                 case BUILDING_LIGHTHOUSE:
                     runtime_building->spawn_figure();

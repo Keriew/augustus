@@ -145,52 +145,48 @@ static void advance_day(void)
 
 static void advance_tick(void)
 {
-    // NB: these ticks are noop:
-    // 0, 10, 11, 13, 14, 15, 18, 26, 41
-    // max is 49
-    switch (game_time_tick()) {
-        case 1: city_gods_calculate_moods(1); break;
-        case 2: sound_music_update(0); break;
-        case 3: widget_minimap_invalidate(); break;
-        case 4: city_emperor_update(); break;
-        case 5: formation_update_all(0); break;
-        case 6: map_natives_check_land(1); break;
-        case 7: map_road_network_update(); break;
-        case 8: building_granaries_calculate_stocks(); break;
-        case 9: city_buildings_update_plague(); break;
-        case 12: house_service_decay_houses_covered(); break;
-        case 16: city_resource_calculate_warehouse_stocks(); break;
-        case 17: city_resource_calculate_food_stocks_and_supply_wheat(); break;
-        case 19: building_dock_update_open_water_access(); break;
-        case 20: building_industry_update_production(1); break;
-        case 21: building_maintenance_check_rome_access(); break;
-        case 22: house_population_update_room(); break;
-        case 23: house_population_update_migration(); break;
-        case 24: house_population_evict_overcrowded(); break;
-        case 25: city_labor_update(); break;
-        case 27: map_water_supply_update_reservoir_fountain(); break;
-        case 28: map_water_supply_update_buildings(); break;
-        case 29: formation_update_all(1); break;
-        case 30: widget_minimap_invalidate(); break;
-        case 31: building_figure_generate(); break;
-        case 32: city_trade_update(); break;
-        case 33: building_entertainment_run_shows(); city_culture_update_coverage(); break;
-        case 34: building_government_distribute_treasury(); break;
-        case 35: house_service_decay_culture(); break;
-        case 36: house_service_calculate_culture_aggregates(); break;
-        case 37: map_desirability_update(); break;
-        case 38: building_update_desirability(); break;
-        case 39: building_house_process_evolve_and_consume_goods(); break;
-        case 40: building_update_state(); break;
-        case 42: city_finance_spawn_tourist(); break;
-        case 43: building_maintenance_update_burning_ruins(); break;
-        case 44: building_maintenance_check_fire_collapse(); break;
-        case 45: figure_generate_criminals(); break;
-        case 46: building_industry_update_production(0); break;
-        case 47: city_games_decrement_duration(); break;
-        case 48: house_service_decay_tax_collector(); break;
-        case 49: city_culture_calculate(); break;
-    }
+    const int current_tick = game_time_tick();
+    if (current_tick == game_time_scale_legacy_day_tick_index(1)) { city_gods_calculate_moods(1); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(2)) { sound_music_update(0); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(3)) { widget_minimap_invalidate(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(4)) { city_emperor_update(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(5)) { formation_update_all(0); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(6)) { map_natives_check_land(1); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(7)) { map_road_network_update(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(8)) { building_granaries_calculate_stocks(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(9)) { city_buildings_update_plague(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(12)) { house_service_decay_houses_covered(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(16)) { city_resource_calculate_warehouse_stocks(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(17)) { city_resource_calculate_food_stocks_and_supply_wheat(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(19)) { building_dock_update_open_water_access(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(20)) { building_industry_update_production(1); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(21)) { building_maintenance_check_rome_access(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(22)) { house_population_update_room(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(23)) { house_population_update_migration(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(24)) { house_population_evict_overcrowded(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(25)) { city_labor_update(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(27)) { map_water_supply_update_reservoir_fountain(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(28)) { map_water_supply_update_buildings(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(29)) { formation_update_all(1); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(30)) { widget_minimap_invalidate(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(31)) { building_figure_generate(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(32)) { city_trade_update(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(33)) { building_entertainment_run_shows(); city_culture_update_coverage(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(34)) { building_government_distribute_treasury(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(35)) { house_service_decay_culture(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(36)) { house_service_calculate_culture_aggregates(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(37)) { map_desirability_update(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(38)) { building_update_desirability(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(39)) { building_house_process_evolve_and_consume_goods(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(40)) { building_update_state(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(42)) { city_finance_spawn_tourist(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(43)) { building_maintenance_update_burning_ruins(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(44)) { building_maintenance_check_fire_collapse(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(45)) { figure_generate_criminals(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(46)) { building_industry_update_production(0); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(47)) { city_games_decrement_duration(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(48)) { house_service_decay_tax_collector(); }
+    if (current_tick == game_time_scale_legacy_day_tick_index(49)) { city_culture_calculate(); }
     if (game_time_advance_tick()) {
         advance_day();
     }

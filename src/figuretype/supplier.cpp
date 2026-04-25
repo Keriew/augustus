@@ -1,5 +1,6 @@
 #include "supplier.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "building/building.h"
 #include "building/distribution.h"
@@ -16,9 +17,11 @@
 #include "figure/route.h"
 #include "figuretype/wall.h"
 #include "game/resource.h"
+#include "game/time.h"
 #include "map/data.h"
 #include "map/road_access.h"
 #include "map/road_network.h"
+}
 
 int figure_supplier_max_stocked_mess_hall_adjusted(void)
 {
@@ -36,7 +39,7 @@ int figure_supplier_max_stocked_mess_hall_adjusted(void)
 int figure_supplier_create_delivery_boy(int leader_id, int first_figure_id, int type)
 {
     figure *f = figure_get(first_figure_id);
-    figure *boy = figure_create(type, f->x, f->y, 0);
+    figure *boy = figure_create(static_cast<figure_type>(type), f->x, f->y, DIR_0_TOP);
     f = figure_get(first_figure_id);
     boy->leading_figure_id = leader_id;
     boy->collecting_item_id = f->collecting_item_id;
@@ -52,7 +55,7 @@ int figure_supplier_create_delivery_boy(int leader_id, int first_figure_id, int 
 
 static int take_food_from_granary(figure *f, int market_id, int granary_id)
 {
-    resource_type resource = f->collecting_item_id;
+    resource_type resource = static_cast<resource_type>(f->collecting_item_id);
 
     if (!resource_is_food(resource)) {
         return 0;
@@ -125,11 +128,12 @@ static int take_resource_from_generic_building(figure *f, int building_id)
 static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amount)
 {
     building *warehouse = building_get(warehouse_id);
+    const resource_type resource = static_cast<resource_type>(f->collecting_item_id);
     if (warehouse->type != BUILDING_WAREHOUSE) {
         return take_resource_from_generic_building(f, warehouse_id);
     }
     int num_loads;
-    int stored = building_warehouse_get_available_amount(warehouse, f->collecting_item_id);
+    int stored = building_warehouse_get_available_amount(warehouse, resource);
     if (stored < max_amount) {
         num_loads = stored;
     } else {
@@ -138,7 +142,7 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
     if (num_loads <= 0) {
         return 0;
     }
-    building_warehouse_try_remove_resource(warehouse, f->collecting_item_id, num_loads);
+    building_warehouse_try_remove_resource(warehouse, resource, num_loads);
 
     // create delivery boys
     if (f->type != FIGURE_LIGHTHOUSE_SUPPLIER) {
@@ -195,7 +199,7 @@ static int is_better_destination(figure *f, resource_type r, resource_storage_in
 
 static int recalculate_market_supplier_destination(figure *f)
 {
-    int item = f->collecting_item_id;
+    resource_type item = static_cast<resource_type>(f->collecting_item_id);
     building *market = building_get(f->building_id);
     resource_storage_info info[RESOURCE_MAX] = { 0 };
 
@@ -254,7 +258,7 @@ void figure_supplier_action(figure *f)
                 f->previous_tile_x = f->x;
                 f->previous_tile_y = f->y;
                 int id = f->id;
-                if (!resource_is_food(f->collecting_item_id)) {
+                if (!resource_is_food(static_cast<resource_type>(f->collecting_item_id))) {
                     int max_amount = f->type == FIGURE_LIGHTHOUSE_SUPPLIER ? 1 : 2;
                     if (!take_resource_from_warehouse(f, f->destination_building_id, max_amount)) {
                         f->state = FIGURE_STATE_DEAD;
@@ -328,7 +332,7 @@ void figure_supplier_action(figure *f)
         }
     } else if (f->type == FIGURE_LIGHTHOUSE_SUPPLIER) {
         if (f->action_state == FIGURE_ACTION_146_SUPPLIER_RETURNING) {
-            f->cart_image_id = resource_get_data(f->collecting_item_id)->image.cart.single_load;
+            f->cart_image_id = resource_get_data(static_cast<resource_type>(f->collecting_item_id))->image.cart.single_load;
         } else {
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART);
         }
@@ -445,7 +449,7 @@ void figure_fort_supplier_action(figure *f)
                 f->action_state = FIGURE_ACTION_237_SUPPLY_POST_RETURNING_FROM_FORT;
                 f->destination_x = f->source_x;
                 f->destination_y = f->source_y;
-                f->wait_ticks = 20;
+                f->wait_ticks = game_time_scale_legacy_day_ticks(20);
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
             } else if (f->direction == DIR_FIGURE_LOST) {

@@ -4,7 +4,11 @@ extern "C" {
 #include "game/defines.h"
 }
 
+#include <climits>
+
 namespace {
+
+constexpr int kLegacyTicksPerDay = 50;
 
 struct GameTimeData {
     int tick = 0;
@@ -60,6 +64,28 @@ static void clamp_loaded_time_state()
     if (g_data.total_days < 0) {
         g_data.total_days = 0;
     }
+}
+
+static int scale_legacy_day_ticks(int legacy_ticks)
+{
+    if (legacy_ticks <= 0) {
+        return 0;
+    }
+
+    const int ticks_per_day = game_time_ticks_per_day();
+    if (ticks_per_day <= 0) {
+        return legacy_ticks;
+    }
+
+    // Legacy gameplay timing was authored against 50 ticks per day. Scale to
+    // the active calendar and round to the nearest whole tick.
+    const long long scaled =
+        (static_cast<long long>(legacy_ticks) * ticks_per_day + kLegacyTicksPerDay / 2) /
+        kLegacyTicksPerDay;
+    if (scaled <= 0) {
+        return 1;
+    }
+    return scaled > INT_MAX ? INT_MAX : static_cast<int>(scaled);
 }
 
 } // namespace
@@ -131,6 +157,24 @@ extern "C" int game_time_is_last_day_of_month(void)
 extern "C" int game_time_is_last_day_of_year(void)
 {
     return game_defines_is_last_day_of_year(g_data.month, g_data.day);
+}
+
+extern "C" int game_time_scale_legacy_day_ticks(int legacy_ticks)
+{
+    return scale_legacy_day_ticks(legacy_ticks);
+}
+
+extern "C" int game_time_scale_legacy_day_tick_index(int legacy_tick)
+{
+    int scaled_tick = scale_legacy_day_ticks(legacy_tick);
+    const int ticks_per_day = game_time_ticks_per_day();
+    if (ticks_per_day <= 0) {
+        return scaled_tick;
+    }
+    if (scaled_tick >= ticks_per_day) {
+        scaled_tick = ticks_per_day - 1;
+    }
+    return scaled_tick < 0 ? 0 : scaled_tick;
 }
 
 extern "C" int game_time_advance_tick(void)

@@ -1,3 +1,6 @@
+#include "graphics/ui_runtime.h"
+
+extern "C" {
 #include "imperial.h"
 
 #include "city/emperor.h"
@@ -26,6 +29,7 @@
 #include "window/popup_dialog.h"
 #include "window/resource_settings.h"
 #include "window/set_salary.h"
+}
 
 #define ADVISOR_HEIGHT 27
 #define RESOURCE_INFO_MAX_TEXT 200
@@ -49,8 +53,22 @@ static generic_button imperial_buttons[] = {
 
 static unsigned int focus_button_id;
 static unsigned int selected_request_id;
-static unsigned int selected_resource;
+static resource_type selected_resource;
 static uint8_t tooltip_resource_info[RESOURCE_INFO_MAX_TEXT];
+
+static void draw_footer_text_button(const generic_button *button, int text_id, int has_focus)
+{
+    UiTextSpec text = {};
+    text.content_type = UiTextContentType::Language;
+    text.alignment = UiTextAlignment::Center;
+    text.text_group = 52;
+    text.text_id = text_id;
+    text.x = button->x;
+    text.y = button->y + 5;
+    text.box_width = button->width;
+    text.font = FONT_NORMAL_WHITE;
+    shared_ui_runtime().draw_advisor_text_button(button->x, button->y, button->width, button->height, has_focus, text);
+}
 
 static void draw_troop_request(int index, int focused)
 {
@@ -85,8 +103,9 @@ static void draw_request_row(int index, const scenario_request *request, int foc
 
     button_border_draw(38, 96 + 42 * index, 560, 40, focused);
     text_draw_number(request->amount.requested, '@', " ", 40, 102 + 42 * index, FONT_NORMAL_WHITE, 0);
-    image_draw(resource_get_data(request->resource)->image.icon, 110, 100 + 42 * index, COLOR_MASK_NONE, SCALE_NONE);
-    text_draw(resource_get_data(request->resource)->text, 150, 102 + 42 * index, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+    const resource_type request_resource = static_cast<resource_type>(request->resource);
+    image_draw(resource_get_data(request_resource)->image.icon, 110, 100 + 42 * index, COLOR_MASK_NONE, SCALE_NONE);
+    text_draw(resource_get_data(request_resource)->text, 150, 102 + 42 * index, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
 
     int width = lang_text_draw_amount(8, 4, request->months_to_comply, 310, 102 + 42 * index, FONT_NORMAL_WHITE);
     lang_text_draw(12, 2, 310 + width, 102 + 42 * index, FONT_NORMAL_WHITE);
@@ -104,7 +123,7 @@ static void draw_request_row(int index, const scenario_request *request, int foc
     } else {
         // normal goods request
         int using_granaries;
-        int amount_stored = city_resource_get_amount_including_granaries(request->resource,
+        int amount_stored = city_resource_get_amount_including_granaries(request_resource,
             request->amount.requested, &using_granaries, 1);
         int y_offset = 120 + 42 * index;
         width = text_draw_number(amount_stored, '@', " ", 40, y_offset, FONT_NORMAL_WHITE, 0);
@@ -165,16 +184,14 @@ static void draw_foreground(void)
     int width = lang_text_draw(52, 1, 72, 372, FONT_NORMAL_WHITE);
     text_draw_money(city_emperor_personal_savings(), 80 + width, 372, FONT_NORMAL_WHITE);
 
-    button_border_draw(320, 367, 250, 20, focus_button_id == 1);
-    lang_text_draw_centered(52, 2, 320, 372, 250, FONT_NORMAL_WHITE);
+    draw_footer_text_button(&imperial_buttons[0], 2, focus_button_id == 1);
 
     button_border_draw(70, 393, 500, 20, focus_button_id == 2);
     width = lang_text_draw(52, city_emperor_salary_rank() + 4, 120, 398, FONT_NORMAL_WHITE);
     width += text_draw_number(city_emperor_salary_amount(), '@', " ", 120 + width, 398, FONT_NORMAL_WHITE, 0);
     lang_text_draw(52, 3, 120 + width, 398, FONT_NORMAL_WHITE);
 
-    button_border_draw(320, 341, 250, 20, focus_button_id == 3);
-    lang_text_draw_centered(52, 49, 320, 346, 250, FONT_NORMAL_WHITE);
+    draw_footer_text_button(&imperial_buttons[2], 49, focus_button_id == 3);
 
     // Request buttons
     for (unsigned int i = 0; i < CITY_REQUEST_MAX_ACTIVE; i++) {
@@ -258,7 +275,7 @@ void button_request(const generic_button *button)
             window_popup_dialog_show(POPUP_DIALOG_NOT_ENOUGH_GOODS, confirm_nothing, 0);
             break;
         default:
-            selected_resource = city_get_request_resource(index);
+            selected_resource = static_cast<resource_type>(city_get_request_resource(index));
             selected_request_id = (status - CITY_REQUEST_STATUS_MAX) & ~CITY_REQUEST_STATUS_RESOURCES_FROM_GRANARY;
             if (status & CITY_REQUEST_STATUS_RESOURCES_FROM_GRANARY) {
                 window_popup_dialog_show_confirmation(
@@ -290,7 +307,7 @@ void button_request_resource(const generic_button *button)
     if (!index && city_request_has_troop_request()) {
         return;
     }
-    selected_resource = city_get_request_resource(index);
+    selected_resource = static_cast<resource_type>(city_get_request_resource(index));
 
     // we can't manage money with the resource settings window
     if (selected_resource == RESOURCE_DENARII) {
@@ -300,7 +317,7 @@ void button_request_resource(const generic_button *button)
     window_resource_settings_show(selected_resource);
 }
 
-static void write_resource_storage_tooltip(advisor_tooltip_result *r, int resource)
+static void write_resource_storage_tooltip(advisor_tooltip_result *r, resource_type resource)
 {
     int amount_warehouse = city_resource_count_warehouses_amount(resource);
     int amount_granary = city_resource_count_food_on_granaries(resource) / RESOURCE_ONE_LOAD;
@@ -330,9 +347,10 @@ static void get_tooltip_text(advisor_tooltip_result *r)
         if (request_status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES || request_status >= CITY_REQUEST_STATUS_MAX) {
             const scenario_request *request = scenario_request_get_visible(index - city_request_has_troop_request());
             int using_granaries;
-            city_resource_get_amount_including_granaries(request->resource, request->amount.requested, &using_granaries, 1);
+            resource_type resource = static_cast<resource_type>(request->resource);
+            city_resource_get_amount_including_granaries(resource, request->amount.requested, &using_granaries, 1);
             if (using_granaries) {
-                write_resource_storage_tooltip(r, request->resource);
+                write_resource_storage_tooltip(r, resource);
             }
         }
     }

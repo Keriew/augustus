@@ -18,6 +18,7 @@ extern "C" {
 #include "figure/image.h"
 #include "figure/movement.h"
 #include "figure/route.h"
+#include "game/time.h"
 #include "map/building.h"
 #include "map/grid.h"
 #include "map/road_access.h"
@@ -146,6 +147,68 @@ void retire_unsupported_native_state(figure *f, const char *native_class)
     }
 }
 
+road_service_effect religion_service_effect_for_owner(const building *owner)
+{
+    if (!owner) {
+        return ROAD_SERVICE_EFFECT_NONE;
+    }
+
+    switch (owner->type) {
+        case BUILDING_SMALL_TEMPLE_CERES:
+        case BUILDING_LARGE_TEMPLE_CERES:
+        case BUILDING_GRAND_TEMPLE_CERES:
+            return ROAD_SERVICE_EFFECT_RELIGION_CERES;
+        case BUILDING_SMALL_TEMPLE_NEPTUNE:
+        case BUILDING_LARGE_TEMPLE_NEPTUNE:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE:
+            return ROAD_SERVICE_EFFECT_RELIGION_NEPTUNE;
+        case BUILDING_SMALL_TEMPLE_MERCURY:
+        case BUILDING_LARGE_TEMPLE_MERCURY:
+        case BUILDING_GRAND_TEMPLE_MERCURY:
+            return ROAD_SERVICE_EFFECT_RELIGION_MERCURY;
+        case BUILDING_SMALL_TEMPLE_MARS:
+        case BUILDING_LARGE_TEMPLE_MARS:
+        case BUILDING_GRAND_TEMPLE_MARS:
+            return ROAD_SERVICE_EFFECT_RELIGION_MARS;
+        case BUILDING_SMALL_TEMPLE_VENUS:
+        case BUILDING_LARGE_TEMPLE_VENUS:
+        case BUILDING_GRAND_TEMPLE_VENUS:
+            return ROAD_SERVICE_EFFECT_RELIGION_VENUS;
+        case BUILDING_PANTHEON:
+            return ROAD_SERVICE_EFFECT_RELIGION_PANTHEON;
+        default:
+            return ROAD_SERVICE_EFFECT_NONE;
+    }
+}
+
+road_service_effect primary_service_effect_for_pathing(
+    const figure_type_registry_impl::PathingPolicy &pathing,
+    const figure *f)
+{
+    if (!pathing.effect_from_religion_owner) {
+        return pathing.effect;
+    }
+    return religion_service_effect_for_owner(f ? building_get(f->building_id) : nullptr);
+}
+
+void record_religion_owner_service_effects(const figure *f)
+{
+    const building *owner = f ? building_get(f->building_id) : nullptr;
+    const road_service_effect effect = religion_service_effect_for_owner(owner);
+    if (effect == ROAD_SERVICE_EFFECT_NONE) {
+        return;
+    }
+
+    if (effect == ROAD_SERVICE_EFFECT_RELIGION_PANTHEON) {
+        map_road_service_history_record(ROAD_SERVICE_EFFECT_RELIGION_CERES, f->grid_offset);
+        map_road_service_history_record(ROAD_SERVICE_EFFECT_RELIGION_NEPTUNE, f->grid_offset);
+        map_road_service_history_record(ROAD_SERVICE_EFFECT_RELIGION_MERCURY, f->grid_offset);
+        map_road_service_history_record(ROAD_SERVICE_EFFECT_RELIGION_MARS, f->grid_offset);
+        map_road_service_history_record(ROAD_SERVICE_EFFECT_RELIGION_VENUS, f->grid_offset);
+    }
+    map_road_service_history_record(effect, f->grid_offset);
+}
+
 class RoamingServiceFigure : public NativeFigure {
 public:
     using NativeFigure::NativeFigure;
@@ -161,6 +224,10 @@ public:
         if (!owner || !owner->id) {
             f->state = FIGURE_STATE_DEAD;
             return 1;
+        }
+
+        if (f->type == FIGURE_PRIEST && f->destination_building_id) {
+            return 0;
         }
 
         if (!owner_binding_matches(f, owner, definition()->owner_binding())) {
@@ -432,7 +499,7 @@ public:
                     f->action_state = FIGURE_ACTION_75_PREFECT_AT_FIRE;
                     figure_route_remove(f);
                     f->roam_length = 0;
-                    f->wait_ticks = 50;
+                    f->wait_ticks = game_time_scale_legacy_day_ticks(50);
                 } else if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                     f->state = FIGURE_STATE_DEAD;
                 } else if (f->wait_ticks++ > FIGURE_REROUTE_DESTINATION_TICKS && !fight_fire(f, true) && !in_combat(f)) {
@@ -853,8 +920,9 @@ extern "C" int figure_runtime_choose_roaming_direction(
     }
 
     const figure_type_registry_impl::PathingPolicy &pathing = entry->definition->pathing_policy();
+    const road_service_effect effect = primary_service_effect_for_pathing(pathing, f);
     if (pathing.mode != figure_type_registry_impl::PathingMode::SmartService ||
-        pathing.effect == ROAD_SERVICE_EFFECT_NONE) {
+        effect == ROAD_SERVICE_EFFECT_NONE) {
         return vanilla_direction;
     }
 
@@ -868,7 +936,7 @@ extern "C" int figure_runtime_choose_roaming_direction(
 
         candidate_count++;
         const int target_grid_offset = f->grid_offset + map_grid_direction_delta(direction);
-        const uint32_t stamp = map_road_service_history_get(pathing.effect, target_grid_offset);
+        const uint32_t stamp = map_road_service_history_get(effect, target_grid_offset);
         if (stamp < best_stamp) {
             best_stamp = stamp;
             best_direction = direction;
@@ -894,10 +962,15 @@ extern "C" void figure_runtime_record_road_service_visit(figure *f)
     }
 
     const figure_type_registry_impl::PathingPolicy &pathing = entry->definition->pathing_policy();
+    const road_service_effect effect = primary_service_effect_for_pathing(pathing, f);
     if (pathing.mode != figure_type_registry_impl::PathingMode::SmartService ||
-        pathing.effect == ROAD_SERVICE_EFFECT_NONE) {
+        effect == ROAD_SERVICE_EFFECT_NONE) {
         return;
     }
 
-    map_road_service_history_record(pathing.effect, f->grid_offset);
+    if (pathing.effect_from_religion_owner) {
+        record_religion_owner_service_effects(f);
+    } else {
+        map_road_service_history_record(effect, f->grid_offset);
+    }
 }

@@ -1,8 +1,13 @@
 #ifndef FIGURETYPE_MIGRANT_H
 #define FIGURETYPE_MIGRANT_H
 
-#include "building/building.h"
 #include "figure/figure.h"
+
+typedef struct building building;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void figure_create_immigrant(building *house, int num_people);
 
@@ -15,5 +20,9 @@ void figure_immigrant_action(figure *f);
 void figure_emigrant_action(figure *f);
 
 void figure_homeless_action(figure *f);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FIGURETYPE_MIGRANT_H

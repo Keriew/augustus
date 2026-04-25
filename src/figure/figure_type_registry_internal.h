@@ -66,6 +66,7 @@ struct GraphicsPolicy {
 struct PathingPolicy {
     PathingMode mode = PathingMode::VanillaRoaming;
     road_service_effect effect = ROAD_SERVICE_EFFECT_NONE;
+    int effect_from_religion_owner = 0;
 };
 
 class FigureTypeDefinition {

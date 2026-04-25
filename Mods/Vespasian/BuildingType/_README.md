@@ -99,7 +99,7 @@ Current supported `<spawn_group>` attributes:
 
 - `road_access="normal"`
 - `delay_bands="100:3,75:7,50:15,25:29,1:44"` as a comma-separated list of `worker_percentage:delay` pairs
-- `existing_figure="actor|barber|bathhouse_worker|doctor|engineer|gladiator|librarian|lion_tamer|prefect|school_child|surgeon|tax_collector|teacher|work_camp_architect|work_camp_worker"`
+- `existing_figure="actor|barber|bathhouse_worker|doctor|engineer|gladiator|librarian|lion_tamer|prefect|priest|school_child|surgeon|tax_collector|teacher|work_camp_architect|work_camp_worker"`
 - `guard_timing="before_road_access|after_labor_seeker"`
 
 `delay_bands` sanity rules:
@@ -107,15 +107,21 @@ Current supported `<spawn_group>` attributes:
 - worker percentage must be an integer from `1` to `100`
 - delay must be a non-negative integer
 - pairs must be written in strictly descending worker-percentage order
+- delay values are authored in legacy 50-tick-day units and scale at runtime to the active calendar day length
 
-Current supported `<spawn>` mode:
+Current supported `<spawn>` modes:
 
 - `mode="service_roamer"`
+- `mode="temple_supplier"`
+- `mode="temple_destination_priest"`
+- `mode="temple_mars_mess_hall_priest"`
+- `mode="temple_neptune_chariot"`
+- `mode="grand_temple_mars_recruit"`
 
 Current supported `<spawn>` attributes:
 
-- `spawn_figure="..."` using the same identifiers
-- `action_state="roaming|engineer_created|prefect_created|tax_collector_created|entertainer_roaming|entertainer_school_created|work_camp_worker_created|work_camp_architect_created"`
+- `spawn_figure="..."` using the same identifiers; required for `service_roamer`
+- `action_state="roaming|engineer_created|prefect_created|tax_collector_created|entertainer_roaming|entertainer_school_created|work_camp_worker_created|work_camp_architect_created"`; required for `service_roamer`
 - `direction="top|bottom"`
 - `figure_slot="primary|secondary|quaternary|none"`
 - `spawn_count="N"` for one policy spawning the same figure several times on one trigger
@@ -130,6 +136,7 @@ Current engine behavior:
 
 - Repo-owned BuildingType graphics use only the structured `<graphics>` schema.
 - A `spawn_group` owns the shared delay/guard phase, then runs its child `<spawn>` policies in order.
+- Temple-specific spawn modes preserve existing religion module behavior while moving temple spawn selection into BuildingType XML. Standard temple priest roamers still use `service_roamer`.
 - Delay evaluation now uses the explicit `delay_bands` data from XML rather than a hardcoded named profile.
 - Ordered policies can coordinate: a policy that succeeds with `block_on_success="true"` stops later sibling policies in the same group.
 - Use `block_on_success="true"` when a building should spawn either A or B on the same trigger.

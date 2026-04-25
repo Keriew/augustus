@@ -1,5 +1,6 @@
 #include "service.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "building/building.h"
 #include "building/market.h"
@@ -11,8 +12,10 @@
 #include "figure/movement.h"
 #include "figure/route.h"
 #include "figuretype/supplier.h"
+#include "game/time.h"
 #include "map/building.h"
 #include "map/road_access.h"
+}
 
 static const int DOCTOR_HEALING_OFFSETS[] = { 0, 1, 2, 3, 4, 5, 4, 3, 2, 1};
 static const int BEGGAR_OFFSETS[] = { 104, 105, 106, 107, 108, 109, 110, 111};
@@ -93,6 +96,7 @@ void figure_destination_priest_action(figure *f)
 
             break;
         case FIGURE_ACTION_214_DESTINATION_MARS_PRIEST_CREATED:
+        {
             f->destination_x = destination->road_access_x;
             f->destination_y = destination->road_access_y;
             int market_units = b->resources[f->collecting_item_id];
@@ -137,6 +141,7 @@ void figure_destination_priest_action(figure *f)
 
             f->action_state = FIGURE_ACTION_215_PRIEST_GOING_TO_MESS_HALL;
             break;
+        }
 
         case FIGURE_ACTION_213_PRIEST_GOING_TO_PANTHEON:
             figure_movement_move_ticks(f, 1);
@@ -251,8 +256,8 @@ static int fight_plague(figure *f, int force)
     int building_with_plague_id = 0;
 
     // Find in houses
-    for (building_type type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
-        for (building *house = building_first_of_type(type); house; house = house->next_of_type) {
+    for (int type = BUILDING_HOUSE_SMALL_TENT; type <= BUILDING_HOUSE_LUXURY_PALACE; type++) {
+        for (building *house = building_first_of_type(static_cast<building_type>(type)); house; house = house->next_of_type) {
             if (house->has_plague) {
                 building_with_plague_id = house->id;
                 break;
@@ -375,7 +380,7 @@ void figure_doctor_action(figure *f)
                 f->action_state = FIGURE_ACTION_232_DOCTOR_AT_PLAGUE;
                 figure_route_remove(f);
                 f->roam_length = 0;
-                f->wait_ticks = 50;
+                f->wait_ticks = game_time_scale_legacy_day_ticks(50);
             } else if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             } else if (f->wait_ticks++ > FIGURE_REROUTE_DESTINATION_TICKS && !fight_plague(f, 1)) {

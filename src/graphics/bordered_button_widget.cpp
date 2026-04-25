@@ -3,6 +3,7 @@
 #include "graphics/ui_border_primitive.h"
 #include "graphics/ui_constants.h"
 #include "graphics/ui_panel_primitive.h"
+#include "graphics/ui_sprite_primitive.h"
 
 namespace {
 
@@ -42,13 +43,15 @@ BorderedButtonWidget::BorderedButtonWidget(
     int height_pixels,
     int has_focus,
     color_t color,
-    BorderedButtonFillStyle fill_style)
+    BorderedButtonFillStyle fill_style,
+    BorderedButtonIconSpec icon)
     : ButtonWidget(primitives, x, y)
     , width_pixels_(width_pixels)
     , height_pixels_(height_pixels)
     , has_focus_(has_focus)
     , color_(color)
     , fill_style_(fill_style)
+    , icon_(icon)
 {
 }
 
@@ -64,6 +67,7 @@ void BorderedButtonWidget::draw_container() const
     }
     draw_fill();
     draw_border();
+    draw_icon();
 }
 
 void BorderedButtonWidget::draw_fill() const
@@ -86,6 +90,16 @@ void BorderedButtonWidget::draw_fill() const
 void BorderedButtonWidget::draw_border() const
 {
     UiBorderPrimitive(primitives_, x_, y_, width_pixels_, height_pixels_, has_focus_, color_).draw();
+}
+
+void BorderedButtonWidget::draw_icon() const
+{
+    if (icon_.image_id <= 0 || icon_.placement == BorderedButtonIconPlacement::None) {
+        return;
+    }
+    UiSpritePrimitive icon(primitives_, icon_.image_id, x_ + icon_.x_offset, y_ + icon_.y_offset, icon_.color);
+    icon.set_logical_size(icon_.logical_width, icon_.logical_height);
+    icon.draw();
 }
 
 int BorderedButtonWidget::width_blocks() const

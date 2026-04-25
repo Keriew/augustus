@@ -89,6 +89,7 @@ Important architectural note:
 - `window.cpp` is the full-window/pass orchestration seam
 - `ui_runtime.cpp` is the facade/orchestration seam for shared widgets
 - widget behavior belongs in the widget classes, not in the runtime itself
+- For UI work, read `docs/ui_widgets_and_primitives_working_memory.md` before adding new primitives/widgets; it records the current vocabulary, widget stock, ad-hoc UI tally, and safe deduplication targets.
 
 ## Asset loading / graphics-pack map
 - `src/game/mod_manager.cpp`

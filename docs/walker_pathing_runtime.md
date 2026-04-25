@@ -20,7 +20,7 @@ Native service walkers use:
 
 - `<movement terrain_usage="roads" roam_ticks="N" max_roam_length="N" return_mode="..." />`
 - `<pathing mode="vanilla_roaming" />`
-- `<pathing mode="smart_service" effect="damage_risk|fire_risk|barber|bathhouse|school|academy|library|labor" />`
+- `<pathing mode="smart_service" effect="damage_risk|fire_risk|barber|bathhouse|school|academy|library|labor|religion_ceres|religion_neptune|religion_mercury|religion_mars|religion_venus|religion_pantheon|religion_owner" />`
 
 `smart_service` is only valid for road-only walkers with a non-none effect. Loader
 validation should fail early through crash-context reporting if either condition
@@ -36,6 +36,12 @@ a valid forward direction.
 chooses the candidate road tile with the lowest visit stamp for that effect.
 Equal stamps fall back to the vanilla-preferred direction so old behavior stays
 stable where history gives no preference.
+
+Priests use `religion_owner` instead of a fixed saved effect id. The runtime
+derives the concrete service effect from the owning temple type. Pantheon priests
+record the Pantheon effect and all five individual god effects on each road tile,
+so Pantheon coverage can inform later god-specific pathing without merging all
+temple walkers into one generic religion bucket.
 
 Prefect emergency behavior is separate from smart roaming. Fire and enemy
 response states keep using targeted movement and should not be redirected by
@@ -64,6 +70,11 @@ as a save compatibility contract:
 - Keep removed meanings as reserved/deprecated slots.
 - If a service meaning changes enough that old recency would mislead pathing,
   either migrate that id explicitly or clear just that effect on load.
+
+Religion effects were appended after the original maintenance/culture effects:
+`religion_ceres`, `religion_neptune`, `religion_mercury`, `religion_mars`,
+`religion_venus`, and `religion_pantheon`. `religion_owner` is XML-only resolver
+metadata and is not serialized as its own road-service effect id.
 
 The current save format writes grids in ordinal enum order. If frequent effect
 schema changes become likely, move the payload to explicit `(effect_id, grid)`

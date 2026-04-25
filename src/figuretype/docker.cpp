@@ -1,5 +1,6 @@
 #include "docker.h"
 
+extern "C" {
 #include "building/building.h"
 #include "building/granary.h"
 #include "building/market.h"
@@ -20,11 +21,13 @@
 #include "figure/trader.h"
 #include "figuretype/trader.h"
 #include "game/resource.h"
+#include "game/time.h"
 #include "map/road_access.h"
+}
 
 #define INFINITE 10000
 
-static int try_import_resource(int building_id, int resource, int city_id, int quantity)
+static int try_import_resource(int building_id, resource_type resource, int city_id, int quantity)
 {
     building *b = building_get(building_id);
     if (b->type != BUILDING_WAREHOUSE &&
@@ -56,7 +59,7 @@ static int try_import_resource(int building_id, int resource, int city_id, int q
     return result;
 }
 
-static int try_export_resource(int building_id, int resource, int city_id)
+static int try_export_resource(int building_id, resource_type resource, int city_id)
 {
     building *b = building_get(building_id);
     if (b->type != BUILDING_WAREHOUSE && b->type != BUILDING_GRANARY) {
@@ -106,7 +109,7 @@ static int is_invalid_destination(building *b, building *dock)
         !building_storage_get_permission(BUILDING_STORAGE_PERMISSION_DOCK, b);
 }
 
-static int get_distance_penalty_imports(building *b, int resource)
+static int get_distance_penalty_imports(building *b, resource_type resource)
 {
     unsigned char max_accepted = building_warehouse_maximum_receptible_amount(b, resource);
 
@@ -114,7 +117,7 @@ static int get_distance_penalty_imports(building *b, int resource)
     return penalty;
 }
 
-static int get_distance_penalty_exports(building *b, int resource)
+static int get_distance_penalty_exports(building *b, resource_type resource)
 {
     unsigned char currently_stored = building_warehouse_get_available_amount(b, resource);
 
@@ -124,19 +127,20 @@ static int get_distance_penalty_exports(building *b, int resource)
 
 
 static unsigned int get_closest_building_for_import(int x, int y, int city_id, building *dock,
-    map_point *dst, int *import_resource)
+    map_point *dst, resource_type *import_resource)
 {
-    int resource = *import_resource;
+    resource_type resource = *import_resource;
     if (resource == RESOURCE_NONE) {
         int importable[RESOURCE_MAX];
         importable[RESOURCE_NONE] = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            importable[r] = building_distribution_is_good_accepted(dock, r) &&
-                empire_can_import_resource_from_city(city_id, r);
+            const resource_type candidate = static_cast<resource_type>(r);
+            importable[r] = building_distribution_is_good_accepted(dock, candidate) &&
+                empire_can_import_resource_from_city(city_id, candidate);
         }
-        resource = city_trade_next_docker_import_resource();
+        resource = static_cast<resource_type>(city_trade_next_docker_import_resource());
         for (int i = RESOURCE_MIN; i < RESOURCE_MAX && !importable[resource]; i++) {
-            resource = city_trade_next_docker_import_resource();
+            resource = static_cast<resource_type>(city_trade_next_docker_import_resource());
         }
         if (!importable[resource]) {
             return 0;
@@ -184,19 +188,20 @@ static unsigned int get_closest_building_for_import(int x, int y, int city_id, b
 }
 
 static int get_closest_building_for_export(int x, int y, int city_id, building *dock,
-    map_point *dst, int *export_resource)
+    map_point *dst, resource_type *export_resource)
 {
-    int resource = *export_resource;
+    resource_type resource = *export_resource;
     if (resource == RESOURCE_NONE) {
         int exportable[RESOURCE_MAX];
         exportable[RESOURCE_NONE] = 0;
         for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            exportable[r] = building_distribution_is_good_accepted(dock, r) &&
-                empire_can_export_resource_to_city(city_id, r);
+            const resource_type candidate = static_cast<resource_type>(r);
+            exportable[r] = building_distribution_is_good_accepted(dock, candidate) &&
+                empire_can_export_resource_to_city(city_id, candidate);
         }
-        resource = city_trade_next_docker_export_resource();
+        resource = static_cast<resource_type>(city_trade_next_docker_export_resource());
         for (int i = RESOURCE_MIN; i < RESOURCE_MAX && !exportable[resource]; i++) {
-            resource = city_trade_next_docker_export_resource();
+            resource = static_cast<resource_type>(city_trade_next_docker_export_resource());
         }
         if (!exportable[resource]) {
             return 0;
@@ -253,7 +258,7 @@ static int deliver_import_resource(figure *f, building *dock)
         return 0;
     }
     map_point tile;
-    int resource = f->resource_id;
+    resource_type resource = static_cast<resource_type>(f->resource_id);
     unsigned int destination_id = get_closest_building_for_import(f->x, f->y, ship->empire_city_id,
         dock, &tile, &resource);
     if (!destination_id) {
@@ -288,7 +293,7 @@ static int fetch_export_resource(figure *f, building *dock, int add_to_bought)
         return 0;
     }
     map_point tile;
-    int resource = f->resource_id;
+    resource_type resource = static_cast<resource_type>(f->resource_id);
     unsigned int destination_id = get_closest_building_for_export(f->x, f->y, ship->empire_city_id,
         dock, &tile, &resource);
     if (!destination_id) {
@@ -311,7 +316,7 @@ static int fetch_export_resource(figure *f, building *dock, int add_to_bought)
 
 static void set_cart_graphic(figure *f)
 {
-    f->cart_image_id = resource_get_data(f->resource_id)->image.cart.single_load;
+    f->cart_image_id = resource_get_data(static_cast<resource_type>(f->resource_id))->image.cart.single_load;
 }
 
 static void set_docker_as_idle(figure *f)
@@ -404,7 +409,7 @@ void figure_docker_action(figure *f)
             if ((unsigned int) b->data.dock.queued_docker_id == f->id) {
                 b->data.dock.num_ships = 120;
                 f->wait_ticks++;
-                if (f->wait_ticks >= 80) {
+                if (f->wait_ticks >= game_time_scale_legacy_day_ticks(80)) {
                     set_docker_as_idle(f);
                     f->image_id = 0;
                     f->cart_image_id = 0;
@@ -412,7 +417,7 @@ void figure_docker_action(figure *f)
                 }
             }
             f->wait_ticks++;
-            if (f->wait_ticks >= 20) {
+            if (f->wait_ticks >= game_time_scale_legacy_day_ticks(20)) {
                 set_docker_as_idle(f);
             }
             f->image_offset = 0;
@@ -483,17 +488,17 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_139_DOCKER_IMPORT_AT_STORAGE:
             set_cart_graphic(f);
             f->wait_ticks++;
-            if (f->wait_ticks > 10) {
+            if (f->wait_ticks > game_time_scale_legacy_day_ticks(10)) {
                 int trade_city_id;
                 if (b->data.dock.trade_ship_id) {
                     trade_city_id = figure_get(b->data.dock.trade_ship_id)->empire_city_id;
                 } else {
                     trade_city_id = 0;
                 }
-                if (try_import_resource(f->destination_building_id, f->resource_id,
+                if (try_import_resource(f->destination_building_id, static_cast<resource_type>(f->resource_id),
                     trade_city_id, f->loads_sold_or_carrying)) {
                     int trader_id = figure_get(b->data.dock.trade_ship_id)->trader_id;
-                    trader_record_sold_resource(trader_id, f->resource_id);
+                    trader_record_sold_resource(trader_id, static_cast<resource_type>(f->resource_id));
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
                     f->action_state = FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING;
@@ -514,7 +519,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_140_DOCKER_EXPORT_AT_STORAGE:
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
             f->wait_ticks++;
-            if (f->wait_ticks > 10) {
+            if (f->wait_ticks > game_time_scale_legacy_day_ticks(10)) {
                 int trade_city_id;
                 if (b->data.dock.trade_ship_id) {
                     trade_city_id = figure_get(b->data.dock.trade_ship_id)->empire_city_id;
@@ -525,9 +530,9 @@ void figure_docker_action(figure *f)
                 f->destination_x = f->source_x;
                 f->destination_y = f->source_y;
                 f->wait_ticks = 0;
-                if (try_export_resource(f->destination_building_id, f->resource_id, trade_city_id)) {
+                if (try_export_resource(f->destination_building_id, static_cast<resource_type>(f->resource_id), trade_city_id)) {
                     int trader_id = figure_get(b->data.dock.trade_ship_id)->trader_id;
-                    trader_record_bought_resource(trader_id, f->resource_id);
+                    trader_record_bought_resource(trader_id, static_cast<resource_type>(f->resource_id));
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
                     f->action_state = FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING;

@@ -1,5 +1,5 @@
 <defines>
-  <calendar id="default" ticks_per_day="50">
+  <calendar id="default" ticks_per_day="100">
     <month_days values="31,28,31,30,31,30,31,31,30,31,30,31" />
   </calendar>
 

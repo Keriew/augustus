@@ -1,5 +1,6 @@
 #include "depot.h"
 
+extern "C" {
 #include "assets/assets.h"
 #include "building/granary.h"
 #include "building/industry.h"
@@ -15,10 +16,12 @@
 #include "figure/movement.h"
 #include "figure/route.h"
 #include "game/resource.h"
+#include "game/time.h"
 #include "map/road_access.h"
 #include "map/road_network.h"
 #include "map/routing.h"
 #include "map/routing_terrain.h"
+}
 
 #define DEPOT_CART_PUSHER_SPEED 1
 
@@ -33,22 +36,23 @@ static const int CART_OFFSETS_Y[8] = { -5,  6, 17, 40,  15,   7,  -3, -6 };
 
 static int cartpusher_carries_food(figure *f)
 {
-    return resource_is_food(f->resource_id);
+    return resource_is_food(static_cast<resource_type>(f->resource_id));
 }
 
 static int storage_add_resource(building *b, int resource, int amount);
 
 static void set_cart_graphic(figure *f)
 {
+    const resource_type resource = static_cast<resource_type>(f->resource_id);
     int carried = f->loads_sold_or_carrying;
-    if (carried == 0 || f->resource_id == RESOURCE_NONE) {
+    if (carried == 0 || resource == RESOURCE_NONE) {
         f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART);
     } else if (carried == 1) {
-        f->cart_image_id = resource_get_data(f->resource_id)->image.cart.single_load;
+        f->cart_image_id = resource_get_data(resource)->image.cart.single_load;
     } else if (cartpusher_carries_food(f) && carried >= 8) {
-        f->cart_image_id = resource_get_data(f->resource_id)->image.cart.eight_loads;
+        f->cart_image_id = resource_get_data(resource)->image.cart.eight_loads;
     } else {
-        f->cart_image_id = resource_get_data(f->resource_id)->image.cart.multiple_loads;
+        f->cart_image_id = resource_get_data(resource)->image.cart.multiple_loads;
     }
 }
 
@@ -335,7 +339,7 @@ void figure_depot_cartpusher_action(figure *f)
             if (is_order_condition_satisfied(&b->data.depot.current_order)) {
                 if (set_destination(f, b->data.depot.current_order.src_storage_id,
                         FIGURE_ACTION_239_DEPOT_CART_PUSHER_HEADING_TO_SOURCE)) {
-                    f->wait_ticks = DEPOT_CART_REROUTE_DELAY + 1;
+                    f->wait_ticks = game_time_scale_legacy_day_ticks(DEPOT_CART_REROUTE_DELAY) + 1;
                 } else {
                     f->state = FIGURE_STATE_DEAD;
                 }
@@ -351,7 +355,7 @@ void figure_depot_cartpusher_action(figure *f)
         case FIGURE_ACTION_250_DEPOT_CART_PUSHER_RETURN_TO_SOURCE:
         {
             set_cart_graphic(f);
-            if (f->wait_ticks > DEPOT_CART_REROUTE_DELAY) {
+            if (f->wait_ticks > game_time_scale_legacy_day_ticks(DEPOT_CART_REROUTE_DELAY)) {
                 figure_movement_move_ticks_with_percentage(f, speed_factor, percentage_speed);
                 try_reroute_order_src(f, b);
                 if (f->direction == DIR_FIGURE_AT_DESTINATION) {
@@ -382,7 +386,7 @@ void figure_depot_cartpusher_action(figure *f)
             set_cart_graphic(f);
             f->wait_ticks++;
             try_reroute_order_src(f, b);
-            if (f->wait_ticks > DEPOT_CART_LOAD_OFFLOAD_DELAY) {
+            if (f->wait_ticks > game_time_scale_legacy_day_ticks(DEPOT_CART_LOAD_OFFLOAD_DELAY)) {
                 building *src = building_get(b->data.depot.current_order.src_storage_id);
                 if (f->loads_sold_or_carrying > 0 && f->resource_id != RESOURCE_NONE) {
                     figure_cart_unload_or_return(f, b);
@@ -411,7 +415,7 @@ void figure_depot_cartpusher_action(figure *f)
 
                     if (set_destination(f, b->data.depot.current_order.dst_storage_id,
                             FIGURE_ACTION_241_DEPOT_CART_PUSHER_HEADING_TO_DESTINATION)) {
-                        f->wait_ticks = DEPOT_CART_REROUTE_DELAY + 1;
+                        f->wait_ticks = game_time_scale_legacy_day_ticks(DEPOT_CART_REROUTE_DELAY) + 1;
                     } else {
                         f->action_state = FIGURE_ACTION_244_DEPOT_CART_PUSHER_CANCEL_ORDER;
                     }
@@ -424,7 +428,7 @@ void figure_depot_cartpusher_action(figure *f)
         case FIGURE_ACTION_242_DEPOT_CART_PUSHER_AT_DESTINATION:
             set_cart_graphic(f);
             f->wait_ticks++;
-            if (f->wait_ticks > DEPOT_CART_LOAD_OFFLOAD_DELAY) {
+            if (f->wait_ticks > game_time_scale_legacy_day_ticks(DEPOT_CART_LOAD_OFFLOAD_DELAY)) {
                 figure_cart_unload_or_return(f, b);
                 f->wait_ticks = 0;
             }

@@ -3,6 +3,10 @@
 
 #include "figure/figure.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void figure_destination_priest_action(figure* f);
 
 void figure_priest_action(figure *f);
@@ -32,5 +36,9 @@ void figure_market_trader_action(figure *f);
 void figure_tax_collector_action(figure *f);
 
 void figure_beggar_action(figure *f);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FIGURETYPE_SERVICE_H
