@@ -433,6 +433,7 @@ static void draw_empire_object(const empire_object *obj)
     int x = obj->x;
     int y = obj->y;
     int image_id = obj->image_id;
+    color_t color_mask = COLOR_MASK_NONE;
 
     if (obj->type == EMPIRE_OBJECT_BORDER_EDGE) {
         if (!data.show_edges) {
@@ -443,11 +444,21 @@ static void draw_empire_object(const empire_object *obj)
         y -= 18 / 2;
     }
 
+    if (obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE) {
+        if (empire_object_get_full(obj->id)->route_hidden) {
+            color_mask = ALPHA_MASK_SEMI_TRANSPARENT;
+        }
+    }
+
     if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
         if (!data.show_edges) {
             return;
         }
-        int is_sea_route = empire_object_get(obj->parent_object_id)->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
+        full_empire_object *full_route = empire_object_get_full(obj->parent_object_id);
+        if (full_route->route_hidden) {
+            color_mask = ALPHA_MASK_SEMI_TRANSPARENT;
+        }
+        int is_sea_route = full_route->obj.type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
         image_id = assets_get_image_id("UI", is_sea_route ? "SeaWaypoint" : "LandWaypoint");
         x -= 19 / 2;
         y -= 18 / 2;
@@ -480,19 +491,19 @@ static void draw_empire_object(const empire_object *obj)
             image_id = assets_lookup_image_id(ASSET_FIRST_ORNAMENT) - 1 - image_id;
         }
     }
-    image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, color_mask, SCALE_NONE);
     const image *img = image_get(image_id);
     if (img->animation && img->animation->speed_id) {
         int new_animation = empire_object_update_animation(obj, image_id);
         image_draw(image_id + new_animation,
             data.x_draw_offset + x + img->animation->sprite_offset_x,
             data.y_draw_offset + y + img->animation->sprite_offset_y,
-            COLOR_MASK_NONE, SCALE_NONE);
+            color_mask, SCALE_NONE);
     }
     // Manually fix the Hagia Sophia
     if (obj->image_id == 3372) {
         image_id = assets_lookup_image_id(ASSET_HAGIA_SOPHIA_FIX);
-        image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, color_mask, SCALE_NONE);
     }
 }
 

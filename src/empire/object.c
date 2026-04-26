@@ -722,6 +722,10 @@ int empire_object_get_closest(int x, int y)
             continue;
         }
         const empire_object *obj = &full->obj;
+        if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+            // make trade route icons unselectable
+            continue;
+        }
         int obj_x, obj_y, width, height;
         if (city_is_selected && obj->type != EMPIRE_OBJECT_CITY) {
             //Prioritize selecting cities if available

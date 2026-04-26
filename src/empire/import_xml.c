@@ -439,7 +439,7 @@ static int xml_start_sells(void)
 static int xml_start_waypoints(void)
 {
     data.current_city_list = LIST_TRADE_WAYPOINTS;
-    int route_hidden = xml_parser_get_attribute_bool("trade_route_cost");
+    int route_hidden = xml_parser_get_attribute_bool("hidden");
     empire_object_get_full(data.current_trade_route_id)->route_hidden = route_hidden;
     return 1;
 }
