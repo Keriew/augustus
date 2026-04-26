@@ -663,6 +663,19 @@ static void update_native_images(int old_climate, int new_climate)
     }
 }
 
+static void fix_animation_offsets(void)
+{
+    // Fix black stripe in legionaries' dying animation
+    data.main[image_group(GROUP_BUILDING_FORT_LEGIONARY) + 155].width = 30;
+
+    data.main[image_group(GROUP_BUILDING_FOUNTAIN_4)].animation->sprite_offset_x -= 1;
+    data.main[image_group(GROUP_BUILDING_FOUNTAIN_3)].animation->sprite_offset_x -= 1;
+    data.main[image_group(GROUP_BUILDING_LION_HOUSE)].animation->sprite_offset_y -= 1;
+
+    // Fix engineer's post animation offset
+    data.main[image_group(GROUP_BUILDING_ENGINEERS_POST)].animation->sprite_offset_y += 1;
+}
+
 int image_load_climate(int climate_id, int is_editor, int force_reload, int keep_atlas_buffers)
 {
     if (climate_id == data.current_climate && is_editor == data.is_editor && !force_reload &&
@@ -747,17 +760,6 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     graphics_renderer()->create_image_atlas(atlas_data, !keep_atlas_buffers);
     image_packer_free(&data.packer);
 
-    // Fix engineer's post animation offset
-    if (!is_editor) {
-        data.main[image_group(GROUP_BUILDING_ENGINEERS_POST)].animation->sprite_offset_y += 1;
-    }
-
-    // Fix black stripe in legionaries' dying animation
-    if (!is_editor) {
-        int image_id = image_group(GROUP_BUILDING_FORT_LEGIONARY) + 155;
-        data.main[image_id].width = 30;
-    }
-
     // Update native huts alternative images after climate change.
     update_native_images(data.current_climate, climate_id);
 
@@ -765,6 +767,10 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     data.is_editor = is_editor;
 
     data.images_with_tops = 0;
+
+    if (!is_editor) {
+        fix_animation_offsets();
+    }
 
     return 1;
 }

@@ -470,6 +470,12 @@ int building_construction_place_building(building_type type, int x, int y, int e
         building_construction_offset_start_from_orientation(&x, &y, size);
     }
     // extra checks
+    if (type == BUILDING_RESERVOIR || type == BUILDING_DRAGGABLE_RESERVOIR) {
+        if (map_terrain_exists_tile_in_area_with_type(x, y, size, TERRAIN_BUILDING & ~TERRAIN_AQUEDUCT)) {
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
+    }
     if (type == BUILDING_TOWER) {
         if (!map_terrain_all_tiles_in_radius_are(x, y, size, 0, TERRAIN_WALL)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);

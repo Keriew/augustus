@@ -373,7 +373,6 @@ static void draw_building(int x_offset, int y_offset, int grid_offset)
     if (data.functions->building) {
         building *b = data.functions->building(data.functions->offset.building_id(grid_offset));
 
-        // Palisades are drawn like walls
         if (b->type == BUILDING_PALISADE) {
             draw_tile(x_offset, y_offset, &minimap_colors.wall);
             return;
@@ -454,7 +453,7 @@ static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
     }
     int terrain = data.functions->offset.terrain(grid_offset);
 
-    if (terrain & TERRAIN_BUILDING) {
+    if (terrain & TERRAIN_BUILDING && !(terrain & (TERRAIN_AQUEDUCT | TERRAIN_WALL))) {
         draw_building(x_view, y_view, grid_offset);
         return;
     }

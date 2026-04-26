@@ -2156,7 +2156,12 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_ROUTE_TYPE, "Route type"},
     {TR_PARAMETER_ROUTE_TYPE_ALL, "All"},
     {TR_PARAMETER_ROUTE_TYPE_LAND, "Land"},
-    {TR_PARAMETER_ROUTE_TYPE_SEA, "Sea"}
+    {TR_PARAMETER_ROUTE_TYPE_SEA, "Sea"},
+    {TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA, "Change model data"},     // window/attributes
+    {TR_EDITOR_PRICE_CHANGE, "price change"},
+    {TR_EDITOR_PRICE_CHANGES, "price changes"},
+    {TR_EDITOR_DEMAND_CHANGE, "demand change"},
+    {TR_EDITOR_DEMAND_CHANGES, "demand changes"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

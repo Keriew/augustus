@@ -107,6 +107,19 @@ unsigned int scenario_price_change_count_total(void)
     return price_changes.size;
 }
 
+int scenario_price_change_count_active(void)
+{
+    int count = 0;
+    price_change_t *price_change;
+    array_foreach(price_changes, price_change)
+    {
+        if (price_change_in_use(price_change)) {
+            count++;
+        }
+    }
+    return count;
+}
+
 void scenario_price_change_save_state(buffer *buf)
 {
     buffer_init_dynamic_array(buf, price_changes.size, PRICE_CHANGES_STRUCT_SIZE_CURRENT);

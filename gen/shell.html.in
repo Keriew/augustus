@@ -179,6 +179,7 @@
         padding: 8pt;
         -webkit-appearance: none;
         -moz-appearance: none;
+        appearance: none;
         min-width: 100pt;
         margin: 8pt;
       }
@@ -361,7 +362,7 @@
             console.error(error);
           });
         } else if (entry.isDirectory) {
-          FS.mkdir(C3Dir + '/' + (path + entry.name), 0777);
+          FS.mkdir(C3Dir + '/' + (path + entry.name), 0o777);
           filesRead++;
 
           // Get folder contents
@@ -650,7 +651,7 @@
         clearPath: function(path) {
           Object.keys(FS.lookupPath(path).node.contents).forEach(element => {
             var stat = FS.stat(path + '/' + element);
-            if (stat.mode & 0040000) {
+            if (stat.mode & 0o40000) {
               Module.clearPath(path + '/' + element);
               FS.rmdir(path + '/' + element);
             } else {
@@ -777,7 +778,7 @@
                 return;
               }
               if (file.dir) {
-                FS.mkdir(C3Dir + '/' + path, 0777);
+                FS.mkdir(C3Dir + '/' + path, 0o777);
                 filesRead++;
               } else {
                 file.async('uint8array').then(function(fileData) {
@@ -848,7 +849,7 @@
                 if (!dirSet.has(currPath)) {
                   dirSet.add(currPath);
                   try { 
-                    FS.mkdir(C3Dir + currPath, 0777);
+                    FS.mkdir(C3Dir + currPath, 0o777);
                   } catch (e) {
                     Module.FSError = true;
                     Module.setStatus("Error loading files:<br><br>" + e +

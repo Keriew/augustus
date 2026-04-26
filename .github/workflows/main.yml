@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - name: Linux Flatpak
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             BUILD_TARGET: flatpak
             DEPLOY: flatpak
           - name: Linux AppImage
@@ -76,6 +76,7 @@ jobs:
           - name: Emscripten
             os: ubuntu-24.04
             cache-key: emscripten
+            EMSDK_VERSION: 5.0.6
             BUILD_TARGET: emscripten
             DEPLOY: emscripten
     name: ${{ matrix.name }}
@@ -83,17 +84,18 @@ jobs:
     env:
       SDL_VERSION: ${{ matrix.SDL_VERSION }}
       SDL_MIXER_VERSION: ${{ matrix.SDL_MIXER_VERSION }}
+      EMSDK_VERSION: ${{ matrix.EMSDK_VERSION }}
       BUILD_TARGET: ${{ matrix.BUILD_TARGET }}
       DEPLOY: ${{ matrix.DEPLOY }}
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         if: ${{ matrix.cache-key }}
         with:
           path: deps
@@ -128,7 +130,7 @@ jobs:
           ./.ci_scripts/build_upload.sh
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.name }}
           path: deploy/
@@ -159,12 +161,12 @@ jobs:
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: deps
           key: windows-${{ matrix.cache-key }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
@@ -180,7 +182,7 @@ jobs:
         uses: ilammy/setup-nasm@v1
       - name: Install cv2pdb
         if: matrix.COMPILER == 'mingw-32' || matrix.COMPILER == 'mingw-64'
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.13
         with:
           repository: "rainers/cv2pdb"
           tag: "v0.53"
@@ -202,7 +204,7 @@ jobs:
         run: ./.ci_scripts/build_upload.ps1
         continue-on-error: true
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.name }}
           path: deploy\

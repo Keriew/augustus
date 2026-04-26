@@ -65,14 +65,14 @@ tasks.register('getVersion') {
 }
 
 android {
-    compileSdk 35
+    compileSdk 36
     ndkVersion "28.1.13356709"
 
     defaultConfig {
         compileSdk 35
         applicationId "com.github.Keriew.augustus"
         minSdkVersion 21
-        targetSdkVersion 35
+        targetSdkVersion 36
 
         versionName getVersion.versionName
         versionCode getVersion.versionCode

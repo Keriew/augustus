@@ -198,7 +198,7 @@ static void restore_map_images(void)
     for (int y = 0; y < map_height; y++) {
         for (int x = 0; x < map_width; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (!map_building_at(grid_offset)) {
+            if (!map_building_at(grid_offset) || map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
                 map_image_restore_at(grid_offset);
             }
         }

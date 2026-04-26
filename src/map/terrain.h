@@ -104,19 +104,19 @@ void map_terrain_remove_all(int terrain);
  * Check orthogonal neighbours of a tile if they contain a terrain.
  * @param grid_offset Tile which neighbours will be checked.
  * @param terrain Terrain bitmask to be checked for.
- * @return 1 if any orthogonal tiles matches at least one terrain from the bitmask, 0 otherwise.
+ * @return The number of orthogonal neighbours that match the terrain bitmask.
  */
-int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain);
+unsigned int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain);
 
 /**
  * Check orthogonal neighbours of a tile if they contain a terrain.
  * @param grid_offset Tile which neighbours will be checked.
  * @param terrain_sum Terrain bitmask to be checked for.
- * @return 1 if any orthogonal tiles matches all terrains from the bitmask, 0 otherwise.
+ * @return The number of orthogonal neighbours that match all terrains from the bitmask.
  */
-int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_sum);
+unsigned int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_sum);
 
-int map_terrain_count_diagonally_adjacent_with_type(int grid_offset, int terrain);
+unsigned int map_terrain_count_diagonally_adjacent_with_type(int grid_offset, int terrain);
 
 int map_terrain_has_adjacent_x_with_type(int grid_offset, int terrain);
 

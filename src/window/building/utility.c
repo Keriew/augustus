@@ -265,8 +265,10 @@ void window_building_draw_burning_ruin(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(111, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
 
-    lang_text_draw(41, building_get(c->rubble_building_id)->type,
-        c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
+    building_type og_type = building_get(c->rubble_building_id)->data.rubble.og_type;
+    building_type type = og_type ? og_type : building_get(c->rubble_building_id)->type;
+    text_draw(lang_get_building_type_string(type),
+        c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_RED, 0);
     lang_text_draw_multiline(111, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
 }
@@ -317,7 +319,6 @@ void window_building_draw_rubble(building_info_context *c)
     building *b = building_get(c->rubble_building_id);
     building_type og_type = b->data.rubble.og_type;
     building_type type = og_type == BUILDING_NONE ? b->type : og_type;
-    int is_burning_ruins = (b->type == BUILDING_BURNING_RUIN);
 
     if (building_can_repair_type(type) || building_can_repair_type(og_type)) {
         init_repair_building_button(c);
@@ -327,12 +328,8 @@ void window_building_draw_rubble(building_info_context *c)
         init_repair_building_button(c);
         complex_button_draw(repair_building_button);
     }
-    int cursor = lang_text_draw(41, type,
-        c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK);
-    if (is_burning_ruins && type) { // show original building type if it's burning ruins
-        cursor += lang_text_draw(41, type, c->x_offset + 32 + cursor, c->y_offset + BLOCK_SIZE * c->height_blocks - 173,
-             FONT_NORMAL_RED);
-    }
+    text_draw(lang_get_building_type_string(type),
+        c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 173, FONT_NORMAL_BLACK, 0);
     lang_text_draw_multiline(140, 1, c->x_offset + 32, c->y_offset + BLOCK_SIZE * c->height_blocks - 143,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
 }
