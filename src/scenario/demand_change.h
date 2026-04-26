@@ -43,4 +43,6 @@ void scenario_demand_change_load_state(buffer *buf, scenario_version_t version);
 
 void scenario_demand_change_load_state_old_version(buffer *buf, int is_legacy_change);
 
+int scenario_demand_change_count_active(void);
+
 #endif // SCENARIO_DEMAND_CHANGE_H

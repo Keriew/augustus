@@ -10,10 +10,6 @@
  * Building storage functions
  */
 
-enum {
-    BUILDING_STORAGE_DATA
-};
-
 /**
  * Storage state
  * state > 0 - means the building accepts that resource

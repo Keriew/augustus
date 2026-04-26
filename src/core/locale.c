@@ -120,7 +120,6 @@ language_type locale_last_determined_language(void)
     } else {
         return data.last_determined_language;
     }
-
 }
 
 

@@ -22,9 +22,10 @@ case "$BUILD_TARGET" in
 	;;
 "emscripten")
 	# Get EMSDK
+	EMSDK_VERSION="${EMSDK_VERSION:-5.0.6}"
 	git clone https://github.com/emscripten-core/emsdk.git
 	cd emsdk
-	./emsdk install latest
-	./emsdk activate latest
+	./emsdk install "$EMSDK_VERSION"
+	./emsdk activate "$EMSDK_VERSION"
 	;;
 esac

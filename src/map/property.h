@@ -32,7 +32,8 @@ void map_property_set_multi_tile_xy(int grid_offset, int x, int y, int is_draw_t
 void map_property_clear_multi_tile_xy(int grid_offset);
 
 int map_property_multi_tile_size(int grid_offset);
-int map_property_multi_tile_size_from_buffer(buffer *bitfields, int grid_offset);
+int map_property_multi_tile_size_from_buffer_8(buffer *bitfields, int grid_offset);
+int map_property_multi_tile_size_from_buffer_16(buffer *bitfields, int grid_offset);
 void map_property_set_multi_tile_size(int grid_offset, int size);
 
 void map_property_init_alternate_terrain(void);

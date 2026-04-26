@@ -157,6 +157,7 @@ static void draw_button_tooltip(tooltip_context *c)
     const uint8_t *text = get_tooltip_text(c);
     int width = 200;
     int largest_width;
+
     int lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
     if (lines > 2) {
         width = 300;
@@ -255,7 +256,6 @@ static void draw_overlay_tooltip(tooltip_context *c)
     const uint8_t *text = get_tooltip_text(c);
     int width = 200;
     int largest_width;
-
     int lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
     if (lines > 2) {
         width = 300;
@@ -263,6 +263,7 @@ static void draw_overlay_tooltip(tooltip_context *c)
     }
     width = largest_width + 16;
     int height = 16 * lines + 10;
+    width = largest_width + 16;
 
 
     int x, y;

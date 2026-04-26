@@ -126,6 +126,19 @@ unsigned int scenario_demand_change_count_total(void)
     return demand_changes.size;
 }
 
+int scenario_demand_change_count_active(void)
+{
+    int count = 0;
+    demand_change_t *demand_change;
+    array_foreach(demand_changes, demand_change)
+    {
+        if (demand_change_in_use(demand_change)) {
+            count++;
+        }
+    }
+    return count;
+}
+
 void scenario_demand_change_save_state(buffer *buf)
 {
     buffer_init_dynamic_array(buf, demand_changes.size, DEMAND_CHANGES_STRUCT_SIZE_CURRENT);

@@ -285,8 +285,8 @@ void empire_object_save(buffer *buf)
         buffer_write_i32(buf, 0);
         return;
     }
-    int size_per_obj = 85; // +2 bytes for empire_city_icon fields
-    int size_per_city = 147 + 4 * (RESOURCE_MAX - RESOURCE_MAX_LEGACY); // +2 bytes for empire_city_icon fields
+    int size_per_obj = 88;
+    int size_per_city = size_per_obj + 4 * (RESOURCE_MAX - RESOURCE_MIN);
     int total_size = 0;
 
     full_empire_object *full;
@@ -297,6 +297,7 @@ void empire_object_save(buffer *buf)
             total_size += size_per_obj;
         } else {
             total_size += 2;
+            // add space for two bytes which are always written even though it's not in_use
         }
     }
     buf_data = malloc(total_size + sizeof(uint32_t));
@@ -306,7 +307,7 @@ void empire_object_save(buffer *buf)
     array_foreach(objects, full) {
         empire_object *obj = &full->obj;
         buffer_write_u8(buf, obj->type);
-        buffer_write_u8(buf, full->in_use);
+        buffer_write_u8(buf, full->in_use); // always write these two bytes
         if (!full->in_use) {
             continue;
         }
@@ -325,7 +326,7 @@ void empire_object_save(buffer *buf)
         buffer_write_u8(buf, full->city_name_id);
         buffer_write_u8(buf, obj->trade_route_id);
         buffer_write_u8(buf, full->trade_route_open);
-        buffer_write_i32(buf, full->trade_route_cost);
+        buffer_write_u32(buf, full->trade_route_cost);
         if (obj->type == EMPIRE_OBJECT_CITY) {
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
                 buffer_write_i16(buf, full->city_sells_resource[r]);

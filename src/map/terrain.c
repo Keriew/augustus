@@ -133,9 +133,9 @@ void map_terrain_remove_all(int terrain)
     map_grid_and_u32(terrain_grid.items, ~terrain);
 }
 
-int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain)
+unsigned int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain)
 {
-    int count = 0;
+    unsigned int count = 0;
     if (map_terrain_is(grid_offset + map_grid_delta(0, -1), terrain)) {
         count++;
     }
@@ -151,9 +151,9 @@ int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain)
     return count;
 }
 
-int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_sum)
+unsigned int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_sum)
 {
-    int count = 0;
+    unsigned int count = 0;
     if (map_terrain_is_superset(grid_offset + map_grid_delta(0, -1), terrain_sum)) {
         count++;
     }
@@ -170,9 +170,9 @@ int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_
 }
 
 
-int map_terrain_count_diagonally_adjacent_with_type(int grid_offset, int terrain)
+unsigned int map_terrain_count_diagonally_adjacent_with_type(int grid_offset, int terrain)
 {
-    int count = 0;
+    unsigned int count = 0;
     if (map_terrain_is(grid_offset + map_grid_delta(1, -1), terrain)) {
         count++;
     }
