@@ -703,13 +703,15 @@ static void draw_city_info(const empire_city *city)
         case EMPIRE_CITY_TRADE:
         case EMPIRE_CITY_FUTURE_TRADE:
         {
-            top_buttons[2].parameter1 = 0;
-            add_resource_buttons[0].dont_draw = 0;
-            add_resource_buttons[1].dont_draw = 0;
-            trade_city_buttons[0].parameter1 = 0;
-            trade_city_buttons[2].parameter1 = city->type != EMPIRE_CITY_FUTURE_TRADE;
-            trade_city_buttons[1].parameter1 = 0;
-            trade_city_buttons[1].x = 44 * (city->type != EMPIRE_CITY_FUTURE_TRADE);
+            if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
+                top_buttons[2].parameter1 = 0;
+                add_resource_buttons[0].dont_draw = 0;
+                add_resource_buttons[1].dont_draw = 0;
+                trade_city_buttons[0].parameter1 = 0;
+                trade_city_buttons[2].parameter1 = city->type != EMPIRE_CITY_FUTURE_TRADE;
+                trade_city_buttons[1].parameter1 = 0;
+                trade_city_buttons[1].x = 44 * (city->type != EMPIRE_CITY_FUTURE_TRADE);
+            }
             int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             width += text_width;
             int resource_x_offset = x_offset + 30 + width;
