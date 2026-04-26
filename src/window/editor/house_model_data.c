@@ -159,7 +159,7 @@ static void draw_model_item(const grid_box_item *item)
     for (unsigned int i = 0; i < MAX_DATA_BUTTONS; i++) {
         button_border_draw(item->x + data_buttons[i].x, item->y + data_buttons[i].y,
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
-        
+
         model_house *model = model_get_house(h_level);
         model_house *default_model = (model_house *)&building_properties_for_type(h_level + 10)->house_model_data;
         int value = *model_get_ptr_for_house_data_type(model, i);
@@ -187,7 +187,7 @@ static void draw_background(void)
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 45 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 28, 85, 8 * BLOCK_SIZE, FONT_SMALL_PLAIN);
-    
+
     for (int i = 0; i < NUM_DATA_BUTTONS; i++) {
         int x = data_buttons[i].x + 35;
         int y = i > 8 ? 95 : 75;

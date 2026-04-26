@@ -385,6 +385,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "weather_type",    .type = PARAMETER_TYPE_WEATHER, .key = TR_PARAMETER_TYPE_WEATHER},
                                         .xml_parm2 = {.name = "intensity",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_INTENSITY}, },
+    [ACTION_TYPE_HIDE_TRADE_ROUTE]     = {.type = ACTION_TYPE_HIDE_TRADE_ROUTE,
+                                        .xml_attr = {.name = "hide_trade_route",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_HIDE_TRADE_ROUTE},
+                                        .xml_parm1 = {.name = "target_city",        .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE },
+                                        .xml_parm2 = {.name = "hide",   .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_HIDE}, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)

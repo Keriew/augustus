@@ -2162,7 +2162,9 @@ static translation_string all_strings[] = {
     {TR_EDITOR_PRICE_CHANGE, "price change"},
     {TR_EDITOR_PRICE_CHANGES, "price changes"},
     {TR_EDITOR_DEMAND_CHANGE, "demand change"},
-    {TR_EDITOR_DEMAND_CHANGES, "demand changes"}
+    {TR_EDITOR_DEMAND_CHANGES, "demand changes"},
+    {TR_ACTION_TYPE_HIDE_TRADE_ROUTE, "Hide trade route"},
+    {TR_PARAMETER_HIDE, "Hide"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

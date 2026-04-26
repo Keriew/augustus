@@ -959,3 +959,19 @@ int scenario_action_type_change_weather_execute(scenario_action_t *action)
 
     return 1;
 }
+
+int scenario_action_type_hide_trade_route_execute(scenario_action_t *action)
+{
+    int route_id = action->parameter1;
+    int hide = action->parameter2; // hide or show again
+
+    if (!trade_route_is_valid(route_id)) {
+        return 0;
+    }
+
+    int city_id = empire_city_get_for_trade_route(route_id);
+    full_empire_object *route_obj = empire_object_get_full(empire_city_get(city_id)->empire_object_id + 1);
+    route_obj->route_hidden = hide;
+
+    return 1;
+}
