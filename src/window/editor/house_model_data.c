@@ -166,7 +166,7 @@ static void draw_model_item(const grid_box_item *item)
         int default_value = *model_get_ptr_for_house_data_type(default_model, i);
         color_t color = 0;
         if (value > default_value) {
-            color = COLOR_MASK_DARK_GREEN;
+            color = COLOR_FONT_GREEN;
         } else if (value < default_value) {
             color = COLOR_FONT_RED;
         }
@@ -183,7 +183,7 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(16, 32, 45, 27);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA, 16, 42, 45 * BLOCK_SIZE, FONT_LARGE_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CHANGE_HOUSE_MODEL_DATA, 16, 42, 45 * BLOCK_SIZE, FONT_LARGE_BLACK);
     lang_text_draw_centered(13, 3, 16, 27 * BLOCK_SIZE + 8, 45 * BLOCK_SIZE, FONT_NORMAL_BLACK);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_PARAMETER_MODEL, 28, 85, 8 * BLOCK_SIZE, FONT_SMALL_PLAIN);

@@ -104,8 +104,8 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
     }
     // religion
     int religion = model->religion;
-    if (religion > 3) {
-        religion = 3;
+    if (religion > 5) {
+        religion = 5;
     }
     if (house->data.house.num_gods < religion) {
         if (religion == 1) {
@@ -114,8 +114,14 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
         } else if (religion == 2) {
             ++demands->missing.second_religion;
             return 0;
-        } else if (religion >= 3) {
+        } else if (religion == 3) {
             ++demands->missing.third_religion;
+            return 0;
+        } else if (religion == 4) {
+            ++demands->missing.fourth_religion;
+            return 0;
+        } else if (religion >= 5) {
+            ++demands->missing.fifth_religion;
             return 0;
         }
     } else if (religion > 0) {
@@ -536,7 +542,7 @@ static void consume_resources(building *b)
         consumption_reduction[RESOURCE_WINE] += 20;
         consumption_reduction[RESOURCE_OIL] += 20;
     }
-    // mars module 2 - all goods reduced by 10% 
+    // mars module 2 - all goods reduced by 10%
     if (b->data.house.temple_mars && building_monument_gt_module_is_active(MARS_MODULE_2_ALL_GOODS)) {
         consumption_reduction[RESOURCE_WINE] += 10;
         consumption_reduction[RESOURCE_OIL] += 10;
@@ -631,7 +637,7 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             return;
         }
     }
-    
+
     if (water == 3 && !house->has_water_access) {
         house->data.house.evolve_text_id = 2;
     }
@@ -711,8 +717,8 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     }
     // religion
     int religion = model->religion;
-    if (religion > 3) {
-        religion = 3;
+    if (religion > 5) {
+        religion = 5;
     }
     if (house->data.house.num_gods < religion) {
         if (religion == 1) {
@@ -723,6 +729,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             return;
         } else if (religion == 3) {
             house->data.house.evolve_text_id = 22;
+            return;
+        } else if (religion == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_GOOD_MISSING_DEVOLVE;
+            return;
+        } else if (religion == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_GOOD_MISSING_DEVOLVE;
             return;
         }
     }
@@ -791,11 +803,11 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
 
     if (water == 2 && !house->has_water_access) {
         if (!house->has_latrines_access || !house->has_well_access) {
-            house->data.house.evolve_text_id = TR_BUILDING_LATRINES_MISSING_EVOLVE;        
+            house->data.house.evolve_text_id = TR_BUILDING_LATRINES_MISSING_EVOLVE;
             return;
         }
     }
-    
+
     if (water == 3 && !house->has_water_access) {
         if (house->has_well_access && house->has_latrines_access) {
             house->data.house.evolve_text_id = 32;
@@ -873,8 +885,8 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     }
     // religion
     religion = model->religion;
-    if (religion > 3) {
-        religion = 3;
+    if (religion > 5) {
+        religion = 5;
     }
     if (house->data.house.num_gods < religion) {
         if (religion == 1) {
@@ -885,6 +897,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             return;
         } else if (religion == 3) {
             house->data.house.evolve_text_id = 52;
+            return;
+        } else if (religion == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_GOOD_MISSING_EVOLVE;
+            return;
+        } else if (religion == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_GOOD_MISSING_EVOLVE;
             return;
         }
     }
