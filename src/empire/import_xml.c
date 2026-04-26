@@ -57,7 +57,7 @@ static struct {
     int version;
     int info_only;
     int current_city_id;
-    int current_trade_route_id; // This is not an actual route id but an empire object id 
+    int current_trade_route_id; // This is not an actual route id but an empire object id
     city_list current_city_list;
     int has_vulnerable_city;
     int current_invasion_path_id;
@@ -439,6 +439,8 @@ static int xml_start_sells(void)
 static int xml_start_waypoints(void)
 {
     data.current_city_list = LIST_TRADE_WAYPOINTS;
+    int route_hidden = xml_parser_get_attribute_bool("trade_route_cost");
+    empire_object_get_full(data.current_trade_route_id)->route_hidden = route_hidden;
     return 1;
 }
 

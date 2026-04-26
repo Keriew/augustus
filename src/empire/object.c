@@ -103,7 +103,7 @@ static void migrate_orders(empire_object *obj)
     if (!parent_id) {
         return;
     }
-    
+
     obj->parent_object_id = parent_id;
     obj->order_index = obj->id - parent_id;
 }
@@ -267,6 +267,9 @@ void empire_object_load(buffer *buf, int version)
             obj->future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
             migrate_orders(obj);
         }
+        if (version > SCENARIO_TESING_VERSION_BUMP_1) {
+            full->route_hidden = buffer_read_u8(buf);
+        }
     }
     objects.size = highest_id_in_use + 1;
     fix_image_ids();
@@ -339,6 +342,7 @@ void empire_object_save(buffer *buf)
         buffer_write_u8(buf, obj->future_trade_after_icon);
         buffer_write_i16(buf, obj->order_index);
         buffer_write_i16(buf, obj->parent_object_id);
+        buffer_write_u8(buf, full->route_hidden);
     }
 }
 
@@ -352,7 +356,7 @@ void empire_object_add_to_cities(full_empire_object *full)
         log_error("Unable to allocate enough memory for the empire cities array. The game will now crash.", 0, 0);
         return;
     }
-    
+
     city->in_use = 1;
     city->type = full->city_type;
     city->name_id = full->city_name_id;
@@ -360,7 +364,7 @@ void empire_object_add_to_cities(full_empire_object *full)
         // create trade route
         full->obj.trade_route_id = trade_route_new();
         array_item(objects, full->obj.id + 1)->obj.trade_route_id = full->obj.trade_route_id;
-        
+
         for (int point_index = 0; point_index < objects.size; ) {
             unsigned int point_id = empire_object_get_next_in_order(full->obj.id + 1, &point_index);
             if (!point_id) {
@@ -372,12 +376,12 @@ void empire_object_add_to_cities(full_empire_object *full)
             }
             trade_point->obj.trade_route_id = full->obj.trade_route_id;
         }
-        
+
         city->route_id = full->obj.trade_route_id;
         city->is_open = full->trade_route_open;
         city->cost_to_open = full->trade_route_cost;
         city->is_sea_trade = empire_object_is_sea_trade_route(full->obj.trade_route_id);
-        
+
         // set sell/buy resources and set trade route accordingly
         for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
             city->sells_resource[resource] = 0;
@@ -741,7 +745,7 @@ int empire_object_get_closest(int x, int y)
             width = img->width;
             height = img->height;
         }
-        
+
         if (obj_x - (is_edge * width / 2) > x || obj_x + width / 1 + is_edge <= x) {
             continue;
         }

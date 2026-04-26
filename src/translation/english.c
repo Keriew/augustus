@@ -2156,7 +2156,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_ROUTE_TYPE, "Route type"},
     {TR_PARAMETER_ROUTE_TYPE_ALL, "All"},
     {TR_PARAMETER_ROUTE_TYPE_LAND, "Land"},
-    {TR_PARAMETER_ROUTE_TYPE_SEA, "Sea"}
+    {TR_PARAMETER_ROUTE_TYPE_SEA, "Sea"},
+    {TR_EMPIRE_CITY_ICON_BUTTON, "Button"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

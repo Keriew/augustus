@@ -62,7 +62,7 @@ typedef enum {
     SAVE_GAME_LAST_ZIP_COMPRESSION = 0x88,
     SAVE_GAME_LAST_ENEMY_ARMIES_BUFFER_BUG = 0x89,
     SAVE_GAME_LAST_BARRACKS_TOWER_SENTRY_REQUEST = 0x8a,
-    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here 
+    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here
     SAVE_GAME_LAST_UNVERSIONED_SCENARIOS = 0x8c,
     SAVE_GAME_LAST_EMPIRE_RESOURCES_ALWAYS_WRITE = 0x8d,
     // the difference between this version and UNVERSIONED_SCENARIOS above is this one actually saves the scenario version
@@ -105,7 +105,7 @@ typedef enum {
 } savegame_version_t;
 
 typedef enum {
-    SCENARIO_CURRENT_VERSION = 23,
+    SCENARIO_CURRENT_VERSION = 24,
 
     SCENARIO_VERSION_NONE = 0,
     SCENARIO_LAST_UNVERSIONED = 1,
@@ -129,7 +129,8 @@ typedef enum {
     SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA = 19,
     SCENARIO_LAST_NO_EMPIRE_EDITOR = 20,
     SCENARIO_LAST_LIMITED_ROUTE_COST = 21,
-    SCENARIO_LAST_NO_HOUSE_MODELS = 22
+    SCENARIO_LAST_NO_HOUSE_MODELS = 22,
+    SCENARIO_TESING_VERSION_BUMP_1 = 23,
 } scenario_version_t;
 
 typedef enum {

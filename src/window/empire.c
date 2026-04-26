@@ -44,12 +44,12 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>  
-#include <string.h>  
+#include <stdlib.h>
+#include <string.h>
 
 #define WIDTH_BORDER 16 //dimensions the border image in px, informative only
-#define HEIGHT_BORDER 136 
-#define SIDEBAR_ENTRY_HEIGHT 120 
+#define HEIGHT_BORDER 136
+#define SIDEBAR_ENTRY_HEIGHT 120
 #define BOTTOM_PANEL_HEIGHT 120
 
 #define RESOURCE_ICON_WIDTH 26 //dimensions the resource icon in px, informative only
@@ -60,13 +60,13 @@
 #define CLAMP(a, x, b) (((x) < (a)) ? (a) : \
 			((b) < (x)) ? (b) : (x))
 #define TRADE_DOT_SPACING 10 //spacing between dots in trade route line
-#define MAX_SIDEBAR_CITIES 256 
+#define MAX_SIDEBAR_CITIES 256
 #define MAX_RESOURCE_BUTTONS 256
 #define MAX_TRADE_OPEN_BUTTONS 64
 #define MAX_TRADE_EDGES 4096
 #define MAX_DOTS_PER_ROUTE 1024
 #define MAX_DOTS_ON_MAP (MAX_DOTS_PER_ROUTE * MAX_SIDEBAR_CITIES)
-#define TRADE_PULSE_DOT_MS 180 
+#define TRADE_PULSE_DOT_MS 180
 #define TRADE_DOT_ANIMATION_SCALE 160
 
 #define FONT_SPACE_WIDTH font_definition_for(FONT_NORMAL_GREEN)->space_width
@@ -76,7 +76,7 @@
 #define NO_POSITION ((unsigned int) -1) //used as an alterntive to 0 for some of new pointers
 //to avoid confusion with when relying on external indexing, which can be 0-based
 
-//typedefs 
+//typedefs
 typedef enum {
     TRADE_ICON_NONE = -1,
     TRADE_ICON_LAND = 0,
@@ -649,7 +649,7 @@ static void draw_paneling(void)
         image_draw(image_base + 2, data.panel.x_min, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_base + 2, data.panel.x_max - WIDTH_BORDER, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
     }
-    // Sidebar background 
+    // Sidebar background
     graphics_set_clip_rectangle(data.sidebar.x_min - WIDTH_BORDER, data.sidebar.y_min, //clipping - border, to let border be drawn OUTSIDE
         data.sidebar.width + WIDTH_BORDER, //account for width border substracted earlier to make sure textures stretch all the way
         data.sidebar.y_max - data.sidebar.y_min);
@@ -660,7 +660,7 @@ static void draw_paneling(void)
             image_draw(asset_id, x, y, COLOR_MASK_NONE, SCALE_NONE);
         }
     }
-    // Sidebar border 
+    // Sidebar border
     for (int y = data.sidebar.y_min; y < data.sidebar.y_max; y += 86) {
         image_draw(image_base, data.sidebar.x_min - WIDTH_BORDER, y, COLOR_MASK_NONE, SCALE_NONE);
     }
@@ -917,7 +917,7 @@ static void window_empire_draw_trade_route_pulses(const empire_object *route_obj
 }
 
 // -------------------------------------------------------------------------------------------------------
-//                                              FOREGROUND ELEMENTS DRAWING 
+//                                              FOREGROUND ELEMENTS DRAWING
 // -------------------------------------------------------------------------------------------------------
 
 static void draw_trade_resource(resource_type r, int trade_max, int x, int y)
@@ -1547,7 +1547,7 @@ static void draw_empire_object(const empire_object *obj)
     const image *img = image_get(image_id);
     if ((((unsigned int) data.hovered_object == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) ||
         ((empire_selected_object() == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY)) {
-        // actions for currently hovered or selected city objects 
+        // actions for currently hovered or selected city objects
         if ((empire_selected_object() == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) {
             const int offsets[16][2] = {
                 {1, 0}, {0, 1}, {-1, 0}, {0, -1},
@@ -1555,6 +1555,10 @@ static void draw_empire_object(const empire_object *obj)
                 {1, 1}, {-1, 1}, {-1, -1}, {1, -1},
                 {3, 3}, {-3, 3}, {-3, -3}, {3, -3}
             }; // 3 an 1 offsets worked best in testing, other values can be used for readability if necessary
+            if (obj->empire_city_icon == EMPIRE_CITY_ICON_BUTTON) {
+                image_draw(image_id + 2, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+                return;
+            }
             for (int i = 0; i < 16; i++) {
                 int dx = offsets[i][0];
                 int dy = offsets[i][1];
@@ -1565,10 +1569,15 @@ static void draw_empire_object(const empire_object *obj)
 
             image_draw_scaled_centered(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 130);
 
-            int new_animation = empire_object_update_animation(obj, image_id);
-            animation_draw_scaled(img, image_id, new_animation, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 130);
-
+            if (img->animation && img->animation->speed_id) {
+                int new_animation = empire_object_update_animation(obj, image_id);
+                animation_draw_scaled(img, image_id, new_animation, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 130);
+            }
         } else {
+            if (obj->empire_city_icon == EMPIRE_CITY_ICON_BUTTON) {
+                image_draw(image_id + 1, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+                return;
+            }
             image_draw_scaled_centered(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 120);
 
             if (img->animation && img->animation->speed_id) {
@@ -1813,7 +1822,7 @@ static void process_selection(void)
     int selected_object = empire_selected_object();
     if (selected_object) {
         data.selected_city = empire_city_get_for_object(selected_object - 1);
-        //data.selected_city is array index of the empire object from the array of cities 
+        //data.selected_city is array index of the empire object from the array of cities
     } else {
         data.selected_city = 0;
     }
@@ -2156,7 +2165,7 @@ static void get_tooltip(tooltip_context *c)
     }
 }
 // -------------------------------------------------------------------------------------------------------
-//                                              BUTTON HANDLERS     
+//                                              BUTTON HANDLERS
 // -------------------------------------------------------------------------------------------------------
 
 static void button_help(int param1, int param2)
@@ -2215,7 +2224,7 @@ void register_open_trade_button(int x, int y, int width, int height, int route_i
 
 
 // -------------------------------------------------------------------------------------------------------
-//                                              WINDOW SHOW 
+//                                              WINDOW SHOW
 // -------------------------------------------------------------------------------------------------------
 
 void window_empire_show(void)

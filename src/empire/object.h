@@ -42,6 +42,7 @@ typedef struct {
     int city_buys_resource[RESOURCE_MAX];
     empire_object obj;
     empire_city_icon_type empire_city_icon;
+    int route_hidden;
 } full_empire_object;
 
 #define BASE_ORNAMENT_IMAGE_ID 3356
