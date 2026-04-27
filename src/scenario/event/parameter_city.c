@@ -306,7 +306,22 @@ static int city_trade_quota_fill_percentage(scenario_action_t *action)
     return limit == 0 ? 0 : calc_percentage(traded, limit);
 }
 
+static int opened_trade_routes(scenario_action_t *action)
+{
+    int open_sea_trade_routes = empire_city_get_trade_routes_count(1, 1);
+    int open_land_trade_routes = empire_city_get_trade_routes_count(0, 1);
 
+    switch (action->parameter3) {
+        case 1:
+            return open_land_trade_routes;
+        case 2:
+            return open_sea_trade_routes;
+        case 0:
+        default:
+            return open_sea_trade_routes + open_land_trade_routes;
+    }
+    return 0;
+}
 
 int scenario_event_parameter_city_for_action(scenario_action_t *action)
 {
@@ -359,6 +374,8 @@ int scenario_event_parameter_city_for_action(scenario_action_t *action)
             return get_terrain_tiles_count(action);
         case CITY_PROPERTY_QUOTA_FILL:
             return city_trade_quota_fill_percentage(action);
+        case CITY_PROPERTY_OPENED_ROUTES:
+            return opened_trade_routes(action);
         case CITY_PROPERTY_NONE:
         case CITY_PROPERTY_MAX:
         default:
@@ -461,6 +478,12 @@ city_property_info_t city_property_get_param_info(city_property_t type)
             info.param_names[0] = "route";
             info.param_names[1] = "resource";
             info.param_names[2] = "percentage_type";
+            break;
+        case CITY_PROPERTY_OPENED_ROUTES:
+            info.count = 1;
+            info.param_types[0] = PARAMETER_TYPE_ROUTE_TYPE;
+            info.param_keys[0] = TR_PARAMETER_TYPE_ROUTE_TYPE;
+            info.param_names[0] = "route_type";
             break;
             // --- Invalid / none ---
         case CITY_PROPERTY_NONE:

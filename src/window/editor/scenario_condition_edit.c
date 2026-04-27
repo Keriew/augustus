@@ -47,8 +47,6 @@ static void resource_selection(const generic_button *button);
 static void custom_message_selection(void);
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button);
 static int get_param_value(void);
-static void on_grid_slice_selected(grid_slice *selection);
-static void start_grid_slice_selection(void);
 
 static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 1},
@@ -429,6 +427,22 @@ static void start_grid_slice_selection(void)
     window_editor_map_show();
 }
 
+static void on_grid_offset_selected(int grid_offset)
+{
+    data.condition->parameter1 = grid_offset;
+    widget_map_editor_add_draw_context_event_tile(grid_offset, data.condition->parent_event_id);
+    scenario_events_fetch_event_tiles_to_editor();
+    editor_tool_clear_selection_callback();
+    window_go_back();
+}
+
+static void start_grid_offset_selection(void)
+{
+    editor_tool_set_single_selection_callback(on_grid_offset_selected);
+    editor_tool_set_type(TOOL_SELECT_OFFSET);
+    window_editor_map_show();
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -472,12 +486,14 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_GRID_SLICE:
-        {
             start_grid_slice_selection();
             return;
-        }
         case PARAMETER_TYPE_FORMULA:
             create_evaluation_formula(parameter);
+            return;
+        case PARAMETER_TYPE_GRID_OFFSET:
+            // unused yet
+            start_grid_offset_selection();
             return;
         default:
             return;

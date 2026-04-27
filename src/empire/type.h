@@ -44,6 +44,8 @@ typedef enum {
     EMPIRE_CITY_ICON_ROMAN_CITY, // ro_city
     EMPIRE_CITY_ICON_DISTANT_CITY, // dis_city
     EMPIRE_CITY_ICON_TOWER, // tower                Empire_Icon_Flag_01.png - Empire_Icon_Flag_06.png
+    EMPIRE_CITY_ICON_BUTTON, // button
+    EMPIRE_CITY_ICON_MAX // helper constant
 } empire_city_icon_type;
 
 #endif // EMPIRE_TYPE_H

@@ -92,6 +92,12 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
             return scenario_condition_type_check_formulas(condition);
         case CONDITION_TYPE_TERRAIN_IN_AREA:
             return scenario_condition_type_terrain_count_area_met(condition);
+        case CONDITION_TYPE_ENEMIES_IN_CITY:
+            return scenario_condition_type_count_enemies_in_city_met(condition);
+        case CONDITION_TYPE_LAND_TRADE_PROBLEMS:
+            return scenario_condition_type_land_trade_problems_met(condition);
+        case CONDITION_TYPE_SEA_TRADE_PROBLEMS:
+            return scenario_condition_type_sea_trade_problems_met(condition);
         default:
             // If we cannot figure condition type (such as with deleted conditions) then default to passed.
             return 1;
