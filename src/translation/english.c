@@ -2169,7 +2169,9 @@ static translation_string all_strings[] = {
     {TR_BUILDING_FIFTH_GOOD_MISSING_DEVOLVE, "This house will devolve soon. Its previously excellent religious facilities were reduced to the temples of only four gods."},
     {TR_EDITOR_SCENARIO_CHANGE_HOUSE_MODEL_DATA, "Change house model data"},   // window/attributes
     {TR_ACTION_TYPE_HIDE_TRADE_ROUTE, "Hide trade route"},
-    {TR_PARAMETER_HIDE, "Hide"}
+    {TR_PARAMETER_HIDE, "Hide"},
+    {TR_EMPIRE_HIDE_TRADE_ROUTE, "Hide route"},
+    {TR_EMPIRE_SHOW_TRADE_ROUTE, "Show route"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

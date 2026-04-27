@@ -78,6 +78,7 @@ static void button_after_icon(const generic_button *button);
 static void button_route_type(const generic_button *button);
 static void button_route_cost(const generic_button *button);
 static void button_empire_tools(int param1, int param2);
+static void button_hide_route(const generic_button *button);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -112,9 +113,10 @@ static image_button all_empire_tools_button[] = {
 };
 
 static generic_button top_buttons[] = {
-    {280, 0, 120, 24, button_delete_object},
-    {140, 0, 120, 24, button_move_object},
-    {0, 0, 120, 24, button_draw_route}
+    {420, 0, 120, 24, button_delete_object},
+    {280, 0, 120, 24, button_move_object},
+    {140, 0, 120, 24, button_draw_route},
+    {0, 0, 120, 24, button_hide_route}
 };
 
 static generic_button trade_city_buttons[] = {
@@ -705,6 +707,7 @@ static void draw_city_info(const empire_city *city)
         {
             if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
                 top_buttons[2].parameter1 = 0;
+                top_buttons[3].parameter1 = 0;
                 add_resource_buttons[0].dont_draw = 0;
                 add_resource_buttons[1].dont_draw = 0;
                 trade_city_buttons[0].parameter1 = 0;
@@ -715,8 +718,12 @@ static void draw_city_info(const empire_city *city)
             int text_width = lang_text_draw(47, 5, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             width += text_width;
             int resource_x_offset = x_offset + 30 + width;
+            if (resource_x_offset + etc_width + 32 + 8 + 39 >= data.panel.x_max - 640) {
+                // if even the add resource button doesn't fit hide the redraw trade route button so it(add resource button) can be shown
+                top_buttons[3].parameter1 = 1;
+            }
             if (resource_x_offset + etc_width + 32 + 8 + 39 >= data.panel.x_max - 500) {
-                // if even the add resource button doesn't fit hide the redraw trade route button so it can be shown
+                // if the add resource button still doesn't fit hide the hide/show trade route button
                 top_buttons[2].parameter1 = 1;
             }
             for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
@@ -746,7 +753,8 @@ static void draw_city_info(const empire_city *city)
             text_width = lang_text_draw(47, 4, resource_x_offset + coords_bonus, y_offset, FONT_NORMAL_GREEN);
             width = width_after_name + text_width + coords_bonus;
             resource_x_offset = x_offset + 30 + width;
-            if (resource_x_offset + etc_width + 32 + 8 + 39 >= data.panel.x_max - 360) {
+            if (resource_x_offset + etc_width + 32 + 8 + 39 >= data.panel.x_max - 640 +
+                ((!trade_city_buttons[2].parameter1) ? trade_city_buttons[2].x : 0)) { // if future trade button isn't shown add it's width + 20 (it's x)
                 // if even the add resource button doesn't fit hide the trade city buttons so it can be shown
                 trade_city_buttons[0].parameter1 = 1;
                 trade_city_buttons[2].parameter1 = 1;
@@ -756,7 +764,7 @@ static void draw_city_info(const empire_city *city)
                 if (empire_object_city_buys_resource(city->empire_object_id, r)) {
                     int max_trade = trade_route_limit(city->route_id, r, 1);
                     int resource_width = 32 + text_get_number_width(max_trade, '\0', "", FONT_NORMAL_GREEN);
-                    if (resource_x_offset + etc_width + 500 - ((!trade_city_buttons[2].parameter1) ?
+                    if (resource_x_offset + etc_width + 640 - ((!trade_city_buttons[2].parameter1) ?
                         trade_city_buttons[2].x : 0) + resource_width + 8 + 39 >= data.panel.x_max) {
                         // if resources hit the buttons on the other side replace the resources with ...
                         text_draw(string_from_ascii("..."), resource_x_offset + 2, y_offset + 4, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
@@ -780,6 +788,13 @@ static void draw_city_info(const empire_city *city)
                 button_border_draw(data.panel.x_max - 500, data.y_max - 133, 120, 24, data.focus_top_button_id == 3);
                 lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_DRAW_TRADE_ROUTE,
                     data.panel.x_max - 500, data.y_max - 126, 120, FONT_NORMAL_GREEN);
+            }
+            if (!top_buttons[3].parameter1) {
+                // only if the hide/show route button should be drawn (not hidden due to lack of space) draw it
+                button_border_draw(data.panel.x_max - 640, data.y_max - 133, 120, 24, data.focus_top_button_id == 4);
+                int hide = 1 - empire_object_get_full(empire_city_get(data.selected_city)->empire_object_id + 1)->route_hidden;
+                lang_text_draw_centered(CUSTOM_TRANSLATION, hide ? TR_EMPIRE_HIDE_TRADE_ROUTE : TR_EMPIRE_SHOW_TRADE_ROUTE,
+                    data.panel.x_max - 640, data.y_max - 126, 120, FONT_NORMAL_GREEN);
             }
 
             if (!trade_city_buttons[0].parameter1) {
@@ -919,6 +934,7 @@ static void draw_panel_buttons(const empire_city *city)
     top_buttons[0].parameter1 = 1;
     top_buttons[1].parameter1 = 1;
     top_buttons[2].parameter1 = 1;
+    top_buttons[3].parameter1 = 1;
     order_buttons[0].parameter2 = 0;
     order_buttons[1].parameter2 = 0;
     add_resource_buttons[0].dont_draw = 1;
@@ -1094,7 +1110,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
     }
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE &&
-        generic_buttons_handle_mouse(m, data.panel.x_max - 500, data.y_max - 133, top_buttons, 3, &data.focus_top_button_id)) {
+        generic_buttons_handle_mouse(m, data.panel.x_max - 640, data.y_max - 133, top_buttons, 4, &data.focus_top_button_id)) {
         if (!top_buttons[data.focus_top_button_id - 1].parameter1) {
             return;
         }
@@ -1515,6 +1531,15 @@ static void button_empire_tools(int param1, int param2)
     }
     window_select_list_show_text((data.x_min + data.x_max) / 2 - 100, ((data.y_min + data.y_max) -
         (20 * EMPIRE_TOOL_MAX + 24)) / 2, NULL, tool_texts, EMPIRE_TOOL_MAX, set_tool);
+}
+
+static void button_hide_route(const generic_button *button)
+{
+    empire_city *city = empire_city_get(data.selected_city);
+    full_empire_object *route_obj = empire_object_get_full(city->empire_object_id + 1);
+    route_obj->route_hidden = 1 - route_obj->route_hidden;
+
+    window_request_refresh();
 }
 
 static int image_button_tooltips(tooltip_context *c)
