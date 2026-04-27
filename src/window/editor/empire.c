@@ -79,6 +79,7 @@ static void button_route_type(const generic_button *button);
 static void button_route_cost(const generic_button *button);
 static void button_empire_tools(int param1, int param2);
 static void button_hide_route(const generic_button *button);
+static void button_hide_edge(const generic_button *button);
 
 static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
@@ -134,6 +135,10 @@ static generic_button set_order_button[] = {
     {0, 27, 48, 24, 0, button_set_index}
 };
 
+static generic_button hide_edge_button[] = {
+    {0, 27, 64, 24, button_hide_edge}
+};
+
 static resource_button sell_buttons[RESOURCE_MAX] = { 0 };
 static resource_button buy_buttons[RESOURCE_MAX] = { 0 };
 
@@ -148,6 +153,7 @@ static struct {
     unsigned int focus_button_id;
     unsigned int focus_top_button_id;
     unsigned int focus_city_button_id;
+    unsigned int hide_edge_button_focused;
     int is_scrolling;
     int finished_scroll;
     int show_battle_objects;
@@ -900,6 +906,12 @@ static void draw_object_info(void)
         order_buttons[0].parameter2 = 1;
         order_buttons[1].parameter2 = 1;
         arrow_buttons_draw(data.panel.x_min, data.y_max - 160, order_buttons, 2);
+        hide_edge_button[0].x = order_buttons[1].x_offset + 28;
+        button_border_draw(hide_edge_button[0].x, data.y_max - 133, hide_edge_button[0].width, 24,
+            data.hide_edge_button_focused);
+        lang_text_draw_centered(CUSTOM_TRANSLATION, obj->image_id ? TR_EMPIRE_HIDE_EDGE : TR_EMPIRE_SHOW_EDGE,
+            hide_edge_button[0].x, data.y_max - 126, hide_edge_button[0].width, FONT_NORMAL_GREEN);
+
     }
     if (obj->type == EMPIRE_OBJECT_TRADE_WAYPOINT) {
         int width = lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_WAYPOINT_INDEX, data.panel.x_min + 28,
@@ -1099,6 +1111,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
     if (order_buttons[0].parameter2) {
         if (generic_buttons_handle_mouse(m, data.panel.x_min, data.y_max - 160, set_order_button, 1, NULL)) {
+            return;
+        }
+    }
+    if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
+        if (generic_buttons_handle_mouse(m, data.panel.x_min, data.y_max - 160, hide_edge_button, 1, &data.hide_edge_button_focused)) {
             return;
         }
     }
@@ -1538,6 +1555,18 @@ static void button_hide_route(const generic_button *button)
     empire_city *city = empire_city_get(data.selected_city);
     full_empire_object *route_obj = empire_object_get_full(city->empire_object_id + 1);
     route_obj->route_hidden = 1 - route_obj->route_hidden;
+
+    window_request_refresh();
+}
+
+static void button_hide_edge(const generic_button *button)
+{
+    int selected_id = empire_selected_object();
+    if (!selected_id) {
+        return;
+    }
+    empire_object *edge = empire_object_get(selected_id - 1);
+    edge->image_id = edge->image_id ? 0 : BASE_BORDER_FLAG_IMAGE_ID;
 
     window_request_refresh();
 }

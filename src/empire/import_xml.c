@@ -24,7 +24,6 @@
 #include <string.h>
 
 #define XML_TOTAL_ELEMENTS 19
-#define BASE_BORDER_FLAG_IMAGE_ID 3323
 #define BORDER_EDGE_DEFAULT_SPACING 50
 
 typedef enum {

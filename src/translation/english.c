@@ -2171,7 +2171,9 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_HIDE_TRADE_ROUTE, "Hide trade route"},
     {TR_PARAMETER_HIDE, "Hide"},
     {TR_EMPIRE_HIDE_TRADE_ROUTE, "Hide route"},
-    {TR_EMPIRE_SHOW_TRADE_ROUTE, "Show route"}
+    {TR_EMPIRE_SHOW_TRADE_ROUTE, "Show route"},
+    {TR_EMPIRE_HIDE_EDGE, "Hide"},
+    {TR_EMPIRE_SHOW_EDGE, "Show"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

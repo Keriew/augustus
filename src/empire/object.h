@@ -84,6 +84,8 @@ static const map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
     {  829, 720 }, { 1347, 745 }, { 1640, 922 }
 };
 
+#define BASE_BORDER_FLAG_IMAGE_ID 3323
+
 void empire_object_clear(void);
 
 int empire_object_count(void);
