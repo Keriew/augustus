@@ -617,6 +617,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_WIN_CONDITION:
         case PARAMETER_TYPE_WEATHER:
         case PARAMETER_TYPE_ROUTE_TYPE:
+        case PARAMETER_TYPE_VARIABLE_COLOR:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:

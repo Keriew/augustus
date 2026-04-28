@@ -975,3 +975,13 @@ int scenario_action_type_hide_trade_route_execute(scenario_action_t *action)
 
     return 1;
 }
+
+int scenario_action_type_change_custom_variable_color_execute(scenario_action_t *action)
+{
+    int variable_id = action->parameter1;
+    int color_id = action->parameter2;
+
+    scenario_custom_variable_set_color_group(variable_id, color_id);
+
+    return 1;
+}

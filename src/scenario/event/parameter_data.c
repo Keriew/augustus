@@ -389,6 +389,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "hide_trade_route",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_HIDE_TRADE_ROUTE},
                                         .xml_parm1 = {.name = "target_city",        .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "hide",   .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_HIDE}, },
+    [ACTION_TYPE_CHANGE_VARIABLE_COLOR] = {.type = ACTION_TYPE_CHANGE_VARIABLE_COLOR,
+                                        .xml_attr = {.name = "change_variable_color",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_VARIABLE_COLOR},
+                                        .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,    .min_limit = 0,    .max_limit = 99,    .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
+                                        .xml_parm2 = {.name = "color_group",    .type = PARAMETER_TYPE_VARIABLE_COLOR,  .key = TR_EDITOR_COLOR_LABEL}, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -966,6 +970,21 @@ static special_attribute_mapping_t special_attribute_mappings_route_type[] = {
 };
 #define SPECIAL_ATTRIBUTE_MAPPINGS_ROUTE_TYPE_SIZE (sizeof(special_attribute_mappings_route_type) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_variable_color[] = {
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "none",           .value = 0,        .key = TR_EDITOR_COLOR_NONE },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "blue",           .value = 1,        .key = TR_EDITOR_COLOR_BLUE },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "orange",         .value = 2,        .key = TR_EDITOR_COLOR_ORANGE },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "green",          .value = 3,        .key = TR_EDITOR_COLOR_GREEN },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "purple",         .value = 4,        .key = TR_EDITOR_COLOR_PURPLE },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "olive",          .value = 5,        .key = TR_EDITOR_COLOR_OLIVE },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "turquoise",      .value = 6,        .key = TR_EDITOR_COLOR_TURQUOISE },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "red",            .value = 7,        .key = TR_EDITOR_COLOR_CORAL },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "gray",           .value = 8,        .key = TR_EDITOR_COLOR_GRAY },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "black",          .value = 9,        .key = TR_EDITOR_COLOR_BLACK },
+    {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "dark_blue",      .value = 10,       .key = TR_EDITOR_COLOR_DARK_BLUE },
+};
+#define SPECIAL_ATTRIBUTE_MAPPINGS_VARIABLE_COLOR_SIZE (sizeof(special_attribute_mappings_variable_color) / sizeof(special_attribute_mapping_t))
+
 static void generate_building_type_mappings(void)
 {
     if (special_attribute_mappings_building_type_size > 0) {
@@ -1114,6 +1133,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_weather_type[index];
         case PARAMETER_TYPE_ROUTE_TYPE:
             return &special_attribute_mappings_route_type[index];
+        case PARAMETER_TYPE_VARIABLE_COLOR:
+            return &special_attribute_mappings_variable_color[index];
         default:
             return 0;
     }
@@ -1186,6 +1207,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_WEATHER_TYPE_SIZE;
         case PARAMETER_TYPE_ROUTE_TYPE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_ROUTE_TYPE_SIZE;
+        case PARAMETER_TYPE_VARIABLE_COLOR:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_VARIABLE_COLOR_SIZE;
         default:
             return 0;
     }

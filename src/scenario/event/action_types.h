@@ -98,4 +98,6 @@ int scenario_action_type_change_weather_execute(scenario_action_t *action);
 
 int scenario_action_type_hide_trade_route_execute(scenario_action_t *action);
 
+int scenario_action_type_change_custom_variable_color_execute(scenario_action_t *action);
+
 #endif // ACTION_TYPES_H

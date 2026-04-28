@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 83
+#define XML_TOTAL_ELEMENTS 84
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -148,6 +148,7 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "sea_trade_problem_duration", xml_import_create_condition, 0, "conditions|group"}, // 80
     { "move_camera", xml_import_create_action, 0, "actions"},
     { "hide_trade_route", xml_import_create_action, 0, "actions"},
+    { "change_variable_color", xml_import_create_action, 0, "actions"},
 };
 
 static int xml_import_start_scenario_events(void)
@@ -522,6 +523,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_WIN_CONDITION:
         case PARAMETER_TYPE_WEATHER:
         case PARAMETER_TYPE_ROUTE_TYPE:
+        case PARAMETER_TYPE_VARIABLE_COLOR:
             return xml_import_special_parse_type(attr, resolved_type, target);
         case PARAMETER_TYPE_ROUTE_RESOURCE:
             return xml_import_special_parse_number(attr, target);

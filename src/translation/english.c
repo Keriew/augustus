@@ -2173,7 +2173,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_HIDE_TRADE_ROUTE, "Hide route"},
     {TR_EMPIRE_SHOW_TRADE_ROUTE, "Show route"},
     {TR_EMPIRE_HIDE_EDGE, "Hide"},
-    {TR_EMPIRE_SHOW_EDGE, "Show"}
+    {TR_EMPIRE_SHOW_EDGE, "Show"},
+    {TR_ACTION_TYPE_CHANGE_VARIABLE_COLOR, "Change custom variable color"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
