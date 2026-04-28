@@ -590,6 +590,10 @@ static void get_mothball_icon_position(const building *b, int *x, int *y)
             *x += 50;
             *y -= 50;
             break;
+        case BUILDING_FORUM:
+            *x += 52;
+            *y += 30;
+            break;
         default:
             *x = (img->width - image_get(icon_id)->width) / 2;
             *y = (-image_get(icon_id)->height / 2) + 10;
@@ -939,17 +943,19 @@ static void draw_granary_stores(const image *img, const building *b, int x, int 
             y + 60 + img->animation->sprite_offset_y - img->height,
             color_mask, draw_context.scale);
     }
-    if (b->resources[RESOURCE_NONE] < FULL_GRANARY) {
+    // Less free space, fuller granary (more sprites drawn)
+    int free_space = b->resources[RESOURCE_NONE];
+    if (free_space < FULL_GRANARY) {//Stores 1-15
         image_draw(image_group(GROUP_BUILDING_GRANARY) + 2, x + 33, y - 60, color_mask, draw_context.scale);
     }
-    if (b->resources[RESOURCE_NONE] < THREEQUARTERS_GRANARY) {
+    if (free_space <= HALF_GRANARY) {//Stores 16-23
         image_draw(image_group(GROUP_BUILDING_GRANARY) + 3, x + 56, y - 50, color_mask, draw_context.scale);
     }
-    if (b->resources[RESOURCE_NONE] < HALF_GRANARY) {
-        image_draw(image_group(GROUP_BUILDING_GRANARY) + 4, x + 91, y - 50, color_mask, draw_context.scale);
+    if (free_space <= QUARTER_GRANARY) {//Stores 24-31
+        image_draw(image_group(GROUP_BUILDING_GRANARY) + 4, x + 92, y - 50, color_mask, draw_context.scale);
     }
-    if (b->resources[RESOURCE_NONE] < QUARTER_GRANARY) {
-        image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 117, y - 62, color_mask, draw_context.scale);
+    if (free_space == 0) {//if no free space, means granary looks full
+        image_draw(image_group(GROUP_BUILDING_GRANARY) + 5, x + 118, y - 61, color_mask, draw_context.scale);
     }
 }
 
