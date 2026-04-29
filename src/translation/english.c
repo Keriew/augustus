@@ -1972,7 +1972,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_POTTERY, "Pottery\nWhether the house needs pottery 0 or 1"},
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_FURNITURE, "Furniture\nWhether the house needs furniture 0 or 1"},
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_OIL, "Oil\nWhether the house needs oil 0 or 1"},
-    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_WINE, "Wine\nWhether the house needs wine 0 or 1"},
+    {TR_EDITOR_HOUSE_MODEL_EXPLANATION_WINE, "Wine\nThe number of required wine types"},
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_PROSPERITY, "Prosperity\nThe amount the house distributes to the desirability cap"},
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_MAX_PEOPLE, "Max people\nHow many people can live in that housing type"},
     {TR_EDITOR_HOUSE_MODEL_EXPLANATION_TAX_MULTIPLIER, "Tax multiplier\nA multiplier for taxes"},
@@ -2174,7 +2174,8 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_SHOW_TRADE_ROUTE, "Show route"},
     {TR_EMPIRE_HIDE_EDGE, "Hide"},
     {TR_EMPIRE_SHOW_EDGE, "Show"},
-    {TR_ACTION_TYPE_CHANGE_VARIABLE_COLOR, "Change custom variable color"}
+    {TR_ACTION_TYPE_CHANGE_VARIABLE_COLOR, "Change custom variable color"},
+    {TR_CONDITION_TYPE_MONTHS_SINCE_FESTIVAL, "Months since last festival"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

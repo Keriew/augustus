@@ -98,6 +98,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
             return scenario_condition_type_land_trade_problems_met(condition);
         case CONDITION_TYPE_SEA_TRADE_PROBLEMS:
             return scenario_condition_type_sea_trade_problems_met(condition);
+        case CONDITION_TYPE_MONTHS_SINCE_FESTIVAL:
+            return scenario_condition_type_months_since_last_festival_met(condition);
         default:
             // If we cannot figure condition type (such as with deleted conditions) then default to passed.
             return 1;

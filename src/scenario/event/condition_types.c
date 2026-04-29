@@ -4,8 +4,10 @@
 #include "building/type.h"
 #include "city/data_private.h"
 #include "city/emperor.h"
+#include "city/festival.h"
 #include "city/finance.h"
 #include "city/figures.h"
+#include "city/gods.h"
 #include "city/health.h"
 #include "city/labor.h"
 #include "city/military.h"
@@ -568,7 +570,7 @@ int scenario_condition_type_count_enemies_in_city_met(const scenario_condition_t
     int enemies_in_city = city_figures_total_invading_enemies();
     int comparison = condition->parameter1;
     int value = scenario_formula_evaluate_formula(condition->parameter2);
-    
+
     return comparison_helper_compare_values(comparison, enemies_in_city, value);
 }
 
@@ -577,7 +579,7 @@ int scenario_condition_type_land_trade_problems_met(const scenario_condition_t *
     int trade_problem_duration = city_data.trade.land_trade_problem_duration;
     int comparison = condition->parameter1;
     int value = scenario_formula_evaluate_formula(condition->parameter2);
-    
+
     return comparison_helper_compare_values(comparison, trade_problem_duration, value);
 }
 
@@ -586,6 +588,20 @@ int scenario_condition_type_sea_trade_problems_met(const scenario_condition_t *c
     int trade_problem_duration = city_data.trade.sea_trade_problem_duration;
     int comparison = condition->parameter1;
     int value = scenario_formula_evaluate_formula(condition->parameter2);
-    
+
     return comparison_helper_compare_values(comparison, trade_problem_duration, value);
+}
+
+int scenario_condition_type_months_since_last_festival_met(const scenario_condition_t *condition)
+{
+    int comparison = condition->parameter1;
+    god_type god = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
+
+    int months_since_last_festival = city_festival_months_since_last();
+    if (god != GOD_ALL) {
+        months_since_last_festival = city_god_months_since_festival(god);
+    }
+
+    return comparison_helper_compare_values(comparison, months_since_last_festival, value);
 }

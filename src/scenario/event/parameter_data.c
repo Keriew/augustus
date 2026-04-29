@@ -164,6 +164,11 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_attr = {.name = "sea_trade_problem_duration", .type = PARAMETER_TYPE_TEXT,      .key = TR_CONDITION_TYPE_SEA_TRADE_PROBLEMS},
                                         .xml_parm1 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm2 = {.name = "value",               .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
+    [CONDITION_TYPE_MONTHS_SINCE_FESTIVAL] = {.type = CONDITION_TYPE_MONTHS_SINCE_FESTIVAL,
+                                        .xml_attr = {.name = "months_since_last_festival", .type = PARAMETER_TYPE_TEXT,      .key = TR_CONDITION_TYPE_MONTHS_SINCE_FESTIVAL},
+                                        .xml_parm1 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm2 = {.name = "god",                 .type = PARAMETER_TYPE_GOD,       .key = TR_PARAMETER_TYPE_GOD},
+                                        .xml_parm3 = {.name = "formula",            .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
 };
 
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes(condition_types type)

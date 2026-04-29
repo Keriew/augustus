@@ -61,4 +61,6 @@ int scenario_condition_type_count_enemies_in_city_met(const scenario_condition_t
 int scenario_condition_type_land_trade_problems_met(const scenario_condition_t *condition);
 int scenario_condition_type_sea_trade_problems_met(const scenario_condition_t *condition);
 
+int scenario_condition_type_months_since_last_festival_met(const scenario_condition_t *condition);
+
 #endif // CONDITION_TYPES_H
