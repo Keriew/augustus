@@ -581,6 +581,14 @@ static void draw_background(void)
         data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : 0;
     color_t color_delete = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
         data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
+    if (data.did_copy_selected) {
+        graphics_fill_rect(bottom_buttons[4].x, bottom_buttons[4].y, bottom_buttons[4].width, bottom_buttons[4].height,
+            COLOR_MASK_LIGHT_OLIVE_GREEN);
+    }
+    if (data.did_copy_event) {
+        graphics_fill_rect(bottom_buttons[7].x, bottom_buttons[7].y, bottom_buttons[7].width, bottom_buttons[7].height,
+            COLOR_MASK_LIGHT_OLIVE_GREEN);
+    }
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_COPY_SELECTED,
         bottom_buttons[2].x, bottom_buttons[2].y + 6, bottom_buttons[2].width, FONT_NORMAL_PLAIN, color_copy);
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED,
@@ -694,8 +702,9 @@ static void draw_foreground(void)
             bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_EVENT && !data.did_copy_event) {
             focus = 0;
         }
-        button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
-            focus);
+
+        button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width,
+            bottom_buttons[i].height, focus);
     }
 
     grid_box_draw(&conditions_grid_box);
