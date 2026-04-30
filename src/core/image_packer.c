@@ -478,7 +478,8 @@ int image_packer_pack(image_packer *packer)
         remaining_area += data->sorted_rects[i]->input.width * data->sorted_rects[i]->input.height;
     }
 
-    unsigned long long available_area = packer->options.reduce_image_size == 1 ? data->image_width * data->image_height : 0;
+    unsigned long long available_area = packer->options.reduce_image_size == 1 ?
+        ((unsigned long long) data->image_width) * data->image_height : 0;
 
     while (remaining_area > available_area) {
         reset_empty_areas(data, data->image_width, data->image_height);
