@@ -127,6 +127,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_WT_WEATHER_DURATION] = "ui_wt_weather_duration",
     [CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_granary_do_not_allow_walkers",
     [CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_warehouse_do_not_allow_walkers",
+    [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = "ui_editor_show_deletion_warnings",
 };
 
 static const char *ini_string_keys[] = {
@@ -200,7 +201,8 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = 0,
     [CONFIG_UI_WT_SANDSTORM_SIZE] = 0,
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = 2,
-    [CONFIG_UI_WT_WEATHER_DURATION] = 1
+    [CONFIG_UI_WT_WEATHER_DURATION] = 1,
+    [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

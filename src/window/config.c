@@ -144,7 +144,7 @@ typedef struct {
     int subtype;
     translation_key description;          //  label / header text key
     const uint8_t *(*get_display_text)(void);
-    int y_offset; //  kept for compatibility 
+    int y_offset; //  kept for compatibility
     int enabled; //  runtime on/off
     int height;
     int margin_top;  //  extra spacing before (can be used instead of TYPE_SPACE)
@@ -343,6 +343,11 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_EMPIRE_CLICK_TO_DELETE, TR_CONFIG_UI_EMPIRE_CLICK_TO_DELETE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_EMPIRE_CONFIRM_DELETE, TR_CONFIG_UI_EMPIRE_CONFIRM_DELETE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_NONE}
+    },
+    // Editor
+    {
+        {TYPE_CHECKBOX, CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS, TR_CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     }
 };
@@ -552,7 +557,8 @@ static const translation_key ui_category_keys[CATEGORY_UI_COUNT] = {
     TR_CONFIG_CATEGORY_UI_BUILDING,
     TR_CONFIG_CATEGORY_UI_CITY,
     TR_CONFIG_CATEGORY_UI_WEATHER,
-    TR_CONFIG_CATEGORY_UI_EMPIRE
+    TR_CONFIG_CATEGORY_UI_EMPIRE,
+    TR_CATEGORY_UI_EDITOR,
 };
 
 static const translation_key city_mgmt_category_keys[CATEGORY_CITY_COUNT] = {
@@ -911,7 +917,7 @@ static int config_change_string_player_name(int key)
     return 1;
 }
 
-//Display text functions 
+//Display text functions
 
 static uint8_t *percent_buf(int key)
 {
@@ -1373,7 +1379,7 @@ static void button_change_user_directory(const generic_button *button)
     window_user_path_setup_show(0);
 }
 
-// Category list boxes 
+// Category list boxes
 static int page_is_category(unsigned int page)
 {
     return (page < CONFIG_PAGES) ? page_is_category_helper[page] : 0;

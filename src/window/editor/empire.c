@@ -675,8 +675,10 @@ static void draw_city_info(const empire_city *city)
 
     switch (city->type) {
         case EMPIRE_CITY_DISTANT_ROMAN:
-        case EMPIRE_CITY_VULNERABLE_ROMAN:
             lang_text_draw(47, 12, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
+            break;
+        case EMPIRE_CITY_VULNERABLE_ROMAN:
+            lang_text_draw(CUSTOM_TRANSLATION, TR_EMPIRE_VULNERABLE_CITY, x_offset + 20 + width, y_offset, FONT_NORMAL_GREEN);
             break;
         case EMPIRE_CITY_DISTANT_FOREIGN:
         case EMPIRE_CITY_FUTURE_ROMAN:

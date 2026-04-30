@@ -2175,7 +2175,10 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_HIDE_EDGE, "Hide"},
     {TR_EMPIRE_SHOW_EDGE, "Show"},
     {TR_ACTION_TYPE_CHANGE_VARIABLE_COLOR, "Change custom variable color"},
-    {TR_CONDITION_TYPE_MONTHS_SINCE_FESTIVAL, "Months since last festival"}
+    {TR_CONDITION_TYPE_MONTHS_SINCE_FESTIVAL, "Months since last festival"},
+    {TR_EMPIRE_VULNERABLE_CITY, "Vulnerable city"},
+    {TR_CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS, "Show warnings when deleting events, conditions or actions"},
+    {TR_CATEGORY_UI_EDITOR, "Editor"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

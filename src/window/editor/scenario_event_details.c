@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "core/array.h"
+#include "core/config.h"
 #include "core/lang.h"
 #include "core/log.h"
 #include "core/string.h"
@@ -141,6 +142,7 @@ static struct {
         unsigned int bottom;
     } focus_button;
     int do_not_ask_again_for_delete;
+    int do_not_ask_again_for_delete_event;
 } data;
 
 static input_box event_name_input = {
@@ -946,7 +948,7 @@ static void button_delete_selected(const generic_button *button)
         data.actions.selection_type == CHECKBOX_NO_SELECTION) {
         return;
     }
-    if (!data.do_not_ask_again_for_delete) {
+    if (!data.do_not_ask_again_for_delete && config_get(CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS)) {
         const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TITLE);
         const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TEXT);
         const uint8_t *check_text = lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_OVERWRITE_FILE_DO_NOT_ASK_AGAIN);
@@ -965,11 +967,30 @@ static void button_add_new_action(const generic_button *button)
     window_request_refresh();
 }
 
-static void button_delete_event(const generic_button *button)
+static void delete_event(int is_ok, int checked)
 {
+    if (!is_ok) {
+        return;
+    }
+    if (checked) {
+        data.do_not_ask_again_for_delete_event = 1;
+    }
     scenario_event_delete(data.event);
     stop_input();
     window_go_back();
+
+}
+static void button_delete_event(const generic_button *button)
+{
+    if (!data.do_not_ask_again_for_delete_event && config_get(CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS)) {
+        const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TITLE);
+        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TEXT);
+        const uint8_t *check_text = lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_OVERWRITE_FILE_DO_NOT_ASK_AGAIN);
+        stop_input();
+        window_popup_dialog_show_confirmation(title, text, check_text, delete_event);
+    } else {
+        delete_event(1, 1);
+    }
 }
 
 static void copy_formulas_action(scenario_action_t *action, int **params, int index)
