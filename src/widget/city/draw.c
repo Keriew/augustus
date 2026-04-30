@@ -946,21 +946,30 @@ static void draw_granary_stores(const image *img, const building *b, int x, int 
     // Less free space means more food stored (granary fills up)
     int free_space = b->resources[RESOURCE_NONE];
                                      //food = 32 - free_space;
-    if (free_space < FULL_GRANARY) { //food 1-32 (any non-empty state)
-        image_draw(image_group(GROUP_BUILDING_GRANARY) + 2,
-            x + 33, y - 60, color_mask, draw_context.scale);
+
+    if (free_space < FULL_GRANARY) { //food 1-32
+        image_draw(assets_get_image_id("Industry", "Granary_4_food"), x + 33, y - 35, color_mask, draw_context.scale);
     }
-    if (free_space <= HALF_GRANARY) { //food 16-32
-        image_draw(image_group(GROUP_BUILDING_GRANARY) + 3,
-            x + 56, y - 50, color_mask, draw_context.scale);
+    if (free_space < GRANARY_28) { //food 5-32
+        image_draw(assets_get_image_id("Industry", "Granary_8_food"), x + 33, y - 60, color_mask, draw_context.scale);
     }
-    if (free_space <= QUARTER_GRANARY) { //food 24-32
-        image_draw(image_group(GROUP_BUILDING_GRANARY) + 4,
-            x + 92, y - 50, color_mask, draw_context.scale);
+    if (free_space < THREEQUARTERS_GRANARY) { //food 9-32
+        image_draw(assets_get_image_id("Industry", "Granary_12_food"), x + 56, y - 25, color_mask, draw_context.scale);
+    }
+    if (free_space < GRANARY_20) { //food 13-32
+        image_draw(assets_get_image_id("Industry", "Granary_16_food"), x + 56, y - 50, color_mask, draw_context.scale);
+    }
+    if (free_space < HALF_GRANARY) { //food 17-32
+        image_draw(assets_get_image_id("Industry", "Granary_20_food"), x + 92, y - 27, color_mask, draw_context.scale);
+    }
+    if (free_space < GRANARY_12) { //food 21-32
+        image_draw(assets_get_image_id("Industry", "Granary_24_food"), x + 92, y - 50, color_mask, draw_context.scale);
+    }
+    if (free_space < QUARTER_GRANARY) { //food 25-32
+        image_draw(assets_get_image_id("Industry", "Granary_28_food"), x + 118, y - 37, color_mask, draw_context.scale);
     }
     if (free_space == 0) { //food 32 (completely full granary)
-        image_draw(image_group(GROUP_BUILDING_GRANARY) + 5,
-            x + 118, y - 61, color_mask, draw_context.scale);
+        image_draw(assets_get_image_id("Industry", "Granary_32_food"), x + 118, y - 61, color_mask, draw_context.scale);
     }
 }
 
