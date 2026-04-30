@@ -328,7 +328,7 @@ static int pack_rect(internal_data *data, image_packer_rect *rect, int allow_rot
     return 0;
 }
 
-static int create_last_image(image_packer *packer, unsigned int remaining_area)
+static int create_last_image(image_packer *packer, unsigned long long remaining_area)
 {
 #ifndef BUILDING_ASSET_PACKER
     SDL_Log("Creating last image for remaining area of %u pixels", remaining_area);
@@ -472,13 +472,13 @@ int image_packer_pack(image_packer *packer)
     }
     unsigned int packed_rects = 0;
     unsigned int area_used_in_last_image = 0;
-    unsigned int remaining_area = 0;
+    unsigned long long remaining_area = 0;
 
     for (unsigned int i = 0; i < data->num_rects; i++) {
         remaining_area += data->sorted_rects[i]->input.width * data->sorted_rects[i]->input.height;
     }
 
-    unsigned int available_area = packer->options.reduce_image_size == 1 ? data->image_width * data->image_height : 0;
+    unsigned long long available_area = packer->options.reduce_image_size == 1 ? data->image_width * data->image_height : 0;
 
     while (remaining_area > available_area) {
         reset_empty_areas(data, data->image_width, data->image_height);
