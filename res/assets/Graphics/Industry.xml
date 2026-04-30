@@ -887,7 +887,7 @@
 		<layer src="Warehouse_Papyrus_04" x="0" y="0"/>
 	</image>
     <!-- Note: Granary Stores Food -->
-	<image id="Granary_4_food" width="31" height="34">
+	<image id="Granary_4_food" width="22" height="34">
 		<layer group="99" image="2" y="-25"/>
 	</image>
 	<image id="Granary_8_food" width="31" height="25">
