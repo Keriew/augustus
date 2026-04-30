@@ -983,8 +983,8 @@ static void delete_event(int is_ok, int checked)
 static void button_delete_event(const generic_button *button)
 {
     if (!data.do_not_ask_again_for_delete_event && config_get(CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS)) {
-        const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TITLE);
-        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED_CONFIRM_TEXT);
+        const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TITLE);
+        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TEXT);
         const uint8_t *check_text = lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_OVERWRITE_FILE_DO_NOT_ASK_AGAIN);
         stop_input();
         window_popup_dialog_show_confirmation(title, text, check_text, delete_event);

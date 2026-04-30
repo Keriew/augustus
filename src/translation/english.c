@@ -2178,7 +2178,9 @@ static translation_string all_strings[] = {
     {TR_CONDITION_TYPE_MONTHS_SINCE_FESTIVAL, "Months since last festival"},
     {TR_EMPIRE_VULNERABLE_CITY, "Vulnerable city"},
     {TR_CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS, "Show warnings when deleting events, conditions or actions"},
-    {TR_CATEGORY_UI_EDITOR, "Editor"}
+    {TR_CATEGORY_UI_EDITOR, "Editor"},
+    {TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TITLE, "Delete event?"},
+    {TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TEXT, "Are you sure you want to delete this event?\n\nThe action is irreversible." },
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
