@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "SDL.h"
+
 typedef struct empty_area {
     unsigned int x, y;
     unsigned int width, height;
@@ -73,6 +75,9 @@ static void set_height_comparator(empty_area *area)
 static int sort_rects(image_packer *packer)
 {
     internal_data *data = packer->internal_data;
+
+    SDL_Log("Sorting %u rectangles for packing", data->num_rects);
+
     data->sorted_rects = (image_packer_rect **) malloc(data->num_rects * sizeof(image_packer_rect *));
 
     if (!data->sorted_rects) {
@@ -106,6 +111,9 @@ static int sort_rects(image_packer *packer)
         qsort(data->sorted_rects, data->num_rects, sizeof(image_packer_rect *), sort_by);
         packer->options.rects_are_sorted = 1;
     }
+
+    SDL_Log("Rectangles sorted successfully");
+
     return 1;
 }
 
@@ -120,6 +128,7 @@ static void reset_empty_areas(internal_data *data, unsigned int width, unsigned 
     data->empty_areas.last = &data->empty_areas.list[0];
     data->empty_areas.first->width = width;
     data->empty_areas.first->height = height;
+    SDL_Log("Empty areas reset to %ux%u", width, height);
 }
 
 static void sort_empty_area(internal_data *data, empty_area *area, empty_area *current)
@@ -317,6 +326,9 @@ static int pack_rect(internal_data *data, image_packer_rect *rect, int allow_rot
 
 static int create_last_image(image_packer *packer, unsigned int remaining_area)
 {
+
+    SDL_Log("Creating last image for remaining area of %u pixels", remaining_area);
+
     internal_data *data = packer->internal_data;
 
     double image_ratio = data->image_width / (double) data->image_height;
@@ -333,6 +345,9 @@ static int create_last_image(image_packer *packer, unsigned int remaining_area)
     while (must_increase_size) {
         packer->result.last_image_width += width_increase_step;
         packer->result.last_image_height += height_increase_step;
+
+        SDL_Log("Trying to pack remaining area of %u pixels in an image of size %ux%u",
+            remaining_area, packer->result.last_image_width, packer->result.last_image_height);
 
         if (packer->result.last_image_width > data->image_width) {
             packer->result.last_image_width = data->image_width;
@@ -374,6 +389,12 @@ static int create_last_image(image_packer *packer, unsigned int remaining_area)
             must_increase_size = 0;
         } else if (packer->result.last_image_width == data->image_width &&
               packer->result.last_image_height == data->image_height) {
+
+            SDL_Log("Could not pack remaining area of %u pixels even with max image size of %ux%u",
+                remaining_area, data->image_width, data->image_height);
+            SDL_Log("Packed %u out of %u remaining pixels in the last image", area_packed_in_loop, remaining_area);
+            SDL_Log("Total images packed in last image: %u", images_packed_in_loop);
+            SDL_Log("Total images packed so far: %u", total_images_packed);
             packer->result.images_needed++;
             total_images_packed += images_packed_in_loop;
             remaining_area -= area_packed_in_loop;
@@ -400,6 +421,8 @@ int image_packer_init(image_packer *packer, unsigned int num_rectangles, unsigne
 
     memset(packer->internal_data, 0, sizeof(internal_data));
 
+    SDL_Log("Initializing image packer with %u rectangles and max image size of %ux%u", num_rectangles, width, height);
+
     packer->rects = (image_packer_rect *) malloc(sizeof(image_packer_rect) * num_rectangles);
     if (!packer->rects) {
         return IMAGE_PACKER_ERROR_NO_MEMORY;
@@ -416,6 +439,8 @@ int image_packer_init(image_packer *packer, unsigned int num_rectangles, unsigne
         return IMAGE_PACKER_ERROR_NO_MEMORY;
     }
     data->empty_areas.size = size;
+
+    SDL_Log("Image packer initialized successfully");
 
     return IMAGE_PACKER_OK;
 }
@@ -454,6 +479,9 @@ int image_packer_pack(image_packer *packer)
         reset_empty_areas(data, data->image_width, data->image_height);
 
         area_used_in_last_image = 0;
+
+        SDL_Log("Starting packing loop with %u rectangles left to pack and remaining area of %u pixels",
+            data->num_rects, remaining_area);
 
         for (unsigned int i = 0; i < data->num_rects; i++) {
             image_packer_rect *rect = data->sorted_rects[i];
@@ -495,6 +523,9 @@ int image_packer_pack(image_packer *packer)
     if (packer->options.reduce_image_size == 1) {
         packed_rects += create_last_image(packer, remaining_area);
     }
+
+    SDL_Log("Packing completed with %u images needed and last image size of %ux%u",
+        packer->result.images_needed, packer->result.last_image_width, packer->result.last_image_height);
 
     return packed_rects;
 }
