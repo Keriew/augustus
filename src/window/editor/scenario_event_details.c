@@ -63,7 +63,9 @@ enum {
 enum {
     DO_NOT_DISABLE = 0,
     DISABLE_ON_NO_REPEAT = 1,
-    DISABLE_ON_NO_SELECTION = 2
+    DISABLE_ON_NO_SELECTION = 2,
+    DISABLE_ON_NO_COPY_SELECTED = 3,
+    DISABLE_ON_NO_COPY_EVENT = 4,
 };
 
 enum {
@@ -205,10 +207,10 @@ static generic_button bottom_buttons[] = {
     {432, 379, 192, 25, button_add_new_action},
     {16, 409, 192, 25, button_copy_selected, 0, 0, DISABLE_ON_NO_SELECTION},
     {224, 409, 192, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
-    {432, 409, 192, 25, button_paste_selected},
+    {432, 409, 192, 25, button_paste_selected, 0, 0, DISABLE_ON_NO_COPY_SELECTED},
     {16, 439, 192, 25, button_delete_event},
     {224, 439, 134, 25, button_copy_event},
-    {374, 439, 134, 25, button_paste_event},
+    {374, 439, 134, 25, button_paste_event, 0, 0, DISABLE_ON_NO_COPY_EVENT},
     {524, 439, 100, 25, button_ok},
 };
 
@@ -573,6 +575,8 @@ static void draw_background(void)
 
     // Selected operation buttons
     color_t color_paste = data.did_copy_selected ? 0 : COLOR_FONT_LIGHT_GRAY;
+    color_t color_paste_event = data.did_copy_event ? 0 : COLOR_FONT_LIGHT_GRAY;
+    font_t font_paste_event = data.did_copy_event ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN;
     color_t color_copy = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
         data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : 0;
     color_t color_delete = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
@@ -589,8 +593,8 @@ static void draw_background(void)
         bottom_buttons[5].width, FONT_NORMAL_PLAIN, COLOR_RED);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COPY, bottom_buttons[6].x, bottom_buttons[6].y + 6,
         bottom_buttons[6].width, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PASTE, bottom_buttons[7].x, bottom_buttons[7].y + 6,
-        bottom_buttons[7].width, FONT_NORMAL_BLACK);
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_PASTE, bottom_buttons[7].x, bottom_buttons[7].y + 6,
+        bottom_buttons[7].width, font_paste_event, color_paste_event);
     lang_text_draw_centered(18, 3, bottom_buttons[8].x, bottom_buttons[8].y + 6, bottom_buttons[8].width,
         FONT_NORMAL_BLACK);
 
@@ -685,7 +689,9 @@ static void draw_foreground(void)
         int focus = data.focus_button.bottom == i + 1;
         if (bottom_buttons[i].parameter2 == DISABLE_ON_NO_SELECTION &&
             data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
-            data.actions.selection_type == CHECKBOX_NO_SELECTION) {
+            data.actions.selection_type == CHECKBOX_NO_SELECTION ||
+            bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_SELECTED && !data.did_copy_selected ||
+            bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_EVENT && !data.did_copy_event) {
             focus = 0;
         }
         button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
@@ -1174,6 +1180,9 @@ static void button_copy_event(const generic_button *button)
         }
     }
     data.did_copy_event = 1;
+
+    // refresh needed to draw text in the right color
+    window_request_refresh();
 }
 
 static void button_paste_event(const generic_button *button)

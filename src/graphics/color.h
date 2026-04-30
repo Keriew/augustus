@@ -28,6 +28,7 @@ typedef uint32_t color_t;
 #define COLOR_FONT_GRAY 0xff888888
 #define COLOR_FONT_PLAIN 0xff180800
 #define COLOR_FONT_GREEN 0xff00cc00
+#define COLOR_FONT_DARK_GREEN 0xff008800
 
 #define COLOR_INSET_LIGHT 0xffffffff
 #define COLOR_INSET_DARK 0xff848484
@@ -60,14 +61,14 @@ typedef uint32_t color_t;
 #define COLOR_MASK_BUILDING_GHOST_RED 0xa7ff8878
 
 #define COLOR_MASK_ORANGE_GOLD 0x66ffcc33
-#define COLOR_MASK_AMBER 0x66ffb300  
-#define COLOR_MASK_DIMMED_RED 0x66ff4444 
-#define COLOR_MASK_LIME_GREEN 0x6600ff00 
-#define COLOR_MASK_COBALT_BLUE 0x660066ff  
-#define COLOR_MASK_TEAL 0x6600ffff  
-#define COLOR_MASK_DIMMED_PURPLE 0x669933cc  
-#define COLOR_MASK_SOFT_WHITE 0x66ffffff  
-#define COLOR_MASK_IMPERIAL_RED 0x66a00000  
+#define COLOR_MASK_AMBER 0x66ffb300
+#define COLOR_MASK_DIMMED_RED 0x66ff4444
+#define COLOR_MASK_LIME_GREEN 0x6600ff00
+#define COLOR_MASK_COBALT_BLUE 0x660066ff
+#define COLOR_MASK_TEAL 0x6600ffff
+#define COLOR_MASK_DIMMED_PURPLE 0x669933cc
+#define COLOR_MASK_SOFT_WHITE 0x66ffffff
+#define COLOR_MASK_IMPERIAL_RED 0x66a00000
 #define COLOR_MASK_OLIVE_GREEN 0x663a5f00
 
 #define COLOR_MASK_TYRIAN_PURPLE 0xff66023C
@@ -98,7 +99,7 @@ typedef uint32_t color_t;
 #define COLOR_MASK_PASTEL_TURQUOISE   0xffa9e5dc  // cool aqua pastel
 #define COLOR_MASK_PASTEL_CORAL       0xfff7a89e  // light coral
 #define COLOR_MASK_PASTEL_GRAY        0xffc0c0c0  // balanced neutral gray
-#define COLOR_MASK_PASTEL_BLACK       0xff3a3a3a  // soft black 
+#define COLOR_MASK_PASTEL_BLACK       0xff3a3a3a  // soft black
 #define COLOR_MASK_PASTEL_DARK_BLUE   0xff6d87b8  // desaturated navy blue
 
 #define COLOR_MOUSE_DARK_GRAY 0xff3f3f3f
