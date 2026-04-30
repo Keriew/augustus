@@ -969,7 +969,7 @@ static void draw_granary_stores(const image *img, const building *b, int x, int 
         image_draw(assets_get_image_id("Industry", "Granary_28_food"), x + 118, y - 37, color_mask, draw_context.scale);
     }
     if (free_space == 0) { //food 32 (completely full granary)
-        image_draw(assets_get_image_id("Industry", "Granary_32_food"), x + 118, y - 61, color_mask, draw_context.scale);
+        image_draw(assets_get_image_id("Industry", "Granary_32_food"), x + 119, y - 60, color_mask, draw_context.scale);
     }
 }
 
