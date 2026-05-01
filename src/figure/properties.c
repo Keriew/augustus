@@ -486,7 +486,11 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
     .max_damage = 100, .attack_value = 0, .defense_value = 0,
     .missile_defense_value = 0, .missile_attack_value = 200, .missile_delay = 0
     },
-
+    [FIGURE_PLEBIAN] = {
+    .category = FIGURE_CATEGORY_CITIZEN,
+    .max_damage = 10, .attack_value = 0, .defense_value = 0,
+    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+    },
 };
 
 const figure_properties *figure_properties_for_type(figure_type type)

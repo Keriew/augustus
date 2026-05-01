@@ -2074,6 +2074,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_PRICE_CHANGES, "price changes"},
     {TR_EDITOR_DEMAND_CHANGE, "demand change"},
     {TR_EDITOR_DEMAND_CHANGES, "demand changes"},
+    {TR_FIGURE_TYPE_PLEBIAN, "Plebeian"},
+    {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, "Houses do not spawn aimless wandering plebeians"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
