@@ -695,11 +695,11 @@ static void draw_foreground(void)
 
     for (unsigned int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
         int focus = data.focus_button.bottom == i + 1;
-        if (bottom_buttons[i].parameter2 == DISABLE_ON_NO_SELECTION &&
+        if ((bottom_buttons[i].parameter2 == DISABLE_ON_NO_SELECTION &&
             data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
-            data.actions.selection_type == CHECKBOX_NO_SELECTION ||
-            bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_SELECTED && !data.did_copy_selected ||
-            bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_EVENT && !data.did_copy_event) {
+            data.actions.selection_type == CHECKBOX_NO_SELECTION) ||
+            (bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_SELECTED && !data.did_copy_selected) ||
+            (bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_EVENT && !data.did_copy_event)) {
             focus = 0;
         }
 

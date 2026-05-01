@@ -63,4 +63,6 @@ int scenario_condition_type_sea_trade_problems_met(const scenario_condition_t *c
 
 int scenario_condition_type_months_since_last_festival_met(const scenario_condition_t *condition);
 
+int scenario_condition_type_desirability_in_area_met(const scenario_condition_t *condition);
+
 #endif // CONDITION_TYPES_H

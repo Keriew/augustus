@@ -18,6 +18,7 @@
 #include "empire/trade_route.h"
 #include "game/settings.h"
 #include "game/time.h"
+#include "map/desirability.h"
 #include "map/grid.h"
 #include "map/property.h"
 #include "map/terrain.h"
@@ -604,4 +605,23 @@ int scenario_condition_type_months_since_last_festival_met(const scenario_condit
     }
 
     return comparison_helper_compare_values(comparison, months_since_last_festival, value);
+}
+
+int scenario_condition_type_desirability_in_area_met(const scenario_condition_t *condition)
+{
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
+    int comparison = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter4);
+
+    int desirability_sum = 0;
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        desirability_sum += map_desirability_get(grid_offset);
+
+    }
+    int desirability_mean = desirability_sum / slice->size;
+
+    return comparison_helper_compare_values(comparison, desirability_mean, value);
 }
