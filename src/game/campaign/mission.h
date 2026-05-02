@@ -21,7 +21,7 @@ campaign_mission *campaign_mission_new(void);
 campaign_mission *campaign_mission_current(int index);
 campaign_mission *campaign_mission_next(int last_index);
 campaign_scenario *campaign_mission_new_scenario(void);
-campaign_scenario *campaign_mission_get_scenario(int scenario_id);
+campaign_scenario *campaign_mission_get_scenario(unsigned int scenario_id);
 
 int campaign_mission_init(void);
 void campaign_mission_clear(void);

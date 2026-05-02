@@ -5,6 +5,7 @@ int scenario_editor_earthquake_severity(void);
 void scenario_editor_earthquake_cycle_severity(void);
 int scenario_editor_earthquake_year(void);
 void scenario_editor_earthquake_set_year(int year);
+void scenario_editor_earthquake_set_pattern(int pattern);
 
 int scenario_editor_gladiator_revolt_enabled(void);
 int scenario_editor_gladiator_revolt_year(void);

@@ -11,6 +11,7 @@
 #include "city/view.h"
 #include "core/image.h"
 #include "core/image_group_editor.h"
+#include "empire/editor.h"
 #include "empire/empire.h"
 #include "empire/object.h"
 #include "figure/enemy_army.h"
@@ -51,6 +52,7 @@
 #include "scenario/property.h"
 #include "sound/city.h"
 #include "sound/music.h"
+#include "widget/map_editor.h"
 
 void game_file_editor_clear_data(void)
 {
@@ -119,6 +121,7 @@ static void prepare_map_for_editing(void)
     int empire_id = scenario_empire_id();
     empire_load(1, empire_id);
     empire_object_init_cities(empire_id);
+    empire_editor_init(0);
 
     figure_init_scenario();
     figure_create_editor_flags();
@@ -130,11 +133,13 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_rocks();
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
+    map_tiles_update_all_rubble();
     map_tiles_update_all_roads();
     map_tiles_update_all_highways();
     map_tiles_update_all_plazas();
     map_tiles_update_all_walls();
     map_tiles_update_all_aqueducts(0);
+    widget_map_editor_custom_earthquake_request_refresh();
     map_natives_init_editor();
     map_routing_update_all();
 
@@ -155,6 +160,7 @@ void game_file_editor_create_scenario(int size)
 int game_file_editor_load_scenario(const char *scenario_file)
 {
     clear_map_data();
+    building_clear_all();
     if (!game_file_io_read_scenario(scenario_file)) {
         return 0;
     }

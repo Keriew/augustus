@@ -85,6 +85,8 @@ static void perform_blessing(god_type god)
             city_population_venus_blessing();
             city_data.religion.venus_blessing_months_left = VENUS_BLESSING_MONTHS;
             break;
+        default:
+            break;
     }
 }
 
@@ -96,9 +98,15 @@ static void perform_small_curse(god_type god)
             building_curse_farms(0);
             break;
         case GOD_NEPTUNE:
-            city_message_post(1, MESSAGE_NEPTUNE_IS_UPSET, 0, 0);
-            figure_sink_all_ships();
-            city_data.religion.neptune_sank_ships = 1;
+            if (city_data.trade.num_sea_routes <= 0 && building_count_active(BUILDING_SHIPYARD) <= 0 && building_count_active(BUILDING_WHARF) <= 0) {
+                city_message_post(1, MESSAGE_WRATH_OF_NEPTUNE_NO_SEA_TRADE, 0, 0);
+                break;
+            } else {
+                city_message_post(1, MESSAGE_WRATH_OF_NEPTUNE, 0, 0);
+                figure_sink_half_ships();
+                city_data.religion.neptune_sank_ships = 1;
+                city_trade_start_sea_trade_problems(40);
+            }
             break;
         case GOD_MERCURY:
             city_message_post(1, MESSAGE_MERCURY_IS_UPSET, 0, 0);
@@ -117,6 +125,8 @@ static void perform_small_curse(god_type god)
             city_health_change(-10);
             city_sentiment_update();
             break;
+        default:
+            break;
     }
 }
 
@@ -128,7 +138,7 @@ static int perform_large_curse(god_type god)
             building_curse_farms(1);
             break;
         case GOD_NEPTUNE:
-            if (city_data.trade.num_sea_routes <= 0) {
+            if (city_data.trade.num_sea_routes <= 0 && building_count_active(BUILDING_SHIPYARD) <= 0 && building_count_active(BUILDING_WHARF) <= 0) {
                 city_message_post(1, MESSAGE_WRATH_OF_NEPTUNE_NO_SEA_TRADE, 0, 0);
                 return 0;
             } else {
@@ -148,6 +158,7 @@ static int perform_large_curse(god_type god)
                 scenario_invasion_start_from_mars();
             } else {
                 city_message_post(1, MESSAGE_WRATH_OF_MARS_NO_MILITARY, 0, 0);
+                scenario_invasion_start_from_mars();
             }
             break;
         case GOD_VENUS:
@@ -163,6 +174,8 @@ static int perform_large_curse(god_type god)
             }
             city_data.religion.venus_curse_active = 1;
             city_sentiment_update();
+            break;
+        default:
             break;
     }
     return 1;
@@ -299,19 +312,19 @@ void city_gods_calculate_moods(int update_moods)
         int num_temples = 0;
         switch (i) {
             case GOD_CERES:
-                num_temples = building_count_total(BUILDING_SMALL_TEMPLE_CERES) + building_count_total(BUILDING_LARGE_TEMPLE_CERES) + building_count_total(BUILDING_GRAND_TEMPLE_CERES);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_CERES) + building_count_active(BUILDING_LARGE_TEMPLE_CERES) + building_count_active(BUILDING_GRAND_TEMPLE_CERES);
                 break;
             case GOD_NEPTUNE:
-                num_temples = building_count_total(BUILDING_SMALL_TEMPLE_NEPTUNE) + building_count_total(BUILDING_LARGE_TEMPLE_NEPTUNE) + building_count_total(BUILDING_GRAND_TEMPLE_NEPTUNE);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_NEPTUNE) + building_count_active(BUILDING_LARGE_TEMPLE_NEPTUNE) + building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE);
                 break;
             case GOD_MERCURY:
-                num_temples = building_count_total(BUILDING_SMALL_TEMPLE_MERCURY) + building_count_total(BUILDING_LARGE_TEMPLE_MERCURY) + building_count_total(BUILDING_GRAND_TEMPLE_MERCURY);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_MERCURY) + building_count_active(BUILDING_LARGE_TEMPLE_MERCURY) + building_count_active(BUILDING_GRAND_TEMPLE_MERCURY);
                 break;
             case GOD_MARS:
-                num_temples = building_count_total(BUILDING_SMALL_TEMPLE_MARS) + building_count_total(BUILDING_LARGE_TEMPLE_MARS) + building_count_total(BUILDING_GRAND_TEMPLE_MARS);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_MARS) + building_count_active(BUILDING_LARGE_TEMPLE_MARS) + building_count_active(BUILDING_GRAND_TEMPLE_MARS);
                 break;
             case GOD_VENUS:
-                num_temples = building_count_total(BUILDING_SMALL_TEMPLE_VENUS) + building_count_total(BUILDING_LARGE_TEMPLE_VENUS) + building_count_total(BUILDING_GRAND_TEMPLE_VENUS);
+                num_temples = building_count_active(BUILDING_SMALL_TEMPLE_VENUS) + building_count_active(BUILDING_LARGE_TEMPLE_VENUS) + building_count_active(BUILDING_GRAND_TEMPLE_VENUS);
                 break;
         }
         if (num_temples == max_temples) {
@@ -396,6 +409,32 @@ int city_gods_calculate_least_happy(void)
     return max_god > 0;
 }
 
+void city_god_change_happiness(int god_id, int amount)
+{
+    if (god_id < 0) {
+        return;
+    } else if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            city_data.religion.gods[i].happiness = calc_bound(amount + city_data.religion.gods[i].happiness, 0, 100);
+        }
+    } else {
+        city_data.religion.gods[god_id].happiness = calc_bound(amount + city_data.religion.gods[god_id].happiness, 0, 100);
+    }
+}
+
+void city_god_set_happiness(int god_id, int amount_set)
+{
+    if (god_id < 0) {
+        return;
+    } else if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            city_data.religion.gods[i].happiness = calc_bound(amount_set, 0, 100);
+        }
+    } else {
+        city_data.religion.gods[god_id].happiness = calc_bound(amount_set, 0, 100);
+    }
+}
+
 int city_god_happiness(int god_id)
 {
     return city_data.religion.gods[god_id].happiness;
@@ -452,14 +491,31 @@ int city_god_venus_bonus_employment(void)
 
 void city_god_blessing(int god_id)
 {
-    perform_blessing(god_id);
+    if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            perform_blessing(i);
+        }
+    } else {
+        perform_blessing(god_id);
+    }
+
 }
 
 void city_god_curse(int god_id, int is_major)
 {
-    if (is_major) {
-        perform_large_curse(god_id);
+    if (god_id == GOD_ALL) {
+        for (int i = 0; i < MAX_GODS; i++) {
+            if (is_major) {
+                perform_large_curse(i);
+            } else {
+                perform_small_curse(i);
+            }
+        }
     } else {
-        perform_small_curse(god_id);
+        if (is_major) {
+            perform_large_curse(god_id);
+        } else {
+            perform_small_curse(god_id);
+        }
     }
 }

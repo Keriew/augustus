@@ -2,7 +2,6 @@
 
 #include "assets/assets.h"
 #include "building/image.h"
-#include "building/model.h"
 #include "building/properties.h"
 #include "city/finance.h"
 #include "city/message.h"
@@ -180,7 +179,7 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
 
 typedef struct {
     int walker_id;
-    int destination_id;
+    unsigned int destination_id;
     int resource;
     int cartloads;
 } monument_delivery;
@@ -274,6 +273,26 @@ int building_monument_add_module(building *b, int module)
     b->monument.upgrades = module;
     map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
     return 1;
+}
+
+int building_monument_is_limited(building_type type)
+{
+    switch (type) {
+        case BUILDING_GRAND_TEMPLE_CERES:
+        case BUILDING_GRAND_TEMPLE_NEPTUNE:
+        case BUILDING_GRAND_TEMPLE_MERCURY:
+        case BUILDING_GRAND_TEMPLE_MARS:
+        case BUILDING_GRAND_TEMPLE_VENUS:
+        case BUILDING_PANTHEON:
+        case BUILDING_LIGHTHOUSE:
+        case BUILDING_CARAVANSERAI:
+        case BUILDING_COLOSSEUM:
+        case BUILDING_HIPPODROME:
+        case BUILDING_CITY_MINT:
+            return 1;
+        default:
+            return 0;
+    }
 }
 
 int building_monument_get_monument(int x, int y, int resource, int road_network_id, map_point *dst)
@@ -500,7 +519,7 @@ void building_monument_initialize_deliveries(void)
     }
 }
 
-void building_monument_add_delivery(int monument_id, int figure_id, int resource_id, int num_loads)
+void building_monument_add_delivery(unsigned int monument_id, int figure_id, int resource_id, int num_loads)
 {
     monument_delivery *delivery;
     array_new_item(monument_deliveries, delivery);
@@ -536,7 +555,7 @@ void building_monument_remove_delivery(int figure_id)
     array_trim(monument_deliveries);
 }
 
-void building_monument_remove_all_deliveries(int monument_id)
+void building_monument_remove_all_deliveries(unsigned int monument_id)
 {
     monument_delivery *delivery;
     array_foreach(monument_deliveries, delivery) {
@@ -547,7 +566,7 @@ void building_monument_remove_all_deliveries(int monument_id)
     array_trim(monument_deliveries);
 }
 
-static int resource_in_delivery(int monument_id, int resource_id)
+static int resource_in_delivery(unsigned int monument_id, int resource_id)
 {
     int resources = 0;
     monument_delivery *delivery;
@@ -632,7 +651,7 @@ int building_monument_has_labour_problems(building *b)
 
 int building_monument_working(building_type type)
 {
-    int monument_id = building_monument_get_id(type);
+    unsigned int monument_id = building_monument_get_id(type);
     building *b = building_get(monument_id);
     if (!monument_id) {
         return 0;
@@ -675,7 +694,7 @@ int building_monument_has_required_resources_to_build(building_type type)
 
 int building_monument_upgraded(building_type type)
 {
-    int monument_id = building_monument_working(type);
+    unsigned int monument_id = building_monument_working(type);
     building *b = building_get(monument_id);
     if (!monument_id) {
         return 0;
@@ -688,7 +707,7 @@ int building_monument_upgraded(building_type type)
 
 int building_monument_module_type(building_type type)
 {
-    int monument_id = building_monument_working(type);
+    unsigned int monument_id = building_monument_working(type);
 
     if (!monument_id) {
         return 0;

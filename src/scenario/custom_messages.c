@@ -114,19 +114,23 @@ int custom_messages_count(void)
 void custom_messages_save_state(buffer *buf)
 {
     uint32_t array_size = custom_messages.size;
-    uint32_t struct_size = (4 * sizeof(int32_t));
+    uint32_t struct_size = (4 * sizeof(uint32_t));
     buffer_init_dynamic_array(buf, array_size, struct_size);
 
     custom_message_t *entry;
     array_foreach(custom_messages, entry) {
-        int linked_uid = entry && entry->linked_uid && entry->linked_uid->in_use ? entry->linked_uid->id : -1;
-        buffer_write_i32(buf, linked_uid);
-        int title_id = entry && entry->title && entry->title->in_use ? entry->title->id : -1;
-        buffer_write_i32(buf, title_id);
-        int subtitle_id = entry && entry->subtitle && entry->subtitle->in_use ? entry->subtitle->id : -1;
-        buffer_write_i32(buf, subtitle_id);
-        int text_id = entry && entry->display_text && entry->display_text->in_use ? entry->display_text->id : -1;
-        buffer_write_i32(buf, text_id);
+        uint32_t linked_uid = entry && entry->linked_uid &&
+            entry->linked_uid->in_use ? (uint32_t) entry->linked_uid->id : (uint32_t) -1;
+        buffer_write_u32(buf, linked_uid);
+        uint32_t title_id = entry && entry->title &&
+            entry->title->in_use ? (uint32_t) entry->title->id : (uint32_t) -1;
+        buffer_write_u32(buf, title_id);
+        uint32_t subtitle_id = entry && entry->subtitle &&
+            entry->subtitle->in_use ? (uint32_t) entry->subtitle->id : (uint32_t) -1;
+        buffer_write_u32(buf, subtitle_id);
+        uint32_t text_id = entry && entry->display_text &&
+            entry->display_text->in_use ? (uint32_t) entry->display_text->id : (uint32_t) -1;
+        buffer_write_u32(buf, text_id);
     }
 }
 
@@ -157,31 +161,31 @@ static void link_media(custom_media_t *media, custom_media_link_type link_type, 
 
 void custom_messages_load_state(buffer *messages_buffer, buffer *media_buffer)
 {
-    unsigned int array_size = buffer_load_dynamic_array(messages_buffer);
+    size_t array_size = buffer_load_dynamic_array(messages_buffer);
 
     // Entry 0 is kept empty.
-    buffer_skip(messages_buffer, (4 * sizeof(int32_t)));
+    buffer_skip(messages_buffer, (4 * sizeof(uint32_t)));
     // Expects the media text blob to be loaded already.
-    for (unsigned int i = 1; i < array_size; i++) {
+    for (size_t i = 1; i < array_size; i++) {
         custom_message_t *entry = custom_messages_create_blank();
 
-        int linked_text_blob_id = buffer_read_i32(messages_buffer);
+        uint32_t linked_text_blob_id = buffer_read_u32(messages_buffer);
         entry->linked_uid = message_media_text_blob_get_entry(linked_text_blob_id);
 
-        linked_text_blob_id = buffer_read_i32(messages_buffer);
+        linked_text_blob_id = buffer_read_u32(messages_buffer);
         entry->title = message_media_text_blob_get_entry(linked_text_blob_id);
 
-        linked_text_blob_id = buffer_read_i32(messages_buffer);
+        linked_text_blob_id = buffer_read_u32(messages_buffer);
         entry->subtitle = message_media_text_blob_get_entry(linked_text_blob_id);
 
-        linked_text_blob_id = buffer_read_i32(messages_buffer);
+        linked_text_blob_id = buffer_read_u32(messages_buffer);
         entry->display_text = message_media_text_blob_get_entry(linked_text_blob_id);
     }
 
     array_size = buffer_load_dynamic_array(media_buffer);
 
     // Entry 0 is kept empty.
-    buffer_skip(media_buffer, (4 * sizeof(int32_t)) + (1 * sizeof(int16_t)));
+    buffer_skip(media_buffer, (4 * sizeof(uint32_t)) + (1 * sizeof(int16_t)));
     custom_media_link_type link_type = 0;
     int link_id = 0;
     for (unsigned int i = 1; i < array_size; i++) {
@@ -311,7 +315,7 @@ const uint8_t *custom_messages_get_background_image(custom_message_t *message)
     }
 }
 
-int custom_messages_relink_text_blob(int text_id, text_blob_string_t *new_text_link)
+int custom_messages_relink_text_blob(size_t text_id, text_blob_string_t *new_text_link)
 {
     custom_message_t *entry;
     array_foreach(custom_messages, entry) {

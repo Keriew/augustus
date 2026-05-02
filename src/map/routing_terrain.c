@@ -49,6 +49,14 @@ static int get_land_type_citizen_building(int grid_offset)
         case BUILDING_ROADBLOCK:
             type = CITIZEN_0_ROAD;
             break;
+        case BUILDING_ROOFED_GARDEN_WALL:
+        case BUILDING_LOOPED_GARDEN_WALL:
+        case BUILDING_PANELLED_GARDEN_WALL:
+        case BUILDING_HEDGE_DARK:
+        case BUILDING_HEDGE_LIGHT:
+            // case BUILDING_COLONNADE: // can be enabled if we add a gate variant
+            type = GATE_0_TRANSFORMABLE;
+            break;
         case BUILDING_FORT_GROUND:
             type = CITIZEN_2_PASSABLE_TERRAIN;
             break;
@@ -112,7 +120,9 @@ void map_routing_update_land_citizen(void)
                 terrain_land_citizen.items[grid_offset] = CITIZEN_1_HIGHWAY;
             } else if (terrain & (TERRAIN_RUBBLE | TERRAIN_ACCESS_RAMP | TERRAIN_GARDEN)) {
                 terrain_land_citizen.items[grid_offset] = CITIZEN_2_PASSABLE_TERRAIN;
-            } else if (terrain & (TERRAIN_BUILDING | TERRAIN_GATEHOUSE)) {
+            } else if (terrain & TERRAIN_AQUEDUCT) {
+                terrain_land_citizen.items[grid_offset] = get_land_type_citizen_aqueduct(grid_offset);
+            }  else if (terrain & (TERRAIN_BUILDING | TERRAIN_GATEHOUSE)) {
                 if (!map_building_at(grid_offset)) {
                     // shouldn't happen
                     terrain_land_noncitizen.items[grid_offset] = CITIZEN_4_CLEAR_TERRAIN; // BUG: should be citizen?
@@ -123,9 +133,7 @@ void map_routing_update_land_citizen(void)
                     continue;
                 }
                 terrain_land_citizen.items[grid_offset] = get_land_type_citizen_building(grid_offset);
-            } else if (terrain & TERRAIN_AQUEDUCT) {
-                terrain_land_citizen.items[grid_offset] = get_land_type_citizen_aqueduct(grid_offset);
-            } else if (terrain & TERRAIN_NOT_CLEAR) {
+            }else if (terrain & TERRAIN_NOT_CLEAR) {
                 terrain_land_citizen.items[grid_offset] = CITIZEN_N1_BLOCKED;
             } else {
                 terrain_land_citizen.items[grid_offset] = CITIZEN_4_CLEAR_TERRAIN;
@@ -139,7 +147,7 @@ static int get_land_type_noncitizen(int grid_offset)
     int type = NONCITIZEN_1_BUILDING;
     switch (building_get(map_building_at(grid_offset))->type) {
         default:
-            return NONCITIZEN_1_BUILDING;
+            return NONCITIZEN_1_BUILDING; //add wall here
         case BUILDING_WAREHOUSE:
         case BUILDING_FORT_GROUND:
             type = NONCITIZEN_0_PASSABLE;
@@ -151,14 +159,18 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_DECORATION:
         case BUILDING_NATIVE_MONUMENT:
-        case BUILDING_WATCHTOWER:
+        case BUILDING_NATIVE_WATCHTOWER:
             type = NONCITIZEN_N1_BLOCKED;
             break;
-        case BUILDING_FORT:
+        case BUILDING_FORT_ARCHERS:
+        case BUILDING_FORT_LEGIONARIES:
+        case BUILDING_FORT_JAVELIN:
+        case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
             type = NONCITIZEN_5_FORT;
             break;
         case BUILDING_GRANARY:
-            switch (map_property_multi_tile_xy(grid_offset)) {
+            switch (map_property_multi_tile_xy(grid_offset)) { //granary cross allways passable
                 case EDGE_X1Y0:
                 case EDGE_X0Y1:
                 case EDGE_X1Y1:
@@ -178,6 +190,17 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_LOW_BRIDGE:
             type = NONCITIZEN_0_PASSABLE;
             break;
+        case BUILDING_ROOFED_GARDEN_WALL:
+        case BUILDING_LOOPED_GARDEN_WALL:
+        case BUILDING_PANELLED_GARDEN_WALL:
+        case BUILDING_HEDGE_DARK:
+        case BUILDING_HEDGE_LIGHT:
+            // case BUILDING_COLONNADE: // can be enabled if we add a gate variant
+            type = GATE_0_TRANSFORMABLE;
+            break;
+        case BUILDING_WALL:
+            type = NONCITIZEN_3_WALL;
+            break;
     }
     return type;
 }
@@ -191,6 +214,8 @@ static void map_routing_update_land_noncitizen(void)
             int terrain = map_terrain_get(grid_offset);
             if (terrain & TERRAIN_GATEHOUSE) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_4_GATEHOUSE;
+            } else if (terrain & TERRAIN_AQUEDUCT) {
+                terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_2_CLEARABLE;
             } else if (terrain & TERRAIN_BUILDING) {
                 terrain_land_noncitizen.items[grid_offset] = get_land_type_noncitizen(grid_offset);
             } else if (terrain & TERRAIN_ROAD) {
@@ -198,8 +223,6 @@ static void map_routing_update_land_noncitizen(void)
             } else if (terrain & TERRAIN_HIGHWAY) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_0_PASSABLE;
             } else if (terrain & (TERRAIN_GARDEN | TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE)) {
-                terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_2_CLEARABLE;
-            } else if (terrain & TERRAIN_AQUEDUCT) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_2_CLEARABLE;
             } else if (terrain & TERRAIN_WALL) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_3_WALL;
@@ -357,6 +380,12 @@ int map_routing_citizen_is_highway(int grid_offset)
 int map_routing_citizen_is_passable_terrain(int grid_offset)
 {
     return terrain_land_citizen.items[grid_offset] == CITIZEN_2_PASSABLE_TERRAIN;
+}
+
+int map_routing_is_gate_transformable(int grid_offset)
+{
+    return terrain_land_citizen.items[grid_offset] == GATE_0_TRANSFORMABLE ||
+        terrain_land_noncitizen.items[grid_offset] == GATE_0_TRANSFORMABLE;
 }
 
 int map_routing_noncitizen_is_passable(int grid_offset)

@@ -366,6 +366,9 @@ static void save_main_data(buffer *main)
     buffer_write_i32(main, city_data.health.population_access.clinic);
     buffer_write_i32(main, city_data.health.population_access.baths);
     buffer_write_i32(main, city_data.health.population_access.barber);
+    buffer_write_i32(main, city_data.health.population_access.wells);
+    buffer_write_i32(main, city_data.health.population_access.latrines);
+    buffer_write_i32(main, city_data.health.population_access.fountains);
     buffer_write_i32(main, city_data.health.months_since_last_contaminated_water);
     buffer_write_i32(main, city_data.emperor.selected_gift_size);
     buffer_write_i32(main, city_data.emperor.months_since_gift);
@@ -430,23 +433,24 @@ static void save_main_data(buffer *main)
     buffer_write_i32(main, city_data.emperor.invasion.retreat_message_shown);
     buffer_write_i32(main, city_data.ratings.peace_destroyed_buildings);
     buffer_write_i32(main, city_data.ratings.peace_years_of_peace);
-    buffer_write_u8(main, city_data.distant_battle.city);
-    buffer_write_u8(main, city_data.distant_battle.enemy_strength);
-    buffer_write_u8(main, city_data.distant_battle.roman_strength);
-    buffer_write_i8(main, city_data.distant_battle.months_until_battle);
-    buffer_write_i8(main, city_data.distant_battle.roman_months_to_travel_back);
-    buffer_write_i8(main, city_data.distant_battle.roman_months_to_travel_forth);
-    buffer_write_i8(main, city_data.distant_battle.city_foreign_months_left);
-    buffer_write_i8(main, city_data.building.triumphal_arches_available);
-    buffer_write_i8(main, city_data.distant_battle.total_count);
-    buffer_write_i8(main, city_data.distant_battle.won_count);
-    buffer_write_i8(main, city_data.distant_battle.enemy_months_traveled);
-    buffer_write_i8(main, city_data.distant_battle.roman_months_traveled);
+
+    buffer_write_u16(main, city_data.distant_battle.city);
+    buffer_write_u16(main, city_data.distant_battle.enemy_strength);
+    buffer_write_u16(main, city_data.distant_battle.roman_strength);
+    buffer_write_i16(main, city_data.distant_battle.months_until_battle);
+    buffer_write_i16(main, city_data.distant_battle.roman_months_to_travel_back);
+    buffer_write_i16(main, city_data.distant_battle.roman_months_to_travel_forth);
+    buffer_write_i16(main, city_data.distant_battle.city_foreign_months_left);
+    buffer_write_i16(main, city_data.building.triumphal_arches_available);
+    buffer_write_i16(main, city_data.distant_battle.total_count);
+    buffer_write_i16(main, city_data.distant_battle.won_count);
+    buffer_write_i16(main, city_data.distant_battle.enemy_months_traveled);
+    buffer_write_i16(main, city_data.distant_battle.roman_months_traveled);
     buffer_write_u8(main, city_data.military.total_legions);
     buffer_write_u8(main, city_data.military.empire_service_legions);
     buffer_write_u8(main, city_data.games.chosen_horse);
-    buffer_write_u8(main, city_data.military.total_soldiers);
-    buffer_write_i8(main, city_data.building.triumphal_arches_placed);
+    buffer_write_i32(main, city_data.military.total_soldiers);
+    buffer_write_i16(main, city_data.building.triumphal_arches_placed);
     buffer_write_i8(main, city_data.sound.die_citizen);
     buffer_write_i8(main, city_data.sound.die_soldier);
     buffer_write_i8(main, city_data.sound.shoot_arrow);
@@ -862,6 +866,11 @@ static void load_main_data(buffer *main, int version)
     city_data.health.population_access.clinic = buffer_read_i32(main);
     city_data.health.population_access.baths = buffer_read_i32(main);
     city_data.health.population_access.barber = buffer_read_i32(main);
+    if (version > SAVE_GAME_LAST_NO_WATER_IN_ADVISORS) {
+        city_data.health.population_access.wells = buffer_read_i32(main);
+        city_data.health.population_access.latrines = buffer_read_i32(main);
+        city_data.health.population_access.fountains = buffer_read_i32(main);
+    }
     city_data.health.months_since_last_contaminated_water = buffer_read_i32(main);
     city_data.emperor.selected_gift_size = buffer_read_i32(main);
     city_data.emperor.months_since_gift = buffer_read_i32(main);
@@ -932,23 +941,44 @@ static void load_main_data(buffer *main, int version)
     city_data.emperor.invasion.retreat_message_shown = buffer_read_i32(main);
     city_data.ratings.peace_destroyed_buildings = buffer_read_i32(main);
     city_data.ratings.peace_years_of_peace = buffer_read_i32(main);
-    city_data.distant_battle.city = buffer_read_u8(main);
-    city_data.distant_battle.enemy_strength = buffer_read_u8(main);
-    city_data.distant_battle.roman_strength = buffer_read_u8(main);
-    city_data.distant_battle.months_until_battle = buffer_read_i8(main);
-    city_data.distant_battle.roman_months_to_travel_back = buffer_read_i8(main);
-    city_data.distant_battle.roman_months_to_travel_forth = buffer_read_i8(main);
-    city_data.distant_battle.city_foreign_months_left = buffer_read_i8(main);
-    city_data.building.triumphal_arches_available = buffer_read_i8(main);
-    city_data.distant_battle.total_count = buffer_read_i8(main);
-    city_data.distant_battle.won_count = buffer_read_i8(main);
-    city_data.distant_battle.enemy_months_traveled = buffer_read_i8(main);
-    city_data.distant_battle.roman_months_traveled = buffer_read_i8(main);
+    if (version <= SAVE_GAME_LAST_10_LEGIONS_MAX) {
+        city_data.distant_battle.city = buffer_read_u8(main);
+        city_data.distant_battle.enemy_strength = buffer_read_u8(main);
+        city_data.distant_battle.roman_strength = buffer_read_u8(main);
+        city_data.distant_battle.months_until_battle = buffer_read_i8(main);
+        city_data.distant_battle.roman_months_to_travel_back = buffer_read_i8(main);
+        city_data.distant_battle.roman_months_to_travel_forth = buffer_read_i8(main);
+        city_data.distant_battle.city_foreign_months_left = buffer_read_i8(main);
+        city_data.building.triumphal_arches_available = buffer_read_i8(main);
+        city_data.distant_battle.total_count = buffer_read_i8(main);
+        city_data.distant_battle.won_count = buffer_read_i8(main);
+        city_data.distant_battle.enemy_months_traveled = buffer_read_i8(main);
+        city_data.distant_battle.roman_months_traveled = buffer_read_i8(main);
+    } else {
+        city_data.distant_battle.city = buffer_read_u16(main);
+        city_data.distant_battle.enemy_strength = buffer_read_u16(main);
+        city_data.distant_battle.roman_strength = buffer_read_u16(main);
+        city_data.distant_battle.months_until_battle = buffer_read_i16(main);
+        city_data.distant_battle.roman_months_to_travel_back = buffer_read_i16(main);
+        city_data.distant_battle.roman_months_to_travel_forth = buffer_read_i16(main);
+        city_data.distant_battle.city_foreign_months_left = buffer_read_i16(main);
+        city_data.building.triumphal_arches_available = buffer_read_i16(main);
+        city_data.distant_battle.total_count = buffer_read_i16(main);
+        city_data.distant_battle.won_count = buffer_read_i16(main);
+        city_data.distant_battle.enemy_months_traveled = buffer_read_i16(main);
+        city_data.distant_battle.roman_months_traveled = buffer_read_i16(main);
+    }
+
     city_data.military.total_legions = buffer_read_u8(main);
     city_data.military.empire_service_legions = buffer_read_u8(main);
     city_data.games.chosen_horse = buffer_read_u8(main);
-    city_data.military.total_soldiers = buffer_read_u8(main);
-    city_data.building.triumphal_arches_placed = buffer_read_i8(main);
+    if (version <= SAVE_GAME_LAST_10_LEGIONS_MAX) {
+        city_data.military.total_soldiers = buffer_read_u8(main);
+        city_data.building.triumphal_arches_placed = buffer_read_i8(main);
+    } else {
+        city_data.military.total_soldiers = buffer_read_i32(main);
+        city_data.building.triumphal_arches_placed = buffer_read_i16(main);
+    }
     city_data.sound.die_citizen = buffer_read_i8(main);
     city_data.sound.die_soldier = buffer_read_i8(main);
     city_data.sound.shoot_arrow = buffer_read_i8(main);
@@ -1050,7 +1080,7 @@ void city_data_load_state(buffer *main, buffer *graph_order,
     load_entry_exit(entry_exit_xy, entry_exit_grid_offset);
 }
 
-void city_data_load_basic_info(buffer *main, int *population, int *treasury, int *caravanserai_id, int version)
+void city_data_load_basic_info(buffer *main, int *population, int *treasury, unsigned int *caravanserai_id, int version)
 {
     int discard_unused_values = version > SAVE_GAME_LAST_UNKNOWN_UNUSED_CITY_DATA;
     int discard_workshop_bytes = (version > SAVE_GAME_LAST_STATIC_RESOURCES) ? 6 * sizeof(int32_t) * 2 : 0;

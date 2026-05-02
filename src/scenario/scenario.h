@@ -18,7 +18,7 @@ void scenario_load_state(buffer *buf, int version);
 
 void scenario_description_from_buffer(buffer *buf, uint8_t *description, int version);
 int scenario_climate_from_buffer(buffer *buf, int version);
-int scenario_image_id_from_buffer(buffer *buf, int version);
+int scenario_image_id_from_buffer(buffer *buf, int scenario_version);
 int scenario_invasions_from_buffer(buffer *buf, int version);
 int scenario_rank_from_buffer(buffer *buf, int version);
 int scenario_start_year_from_buffer(buffer *buf, int version);

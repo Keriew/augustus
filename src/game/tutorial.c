@@ -212,7 +212,7 @@ void tutorial_on_filled_granary(void)
 
 void tutorial_on_add_to_warehouse(void)
 {
-    if (!data.tutorial2.pottery_made && city_resource_count(RESOURCE_POTTERY) >= 1) {
+    if (!data.tutorial2.pottery_made && city_resource_count_warehouses_amount(RESOURCE_POTTERY) >= 1) {
         data.tutorial2.pottery_made = 1;
         data.tutorial2.pottery_made_year = game_time_year();
         building_menu_update();

@@ -41,6 +41,8 @@ typedef struct {
     } output;
 } image_packer_rect;
 
+typedef struct internal_data internal_data;
+
 typedef struct {
     image_packer_rect *rects;
     struct {
@@ -55,7 +57,7 @@ typedef struct {
         unsigned int last_image_width;
         unsigned int last_image_height;
     } result;
-    void *internal_data;
+    internal_data *internal_data;
 } image_packer;
 
 /**

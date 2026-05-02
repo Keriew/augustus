@@ -1,12 +1,15 @@
 #include "tooltip.h"
 
+#include "building/building.h"
 #include "city/labor.h"
 #include "city/ratings.h"
 #include "city/view.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/lang.h"
 #include "core/string.h"
 #include "core/time.h"
+#include "game/cheats.h"
 #include "game/settings.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
@@ -14,8 +17,12 @@
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "map/building.h"
+#include "map/desirability.h"
 #include "map/grid.h"
+#include "map/image.h"
 #include "map/property.h"
+#include "map/terrain.h"
 #include "scenario/criteria.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
@@ -89,7 +96,7 @@ static void reset_tooltip(tooltip_context *c)
 
 static const uint8_t *get_tooltip_text(const tooltip_context *c)
 {
-    const uint8_t* text;
+    const uint8_t *text;
     if (c->precomposed_text) {
         return c->precomposed_text;
     }
@@ -150,6 +157,7 @@ static void draw_button_tooltip(tooltip_context *c)
     const uint8_t *text = get_tooltip_text(c);
     int width = 200;
     int largest_width;
+
     int lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
     if (lines > 2) {
         width = 300;
@@ -253,8 +261,10 @@ static void draw_overlay_tooltip(tooltip_context *c)
         width = 300;
         lines = text_measure_multiline(text, width - 16, FONT_SMALL_PLAIN, &largest_width);
     }
+    width = largest_width + 16;
     int height = 16 * lines + 10;
     width = largest_width + 16;
+
 
     int x, y;
     if (c->mouse_x < width + 20) {
@@ -395,18 +405,54 @@ static void draw_senate_tooltip(tooltip_context *c)
     graphics_renderer()->finish_tooltip_creation();
 }
 
+
+static int terrain_info_string(int grid_offset, const char **out_flags, int max_flags)
+{
+    const terrain_flags_array *flags_array = map_terrain_to_array(grid_offset);
+    int count = 0;
+
+    // Simply copy the active flag names that are already stored consecutively
+    for (int i = 0; i < flags_array->count && count < max_flags; i++) {
+        out_flags[count++] = flags_array->key[i];
+    }
+    return count; // number of active flags stored in out_flags
+}
+
 static void draw_tile_tooltip(tooltip_context *c)
 {
     view_tile view;
+
+    int debug_tooltip_type = game_cheat_tooltip_enabled();
+    const char *flags[32]; // enough for all TERRAIN_NUM_FLAGS
     if (city_view_pixels_to_view_tile(c->mouse_x, c->mouse_y, &view)) {
         int grid_offset = city_view_tile_to_grid_offset(&view);
+        int num_flags = terrain_info_string(grid_offset, flags, 32);
+        int b_id_at = map_building_at(grid_offset);
+        int rubble_id_at = map_building_rubble_building_id(grid_offset);
         city_view_set_selected_view_tile(&view);
         int x_tile = map_grid_offset_to_x(grid_offset);
         int y_tile = map_grid_offset_to_y(grid_offset);
 
-        int x, y;
-        int width = 60;
-        int height = 40;
+        int x, y, width, height;
+        switch (debug_tooltip_type) {
+            case 4: // desirability per tile
+                width = 110;
+                height = 61;
+                break;
+            case 3: // terrain flags and other info included
+                width = 160 + (b_id_at ? 60 : 0);
+                height = 61 + (b_id_at ? 14 : 0) + (rubble_id_at ? 14 : 0) + (num_flags * 14);
+                break;
+            case 2:
+                width = 90;
+                height = 45;
+                break; // grid offset included
+            case 1:
+            default:
+                width = 60;
+                height = 38;
+                break;
+        }
         if (c->mouse_x < width + 20) {
             x = c->mouse_x + 20;
         } else {
@@ -437,9 +483,43 @@ static void draw_tile_tooltip(tooltip_context *c)
         graphics_fill_rect(1, 1, width - 2, height - 2, COLOR_WHITE);
         text_draw_label_and_number(string_from_ascii("x: "), x_tile, " ", 2, 5, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
         text_draw_label_and_number(string_from_ascii("y: "), y_tile, " ", 2, 19, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
-
+        if (debug_tooltip_type >= 2) {
+            text_draw_label_and_number(
+                string_from_ascii("grid: "), grid_offset, " ", 2, 33, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+        }
+        if (debug_tooltip_type == 3) { // dont show flags for 4 (desirability)
+            int y_offset = 47;
+            if (b_id_at) {
+                int drawn_width = text_draw_label_and_number(string_from_ascii("b_grid: "), b_id_at,
+                "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                drawn_width += text_draw_label_and_number(string_from_ascii(" (type: "), map_building_type_at(grid_offset),
+                    ")", 2 + drawn_width, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                text_draw_label_and_number(string_from_ascii(" (state: "), building_get(b_id_at)->state,
+                    ")", 2 + drawn_width, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                y_offset += 14;
+            }
+            if (map_building_rubble_building_id(grid_offset)) {
+                text_draw_label_and_number(string_from_ascii("r_grid: "), map_building_rubble_building_id(grid_offset),
+                "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                y_offset += 14;
+            }
+            for (int i = 0; i < num_flags; i++) {
+                text_draw(string_from_ascii(flags[i]), 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                y_offset += 14;
+            }
+            int image_id = map_image_at(grid_offset); // to avoid unused function warning
+            if (image_id) {
+                text_draw_label_and_number(string_from_ascii("img id: "), image_id,
+                    "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+            }
+        }
+        if (debug_tooltip_type >= 4) {
+            int desirability = map_desirability_get(grid_offset);
+            text_draw_label_and_number(string_from_ascii("desirability: "), desirability,
+                "", 2, 47, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+        }
         graphics_renderer()->finish_tooltip_creation();
-    
+
         save_tooltip_text(0);
         tile_data.active = 1;
         tile_data.x = x_tile;
@@ -449,11 +529,14 @@ static void draw_tile_tooltip(tooltip_context *c)
 
 static void draw_tooltip(tooltip_context *c)
 {
+    if (config_get(CONFIG_DEBUG_START_WITH_TOOLTIP)) {
+
+    }
     if (c->type == TOOLTIP_BUTTON) {
         draw_button_tooltip(c);
     } else if (c->type == TOOLTIP_OVERLAY) {
         draw_overlay_tooltip(c);
-    } else if(c->type == TOOLTIP_TILES) {
+    } else if (c->type == TOOLTIP_TILES) {
         draw_tile_tooltip(c);
     } else if (c->type == TOOLTIP_SENATE) {
         draw_senate_tooltip(c);
@@ -466,7 +549,7 @@ void tooltip_handle(const mouse *m, void (*func)(tooltip_context *))
         reset_timer();
         return;
     }
-    tooltip_context context = {m->x, m->y};
+    tooltip_context context = { m->x, m->y };
     context.text_group = DEFAULT_TEXT_GROUP;
     if (setting_tooltips() && func) {
         func(&context);

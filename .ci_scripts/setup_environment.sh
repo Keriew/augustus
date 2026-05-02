@@ -5,12 +5,12 @@ case "$BUILD_TARGET" in
 	# Note: Using a tagged version of the container to make sure that it's not updated unexpectedly
 	# You can update the tag by obtaining a recent one from here: https://hub.docker.com/r/gnuton/vitasdk-docker/tags
 	# Make sure that it compiles correctly and runs on a Vita prior to pushing the change
-	docker run -d --name vitasdk --workdir /build/git -v "${PWD}:/build/git" gnuton/vitasdk-docker:20250711 tail -f /dev/null
+	docker run -d --name vitasdk --workdir /build/git -v "${PWD}:/build/git" gnuton/vitasdk-docker:20251208 tail -f /dev/null
 	;;
 "switch")
 	# You can obtain a recent devkitA64 image from https://hub.docker.com/repository/docker/devkitpro/devkita64/general
 	# As for Vita above, make sure that it compiles correctly and runs on a Switch prior to pushing the change
-	docker run -d --name switchdev --workdir /build/git -v "${PWD}:/build/git" devkitpro/devkita64:20250527 tail -f /dev/null
+	docker run -d --name switchdev --workdir /build/git -v "${PWD}:/build/git" devkitpro/devkita64:20260219 tail -f /dev/null
 	;;
 "android")
 	# Decrypt the key files
@@ -22,9 +22,10 @@ case "$BUILD_TARGET" in
 	;;
 "emscripten")
 	# Get EMSDK
+	EMSDK_VERSION="${EMSDK_VERSION:-5.0.6}"
 	git clone https://github.com/emscripten-core/emsdk.git
 	cd emsdk
-	./emsdk install latest
-	./emsdk activate latest
+	./emsdk install "$EMSDK_VERSION"
+	./emsdk activate "$EMSDK_VERSION"
 	;;
 esac

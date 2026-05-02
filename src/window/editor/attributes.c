@@ -16,8 +16,10 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/demand_change.h"
 #include "scenario/editor.h"
 #include "scenario/invasion.h"
+#include "scenario/price_change.h"
 #include "scenario/property.h"
 #include "scenario/request.h"
 #include "widget/input_box.h"
@@ -29,6 +31,7 @@
 #include "window/editor/demand_changes.h"
 #include "window/editor/invasions.h"
 #include "window/editor/map.h"
+#include "window/editor/model_data.h"
 #include "window/editor/price_changes.h"
 #include "window/editor/requests.h"
 #include "window/editor/scenario_events.h"
@@ -55,6 +58,7 @@ static void button_change_intro(const generic_button *button);
 static void button_delete_intro(const generic_button *button);
 static void button_change_victory(const generic_button *button);
 static void button_delete_victory(const generic_button *button);
+static void button_change_model_data(const generic_button *button);
 static void button_return_to_city(const generic_button *button);
 static void button_change_climate(const generic_button *button);
 static void button_change_image(int forward, int param2);
@@ -74,6 +78,7 @@ static generic_button buttons[] = {
     {470, 116, 250, 30, button_custom_messages, 0, 12},
     {470, 156, 250, 30, button_change_intro, button_delete_intro, 13},
     {470, 196, 250, 30, button_change_victory, button_delete_victory, 14},
+    {470, 236, 250, 30, button_change_model_data, 0, 15},
     {470, 436, 250, 30, button_return_to_city},
 };
 #define NUMBER_OF_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -127,14 +132,14 @@ static void draw_foreground(void)
     input_box_draw(&scenario_description_input);
 
     button_border_draw(212, 76, 250, 30, data.focus_button_id == 1);
-    lang_text_draw_centered(44, 88, 212, 85, 250, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(44, 88, 212, 85, 250, FONT_NORMAL_BLACK);    //Starting conditions
 
-    lang_text_draw(44, 76, 32, 125, FONT_NORMAL_BLACK);
     button_border_draw(212, 116, 250, 30, data.focus_button_id == 2);
+    lang_text_draw(44, 76, 32, 125, FONT_NORMAL_BLACK);                  //Terrain set
     lang_text_draw_centered(44, 77 + scenario_property_climate(), 212, 125, 250, FONT_NORMAL_BLACK);
 
-    lang_text_draw(44, 40, 32, 165, FONT_NORMAL_BLACK);
     button_border_draw(212, 156, 250, 30, data.focus_button_id == 3);
+    lang_text_draw(44, 40, 32, 165, FONT_NORMAL_BLACK);                  //Requests
     int requests = scenario_request_count_active();
     if (requests == 0) {
         lang_text_draw_centered(44, 19, 212, 165, 250, FONT_NORMAL_BLACK);
@@ -143,13 +148,12 @@ static void draw_foreground(void)
             FONT_NORMAL_BLACK);
     }
 
-    lang_text_draw(44, 41, 32, 205, FONT_NORMAL_BLACK);
     button_border_draw(212, 196, 250, 30, data.focus_button_id == 4);
+    lang_text_draw(44, 41, 32, 205, FONT_NORMAL_BLACK);                 //Enemy
     lang_text_draw_centered(37, scenario_property_enemy(), 212, 205, 250, FONT_NORMAL_BLACK);
 
-    lang_text_draw(44, 42, 32, 245, FONT_NORMAL_BLACK);
     button_border_draw(212, 236, 250, 30, data.focus_button_id == 5);
-
+    lang_text_draw(44, 42, 32, 245, FONT_NORMAL_BLACK);                 //Invasions
     int invasions = scenario_invasion_count_active();
     if (invasions == 0) {
         lang_text_draw_centered(44, 20, 212, 245, 250, FONT_NORMAL_BLACK);
@@ -159,19 +163,32 @@ static void draw_foreground(void)
     }
 
     button_border_draw(212, 276, 250, 30, data.focus_button_id == 6);
-    lang_text_draw_centered(44, 44, 212, 285, 250, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(44, 44, 212, 285, 250, FONT_NORMAL_BLACK);  //Buildings allowed
 
     button_border_draw(212, 316, 250, 30, data.focus_button_id == 7);
-    lang_text_draw_centered(44, 45, 212, 325, 250, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(44, 45, 212, 325, 250, FONT_NORMAL_BLACK);  //Win criteria
 
     button_border_draw(212, 356, 250, 30, data.focus_button_id == 8);
-    lang_text_draw_centered(44, 49, 212, 365, 250, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(44, 49, 212, 365, 250, FONT_NORMAL_BLACK);  //Special events
 
     button_border_draw(212, 396, 250, 30, data.focus_button_id == 9);
-    lang_text_draw_centered(44, 95, 212, 405, 250, FONT_NORMAL_BLACK);
+    int price_changes = scenario_price_change_count_active();
+    if (price_changes == 0) {
+        lang_text_draw_centered(44, 95, 212, 405, 250, FONT_NORMAL_BLACK);   //Price changes
+    } else {
+        lang_text_draw_amount_centered(CUSTOM_TRANSLATION, TR_EDITOR_PRICE_CHANGE,
+            price_changes, 212, 405, 250, FONT_NORMAL_BLACK
+        );
+    }
 
     button_border_draw(212, 436, 250, 30, data.focus_button_id == 10);
-    lang_text_draw_centered(44, 94, 212, 445, 250, FONT_NORMAL_BLACK);
+    int demand_changes = scenario_demand_change_count_active();
+    if (demand_changes == 0) {
+        lang_text_draw_centered(44, 94, 212, 445, 250, FONT_NORMAL_BLACK);  //Demand changes
+    } else {
+        lang_text_draw_amount_centered(CUSTOM_TRANSLATION, TR_EDITOR_DEMAND_CHANGE,
+            demand_changes, 212, 445, 250, FONT_NORMAL_BLACK);
+    }
 
     button_border_draw(470, 76, 250, 30, data.focus_button_id == 11);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_TITLE, 470, 85, 250, FONT_NORMAL_BLACK);
@@ -197,8 +214,11 @@ static void draw_foreground(void)
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_DESELECT_VICTORY, 490, 205, 230, FONT_NORMAL_BLACK);
     }
 
+    button_border_draw(470, 236, 250, 30, data.focus_button_id == 15);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA, 470, 245, 250, FONT_NORMAL_BLACK);
+
     if (!editor_is_active()) {
-        button_border_draw(470, 436, 250, 30, data.focus_button_id == 15);
+        button_border_draw(470, 436, 250, 30, data.focus_button_id == 16);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_RETURN_TO_CITY, 470, 445, 250, FONT_NORMAL_BLACK);
     }
 
@@ -330,6 +350,12 @@ static void button_delete_victory(const generic_button *button)
 {
     stop();
     scenario_editor_set_custom_victory_message(0);
+}
+
+static void button_change_model_data(const generic_button *button)
+{
+    stop();
+    window_model_data_show();
 }
 
 static void button_return_to_city(const generic_button *button)

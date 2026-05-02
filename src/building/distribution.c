@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-int building_distribution_is_good_accepted(resource_type resource, const building *b)
+int building_distribution_is_good_accepted(const building *b, resource_type resource)
 {
     return b->accepted_goods[resource] > 0;
 }
@@ -24,7 +24,7 @@ int building_distribution_check_if_accepts_nothing(const building *b)
     return 1;
 }
 
-void building_distribution_toggle_good_accepted(resource_type resource, building *b)
+void building_distribution_toggle_good_accepted(building *b, resource_type resource)
 {
     if (b->accepted_goods[resource] == 0) {
         b->accepted_goods[resource] = 1;
@@ -35,7 +35,9 @@ void building_distribution_toggle_good_accepted(resource_type resource, building
 
 void building_distribution_unaccept_all_goods(building *b)
 {
-    memset(b->accepted_goods, 0, sizeof(b->accepted_goods));
+    for (resource_type resource = 0; resource < RESOURCE_MAX_WITH_MONUMENT_RESOURCES; resource++) {
+        b->accepted_goods[resource] = 0; //loop instead of memset for consistency and clarity
+    }
 }
 
 void building_distribution_accept_all_goods(building *b)
@@ -75,11 +77,11 @@ void building_distribution_update_demands(building *b)
 
 int building_distribution_resource_is_handled(resource_type resource, building_type type)
 {
+    if (type == BUILDING_DOCK) { // before 'potentially' checks to avoid docks not accepting future resources
+        return 1;
+    }
     if (!empire_can_produce_resource_potentially(resource) && !empire_can_import_resource_potentially(resource)) {
         return 0;
-    }
-    if (type == BUILDING_DOCK) {
-        return 1;
     }
     if (!resource_is_inventory(resource)) {
         return 0;
@@ -111,7 +113,7 @@ int building_distribution_get_handled_resources_for_building(const building *b,
     int needed = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         info[r].needed = building_distribution_resource_is_handled(r, b->type) &&
-            building_distribution_is_good_accepted(r, b);
+            building_distribution_is_good_accepted(b, r);
         if (!needed && info[r].needed) {
             needed = 1;
         }
@@ -149,7 +151,7 @@ static void update_food_resource(resource_storage_info *info, resource_type reso
 static void update_good_resource(resource_storage_info *info, resource_type resource, building *b, int distance)
 {
     if (distance < info[resource].min_distance &&
-        !city_resource_is_stockpiled(resource) && building_warehouse_get_amount(b, resource) > 0) {
+        !city_resource_is_stockpiled(resource) && building_warehouse_get_available_amount(b, resource)) {
         info[resource].min_distance = distance;
         info[resource].building_id = b->id;
     }
@@ -181,29 +183,7 @@ static int get_resource_storages(resource_storage_info info[RESOURCE_MAX],
         info[r].building_id = 0;
     }
 
-    int permission;
-
-    switch (type) {
-        case BUILDING_MESS_HALL:
-            permission = BUILDING_STORAGE_PERMISSION_QUARTERMASTER;
-            break;
-        case BUILDING_TAVERN:
-            permission = BUILDING_STORAGE_PERMISSION_BARKEEP;
-            break;
-        case BUILDING_CARAVANSERAI:
-            permission = BUILDING_STORAGE_PERMISSION_CARAVANSERAI;
-            break;
-        case BUILDING_LIGHTHOUSE:
-            permission = BUILDING_STORAGE_PERMISSION_LIGHTHOUSE;
-            break;
-        case BUILDING_ARMOURY:
-            permission = BUILDING_STORAGE_PERMISSION_ARMOURY;
-            break;
-        default:
-            permission = BUILDING_STORAGE_PERMISSION_MARKET;
-            break;
-    }
-
+    int permission = building_storage_get_permission_from_building_type(type);
     if (is_food_needed(info)) {
         for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
             // Looter walkers have no type

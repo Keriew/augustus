@@ -11,24 +11,24 @@ typedef enum {
 } message_media_text_blob_version;
 
 typedef struct {
-    int id;
+    size_t id;
     int in_use;
-    int index;
-    int offset;
-    int length;
+    size_t index;
+    size_t offset;
+    size_t length;
     uint8_t *text;
 } text_blob_string_t;
 
 typedef struct {
-    int size;
-    int entry_count;
+    size_t size;
+    size_t entry_count;
     text_blob_string_t *text_entries;
     uint8_t *text_blob;
 
     size_t max_size_text_entries;
-    int max_size_text_blob;
+    size_t max_size_text_blob;
 
-    int highest_id;
+    size_t highest_id;
 } message_media_text_blob_t;
 
 message_media_text_blob_t *message_media_text_get_data(void);

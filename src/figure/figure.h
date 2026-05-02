@@ -4,6 +4,7 @@
 #include "core/buffer.h"
 #include "core/direction.h"
 #include "figure/action.h"
+#include "figure/properties.h"
 #include "figure/type.h"
 
 #define FIGURE_FACTION_ROAMER_PREVIEW 2
@@ -53,9 +54,9 @@ typedef struct {
     short wait_ticks;
     unsigned char action_state;
     unsigned char progress_on_tile;
-    short routing_path_id;
-    short routing_path_current_tile;
-    short routing_path_length;
+    unsigned int routing_path_id;
+    unsigned int routing_path_current_tile;
+    unsigned int routing_path_length;
     unsigned char in_building_wait_ticks;
     unsigned char is_on_road;
     short max_roam_length;
@@ -73,10 +74,10 @@ typedef struct {
     short cc_delta_xy;
     unsigned char cc_direction; // 1 = x, 2 = y
     unsigned char speed_multiplier;
-    short building_id;
-    short immigrant_building_id;
-    short destination_building_id;
-    short formation_id;
+    unsigned int building_id;
+    unsigned int immigrant_building_id;
+    unsigned int destination_building_id;
+    unsigned int formation_id;
     unsigned char index_in_formation;
     unsigned char formation_at_rest;
     unsigned char migrant_num_people;
@@ -103,18 +104,19 @@ typedef struct {
     signed char phrase_id;
     unsigned char phrase_sequence_city;
     unsigned char trader_id;
-    unsigned char wait_ticks_next_target;
+    unsigned char wait_ticks_next_target; //used for retargetting for fighting figures, and destination for pushers
     unsigned char dont_draw_elevated;
-    short target_figure_id;
-    short targeted_by_figure_id;
+    unsigned short target_figure_id;
+    unsigned short targeted_by_figure_id;
     unsigned short created_sequence;
     unsigned short target_figure_created_sequence;
     unsigned char figures_on_same_tile_index;
     unsigned char num_attackers;
-    short attacker_id1;
-    short attacker_id2;
-    short opponent_id;
-    short last_visited_index;
+    unsigned int attacker_id1;
+    unsigned int attacker_id2;
+    unsigned int opponent_id;
+    short last_visited_index; //can only be used if figure goes through initialization process
+    int last_destinatation_id; //can be used for any figure, holds only one value
     struct {
         unsigned short tourist_money_spent;
         unsigned short ticks_since_last_visited_id[12];
@@ -123,9 +125,9 @@ typedef struct {
     } tourist;
 } figure;
 
-figure *figure_get(int id);
+figure *figure_get(unsigned int id);
 
-int figure_count(void);
+unsigned int figure_count(void);
 
 /**
  * Creates a figure
@@ -143,9 +145,19 @@ int figure_is_dead(const figure *f);
 
 int figure_is_enemy(const figure *f);
 
+int figure_is_melee_enemy(const figure *f);
+
+int figure_is_ranged_enemy(const figure *f);
+
+int figure_is_mounted_enemy(const figure *f);
+
+int figure_is_caesar_enemy(const figure *f);
+
 int figure_is_legion(const figure *f);
 
 int figure_is_herd(const figure *f);
+
+int figure_is_category(figure *f, figure_category category);
 
 void figure_init_scenario(void);
 

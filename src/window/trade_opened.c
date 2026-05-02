@@ -52,7 +52,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (input_go_back_requested(m, h)) {
-        window_empire_show();
+        window_go_back();
     }
 }
 
@@ -63,7 +63,7 @@ static void button_advisor(int advisor, int param2)
 
 static void button_close(int param1, int param2)
 {
-    window_empire_show();
+    window_go_back();
 }
 
 void window_trade_opened_show(int city)

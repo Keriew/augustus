@@ -91,18 +91,6 @@ static void update_mpg_audio(plm_t *mpeg, plm_samples_t *samples, void *user)
     sound_device_write_custom_music_data(samples->interleaved, sizeof(float) * samples->count * 2);
 }
 
-static const char *get_filename_from_path(const char *filename)
-{
-    if (data.type == VIDEO_TYPE_SMK) {
-        return filename;
-    } else if (data.type == VIDEO_TYPE_AV1) {
-        return filename;
-    } else if (data.type == VIDEO_TYPE_MPG) {
-        return filename;
-    }
-    return NULL;
-}
-
 static int load_av1(const char *filename)
 {
     if (data.type == VIDEO_TYPE_SMK || data.type == VIDEO_TYPE_MPG) {
@@ -166,10 +154,11 @@ static int load_av1(const char *filename)
         return 0;
     }
     data.video.width = easyav1_get_video_width(data.easyav1);
-    data.video.height =  easyav1_get_video_height(data.easyav1);
+    data.video.height = easyav1_get_video_height(data.easyav1);
     data.video.y_scale = SMACKER_Y_SCALE_NONE;
     data.video.current_frame = 0;
-    data.video.micros_per_frame = 1000000 / easyav1_get_video_fps(data.easyav1);
+    unsigned int framerate = easyav1_get_video_fps(data.easyav1);
+    data.video.micros_per_frame = framerate ? 1000000 / framerate : 0;
 
     data.audio.has_audio = 0;
 
@@ -229,8 +218,8 @@ static int load_mpg(const char *filename)
 
     data.audio.has_audio = 0;
 
-	plm_set_video_decode_callback(data.plm, update_mpg_video, 0);
-	
+    plm_set_video_decode_callback(data.plm, update_mpg_video, 0);
+
     if (config_get(CONFIG_GENERAL_ENABLE_VIDEO_SOUND) && plm_get_num_audio_streams(data.plm) > 0) {
         plm_set_audio_enabled(data.plm, 1);
         plm_set_audio_stream(data.plm, 0);

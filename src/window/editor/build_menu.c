@@ -52,8 +52,9 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     {18, 19, -1},
     {20, TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, 21, 22,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT,
-    TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, -1},
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, TR_EDITOR_RUBBLE,-1},
     {23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, -1},
+    {TR_EDITOR_TOOL_EARTHQUAKE_POINT, TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, TR_EDITOR_TOOL_EARTHQUAKE_REMOVE, -1},
 };
 
 static struct {
@@ -61,7 +62,7 @@ static struct {
     unsigned int num_items;
     int y_offset;
     unsigned int focus_button_id;
-} data = {MENU_NONE};
+} data = { MENU_NONE };
 
 static int count_items(int submenu)
 {
@@ -175,7 +176,7 @@ static void button_menu_item(const generic_button *button)
                 case 4: editor_tool_set_type(TOOL_NATIVE_DECORATION); break;
                 case 5: editor_tool_set_type(TOOL_NATIVE_MONUMENT); break;
                 case 6: editor_tool_set_type(TOOL_NATIVE_WATCHTOWER); break;
-
+                case 7: editor_tool_set_type(TOOL_NATIVE_RUINS); break;
             }
             break;
         case MENU_INVASION_POINTS:
@@ -188,6 +189,12 @@ static void button_menu_item(const generic_button *button)
                 editor_tool_set_with_id(TOOL_HERD_POINT, index - 8);
             }
             break;
+        case MENU_EARTHQUAKE:
+            switch (index) {
+                case 0: editor_tool_set_type(TOOL_EARTHQUAKE_POINT); break;
+                case 1: editor_tool_set_type(TOOL_EARTHQUAKE_CUSTOM); break;
+                case 2: editor_tool_set_type(TOOL_EARTHQUAKE_CUSTOM_REMOVE); break;
+            }
     }
     data.selected_submenu = MENU_NONE;
     window_editor_map_show();

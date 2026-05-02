@@ -4,6 +4,7 @@
 #include "core/log.h"
 #include "game/system.h"
 #include "input/hotkey.h"
+#include "platform/file_manager.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -128,6 +129,23 @@ static const char *ini_keys[] = {
     "show_overlay_native",
     "build_highway",
     "show_overlay_enemy",
+    "next_track",
+    "build_repair_land",
+    "editor_empire_delete_object",
+    "editor_empire_tool_our_city",
+    "editor_empire_tool_trade_city",
+    "editor_empire_tool_roman_city",
+    "editor_empire_tool_vulnerable_city",
+    "editor_empire_tool_future_trade_city",
+    "editor_empire_tool_distant_city",
+    "editor_empire_tool_border",
+    "editor_empire_tool_battle",
+    "editor_empire_tool_babarian",
+    "editor_empire_tool_legion",
+    "editor_empire_tool_land_point",
+    "editor_empire_tool_sea_point",
+    "editor_empire_tool_selection",
+    "editor_empire_pick_tool"
 };
 
 static struct {
@@ -235,6 +253,7 @@ static void init_defaults(void)
     set_mapping(KEY_TYPE_F12, KEY_MOD_ALT, HOTKEY_SAVE_SCREENSHOT); // mac specific
     set_mapping(KEY_TYPE_F12, KEY_MOD_CTRL, HOTKEY_SAVE_CITY_SCREENSHOT);
     set_mapping(KEY_TYPE_F12, KEY_MOD_SHIFT, HOTKEY_SAVE_MINIMAP_SCREENSHOT);
+    set_layout_mapping("X", KEY_TYPE_X, KEY_MOD_CTRL, HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT);
 }
 
 const hotkey_mapping *hotkey_for_action(hotkey_action action, int index)
@@ -284,10 +303,37 @@ static void load_defaults(void)
     }
 }
 
+static void add_mapping(int hotkey_id, const char *value)
+{
+    hotkey_mapping mapping;
+    if (key_combination_from_name(value, &mapping.key, &mapping.modifiers)) {
+        mapping.action = hotkey_id;
+        hotkey_config_add_mapping(&mapping);
+    }
+}
+
 static void load_file(void)
 {
     hotkey_config_clear();
-    FILE *fp = file_open(INI_FILENAME, "rt");
+
+    const char *file_name = INI_FILENAME;
+
+    if (file_exists(INI_FILENAME, NOT_LOCALIZED)) {
+        const char *new_file_name = dir_append_location(INI_FILENAME, PATH_LOCATION_CONFIG);
+        if (strcmp(file_name, new_file_name) != 0) {
+            if (platform_file_manager_copy_file(INI_FILENAME, new_file_name)) {
+                platform_file_manager_remove_file(INI_FILENAME);
+                file_name = new_file_name;
+                log_info("Copied hotkey configuration file from default path to config path", 0, 0);
+            }
+        }
+    } else {
+        file_name = dir_get_file_at_location(INI_FILENAME, PATH_LOCATION_CONFIG);
+    }
+    if (!file_name) {
+        return;
+    }
+    FILE *fp = file_open(file_name, "rt");
     if (!fp) {
         return;
     }
@@ -320,6 +366,12 @@ static void load_file(void)
                 break;
             }
         }
+        // Migrate changed keys
+        if (strcmp("build_clear_land", line) == 0) {
+            add_mapping(HOTKEY_BUILD_VACANT_HOUSE, value);
+        } else if (strcmp("build_vacant_house", line) == 0) {
+            add_mapping(HOTKEY_BUILD_CLEAR_LAND, value);
+        }
     }
     file_close(fp);
     if (data.num_mappings == 0) {
@@ -346,7 +398,11 @@ void hotkey_config_load(void)
 void hotkey_config_save(void)
 {
     hotkey_install_mapping(data.mappings, data.num_mappings);
-    FILE *fp = file_open(INI_FILENAME, "wt");
+    const char *file_name = dir_append_location(INI_FILENAME, PATH_LOCATION_CONFIG);
+    if (!file_name) {
+        return;
+    }
+    FILE *fp = file_open(file_name, "wt");
     if (!fp) {
         log_error("Unable to write hotkey configuration file", INI_FILENAME, 0);
         return;

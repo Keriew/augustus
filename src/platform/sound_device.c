@@ -59,9 +59,9 @@ static struct {
     int start;
     int total;
 } sound_type_to_channels[SOUND_TYPE_MAX] = {
-    [SOUND_TYPE_SPEECH]  = { .total = 1  },
-    [SOUND_TYPE_EFFECTS] = { .total = 10 },
-    [SOUND_TYPE_CITY]    = { .total = 5  }
+    [SOUND_TYPE_SPEECH] = {.total = 1  },
+    [SOUND_TYPE_EFFECTS] = {.total = 10 },
+    [SOUND_TYPE_CITY] = {.total = 5  }
 };
 
 static struct {
@@ -169,7 +169,7 @@ void sound_device_close(void)
     if (!data.initialized) {
         return;
     }
-    for (int i = 0; i < data.total_channels; i++) {
+    for (unsigned int i = 0; i < data.total_channels; i++) {
         stop_channel(i);
     }
     Mix_ChannelFinished(NULL);
@@ -229,7 +229,7 @@ void sound_device_init_channels(void)
     }
     Mix_AllocateChannels(data.total_channels);
     log_info("Loading audio files", 0, 0);
-    for (int i = 0; i < data.total_channels; i++) {
+    for (unsigned int i = 0; i < data.total_channels; i++) {
         data.channels[i].chunk = 0;
         data.channels[i].filename[0] = 0;
         data.channels[i].last_played = 0;
@@ -420,11 +420,16 @@ static int get_available_channel(sound_type type)
 }
 
 int sound_device_play_file_on_channel_panned(const char *filename, sound_type type,
-    int volume_pct, int left_pct, int right_pct)
+    int volume_pct, int left_pct, int right_pct, int loop)
 {
     if (!data.initialized || !config_get(CONFIG_GENERAL_ENABLE_AUDIO)) {
         return 0;
     }
+
+    if (!setting_sound_is_enabled(type)) {
+        return 0;
+    }
+    
     int channel = get_channel_for_filename(filename, type);
     if (channel == NO_CHANNEL) {
         channel = get_available_channel(type);
@@ -440,7 +445,7 @@ int sound_device_play_file_on_channel_panned(const char *filename, sound_type ty
     }
     Mix_SetPanning(channel, left_pct * 255 / 100, right_pct * 255 / 100);
     Mix_VolumeChunk(data.channels[channel].chunk, percentage_to_volume(volume_pct));
-    int result = Mix_PlayChannel(channel, data.channels[channel].chunk, 0);
+    int result = Mix_PlayChannel(channel, data.channels[channel].chunk, loop ? -1 : 0); // -1 = loop
     if (result == -1) {
         return 0;
     }
@@ -450,7 +455,7 @@ int sound_device_play_file_on_channel_panned(const char *filename, sound_type ty
 
 int sound_device_play_file_on_channel(const char *filename, sound_type type, int volume_pct)
 {
-    return sound_device_play_file_on_channel_panned(filename, type, volume_pct, 100, 100);
+    return sound_device_play_file_on_channel_panned(filename, type, volume_pct, 100, 100, 0);
 }
 
 void sound_device_on_audio_finished(void (*callback)(sound_type))
@@ -487,7 +492,6 @@ int sound_device_resume_music(void)
     }
     return 0;
 }
-
 
 void sound_device_stop_music(void)
 {

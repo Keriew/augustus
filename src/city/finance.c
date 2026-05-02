@@ -2,8 +2,8 @@
 
 #include "building/building.h"
 #include "building/count.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/data_private.h"
 #include "city/culture.h"
 #include "city/festival.h"
@@ -19,7 +19,11 @@
 
 
 static building_levy_for_type building_levies[] = {
-    {BUILDING_FORT, FORT_LEVY_MONTHLY},
+    {BUILDING_FORT_ARCHERS, FORT_LEVY_MONTHLY},
+    {BUILDING_FORT_LEGIONARIES, FORT_LEVY_MONTHLY},
+    {BUILDING_FORT_JAVELIN, FORT_LEVY_MONTHLY},
+    {BUILDING_FORT_MOUNTED, FORT_LEVY_MONTHLY},
+    {BUILDING_FORT_AUXILIA_INFANTRY, FORT_LEVY_MONTHLY},
     {BUILDING_SMALL_TEMPLE_CERES, SMALL_TEMPLE_LEVY_MONTHLY },
     {BUILDING_SMALL_TEMPLE_NEPTUNE, SMALL_TEMPLE_LEVY_MONTHLY },
     {BUILDING_SMALL_TEMPLE_MERCURY, SMALL_TEMPLE_LEVY_MONTHLY },

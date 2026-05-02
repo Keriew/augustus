@@ -347,7 +347,6 @@ set(BUILDING_FILES
     ${PROJECT_SOURCE_DIR}/src/building/market.c
     ${PROJECT_SOURCE_DIR}/src/building/menu.c
     ${PROJECT_SOURCE_DIR}/src/building/mess_hall.c
-    ${PROJECT_SOURCE_DIR}/src/building/model.c
     ${PROJECT_SOURCE_DIR}/src/building/monument.c
     ${PROJECT_SOURCE_DIR}/src/building/properties.c
     ${PROJECT_SOURCE_DIR}/src/building/roadblock.c
@@ -395,8 +394,10 @@ set(CITY_FILES
 )
 set(EMPIRE_FILES
     ${PROJECT_SOURCE_DIR}/src/empire/city.c
+    ${PROJECT_SOURCE_DIR}/src/empire/editor.c
     ${PROJECT_SOURCE_DIR}/src/empire/empire.c
-    ${PROJECT_SOURCE_DIR}/src/empire/xml.c
+    ${PROJECT_SOURCE_DIR}/src/empire/export_xml.c
+    ${PROJECT_SOURCE_DIR}/src/empire/import_xml.c
     ${PROJECT_SOURCE_DIR}/src/empire/object.c
     ${PROJECT_SOURCE_DIR}/src/empire/trade_prices.c
     ${PROJECT_SOURCE_DIR}/src/empire/trade_route.c
@@ -540,6 +541,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/invasion.c
     ${PROJECT_SOURCE_DIR}/src/scenario/map.c
     ${PROJECT_SOURCE_DIR}/src/scenario/message_media_text_blob.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/model_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/price_change.c
     ${PROJECT_SOURCE_DIR}/src/scenario/property.c
     ${PROJECT_SOURCE_DIR}/src/scenario/random_event.c
@@ -549,7 +551,9 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/formula.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_city.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/action_types.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/condition_comparison_helper.c
@@ -560,6 +564,8 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/clouds.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/complex_button.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/weather.c
     ${PROJECT_SOURCE_DIR}/src/graphics/font.c
     ${PROJECT_SOURCE_DIR}/src/graphics/generic_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/graphics.c
@@ -589,33 +595,32 @@ set(SOUND_FILES
     ${PROJECT_SOURCE_DIR}/src/sound/system.c
 )
 set(WIDGET_FILES
-    ${PROJECT_SOURCE_DIR}/src/widget/city.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_bridge.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_building_ghost.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_figure.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_draw_highway.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_education.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_entertainment.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_health.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_other.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_overlay_risks.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_pause_menu.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_water_ghost.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_with_overlay.c
-    ${PROJECT_SOURCE_DIR}/src/widget/city_without_overlay.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/city.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/bridge.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/building_ghost.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/draw.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/figure.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/highway.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/education.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/entertainment.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/health.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/housing.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/other.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/overlay.c
+    ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/risks.c
+    ${PROJECT_SOURCE_DIR}/src/widget/dropdown_button.c
     ${PROJECT_SOURCE_DIR}/src/widget/input_box.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_tool.c
-    ${PROJECT_SOURCE_DIR}/src/widget/map_editor_pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/minimap.c
-    ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
-    ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/city.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/common.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/extra.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/military.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/slide.c
+    ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
+    ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
 )
 set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisors.c
@@ -656,9 +661,12 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_invasion.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_price_change.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_request.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/empire_properties.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/empire.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/invasions.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/map.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/model_data.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/price_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/requests.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/scenario_events.c
@@ -682,6 +690,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/console.c
     ${PROJECT_SOURCE_DIR}/src/window/donate_to_city.c
     ${PROJECT_SOURCE_DIR}/src/window/empire.c
+    ${PROJECT_SOURCE_DIR}/src/window/empire_sidebar_sort.c
     ${PROJECT_SOURCE_DIR}/src/window/file_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/gift_to_emperor.c
     ${PROJECT_SOURCE_DIR}/src/window/hold_games.c
@@ -703,6 +712,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/numeric_input.c
     ${PROJECT_SOURCE_DIR}/src/window/option_popup.c
     ${PROJECT_SOURCE_DIR}/src/window/overlay_menu.c
+    ${PROJECT_SOURCE_DIR}/src/window/pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/plain_message_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/popup_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/race_bet.c
@@ -739,6 +749,7 @@ set(TRANSLATION_FILES
     ${PROJECT_SOURCE_DIR}/src/translation/swedish.c
     ${PROJECT_SOURCE_DIR}/src/translation/traditional_chinese.c
     ${PROJECT_SOURCE_DIR}/src/translation/translation.c
+    ${PROJECT_SOURCE_DIR}/src/translation/ukrainian.c
 )
 
 set(MACOSX_FILES "")
@@ -834,7 +845,7 @@ function(GET_SDL_EXT_DIR result module)
 endfunction()
 
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
-    set(USE_FLAGS "-s USE_SDL=2 -s USE_SDL_MIXER=2 -s SDL2_MIXER_FORMATS=[\"mp3\"] -s USE_MPG123=1")
+    set(USE_FLAGS "-s USE_SDL=2 -s USE_SDL_MIXER=2 -s SDL2_MIXER_FORMATS=[\"mp3,ogg\"] -s USE_MPG123=1")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
 elseif(${TARGET_PLATFORM} STREQUAL "android")
@@ -871,7 +882,13 @@ endif()
 
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
     set(CMAKE_EXECUTABLE_SUFFIX .html)
-    set_target_properties(${SHORT_NAME} PROPERTIES LINK_FLAGS "-lidbfs.js -s SINGLE_FILE=1 -s DYNCALLS=1 --shell-file ${PROJECT_SOURCE_DIR}/res/shell.html --embed-file ${ASSETS_DIR}@/assets -s INITIAL_MEMORY=268435456 -s ALLOW_MEMORY_GROWTH=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s SAFE_HEAP=1 -s INVOKE_RUN=0 -s EXPORTED_FUNCTIONS=[\"_main\"] -s EXPORTED_RUNTIME_METHODS=[\"callMain\",\"FS\"] -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\"$autoResumeAudioContext\"] --bind")
+    set(EMSCRIPTEN_LINK_FLAGS
+        "-lidbfs.js -s SINGLE_FILE=1 -s SINGLE_FILE_BINARY_ENCODE=0 --shell-file ${PROJECT_SOURCE_DIR}/res/shell.html --embed-file ${ASSETS_DIR}@/assets -s INITIAL_MEMORY=268435456 -s ALLOW_MEMORY_GROWTH=1 -s INVOKE_RUN=0 -s EXPORTED_FUNCTIONS=[\"_main\"] -s EXPORTED_RUNTIME_METHODS=[\"callMain\",\"FS\"] -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\"$autoResumeAudioContext\"] --bind"
+    )
+    if("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+        set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s ASSERTIONS=1")
+    endif()
+    set_target_properties(${SHORT_NAME} PROPERTIES LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}")
 endif()
 
 if(MSVC)

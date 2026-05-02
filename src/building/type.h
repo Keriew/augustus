@@ -68,7 +68,7 @@ typedef enum {
     BUILDING_FORT_GROUND = 54,
     BUILDING_PREFECTURE = 55,
     BUILDING_TRIUMPHAL_ARCH = 56,
-    BUILDING_FORT = 57,
+    BUILDING_MENU_FORT = 57,
     BUILDING_GATEHOUSE = 58,
     BUILDING_TOWER = 59,
     BUILDING_SMALL_TEMPLE_CERES = 60,
@@ -221,8 +221,9 @@ typedef enum {
     BUILDING_NATIVE_WATCHTOWER = 207,
     BUILDING_NATIVE_MONUMENT = 208,
     BUILDING_NATIVE_DECORATION = 209,
+    BUILDING_REPAIR_LAND = 210, // tool, not an actual building
     // helper constants
-    BUILDING_TYPE_MAX = 210
+    BUILDING_TYPE_MAX = 211
 } building_type;
 
 /**
@@ -252,6 +253,17 @@ typedef enum {
     HOUSE_LUXURY_PALACE = 19,
     HOUSE_MAX = 19,
 } house_level;
+
+typedef enum {
+    HOUSE_GROUP_ALL = 0,
+    HOUSE_GROUP_TENT = 10000,
+    HOUSE_GROUP_SHACK = 20000,
+    HOUSE_GROUP_HOVEL = 30000,
+    HOUSE_GROUP_CASA = 40000,
+    HOUSE_GROUP_INSULA = 50000,
+    HOUSE_GROUP_VILLA = 60000,
+    HOUSE_GROUP_PALACE = 70000
+} house_groups;
 
 enum {
     BUILDING_STATE_UNUSED = 0,

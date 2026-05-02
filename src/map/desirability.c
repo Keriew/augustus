@@ -1,8 +1,8 @@
 #include "desirability.h"
 
 #include "building/building.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "core/calc.h"
 #include "map/data.h"
 #include "map/grid.h"
@@ -187,6 +187,8 @@ static void update_terrain(void)
                     model->desirability_step,
                     model->desirability_step_size,
                     model->desirability_range);
+            } else if (terrain & TERRAIN_AQUEDUCT) {
+                add_to_terrain(x, y, 1, -2, 1, 1, 2);
             }
         }
     }

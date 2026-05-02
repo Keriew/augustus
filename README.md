@@ -2,11 +2,18 @@
 
 [![Github Actions](https://github.com/Keriew/augustus/workflows/Build%20Augustus/badge.svg)](https://github.com/Keriew/Augustus/actions)
 
-Chat: [Discord](http://www.discord.gg/GamerZakh) (kindly hosted by GamerZakh)
+ **💬 Join the Augustus Community - players, mapmakers, and developers**  
+[![Discord](https://img.shields.io/badge/Discord-TheZakhcolytes-5865F2?logo=discord&logoColor=white)](https://discord.gg/GamerZakh)  
+kindly hosted by GamerZakh.
+
+ **📜 Share Maps, Campaigns and Scenarios**  
+[![AugustusScernarios](https://augustus.josecadete.net/badge/c3-heaven.svg)](https://caesar3.heavengames.com/downloads/lister.php?&category=augustus_scen&start=0&s=dls&o=d)  
+Download Julius and Augustus scenarios, create your own and share with others! 
 
 | Platform | Latest release | Unstable build |
 |----------|----------------|----------------|
-| Windows  | [![Download](https://augustus.josecadete.net/badge/release/windows.svg)](https://augustus.josecadete.net/download/latest/release/windows) | [![Download](https://augustus.josecadete.net/badge/development/windows.svg)](https://augustus.josecadete.net/download/latest/development/windows)  [(Download development assets)](https://augustus.josecadete.net/download/latest/development/assets) | 
+| Windows - 64 bit| Next release! |[![Download](https://augustus.josecadete.net/badge/development/windows-64bit.svg)](https://augustus.josecadete.net/download/latest/development/windows-64bit)   [(Download development assets)](https://augustus.josecadete.net/download/latest/development/assets)
+| Windows - 32 bit  | [![Download](https://augustus.josecadete.net/badge/release/windows.svg)](https://augustus.josecadete.net/download/latest/release/windows)|[![Download](https://augustus.josecadete.net/badge/development/windows.svg)](https://augustus.josecadete.net/download/latest/development/windows)
 | Linux AppImage | [![Download](https://augustus.josecadete.net/badge/release/linux-appimage.svg)](https://augustus.josecadete.net/download/latest/release/linux-appimage) | [![Download](https://augustus.josecadete.net/badge/development/linux-appimage.svg)](https://augustus.josecadete.net/download/latest/development/linux-appimage)
 | Linux Flatpak | Next release! | [![Download](https://augustus.josecadete.net/badge/development/linux-flatpak.svg)](https://augustus.josecadete.net/download/latest/development/linux-flatpak)
 | Mac | [![Download](https://augustus.josecadete.net/badge/release/mac.svg)](https://augustus.josecadete.net/download/latest/release/mac) | [![Download](https://augustus.josecadete.net/badge/development/mac.svg)](https://augustus.josecadete.net/download/latest/development/mac) |
@@ -37,7 +44,7 @@ Because of gameplay changes and additions, save files from Augustus are NOT comp
 
 Augustus, like Julius, requires the original assets (graphics, sounds, etc) from Caesar 3 to run. Augustus optionally [supports the high-quality MP3 files](https://github.com/bvschaik/julius/wiki/MP3-Support) once provided on the Sierra website.
 
-[![](doc/main-image.png)](https://ppb.chymera.eu/fefa2d.png)
+[![](doc/main-image.png)](https://github.com/user-attachments/assets/5027579d-4277-4b1f-9eca-297a04cb1c79)
 
 ## Running the game
 

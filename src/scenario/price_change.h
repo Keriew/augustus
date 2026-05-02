@@ -30,7 +30,7 @@ void scenario_price_change_delete(int id);
 
 void scenario_price_change_remap_resource(void);
 
-int scenario_price_change_count_total(void);
+unsigned int scenario_price_change_count_total(void);
 
 void scenario_price_change_process(void);
 
@@ -39,5 +39,7 @@ void scenario_price_change_save_state(buffer *buf);
 void scenario_price_change_load_state(buffer *buf);
 
 void scenario_price_change_load_state_old_version(buffer *buf);
+
+int scenario_price_change_count_active(void);
 
 #endif // SCENARIO_PRICE_CHANGE_H

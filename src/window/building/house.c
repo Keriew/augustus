@@ -1,7 +1,7 @@
 #include "house.h"
 
 #include "building/building.h"
-#include "building/model.h"
+#include "building/properties.h"
 #include "city/constants.h"
 #include "city/finance.h"
 #include "city/sentiment.h"
@@ -236,7 +236,7 @@ void window_building_draw_house(building_info_context *c)
     } else if (b->data.house.evolve_text_id == 62) {
         int width = lang_text_draw(127, 40 + b->data.house.evolve_text_id,
             c->x_offset + 32, c->y_offset + 56, FONT_NORMAL_BLACK);
-        width += lang_text_draw_colored(41, c->worst_desirability_building_type,
+        width += text_draw(lang_get_building_type_string(c->worst_desirability_building_type),
             c->x_offset + 32 + width, c->y_offset + 56, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
         text_draw((uint8_t *) ")", c->x_offset + 32 + width, c->y_offset + 56, FONT_NORMAL_BLACK, 0);
         lang_text_draw_multiline(127, 41 + b->data.house.evolve_text_id,

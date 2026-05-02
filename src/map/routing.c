@@ -1,6 +1,7 @@
 #include "routing.h"
 
 #include "building/building.h"
+#include "building/connectable.h"
 #include "core/time.h"
 #include "map/building.h"
 #include "map/figure.h"
@@ -333,7 +334,7 @@ static int can_build_highway(int next_offset, int check_highway_routing)
         for (int y = 0; y < size; y++) {
             int offset = next_offset + map_grid_delta(x, y);
             int terrain = map_terrain_get(offset);
-            if (terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_AQUEDUCT & ~TERRAIN_ROAD) {
+            if ((terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_ROAD) && !(terrain & TERRAIN_AQUEDUCT)) {
                 return 0;
             } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
                 return 0;
@@ -356,6 +357,9 @@ static int callback_calc_distance_build_road(int next_offset, int dist, int dire
 {
     int blocked = 0;
     switch (terrain_land_citizen.items[next_offset]) {
+        case GATE_0_TRANSFORMABLE:
+            // can be transformed to gate, so not blocked for road building
+            break;
         case CITIZEN_N3_AQUEDUCT:
             if (!map_can_place_road_under_aqueduct(next_offset)) {
                 distance.determined.items[next_offset] = -1;
@@ -410,21 +414,7 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
     return 1;
 }
 
-static int map_can_place_initial_reservoir(int grid_offset)
-{
-    if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
-        return 1;
-    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-        if (building_get(map_building_at(grid_offset))->type == BUILDING_RESERVOIR) {
-            return 1;
-        }
-    } else {
-        return 0;
-    }
-
-}
-
-static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
+static int can_place_initial_road_or_aqueduct(int grid_offset, int is_aqueduct)
 {
     if (is_aqueduct && !map_can_place_aqueduct_on_highway(grid_offset, 0)) {
         return 0;
@@ -436,7 +426,7 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
         if (!is_aqueduct) {
             return 0;
         }
-        if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
+        if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT & TERRAIN_BUILDING)) {
             return 1;
         }
         if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
@@ -461,6 +451,19 @@ static int map_can_place_initial_road_or_aqueduct(int grid_offset, int is_aquedu
     }
 }
 
+static int aqueduct_in_reservoir(int center_offset)
+{
+    for (int y = map_grid_offset_to_y(center_offset) - 1; y < map_grid_offset_to_y(center_offset) + 2; y++) {
+        for (int x = map_grid_offset_to_x(center_offset) - 1; x < map_grid_offset_to_x(center_offset) + 2; x++) {
+            if (map_terrain_is(map_grid_offset(x, y), TERRAIN_AQUEDUCT & TERRAIN_BUILDING)) {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
 int map_routing_calculate_distances_for_building(routed_building_type type, int x, int y)
 {
     int source_offset = map_grid_offset(x, y);
@@ -478,15 +481,15 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_highway, 0);
         return 1;
     }
-    if (type == BUILDING_DRAGGABLE_RESERVOIR) {
-        if (map_can_place_initial_reservoir(source_offset)) {
-            return 1;
-        } else {
+
+    if (type == ROUTED_BUILDING_DRAGGABLE_RESERVOIR) {
+        if (!map_terrain_is(source_offset, TERRAIN_AQUEDUCT & TERRAIN_BUILDING) && aqueduct_in_reservoir(source_offset)) {
             return 0;
         }
-
+        return 1;
     }
-    if (!map_can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
+
+    if (!can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
         return 0;
     }
     if (map_terrain_is(source_offset, TERRAIN_ROAD) &&

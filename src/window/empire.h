@@ -5,12 +5,18 @@
 
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset);
 
-void window_empire_draw_trade_waypoints(const empire_object *trade_route, int x_offset, int y_offset);
+void window_empire_collect_trade_edges(void);
+
+void empire_reset_route_drawn_flags(void);
+
+void window_empire_draw_static_trade_waypoints(const empire_object *trade_route, int x_offset, int y_offset);
 
 void window_empire_draw_resource_shields(int trade_max, int x_offset, int y_offset);
 
 void window_empire_show(void);
 
 void window_empire_show_checked(void);
+
+int window_empire_is_dragging_sidebar(void);
 
 #endif // WINDOW_EMPIRE_H

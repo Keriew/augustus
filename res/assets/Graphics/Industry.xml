@@ -886,4 +886,29 @@
 		<layer group="83" image="0" x="0" y="8"/>
 		<layer src="Warehouse_Papyrus_04" x="0" y="0"/>
 	</image>
+	<!-- Note: Granary Stores Food -->
+	<image id="Granary_4_food" width="22" height="34">
+		<layer group="99" image="2" y="-25"/>
+	</image>
+	<image id="Granary_8_food" width="31" height="25">
+		<layer group="99" image="2"/>
+	</image>
+	<image id="Granary_12_food" width="34" height="29">
+		<layer group="99" image="3" y="-25"/>
+	</image>
+	<image id="Granary_16_food" width="33" height="22">
+		<layer group="99" image="3"/>
+	</image>
+	<image id="Granary_20_food" width="33" height="31">
+		<layer group="99" image="4" y="-23"/>
+	</image>
+	<image id="Granary_24_food" width="33" height="22">
+		<layer group="99" image="4"/>
+	</image>
+	<image id="Granary_28_food" width="30" height="34">
+		<layer group="99" image="5" y="-24"/>
+	</image>
+	<image id="Granary_32_food" width="19" height="21">
+		<layer group="99" image="5" x="-1" y="-1"/>
+	</image>
 </assetlist>

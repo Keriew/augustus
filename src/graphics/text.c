@@ -74,7 +74,7 @@ void text_draw_cursor(int x_offset, int y_offset, int is_insert)
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset - 3, COLOR_WHITE);
             graphics_draw_line(
-                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1, 
+                x_offset + input_cursor.x_offset - 1, x_offset + input_cursor.x_offset - 1,
                 y_offset + input_cursor.y_offset - 3, y_offset + input_cursor.y_offset + 13, COLOR_WHITE);
             graphics_draw_line(
                 x_offset + input_cursor.x_offset - 3, x_offset + input_cursor.x_offset + 1,
@@ -311,6 +311,20 @@ int text_draw_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t
     return text_draw(buffer, x, y, font, color);
 }
 
+int text_draw_centered_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color)
+{
+    static uint8_t buffer[1000];
+    string_copy(str, buffer, sizeof(buffer));
+
+    text_ellipsize(buffer, font, box_width);
+
+    int text_width = text_get_width(buffer, font);
+    int offset = (box_width - text_width) / 2;
+    if (offset < 0) offset = 0;
+
+    return text_draw(buffer, x + offset, y, font, color);
+}
+
 int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t color, float scale)
 {
     const font_definition *def = font_definition_for(font);
@@ -325,7 +339,11 @@ int text_draw_scaled(const uint8_t *str, int x, int y, font_t font, color_t colo
     while (length > 0) {
         int num_bytes = 1;
 
-        if (*str >= ' ') {
+        if (*str == 0x01) { // special padding character
+            // Invisible 1px push
+            current_x += 1;
+            num_bytes = 1; // just consume the byte
+        } else if (*str >= ' ') {
             int letter_id = font_letter_id(def, str, &num_bytes);
             int width;
             if (*str == ' ' || *str == '_' || letter_id < 0) {
@@ -514,6 +532,13 @@ int text_draw_percentage(int value, int x_offset, int y_offset, font_t font)
     return text_draw(str, x_offset, y_offset, font, 0);
 }
 
+void text_draw_percentage_centered(int value, int x_offset, int y_offset, int box_width, font_t font)
+{
+    uint8_t str[NUMBER_BUFFER_LENGTH];
+    number_to_string(str, value, 0, "%");
+    text_draw_centered(str, x_offset, y_offset, box_width, font, 0);
+}
+
 int text_draw_label_and_number(const uint8_t *label, int value, const char *postfix, int x_offset, int y_offset, font_t font, color_t color)
 {
     uint8_t str[2 * NUMBER_BUFFER_LENGTH];
@@ -616,7 +641,10 @@ int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_
 
 int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *largest_width)
 {
-    *largest_width = 0;
+    // \n is not counted as a word and is only caught it directly after a word: "word \n" won't work correctly
+    if (largest_width) {
+        *largest_width = 0;
+    }
     int has_more_characters = 1;
     int guard = 0;
     int num_lines = 0;
@@ -650,10 +678,23 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *
                 }
             }
         }
-        if (current_width > *largest_width) {
+        if (largest_width && current_width > *largest_width) {
             *largest_width = current_width;
         }
         num_lines += 1;
     }
     return num_lines;
+}
+
+void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color)
+{
+    uint8_t strx[NUMBER_BUFFER_LENGTH];
+    uint8_t *current = string_copy(str, strx, NUMBER_BUFFER_LENGTH - 5);
+
+    *current++ = '(';
+    current += string_from_int(current, index, 0);
+    *current++ = ')';
+    *current = 0;
+
+    text_draw_centered(strx, x_offset, y_offset, box_width, font, color);
 }

@@ -3,11 +3,19 @@
 #include "graphics/image.h"
 #include "graphics/panel.h"
 
+void button_border_draw_colored(int x, int y, int width_pixels, int height_pixels, int has_focus, color_t color);
+
 void button_none(int param1, int param2)
 {
+
 }
 
 void button_border_draw(int x, int y, int width_pixels, int height_pixels, int has_focus)
+{
+    button_border_draw_colored(x, y, width_pixels, height_pixels, has_focus, COLOR_MASK_NONE);
+}
+
+void button_border_draw_colored(int x, int y, int width_pixels, int height_pixels, int has_focus, color_t color)
 {
     int width_blocks = width_pixels / BLOCK_SIZE;
     if (width_pixels % BLOCK_SIZE) {
@@ -31,31 +39,31 @@ void button_border_draw(int x, int y, int width_pixels, int height_pixels, int h
             int draw_offset_x = x + BLOCK_SIZE * xx;
             if (yy == 0) {
                 if (xx == 0) {
-                    image_draw(image_base, draw_offset_x, draw_offset_y, COLOR_MASK_NONE, SCALE_NONE);
+                    image_draw(image_base, draw_offset_x, draw_offset_y, color, SCALE_NONE);
                 } else if (xx < width_blocks - 1) {
-                    image_draw(image_base + 1, draw_offset_x, draw_offset_y, COLOR_MASK_NONE, SCALE_NONE);
+                    image_draw(image_base + 1, draw_offset_x, draw_offset_y, color, SCALE_NONE);
                 } else {
                     image_draw(image_base + 2, draw_offset_x - last_block_offset_x, draw_offset_y,
-                        COLOR_MASK_NONE, SCALE_NONE);
+                        color, SCALE_NONE);
                 }
             } else if (yy < height_blocks - 1) {
                 if (xx == 0) {
-                    image_draw(image_base + 7, draw_offset_x, draw_offset_y, COLOR_MASK_NONE, SCALE_NONE);
+                    image_draw(image_base + 7, draw_offset_x, draw_offset_y, color, SCALE_NONE);
                 } else if (xx >= width_blocks - 1) {
                     image_draw(image_base + 3, draw_offset_x - last_block_offset_x, draw_offset_y,
-                        COLOR_MASK_NONE, SCALE_NONE);
+                        color, SCALE_NONE);
                 }
             } else {
                 if (xx == 0) {
                     image_draw(image_base + 6, draw_offset_x, draw_offset_y - last_block_offset_y,
-                        COLOR_MASK_NONE, SCALE_NONE);
+                        color, SCALE_NONE);
                 } else if (xx < width_blocks - 1) {
                     image_draw(image_base + 5, draw_offset_x, draw_offset_y - last_block_offset_y,
-                        COLOR_MASK_NONE, SCALE_NONE);
+                        color, SCALE_NONE);
                 } else {
                     image_draw(image_base + 4,
                         draw_offset_x - last_block_offset_x, draw_offset_y - last_block_offset_y,
-                        COLOR_MASK_NONE, SCALE_NONE);
+                        color, SCALE_NONE);
                 }
             }
         }

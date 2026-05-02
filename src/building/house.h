@@ -4,6 +4,7 @@
 #include "building/building.h"
 
 void building_house_change_to(building *house, building_type type);
+void building_house_vacant_lot_mark_draw(int building_id);
 void building_house_change_to_vacant_lot(building *house);
 
 void building_house_merge(building *house);
@@ -17,6 +18,8 @@ void building_house_expand_to_large_palace(building *house);
 void building_house_devolve_from_large_insula(building *house);
 void building_house_devolve_from_large_villa(building *house);
 void building_house_devolve_from_large_palace(building *house);
+
+void building_house_desize_patrician(building *house);
 
 void building_house_check_for_corruption(building *house);
 

@@ -1,8 +1,8 @@
 #include "labor.h"
 
 #include "building/building.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "core/config.h"
 #include "city/data_private.h"
 #include "city/gods.h"
@@ -69,7 +69,11 @@ static const int CATEGORY_FOR_BUILDING_TYPE[BUILDING_TYPE_MAX] = {
 
     [BUILDING_PREFECTURE] = LABOR_CATEGORY_PREFECTURES,
 
-    [BUILDING_FORT]             = LABOR_CATEGORY_MILITARY,
+    [BUILDING_FORT_ARCHERS]             = LABOR_CATEGORY_MILITARY,
+    [BUILDING_FORT_LEGIONARIES]         = LABOR_CATEGORY_MILITARY,
+    [BUILDING_FORT_JAVELIN]             = LABOR_CATEGORY_MILITARY,
+    [BUILDING_FORT_MOUNTED]             = LABOR_CATEGORY_MILITARY,
+    [BUILDING_FORT_AUXILIA_INFANTRY]    = LABOR_CATEGORY_MILITARY,
     [BUILDING_GATEHOUSE]        = LABOR_CATEGORY_MILITARY,
     [BUILDING_TOWER]            = LABOR_CATEGORY_MILITARY,
     [BUILDING_MILITARY_ACADEMY] = LABOR_CATEGORY_MILITARY,

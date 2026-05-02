@@ -15,7 +15,7 @@
 #include "graphics/window.h"
 #include "map/grid.h"
 #include "translation/translation.h"
-#include "widget/city_without_overlay.h"
+#include "widget/city/draw.h"
 #include "widget/minimap.h"
 
 #include "spng/spng.h"
@@ -221,7 +221,7 @@ static void show_saved_notice(const char *filename)
     const uint8_t *prefix = translation_for(TR_WARNING_SCREENSHOT_SAVED);
     string_copy(prefix, notice_text, FILE_NAME_MAX);
     int prefix_length = string_length(prefix);
-    string_copy(string_from_ascii(filename), &notice_text[prefix_length], FILE_NAME_MAX - prefix_length);
+    encoding_from_utf8(filename, &notice_text[prefix_length], FILE_NAME_MAX - prefix_length);
 
     city_warning_show_custom(notice_text, 0);
 }
@@ -314,7 +314,7 @@ static void create_full_city_screenshot(void)
                 x_offset = canvas_width - image_section_width - TILE_X_SIZE * 2;
             }
             city_view_set_camera_from_pixel_position(min_width + width, current_height);
-            city_without_overlay_draw(0, 0, &dummy_tile, 0);
+            city_draw(0, 0, &dummy_tile, 0);
             graphics_renderer()->save_screen_buffer(&canvas[width], x_offset, TOP_MENU_HEIGHT + y_offset,
                 image_section_width, IMAGE_HEIGHT_CHUNK - y_offset, city_width_pixels);
         }

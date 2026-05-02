@@ -26,6 +26,7 @@
 #include "window/building/culture.h"
 
 static void button_return_to_fort(const generic_button *button);
+static void button_all_legions_return_to_fort(const generic_button *button);
 static void button_layout(const generic_button *button);
 static void button_priority(const generic_button *button);
 static void button_delivery(const generic_button *button);
@@ -52,8 +53,9 @@ static generic_button delivery_buttons[] = {
     {0, 0, 52, 52, button_delivery},
 };
 
-static generic_button return_button[] = {
-    {0, 0, 288, 32, button_return_to_fort},
+static generic_button return_buttons[] = {
+    {0, 0, 185, 32, button_return_to_fort},
+    {189, 0, 185, 32, button_all_legions_return_to_fort},
 };
 
 static struct {
@@ -315,11 +317,11 @@ void window_building_draw_legion_info(building_info_context *c)
     const formation *m = formation_get(c->formation_id);
     c->help_id = 87;
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
-    lang_text_draw_centered(138, m->legion_id, c->x_offset, c->y_offset + 10,
-        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    lang_text_draw_centered(m->legion_name_group, m->legion_name_id, c->x_offset, c->y_offset + 10,
+        BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK); //name of the legion
 
     // standard icon at the top
-    int icon_image_id = image_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + m->legion_id;
+    int icon_image_id = m->legion_flag_id;
     const image *icon_image = image_get(icon_image_id);
     int icon_height = icon_image->height;
     image_draw(icon_image_id, c->x_offset + 16 + (40 - icon_image->width - icon_image->x_offset) / 2, c->y_offset + 16,
@@ -579,10 +581,17 @@ void window_building_draw_legion_info_foreground(building_info_context *c)
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_GREEN);
 
     if (!m->is_at_fort && !m->in_distant_battle) {
-        button_border_draw(c->x_offset + BLOCK_SIZE * (c->width_blocks - 18) / 2,
-            c->y_offset + 2 + BLOCK_SIZE * c->height_blocks - 48, 288, 32, data.return_button_id == 1);
-        lang_text_draw_centered(138, 58, c->x_offset + BLOCK_SIZE * (c->width_blocks - 18) / 2,
-            c->y_offset + 3 + BLOCK_SIZE * c->height_blocks - 39, 288, FONT_NORMAL_BLACK);
+        int button_x = c->x_offset + 44;
+        int button_y = c->y_offset + 2 + BLOCK_SIZE * c->height_blocks - 47;
+
+        // First button
+        button_border_draw(button_x, button_y, 185, 32, data.return_button_id == 1);
+        lang_text_draw_centered(138, 58, button_x, button_y + 10, 185, FONT_NORMAL_BLACK);
+
+        // Second button  
+        button_border_draw(button_x + 189, button_y, 185, 32, data.return_button_id == 2);
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUTTON_INFO_RETURN_ALL_LEGIONS,
+            button_x + 189, button_y + 10, 185, FONT_NORMAL_BLACK);
     }
 }
 
@@ -597,8 +606,8 @@ int window_building_handle_mouse_legion_info(const mouse *m, building_info_conte
         }
     }
     if (!handled) {
-        handled = generic_buttons_handle_mouse(m, c->x_offset + BLOCK_SIZE * (c->width_blocks - 18) / 2,
-            c->y_offset + BLOCK_SIZE * c->height_blocks - 48, return_button, 1, &data.return_button_id);
+        handled = generic_buttons_handle_mouse(m, c->x_offset + 44,
+            c->y_offset + 2 + BLOCK_SIZE * c->height_blocks - 47, return_buttons, 2, &data.return_button_id);
     }
     data.context_for_callback = 0;
     return handled;
@@ -657,6 +666,12 @@ static void button_return_to_fort(const generic_button *button)
         formation_legion_return_home(m);
         window_city_show();
     }
+}
+
+static void button_all_legions_return_to_fort(const generic_button *button)
+{
+    formation_legion_return_home_all();
+    window_city_show();
 }
 
 static void button_layout(const generic_button *button)
@@ -729,10 +744,10 @@ void window_building_draw_watchtower(building_info_context *c)
         building *b = building_get(c->building_id);
         if (!b->figure_id4) {
             text_draw_multiline(translation_for(TR_BUILDING_WATCHTOWER_DESC_NO_SOLDIERS),
-                c->x_offset + 32, c->y_offset + 76, 16 * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
+                c->x_offset + 32, c->y_offset + 56, 16 * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
         } else {
             text_draw_multiline(translation_for(TR_BUILDING_WATCHTOWER_DESC),
-                c->x_offset + 32, c->y_offset + 76, 16 * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
+                c->x_offset + 32, c->y_offset + 56, 16 * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
         }
     }
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);

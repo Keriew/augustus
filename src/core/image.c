@@ -46,6 +46,7 @@
 #define GREEK_FONT_BASE_OFFSET 1
 
 #define NAME_SIZE 32
+#define NAME_SIZE_LONG 128
 
 #define IMAGE_TYPE_ISOMETRIC 30
 
@@ -123,7 +124,8 @@ static const char EDITOR_GRAPHICS_555[][NAME_SIZE] = {
 static const char EXTERNAL_FONTS_SG2[NAME_SIZE] = "C3_fonts.sg2";
 static const char EXTERNAL_FONTS_555[NAME_SIZE] = "C3_fonts.555";
 static const char CHINESE_FONTS_555[NAME_SIZE] = "rome.555";
-static const char CHINESE_FONTS_555_V2[NAME_SIZE] = "rome-v2.555";
+static const char SIMP_CHINESE_FONTS_555_V2[NAME_SIZE_LONG] = ASSETS_DIRECTORY "/i18n/Simplified_Chinese.555";
+static const char TRAD_CHINESE_FONTS_555_V2[NAME_SIZE_LONG] = ASSETS_DIRECTORY "/i18n/Traditional_Chinese.555";
 static const char KOREAN_FONTS_555[NAME_SIZE] = "korean.555";
 static const char KOREAN_FONTS_555_V2[NAME_SIZE] = "korean-v2.555";
 static const char JAPANESE_FONTS_555[NAME_SIZE] = "japanese-v2.555";
@@ -177,7 +179,7 @@ static multibyte_font_data multibyte_font_info[MULTIBYTE_FONT_MAX] = {
     {
         .name = "Traditional Chinese",
         .file_v1 = CHINESE_FONTS_555,
-        .file_v2 = CHINESE_FONTS_555_V2,
+        .file_v2 = TRAD_CHINESE_FONTS_555_V2,
         .data_size = CHINESE_FONT_DATA_SIZE,
         .chars = IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS,
         .sizes = {
@@ -189,7 +191,7 @@ static multibyte_font_data multibyte_font_info[MULTIBYTE_FONT_MAX] = {
     {
         .name = "Simplified Chinese",
         .file_v1 = CHINESE_FONTS_555,
-        .file_v2 = CHINESE_FONTS_555_V2,
+        .file_v2 = SIMP_CHINESE_FONTS_555_V2,
         .data_size = CHINESE_FONT_DATA_SIZE,
         .chars = IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS,
         .sizes = {
@@ -661,6 +663,19 @@ static void update_native_images(int old_climate, int new_climate)
     }
 }
 
+static void fix_animation_offsets(void)
+{
+    // Fix black stripe in legionaries' dying animation
+    data.main[image_group(GROUP_BUILDING_FORT_LEGIONARY) + 155].width = 30;
+
+    data.main[image_group(GROUP_BUILDING_FOUNTAIN_4)].animation->sprite_offset_x -= 1;
+    data.main[image_group(GROUP_BUILDING_FOUNTAIN_3)].animation->sprite_offset_x -= 1;
+    data.main[image_group(GROUP_BUILDING_LION_HOUSE)].animation->sprite_offset_y -= 1;
+
+    // Fix engineer's post animation offset
+    data.main[image_group(GROUP_BUILDING_ENGINEERS_POST)].animation->sprite_offset_y += 1;
+}
+
 int image_load_climate(int climate_id, int is_editor, int force_reload, int keep_atlas_buffers)
 {
     if (climate_id == data.current_climate && is_editor == data.is_editor && !force_reload &&
@@ -674,6 +689,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
         free(data.main[i].animation);
     }
 
+    memset(data.main, 0, sizeof(data.main));
     release_external_buffers();
     free(data.external_draw_data);
     data.external_draw_data = 0;
@@ -683,7 +699,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     const char *filename_bmp = is_editor ? EDITOR_GRAPHICS_555[climate_id] : MAIN_GRAPHICS_555[climate_id];
     const char *filename_idx = is_editor ? EDITOR_GRAPHICS_SG2[climate_id] : MAIN_GRAPHICS_SG2[climate_id];
     uint8_t *tmp_data = malloc(MAIN_DATA_SIZE * sizeof(uint8_t));
-    image_draw_data *draw_data = malloc((IMAGE_MAIN_ENTRIES + data.images_with_tops) * sizeof(image_draw_data));
+    image_draw_data *draw_data = malloc(IMAGE_MAIN_ENTRIES * sizeof(image_draw_data));
     if (!tmp_data || !draw_data ||
         MAIN_INDEX_SIZE != io_read_file_into_buffer(filename_idx, MAY_BE_LOCALIZED, tmp_data, MAIN_INDEX_SIZE)) {
         free(tmp_data);
@@ -745,17 +761,6 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     graphics_renderer()->create_image_atlas(atlas_data, !keep_atlas_buffers);
     image_packer_free(&data.packer);
 
-    // Fix engineer's post animation offset
-    if (!is_editor) {
-        data.main[image_group(GROUP_BUILDING_ENGINEERS_POST)].animation->sprite_offset_y += 1;
-    }
-
-    // Fix black stripe in legionaries' dying animation
-    if (!is_editor) {
-        int image_id = image_group(GROUP_BUILDING_FORT_LEGIONARY) + 155;
-        data.main[image_id].width = 30;
-    }
-
     // Update native huts alternative images after climate change.
     update_native_images(data.current_climate, climate_id);
 
@@ -763,6 +768,10 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     data.is_editor = is_editor;
 
     data.images_with_tops = 0;
+
+    if (!is_editor) {
+        fix_animation_offsets();
+    }
 
     return 1;
 }
@@ -1381,10 +1390,18 @@ const image *image_get(int id)
 
 const image *image_letter(int letter_id)
 {
+    // IMPORTANT: multibyte font check must come BEFORE the custom offset check.
+    // For simplified Chinese, letter_id can exceed IMAGE_FONT_CUSTOM_OFFSET (14000)
+    // because multibyte_image_offset (2229) + large char_id (e.g. 1874) pushes
+    // letter_id to 14103, which is above the custom font threshold.
+    if (data.fonts_enabled == MULTIBYTE_IN_FONT && letter_id >= IMAGE_FONT_MULTIBYTE_OFFSET) {
+        return &data.font[data.font_base_offset + letter_id - IMAGE_FONT_MULTIBYTE_OFFSET];
+    }
+    if (letter_id > IMAGE_FONT_CUSTOM_OFFSET) {
+        return assets_get_font_image(letter_id); // Custom font image intercept
+    }
     if (data.fonts_enabled == FULL_CHARSET_IN_FONT) {
         return &data.font[data.font_base_offset + letter_id];
-    } else if (data.fonts_enabled == MULTIBYTE_IN_FONT && letter_id >= IMAGE_FONT_MULTIBYTE_OFFSET) {
-        return &data.font[data.font_base_offset + letter_id - IMAGE_FONT_MULTIBYTE_OFFSET];
     } else if (letter_id < IMAGE_FONT_MULTIBYTE_OFFSET) {
         return &data.main[data.group_image_ids[GROUP_FONT] + letter_id];
     } else {

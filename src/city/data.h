@@ -14,6 +14,6 @@ void city_data_save_state(buffer *main, buffer *graph_order, buffer *entry_exit_
 void city_data_load_state(buffer *main, buffer *graph_order, buffer *entry_exit_xy, buffer *entry_exit_grid_offset,
     int version);
 
-void city_data_load_basic_info(buffer *main, int *population, int *treasury, int *caravanserai_id, int version);
+void city_data_load_basic_info(buffer *main, int *population, int *treasury, unsigned int *caravanserai_id, int version);
 
 #endif // CITY_DATA_H

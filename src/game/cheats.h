@@ -20,6 +20,15 @@ void game_cheat_breakpoint(void);
 
 void game_cheat_console(void);
 
-void game_cheat_parse_command(uint8_t * command);
+void game_cheat_parse_command(uint8_t *command);
 
+int game_cheat_extra_legions(void);
+
+int game_cheat_disabled_legions_consumption(void);
+
+int game_cheat_disabled_invasions(void);
+
+void game_cheat_show_custom_events(uint8_t *args);
+
+void game_cheat_show_editor(uint8_t *args);
 #endif // GAME_CHEATS_H

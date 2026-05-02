@@ -24,7 +24,7 @@ static image_button clear_text_button = {
 void input_box_start(input_box *box)
 {
     int text_width = (box->width_blocks - 2) * BLOCK_SIZE - 35;
-    keyboard_start_capture(box->text, box->text_length, box->allow_punctuation, text_width, box->font);
+    keyboard_start_capture(box->text, box->text_length, box->allow_punctuation, text_width, box->font, box->allowed_chars);
     clear_text_button.x_offset = box->x + box->width_blocks * 16;
     if (!box->put_clear_button_outside_box) {
         clear_text_button.x_offset -= CLEAR_BUTTON_WIDTH;

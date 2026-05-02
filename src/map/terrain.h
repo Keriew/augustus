@@ -1,9 +1,15 @@
 #ifndef MAP_TERRAIN_H
 #define MAP_TERRAIN_H
 
+#include <stdint.h>
 #include "core/buffer.h"
 
+#define TERRAIN_LAST_FLAG TERRAIN_HIGHWAY_BOTTOM_RIGHT
+#define TERRAIN_NUM_FLAGS  (21)  // bits
+#define KEY_MAX_LEN 32 // max length of a single key - only debugging purposes
+
 enum {
+    TERRAIN_CLEAR = 0,
     TERRAIN_TREE = 1 << 0,
     TERRAIN_ROCK = 1 << 1,
     TERRAIN_WATER = 1 << 2,
@@ -19,7 +25,7 @@ enum {
     TERRAIN_RUBBLE = 1 << 12,
     TERRAIN_FOUNTAIN_RANGE = 1 << 13,
     TERRAIN_WALL = 1 << 14,
-    TERRAIN_GATEHOUSE = 1 << 15,
+    TERRAIN_GATEHOUSE = 1 << 15, // this is used for TERRAIN_TOWER as well
     TERRAIN_ORIGINALLY_TREE = 1 << 16,
     TERRAIN_HIGHWAY_TOP_LEFT = 1 << 17,
     TERRAIN_HIGHWAY_BOTTOM_LEFT = 1 << 18,
@@ -29,7 +35,6 @@ enum {
     // Combined
     TERRAIN_HIGHWAY = TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_BOTTOM_LEFT |
     TERRAIN_HIGHWAY_TOP_RIGHT | TERRAIN_HIGHWAY_BOTTOM_RIGHT,
-
     TERRAIN_WALL_OR_GATEHOUSE = TERRAIN_WALL | TERRAIN_GATEHOUSE,
 
     TERRAIN_NOT_CLEAR_EXCEPT_ROAD = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB |
@@ -51,6 +56,8 @@ enum {
     TERRAIN_IMPASSABLE_WOLF = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB |
     TERRAIN_GARDEN | TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP |
     TERRAIN_RUBBLE | TERRAIN_WALL_OR_GATEHOUSE,
+    
+    TERRAIN_IMPASSABLE_EARTHQUAKE = TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP,
 
     TERRAIN_ELEVATION_ROCK = TERRAIN_ELEVATION | TERRAIN_ROCK,
 
@@ -62,7 +69,16 @@ enum {
     TERRAIN_MAP_EDGE = TERRAIN_TREE | TERRAIN_WATER,
 };
 
+typedef struct {
+    char key[TERRAIN_NUM_FLAGS][KEY_MAX_LEN];  // array of active flag names
+    uint8_t bits[TERRAIN_NUM_FLAGS];           // which bits are set (for compatibility)
+    int count;                                 // number of active flags
+} terrain_flags_array;
+
+const terrain_flags_array *map_terrain_to_array(int grid_offset);
 int map_terrain_is(int grid_offset, int terrain);
+
+int map_terrain_is_roadblock(int grid_offset);
 
 int map_terrain_is_superset(int grid_offset, unsigned int terrain_sum);
 
@@ -88,19 +104,19 @@ void map_terrain_remove_all(int terrain);
  * Check orthogonal neighbours of a tile if they contain a terrain.
  * @param grid_offset Tile which neighbours will be checked.
  * @param terrain Terrain bitmask to be checked for.
- * @return 1 if any orthogonal tiles matches at least one terrain from the bitmask, 0 otherwise.
+ * @return The number of orthogonal neighbours that match the terrain bitmask.
  */
-int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain);
+unsigned int map_terrain_count_directly_adjacent_with_type(int grid_offset, int terrain);
 
 /**
  * Check orthogonal neighbours of a tile if they contain a terrain.
  * @param grid_offset Tile which neighbours will be checked.
  * @param terrain_sum Terrain bitmask to be checked for.
- * @return 1 if any orthogonal tiles matches all terrains from the bitmask, 0 otherwise.
+ * @return The number of orthogonal neighbours that match all terrains from the bitmask.
  */
-int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_sum);
+unsigned int map_terrain_count_directly_adjacent_with_types(int grid_offset, int terrain_sum);
 
-int map_terrain_count_diagonally_adjacent_with_type(int grid_offset, int terrain);
+unsigned int map_terrain_count_diagonally_adjacent_with_type(int grid_offset, int terrain);
 
 int map_terrain_has_adjacent_x_with_type(int grid_offset, int terrain);
 
@@ -130,7 +146,6 @@ int map_terrain_is_adjacent_to_open_water(int x, int y, int size);
 int map_terrain_get_adjacent_road_or_clear_land(int x, int y, int size, int *x_tile, int *y_tile);
 
 void map_terrain_add_roadblock_road(int x, int y);
-void map_terrain_add_warehouse_road(int x, int y);
 void map_terrain_add_gatehouse_roads(int x, int y, int orientation);
 void map_terrain_add_triumphal_arch_roads(int x, int y, int orientation);
 
@@ -146,6 +161,8 @@ void map_terrain_save_state(buffer *buf);
 void map_terrain_save_state_legacy(buffer *buf);
 
 void map_terrain_migrate_old_bridges(void);
+
+void map_terrain_migrate_shared_buildings(void);
 
 void map_terrain_load_state(buffer *buf, int expanded_terrain_data, buffer *images, int legacy_image_buffer);
 

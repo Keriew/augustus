@@ -23,6 +23,8 @@ void text_draw_centered(const uint8_t *str, int x, int y, int box_width, font_t 
 void text_draw_right_aligned(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color);
 int text_draw_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color);
 
+int text_draw_centered_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color);
+
 int text_draw_number(int value, char prefix, const char *postfix, int x, int y, font_t font, color_t color);
 void text_draw_number_finances(int value, int x, int y, font_t font, color_t color);
 int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
@@ -31,6 +33,7 @@ int text_draw_money(int value, int x_offset, int y_offset, font_t font);
 void text_draw_with_money(const uint8_t *text, int value, const char *prefix, const char *postfix,
     int x_offset, int y_offset, int box_width, font_t font, color_t color);
 int text_draw_percentage(int value, int x_offset, int y_offset, font_t font);
+void text_draw_percentage_centered(int value, int x_offset, int y_offset, int box_width, font_t font);
 
 int text_draw_label_and_number(const uint8_t *label, int value, const char *postfix,
     int x_offset, int y_offset, font_t font, color_t color);
@@ -53,4 +56,5 @@ int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_
  */
 int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *largest_width);
 
+void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color);
 #endif // GRAPHICS_TEXT_H

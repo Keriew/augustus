@@ -94,6 +94,7 @@ static struct {
     int y_offset;
     int width;
     int height;
+    int available_height;
     int is_collapsed;
     sidebar_extra_display info_to_display;
     int game_speed;
@@ -173,6 +174,12 @@ static sidebar_extra_display calculate_displayable_info(sidebar_extra_display in
     } else {
         return result;
     }
+    if (available_height >= EXTRA_INFO_HEIGHT_REQUESTS_MIN) {
+        if (info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS) {
+            available_height -= EXTRA_INFO_HEIGHT_REQUESTS_MIN;
+            result |= SIDEBAR_EXTRA_DISPLAY_REQUESTS;
+        }
+    }
     if (available_height >= EXTRA_INFO_HEIGHT_RATINGS) {
         if (info_to_display & SIDEBAR_EXTRA_DISPLAY_RATINGS) {
             available_height -= EXTRA_INFO_HEIGHT_RATINGS;
@@ -181,12 +188,7 @@ static sidebar_extra_display calculate_displayable_info(sidebar_extra_display in
     } else {
         return result;
     }
-    if (available_height >= EXTRA_INFO_HEIGHT_REQUESTS_MIN) {
-        if (info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS) {
-            available_height -= EXTRA_INFO_HEIGHT_REQUESTS_MIN;
-            result |= SIDEBAR_EXTRA_DISPLAY_REQUESTS;
-        }
-    }
+
     return result;
 }
 
@@ -208,9 +210,6 @@ static int calculate_extra_info_height(int available_height)
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_GODS) {
         height += EXTRA_INFO_HEIGHT_GODS;
     }
-    if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_RATINGS) {
-        height += EXTRA_INFO_HEIGHT_RATINGS;
-    }
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS) {
         height += EXTRA_INFO_HEIGHT_REQUESTS_MIN;
         unsigned int num_requests = count_active_requests();
@@ -223,6 +222,10 @@ static int calculate_extra_info_height(int available_height)
             data.visible_requests++;
         }
     }
+    if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_RATINGS) {
+        height += EXTRA_INFO_HEIGHT_RATINGS;
+    }
+
     return height;
 }
 
@@ -315,16 +318,6 @@ static int update_extra_info(int is_background)
         changed |= update_extra_info_value(count_happy_gods(), &data.gods.happy);
         changed |= update_extra_info_value(count_angry_gods(), &data.gods.angry);
     }
-    if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_RATINGS) {
-        if (is_background) {
-            set_extra_info_objectives();
-        }
-        changed |= update_extra_info_value(city_rating_culture(), &data.objectives.culture.value);
-        changed |= update_extra_info_value(city_rating_prosperity(), &data.objectives.prosperity.value);
-        changed |= update_extra_info_value(city_rating_peace(), &data.objectives.peace.value);
-        changed |= update_extra_info_value(city_rating_favor(), &data.objectives.favor.value);
-        changed |= update_extra_info_value(city_population(), &data.objectives.population.value);
-    }
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS) {
         int new_requests = update_extra_info_value(count_active_requests(), (int *) &data.active_requests);
         new_requests |= update_extra_info_value(city_request_has_troop_request(), &data.troop_requests);
@@ -354,7 +347,7 @@ static int update_extra_info(int is_background)
                 changed |= update_extra_info_value(city_finance_treasury(), &slot->available);
             } else {
                 changed |= update_extra_info_value(city_resource_get_amount_including_granaries(r->resource,
-                    r->amount.requested, 0), &slot->available);
+                    r->amount.requested, 0, 1), &slot->available);
             }
 
             changed |= update_extra_info_value(is_stockpiled_changed(r->resource), &slot->stockpiled);
@@ -364,6 +357,18 @@ static int update_extra_info(int is_background)
             changed = 1;
         }
     }
+
+    if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_RATINGS) {
+        if (is_background) {
+            set_extra_info_objectives();
+        }
+        changed |= update_extra_info_value(city_rating_culture(), &data.objectives.culture.value);
+        changed |= update_extra_info_value(city_rating_prosperity(), &data.objectives.prosperity.value);
+        changed |= update_extra_info_value(city_rating_peace(), &data.objectives.peace.value);
+        changed |= update_extra_info_value(city_rating_favor(), &data.objectives.favor.value);
+        changed |= update_extra_info_value(city_population(), &data.objectives.population.value);
+    }
+
     return changed;
 }
 
@@ -412,7 +417,9 @@ static int draw_request_buttons(int y_offset)
         const request *r = &data.requests[i];
         int base_button_y_offset = i * EXTRA_INFO_HEIGHT_REQUESTS_PANEL;
 
-        if (data.visible_requests < data.active_requests && i == data.visible_requests - 1) {
+        if (data.visible_requests + 1 == data.active_requests &&
+            data.height + EXTRA_INFO_HEIGHT_REQUESTS_PANEL > data.available_height) {
+
             buttons_emperor_requests[i].y = base_button_y_offset + 9;
             buttons_emperor_requests[i].height = 30;
 
@@ -448,18 +455,15 @@ static int draw_request_buttons(int y_offset)
             image_draw(image_id, width, y_offset + image_y_offset, COLOR_MASK_NONE, SCALE_NONE);
 
             width += img->width + 6;
+            int request_index = data.requests[i].index;
+            if (city_request_has_troop_request() && i != 0) {
+                request_index++;
+            }
 
+            int status = city_request_get_status(request_index);
             if (r->resource != RESOURCE_DENARII) {
                 int is_stockpiled = city_resource_is_stockpiled(r->resource);
                 int enough_resource = 0;
-
-                int request_index = data.requests[i].index;
-                if (city_request_has_troop_request() && i != 0) {
-                    request_index++;
-                }
-
-                int status = city_request_get_status(request_index);
-
                 // button text
                 if (status) {
                     if (status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES) {
@@ -486,11 +490,12 @@ static int draw_request_buttons(int y_offset)
                     width - 5, y_offset + 2, enough_resource ? FONT_NORMAL_GREEN : FONT_NORMAL_RED, 0);
 
             } else {
+                color_t color = status == CITY_REQUEST_STATUS_NOT_ENOUGH_RESOURCES ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
                 width += text_draw_number(r->amount, 0, "",
-                    width, y_offset + 2, FONT_NORMAL_GREEN, 0);
+                    width, y_offset + 2, color, 0);
 
                 text_draw_centered(translation_for(TR_SIDEBAR_EXTRA_REQUESTS_SEND),
-                    data.x_offset + 2, y_offset + 25, 158, FONT_NORMAL_GREEN, 0);
+                    data.x_offset + 2, y_offset + 25, 158, color, 0);
             }
 
             font_t font_color = r->time <= REQUEST_MONTHS_LEFT_FOR_RED_WARNING ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
@@ -612,6 +617,7 @@ int sidebar_extra_draw_background(int x_offset, int y_offset, int width, int ava
     data.y_offset = y_offset;
     data.width = width;
     data.info_to_display = calculate_displayable_info(info_to_display, available_height);
+    data.available_height = available_height;
     data.height = calculate_extra_info_height(available_height);
 
     if (data.info_to_display != SIDEBAR_EXTRA_DISPLAY_NONE) {
@@ -651,7 +657,7 @@ int sidebar_extra_handle_mouse(const mouse *m)
 {
     if ((data.info_to_display & SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) &&
         (arrow_buttons_handle_mouse(m, data.x_offset, data.y_offset, arrow_buttons_speed, 2, 0) ||
-        image_buttons_handle_mouse(m, data.x_offset, data.y_offset, &play_paused_button, 1, 0))) {
+            image_buttons_handle_mouse(m, data.x_offset, data.y_offset, &play_paused_button, 1, 0))) {
         return 1;
     }
     if ((data.info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS) &&
@@ -668,7 +674,7 @@ int sidebar_extra_get_tooltip(tooltip_context *c)
         return 0;
     }
     const mouse *m = mouse_get();
-    if (m->x < data.x_offset + 2 || m->x >= data.x_offset + data.width - 2 ||  m->y < data.objectives_y_offset ||
+    if (m->x < data.x_offset + 2 || m->x >= data.x_offset + data.width - 2 || m->y < data.objectives_y_offset ||
         m->y >= data.objectives_y_offset + EXTRA_INFO_LINE_SPACE * 8) {
         return 0;
     }

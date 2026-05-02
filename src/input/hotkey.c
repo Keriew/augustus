@@ -2,6 +2,7 @@
 
 #include "building/type.h"
 #include "city/constants.h"
+#include "empire/editor.h"
 #include "game/settings.h"
 #include "game/state.h"
 #include "game/system.h"
@@ -9,6 +10,7 @@
 #include "graphics/video.h"
 #include "graphics/window.h"
 #include "input/scroll.h"
+#include "sound/music.h"
 #include "window/hotkey_editor.h"
 #include "window/popup_dialog.h"
 
@@ -35,7 +37,12 @@ typedef struct {
     int save_screenshot;
     int save_city_screenshot;
     int save_minimap_screenshot;
+    int next_track;
 } global_hotkeys;
+
+typedef struct {
+    key_type keys[10];
+} build_menu_hotkeys;
 
 static struct {
     global_hotkeys global_hotkey_state;
@@ -45,6 +52,7 @@ static struct {
     arrow_definition *arrows;
     int num_arrows;
     key_modifier_type modifiers;
+    build_menu_hotkeys build_menu_hotkeys;
 } data;
 
 static void set_definition_for_action(hotkey_action action, hotkey_definition *def)
@@ -240,6 +248,10 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_BUILD_CLEAR_LAND:
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_CLEAR_LAND;
+            break;
+        case HOTKEY_BUILD_REPAIR_LAND:
+            def->action = &data.hotkey_state.building;
+            def->value = BUILDING_REPAIR_LAND;
             break;
         case HOTKEY_BUILD_ROAD:
             def->action = &data.hotkey_state.building;
@@ -440,6 +452,67 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             def->action = &data.hotkey_state.show_overlay;
             def->value = OVERLAY_ENEMY;
             break;
+        case HOTKEY_NEXT_TRACK:
+            def->action = &data.global_hotkey_state.next_track;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_DELETE_OBJECT:
+            def->action = &data.hotkey_state.delete_empire_object;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_OUR_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_OUR_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_TRADE_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_TRADE_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_ROMAN_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_ROMAN_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_VULNERABLE_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_VULNERABLE_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_FUTURE_TRADE_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_FUTURE_TRADE_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_DISTANT_CITY:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_DISTANT_CITY + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_BORDER:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_BORDER + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_BATTLE:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_BATTLE + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_BABRIAN:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_DISTANT_BABARIAN + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_LEGION:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_DISTANT_LEGION + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_LAND_POINT:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_LAND_ROUTE + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_SEA_POINT:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_SEA_ROUTE + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_TOOL_SELECTION:
+            def->action = &data.hotkey_state.empire_tool;
+            def->value = EMPIRE_TOOL_MAX + 1;
+            break;
+        case HOTKEY_EDITOR_EMPIRE_PICK_TOOL:
+            def->action = &data.hotkey_state.pick_empire_tool;
+            break;
         default:
             def->action = 0;
     }
@@ -557,6 +630,11 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
             add_definition(&mappings[i]);
         }
     }
+
+    for (int i = 0; i < 10; i++) {
+        int k = KEY_TYPE_1 + i;
+        data.build_menu_hotkeys.keys[i] = k;
+    }
 }
 
 const hotkeys *hotkey_state(void)
@@ -590,6 +668,12 @@ void hotkey_key_pressed(key_type key, key_modifier_type modifiers, int repeat)
         }
         if (def->key == key && def->modifiers == modifiers && (!repeat || def->repeatable)) {
             *(def->action) = def->value;
+            found_action = 1;
+        }
+    }
+    for (int i = 0; i < 10; i++) {
+        if (data.build_menu_hotkeys.keys[i] == key) {
+            data.hotkey_state.build_menu_index_num = (key - KEY_TYPE_1) + 1;
             found_action = 1;
         }
     }
@@ -664,6 +748,9 @@ void hotkey_handle_global_keys(void)
     }
     if (data.global_hotkey_state.save_minimap_screenshot) {
         graphics_save_screenshot(SCREENSHOT_MINIMAP);
+    }
+    if (data.global_hotkey_state.next_track) {
+        sound_music_next_track();
     }
 }
 

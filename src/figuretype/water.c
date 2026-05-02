@@ -1,8 +1,8 @@
 #include "water.h"
 
 #include "building/building.h"
-#include "building/model.h"
 #include "building/monument.h"
+#include "building/properties.h"
 #include "city/gods.h"
 #include "city/message.h"
 #include "core/calc.h"
@@ -37,7 +37,7 @@ void figure_create_flotsam(void)
     if (!scenario_map_has_river_entry() || !scenario_map_has_river_exit() || !scenario_map_has_flotsam()) {
         return;
     }
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state && f->type == FIGURE_FLOTSAM) {
             figure_delete(f);
@@ -314,7 +314,7 @@ void figure_fishing_boat_action(figure *f)
 
 void figure_sink_all_ships(void)
 {
-    for (int i = 1; i < figure_count(); i++) {
+    for (unsigned int i = 1; i < figure_count(); i++) {
         figure *f = figure_get(i);
         if (f->state != FIGURE_STATE_ALIVE) {
             continue;
@@ -323,6 +323,43 @@ void figure_sink_all_ships(void)
             building_get(f->destination_building_id)->data.dock.trade_ship_id = 0;
         } else if (f->type == FIGURE_FISHING_BOAT) {
             building_get(f->building_id)->data.industry.fishing_boat_id = 0;
+        } else {
+            continue;
+        }
+        f->building_id = 0;
+        f->type = FIGURE_SHIPWRECK;
+        f->wait_ticks = 0;
+    }
+}
+
+void figure_sink_half_ships(void)
+{
+    int fishing_to_destroy = 0;
+    int trade_to_destroy = 0;
+    for (unsigned int i = 1; i < figure_count(); i++) {
+        figure *f = figure_get(i);
+        if (f->state != FIGURE_STATE_ALIVE) {
+            continue;
+        }
+        if (f->type == FIGURE_TRADE_SHIP) {
+            trade_to_destroy++;
+        } else if (f->type == FIGURE_FISHING_BOAT) {
+            fishing_to_destroy++;
+        }
+    }
+    int fishing_destroyed = 0;
+    int trade_destroyed = 0;
+    for (unsigned int i = 1; i < figure_count(); i++) {
+        figure *f = figure_get(i);
+        if (f->state != FIGURE_STATE_ALIVE) {
+            continue;
+        }
+        if (f->type == FIGURE_TRADE_SHIP && (trade_destroyed < (int)trade_to_destroy / 2 )) {
+            building_get(f->destination_building_id)->data.dock.trade_ship_id = 0;
+            trade_destroyed++;
+        } else if (f->type == FIGURE_FISHING_BOAT && (fishing_destroyed < (int)fishing_to_destroy / 2 )) {
+            building_get(f->building_id)->data.industry.fishing_boat_id = 0;
+            fishing_destroyed++;
         } else {
             continue;
         }

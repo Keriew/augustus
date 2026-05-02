@@ -15,7 +15,7 @@ typedef struct {
     int is_open;
     int buys_resource[RESOURCE_MAX];
     int sells_resource[RESOURCE_MAX];
-    int cost_to_open;
+    unsigned int cost_to_open;
     int trader_entry_delay;
     int empire_object_id;
     int is_sea_trade;
@@ -27,6 +27,8 @@ void empire_city_clear_all(void);
 empire_city *empire_city_get(int city_id);
 
 empire_city *empire_city_get_new(void);
+
+void empire_city_remove(int city_id);
 
 int empire_city_get_route_id(int city_id);
 
@@ -54,6 +56,10 @@ int empire_city_get_for_object(int empire_object_id);
 
 int empire_city_get_for_trade_route(int route_id);
 
+int empire_city_buys_resource(int city_id, int resource);
+
+int empire_city_sells_resource(int city_id, int resource);
+
 int empire_city_get_trade_routes_count(int is_sea_trade, int is_route_open);
 
 int empire_city_is_trade_route_open(int route_id);
@@ -79,6 +85,8 @@ void empire_city_set_vulnerable(int city_id);
 
 void empire_city_set_foreign(int city_id);
 
+void empire_city_set_type(int city_id, empire_city_type type);
+
 void empire_city_open_trade(int city_id, int apply_cost);
 
 void empire_city_generate_trader(void);
@@ -100,5 +108,9 @@ void empire_city_update_trading_data(int empire_id);
 void empire_city_load_state(buffer *buf, int version);
 
 int empire_city_get_array_size(void);
+
+int empire_city_get_icon_image_id(empire_city_icon_type type);
+
+int empire_city_get_at(int x, int y, const uint8_t *name);
 
 #endif // EMPIRE_CITY_H

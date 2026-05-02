@@ -138,10 +138,11 @@ int platform_sdl_version_at_least(int major, int minor, int patch)
 
 char *platform_get_logging_path(void)
 {
-    if (!SDL_strcasecmp(system_OS(), "Android")) {
-        return NULL;
-    }
+#if defined(__ANDROID__)
+    return NULL;
+#else
     return platform_get_pref_path();
+#endif
 }
 
 char *platform_get_pref_path(void)

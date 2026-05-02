@@ -32,6 +32,8 @@ void rich_text_set_fonts(font_t normal_font, font_t heading_font, font_t link_fo
  */
 void rich_text_reset(int scroll_position);
 
+void rich_text_update(void);
+
 /**
  * Clear the links table
  */
