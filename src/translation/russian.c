@@ -2074,6 +2074,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_PRICE_CHANGES, "изменений цен"},
     {TR_EDITOR_DEMAND_CHANGE, "изменение спроса"},
     {TR_EDITOR_DEMAND_CHANGES, "изменений спроса"},
+    {TR_FIGURE_TYPE_PLEBIAN, "Плебей"},
+    {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, "Дома не создают бесцельно блуждающих плебеев"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

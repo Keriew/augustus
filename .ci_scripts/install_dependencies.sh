@@ -98,7 +98,7 @@ function install_sdl_ios {
 mkdir -p deps
 if [ "$BUILD_TARGET" == "appimage" ] || [ "$BUILD_TARGET" == "codeql-cpp" ]
 then
-  sudo add-apt-repository universe && sudo add-apt-repository ppa:savoury1/multimedia && sudo apt-get update && sudo apt-get -y install libgl1-mesa-dev libsdl2-dev libsdl2-mixer-dev libfuse2
+  sudo add-apt-repository universe && sudo apt-get update && sudo apt-get -y install libgl1-mesa-dev libsdl2-dev libsdl2-mixer-dev libfuse2
 elif [ "$BUILD_TARGET" == "flatpak" ]
 then
   sudo apt-get update && sudo apt-get -y install flatpak-builder
