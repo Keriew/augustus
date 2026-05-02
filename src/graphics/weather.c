@@ -47,7 +47,7 @@ typedef struct {
     // For rain
     int length;
     int speed;
-    int wind_variation;
+    int wind_phase;
 
     // For snow
     int drift_offset;
@@ -111,11 +111,9 @@ void init_weather_element(weather_element *e, int type)
         case WEATHER_RAIN:
             e->length = get_particle_size(PARTICLE_SIZES_RAIN, config_get(CONFIG_WT_RAIN_LENGTH)) + random_from_stdlib() % 10;
             e->speed = get_particle_size(PARTICLE_SPEEDS_RAIN, config_get(CONFIG_WT_RAIN_SPEED)) + random_from_stdlib() % 5;
-            if (data.weather_config.intensity < 600) {
-                e->wind_variation = 0;
-            } else {
-                e->wind_variation = (random_from_stdlib() % 3) - 1; // -1, 0 or 1
-            }
+            // Phase offset: each drop sees the wind cycle at a different point,
+            // so they don't all change direction in lockstep.
+            e->wind_phase = random_from_stdlib() % 300;
             break;
         case WEATHER_SNOW:
             e->drift_offset = random_from_stdlib() % 100;
@@ -184,7 +182,15 @@ static void update_lightning(void)
 static void update_wind(void)
 {
     data.wind_angle += data.wind_speed;
-    data.weather_config.dx = ((data.wind_angle / 10) % 5) - 2;
+    if (data.wind_angle > 1000000) {
+        data.wind_angle %= 1000;
+    }
+    // Sum of two slow sines at non-commensurate frequencies: smooth drift with
+    // no discontinuous wrap (replaces the sawtooth that snapped all drops
+    // through -2..+2 together every 50 frames).
+    float w = sinf(data.wind_angle * 0.011f) * 1.5f
+            + sinf(data.wind_angle * 0.025f) * 0.8f;
+    data.weather_config.dx = (int) w;
 }
 
 static void update_current_particle_count(void)
@@ -340,8 +346,7 @@ static void draw_rain(void)
         return;
     }
 
-    if (data.weather_config.intensity < 600 &&
-        (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_RAIN))) {
+    if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_RAIN)) {
         update_wind();
     }
 
@@ -354,13 +359,17 @@ static void draw_rain(void)
         count = max_particles;
     }
 
+    // Global wind shared by every drop: dominant horizontal direction.
+    float global_w = sinf(data.wind_angle * 0.011f) * 1.5f
+                   + sinf(data.wind_angle * 0.025f) * 0.8f;
+
     for (int i = 0; i < count; ++i) {
-        int dx;
-        if (data.current_particle_count < 600) {
-            dx = data.weather_config.dx;
-        } else {
-            dx = data.weather_config.dx + data.elements[i].wind_variation;
-        }
+        // Small per-particle perturbation around the global wind. Low amplitude
+        // (±0.5) so most drops still follow the global direction; it only
+        // changes the rounded result at transition boundaries, which staggers
+        // the moment each drop switches direction.
+        float pp = sinf((data.wind_angle + data.elements[i].wind_phase) * 0.04f) * 0.5f;
+        int dx = (int) (global_w + pp);
 
         graphics_draw_line(
             data.elements[i].x,
@@ -372,7 +381,8 @@ static void draw_rain(void)
         if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_RAIN)) {
             data.elements[i].x += dx;
 
-            int dy = base_speed + data.elements[i].speed + (((data.elements[i].x + data.elements[i].y) % 10) / 10);
+            int dy = base_speed + data.elements[i].speed
+                   + (((data.elements[i].x + data.elements[i].y) % 3) - 1);
             data.elements[i].y += dy;
         }
 
