@@ -149,7 +149,7 @@ typedef struct building {
             unsigned char health;
             unsigned char num_gods;
             unsigned char devolve_delay;
-            unsigned char evolve_text_id;
+            unsigned int evolve_text_id;
         } house;
         struct {
             unsigned short og_type;

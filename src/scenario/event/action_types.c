@@ -17,13 +17,16 @@
 #include "city/sentiment.h"
 #include "city/trade.h"
 #include "city/victory.h"
+#include "city/view.h"
 #include "core/random.h"
+#include "core/calc.h"
 #include "empire/city.h"
 #include "empire/object.h"
 #include "empire/trade_prices.h"
 #include "empire/trade_route.h"
 #include "game/time.h"
 #include "game/resource.h"
+#include "graphics/weather.h"
 #include "map/building.h"
 #include "map/grid.h"
 #include "map/property.h"
@@ -31,11 +34,13 @@
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "scenario/allowed_building.h"
+#include "scenario/criteria.h"
 #include "scenario/custom_variable.h"
+#include "scenario/data.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/formula.h"
 #include "scenario/event/parameter_city.h"
-#include "scenario/gladiator_revolt.h"  
+#include "scenario/gladiator_revolt.h"
 #include "scenario/custom_messages.h"
 #include "scenario/invasion.h"
 #include "scenario/property.h"
@@ -111,7 +116,7 @@ int scenario_action_type_change_custom_variable_visibility(scenario_action_t *ac
 int scenario_action_type_custom_variable_formula_execute(scenario_action_t *action)
 {
     int variable_id = action->parameter1;
-    unsigned int formula_id = (unsigned int) action->parameter2; //cast 
+    unsigned int formula_id = (unsigned int) action->parameter2; //cast
 
     int evaluation = scenario_formula_evaluate_formula(formula_id);
     scenario_custom_variable_set_value(variable_id, evaluation);
@@ -736,7 +741,7 @@ int scenario_action_type_change_terrain_execute(scenario_action_t *action)
                     building *b = building_main(building_get(building_id));
                     building_destroy_without_rubble(b);
                 }
-                // Since the engine only supports one blocking terrain per tile, 
+                // Since the engine only supports one blocking terrain per tile,
                 // remove all others before adding a new one
                 map_terrain_remove(current_grid_offset, TERRAIN_NOT_CLEAR);
             }
@@ -770,28 +775,10 @@ int scenario_action_type_change_model_data_execute(scenario_action_t *action)
 
     model_building *model_ptr = model_get_building(model);
 
-    switch (data_type) {
-        case MODEL_COST:
-            model_ptr->cost = set_to_value ? amount : amount + model_ptr->cost;
-            break;
-        case MODEL_DESIRABILITY_VALUE:
-            model_ptr->desirability_value = set_to_value ? amount : amount + model_ptr->desirability_value;
-            break;
-        case MODEL_DESIRABILITY_STEP:
-            model_ptr->desirability_step = set_to_value ? amount : amount + model_ptr->desirability_step;
-            break;
-        case MODEL_DESIRABILITY_STEP_SIZE:
-            model_ptr->desirability_step_size = set_to_value ? amount : amount + model_ptr->desirability_step_size;
-            break;
-        case MODEL_DESIRABILITY_RANGE:
-            model_ptr->desirability_range = set_to_value ? amount : amount + model_ptr->desirability_range;
-            break;
-        case MODEL_LABORERS:
-            model_ptr->laborers = set_to_value ? amount : amount + model_ptr->laborers;
-            break;
-        default:
-            break;
-    }
+    int *value = model_get_ptr_for_building_data_type(model_ptr, data_type);
+    *value = calc_bound(amount + (set_to_value ? 0 : *value), model_get_min_for_data_type(data_type),
+        model_get_max_for_data_type(data_type));
+
     return 1;
 }
 
@@ -851,11 +838,27 @@ int scenario_action_type_change_production_rate_execute(scenario_action_t *actio
     int set_to_value = action->parameter3;
 
     resource_data *current_data = resource_get_data(resource);
-    if (set_to_value) {
-        current_data->production_per_month = rate;
-    } else {
-        current_data->production_per_month += rate;
+    int new_rate = rate + set_to_value * current_data->production_per_month;
+    if (new_rate < 0) {
+        new_rate = 0;
     }
+    current_data->production_per_month = new_rate;
+
+    return 1;
+}
+
+int scenario_action_type_change_house_model_data_execute(scenario_action_t *action)
+{
+    int model = action->parameter1;
+    int data_type = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter3);
+    int set_to_value = action->parameter4;
+
+    model_house *model_ptr = model_get_house(model - 10); // convert from building type to housing
+
+    int *value = model_get_ptr_for_house_data_type(model_ptr, data_type);
+    *value = calc_bound(amount + (set_to_value ? 0 : *value), model_get_min_for_house_data_type(data_type),
+        model_get_max_for_house_data_type(data_type));
 
     return 1;
 }
@@ -865,13 +868,13 @@ int scenario_action_type_lock_trade_route_execute(scenario_action_t *action)
     int route_id = action->parameter1;
     int lock = action->parameter2;
     int show_message = action->parameter3;
-    
+
     if (!trade_route_is_valid(route_id)) {
         return 0;
     }
-    
+
     int city_id = empire_city_get_for_trade_route(route_id);
-    
+
     if (show_message) {
         if (lock && empire_city_is_trade_route_open(route_id)) {
             city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, RESOURCE_NONE);
@@ -886,6 +889,99 @@ int scenario_action_type_lock_trade_route_execute(scenario_action_t *action)
         empire_city_open_trade(city_id, 0);
     }
     building_menu_update();
-    
+
+    return 1;
+}
+
+int scenario_action_type_change_goal_execute(scenario_action_t *action)
+{
+    int win_condition = action->parameter1;
+    int value = scenario_formula_evaluate_formula(action->parameter2);
+    int set_to_value = action->parameter3;
+
+    value = calc_bound(value, 0, scenario_criteria_get_max_value(win_condition));
+    switch(win_condition) {
+        case SCENARIO_WIN_CONDITION_CULTURE:
+            if (scenario_criteria_culture_enabled()) {
+                scenario.win_criteria.culture.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_PROSPERITY:
+            if (scenario_criteria_prosperity_enabled()) {
+                scenario.win_criteria.prosperity.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_PEACE:
+            if (scenario_criteria_peace_enabled()) {
+                scenario.win_criteria.peace.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_FAVOR:
+            if (scenario_criteria_favor_enabled()) {
+                scenario.win_criteria.favor.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_LOOSING_TIME:
+            if (scenario_criteria_time_limit_enabled()) {
+                scenario.win_criteria.time_limit.years = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_WINNING_TIME:
+            if (scenario_criteria_survival_enabled()) {
+                scenario.win_criteria.survival_time.years = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+        case SCENARIO_WIN_CONDITION_POPULATION:
+            if (scenario_criteria_population_enabled()) {
+                scenario.win_criteria.population.goal = value + scenario.win_criteria.culture.goal * !set_to_value;
+            }
+            break;
+    }
+
+    return 1;
+}
+
+int scenario_action_type_move_camera_execute(scenario_action_t *action)
+{
+    int grid_offset = action->parameter1;
+
+    city_view_go_to_grid_offset(grid_offset);
+
+    return 1;
+}
+
+int scenario_action_type_change_weather_execute(scenario_action_t *action)
+{
+    int weather_type = action->parameter1;
+    int intensity = action->parameter2;
+
+    set_weather(1, intensity, weather_type);
+
+    return 1;
+}
+
+int scenario_action_type_hide_trade_route_execute(scenario_action_t *action)
+{
+    int route_id = action->parameter1;
+    int hide = action->parameter2; // hide or show again
+
+    if (!trade_route_is_valid(route_id)) {
+        return 0;
+    }
+
+    int city_id = empire_city_get_for_trade_route(route_id);
+    full_empire_object *route_obj = empire_object_get_full(empire_city_get(city_id)->empire_object_id + 1);
+    route_obj->route_hidden = hide;
+
+    return 1;
+}
+
+int scenario_action_type_change_custom_variable_color_execute(scenario_action_t *action)
+{
+    int variable_id = action->parameter1;
+    int color_id = action->parameter2;
+
+    scenario_custom_variable_set_color_group(variable_id, color_id);
+
     return 1;
 }

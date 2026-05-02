@@ -18,7 +18,6 @@
 #include "window/empire.h"
 #include "window/popup_dialog.h"
 
-#define BASE_BORDER_FLAG_IMAGE_ID 3323
 #define BORDER_EDGE_DEFAULT_SPACING 50
 
 static struct {
@@ -339,7 +338,7 @@ static int place_city(full_empire_object *city_obj)
 {
     city_obj->in_use = 1;
     city_obj->obj.type = EMPIRE_OBJECT_CITY;
-    
+
     switch (data.current_tool) {
         case EMPIRE_TOOL_OUR_CITY:
             if (empire_object_get_our_city()) {
@@ -391,7 +390,7 @@ static int place_city(full_empire_object *city_obj)
             city_obj->empire_city_icon = EMPIRE_CITY_ICON_DISTANT_CITY;
             break;
         default:
-            return 0; 
+            return 0;
     }
 
     city_obj->obj.image_id = empire_city_get_icon_image_id(city_obj->empire_city_icon);
@@ -407,7 +406,7 @@ static int place_city(full_empire_object *city_obj)
 static int place_border(full_empire_object *edge)
 {
     edge->in_use = 1;
-    unsigned int parent_id = 0; 
+    unsigned int parent_id = 0;
     const empire_object *current_border = empire_object_get_border();
     if (!current_border) {
         // create border
@@ -446,7 +445,7 @@ static int place_battle(full_empire_object *battle_obj)
     const image *img = image_get(battle_obj->obj.image_id);
     battle_obj->obj.width = img->width;
     battle_obj->obj.height = img->height;
-    
+
     return 1;
 }
 
@@ -471,7 +470,7 @@ static int place_distant_battle(full_empire_object *distant_battle)
     const image *img = image_get(distant_battle->obj.image_id);
     distant_battle->obj.width = img->width;
     distant_battle->obj.height = img->height;
-    
+
     return 1;
 }
 
@@ -511,7 +510,7 @@ static void deletion_confirmed(int confirmed, int checked)
 }
 
 static int delete_object_at(int mouse_x, int mouse_y)
-{    
+{
     int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
     int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
     data.deletion_id = empire_object_get_at(empire_x, empire_y);
@@ -574,7 +573,7 @@ int empire_editor_delete_object(unsigned int obj_id)
 }
 
 static int pick_empire_tool(int mouse_x, int mouse_y)
-{    
+{
     int empire_x = editor_empire_mouse_to_empire_x(mouse_x);
     int empire_y = editor_empire_mouse_to_empire_y(mouse_y);
     int picked_id = empire_object_get_at(empire_x, empire_y);
@@ -584,7 +583,7 @@ static int pick_empire_tool(int mouse_x, int mouse_y)
     full_empire_object *full = empire_object_get_full(picked_id);
     empire_tool object_tool = empire_editor_get_tool_for_object(full);
     if (!object_tool && full->city_type != EMPIRE_CITY_OURS) {
-        return 0;   
+        return 0;
     }
     data.current_tool = object_tool;
     window_request_refresh();

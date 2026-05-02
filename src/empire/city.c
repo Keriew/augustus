@@ -803,6 +803,8 @@ int empire_city_get_icon_image_id(empire_city_icon_type type)
             return image_group(GROUP_EMPIRE_FOREIGN_CITY);
         case EMPIRE_CITY_ICON_TOWER:
             return assets_lookup_image_id(ASSET_UI_EMP_ICON_OLD_WATCHTOWER); // old_watchtower
+        case EMPIRE_CITY_ICON_BUTTON:
+            return image_group(GROUP_SELECT_MISSION_BUTTON); // button
         default:
             return -1;
     }
@@ -823,6 +825,6 @@ int empire_city_get_at(int x, int y, const uint8_t *name)
             }
         }
     }
-    
+
     return 0;
 }

@@ -4,7 +4,10 @@
 #include "building/type.h"
 #include "city/data_private.h"
 #include "city/emperor.h"
+#include "city/festival.h"
 #include "city/finance.h"
+#include "city/figures.h"
+#include "city/gods.h"
 #include "city/health.h"
 #include "city/labor.h"
 #include "city/military.h"
@@ -15,6 +18,7 @@
 #include "empire/trade_route.h"
 #include "game/settings.h"
 #include "game/time.h"
+#include "map/desirability.h"
 #include "map/grid.h"
 #include "map/property.h"
 #include "map/terrain.h"
@@ -560,4 +564,64 @@ int scenario_condition_type_tax_rate_met(const scenario_condition_t *condition)
     int value = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, tax_rate, value);
+}
+
+int scenario_condition_type_count_enemies_in_city_met(const scenario_condition_t *condition)
+{
+    int enemies_in_city = city_figures_total_invading_enemies();
+    int comparison = condition->parameter1;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
+
+    return comparison_helper_compare_values(comparison, enemies_in_city, value);
+}
+
+int scenario_condition_type_land_trade_problems_met(const scenario_condition_t *condition)
+{
+    int trade_problem_duration = city_data.trade.land_trade_problem_duration;
+    int comparison = condition->parameter1;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
+
+    return comparison_helper_compare_values(comparison, trade_problem_duration, value);
+}
+
+int scenario_condition_type_sea_trade_problems_met(const scenario_condition_t *condition)
+{
+    int trade_problem_duration = city_data.trade.sea_trade_problem_duration;
+    int comparison = condition->parameter1;
+    int value = scenario_formula_evaluate_formula(condition->parameter2);
+
+    return comparison_helper_compare_values(comparison, trade_problem_duration, value);
+}
+
+int scenario_condition_type_months_since_last_festival_met(const scenario_condition_t *condition)
+{
+    int comparison = condition->parameter1;
+    god_type god = condition->parameter2;
+    int value = scenario_formula_evaluate_formula(condition->parameter3);
+
+    int months_since_last_festival = city_festival_months_since_last();
+    if (god != GOD_ALL) {
+        months_since_last_festival = city_god_months_since_festival(god);
+    }
+
+    return comparison_helper_compare_values(comparison, months_since_last_festival, value);
+}
+
+int scenario_condition_type_desirability_in_area_met(const scenario_condition_t *condition)
+{
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
+    int comparison = condition->parameter3;
+    int value = scenario_formula_evaluate_formula(condition->parameter4);
+
+    int desirability_sum = 0;
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        desirability_sum += map_desirability_get(grid_offset);
+
+    }
+    int desirability_mean = desirability_sum / slice->size;
+
+    return comparison_helper_compare_values(comparison, desirability_mean, value);
 }

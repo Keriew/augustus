@@ -34,6 +34,7 @@ typedef enum {
     CITY_PROPERTY_TERRAIN_COUNT_TILES,
     // trade
     CITY_PROPERTY_QUOTA_FILL,
+    CITY_PROPERTY_OPENED_ROUTES,
     CITY_PROPERTY_MAX,
 } city_property_t;
 
