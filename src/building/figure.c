@@ -1993,7 +1993,6 @@ static void update_native_crop_progress(building *b)
 void building_figure_generate(void)
 {
     int patrician_generated = 0;
-    //int plebian_generated = 0;
     calculate_houses_needed_per_beggar();
     for (int i = 1; i < building_count(); i++) {
         building *b = building_get(i);
