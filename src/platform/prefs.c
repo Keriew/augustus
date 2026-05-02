@@ -4,8 +4,6 @@
 #include "core/file.h"
 #include "platform/platform.h"
 
-#include "SDL.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,7 +25,7 @@ static struct {
 
 static FILE *open_pref_file(const char *filename, const char *mode)
 {
-    char *pref_dir = platform_get_pref_path();
+    const char *pref_dir = platform_get_pref_path();
     if (!prefs.location_printed) {
         log_info("Pref dir location:", pref_dir ? pref_dir : ".", 0);
         prefs.location_printed = 1;
@@ -35,11 +33,9 @@ static FILE *open_pref_file(const char *filename, const char *mode)
     size_t file_len = strlen(filename) + strlen(pref_dir) + 1;
     char *pref_file = malloc(file_len * sizeof(char));
     if (!pref_file) {
-        SDL_free(pref_dir);
-        return NULL;
+        return 0;
     }
     snprintf(pref_file, file_len, "%s%s", pref_dir ? pref_dir : "", filename);
-    SDL_free(pref_dir);
     FILE *fp = fopen(pref_file, mode);
     free(pref_file);
     return fp;

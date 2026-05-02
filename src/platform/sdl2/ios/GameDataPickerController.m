@@ -3,6 +3,7 @@
 #import "ios.h"
 #import "platform/screen.h"
 #import "SDL.h"
+#import "SDL_platform.h"
 #import "SDL_system.h"
 #import "SDL_syswm.h"
 #import "SDL_video.h"

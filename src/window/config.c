@@ -24,7 +24,6 @@
 #include "graphics/text.h"
 #include "graphics/weather.h"
 #include "graphics/window.h"
-#include "platform/screen.h"
 #include "sound/city.h"
 #include "sound/device.h"
 #include "sound/effect.h"
@@ -842,7 +841,7 @@ static int config_set_city_sounds_volume(int key)
 static int config_mouse_unlock_fullscreen(int key)
 {
     config_change_basic(key);
-    platform_screen_update_window_grab();
+    system_update_window_grab();
     window_invalidate();
     return 1;
 }

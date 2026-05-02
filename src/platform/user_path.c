@@ -2,8 +2,8 @@
 
 #include "core/file.h"
 #include "platform/file_manager.h"
-#include "platform/platform.h"
 #include "platform/prefs.h"
+#include "platform/platform.h"
 
 #include <stdlib.h>
 #include <string.h>

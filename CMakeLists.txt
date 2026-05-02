@@ -6,6 +6,9 @@ set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android 
 
 string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
+set(SDL_VERSION "2" CACHE STRING "SDL Version to use. Supported versions: 2, 3")
+set_property(CACHE SDL_VERSION PROPERTY STRINGS 2 3)
+    
 option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
 option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
@@ -234,38 +237,38 @@ set(ZIP_FILES
 
 set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/arguments.c
-    ${PROJECT_SOURCE_DIR}/src/platform/augustus.c
     ${PROJECT_SOURCE_DIR}/src/platform/crash_handler.c
-    ${PROJECT_SOURCE_DIR}/src/platform/cursor.c
     ${PROJECT_SOURCE_DIR}/src/platform/file_manager.c
     ${PROJECT_SOURCE_DIR}/src/platform/icon.c
-    ${PROJECT_SOURCE_DIR}/src/platform/joystick.c
-    ${PROJECT_SOURCE_DIR}/src/platform/keyboard_input.c
-    ${PROJECT_SOURCE_DIR}/src/platform/log.c
-    ${PROJECT_SOURCE_DIR}/src/platform/mouse.c
-    ${PROJECT_SOURCE_DIR}/src/platform/platform.c
     ${PROJECT_SOURCE_DIR}/src/platform/prefs.c
-    ${PROJECT_SOURCE_DIR}/src/platform/renderer.c
-    ${PROJECT_SOURCE_DIR}/src/platform/screen.c
-    ${PROJECT_SOURCE_DIR}/src/platform/sound_device.c
-    ${PROJECT_SOURCE_DIR}/src/platform/touch.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/augustus.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/cursor.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/joystick.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/keyboard_input.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/log.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/mouse.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/platform.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/renderer.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/screen.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/sound_device.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/touch.c
+    ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/virtual_keyboard.c
     ${PROJECT_SOURCE_DIR}/src/platform/user_path.c
     ${PROJECT_SOURCE_DIR}/src/platform/version.c
-    ${PROJECT_SOURCE_DIR}/src/platform/virtual_keyboard.c
 )
 
 if (${TARGET_PLATFORM} STREQUAL "vita")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
         ${PROJECT_SOURCE_DIR}/src/platform/file_manager_cache.c
-        ${PROJECT_SOURCE_DIR}/src/platform/vita/vita.c
+        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/vita/vita.c
         ${PROJECT_SOURCE_DIR}/src/platform/vita/vita_keyboard.c
     )
 elseif (NINTENDO_SWITCH)
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
         ${PROJECT_SOURCE_DIR}/src/platform/file_manager_cache.c
-        ${PROJECT_SOURCE_DIR}/src/platform/switch/switch.c
+        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/switch/switch.c
     )
 elseif (${TARGET_PLATFORM} STREQUAL "android")
     set(PLATFORM_FILES
@@ -826,14 +829,14 @@ function(GET_SDL_EXT_DIR result module)
     if(NOT module STREQUAL "")
         set(module "_${module}")
     endif()
-    set(SDL_LOCATION ${PROJECT_SOURCE_DIR}/ext/SDL2)
+    set(SDL_LOCATION ${PROJECT_SOURCE_DIR}/ext/SDL${SDL_VERSION})
     file(GLOB children
         RELATIVE ${SDL_LOCATION}
         CONFIGURE_DEPENDS
         ${SDL_LOCATION}/SDL${module}
-        ${SDL_LOCATION}/SDL2${module}
+        ${SDL_LOCATION}/SDL${SDL_VERSION}${module}
         ${SDL_LOCATION}/SDL${module}-*
-        ${SDL_LOCATION}/SDL2${module}-*
+        ${SDL_LOCATION}/SDL${SDL_VERSION}${module}-*
     )
     foreach(child ${children})
         if(IS_DIRECTORY "${SDL_LOCATION}/${child}")
@@ -844,7 +847,7 @@ function(GET_SDL_EXT_DIR result module)
 endfunction()
 
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
-    set(USE_FLAGS "-s USE_SDL=2 -s USE_SDL_MIXER=2 -s SDL2_MIXER_FORMATS=[\"mp3,ogg\"] -s USE_MPG123=1")
+    set(USE_FLAGS "-s USE_SDL=${SDL_VERSION} -s USE_SDL_MIXER=${SDL_VERSION} -s SDL${SDL_VERSION}_MIXER_FORMATS=[\"mp3,ogg\"] -s USE_MPG123=1")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
 elseif(${TARGET_PLATFORM} STREQUAL "android")
@@ -867,8 +870,8 @@ elseif(${TARGET_PLATFORM} STREQUAL "ios")
         SDL2_mixer
     )
 else()
-    find_package(SDL2 REQUIRED)
-    find_package(SDL2_mixer REQUIRED)
+    find_package(SDL${SDL_VERSION} REQUIRED)
+    find_package(SDL${SDL_VERSION}_mixer REQUIRED)
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "android")
@@ -995,11 +998,11 @@ if(${TARGET_PLATFORM} STREQUAL "ios")
         MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
-if(SDL2_INCLUDE_DIR)
-    include_directories(SYSTEM ${SDL2_INCLUDE_DIR})
+if(SDL${SDL_VERSION}_INCLUDE_DIR)
+    include_directories(SYSTEM ${SDL${SDL_VERSION}_INCLUDE_DIR})
 endif()
-if(SDL2_MIXER_INCLUDE_DIR)
-    include_directories(SYSTEM ${SDL2_MIXER_INCLUDE_DIR})
+if(SDL${SDL_VERSION}_MIXER_INCLUDE_DIR)
+    include_directories(SYSTEM ${SDL${SDL_VERSION}_MIXER_INCLUDE_DIR})
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "vita")
@@ -1110,7 +1113,7 @@ else()
         )
     endif()
 
-    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} ${EASYAV1_LIBRARY})
+    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL${SDL_VERSION}_LIBRARY} ${SDL${SDL_VERSION}_MIXER_LIBRARY} ${EASYAV1_LIBRARY})
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()

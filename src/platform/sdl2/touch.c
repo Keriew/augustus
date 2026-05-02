@@ -1,4 +1,4 @@
-#include "platform/touch.h"
+#include "touch.h"
 
 #include "core/time.h"
 #include "game/settings.h"

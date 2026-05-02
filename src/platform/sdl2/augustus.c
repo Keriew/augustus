@@ -13,21 +13,21 @@
 #include "graphics/window.h"
 #include "input/mouse.h"
 #include "input/touch.h"
+#include "platform/file_manager.h"
+#include "platform/prefs.h"
 #include "platform/android/android.h"
 #include "platform/arguments.h"
 #include "platform/cursor.h"
 #include "platform/emscripten/emscripten.h"
-#include "platform/file_manager.h"
 #include "platform/file_manager_cache.h"
 #include "platform/ios/ios.h"
-#include "platform/joystick.h"
-#include "platform/keyboard_input.h"
 #include "platform/platform.h"
-#include "platform/prefs.h"
 #include "platform/renderer.h"
 #include "platform/screen.h"
+#include "platform/SDL2/joystick.h"
+#include "platform/SDL2/keyboard_input.h"
+#include "platform/SDL2/touch.h"
 #include "platform/switch/switch.h"
-#include "platform/touch.h"
 #include "platform/vita/vita.h"
 #include "window/asset_previewer.h"
 
@@ -106,10 +106,9 @@ static void setup_logging(void)
     const char *backup_filename = "augustus-log-backup.txt";
     char log_file[FILE_NAME_MAX];
     char log_file_old[FILE_NAME_MAX];
-    char *pref_dir = platform_get_logging_path();
+    const char *pref_dir = platform_get_logging_path();
     snprintf(log_file, FILE_NAME_MAX, "%s%s", pref_dir ? pref_dir : "", filename);
     snprintf(log_file_old, FILE_NAME_MAX, "%s%s", pref_dir ? pref_dir : "", backup_filename);
-    SDL_free(pref_dir);
     backup_log(log_file, log_file_old);
 
     // On some platforms (vita, android), not removing the file will not empty it when reopening for writing

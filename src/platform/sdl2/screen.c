@@ -69,7 +69,7 @@ static void update_window_grab(void)
 #endif
 }
 
-void platform_screen_update_window_grab(void)
+void system_update_window_grab(void)
 {
     update_window_grab();
 }
@@ -353,7 +353,7 @@ void platform_screen_recreate_texture(void)
 }
 #endif
 
-void platform_screen_show_error_message_box(const char *title, const char *message)
+void system_show_error_message_box(const char *title, const char *message)
 {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, SDL.window);
 }
