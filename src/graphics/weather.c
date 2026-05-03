@@ -19,8 +19,6 @@
 #include <stdio.h>
 #include <math.h>
 
-
-
 static const int PARTICLE_SIZES_RAIN[] = { 1, 8, 15, 23, 30 }; //sets of arbitrary values for a noticeable difference
 static const int PARTICLE_SIZES_SAND[] = { 1, 6, 10, 15, 20 }; //denoted as: minmum, small, regular, large, maximum
 static const int PARTICLE_SIZES_SNOW[] = { 2, 3, 4, 6, 8 };
@@ -28,6 +26,10 @@ static const int PARTICLE_SPEEDS_RAIN[] = { 1, 4, 8, 13, 20 }; //sets of arbitra
 static const int PARTICLE_SPEEDS_SNOW[] = { 1, 1, 2, 3, 5 };  //denoted as: minimum, slow, regular, fast, maximum
 static const int PARTICLE_SPEEDS_SAND[] = { 1, 3, 5, 8, 12 };
 static const int WEATHER_MAX_DURATION[] = { 1, 3, 6 }; // expressed in months, doesn't apply to thunderstorms
+
+// Intensity at/above which rain is treated as "heavy": drops gain per-particle
+// wind perturbation and a speed boost. Below this it's "light" rain.
+#define HEAVY_RAIN_THRESHOLD 600
 
 static int get_particle_size(const int *table, int idx)
 {
@@ -101,7 +103,7 @@ static struct {
 // Scale the simulation's chosen intensity (particle count) by the user's
 // type-specific intensity slider so the slider controls how many particles
 // are shown, not just the overlay alpha.
-static int effective_intensity(void)
+static int get_adjusted_intensity(void)
 {
     int base = data.weather_config.intensity;
     int slider = 100;
@@ -133,10 +135,10 @@ void init_weather_element(weather_element *e, int type)
             // Light rain: every drop shares the global wind cycle (uniform sweep).
             // Heavy rain: each drop sees the cycle at a different phase, so they
             // don't all change direction in lockstep.
-            if (effective_intensity() < 600) {
+            if (get_adjusted_intensity() < HEAVY_RAIN_THRESHOLD) {
                 e->wind_phase = 0;
             } else {
-                e->wind_phase = random_from_stdlib() % 300;
+                e->wind_phase = random_from_stdlib() % (HEAVY_RAIN_THRESHOLD / 2);
             }
             break;
         case WEATHER_SNOW:
@@ -224,7 +226,7 @@ static void update_wind(void)
 
 static void update_current_particle_count(void)
 {
-    int target = data.weather_config.active ? effective_intensity() : 0;
+    int target = data.weather_config.active ? get_adjusted_intensity() : 0;
     int duration = 48;
     int diff = abs(target - data.current_particle_count);
 
@@ -400,8 +402,8 @@ static void draw_rain(void)
     }
 
     int wind_strength = abs(data.weather_config.dx);
-    int eff_intensity = effective_intensity();
-    int base_speed = 3 + wind_strength + (eff_intensity / 300);
+    int adjusted_intensity = get_adjusted_intensity();
+    int base_speed = 3 + wind_strength + (adjusted_intensity / (HEAVY_RAIN_THRESHOLD / 2));
 
     int max_particles = data.last_elements_count;
     int count = data.current_particle_count;
@@ -418,7 +420,7 @@ static void draw_rain(void)
         // Heavy rain: small per-particle perturbation (±0.5) staggers the
         // moment each drop switches direction at rounding boundaries.
         float pp = 0.0f;
-        if (eff_intensity >= 600) {
+        if (adjusted_intensity >= HEAVY_RAIN_THRESHOLD) {
             pp = sinf((data.wind_angle + data.elements[i].wind_phase) * 0.04f) * 0.5f;
         }
         int dx = (int) (global_w + pp);
@@ -489,7 +491,7 @@ void update_weather(void)
         return;
     }
 
-    int target_count = effective_intensity();
+    int target_count = get_adjusted_intensity();
     if (target_count != data.last_elements_count && target_count > 0) {
         if (data.elements) {
             free(data.elements);
