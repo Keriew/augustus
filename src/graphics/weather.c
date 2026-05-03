@@ -19,17 +19,13 @@
 #include <stdio.h>
 #include <math.h>
 
-#define DRIFT_DIRECTION_RIGHT 1
-#define DRIFT_DIRECTION_LEFT -1
-
-
 
 
 static const int PARTICLE_SIZES_RAIN[] = { 1, 8, 15, 23, 30 }; //sets of arbitrary values for a noticeable difference
 static const int PARTICLE_SIZES_SAND[] = { 1, 6, 10, 15, 20 }; //denoted as: minmum, small, regular, large, maximum
 static const int PARTICLE_SIZES_SNOW[] = { 2, 3, 4, 6, 8 };
 static const int PARTICLE_SPEEDS_RAIN[] = { 1, 4, 8, 13, 20 }; //sets of arbitrary values for a noticeable difference
-static const int PARTICLE_SPEEDS_SNOW[] = { 1, 2, 4, 6, 10 };  //denoted as: minimum, slow, regular, fast, maximum
+static const int PARTICLE_SPEEDS_SNOW[] = { 1, 1, 2, 3, 5 };  //denoted as: minimum, slow, regular, fast, maximum
 static const int PARTICLE_SPEEDS_SAND[] = { 1, 3, 5, 8, 12 };
 static const int WEATHER_MAX_DURATION[] = { 1, 3, 6 }; // expressed in months, doesn't apply to thunderstorms
 
@@ -51,7 +47,7 @@ typedef struct {
 
     // For snow
     int drift_offset;
-    int drift_direction;
+    int prev_drift;
 
     // For sand
     int offset;
@@ -102,6 +98,29 @@ static struct {
     }
 };
 
+// Scale the simulation's chosen intensity (particle count) by the user's
+// type-specific intensity slider so the slider controls how many particles
+// are shown, not just the overlay alpha.
+static int effective_intensity(void)
+{
+    int base = data.weather_config.intensity;
+    int slider = 100;
+    switch (data.weather_config.type) {
+        case WEATHER_RAIN:
+            slider = config_get(CONFIG_WT_RAIN_INTENSITY);
+            break;
+        case WEATHER_SNOW:
+            slider = config_get(CONFIG_WT_SNOW_INTENSITY);
+            break;
+        case WEATHER_SAND:
+            slider = config_get(CONFIG_WT_SANDSTORM_INTENSITY);
+            break;
+        default:
+            break;
+    }
+    return base * slider / 100;
+}
+
 void init_weather_element(weather_element *e, int type)
 {
     e->x = random_from_stdlib() % screen_width();
@@ -111,14 +130,24 @@ void init_weather_element(weather_element *e, int type)
         case WEATHER_RAIN:
             e->length = get_particle_size(PARTICLE_SIZES_RAIN, config_get(CONFIG_WT_RAIN_LENGTH)) + random_from_stdlib() % 10;
             e->speed = get_particle_size(PARTICLE_SPEEDS_RAIN, config_get(CONFIG_WT_RAIN_SPEED)) + random_from_stdlib() % 5;
-            // Phase offset: each drop sees the wind cycle at a different point,
-            // so they don't all change direction in lockstep.
-            e->wind_phase = random_from_stdlib() % 300;
+            // Light rain: every drop shares the global wind cycle (uniform sweep).
+            // Heavy rain: each drop sees the cycle at a different phase, so they
+            // don't all change direction in lockstep.
+            if (effective_intensity() < 600) {
+                e->wind_phase = 0;
+            } else {
+                e->wind_phase = random_from_stdlib() % 300;
+            }
             break;
         case WEATHER_SNOW:
-            e->drift_offset = random_from_stdlib() % 100;
-            e->speed = get_particle_size(PARTICLE_SPEEDS_SNOW, config_get(CONFIG_WT_SNOW_SPEED)) + random_from_stdlib() % 4;
-            e->drift_direction = (random_from_stdlib() % 2 == 0) ? DRIFT_DIRECTION_RIGHT : DRIFT_DIRECTION_LEFT;
+            // drift_offset is a per-flake phase so each flake samples the
+            // sway cycle slightly out of step. prev_drift seeds the delta
+            // tracker with the sway curve's current value so the flake doesn't
+            // jump on its first rendered frame.
+            e->drift_offset = random_from_stdlib() % 300;
+            e->prev_drift = (int) (sinf(data.wind_angle * 0.021f
+                            + e->drift_offset * 0.02f) * 10.0f);
+            e->speed = get_particle_size(PARTICLE_SPEEDS_SNOW, config_get(CONFIG_WT_SNOW_SPEED)) + random_from_stdlib() % 2;
             break;
         case WEATHER_SAND:
             e->speed = get_particle_size(PARTICLE_SPEEDS_SAND, config_get(CONFIG_WT_SANDSTORM_SPEED)) + (random_from_stdlib() % 2);
@@ -195,7 +224,7 @@ static void update_wind(void)
 
 static void update_current_particle_count(void)
 {
-    int target = data.weather_config.active ? data.weather_config.intensity : 0;
+    int target = data.weather_config.active ? effective_intensity() : 0;
     int duration = 48;
     int diff = abs(target - data.current_particle_count);
 
@@ -231,8 +260,12 @@ static void update_overlay_alpha(void)
 
 static void render_weather_overlay(void)
 {
-    if (data.displayed_type == WEATHER_RAIN && data.current_particle_count < 800) {
-        return; // no overlay for light rain
+    // No dark overlay for light rain — the black tint only makes visual sense
+    // for actual storms. Threshold uses the simulation's base intensity, not
+    // the slider-scaled value, because "is this a storm" is a simulation
+    // property the slider shouldn't override.
+    if (data.displayed_type == WEATHER_RAIN && data.weather_config.intensity < 800) {
+        return;
     }
 
     update_overlay_alpha();
@@ -241,13 +274,16 @@ static void render_weather_overlay(void)
         return;
     }
 
+    // Slider 100 maps to the historically-tuned visual cap (so a black rain
+    // overlay never goes fully opaque). The cap differs per weather type
+    // because the overlay colors are different (black vs near-white vs sandy).
     int alpha_factor = 40;
     if (data.displayed_type == WEATHER_SNOW) {
-        alpha_factor = config_get(CONFIG_WT_SNOW_INTENSITY);
-    } else if (data.displayed_type == WEATHER_RAIN && data.current_particle_count > 800) {
-        alpha_factor = config_get(CONFIG_WT_RAIN_INTENSITY);
+        alpha_factor = config_get(CONFIG_WT_SNOW_INTENSITY) * 30 / 100;
+    } else if (data.displayed_type == WEATHER_RAIN) {
+        alpha_factor = config_get(CONFIG_WT_RAIN_INTENSITY) * 60 / 100;
     } else if (data.displayed_type == WEATHER_SAND) {
-        alpha_factor = config_get(CONFIG_WT_SANDSTORM_INTENSITY);
+        alpha_factor = config_get(CONFIG_WT_SANDSTORM_INTENSITY) * 10 / 100;
     }
 
     uint8_t alpha = (uint8_t) (((alpha_factor * data.overlay_alpha) / 100) * 255 / 100);
@@ -271,15 +307,28 @@ static void draw_snow(void)
         return;
     }
 
+    if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_SNOW)) {
+        update_wind();
+    }
+
     int max_particles = data.last_elements_count;
     int count = data.current_particle_count;
     if (count > max_particles) {
         count = max_particles;
     }
+
     for (int i = 0; i < count; ++i) {
         if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_SNOW)) {
-            int drift = ((data.elements[i].y + data.elements[i].drift_offset) % 10) - 5;
-            data.elements[i].x += (drift / 10) * data.elements[i].drift_direction;
+            // Slow, bounded horizontal sway around the flake's spawn column.
+            // target_drift oscillates in ±10px over ~5 seconds, with a per-flake
+            // phase offset so flakes don't sway in unison. We apply the delta
+            // (new - prev) so x naturally returns to center instead of running
+            // off-screen via accumulating per-frame perturbations.
+            float target_drift = sinf(data.wind_angle * 0.021f
+                                + data.elements[i].drift_offset * 0.02f) * 10.0f;
+            int new_drift = (int) target_drift;
+            data.elements[i].x += new_drift - data.elements[i].prev_drift;
+            data.elements[i].prev_drift = new_drift;
             data.elements[i].y += data.elements[i].speed;
         }
 
@@ -351,7 +400,8 @@ static void draw_rain(void)
     }
 
     int wind_strength = abs(data.weather_config.dx);
-    int base_speed = 3 + wind_strength + (data.weather_config.intensity / 300);
+    int eff_intensity = effective_intensity();
+    int base_speed = 3 + wind_strength + (eff_intensity / 300);
 
     int max_particles = data.last_elements_count;
     int count = data.current_particle_count;
@@ -364,11 +414,13 @@ static void draw_rain(void)
                    + sinf(data.wind_angle * 0.025f) * 0.8f;
 
     for (int i = 0; i < count; ++i) {
-        // Small per-particle perturbation around the global wind. Low amplitude
-        // (±0.5) so most drops still follow the global direction; it only
-        // changes the rounded result at transition boundaries, which staggers
-        // the moment each drop switches direction.
-        float pp = sinf((data.wind_angle + data.elements[i].wind_phase) * 0.04f) * 0.5f;
+        // Light rain: drops follow the global wind exactly (uniform sweep).
+        // Heavy rain: small per-particle perturbation (±0.5) staggers the
+        // moment each drop switches direction at rounding boundaries.
+        float pp = 0.0f;
+        if (eff_intensity >= 600) {
+            pp = sinf((data.wind_angle + data.elements[i].wind_phase) * 0.04f) * 0.5f;
+        }
         int dx = (int) (global_w + pp);
 
         graphics_draw_line(
@@ -437,7 +489,7 @@ void update_weather(void)
         return;
     }
 
-    int target_count = data.weather_config.intensity;
+    int target_count = effective_intensity();
     if (target_count != data.last_elements_count && target_count > 0) {
         if (data.elements) {
             free(data.elements);
