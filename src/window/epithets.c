@@ -54,7 +54,7 @@ static option_menu_item epithets_options[18] = {
 static int selected_god_id;
 
 static image_button image_buttons_bottom[] = {
-    {600, 338, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1}
+    {598, 395, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1}
 };
 
 static generic_button buttons_gods_size[] = {
@@ -134,7 +134,7 @@ static void draw_background(void)
 
     graphics_in_dialog();
 
-    outer_panel_draw(0, 0, 40, 24);
+    outer_panel_draw(0, 0, 40, 27);
     
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ADVISOR_EPITHETS, 0, 15, 640, FONT_LARGE_BLACK);
     int border_image_id = assets_get_image_id("UI", "Image Border Small");
@@ -145,7 +145,7 @@ static void draw_background(void)
     
     for (int god = 0; god <= MAX_GODS; god++) {
         if (god == selected_god_id) {
-            button_border_draw(100 * god + 26, 52, 90, 100, 1);
+            button_border_draw(100 * god + 25, 51, 91, 101, 1);
             if (god == MAX_GODS) {
                 image_draw_border(border_image_id, 100 * god + 30, 56, border_color);
                 image_draw(base_image_id, 100 * god + 35, 61, COLOR_MASK_NONE, SCALE_NONE);
@@ -156,7 +156,7 @@ static void draw_background(void)
         } else {
             if (god == MAX_GODS) {
                 highlight_color = COLOR_BLACK;
-                border_color =  COLOR_BORDER_BROWN;
+                border_color = COLOR_BORDER_BROWN;
                 image_draw_border(border_image_id, 100 * god + 30, 56, border_color);
                 image_draw(base_image_id, 100 * god + 35, 61, COLOR_MASK_NONE, SCALE_NONE);
                 image_draw_border(highlight_image_id, 100 * god + 35, 61, highlight_color);
@@ -166,13 +166,14 @@ static void draw_background(void)
         }
     }
 
-    inner_panel_draw(16, 170, 38, 10);
-    rich_text_init(epithet_text_buffer, 24, 170, 35, 10, 0);
-    rich_text_draw(epithet_text_buffer, 32, 176, 34 * BLOCK_SIZE, 9, 0);
+    inner_panel_draw(16, 165, 35, 14);
+    rich_text_init(epithet_text_buffer, 24, 165, 35, 14, 0);
+    rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, 12, 0);
+
+    lang_text_draw_centered(13, 1, 10, 410, 585, FONT_SMALL_PLAIN); //Right-click to Exit
 
     graphics_reset_dialog();
 }
-
 
 static void draw_foreground(void)
 {
