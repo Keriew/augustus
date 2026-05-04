@@ -1472,6 +1472,7 @@ static translation_string all_strings[] = {
     {TR_CHEAT_EDITOR_WARNING_TITLE, "Warning"},
     {TR_CHEAT_EDITOR_WARNING_TEXT, "Running the map editor from city mode can corrupt the save or cause the game to crash.\n\nProceed at your own risk and make sure you have a backup of the current save."},
     {TR_MAIN_MENU_SELECT_CAMPAIGN, "Start new campaign"},
+    {TR_MAIN_MENU_TERRAIN_GENERATOR, "Terrain generator"},
     {TR_WINDOW_SELECT_CAMPAIGN, "Select a campaign"},
     {TR_WINDOW_CAMPAIGN_AUTHOR, "Author:"},
     {TR_WINDOW_CAMPAIGN_NO_DESC, "No description"},

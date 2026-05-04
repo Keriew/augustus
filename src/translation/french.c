@@ -1472,6 +1472,7 @@ static translation_string all_strings[] = {
     {TR_CHEAT_EDITOR_WARNING_TITLE, "Avertissement"},
     {TR_CHEAT_EDITOR_WARNING_TEXT, "Lancer l'éditeur depuis une cité peut corrompre la sauvegarde ou provoquer un arrêt inopiné.\n\nEffectuez une copie de la sauvegarde avant de continuer."},
     {TR_MAIN_MENU_SELECT_CAMPAIGN, "Nouvelle campagne"},
+    {TR_MAIN_MENU_TERRAIN_GENERATOR, "Terrain generator"},
     {TR_WINDOW_SELECT_CAMPAIGN, "Choisir une campagne"},
     {TR_WINDOW_CAMPAIGN_AUTHOR, "Auteur :"},
     {TR_WINDOW_CAMPAIGN_NO_DESC, "Pas de description"},
