@@ -1,5 +1,8 @@
 #include "military.h"
 
+
+#include "map/building.h"
+
 #include "assets/assets.h"
 #include "building/barracks.h"
 #include "building/building.h"
@@ -121,6 +124,13 @@ void window_building_draw_wall(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(139, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 158, 139, 1);
+
+    building *b = building_get(c->building_id);
+    int current_hp;
+    int max_hp;
+    map_building_get_health(b, &current_hp, &max_hp);
+    int width = text_draw_number(current_hp, '@', " / ", c->x_offset + 10, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
+    width += text_draw_number(max_hp, '@', "", c->x_offset + width, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
 }
 
 void window_building_draw_gatehouse(building_info_context *c)
@@ -131,6 +141,14 @@ void window_building_draw_gatehouse(building_info_context *c)
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
     lang_text_draw_centered(90, 0, c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 158, 90, 1);
+
+    building *b = building_get(c->building_id);
+    int current_hp;
+    int max_hp;
+    map_building_get_health(b, &current_hp, &max_hp);
+    int width = text_draw_number(current_hp, '@', " / ", c->x_offset + 10, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
+    width += text_draw_number(max_hp, '@', "", c->x_offset + width, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
+
 }
 
 void window_building_draw_tower(building_info_context *c)
@@ -154,6 +172,12 @@ void window_building_draw_tower(building_info_context *c)
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
     window_building_draw_employment(c, 140);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+
+    int current_hp;
+    int max_hp;
+    map_building_get_health(b, &current_hp, &max_hp);
+    int width = text_draw_number(current_hp, '@', " / ", c->x_offset + 10, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
+    width += text_draw_number(max_hp, '@', "", c->x_offset + width, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
 }
 
 void window_building_draw_barracks(building_info_context *c)
@@ -753,6 +777,13 @@ void window_building_draw_watchtower(building_info_context *c)
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
     window_building_draw_employment(c, 140);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+
+    building *b = building_get(c->building_id);
+    int current_hp;
+    int max_hp;
+    map_building_get_health(b, &current_hp, &max_hp);
+    int width = text_draw_number(current_hp, '@', " / ", c->x_offset + 10, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
+    width += text_draw_number(max_hp, '@', "", c->x_offset + width, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
 }
 
 void window_building_draw_palisade(building_info_context *c)
@@ -763,6 +794,13 @@ void window_building_draw_palisade(building_info_context *c)
     text_draw_centered(translation_for(TR_BUILDING_PALISADE), c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
     window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 158, CUSTOM_TRANSLATION,
         TR_BUILDING_PALISADE_DESC);
+
+    building *b = building_get(c->building_id);
+    int current_hp;
+    int max_hp;
+    map_building_get_health(b, &current_hp, &max_hp);
+    int width = text_draw_number(current_hp, '@', " / ", c->x_offset + 10, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
+    width += text_draw_number(max_hp, '@', "", c->x_offset + width, c->y_offset + 10, FONT_NORMAL_BLACK, 0);
 }
 
 void window_building_draw_armoury(building_info_context *c)

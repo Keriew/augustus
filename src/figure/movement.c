@@ -18,12 +18,12 @@
 #include "map/road_access.h"
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
-
+/*
 #define PALISADE_HP   60
 #define BUILDING_HP   10
 #define WALL_HP      200
 #define GATEHOUSE_HP 150
-
+*/
 static void advance_tick(figure *f)
 {
     switch (f->direction) {

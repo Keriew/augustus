@@ -1,5 +1,9 @@
 #include "building.h"
 
+
+#include "figure/movement.h"
+
+
 #include "building/building.h"
 #include "core/config.h"
 #include "game/save_version.h"
@@ -160,4 +164,63 @@ int map_building_is_reservoir(int x, int y)
         }
     }
     return 1;
+}
+
+/*
+int map_building_damage_get(int grid_offset)
+{
+    return map_grid_is_valid_offset(grid_offset) ? damage_grid.items[grid_offset] : 0;
+}
+*/
+
+
+int map_building_damage_get(int grid_offset)
+{
+    return damage_grid.items[grid_offset];
+}
+
+int map_building_average_damage(const building *b)
+{
+    int total_damage = 0;
+    int tiles = 0;
+
+    int size = b->size;
+    int base_x = map_grid_offset_to_x(b->grid_offset);
+    int base_y = map_grid_offset_to_y(b->grid_offset);
+
+    for (int dy = 0; dy < size; dy++) {
+        for (int dx = 0; dx < size; dx++) {
+            int offset = map_grid_offset(base_x + dx, base_y + dy);
+
+            if (map_building_at(offset) == b->id) {
+                total_damage += map_building_damage_get(offset);
+                tiles++;
+            }
+        }
+    }
+
+    return tiles ? total_damage / tiles : 0;
+}
+
+void map_building_get_health(const building *b, int *current, int *max)
+{
+    int max_hp = BUILDING_HP;
+
+    switch (b->type) {
+        case BUILDING_WALL: max_hp = WALL_HP; break;
+        case BUILDING_GATEHOUSE: max_hp = GATEHOUSE_HP; break;
+        case BUILDING_PALISADE:
+        case BUILDING_PALISADE_GATE: max_hp = PALISADE_HP; break;
+        case BUILDING_TOWER: max_hp = TOWER_HP; break;
+
+        default: max_hp = BUILDING_HP; break;
+    }
+
+    int damage = map_building_average_damage(b);
+
+    int current_hp = max_hp - damage;
+    if (current_hp < 0) current_hp = 0;
+
+    *current = current_hp;
+    *max = max_hp;
 }
