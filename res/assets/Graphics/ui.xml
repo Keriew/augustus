@@ -100,6 +100,7 @@
 	<image id="Monument Build Icon" src="Monument_Panel"/>
 	<image id="Rotate Build Icon" src="Rotation_Panel"/>
 	<image id="Expand Menu Icon" src="Expand_Panel"/>
+	<image id="Expand Menu Icon Left" src="Expand_Panel" invert="horizontal"/>
 	<!-- Note: Hippodrome racing UI button -->
 	<image id="Hipp_Racing_Button" src="Hippodrome_Betting_Select_Button"/>
 	<!-- Note: Hippodrome team selection buttons -->
