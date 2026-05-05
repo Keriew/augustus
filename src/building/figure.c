@@ -193,10 +193,24 @@ static void spawn_plebian(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > 16) {
             b->figure_spawn_delay = 0;
-            figure *f = figure_create(FIGURE_PLEBIAN, road.x, road.y, DIR_4_BOTTOM);
-            f->action_state = FIGURE_ACTION_125_ROAMING;
-            f->building_id = b->id;
-            figure_movement_init_roaming(f);
+            int unemployment = city_labor_unemployment_percentage();
+            // base spawn chance
+            int chance = 25;
+            // increase chance if unemployment is above 5%
+            if (unemployment > 5) {
+                chance += (unemployment - 5);
+            }
+            // clamp chance to maximum 50%
+            if (chance > 50) {
+                chance = 50;
+            }
+            // random spawn check
+            if (rand() % 100 < chance) {
+                figure *f = figure_create(FIGURE_PLEBIAN, road.x, road.y, DIR_4_BOTTOM);
+                f->action_state = FIGURE_ACTION_125_ROAMING;
+                f->building_id = b->id;
+                figure_movement_init_roaming(f);
+            }
         }
     }
 }
@@ -2008,7 +2022,8 @@ void building_figure_generate(void)
         b->has_problem = 0;
         // range of building types
         if (b->type >= BUILDING_HOUSE_SMALL_TENT && b->type <= BUILDING_HOUSE_GRAND_INSULA) {
-            if (!config_get(CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS)) {
+            if (!config_get(CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS) &&
+                config_get(CONFIG_GP_CH_GLOBAL_LABOUR)) {
                 spawn_plebian(b);
             }
             if (city_labor_unemployment_percentage() > BEGGAR_UNEMPLOYMENT_THRESHOLD) {
