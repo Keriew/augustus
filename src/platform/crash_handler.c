@@ -1,6 +1,7 @@
 #include "game/system.h"
 
 #include "core/log.h"
+#include "platform/platform.h"
 
 #if (defined(__GNUC__) && !defined(__MINGW32__) && !defined(__OpenBSD__) && \
    !defined(__vita__) && !defined(__SWITCH__) && !defined(__ANDROID__) && \
@@ -80,7 +81,7 @@ static const char *fetch_signal_name(int sig)
 static void crash_handler(int sig)
 {
     log_error("Oops, crashed :(", 0, 0);
-    log_error("Signal ", sig, fetch_signal_name(sig), 0);
+    log_error("Signal ", fetch_signal_name(sig), sig);
     backtrace_print();
     display_crash_message();
     exit_with_status(1);

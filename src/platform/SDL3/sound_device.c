@@ -490,14 +490,6 @@ static int custom_audio_stream_active(void)
     return data.custom_music.track != 0;
 }
 
-static int put_custom_audio_stream(const void *audio_data, int len)
-{
-    if (!audio_data || len <= 0 || !custom_audio_stream_active()) {
-        return 0;
-    }
-
-}
-
 void sound_device_use_custom_music_player(int bitdepth, int num_channels, int rate, const void *audio_data, int len)
 {
     if (!data.initialized) {

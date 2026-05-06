@@ -219,9 +219,11 @@ if (EXISTS ${PROJECT_SOURCE_DIR}/res/packed_assets)
     set(ASSETS_DIR ${PROJECT_SOURCE_DIR}/res/packed_assets)
 endif()
 
-set(TINYFD_FILES
-    ${PROJECT_SOURCE_DIR}/ext/tinyfiledialogs/tinyfiledialogs.c
-)
+if (${SDL_VERSION} STREQUAL "2")
+    set(TINYFD_FILES
+        ${PROJECT_SOURCE_DIR}/ext/tinyfiledialogs/tinyfiledialogs.c
+    )
+endif()
 
 set(SPNG_FILES
     ${PROJECT_SOURCE_DIR}/ext/spng/spng.c
