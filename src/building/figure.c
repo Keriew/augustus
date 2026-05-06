@@ -204,6 +204,13 @@ static void spawn_plebian(building *b)
             if (chance > 50) {
                 chance = 50;
             }
+            // 1x1 (not merged) houses spawn 4x less
+            if (!b->house_is_merged) {
+                chance /= 4;
+                if (chance < 1) {
+                    chance = 1;
+                }
+            }
             // random spawn check
             if (rand() % 100 < chance) {
                 figure *f = figure_create(FIGURE_PLEBIAN, road.x, road.y, DIR_4_BOTTOM);
