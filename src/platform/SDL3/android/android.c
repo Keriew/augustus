@@ -1,4 +1,4 @@
-#include "android.h"
+#include "platform/android/android.h"
 
 #include "core/dir.h"
 #include "core/file.h"

@@ -1,4 +1,4 @@
-#include "vita.h"
+#include "platform/vita/vita.h"
 
 #include "core/file.h"
 #include "game/system.h"
