@@ -2,15 +2,16 @@
 
 // The following includes are all required as they define PLATFORM_USE_VIRTUAL_KEYBOARD
 #include "platform/android/android.h"
+#include "platform/SDL3/screen.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 void system_keyboard_set_input_rect(int x, int y, int width, int height)
 {
     SDL_Rect rect = {x, y, width, height};
-    SDL_SetTextInputRect(&rect);
+    SDL_SetTextInputArea(platform_screen_get_window(), &rect, 0);
 }
 
 void system_keyboard_show(void)
@@ -30,13 +31,13 @@ void system_keyboard_hide(void)
 void system_start_text_input(void)
 {
 #ifndef PLATFORM_USE_VIRTUAL_KEYBOARD
-    SDL_StartTextInput();
+    SDL_StartTextInput(platform_screen_get_window());
 #endif
 }
 
 void system_stop_text_input(void)
 {
 #ifndef PLATFORM_USE_VIRTUAL_KEYBOARD
-    SDL_StopTextInput();
+    SDL_StopTextInput(platform_screen_get_window());
 #endif
 }

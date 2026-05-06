@@ -273,15 +273,15 @@ elseif (NINTENDO_SWITCH)
 elseif (${TARGET_PLATFORM} STREQUAL "android")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
-        ${PROJECT_SOURCE_DIR}/src/platform/android/android.c
-        ${PROJECT_SOURCE_DIR}/src/platform/android/asset_handler.c
-        ${PROJECT_SOURCE_DIR}/src/platform/android/jni.c
+        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/android/android.c
+        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/android/asset_handler.c
+        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/android/jni.c
     )
 elseif (${TARGET_PLATFORM} STREQUAL "ios")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
-        ${PROJECT_SOURCE_DIR}/src/platform/ios/ios.m
-        ${PROJECT_SOURCE_DIR}/src/platform/ios/GameDataPickerController.m
+        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/ios/ios.m
+        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/ios/GameDataPickerController.m
     )
 endif()
 
@@ -1113,7 +1113,14 @@ else()
         )
     endif()
 
-    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL${SDL_VERSION}_LIBRARY} ${SDL${SDL_VERSION}_MIXER_LIBRARY} ${EASYAV1_LIBRARY})
+if(SDL_VERSION STREQUAL "2")
+    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+else()
+    target_link_libraries(${SHORT_NAME} SDL3::SDL3 SDL3_mixer::SDL3_mixer)
+endif()
+
+    target_link_libraries(${SHORT_NAME} ${EASYAV1_LIBRARY})
+
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()

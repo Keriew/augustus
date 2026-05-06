@@ -1,7 +1,7 @@
 #ifndef PLATFORM_KEYBOARD_INPUT_H
 #define PLATFORM_KEYBOARD_INPUT_H
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 void platform_handle_key_down(SDL_KeyboardEvent *event);
 

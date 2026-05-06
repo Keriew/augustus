@@ -6,7 +6,7 @@
 #include "platform/android/jni.h"
 #include "platform/file_manager.h"
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 #include <string.h>
 

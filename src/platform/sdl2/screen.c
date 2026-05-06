@@ -127,7 +127,7 @@ int platform_screen_create(const char *title, int display_scale_percentage, int 
     int fullscreen = system_is_fullscreen_only() ? 1 : setting_fullscreen();
     if (fullscreen) {
         SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(0, &mode);
+        SDL_GetDesktopDisplayMode(display_id, &mode);
         width = mode.w;
         height = mode.h;
     } else {

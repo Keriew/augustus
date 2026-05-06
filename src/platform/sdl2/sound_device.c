@@ -311,51 +311,51 @@ static void load_music_for_vita(const char *filename)
 
 int sound_device_play_music(const char *filename, int volume_pct, int loop)
 {
-    if (data.initialized && config_get(CONFIG_GENERAL_ENABLE_AUDIO)) {
-        sound_device_stop_music();
-        if (!filename) {
+    if (!data.initialized || !config_get(CONFIG_GENERAL_ENABLE_AUDIO) || !filename || !*filename) {
+        return 0;
+    }
+
+    sound_device_stop_music();
+
+    size_t size;
+    data.custom_music = game_campaign_load_file(filename, &size);
+    if (data.custom_music) {
+        SDL_RWops *sdl_music = SDL_RWFromMem(data.custom_music, (int) size);
+        data.music = Mix_LoadMUS_RW(sdl_music, SDL_TRUE);
+    } else {
+#ifdef __vita__
+        load_music_for_vita(filename);
+        if (!vita_music_data.buffer) {
             return 0;
         }
-        size_t size;
-        data.custom_music = game_campaign_load_file(filename, &size);
-        if (data.custom_music) {
-            SDL_RWops *sdl_music = SDL_RWFromMem(data.custom_music, (int) size);
-            data.music = Mix_LoadMUS_RW(sdl_music, SDL_TRUE);
-        } else {
-#ifdef __vita__
-            load_music_for_vita(filename);
-            if (!vita_music_data.buffer) {
-                return 0;
-            }
-            SDL_RWops *sdl_music = SDL_RWFromMem(vita_music_data.buffer, vita_music_data.size);
-            data.music = Mix_LoadMUS_RW(sdl_music, SDL_TRUE);
+        SDL_RWops *sdl_music = SDL_RWFromMem(vita_music_data.buffer, vita_music_data.size);
+        data.music = Mix_LoadMUS_RW(sdl_music, SDL_TRUE);
 #elif defined(__ANDROID__)
-            FILE *fp = file_open(filename, "rb");
-            if (!fp) {
-                return 0;
-            }
-            SDL_RWops *sdl_fp = SDL_RWFromFP(fp, SDL_TRUE);
-            data.music = Mix_LoadMUS_RW(sdl_fp, SDL_TRUE);
+        FILE *fp = file_open(filename, "rb");
+        if (!fp) {
+            return 0;
+        }
+        SDL_RWops *sdl_fp = SDL_RWFromFP(fp, SDL_TRUE);
+        data.music = Mix_LoadMUS_RW(sdl_fp, SDL_TRUE);
 #else
-            data.music = Mix_LoadMUS(filename);
+        data.music = Mix_LoadMUS(filename);
 #endif
-        }
-        if (!data.music) {
-            SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                "Error opening music file '%s'. Reason: %s", filename, Mix_GetError());
-        } else {
-            if (Mix_PlayMusic(data.music, loop ? -1 : 0) == -1) {
-                data.music = 0;
-                SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                    "Error playing music file '%s'. Reason: %s", filename, Mix_GetError());
-            } else {
-                sound_device_set_music_volume(volume_pct);
-            }
-        }
-        return data.music ? 1 : 0;
     }
-    return 0;
+    if (!data.music) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+            "Error opening music file '%s'. Reason: %s", filename, Mix_GetError());
+    } else {
+        if (Mix_PlayMusic(data.music, loop ? -1 : 0) == -1) {
+            data.music = 0;
+            SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                "Error playing music file '%s'. Reason: %s", filename, Mix_GetError());
+        } else {
+            sound_device_set_music_volume(volume_pct);
+        }
+    }
+    return data.music ? 1 : 0;
 }
+
 static void (*track_finished_callback)(void) = NULL;
 
 static void internal_on_track_finished(void)

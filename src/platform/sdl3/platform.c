@@ -3,12 +3,10 @@
 #include "game/system.h"
 #include "platform/emscripten/emscripten.h"
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-
-static SDL_version version;
 
 const char *system_architecture(void)
 {
@@ -130,10 +128,7 @@ const char *system_OS(void)
 
 int platform_sdl_version_at_least(int major, int minor, int patch)
 {
-    if (version.major == 0) {
-        SDL_GetVersion(&version);
-    }
-    return SDL_VERSIONNUM(version.major, version.minor, version.patch) >= SDL_VERSIONNUM(major, minor, patch);
+    return SDL_VERSIONNUM(major, minor, patch) >= SDL_GetVersion();
 }
 
 const char *platform_get_logging_path(void)
@@ -147,27 +142,20 @@ const char *platform_get_logging_path(void)
 
 const char *platform_get_pref_path(void)
 {
-#if SDL_VERSION_ATLEAST(2, 0, 1)
     static const char *pref_path;
-    if (!pref_path && platform_sdl_version_at_least(2, 0, 1)) {
+    if (!pref_path) {
         pref_path = SDL_GetPrefPath("augustus", "augustus");
     }
     return pref_path;
-#endif
-    return 0;
 }
 
 const char *platform_get_base_path(void)
 {
-#if SDL_VERSION_ATLEAST(2, 0, 1)
     static const char *base_path;
-    if (!base_path && platform_sdl_version_at_least(2, 0, 1)) {
+    if (!base_path ) {
         base_path = SDL_GetBasePath();
     }
     return base_path;
-#else
-    return 0;
-#endif
 }
 
 void exit_with_status(int status)

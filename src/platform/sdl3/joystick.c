@@ -7,26 +7,31 @@
 #include <stdio.h>
 #include <string.h>
 
+typedef struct {
+    /* SDL binding kind for this entry (button, axis, hat, etc.). */
+    SDL_GamepadBindingType type;
+    /* SDL identifier for the bound control, such as axis/button index. */
+    union {
+        SDL_GamepadAxis axis;
+        SDL_GamepadButton button;
+    } id;
+    /* Direction or position associated with the binding when applicable. */
+    joystick_axis_position position;
+} gamepad_mapping_element;
+
 /*
- * Stores the SDL game controller bindings associated with a mapping action.
+ * Stores the SDL gamepad bindings associated with a mapping action.
  *
  * Unlike mapping_element, which describes a generic joystick input in terms of
- * this project's JOYSTICK_ELEMENT_* representation, controller_mapping keeps
- * the SDL_GameController-derived binding information returned by SDL for each
+ * this project's JOYSTICK_ELEMENT_* representation, gamepad_mapping keeps
+ * the SDL_Gamepad-derived binding information returned by SDL for each
  * action so it can be translated into the internal mapping format.
  */
 typedef struct {
     /* Action that the listed controller bindings should trigger. */
     mapping_action action;
-    struct {
-        /* SDL binding kind for this entry (button, axis, hat, etc.). */
-        SDL_GameControllerBindType type;
-        /* SDL identifier for the bound control, such as axis/button index. */
-        int id;
-        /* Direction or position associated with the binding when applicable. */
-        int position;
-    } element[JOYSTICK_MAPPING_ELEMENTS_MAX];
-} controller_mapping;
+    gamepad_mapping_element element[JOYSTICK_MAPPING_ELEMENTS_MAX];
+} gamepad_mapping;
 
 static int enabled;
 
@@ -56,8 +61,8 @@ static mapping_element default_mapping[] = {
     {MAPPING_ACTION_MOUSE_CURSOR_LEFT, {{JOYSTICK_ELEMENT_BUTTON, VITA_PAD_LEFT}}},
     {MAPPING_ACTION_MOUSE_CURSOR_DOWN, {{JOYSTICK_ELEMENT_BUTTON, VITA_PAD_DOWN}}},
     {MAPPING_ACTION_MOUSE_CURSOR_RIGHT, {{JOYSTICK_ELEMENT_BUTTON, VITA_PAD_RIGHT}}},
-    {MAPPING_ACTION_RESET_MAPPING,
-        {{JOYSTICK_ELEMENT_BUTTON, VITA_PAD_L}, {JOYSTICK_ELEMENT_BUTTON, VITA_PAD_R}
+    {MAPPING_ACTION_RESET_MAPPING, {
+        {JOYSTICK_ELEMENT_BUTTON, VITA_PAD_L}, {JOYSTICK_ELEMENT_BUTTON, VITA_PAD_R}
     }},
 };
 #elif defined(__SWITCH__)
@@ -121,32 +126,32 @@ static mapping_element default_mapping[] = {
 };
 #endif
 
-static controller_mapping controller_mappings[] = {
-    {MAPPING_ACTION_MOUSE_CURSOR_UP, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_LEFTY, JOYSTICK_AXIS_NEGATIVE}}},
-    {MAPPING_ACTION_MOUSE_CURSOR_LEFT, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_LEFTX, JOYSTICK_AXIS_NEGATIVE}}},
-    {MAPPING_ACTION_MOUSE_CURSOR_DOWN, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_LEFTY, JOYSTICK_AXIS_POSITIVE}}},
-    {MAPPING_ACTION_MOUSE_CURSOR_RIGHT, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_LEFTX, JOYSTICK_AXIS_POSITIVE}}},
-    {MAPPING_ACTION_FASTER_MOUSE_CURSOR_SPEED, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_TRIGGERLEFT, JOYSTICK_AXIS_POSITIVE}}},
-    {MAPPING_ACTION_SLOWER_MOUSE_CURSOR_SPEED, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, JOYSTICK_AXIS_POSITIVE}}},
-    {MAPPING_ACTION_LEFT_MOUSE_BUTTON, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_A}}},
-    {MAPPING_ACTION_RIGHT_MOUSE_BUTTON, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_B}}},
-    {MAPPING_ACTION_SCROLL_WINDOW_UP, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_RIGHTY, JOYSTICK_AXIS_NEGATIVE}}},
-    {MAPPING_ACTION_SCROLL_WINDOW_DOWN, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_RIGHTY, JOYSTICK_AXIS_POSITIVE}}},
-    {MAPPING_ACTION_SCROLL_MAP_UP, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_RIGHTY, JOYSTICK_AXIS_NEGATIVE}}},
-    {MAPPING_ACTION_SCROLL_MAP_LEFT, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_RIGHTX, JOYSTICK_AXIS_NEGATIVE}}},
-    {MAPPING_ACTION_SCROLL_MAP_DOWN, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_RIGHTY, JOYSTICK_AXIS_POSITIVE}}},
-    {MAPPING_ACTION_SCROLL_MAP_RIGHT, {{SDL_CONTROLLER_BINDTYPE_AXIS, SDL_CONTROLLER_AXIS_RIGHTX, JOYSTICK_AXIS_POSITIVE}}},
-    {MAPPING_ACTION_ROTATE_MAP_LEFT, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_LEFTSHOULDER}}},
-    {MAPPING_ACTION_ROTATE_MAP_RIGHT, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER}}},
-    {MAPPING_ACTION_INCREASE_GAME_SPEED, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_Y}}},
-    {MAPPING_ACTION_DECREASE_GAME_SPEED, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_X}}},
-    {MAPPING_ACTION_MOUSE_CURSOR_UP, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_DPAD_UP}}},
-    {MAPPING_ACTION_MOUSE_CURSOR_LEFT, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_DPAD_LEFT}}},
-    {MAPPING_ACTION_MOUSE_CURSOR_DOWN, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_DPAD_DOWN}}},
-    {MAPPING_ACTION_MOUSE_CURSOR_RIGHT, {{SDL_CONTROLLER_BINDTYPE_BUTTON, SDL_CONTROLLER_BUTTON_DPAD_RIGHT}}}
+static gamepad_mapping gamepad_mappings[] = {
+    {MAPPING_ACTION_MOUSE_CURSOR_UP, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_LEFTY, JOYSTICK_AXIS_NEGATIVE}}},
+    {MAPPING_ACTION_MOUSE_CURSOR_LEFT, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_LEFTX, JOYSTICK_AXIS_NEGATIVE}}},
+    {MAPPING_ACTION_MOUSE_CURSOR_DOWN, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_LEFTY, JOYSTICK_AXIS_POSITIVE}}},
+    {MAPPING_ACTION_MOUSE_CURSOR_RIGHT, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_LEFTX, JOYSTICK_AXIS_POSITIVE}}},
+    {MAPPING_ACTION_FASTER_MOUSE_CURSOR_SPEED, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_LEFT_TRIGGER, JOYSTICK_AXIS_POSITIVE}}},
+    {MAPPING_ACTION_SLOWER_MOUSE_CURSOR_SPEED, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER, JOYSTICK_AXIS_POSITIVE}}},
+    {MAPPING_ACTION_LEFT_MOUSE_BUTTON, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_SOUTH}}},
+    {MAPPING_ACTION_RIGHT_MOUSE_BUTTON, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_EAST}}},
+    {MAPPING_ACTION_SCROLL_WINDOW_UP, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_RIGHTY, JOYSTICK_AXIS_NEGATIVE}}},
+    {MAPPING_ACTION_SCROLL_WINDOW_DOWN, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_RIGHTY, JOYSTICK_AXIS_POSITIVE}}},
+    {MAPPING_ACTION_SCROLL_MAP_UP, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_RIGHTY, JOYSTICK_AXIS_NEGATIVE}}},
+    {MAPPING_ACTION_SCROLL_MAP_LEFT, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_RIGHTX, JOYSTICK_AXIS_NEGATIVE}}},
+    {MAPPING_ACTION_SCROLL_MAP_DOWN, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_RIGHTY, JOYSTICK_AXIS_POSITIVE}}},
+    {MAPPING_ACTION_SCROLL_MAP_RIGHT, {{SDL_GAMEPAD_BINDTYPE_AXIS, SDL_GAMEPAD_AXIS_RIGHTX, JOYSTICK_AXIS_POSITIVE}}},
+    {MAPPING_ACTION_ROTATE_MAP_LEFT, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER}}},
+    {MAPPING_ACTION_ROTATE_MAP_RIGHT, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER}}},
+    {MAPPING_ACTION_INCREASE_GAME_SPEED, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_WEST}}},
+    {MAPPING_ACTION_DECREASE_GAME_SPEED, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_NORTH}}},
+    {MAPPING_ACTION_MOUSE_CURSOR_UP, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_DPAD_UP}}},
+    {MAPPING_ACTION_MOUSE_CURSOR_LEFT, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_DPAD_LEFT}}},
+    {MAPPING_ACTION_MOUSE_CURSOR_DOWN, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_DPAD_DOWN}}},
+    {MAPPING_ACTION_MOUSE_CURSOR_RIGHT, {{SDL_GAMEPAD_BINDTYPE_BUTTON, SDL_GAMEPAD_BUTTON_DPAD_RIGHT}}}
 };
 
-#define NUM_CONTROLLER_MAPPINGS (sizeof(controller_mappings) / sizeof(controller_mapping))
+#define NUM_GAMEPAD_MAPPINGS (sizeof(gamepad_mappings) / sizeof(gamepad_mapping))
 
 static int use_joystick(void)
 {
@@ -175,22 +180,54 @@ static joystick_hat_position convert_hat_position(int value)
     return position;
 }
 
-static void set_default_controller_mapping(joystick_model *model, SDL_GameController *controller)
+static SDL_GamepadBinding *get_binding_for_element(SDL_GamepadBinding **bindings, int total_bindings,
+    const gamepad_mapping_element *element)
 {
-    for (int i = 0; i < NUM_CONTROLLER_MAPPINGS; i++) {
-        const controller_mapping *mapping = &controller_mappings[i];
-        SDL_GameControllerButtonBind binds[JOYSTICK_MAPPING_ELEMENTS_MAX] = { 0 };
+    for (int i = 0; i < total_bindings; i++) {
+        SDL_GamepadBinding *binding = bindings[i];
+        if (binding->output_type != element->type) {
+            continue;
+        }
+        switch (binding->output_type) {
+            case SDL_GAMEPAD_BINDTYPE_AXIS:
+                if (binding->output.axis.axis == element->id.axis) {
+                    return binding;
+                }
+                break;
+            case SDL_GAMEPAD_BINDTYPE_BUTTON:
+                if (binding->output.button == element->id.button) {
+                    return binding;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    return 0;
+}
+
+static void set_default_controller_mapping(joystick_model *model, SDL_Gamepad *gamepad)
+{
+    int total_bindings;
+    SDL_GamepadBinding **bindings = SDL_GetGamepadBindings(gamepad, &total_bindings);
+
+    if (!bindings) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Could not get gamepad bindings: %s", SDL_GetError());
+        return;
+    }
+
+    for (int i = 0; i < NUM_GAMEPAD_MAPPINGS; i++) {
+        const gamepad_mapping *mapping = &gamepad_mappings[i];
+
+        SDL_GamepadBinding *binds[JOYSTICK_MAPPING_ELEMENTS_MAX] = { 0 };
+
         int bind_failed = 0;
         for (int j = 0; j < JOYSTICK_MAPPING_ELEMENTS_MAX; j++) {
-            int has_bind = 0;
-            if (mapping->element[j].type == SDL_CONTROLLER_BINDTYPE_AXIS) {
-                has_bind = 1;
-                binds[j] = SDL_GameControllerGetBindForAxis(controller, mapping->element[j].id);
-            } else if (mapping->element[j].type == SDL_CONTROLLER_BINDTYPE_BUTTON) {
-                has_bind = 1;
-                binds[j] = SDL_GameControllerGetBindForButton(controller, mapping->element[j].id);
+            if (mapping->element[j].type == SDL_GAMEPAD_BINDTYPE_NONE) {
+                continue;
             }
-            if (has_bind && binds[j].bindType == SDL_CONTROLLER_BINDTYPE_NONE) {
+            binds[j] = get_binding_for_element(bindings, total_bindings, &mapping->element[j]);
+            if (!binds[j]) {
                 bind_failed = 1;
                 break;
             }
@@ -201,20 +238,20 @@ static void set_default_controller_mapping(joystick_model *model, SDL_GameContro
         mapping_element *action = &model->mapping[model->num_mappings];
         action->action = mapping->action;
         for (int j = 0; j < JOYSTICK_MAPPING_ELEMENTS_MAX; j++) {
-            switch (binds[j].bindType) {
-                case SDL_CONTROLLER_BINDTYPE_AXIS:
+            switch (binds[j]->input_type) {
+                case SDL_GAMEPAD_BINDTYPE_AXIS:
                     action->element[j].type = JOYSTICK_ELEMENT_AXIS;
-                    action->element[j].id = binds[j].value.axis;
+                    action->element[j].id = binds[j]->input.axis.axis;
                     action->element[j].position = mapping->element[j].position;
                     break;
-                case SDL_CONTROLLER_BINDTYPE_BUTTON:
+                case SDL_GAMEPAD_BINDTYPE_BUTTON:
                     action->element[j].type = JOYSTICK_ELEMENT_BUTTON;
-                    action->element[j].id = binds[j].value.button;
+                    action->element[j].id = binds[j]->input.button;
                     break;
-                case SDL_CONTROLLER_BINDTYPE_HAT:
+                case SDL_GAMEPAD_BINDTYPE_HAT:
                     action->element[j].type = JOYSTICK_ELEMENT_HAT;
-                    action->element[j].id = binds[j].value.hat.hat;
-                    action->element[j].position = convert_hat_position(binds[j].value.hat.hat_mask);
+                    action->element[j].id = binds[j]->input.hat.hat;
+                    action->element[j].position = convert_hat_position(binds[j]->input.hat.hat_mask);
                     break;
                 default:
                     break;
@@ -222,9 +259,10 @@ static void set_default_controller_mapping(joystick_model *model, SDL_GameContro
         }
         model->num_mappings++;
     }
+    SDL_free(bindings);
 }
 
-static void create_new_model(const char *guid, const char *name, int instance_id, SDL_GameController *controller)
+static void create_new_model(const char *guid, const char *name, int instance_id, SDL_Gamepad *gamepad)
 {
     joystick_model model;
     memset(&model, 0, sizeof(model));
@@ -234,8 +272,8 @@ static void create_new_model(const char *guid, const char *name, int instance_id
     } else {
         snprintf(model.name, JOYSTICK_MAX_NAME, "Joystick %s", name);
     }
-    if (controller) {
-        set_default_controller_mapping(&model, controller);
+    if (gamepad) {
+        set_default_controller_mapping(&model, gamepad);
     } else {
         size_t size = sizeof(default_mapping);
         if (size > sizeof(model.mapping)) {
@@ -247,82 +285,57 @@ static void create_new_model(const char *guid, const char *name, int instance_id
     joystick_add_model(&model);
 }
 
-static void add_joystick(int index)
+static void add_joystick(SDL_JoystickID instance_id)
 {
-    SDL_GameController *controller = 0;
+    SDL_Gamepad *gamepad = 0;
     SDL_Joystick *joystick = 0;
 
-    if (SDL_IsGameController(index)) {
-        controller = SDL_GameControllerOpen(index);
-        joystick = SDL_GameControllerGetJoystick(controller);
+    if (SDL_IsGamepad(instance_id)) {
+        gamepad = SDL_OpenGamepad(instance_id);
+        joystick = SDL_GetGamepadJoystick(gamepad);
         SDL_Log("Game controller found. Setting default gamepad mapping.");
     } else {
-        joystick = SDL_JoystickOpen(index);
+        joystick = SDL_OpenJoystick(instance_id);
     }
-    int instance_id = SDL_JoystickInstanceID(joystick);
     if (joystick_is_active(instance_id)) {
-        if (controller) {
-            SDL_GameControllerClose(controller);
+        if (gamepad) {
+            SDL_CloseGamepad(gamepad);
         } else {
-            SDL_JoystickClose(joystick);
+            SDL_CloseJoystick(joystick);
         }
         return;
     }
 
     static char guid[JOYSTICK_MAX_GUID];
-    SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(joystick), guid, JOYSTICK_MAX_GUID);
+    SDL_GUIDToString(SDL_GetJoystickGUID(joystick), guid, JOYSTICK_MAX_GUID);
     if (!joystick_has_model(guid)) {
-        create_new_model(guid, SDL_JoystickName(joystick), instance_id, controller);
+        create_new_model(guid, SDL_GetJoystickName(joystick), instance_id, gamepad);
     }
     if (!joystick_add(instance_id, guid)) {
-        if (controller) {
-            SDL_GameControllerClose(controller);
+        if (gamepad) {
+            SDL_CloseGamepad(gamepad);
         } else {
-            SDL_JoystickClose(joystick);
+            SDL_CloseJoystick(joystick);
         }
     }
 }
 
-static void remove_joystick(int instance_id)
+static void remove_joystick(SDL_JoystickID instance_id)
 {
     if (!joystick_is_active(instance_id)) {
         return;
     }
-    SDL_GameController *controller = 0;
+    SDL_Gamepad *gamepad = 0;
     SDL_Joystick *joystick = 0;
-#if SDL_VERSION_ATLEAST(2, 0, 4)
-    if (platform_sdl_version_at_least(2, 0, 4)) {
-        controller = SDL_GameControllerFromInstanceID(instance_id);
-        if (!controller) {
-            joystick = SDL_JoystickFromInstanceID(instance_id);
-        }
-    } else {
-#endif
-        for (int i = 0; i < SDL_NumJoysticks(); ++i) {
-            if (SDL_IsGameController(i)) {
-                SDL_GameController *current_controller = SDL_GameControllerOpen(i);
-                SDL_Joystick *current_joystick = SDL_GameControllerGetJoystick(current_controller);
-                if (SDL_JoystickInstanceID(current_joystick) == instance_id) {
-                    controller = current_controller;
-                    break;
-                }
-                SDL_GameControllerClose(current_controller);
-            } else {
-                SDL_Joystick *current_joystick = SDL_JoystickOpen(i);
-                if (SDL_JoystickInstanceID(current_joystick) == instance_id) {
-                    joystick = current_joystick;
-                    break;
-                }
-                SDL_JoystickClose(current_joystick);
-            }
-        }
-#if SDL_VERSION_ATLEAST(2, 0, 4)
+    gamepad = SDL_GetGamepadFromID(instance_id);
+    if (!gamepad) {
+        joystick = SDL_GetJoystickFromID(instance_id);
     }
-#endif
-    if (controller) {
-        SDL_GameControllerClose(controller);
+
+    if (gamepad) {
+        SDL_CloseGamepad(gamepad);
     } else if (joystick) {
-        SDL_JoystickClose(joystick);
+        SDL_CloseJoystick(joystick);
     }
     joystick_remove(instance_id);
 }
@@ -334,15 +347,16 @@ void platform_joystick_init(int force_enable)
     if (!use_joystick()) {
         return;
     }
-    if (SDL_JoystickEventState(SDL_ENABLE) != SDL_ENABLE) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Joystick events could not be enabled: %s", SDL_GetError());
+    SDL_SetJoystickEventsEnabled(true);
+    int count;
+    SDL_JoystickID *instance_ids = SDL_GetJoysticks(&count);
+    for (int i = 0; i < count; ++i) {
+        add_joystick(instance_ids[i]);
     }
-    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
-        add_joystick(i);
-    }
+    SDL_free(instance_ids);
 }
 
-void platform_joystick_device_changed(int id, int is_connected)
+void platform_joystick_device_changed(SDL_JoystickID id, int is_connected)
 {
     if (!use_joystick()) {
         return;

@@ -39,7 +39,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <SDL_mouse.h>
 
 #define MAX_LANGUAGE_DIRS 20
 #define MAX_WIDGETS       64

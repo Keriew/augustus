@@ -1,10 +1,10 @@
 #ifndef PLATFORM_JOYSTICK_H
 #define PLATFORM_JOYSTICK_H
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 void platform_joystick_init(int force_enable);
-void platform_joystick_device_changed(int id, int is_connected);
+void platform_joystick_device_changed(SDL_JoystickID id, int is_connected);
 void platform_joystick_handle_axis(SDL_JoyAxisEvent *event);
 void platform_joystick_handle_trackball(SDL_JoyBallEvent *event);
 void platform_joystick_handle_hat(SDL_JoyHatEvent *event);
