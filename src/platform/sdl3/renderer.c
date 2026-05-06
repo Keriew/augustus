@@ -129,6 +129,8 @@ static int save_screen_buffer(color_t *pixels, int x, int y, int width, int heig
 
     SDL_UnlockSurface(surface);
     SDL_DestroySurface(surface);
+
+    return 1;
 }
 
 static void draw_line(int x_start, int x_end, int y_start, int y_end, color_t color)
@@ -154,7 +156,7 @@ static void draw_rect(int x_start, int x_end, int y_start, int y_end, color_t co
         (color & COLOR_CHANNEL_GREEN) >> COLOR_BITSHIFT_GREEN,
         (color & COLOR_CHANNEL_BLUE) >> COLOR_BITSHIFT_BLUE,
         (color & COLOR_CHANNEL_ALPHA) >> COLOR_BITSHIFT_ALPHA);
-    SDL_FRect rect = { x_start, y_start, x_end - x_start, y_end - y_start };
+    SDL_FRect rect = { x_start, y_start, x_end, y_end };
     SDL_RenderRect(data.renderer, &rect);
 }
 
@@ -168,7 +170,7 @@ static void fill_rect(int x_start, int x_end, int y_start, int y_end, color_t co
         (color & COLOR_CHANNEL_GREEN) >> COLOR_BITSHIFT_GREEN,
         (color & COLOR_CHANNEL_BLUE) >> COLOR_BITSHIFT_BLUE,
         (color & COLOR_CHANNEL_ALPHA) >> COLOR_BITSHIFT_ALPHA);
-    SDL_FRect rect = { x_start, y_start, x_end - x_start, y_end - y_start };
+    SDL_FRect rect = { x_start, y_start, x_end, y_end };
     SDL_RenderFillRect(data.renderer, &rect);
 }
 
@@ -177,7 +179,7 @@ static void set_clip_rectangle(int x, int y, int width, int height)
     if (data.paused) {
         return;
     }
-    SDL_FRect clip = { x, y, width, height };
+    SDL_Rect clip = { x, y, width, height };
     SDL_SetRenderClipRect(data.renderer, &clip);
 }
 
@@ -667,7 +669,7 @@ static void update_custom_texture_yuv(custom_image_type type, const uint8_t *y_d
     if (data.paused || !data.supports_yuv_textures || !data.custom_textures[type].texture) {
         return;
     }
-    int width, height;
+
     SDL_PropertiesID texture_properties = SDL_GetTextureProperties(data.custom_textures[type].texture);
 
     SDL_PixelFormat format = (SDL_PixelFormat) SDL_GetNumberProperty(texture_properties, SDL_PROP_TEXTURE_FORMAT_NUMBER,
@@ -1214,6 +1216,7 @@ int platform_renderer_init(void *window)
     data.paused = 0;
    
     SDL_SetRenderDrawColor(data.renderer, 0, 0, 0, 0xff);
+    SDL_SetRenderDrawBlendMode(data.renderer, SDL_BLENDMODE_BLEND);
 
     create_renderer_interface();
 

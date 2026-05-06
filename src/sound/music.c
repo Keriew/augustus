@@ -78,6 +78,7 @@ static void play_track(int track)
     }
     data.current_track = track;
 }
+
 static void play_randomised_track(int track)
 {
     const char *filename = dir_get_file(mp3_tracks[track], NOT_LOCALIZED);

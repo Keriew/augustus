@@ -153,18 +153,6 @@ static void stop_channel(int channel)
     ch->last_played = 0;
 }
 
-void sound_device_close(void)
-{
-    if (!data.initialized) {
-        return;
-    }
-    MIX_DestroyMixer(data.mixer);
-    free(data.channels);
-    data.channels = 0;
-    data.total_channels = 0;
-    data.initialized = 0;
-}
-
 static uint8_t *load_file(const char *filename, size_t *size)
 {
     filename = dir_get_file(filename, MAY_BE_LOCALIZED);
@@ -221,7 +209,6 @@ static MIX_Track *create_track_from_memory(uint8_t *buffer, size_t size, const c
     }
 
     MIX_SetTrackAudio(track, audio);
-    MIX_DestroyAudio(audio);
 
     return track;
 }
@@ -468,6 +455,9 @@ int sound_device_resume_music(void)
         return 0;
     }
     sound_channel *music_channel = &data.channels[sound_type_to_channels[SOUND_TYPE_MUSIC].start];
+    if (!MIX_TrackPaused(music_channel->track)) {
+        return 0;
+    }
     return MIX_ResumeTrack(music_channel->track);
 }
 
@@ -556,7 +546,11 @@ void sound_device_use_custom_music_player(int bitdepth, int num_channels, int ra
     }  
 
     sound_device_write_custom_music_data(audio_data, len);
-    MIX_PlayTrack(data.custom_music.track, 0);
+    SDL_PropertiesID options = SDL_CreateProperties();
+    if (options) {
+        SDL_SetBooleanProperty(options, MIX_PROP_PLAY_HALT_WHEN_EXHAUSTED_BOOLEAN, false);
+    }
+    MIX_PlayTrack(data.custom_music.track, options);
 }
 
 void sound_device_write_custom_music_data(const void *audio_data, int len)
@@ -578,4 +572,17 @@ void sound_device_use_default_music_player(void)
         return;
     }
     free_custom_audio_stream();
+}
+
+void sound_device_close(void)
+{
+    if (!data.initialized) {
+        return;
+    }
+    free_custom_audio_stream();
+    MIX_DestroyMixer(data.mixer);
+    free(data.channels);
+    data.channels = 0;
+    data.total_channels = 0;
+    data.initialized = 0;
 }
