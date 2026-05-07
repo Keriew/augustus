@@ -89,11 +89,6 @@ const char *system_OS(void)
         snprintf(full_version, 300, "Windows (unknown version)");
     }
     return full_version;
-#elif defined(__APPLE__) || defined(__MACH__)
-    #include <TargetConditionals.h>
-    #if TARGET_OS_MAC
-        return "Mac OS X";
-    #endif
 #elif defined(__GNUC__) && !defined(__SWITCH__)
     struct utsname uts;
     if (uname(&uts) == 0) {
@@ -101,28 +96,11 @@ const char *system_OS(void)
         snprintf(full_version, 300, "%s %s", uts.sysname, uts.release);
         return full_version;
     }
-#ifdef __linux__
-    return "Linux";
-#endif
-    return "Unix";
-#elif defined(__HAIKU__)
-    return "Haiku";
-#elif defined(__FreeBSD__)
-    return "FreeBSD";
-#elif defined(__NetBSD__)
-    return "NetBSD";
-#elif defined(__OpenBSD__)
-    return "OpenBSD";
-#elif defined(__vita__)
-    return "PlayStation Vita";
+    return SDL_GetPlatform();
 #elif defined(__SWITCH__)
     return "Nintendo Switch";
-#elif defined(__ANDROID__)
-    return "Android";
-#elif defined(__EMSCRIPTEN__)
-    return "Emscripten";
 #else
-    return "(unknown operating system)";
+    return SDL_GetPlatform();
 #endif
 }
 

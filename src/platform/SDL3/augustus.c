@@ -70,7 +70,7 @@ static void write_to_output(FILE *output, const char *message)
     fflush(output);
 }
 
-#ifdef __IPHONEOS__
+#ifdef SDL_PLATFORM_IOS
 static augustus_args args;
 static void setup(const augustus_args *args);
 #endif
@@ -518,7 +518,7 @@ static void teardown(void)
     SDL_Quit();
     teardown_logging();
 
-#ifdef __IPHONEOS__
+#ifdef SDL_PLATFORM_IOS
     // iOS apps are not allowed to self-terminate. To avoid being stuck on a blank screen here, we start the game again.
     setup(&args);
 #endif
@@ -604,7 +604,7 @@ static const char *ask_for_data_dir(int again)
         const SDL_MessageBoxData messageboxdata = {
             SDL_MESSAGEBOX_WARNING, NULL, "Wrong folder selected",
             "The selected folder is not a proper Caesar 3 folder.\n\n"
-#ifndef __IPHONEOS__
+#ifndef SDL_PLATFORM_IOS
             "Please select a path directly from either the internal storage "
             "or the SD card, otherwise the path may not be recognised.\n\n"
 #endif
@@ -619,7 +619,7 @@ static const char *ask_for_data_dir(int again)
     }
 #ifdef __ANDROID__
     return android_show_c3_path_dialog(again);
-#elif defined __IPHONEOS__
+#elif defined SDL_PLATFORM_IOS
     return ios_show_c3_path_dialog(again);
 #else
     return system_show_select_folder_dialog("Please select your Caesar 3 folder", 0);
@@ -647,7 +647,7 @@ static int pre_init(const char *custom_data_dir)
         return 1;
     }
 
-#ifdef __IPHONEOS__
+#ifdef SDL_PLATFORM_IOS
     const char *base_path = ios_get_base_path();
 #else
     const char *base_path = platform_get_base_path();
