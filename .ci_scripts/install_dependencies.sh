@@ -153,7 +153,9 @@ then
     fi
     if [[ "$SDL_MAJOR_VERSION" == "3" ]]
     then
-      sudo apt-get update && sudo apt-get -y install libx11-dev libpulse-dev libaudio-dev
+      sudo apt-get update && sudo apt-get -y install libx11-dev libxext-dev libxrandr-dev libxcursor-dev \
+        libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+        libxkbcommon-dev libpulse-dev libaudio-dev
     fi
     install_sdl_lib "SDL$SDL_MAJOR_VERSION" $SDL_VERSION "$SDL_CONFIGURE_OPTIONS"
     install_sdl_lib "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION "$SDL_MIXER_CONFIGURE_OPTIONS" \
