@@ -16,10 +16,13 @@ if ("${env:COMPILER}" -eq "msvc") {
         curl "https://libsdl.org/projects/SDL_mixer/release/SDL${SDL_MAJOR_VERSION}_mixer-devel-${env:SDL_MIXER_VERSION}-VC.zip" -o deps/SDL_mixer.zip
         CheckSuccess("Download SDL mixer")
     }
+    $SDL_EXT_DIR = Join-Path $PWD.Path "ext\SDL${SDL_MAJOR_VERSION}"
+    mkdir -Force $SDL_EXT_DIR
+
     echo "Extracting SDL"
-    7z x deps\SDL.zip -oext\SDL${SDL_MAJOR_VERSION}
+    7z x deps\SDL.zip "-o$SDL_EXT_DIR"
     CheckSuccess("Unpack SDL")
-    7z x deps\SDL_mixer.zip -oext\SDL${SDL_MAJOR_VERSION}
+    7z x deps\SDL_mixer.zip "-o$SDL_EXT_DIR"
     CheckSuccess("Unpack SDL mixer")
 } elseif ("${env:COMPILER}" -eq "msvc-arm64") {
     $SDL_DIR = $PWD.Path + "\deps\SDL${SDL_MAJOR_VERSION}"
