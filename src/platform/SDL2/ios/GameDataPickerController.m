@@ -1,6 +1,7 @@
 #import "GameDataPickerController.h"
 
-#import "ios.h"
+#import "../../ios/ios.h"
+
 #import "platform/screen.h"
 #import "SDL.h"
 #import "SDL_platform.h"
