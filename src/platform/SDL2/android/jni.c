@@ -1,4 +1,4 @@
-#include "jni.h"
+#include "platform/android/jni.h"
 
 #include "SDL.h"
 
