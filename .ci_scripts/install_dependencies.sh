@@ -6,13 +6,14 @@ function get_sdl_lib_url {
   local MODULE=$1
   local VERSION=$2
   local EXT=$3
-  if [[ "$MODULE" == "SDL$SDL_MAJOR_VERSION_mixer" ]]
+  if [[ "$MODULE" == "SDL${SDL_MAJOR_VERSION}_mixer" ]]
   then
     local SDL_URL_PATH="projects/SDL_mixer/release"
   else
     local SDL_URL_PATH="release"
   fi
   SDL_LIB_URL="https://www.libsdl.org/$SDL_URL_PATH/$MODULE-$VERSION.$EXT"
+  echo "Obtained URL for $MODULE-$VERSION: $SDL_LIB_URL"
 }
 
 function install_sdl_lib {
@@ -42,7 +43,7 @@ function install_sdl_lib {
     mkdir -p $LIBDIR
     tar -zxf "$FILENAME" -C deps/build
     cd $BUILDDIR
-    if [ "$SDL_MAJOR_VERSION" == "2" ]
+    if [[ "$SDL_MAJOR_VERSION" == "2" ]]
     then
       ($ENV_VARS ; $CONFIGURE_PREFIX ./configure --prefix=$ROOT/$LIBDIR $CONFIGURE_OPTIONS)
     else
@@ -119,7 +120,7 @@ then
   if [ "$BUILD_TARGET" == "mac" ]
   then
     install_sdl_macos "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
-    install_sdl_macos "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION
+    install_sdl_macos "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
   elif [ "$BUILD_TARGET" == "android" ]
   then
   	if [ ! -f "android/augustus.keystore" ]
@@ -131,7 +132,7 @@ then
     if [ ! -f "deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar" ]
     then
       install_sdl_android "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
-      install_sdl_android "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION
+      install_sdl_android "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
     else
       mkdir android/augustus/libs
       cp deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar android/augustus/libs/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar
@@ -139,7 +140,7 @@ then
   elif [ "$BUILD_TARGET" == "ios" ]
   then
     install_sdl_ios "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
-    install_sdl_ios "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION
+    install_sdl_ios "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
   else
     if [ "$BUILD_TARGET" == "emscripten" ]
     then
@@ -151,7 +152,7 @@ then
       SDL_MIXER_CONFIGURE_OPTIONS="--host=wasm32-unknown-emscripten"
     fi
     install_sdl_lib "SDL$SDL_MAJOR_VERSION" $SDL_VERSION "$SDL_CONFIGURE_OPTIONS"
-    install_sdl_lib "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION "$SDL_MIXER_CONFIGURE_OPTIONS" \
+    install_sdl_lib "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION "$SDL_MIXER_CONFIGURE_OPTIONS" \
       "SDL2_CONFIG=$PWD/deps/SDL2-$SDL_VERSION/bin/sdl2-config"
   fi
 fi
