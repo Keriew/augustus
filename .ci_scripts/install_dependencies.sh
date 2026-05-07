@@ -49,7 +49,7 @@ function install_sdl_lib {
     else
       mkdir build
       cd build
-      $CMAKE_PREFIX cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$ROOT/$LIBDIR -DCMAKE_PREFIX_PATH=$ROOT/$LIBDIR ..
+      $CMAKE_PREFIX cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$ROOT/$LIBDIR $CONFIGURE_OPTIONS -DSDL_TESTS=OFF -DSDL_EXAMPLES=OFF ..
     fi
     $MAKE_PREFIX make -j4
     $MAKE_PREFIX make install
@@ -156,6 +156,8 @@ then
       sudo apt-get update && sudo apt-get -y install libx11-dev libxext-dev libxrandr-dev libxcursor-dev \
         libxfixes-dev libxi-dev libxss-dev libxtst-dev \
         libxkbcommon-dev libpulse-dev libaudio-dev
+      SDL_CONFIGURE_OPTIONS=""
+      SDL_MIXER_CONFIGURE_OPTIONS="-DCMAKE_PREFIX_PATH=$PWD/deps/SDL3-$SDL_VERSION"
     fi
     install_sdl_lib "SDL$SDL_MAJOR_VERSION" $SDL_VERSION "$SDL_CONFIGURE_OPTIONS"
     install_sdl_lib "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION "$SDL_MIXER_CONFIGURE_OPTIONS" \
