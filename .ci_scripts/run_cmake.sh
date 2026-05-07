@@ -2,7 +2,7 @@
 
 set -e
 
-if [ -n "$SDL_VERSION"]
+if [ -n "$SDL_VERSION" ]
 then
   SDL_MAJOR_VERSION=${SDL_VERSION%%.*}
 
