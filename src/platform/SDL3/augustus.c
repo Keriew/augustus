@@ -309,12 +309,26 @@ static void run_and_draw(void)
     platform_renderer_render();
 }
 
+static void handle_mouse_position(Uint32 which, Uint32 windowID, float x, float y)
+{
+    if (which != SDL_TOUCH_MOUSEID) {
+        SDL_Window *window = SDL_GetWindowFromID(windowID);
+        if (window && !SDL_GetWindowRelativeMouseMode(window)) {
+            float fx = x;
+            float fy = y;
+            SDL_Renderer *renderer = SDL_GetRenderer(window);
+            if (renderer) {
+                SDL_RenderCoordinatesFromWindow(renderer, x, y, &fx, &fy);
+            }
+            mouse_set_position((int) fx, (int) fy);
+        }
+    }
+}
+
 static void handle_mouse_button(SDL_MouseButtonEvent *event, int is_down)
 {
-    SDL_Window *window = SDL_GetWindowFromID(event->windowID);
-    if (window && !SDL_GetWindowRelativeMouseMode(window)) {
-        mouse_set_position(event->x, event->y);
-    }
+    handle_mouse_position(event->which, event->windowID, event->x, event->y);
+
     if (event->button == SDL_BUTTON_LEFT) {
         mouse_set_left_down(is_down);
     } else if (event->button == SDL_BUTTON_MIDDLE) {
@@ -424,10 +438,7 @@ static void handle_event(SDL_Event *event)
             platform_handle_text(&event->text);
             break;
         case SDL_EVENT_MOUSE_MOTION:
-            if (event->motion.which != SDL_TOUCH_MOUSEID &&
-                !SDL_GetWindowRelativeMouseMode(SDL_GetWindowFromID(event->motion.windowID))) {
-                mouse_set_position(event->motion.x, event->motion.y);
-            }
+            handle_mouse_position(event->motion.which, event->motion.windowID, event->motion.x, event->motion.y);
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
             if (event->button.which != SDL_TOUCH_MOUSEID) {
