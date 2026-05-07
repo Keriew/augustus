@@ -32,7 +32,7 @@ case "$BUILD_TARGET" in
 	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release $CMAKE_SDL_VERSION -DCMAKE_INSTALL_PREFIX=/usr ..
 	;;
 "linux")
-	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release $CMAKE_SDL_VERSION $CMAKE_SDL_PREFIX..
+	mkdir build && cd build && cmake -DAV1_VIDEO_SUPPORT=ON -DCMAKE_BUILD_TYPE=Release $CMAKE_SDL_VERSION $CMAKE_SDL_PREFIX ..
 	;;
 "android")
 	mkdir build
