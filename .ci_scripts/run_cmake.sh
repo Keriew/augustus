@@ -4,7 +4,7 @@ set -e
 
 if [ -n "$SDL_VERSION"]
 then
-  local SDL_MAJOR_VERSION=${SDL_VERSION%%.*}
+  SDL_MAJOR_VERSION=${SDL_VERSION%%.*}
 
   if [[ "$SDL_MAJOR_VERSION" == "3" ]]
   then

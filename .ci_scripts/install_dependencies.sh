@@ -151,6 +151,10 @@ then
       SDL_CONFIGURE_OPTIONS="--host=wasm32-unknown-emscripten --disable-assembly --disable-cpuinfo"
       SDL_MIXER_CONFIGURE_OPTIONS="--host=wasm32-unknown-emscripten"
     fi
+    if [[ "$SDL_MAJOR_VERSION" == "3" ]]
+    then
+      sudo apt-get update && sudo apt-get -y install libx11-dev libpulse-dev libaudio-dev
+    fi
     install_sdl_lib "SDL$SDL_MAJOR_VERSION" $SDL_VERSION "$SDL_CONFIGURE_OPTIONS"
     install_sdl_lib "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION "$SDL_MIXER_CONFIGURE_OPTIONS" \
       "SDL2_CONFIG=$PWD/deps/SDL2-$SDL_VERSION/bin/sdl2-config"
