@@ -1,4 +1,4 @@
-#import "../../ios/ios.h"
+#import "ios.h"
 
 #import "GameDataPickerController.h"
 
