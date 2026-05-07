@@ -848,8 +848,6 @@ function(GET_SDL_EXT_DIR result module)
     endforeach()
 endfunction()
 
-message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-
 if(${TARGET_PLATFORM} STREQUAL "emscripten")
     set(USE_FLAGS "-s USE_SDL=${SDL_VERSION} -s USE_SDL_MIXER=${SDL_VERSION} -s SDL${SDL_VERSION}_MIXER_FORMATS=[\"mp3,ogg\"] -s USE_MPG123=1")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")

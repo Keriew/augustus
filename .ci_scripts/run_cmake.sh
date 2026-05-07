@@ -8,6 +8,10 @@ then
 
   if [[ "$SDL_MAJOR_VERSION" == "3" ]]
   then
+    echo "SDL3 ext path"
+	ls $PWD/ext/SDL3
+	echo "SDL3_mixer ext path"
+	ls $PWD/ext/SDL3/SDL3_mixer-$SDL_MIXER_VERSION
 	CMAKE_SDL_VERSION="-DSDL_VERSION=3"
 	CMAKE_SDL_PREFIX="-DCMAKE_PREFIX_PATH=\"$PWD/ext/SDL3/SDL3-$SDL_VERSION;$PWD/ext/SDL3/SDL3_mixer-$SDL_MIXER_VERSION\""
   fi
