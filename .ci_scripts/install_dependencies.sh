@@ -6,7 +6,7 @@ function get_sdl_lib_url {
   local MODULE=$1
   local VERSION=$2
   local EXT=$3
-  if [[ "$MODULE" == "SDL2_mixer" ]]
+  if [[ "$MODULE" == "SDL$SDL_MAJOR_VERSION_mixer" ]]
   then
     local SDL_URL_PATH="projects/SDL_mixer/release"
   else
@@ -42,13 +42,20 @@ function install_sdl_lib {
     mkdir -p $LIBDIR
     tar -zxf "$FILENAME" -C deps/build
     cd $BUILDDIR
-    ($ENV_VARS ; $CONFIGURE_PREFIX ./configure --prefix=$ROOT/$LIBDIR $CONFIGURE_OPTIONS)
+    if [ "$SDL_MAJOR_VERSION" == "2" ]
+    then
+      ($ENV_VARS ; $CONFIGURE_PREFIX ./configure --prefix=$ROOT/$LIBDIR $CONFIGURE_OPTIONS)
+    else
+      mkdir build
+      cd build
+      $CMAKE_PREFIX cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$ROOT/$LIBDIR -DCMAKE_PREFIX_PATH=$ROOT/$LIBDIR ..
+    fi
     $MAKE_PREFIX make -j4
     $MAKE_PREFIX make install
     cd $ROOT
     rm -rf deps/build
   fi
-  ln -sf "$ROOT/$LIBDIR" ext/SDL2
+  ln -sf "$ROOT/$LIBDIR" "ext/SDL$SDL_MAJOR_VERSION"
 }
 
 function install_sdl_macos {
@@ -78,7 +85,7 @@ function install_sdl_android {
   local FILENAME=ext/SDL2/$MODULE-$VERSION.tar.gz
   get_sdl_lib_url $MODULE $VERSION "tar.gz"
   curl -o "$FILENAME" "$SDL_LIB_URL"
-  tar -zxf $FILENAME -C ext/SDL2
+  tar -zxf $FILENAME -C "ext/SDL$SDL_MAJOR_VERSION"
   rm $FILENAME
 }
 
@@ -92,8 +99,10 @@ function install_sdl_ios {
     get_sdl_lib_url $MODULE $VERSION "tar.gz"
     curl -o "$FILENAME" "$SDL_LIB_URL"
   fi
-  tar -zxf $FILENAME -C ext/SDL2
+  tar -zxf $FILENAME -C "ext/SDL$SDL_MAJOR_VERSION"
 }
+
+SDL_MAJOR_VERSION="${SDL_VERSION%%.*}"
 
 mkdir -p deps
 if [ "$BUILD_TARGET" == "appimage" ] || [ "$BUILD_TARGET" == "codeql-cpp" ]
@@ -109,8 +118,8 @@ elif [ ! -z "$SDL_VERSION" ] && [ ! -z "$SDL_MIXER_VERSION" ]
 then
   if [ "$BUILD_TARGET" == "mac" ]
   then
-    install_sdl_macos "SDL2" $SDL_VERSION
-    install_sdl_macos "SDL2_mixer" $SDL_MIXER_VERSION
+    install_sdl_macos "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
+    install_sdl_macos "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION
   elif [ "$BUILD_TARGET" == "android" ]
   then
   	if [ ! -f "android/augustus.keystore" ]
@@ -119,29 +128,30 @@ then
     else
       BUILDTYPE=release
     fi
-    if [ ! -f "deps/SDL2-$BUILDTYPE.aar" ]
+    if [ ! -f "deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar" ]
     then
-      install_sdl_android "SDL2" $SDL_VERSION
-      install_sdl_android "SDL2_mixer" $SDL_MIXER_VERSION
+      install_sdl_android "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
+      install_sdl_android "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION
     else
       mkdir android/augustus/libs
-      cp deps/SDL2-$BUILDTYPE.aar android/augustus/libs/SDL2-$BUILDTYPE.aar
+      cp deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar android/augustus/libs/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar
     fi
   elif [ "$BUILD_TARGET" == "ios" ]
   then
-    install_sdl_ios "SDL2" $SDL_VERSION
-    install_sdl_ios "SDL2_mixer" $SDL_MIXER_VERSION
+    install_sdl_ios "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
+    install_sdl_ios "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION
   else
     if [ "$BUILD_TARGET" == "emscripten" ]
     then
       source ${PWD}/emsdk/emsdk_env.sh
       CONFIGURE_PREFIX="emconfigure"
       MAKE_PREFIX="emmake"
+      CMAKE_PREFIX="emcmake"
       SDL_CONFIGURE_OPTIONS="--host=wasm32-unknown-emscripten --disable-assembly --disable-cpuinfo"
       SDL_MIXER_CONFIGURE_OPTIONS="--host=wasm32-unknown-emscripten"
     fi
-    install_sdl_lib "SDL2" $SDL_VERSION "$SDL_CONFIGURE_OPTIONS"
-    install_sdl_lib "SDL2_mixer" $SDL_MIXER_VERSION "$SDL_MIXER_CONFIGURE_OPTIONS" \
+    install_sdl_lib "SDL$SDL_MAJOR_VERSION" $SDL_VERSION "$SDL_CONFIGURE_OPTIONS"
+    install_sdl_lib "SDL$SDL_MAJOR_VERSION_mixer" $SDL_MIXER_VERSION "$SDL_MIXER_CONFIGURE_OPTIONS" \
       "SDL2_CONFIG=$PWD/deps/SDL2-$SDL_VERSION/bin/sdl2-config"
   fi
 fi
