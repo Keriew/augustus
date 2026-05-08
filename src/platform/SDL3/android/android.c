@@ -201,14 +201,16 @@ JNIEXPORT void JNICALL Java_com_github_Keriew_augustus_AugustusMainActivity_gotD
 
 void platform_show_virtual_keyboard(void)
 {
-    if (!SDL_TextInputActive()) {
-        SDL_StartTextInput(platform_screen_get_window());
+    SDL_Window *window = platform_screen_get_window();
+    if (!SDL_TextInputActive(window)) {
+        SDL_StartTextInput(window);
     }
 }
 
 void platform_hide_virtual_keyboard(void)
 {
-    if (SDL_TextInputActive()) {
-        SDL_StopTextInput(platform_screen_get_window());
+    SDL_Window *window = platform_screen_get_window();
+    if (SDL_TextInputActive(window)) {
+        SDL_StopTextInput(window);
     }
 }

@@ -132,7 +132,7 @@ int asset_handler_get_directory_contents(const char *dir_name, int type,
 JNIEXPORT void JNICALL Java_com_github_Keriew_augustus_AugustusMainActivity_releaseAssetManager(JNIEnv *env, jobject thiz)
 {
     if (asset_manager) {
-        JNIEnv *env = SDL_AndroidGetJNIEnv();
+        JNIEnv *env = SDL_GetAndroidJNIEnv();
         (*env)->DeleteGlobalRef(env, java_asset_manager);
         asset_manager = 0;
     }
