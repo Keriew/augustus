@@ -165,9 +165,9 @@ repositories {
 
 dependencies {
     if (!rootProject.ext.usingAAR) {
-        if (file('libs/SDL3.aar').exists() && file('libs/SDL3_mixer.aar').exists()) {
+        if (rootProject.ext.findAAR('augustus/libs', 'SDL3') && rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer')) {
             println 'Using pre-packed SDL3 AAR'
-            implementation files('libs/SDL3.aar', 'libs/SDL3_mixer.aar')
+            implementation files(rootProject.ext.findAAR('augustus/libs', 'SDL3'), rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer'))
             rootProject.ext.usingAAR = 3
         } else if (file('libs/SDL2.aar').exists()) {
             println 'Using pre-packed SDL2 General AAR'

@@ -6,13 +6,19 @@ function get_sdl_lib_url {
   local MODULE=$1
   local VERSION=$2
   local EXT=$3
+  local PLATFORM=$4
   if [[ "$MODULE" == "SDL${SDL_MAJOR_VERSION}_mixer" ]]
   then
     local SDL_URL_PATH="projects/SDL_mixer/release"
   else
     local SDL_URL_PATH="release"
   fi
-  SDL_LIB_URL="https://www.libsdl.org/$SDL_URL_PATH/$MODULE-$VERSION.$EXT"
+  if [ ! -z "$PLATFORM" ]
+  then
+    SDL_LIB_URL="https://www.libsdl.org/$SDL_URL_PATH/$MODULE-devel-$VERSION-$PLATFORM.$EXT"
+  else
+    SDL_LIB_URL="https://www.libsdl.org/$SDL_URL_PATH/$MODULE-$VERSION.$EXT"
+  fi
   echo "Obtained URL for $MODULE-$VERSION: $SDL_LIB_URL"
 }
 
@@ -90,6 +96,20 @@ function install_sdl_android {
   rm $FILENAME
 }
 
+function install_sdl_android_aar {
+  local MODULE=$1
+  local VERSION=$2
+  local ZIP_FILENAME="$MODULE-devel-$VERSION-android.zip"
+  local AAR_FILENAME="$MODULE-$VERSION.aar"
+
+  if [ ! -f "deps/$AAR_FILENAME" ]
+  then
+    get_sdl_lib_url $MODULE $VERSION "zip" "android"
+    curl -L -o "$ZIP_FILENAME" "$SDL_LIB_URL"
+    unzip -j -o "$ZIP_FILENAME" "$AAR_FILENAME" -d deps
+  fi
+}
+
 function install_sdl_ios {
   local MODULE=$1
   local VERSION=$2
@@ -125,14 +145,11 @@ then
   then
     if [[ "$SDL_MAJOR_VERSION" == "3" ]]
     then
-      if [ ! -f "deps/SDL$SDL_MAJOR_VERSION.aar" ]
-      then
-        install_sdl_android "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
-        install_sdl_android "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
-      else
-        mkdir -p android/augustus/libs
-        cp deps/SDL$SDL_MAJOR_VERSION.aar android/augustus/libs/SDL$SDL_MAJOR_VERSION.aar
-      fi
+      install_sdl_android_aar "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
+      install_sdl_android_aar "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
+      mkdir -p android/augustus/libs
+      cp "deps/SDL$SDL_MAJOR_VERSION-$SDL_VERSION.aar" "android/augustus/libs/SDL$SDL_MAJOR_VERSION.aar"
+      cp "deps/SDL${SDL_MAJOR_VERSION}_mixer-$SDL_MIXER_VERSION.aar" "android/augustus/libs/SDL${SDL_MAJOR_VERSION}_mixer.aar"
     else
   	  if [ ! -f "android/augustus.keystore" ]
       then
