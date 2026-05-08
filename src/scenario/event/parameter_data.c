@@ -176,11 +176,12 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm4 = {.name = "formula",             .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_POPULATION_IN_AREA] = {.type = CONDITION_TYPE_POPULATION_IN_AREA,
-                                        .xml_attr = {.name = "population_in_area", .type = PARAMETER_TYPE_TEXT,            .key = TR_CONDITION_TYPE_DESIRABILITY_IN_AREA},
+                                        .xml_attr = {.name = "population_in_area", .type = PARAMETER_TYPE_TEXT,            .key = TR_CONDITION_TYPE_POPULATION_IN_AREA},
                                         .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
                                         .xml_parm2 = {.name = "grid_offset2",        .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
-                                        .xml_parm3 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm4 = {.name = "formula",             .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
+                                        .xml_parm3 = {.name = "housing_type",        .type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS,        .min_limit = 1,         .max_limit = 3,             .key = TR_PARAMETER_TYPE_POP_CLASS },
+                                        .xml_parm4 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm5 = {.name = "formula",             .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
 };
 
 scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes(condition_types type)
@@ -900,10 +901,10 @@ static special_attribute_mapping_t special_attribute_mappings_age[] = {
     {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_9",  .value = 9,  .key = TR_DECENNIUM_9 }, // Ages 90-99
 
     // Age groups
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "school_age",   .value = 10, .key = TR_PLACEHOLDER }, // Ages 0-14
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "academy_age",  .value = 11, .key = TR_PLACEHOLDER }, // Ages 14-21
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "working_age",  .value = 12, .key = TR_PLACEHOLDER }, // Ages 20-49/59 (depends on config)
-    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "retired",      .value = 13, .key = TR_PLACEHOLDER }, // Ages 50+/60+ (depends on config)
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "school_age",   .value = 10, .key = TR_PARAMETER_AGE_SCHOOL }, // Ages 0-14
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "academy_age",  .value = 11, .key = TR_PARAMETER_AGE_ACADEMY }, // Ages 14-21
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "working_age",  .value = 12, .key = TR_PARAMETER_AGE_WORKING }, // Ages 20-49/59 (depends on config)
+    {.type = PARAMETER_TYPE_AGE_GROUP, .text = "retired",      .value = 13, .key = TR_PARAMETER_AGE_RETIRED }, // Ages 50+/60+ (depends on config)
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE (sizeof(special_attribute_mappings_age) / sizeof(special_attribute_mapping_t))

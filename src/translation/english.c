@@ -2181,7 +2181,12 @@ static translation_string all_strings[] = {
     {TR_CATEGORY_UI_EDITOR, "Editor"},
     {TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TITLE, "Delete event?"},
     {TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TEXT, "Are you sure you want to delete this event?\n\nThe action is irreversible." },
-    {TR_CONDITION_TYPE_DESIRABILITY_IN_AREA, "Desirability in area"}
+    {TR_CONDITION_TYPE_DESIRABILITY_IN_AREA, "Desirability in area"},
+    {TR_CONDITION_TYPE_POPULATION_IN_AREA, "Population in area"},
+    {TR_PARAMETER_AGE_SCHOOL, "School age"},
+    {TR_PARAMETER_AGE_ACADEMY, "Academy age"},
+    {TR_PARAMETER_AGE_WORKING, "Working age"},
+    {TR_PARAMETER_AGE_RETIRED, "Retired"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

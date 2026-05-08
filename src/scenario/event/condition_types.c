@@ -19,6 +19,7 @@
 #include "empire/trade_route.h"
 #include "game/settings.h"
 #include "game/time.h"
+#include "map/building.h"
 #include "map/desirability.h"
 #include "map/grid.h"
 #include "map/property.h"
@@ -640,12 +641,87 @@ int scenario_condition_type_desirability_in_area_met(const scenario_condition_t 
 
     int desirability_sum = 0;
     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+
     for (int i = 0; i < slice->size; i++) {
         int grid_offset = slice->grid_offsets[i];
         desirability_sum += map_desirability_get(grid_offset);
-
     }
     int desirability_mean = desirability_sum / slice->size;
 
     return comparison_helper_compare_values(comparison, desirability_mean, value);
+}
+
+int scenario_condition_type_population_in_area_met(const scenario_condition_t *condition)
+{
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
+    int class = condition->parameter3;
+    int comparison = condition->parameter4;
+    int value = scenario_formula_evaluate_formula(condition->parameter5);
+
+    int min_type = condition->parameter3;
+    int max_type = condition->parameter3;
+
+    if (class < BUILDING_HOUSE_SMALL_TENT || class >= HOUSE_GROUP_TENT) {
+        switch (class) {
+            case HOUSE_GROUP_TENT:   min_type = BUILDING_HOUSE_SMALL_TENT;   max_type = BUILDING_HOUSE_LARGE_TENT;    break;
+            case HOUSE_GROUP_SHACK:  min_type = BUILDING_HOUSE_SMALL_SHACK;  max_type = BUILDING_HOUSE_LARGE_SHACK;   break;
+            case HOUSE_GROUP_HOVEL:  min_type = BUILDING_HOUSE_SMALL_HOVEL;  max_type = BUILDING_HOUSE_LARGE_HOVEL;   break;
+            case HOUSE_GROUP_CASA:   min_type = BUILDING_HOUSE_SMALL_CASA;   max_type = BUILDING_HOUSE_LARGE_CASA;    break;
+            case HOUSE_GROUP_INSULA: min_type = BUILDING_HOUSE_SMALL_INSULA; max_type = BUILDING_HOUSE_GRAND_INSULA;  break;
+            case HOUSE_GROUP_VILLA:  min_type = BUILDING_HOUSE_SMALL_VILLA;  max_type = BUILDING_HOUSE_GRAND_VILLA;   break;
+            case HOUSE_GROUP_PALACE: min_type = BUILDING_HOUSE_SMALL_PALACE; max_type = BUILDING_HOUSE_LUXURY_PALACE; break;
+
+            case POP_CLASS_PATRICIAN: min_type = BUILDING_HOUSE_SMALL_VILLA; max_type = BUILDING_HOUSE_LUXURY_PALACE; break;
+            case POP_CLASS_PLEBEIAN:  min_type = BUILDING_HOUSE_SMALL_CASA;  max_type = BUILDING_HOUSE_GRAND_INSULA;  break;
+            case POP_CLASS_SLUMS:     min_type = BUILDING_HOUSE_SMALL_TENT;  max_type = BUILDING_HOUSE_LARGE_HOVEL;   break;
+            default:
+                return 0;
+        }
+    }
+
+    int total_population = 0;
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+    array(int) handled_house_ids = {0};
+    array_init(handled_house_ids, 4, NULL, NULL);
+    // array used to store all house ids which have been handled already to prevent counting merged houses multiple times
+    for (int i = 0; i < slice->size; i++) {
+        int grid_offset = slice->grid_offsets[i];
+        const building *b = building_get(map_building_at(grid_offset));
+        if (!b) {
+            continue;
+        }
+        if (!b->size || b->state != BUILDING_STATE_IN_USE) {
+            continue;
+        }
+
+        if (b->type < min_type || b->type > max_type) {
+            continue;
+        }
+
+        int found = 0;
+        int *item;
+        array_foreach(handled_house_ids, item)
+        {
+            if (*item == b->id) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            int *house_id;
+            array_new_item(handled_house_ids, house_id);
+            // if it hasn't been handled yet add to id to the array
+            if (house_id) {
+                *house_id = b->id;
+            }
+        } else {
+            // skip if it's been handled already
+            continue;
+        }
+
+        total_population += b->house_population;
+    }
+
+    return comparison_helper_compare_values(comparison, total_population, value);
 }

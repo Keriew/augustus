@@ -102,6 +102,8 @@ int scenario_condition_type_is_met(scenario_condition_t *condition)
             return scenario_condition_type_months_since_last_festival_met(condition);
         case CONDITION_TYPE_DESIRABILITY_IN_AREA:
             return scenario_condition_type_desirability_in_area_met(condition);
+        case CONDITION_TYPE_POPULATION_IN_AREA:
+            return scenario_condition_type_population_in_area_met(condition);
         default:
             // If we cannot figure condition type (such as with deleted conditions) then default to passed.
             return 1;
