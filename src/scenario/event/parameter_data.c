@@ -77,8 +77,8 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
     [CONDITION_TYPE_CITY_POPULATION] = {.type = CONDITION_TYPE_CITY_POPULATION,
                                         .xml_attr = {.name = "city_population",     .type = PARAMETER_TYPE_TEXT,        .key = TR_CONDITION_TYPE_CITY_POPULATION },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
-                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
-                                        .xml_parm3 = {.name = "class",          .type = PARAMETER_TYPE_POP_CLASS,        .min_limit = 1,         .max_limit = 3,             .key = TR_PARAMETER_TYPE_POP_CLASS }, },
+                                        .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
+                                        .xml_parm3 = {.name = "class",          .type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS,        .min_limit = 1,         .max_limit = 3,             .key = TR_PARAMETER_TYPE_POP_CLASS }, },
     [CONDITION_TYPE_BUILDING_COUNT_ACTIVE] = {.type = CONDITION_TYPE_BUILDING_COUNT_ACTIVE,
                                         .xml_attr = {.name = "building_count_active",     .type = PARAMETER_TYPE_TEXT,  .key = TR_CONDITION_TYPE_BUILDING_COUNT_ACTIVE },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
@@ -171,6 +171,12 @@ static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
                                         .xml_parm3 = {.name = "formula",             .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_DESIRABILITY_IN_AREA] = {.type = CONDITION_TYPE_DESIRABILITY_IN_AREA,
                                         .xml_attr = {.name = "desirability_in_area", .type = PARAMETER_TYPE_TEXT,            .key = TR_CONDITION_TYPE_DESIRABILITY_IN_AREA},
+                                        .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
+                                        .xml_parm2 = {.name = "grid_offset2",        .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
+                                        .xml_parm3 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
+                                        .xml_parm4 = {.name = "formula",             .type = PARAMETER_TYPE_FORMULA,          .min_limit = NEGATIVE_UNLIMITED,         .max_limit = UNLIMITED,       .key = TR_PARAMETER_TYPE_FORMULA }, },
+    [CONDITION_TYPE_POPULATION_IN_AREA] = {.type = CONDITION_TYPE_POPULATION_IN_AREA,
+                                        .xml_attr = {.name = "population_in_area", .type = PARAMETER_TYPE_TEXT,            .key = TR_CONDITION_TYPE_DESIRABILITY_IN_AREA},
                                         .xml_parm1 = {.name = "grid_offset",         .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
                                         .xml_parm2 = {.name = "grid_offset2",        .type = PARAMETER_TYPE_GRID_SLICE,           .min_limit = 0,         .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
                                         .xml_parm3 = {.name = "check",               .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,             .key = TR_PARAMETER_TYPE_CHECK },
@@ -813,6 +819,47 @@ static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE (sizeof(special_attribute_mappings_percentage) / sizeof(special_attribute_mapping_t))
 
+static special_attribute_mapping_t special_attribute_mappings_housing_with_groups[] = {
+    // Individual housing types
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "small_tent",       .value = BUILDING_HOUSE_SMALL_TENT,     .key = TR_BUILDING_HOUSE_SMALL_TENT },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "large_tent",       .value = BUILDING_HOUSE_LARGE_TENT,     .key = TR_BUILDING_HOUSE_LARGE_TENT },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "small_shack",      .value = BUILDING_HOUSE_SMALL_SHACK,    .key = TR_BUILDING_HOUSE_SMALL_SHACK },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "large_shack",      .value = BUILDING_HOUSE_LARGE_SHACK,    .key = TR_BUILDING_HOUSE_LARGE_SHACK },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "small_hovel",      .value = BUILDING_HOUSE_SMALL_HOVEL,    .key = TR_BUILDING_HOUSE_SMALL_HOVEL },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "large_hovel",      .value = BUILDING_HOUSE_LARGE_HOVEL,    .key = TR_BUILDING_HOUSE_LARGE_HOVEL },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "small_casa",       .value = BUILDING_HOUSE_SMALL_CASA,     .key = TR_BUILDING_HOUSE_SMALL_CASA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "large_casa",       .value = BUILDING_HOUSE_LARGE_CASA,     .key = TR_BUILDING_HOUSE_LARGE_CASA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "small_insula",     .value = BUILDING_HOUSE_SMALL_INSULA,   .key = TR_BUILDING_HOUSE_SMALL_INSULA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "medium_insula",    .value = BUILDING_HOUSE_MEDIUM_INSULA,  .key = TR_BUILDING_HOUSE_MEDIUM_INSULA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "large_insula",     .value = BUILDING_HOUSE_LARGE_INSULA,   .key = TR_BUILDING_HOUSE_LARGE_INSULA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "grand_insula",     .value = BUILDING_HOUSE_GRAND_INSULA,   .key = TR_BUILDING_HOUSE_GRAND_INSULA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "small_villa",      .value = BUILDING_HOUSE_SMALL_VILLA,    .key = TR_BUILDING_HOUSE_SMALL_VILLA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "medium_villa",     .value = BUILDING_HOUSE_MEDIUM_VILLA,   .key = TR_BUILDING_HOUSE_MEDIUM_VILLA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "large_villa",      .value = BUILDING_HOUSE_LARGE_VILLA,    .key = TR_BUILDING_HOUSE_LARGE_VILLA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "grand_villa",      .value = BUILDING_HOUSE_GRAND_VILLA,    .key = TR_BUILDING_HOUSE_GRAND_VILLA },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "small_palace",     .value = BUILDING_HOUSE_SMALL_PALACE,   .key = TR_BUILDING_HOUSE_SMALL_PALACE },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "medium_palace",    .value = BUILDING_HOUSE_MEDIUM_PALACE,  .key = TR_BUILDING_HOUSE_MEDIUM_PALACE },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "large_palace",     .value = BUILDING_HOUSE_LARGE_PALACE,   .key = TR_BUILDING_HOUSE_LARGE_PALACE },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "luxury_palace",    .value = BUILDING_HOUSE_LUXURY_PALACE,  .key = TR_BUILDING_HOUSE_LUXURY_PALACE },
+
+    // Housing groups (using overlay enum values for groups)
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "group_tents",      .value = HOUSE_GROUP_TENT,     .key = TR_OVERLAY_HOUSING_TENTS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "group_shacks",     .value = HOUSE_GROUP_SHACK,    .key = TR_OVERLAY_HOUSING_SHACKS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "group_hovels",     .value = HOUSE_GROUP_HOVEL,    .key = TR_OVERLAY_HOUSING_HOVELS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "group_casae",      .value = HOUSE_GROUP_CASA,     .key = TR_OVERLAY_HOUSING_CASAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "group_insulae",    .value = HOUSE_GROUP_INSULA,   .key = TR_OVERLAY_HOUSE_INSULAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "group_villas",     .value = HOUSE_GROUP_VILLA,    .key = TR_OVERLAY_HOUSE_VILLAS },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS, .text = "group_palaces",    .value = HOUSE_GROUP_PALACE,   .key = TR_OVERLAY_HOUSE_PALACES },
+
+    // Population classes (using custom enum values)
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS,            .text = "all",                           .value = POP_CLASS_ALL,                      .key = TR_PARAMETER_VALUE_POP_CLASS_ALL },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS,            .text = "patrician",                     .value = POP_CLASS_PATRICIAN,                .key = TR_PARAMETER_VALUE_POP_CLASS_PATRICIAN },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS,            .text = "plebeian",                      .value = POP_CLASS_PLEBEIAN,                 .key = TR_PARAMETER_VALUE_POP_CLASS_PLEBEIAN },
+    {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS,            .text = "slums",                         .value = POP_CLASS_SLUMS,                    .key = TR_PARAMETER_VALUE_POP_CLASS_SLUMS },
+};
+
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_WITH_GROUPS_SIZE (sizeof(special_attribute_mappings_housing_with_groups) / sizeof(special_attribute_mapping_t))
+
 static special_attribute_mapping_t special_attribute_mappings_housing[] = {
     // Individual housing types
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_tent",       .value = BUILDING_HOUSE_SMALL_TENT,     .key = TR_BUILDING_HOUSE_SMALL_TENT },
@@ -835,16 +882,6 @@ static special_attribute_mapping_t special_attribute_mappings_housing[] = {
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "medium_palace",    .value = BUILDING_HOUSE_MEDIUM_PALACE,  .key = TR_BUILDING_HOUSE_MEDIUM_PALACE },
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "large_palace",     .value = BUILDING_HOUSE_LARGE_PALACE,   .key = TR_BUILDING_HOUSE_LARGE_PALACE },
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "luxury_palace",    .value = BUILDING_HOUSE_LUXURY_PALACE,  .key = TR_BUILDING_HOUSE_LUXURY_PALACE },
-
-
-    // Housing groups (using overlay enum values for groups)
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_tents",      .value = HOUSE_GROUP_TENT,     .key = TR_OVERLAY_HOUSING_TENTS },
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_shacks",     .value = HOUSE_GROUP_SHACK,    .key = TR_OVERLAY_HOUSING_SHACKS },
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_hovels",     .value = HOUSE_GROUP_HOVEL,    .key = TR_OVERLAY_HOUSING_HOVELS },
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_casae",      .value = HOUSE_GROUP_CASA,     .key = TR_OVERLAY_HOUSING_CASAS },
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_insulae",    .value = HOUSE_GROUP_INSULA,   .key = TR_OVERLAY_HOUSE_INSULAS },
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_villas",     .value = HOUSE_GROUP_VILLA,    .key = TR_OVERLAY_HOUSE_VILLAS },
-    {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "group_palaces",    .value = HOUSE_GROUP_PALACE,   .key = TR_OVERLAY_HOUSE_PALACES },
 };
 
 #define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE (sizeof(special_attribute_mappings_housing) / sizeof(special_attribute_mapping_t))
@@ -1122,8 +1159,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return &special_attribute_mappings_model_buildings[index];
-        case PARAMETER_TYPE_HOUSING_TYPE:
-            return &special_attribute_mappings_housing[index];
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
+            return &special_attribute_mappings_housing_with_groups[index];
         case PARAMETER_TYPE_AGE_GROUP:
             return &special_attribute_mappings_age[index];
         case PARAMETER_TYPE_CITY_PROPERTY:
@@ -1146,6 +1183,8 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_route_type[index];
         case PARAMETER_TYPE_VARIABLE_COLOR:
             return &special_attribute_mappings_variable_color[index];
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return &special_attribute_mappings_housing[index];
         default:
             return 0;
     }
@@ -1196,8 +1235,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
         case PARAMETER_TYPE_MODEL:
             generate_model_mappings();
             return special_attribute_mappings_model_buildings_size;
-        case PARAMETER_TYPE_HOUSING_TYPE:
-            return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE;
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_WITH_GROUPS_SIZE;
         case PARAMETER_TYPE_AGE_GROUP:
             return SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE;
         case PARAMETER_TYPE_CITY_PROPERTY:
@@ -1220,6 +1259,8 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_ROUTE_TYPE_SIZE;
         case PARAMETER_TYPE_VARIABLE_COLOR:
             return SPECIAL_ATTRIBUTE_MAPPINGS_VARIABLE_COLOR_SIZE;
+        case PARAMETER_TYPE_HOUSING_TYPE:
+            return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE;
         default:
             return 0;
     }
@@ -1303,6 +1344,7 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return MODEL_COST;
         case PARAMETER_TYPE_HOUSE_DATA_TYPE:
             return MODEL_EVOLVE_DESIRABILITY;
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
         case PARAMETER_TYPE_HOUSING_TYPE:
             return BUILDING_HOUSE_SMALL_TENT;
         case PARAMETER_TYPE_CITY_PROPERTY:

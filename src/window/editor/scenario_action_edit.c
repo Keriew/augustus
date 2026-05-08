@@ -608,7 +608,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_MODEL:
         case PARAMETER_TYPE_CITY_PROPERTY:
         case PARAMETER_TYPE_PERCENTAGE:
-        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
         case PARAMETER_TYPE_AGE_GROUP:
         case PARAMETER_TYPE_PLAYER_TROOPS:
         case PARAMETER_TYPE_ENEMY_CLASS:
@@ -618,6 +618,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_WEATHER:
         case PARAMETER_TYPE_ROUTE_TYPE:
         case PARAMETER_TYPE_VARIABLE_COLOR:
+        case PARAMETER_TYPE_HOUSING_TYPE:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:

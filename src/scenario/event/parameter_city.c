@@ -94,16 +94,19 @@ static int unemployment_rate(scenario_action_t *action)
 
 static int population_by_housing_type(scenario_action_t *action)
 {
-
+    int level_as_int = (int) action->parameter3; // Store the int value separately
     int is_absolute = action->parameter4;
-    int is_group = ((int) action->parameter3 >= (int) HOUSE_GROUP_TENT);
+    int is_group = ((int) action->parameter3 >= (int) HOUSE_GROUP_TENT || action->parameter3 < BUILDING_HOUSE_SMALL_TENT);
     int total_pop = city_population();
     if (!total_pop) {
         return 0;
     }
+    if (level_as_int == 1) {
+        return total_pop;
+    }
     if (!is_group) {
         house_level level = action->parameter3 - 10; // convert from building_type to house_level
-        int pop_at_level = city_population_at_level(level);
+        int pop_at_level = city_population_count_at_level(level);
         if (is_absolute) {
             return pop_at_level;
         }
@@ -112,21 +115,24 @@ static int population_by_housing_type(scenario_action_t *action)
     int min = 0;
     int max = 0;
     int total = 0;
-    int level_as_int = (int) action->parameter3; // Store the int value separately
     switch (level_as_int) { // Use the int variable in switch
-        case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;   break;
-        case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;  break;
-        case HOUSE_GROUP_HOVEL:  min = HOUSE_SMALL_HOVEL;  max = HOUSE_LARGE_HOVEL;  break;
-        case HOUSE_GROUP_CASA:   min = HOUSE_SMALL_CASA;   max = HOUSE_LARGE_CASA;   break;
-        case HOUSE_GROUP_INSULA: min = HOUSE_SMALL_INSULA; max = HOUSE_GRAND_INSULA; break;
-        case HOUSE_GROUP_VILLA:  min = HOUSE_SMALL_VILLA;  max = HOUSE_GRAND_VILLA;  break;
+        case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;    break;
+        case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;   break;
+        case HOUSE_GROUP_HOVEL:  min = HOUSE_SMALL_HOVEL;  max = HOUSE_LARGE_HOVEL;   break;
+        case HOUSE_GROUP_CASA:   min = HOUSE_SMALL_CASA;   max = HOUSE_LARGE_CASA;    break;
+        case HOUSE_GROUP_INSULA: min = HOUSE_SMALL_INSULA; max = HOUSE_GRAND_INSULA;  break;
+        case HOUSE_GROUP_VILLA:  min = HOUSE_SMALL_VILLA;  max = HOUSE_GRAND_VILLA;   break;
         case HOUSE_GROUP_PALACE: min = HOUSE_SMALL_PALACE; max = HOUSE_LUXURY_PALACE; break;
+
+        case POP_CLASS_PATRICIAN: min = HOUSE_SMALL_VILLA; max = HOUSE_LUXURY_PALACE; break;
+        case POP_CLASS_PLEBEIAN:  min = HOUSE_SMALL_CASA;  max = HOUSE_GRAND_INSULA;  break;
+        case POP_CLASS_SLUMS:     min = HOUSE_SMALL_TENT;  max = HOUSE_LARGE_HOVEL;   break;
         default:
             return 0;
     }
 
     for (int i = min; i <= max; i++) {
-        total += city_population_at_level(i);
+        total += city_population_count_at_level(i);
     }
     return is_absolute ? total : calc_percentage(total, total_pop);
 }
@@ -419,7 +425,7 @@ city_property_info_t city_property_get_param_info(city_property_t type)
 
         case CITY_PROPERTY_POPS_HOUSING_TYPE:
             info.count = 2;
-            info.param_types[0] = PARAMETER_TYPE_HOUSING_TYPE;
+            info.param_types[0] = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS;
             info.param_types[1] = PARAMETER_TYPE_PERCENTAGE;
             info.param_keys[0] = TR_CITY_PROPERTY_POPS_HOUSING_TYPE;
             info.param_keys[1] = TR_PARAMETER_PERCENTAGE;

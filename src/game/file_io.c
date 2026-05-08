@@ -756,9 +756,9 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     } else {
         scenario_events_clear();
     }
-    
+
     scenario_map_init();
-    
+
     if (version > SCENARIO_LAST_UNVERSIONED) {
         empire_object_load(file->empire, version);
         if (resource_mapping_get_version() < RESOURCE_SEPARATE_FISH_AND_MEAT_VERSION) {
@@ -789,6 +789,9 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     scenario_events_assign_parent_event_ids();
     if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
+    }
+    if (version <= SCENARIO_TESTING_VERSION_BUMP_1) {
+        scenario_events_population_migrate_counting();
     }
 
     buffer_skip(file->end_marker, 4);
@@ -993,6 +996,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     scenario_events_assign_parent_event_ids();
     if (version <= SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
+    }
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_1) {
+        scenario_events_population_migrate_counting();
     }
 }
 

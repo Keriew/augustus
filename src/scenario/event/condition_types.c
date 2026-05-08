@@ -11,6 +11,7 @@
 #include "city/health.h"
 #include "city/labor.h"
 #include "city/military.h"
+#include "city/population.h"
 #include "city/ratings.h"
 #include "core/random.h"
 #include "empire/city.h"
@@ -296,16 +297,39 @@ int scenario_condition_type_city_population_met(const scenario_condition_t *cond
     int value = scenario_formula_evaluate_formula(condition->parameter2);
     int class = condition->parameter3;
 
-    int population_value_to_use = city_data.population.population;
-    if (class == POP_CLASS_PATRICIAN) {
-        population_value_to_use = city_data.population.people_in_villas_palaces;
-    } else if (class == POP_CLASS_PLEBEIAN) {
-        population_value_to_use = city_data.population.population - city_data.population.people_in_villas_palaces;
-    } else if (class == POP_CLASS_SLUMS) {
-        population_value_to_use = city_data.population.people_in_tents_shacks;
+    int total = 0;
+    int is_group = (class >= HOUSE_GROUP_TENT || class < BUILDING_HOUSE_SMALL_TENT);
+    if (class == 1) {
+        total = city_population();
+    } else if (!is_group) {
+        house_level level = class - 10; // convert from building_type to house_level
+        int pop_at_level = city_population_count_at_level(level);
+        total = pop_at_level;
+    } else {
+        int min = 0;
+        int max = 0;
+        switch (class) {
+            case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;    break;
+            case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;   break;
+            case HOUSE_GROUP_HOVEL:  min = HOUSE_SMALL_HOVEL;  max = HOUSE_LARGE_HOVEL;   break;
+            case HOUSE_GROUP_CASA:   min = HOUSE_SMALL_CASA;   max = HOUSE_LARGE_CASA;    break;
+            case HOUSE_GROUP_INSULA: min = HOUSE_SMALL_INSULA; max = HOUSE_GRAND_INSULA;  break;
+            case HOUSE_GROUP_VILLA:  min = HOUSE_SMALL_VILLA;  max = HOUSE_GRAND_VILLA;   break;
+            case HOUSE_GROUP_PALACE: min = HOUSE_SMALL_PALACE; max = HOUSE_LUXURY_PALACE; break;
+
+            case POP_CLASS_PATRICIAN: min = HOUSE_SMALL_VILLA; max = HOUSE_LUXURY_PALACE; break;
+            case POP_CLASS_PLEBEIAN:  min = HOUSE_SMALL_CASA;  max = HOUSE_GRAND_INSULA;  break;
+            case POP_CLASS_SLUMS:     min = HOUSE_SMALL_TENT;  max = HOUSE_LARGE_HOVEL;   break;
+            default:
+                return 0;
+        }
+
+        for (int i = min; i <= max; i++) {
+            total += city_population_count_at_level(i);
+        }
     }
 
-    return comparison_helper_compare_values(comparison, population_value_to_use, value);
+    return comparison_helper_compare_values(comparison, total, value);
 }
 
 int scenario_condition_type_count_own_troops_met(const scenario_condition_t *condition)

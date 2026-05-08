@@ -515,7 +515,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_HOUSE_DATA_TYPE:
         case PARAMETER_TYPE_MODEL:
         case PARAMETER_TYPE_PERCENTAGE:
-        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
         case PARAMETER_TYPE_AGE_GROUP:
         case PARAMETER_TYPE_ENEMY_CLASS:
         case PARAMETER_TYPE_PLAYER_TROOPS:
@@ -527,6 +527,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_WEATHER:
         case PARAMETER_TYPE_ROUTE_TYPE:
         case PARAMETER_TYPE_VARIABLE_COLOR:
+        case PARAMETER_TYPE_HOUSING_TYPE:
             return xml_import_special_parse_type(attr, resolved_type, target);
         case PARAMETER_TYPE_ROUTE_RESOURCE:
             return xml_import_special_parse_number(attr, target);

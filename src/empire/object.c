@@ -267,7 +267,7 @@ void empire_object_load(buffer *buf, int version)
             obj->future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
             migrate_orders(obj);
         }
-        if (version > SCENARIO_TESING_VERSION_BUMP_1) {
+        if (version > SCENARIO_TESTING_VERSION_BUMP_1) {
             full->route_hidden = buffer_read_u8(buf);
         }
     }

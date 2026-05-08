@@ -2,7 +2,7 @@
 
 #include "core/array.h"
 #include "core/log.h"
-#include "core/string.h"   
+#include "core/string.h"
 #include "empire/city.h"
 #include "game/save_version.h"
 #include "map/grid.h"
@@ -53,7 +53,7 @@ unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_
     calculation->evaluation = 0;
     strncpy((char *) calculation->formatted_calculation, (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
     scenario_event_formula_check(calculation);
-    // null termination on last char-  treating as string 
+    // null termination on last char-  treating as string
     return calculation->id;
 }
 
@@ -393,7 +393,7 @@ static void formulas_load_state(buffer *buf)
     for (size_t i = 0; i < array_size; ++i) {
 
         scenario_formula_t *formula = array_advance(scenario_formulas);
-        
+
         unsigned int id = buffer_read_u32(buf);
         if (id != formula->id) {
             log_error("Formula ID mismatch during loading. Something has gone wrong.", 0, 0);
@@ -560,6 +560,45 @@ void scenario_events_min_max_migrate_to_formulas(void)
             }
             unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
             action->parameter1 = id;
+        }
+    }
+}
+
+void scenario_events_population_migrate_counting(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        scenario_action_t *action;
+        for (unsigned int j = 0; j < current->actions.size; j++) {
+            action = array_item(current->actions, j);
+            if (action->type != ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA) {
+                return; // only migrate change house model data for actions
+            }
+            if (action->parameter1 == HOUSE_GROUP_TENT) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_TENT;
+            } else if (action->parameter1 == HOUSE_GROUP_SHACK) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_SHACK;
+            } else if (action->parameter1 == HOUSE_GROUP_HOVEL) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_HOVEL;
+            } else if (action->parameter1 == HOUSE_GROUP_CASA) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_CASA;
+            } else if (action->parameter1 == HOUSE_GROUP_INSULA) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_INSULA;
+            } else if (action->parameter1 == HOUSE_GROUP_VILLA) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_VILLA;
+            } else if (action->parameter1 == HOUSE_GROUP_PALACE) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_PALACE;
+            }
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
+            group = array_item(current->condition_groups, j);
+            for (unsigned int k = 0; k < group->conditions.size; k++) {
+                condition = array_item(group->conditions, k);
+
+            }
         }
     }
 }
