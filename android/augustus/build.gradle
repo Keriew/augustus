@@ -80,7 +80,7 @@ android {
         externalNativeBuild {
             cmake {
                 version "3.31.5"
-                arguments "-DAV1_VIDEO_SUPPORT=ON", "-DTARGET_PLATFORM=android", "-DSYSTEM_LIBS=OFF","-DANDROID_STL=c++_shared"
+                arguments "-DAV1_VIDEO_SUPPORT=ON", "-DTARGET_PLATFORM=android", "-DANDROID_STL=c++_shared"
             }
         }
         ndk {
@@ -116,11 +116,11 @@ android {
         debug {
             ext.alwaysUpdateBuildId = false
             applicationIdSuffix ".debug"
-            if (rootProject.ext.findAAR('libs', 'SDL3') && rootProject.ext.findAAR('libs', 'SDL3_mixer')) {
+            if (rootProject.ext.findAAR('augustus/libs', 'SDL3') && rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer')) {
                 println 'Using pre-packed SDL3 AAR'
                 rootProject.ext.usingAAR = 3
                 externalNativeBuild.cmake.arguments += "-DSDL_VERSION=3"
-                dependencies.debugImplementation files('libs/SDL3.aar', 'libs/SDL3_mixer.aar')
+                dependencies.debugImplementation files(rootProject.ext.findAAR('augustus/libs', 'SDL3'), rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer'))
             }
             if (file('libs/SDL2-debug.aar').exists()) {
                 println 'Using pre-packed SDL2 Debug AAR'
@@ -132,11 +132,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-            if (rootProject.ext.findAAR('libs', 'SDL3') && rootProject.ext.findAAR('libs', 'SDL3_mixer')) {
+            if (rootProject.ext.findAAR('augustus/libs', 'SDL3') && rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer')) {
                 println 'Using pre-packed SDL3 AAR'
                 rootProject.ext.usingAAR = 3
                 externalNativeBuild.cmake.arguments += "-DSDL_VERSION=3"
-                dependencies.releaseImplementation files('libs/SDL3.aar', 'libs/SDL3_mixer.aar')
+                dependencies.releaseImplementation files(rootProject.ext.findAAR('augustus/libs', 'SDL3'), rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer'))
             }
             if (file('libs/SDL2-release.aar').exists()) {
                 println 'Using pre-packed SDL2 Release AAR'

@@ -81,6 +81,14 @@ jobs:
             SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: android
             DEPLOY: android
+          - name: Android SDL3
+            os: ubuntu-24.04
+            cache-key: android
+            SDL_VERSION: 3.4.8
+            SDL_MIXER_VERSION: 3.2.0
+            BUILD_TARGET: android
+            DEPLOY: android-sdl3
+            SKIP_UPLOAD: true
           - name: Emscripten
             os: ubuntu-24.04
             cache-key: emscripten
