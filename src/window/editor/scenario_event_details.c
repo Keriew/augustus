@@ -155,11 +155,11 @@ static grid_box_type conditions_grid_box = {
     .x = 16,
     .y = 188,
     .width = 18 * BLOCK_SIZE,
-    .height = 12 * BLOCK_SIZE - 2,
+    .height = 14 * BLOCK_SIZE,
     .num_columns = 1,
-    .item_height = 30,
+    .item_height = 28,
     .item_margin.horizontal = 10,
-    .item_margin.vertical = 4,
+    .item_margin.vertical = 3,
     .extend_to_hidden_scrollbar = 1,
     .draw_item = draw_condition_button,
     .on_click = click_condition_button,
@@ -170,11 +170,11 @@ static grid_box_type actions_grid_box = {
     .x = 320,
     .y = 188,
     .width = 18 * BLOCK_SIZE,
-    .height = 12 * BLOCK_SIZE - 2,
+    .height = 14 * BLOCK_SIZE,
     .num_columns = 1,
-    .item_height = 30,
+    .item_height = 28,
     .item_margin.horizontal = 10,
-    .item_margin.vertical = 4,
+    .item_margin.vertical = 3,
     .extend_to_hidden_scrollbar = 1,
     .draw_item = draw_action_button,
     .on_click = click_action_button,
@@ -188,8 +188,8 @@ static generic_button top_buttons[] = {
     {100, 105, 220, 20, button_repeat_type, 0, EVENT_REPEAT_FOREVER},
     {100, 130, 20, 20, button_repeat_type, 0, EVENT_REPEAT_TIMES},
     {130, 128, 190, 25, button_repeat_times},
-    {410, 128, 50, 25, button_repeat_between, 0, REPEAT_MIN, DISABLE_ON_NO_REPEAT},
-    {500, 128, 50, 25, button_repeat_between, 0, REPEAT_MAX, DISABLE_ON_NO_REPEAT},
+    {410, 102, 50, 25, button_repeat_between, 0, REPEAT_MIN, DISABLE_ON_NO_REPEAT},
+    {500, 102, 50, 25, button_repeat_between, 0, REPEAT_MAX, DISABLE_ON_NO_REPEAT},
     {144, 163, 155, 20, button_set_selected_to_group, 0, 0, DISABLE_ON_NO_SELECTION}
 };
 
@@ -203,15 +203,19 @@ static dropdown_button repeat_interval_dropdown;
 #define NUM_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
 
 static generic_button bottom_buttons[] = {
-    {16, 379, 192, 25, button_add_new_condition},
-    {432, 379, 192, 25, button_add_new_action},
-    {16, 409, 192, 25, button_copy_selected, 0, 0, DISABLE_ON_NO_SELECTION},
-    {224, 409, 192, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
-    {432, 409, 192, 25, button_paste_selected, 0, 0, DISABLE_ON_NO_COPY_SELECTED},
-    {16, 439, 192, 25, button_delete_event},
-    {224, 439, 134, 25, button_copy_event},
-    {374, 439, 134, 25, button_paste_event, 0, 0, DISABLE_ON_NO_COPY_EVENT},
-    {524, 439, 100, 25, button_ok},
+    {15, 414, 122, 25, button_add_new_condition},
+
+    {15, 440, 178, 25, button_copy_selected, 0, 0, DISABLE_ON_NO_SELECTION},
+    {193, 440, 178, 25, button_paste_selected, 0, 0, DISABLE_ON_NO_COPY_SELECTED},
+    {371, 440, 178, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
+
+    {137, 414, 122, 25, button_copy_event},
+    {259, 414, 122, 25, button_paste_event, 0, 0, DISABLE_ON_NO_COPY_EVENT},
+    {381, 414, 122, 25, button_delete_event},
+
+    {503, 414, 122, 25, button_add_new_action},
+
+    {549, 440, 76, 25, button_ok},
 };
 
 static unsigned int count_maximum_needed_list_items(void)
@@ -397,7 +401,7 @@ static void set_repeat_interval_type(dropdown_button *dd)
 static void dropdown_init(void)
 {
     int dd_x = top_buttons[5].x + top_buttons[5].width + 10;
-    int dd_y = top_buttons[5].y + 6;
+    int dd_y = top_buttons[5].y + 3;
     static lang_fragment repeat_interval_frags[] = {
         {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_INTERVAL_TYPE},
         {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_PARAMETER_DISPLAY_DAYS },
@@ -505,20 +509,21 @@ static void draw_background(void)
     color_t enabled_color = data.repeat_type == EVENT_REPEAT_NEVER ? COLOR_FONT_LIGHT_GRAY : COLOR_MASK_NONE;
 
     btn = &top_buttons[4];
-    lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY, 0, btn->y - 20, top_buttons[0].x + 450,
+    lang_text_draw_right_aligned(CUSTOM_TRANSLATION, TR_EDITOR_REPEAT_FREQUENCY, 0, btn->y - 19, top_buttons[0].x + 450,
         FONT_NORMAL_BLACK);
     lang_text_draw_colored(CUSTOM_TRANSLATION, TR_EDITOR_BETWEEN, top_buttons[0].x + 240, btn->y + 6,
         enabled_font, enabled_color);
     int repeat_min = convert_days_to_display(data.event->repeat_days_min);
     int repeat_max = convert_days_to_display(data.event->repeat_days_max);
-    text_draw_number_centered_colored(repeat_min, btn->x, btn->y + 6,
+    text_draw_number_centered_colored(repeat_min, btn->x, btn->y + 7,
         btn->width, enabled_font, enabled_color);
     lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_AND, btn->x + btn->width,
         btn->y + 6, btn[1].x - (btn->x + btn->width), enabled_font, enabled_color);
     btn = &top_buttons[5];
-    text_draw_number_centered_colored(repeat_max, btn->x, btn->y + 6,
+    text_draw_number_centered_colored(repeat_max, btn->x, btn->y + 7,
         btn->width, enabled_font, enabled_color);
     dropdown_button_draw(&repeat_interval_dropdown);
+
     // Checkmarks for select all/none buttons for conditions
     int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
     const image *img = image_get(checkmark_id);
@@ -567,44 +572,70 @@ static void draw_background(void)
             y_offset, actions_grid_box.width, FONT_NORMAL_BLACK);
     }
 
-    // New action and condition buttons
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CONDITION_ADD,
-        bottom_buttons[0].x, bottom_buttons[0].y + 6, bottom_buttons[0].width, FONT_NORMAL_BLACK);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
-        bottom_buttons[1].x, bottom_buttons[1].y + 6, bottom_buttons[1].width, FONT_NORMAL_BLACK);
+    // --- Bottom buttons text ---
 
-    // Selected operation buttons
+    // --- Add buttons ---
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CONDITION_ADD,
+        bottom_buttons[0].x, bottom_buttons[0].y + 7, bottom_buttons[0].width, FONT_SMALL_PLAIN);
+
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
+        bottom_buttons[7].x, bottom_buttons[7].y + 7, bottom_buttons[7].width, FONT_SMALL_PLAIN);
+
+
+    // --- Selected operations ---
     color_t color_paste = data.did_copy_selected ? 0 : COLOR_FONT_LIGHT_GRAY;
     color_t color_paste_event = data.did_copy_event ? 0 : COLOR_FONT_LIGHT_GRAY;
-    font_t font_paste_event = data.did_copy_event ? FONT_NORMAL_BLACK : FONT_NORMAL_PLAIN;
-    color_t color_copy = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
-        data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : 0;
-    color_t color_delete = data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
-        data.actions.selection_type == CHECKBOX_NO_SELECTION ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
-    if (data.did_copy_selected) {
-        graphics_fill_rect(bottom_buttons[4].x, bottom_buttons[4].y, bottom_buttons[4].width, bottom_buttons[4].height,
-            COLOR_MASK_LIGHT_OLIVE_GREEN);
-    }
-    if (data.did_copy_event) {
-        graphics_fill_rect(bottom_buttons[7].x, bottom_buttons[7].y, bottom_buttons[7].width, bottom_buttons[7].height,
-            COLOR_MASK_LIGHT_OLIVE_GREEN);
-    }
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_COPY_SELECTED,
-        bottom_buttons[2].x, bottom_buttons[2].y + 6, bottom_buttons[2].width, FONT_NORMAL_PLAIN, color_copy);
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED,
-        bottom_buttons[3].x, bottom_buttons[3].y + 6, bottom_buttons[3].width, FONT_NORMAL_PLAIN, color_delete);
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_PASTE_SELECTED,
-        bottom_buttons[4].x, bottom_buttons[4].y + 6, bottom_buttons[4].width, FONT_NORMAL_PLAIN, color_paste);
+    font_t font_paste_event = data.did_copy_event ? FONT_SMALL_PLAIN : FONT_SMALL_PLAIN;
 
-    // Bottom buttons
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE, bottom_buttons[5].x, bottom_buttons[5].y + 6,
-        bottom_buttons[5].width, FONT_NORMAL_PLAIN, COLOR_RED);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COPY, bottom_buttons[6].x, bottom_buttons[6].y + 6,
-        bottom_buttons[6].width, FONT_NORMAL_BLACK);
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_PASTE, bottom_buttons[7].x, bottom_buttons[7].y + 6,
-        bottom_buttons[7].width, font_paste_event, color_paste_event);
-    lang_text_draw_centered(18, 3, bottom_buttons[8].x, bottom_buttons[8].y + 6, bottom_buttons[8].width,
-        FONT_NORMAL_BLACK);
+    color_t color_copy = (data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
+        data.actions.selection_type == CHECKBOX_NO_SELECTION) ? COLOR_FONT_LIGHT_GRAY : 0;
+
+    color_t color_delete = (data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
+        data.actions.selection_type == CHECKBOX_NO_SELECTION) ? COLOR_FONT_LIGHT_GRAY : COLOR_RED;
+
+
+    // --- Highlights ---
+    if (data.did_copy_selected) {
+        graphics_fill_rect(bottom_buttons[2].x, bottom_buttons[2].y,
+            bottom_buttons[2].width, bottom_buttons[2].height,
+            COLOR_MASK_LIGHT_OLIVE_GREEN);
+    }
+
+    if (data.did_copy_event) {
+        graphics_fill_rect(bottom_buttons[5].x, bottom_buttons[5].y,
+            bottom_buttons[5].width, bottom_buttons[5].height,
+            COLOR_MASK_LIGHT_OLIVE_GREEN);
+    }
+
+    // --- Selected buttons text ---
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_COPY_SELECTED,
+        bottom_buttons[1].x, bottom_buttons[1].y + 7, bottom_buttons[1].width,
+        FONT_SMALL_PLAIN, color_copy);
+
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_PASTE_SELECTED,
+        bottom_buttons[2].x, bottom_buttons[2].y + 7, bottom_buttons[2].width,
+        FONT_SMALL_PLAIN, color_paste);
+
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED,
+        bottom_buttons[3].x, bottom_buttons[3].y + 7, bottom_buttons[3].width,
+        FONT_SMALL_PLAIN, color_delete);
+
+    // --- Event buttons ---
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COPY,
+        bottom_buttons[4].x, bottom_buttons[4].y + 7, bottom_buttons[4].width,
+        FONT_SMALL_PLAIN);
+
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_PASTE,
+        bottom_buttons[5].x, bottom_buttons[5].y + 7, bottom_buttons[5].width,
+        font_paste_event, color_paste_event);
+
+    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE,
+        bottom_buttons[6].x, bottom_buttons[6].y + 7, bottom_buttons[6].width,
+        FONT_SMALL_PLAIN, COLOR_RED);
+
+    // --- OK ---
+    lang_text_draw_centered(18, 3, bottom_buttons[8].x, bottom_buttons[8].y + 7,
+        bottom_buttons[8].width, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
 }
