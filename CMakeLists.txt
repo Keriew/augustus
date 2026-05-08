@@ -43,19 +43,26 @@ if(${TARGET_PLATFORM} STREQUAL "ios")
 
     set(SYSTEM_LIBS OFF)
 
-    # Build SDL2 as static library
+    # Build SDL as static library
     set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
     set(SDL_SHARED OFF)
     set(SDL_STATIC ON)
 
-    # Build SDL2_mixer as static library
+    # Build SDL_mixer as static library
     set(BUILD_SHARED_LIBS OFF)
 
     # Disable stuff that breaks the build and we don't need.
-    set(SDL2MIXER_WAVPACK OFF) 
-    set(SDL2MIXER_OPUS OFF) 
-    set(SDL2MIXER_MIDI OFF) 
-    set(SDL2MIXER_MOD OFF) 
+    if (SDL_VERSION STREQUAL "2")
+        set(SDL2MIXER_WAVPACK OFF) 
+        set(SDL2MIXER_OPUS OFF) 
+        set(SDL2MIXER_MIDI OFF) 
+        set(SDL2MIXER_MOD OFF)
+    else()
+        set(SDLMIXER_WAVPACK OFF)
+        set(SDLMIXER_OPUS OFF)
+        set(SDLMIXER_MIDI OFF)
+        set(SDLMIXER_MOD OFF)
+    endif()
 
     # Explicitly set SDKROOT (called Base SDK in Xcode), otherwise it is set incorrectly.
     set(CMAKE_XCODE_ATTRIBUTE_SDKROOT iphoneos)
@@ -852,7 +859,7 @@ if(${TARGET_PLATFORM} STREQUAL "emscripten")
     set(USE_FLAGS "-s USE_SDL=${SDL_VERSION} -s USE_SDL_MIXER=${SDL_VERSION} -s SDL${SDL_VERSION}_MIXER_FORMATS=[\"mp3,ogg\"] -s USE_MPG123=1")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
-elseif(${TARGET_PLATFORM} STREQUAL "android")
+elseif(${TARGET_PLATFORM} STREQUAL "android" AND ${SDL_VERSION} STREQUAL "2")
     find_package(SDL2 REQUIRED CONFIG)
     string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
     set(SDL2_LIBRARY SDL2::SDL2)
@@ -860,16 +867,16 @@ elseif(${TARGET_PLATFORM} STREQUAL "android")
 elseif(${TARGET_PLATFORM} STREQUAL "ios")
     GET_SDL_EXT_DIR(SDL_EXT_DIR "")
     add_subdirectory(${SDL_EXT_DIR})
-    find_library(SDL2 NAMES SDL2-static SDL2main)
-    list(APPEND SDL2_LIBRARY
-        # We don't need to add SDL2-static here because SDL2_mixer will include it
-        SDL2main
+    find_library(SDL${SDL_VERSION} NAMES SDL${SDL_VERSION}-static SDL${SDL_VERSION}main)
+    list(APPEND SDL${SDL_VERSION}_LIBRARY
+        # We don't need to add SDL-static here because SDL_mixer will include it
+        SDL${SDL_VERSION}main
     )
     GET_SDL_EXT_DIR(SDL_MIXER_EXT_DIR "mixer")
     add_subdirectory(${SDL_MIXER_EXT_DIR})
-    find_library(SDL2_mixer NAMES SDL2_mixer-static)
-    list(APPEND SDL2_MIXER_LIBRARY
-        SDL2_mixer
+    find_library(SDL${SDL_VERSION}_mixer NAMES SDL${SDL_VERSION}_mixer-static)
+    list(APPEND SDL${SDL_VERSION}_MIXER_LIBRARY
+        SDL${SDL_VERSION}_mixer
     )
 else()
     find_package(SDL${SDL_VERSION} REQUIRED)
@@ -1025,9 +1032,13 @@ if (AV1_VIDEO_SUPPORT)
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "vita")
+    if(SDL_VERSION STREQUAL "2")
+        target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    else()
+        target_link_libraries(${SHORT_NAME} SDL3::SDL3 SDL3_mixer::SDL3_mixer)
+    endif()
+
     target_link_libraries(${SHORT_NAME}
-        ${SDL2_MIXER_LIBRARY}
-        ${SDL2_LIBRARY}
         ${EASYAV1_LIBRARY}
         vorbisfile
         vorbis
@@ -1075,8 +1086,8 @@ if(${TARGET_PLATFORM} STREQUAL "vita")
     )
 elseif(NINTENDO_SWITCH)
 
-    pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_mixer)
-    target_link_libraries(${SHORT_NAME} PkgConfig::SDL2 ${EASYAV1_LIBRARY})
+    pkg_check_modules(SDL${SDL_VERSION} REQUIRED IMPORTED_TARGET sdl${SDL_VERSION} SDL${SDL_VERSION}_mixer)
+    target_link_libraries(${SHORT_NAME} PkgConfig::SDL${SDL_VERSION} ${EASYAV1_LIBRARY})
 
 nx_generate_nacp (${PROJECT_NAME}.nacp
     NAME   "Augustus"
@@ -1102,7 +1113,7 @@ else()
 
     if(${TARGET_PLATFORM} STREQUAL "ios")
         set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -DUSE_SDL_MAIN")
-        # Add SDL2 and SDL_Mixer headers, or they won't be found
+        # Add SDL and SDL_Mixer headers, or they won't be found
         target_include_directories(${SHORT_NAME} PRIVATE "${SDL_EXT_DIR}/include")
         target_include_directories(${SHORT_NAME} PRIVATE "${SDL_MIXER_EXT_DIR}/include")
 
@@ -1115,11 +1126,11 @@ else()
         )
     endif()
 
-if(SDL_VERSION STREQUAL "2")
-    target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
-else()
-    target_link_libraries(${SHORT_NAME} SDL3::SDL3 SDL3_mixer::SDL3_mixer)
-endif()
+    if(SDL_VERSION STREQUAL "2")
+        target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    else()
+        target_link_libraries(${SHORT_NAME} SDL3::SDL3 SDL3_mixer::SDL3_mixer)
+    endif()
 
     target_link_libraries(${SHORT_NAME} ${EASYAV1_LIBRARY})
 

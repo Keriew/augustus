@@ -13,7 +13,12 @@ buildscript {
 }
 
 ext {
-    usingAAR = file('augustus/libs/SDL2.aar').exists() || file('augustus/libs/SDL2-debug.aar').exists() || file('augustus/libs/SDL2-release.aar').exists()
+    usingAAR = 0
+    if (file('augustus/libs/SDL3.aar').exists() && file('augustus/libs/SDL3_mixer.aar').exists()) {
+        usingAAR = 3
+    } else if (file('augustus/libs/SDL2.aar').exists() || file('augustus/libs/SDL2-debug.aar').exists() || file('augustus/libs/SDL2-release.aar').exists()) {
+        usingAAR = 2
+    }
 }
 
 tasks.register('clean', Delete) {
