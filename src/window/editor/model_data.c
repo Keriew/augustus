@@ -309,9 +309,11 @@ static int desirability_tooltip(tooltip_context *c)
 
 static void building_tooltip(const grid_box_item *item, tooltip_context *c)
 {
-    uint8_t text[128];
-    get_building_translation(data.items[item->index], text, 128);
-    if (text_get_width(text, FONT_SMALL_PLAIN) > 12 * BLOCK_SIZE  + 5 - 32 && !data.data_buttons_focus_id) {
+    static uint8_t text[128];
+    get_building_translation(data.items[item->index], text, sizeof(text));
+    const int max_width = 12 * BLOCK_SIZE;
+    if (text_get_width(text, FONT_NORMAL_BLACK) > max_width &&
+        !data.data_buttons_focus_id) {
         c->precomposed_text = text;
         c->type = TOOLTIP_BUTTON;
     }
