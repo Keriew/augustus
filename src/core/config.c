@@ -127,6 +127,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_WT_WEATHER_DURATION] = "ui_wt_weather_duration",
     [CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_granary_do_not_allow_walkers",
     [CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_warehouse_do_not_allow_walkers",
+    [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS] = "gameplay_change_houses_do_not_spawn_plebeians",
     [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = "ui_editor_show_deletion_warnings",
 };
 
@@ -163,9 +164,9 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_GP_STORAGE_INCREMENT_4] = 0,
     [CONFIG_UI_MOVE_SAVINGS_TO_RIGHT] = 0,
     [CONFIG_GP_CH_PATRICIAN_DEVOLUTION_FIX] = 1,
-    [CONFIG_WT_SNOW_INTENSITY] = 30,
-    [CONFIG_WT_RAIN_INTENSITY] = 60,
-    [CONFIG_WT_SANDSTORM_INTENSITY] = 10,
+    [CONFIG_WT_SNOW_INTENSITY] = 100,
+    [CONFIG_WT_RAIN_INTENSITY] = 100,
+    [CONFIG_WT_SANDSTORM_INTENSITY] = 100,
     [CONFIG_WT_RAIN_SPEED] = 2,
     [CONFIG_WT_RAIN_LENGTH] = 2,
     [CONFIG_WT_SNOW_SPEED] = 1,

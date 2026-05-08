@@ -518,6 +518,7 @@ int figure_service_provide_coverage(figure *f)
     building *b;
     switch (f->type) {
         case FIGURE_PATRICIAN:
+        case FIGURE_PLEBIAN:
             return 0;
         case FIGURE_LABOR_SEEKER:
             houses_serviced = provide_culture(x, y, labor_seeker_coverage);

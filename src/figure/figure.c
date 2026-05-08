@@ -147,6 +147,7 @@ void figure_delete(figure *f)
         case FIGURE_ZEBRA:
         case FIGURE_DELIVERY_BOY:
         case FIGURE_PATRICIAN:
+        case FIGURE_PLEBIAN:
         case FIGURE_MESS_HALL_COLLECTOR:
         case FIGURE_TRADE_SHIP:
             // nothing to do here

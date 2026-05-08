@@ -428,6 +428,20 @@ void figure_patrician_action(figure *f)
     figure_image_update(f, image_group(GROUP_FIGURE_PATRICIAN));
 }
 
+void figure_plebian_action(figure *f)
+{
+    f->terrain_usage = TERRAIN_USAGE_ROADS;
+    f->use_cross_country = 0;
+    f->max_roam_length = 384;
+    if (building_get(f->building_id)->state != BUILDING_STATE_IN_USE) {
+        f->state = FIGURE_STATE_DEAD;
+    }
+    figure_image_increase_offset(f, 12);
+    roamer_action(f, 1);
+    figure_image_update(f, image_group(GROUP_FIGURE_LABOR_SEEKER));
+}
+
+
 void figure_labor_seeker_action(figure *f)
 {
     f->terrain_usage = TERRAIN_USAGE_ROADS;

@@ -2186,7 +2186,17 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_AGE_SCHOOL, "School age (0-14)"},
     {TR_PARAMETER_AGE_ACADEMY, "Academy age (14-21)"},
     {TR_PARAMETER_AGE_WORKING, "Working age (20-49/59)"},
-    {TR_PARAMETER_AGE_RETIRED, "Retired (50+/60+)"}
+    {TR_PARAMETER_AGE_RETIRED, "Retired (50+/60+)"},
+    {TR_WINDOW_ADVISOR_EPITHETS, "Powers of the Gods"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP, "Divine powers granted by Great Temples"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_CERES, "Ceres divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_NEPTUNE, "Neptune divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MERCURY, "Mercury divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_MARS, "Mars divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_VENUS, "Venus divine powers"},
+    {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_PANTHEON, "Pantheon divine powers"},
+    {TR_FIGURE_TYPE_PLEBIAN, "Plebeian"},
+    {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, "Houses do not spawn aimless wandering plebeians"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

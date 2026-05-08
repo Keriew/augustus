@@ -25,6 +25,8 @@ void figure_missionary_action(figure *f);
 
 void figure_patrician_action(figure *f);
 
+void figure_plebian_action(figure *f);
+
 void figure_labor_seeker_action(figure *f);
 
 void figure_market_trader_action(figure *f);

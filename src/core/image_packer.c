@@ -1,6 +1,7 @@
 #include "image_packer.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,7 +12,7 @@ typedef struct empty_area {
     struct empty_area *prev, *next;
 } empty_area;
 
-typedef struct {
+struct internal_data {
     image_packer_rect **sorted_rects;
     unsigned int num_rects;
     unsigned int image_width;
@@ -24,7 +25,7 @@ typedef struct {
         unsigned int size;
         void (*set_comparator)(empty_area *area);
     } empty_areas;
-} internal_data;
+};
 
 static int compare_rect_perimeters(const void *a, const void *b)
 {
@@ -315,7 +316,7 @@ static int pack_rect(internal_data *data, image_packer_rect *rect, int allow_rot
     return 0;
 }
 
-static int create_last_image(image_packer *packer, unsigned int remaining_area)
+static unsigned int create_last_image(image_packer *packer, uint64_t remaining_area)
 {
     internal_data *data = packer->internal_data;
 
@@ -328,7 +329,7 @@ static int create_last_image(image_packer *packer, unsigned int remaining_area)
     packer->result.last_image_height = needed_height;
 
     int must_increase_size = 1;
-    int total_images_packed = 0;
+    unsigned int total_images_packed = 0;
 
     while (must_increase_size) {
         packer->result.last_image_width += width_increase_step;
@@ -341,8 +342,8 @@ static int create_last_image(image_packer *packer, unsigned int remaining_area)
             packer->result.last_image_height = data->image_height;
         }
 
-        int images_packed_in_loop = 0;
-        int area_packed_in_loop = 0;
+        unsigned int images_packed_in_loop = 0;
+        uint64_t area_packed_in_loop = 0;
 
         reset_empty_areas(data, packer->result.last_image_width, packer->result.last_image_height);
 
@@ -441,14 +442,15 @@ int image_packer_pack(image_packer *packer)
         }
     }
     unsigned int packed_rects = 0;
-    unsigned int area_used_in_last_image = 0;
-    unsigned int remaining_area = 0;
+    uint64_t area_used_in_last_image = 0;
+    uint64_t remaining_area = 0;
 
     for (unsigned int i = 0; i < data->num_rects; i++) {
         remaining_area += data->sorted_rects[i]->input.width * data->sorted_rects[i]->input.height;
     }
 
-    unsigned int available_area = packer->options.reduce_image_size == 1 ? data->image_width * data->image_height : 0;
+    uint64_t available_area = packer->options.reduce_image_size == 1 ?
+        (uint64_t) data->image_width * data->image_height : 0;
 
     while (remaining_area > available_area) {
         reset_empty_areas(data, data->image_width, data->image_height);
