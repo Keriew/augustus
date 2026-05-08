@@ -116,7 +116,7 @@ android {
         debug {
             ext.alwaysUpdateBuildId = false
             applicationIdSuffix ".debug"
-            if (file('libs/SDL3.aar').exists() && file('libs/SDL3_mixer.aar').exists()) {
+            if (rootProject.ext.findAAR('libs', 'SDL3') && rootProject.ext.findAAR('libs', 'SDL3_mixer')) {
                 println 'Using pre-packed SDL3 AAR'
                 rootProject.ext.usingAAR = 3
                 externalNativeBuild.cmake.arguments += "-DSDL_VERSION=3"
@@ -132,7 +132,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-            if (file('libs/SDL3.aar').exists() && file('libs/SDL3_mixer.aar').exists()) {
+            if (rootProject.ext.findAAR('libs', 'SDL3') && rootProject.ext.findAAR('libs', 'SDL3_mixer')) {
                 println 'Using pre-packed SDL3 AAR'
                 rootProject.ext.usingAAR = 3
                 externalNativeBuild.cmake.arguments += "-DSDL_VERSION=3"

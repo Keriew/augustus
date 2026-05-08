@@ -1032,10 +1032,10 @@ if (AV1_VIDEO_SUPPORT)
 endif()
 
 if(${TARGET_PLATFORM} STREQUAL "vita")
-    if(SDL_VERSION STREQUAL "2")
-        target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
-    else()
+    if(SDL_VERSION STREQUAL "3")
         target_link_libraries(${SHORT_NAME} SDL3::SDL3 SDL3_mixer::SDL3_mixer)
+    else()
+        target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
     endif()
 
     target_link_libraries(${SHORT_NAME}
