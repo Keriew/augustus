@@ -70,11 +70,11 @@ function install_sdl_macos {
   fi
   local VOLUME=$(hdiutil attach $FILENAME | grep -o '/Volumes/.*')
   mkdir -p ~/Library/Frameworks
-  echo "Installing framework:" "/Volumes/SDL2"/*.framework
+  echo "Installing framework:" "/Volumes/SDL$SDL_MAJOR_VERSION"/*.framework
   cp -rp "$VOLUME"/*.framework ~/Library/Frameworks
   if [ -d "$VOLUME/optional" ]
   then
-    echo "Installing optional framework:" "/Volumes/SDL2/optional"/*.framework
+    echo "Installing optional framework:" "/Volumes/SDL$SDL_MAJOR_VERSION/optional"/*.framework
     cp -rp "$VOLUME"/optional/*.framework ~/Library/Frameworks
   fi
   hdiutil detach "$VOLUME"
@@ -83,7 +83,7 @@ function install_sdl_macos {
 function install_sdl_android {
   local MODULE=$1
   local VERSION=$2
-  local FILENAME=ext/SDL2/$MODULE-$VERSION.tar.gz
+  local FILENAME=ext/SDL$SDL_MAJOR_VERSION/$MODULE-$VERSION.tar.gz
   get_sdl_lib_url $MODULE $VERSION "tar.gz"
   curl -o "$FILENAME" "$SDL_LIB_URL"
   tar -zxf $FILENAME -C "ext/SDL$SDL_MAJOR_VERSION"
@@ -123,19 +123,31 @@ then
     install_sdl_macos "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
   elif [ "$BUILD_TARGET" == "android" ]
   then
-  	if [ ! -f "android/augustus.keystore" ]
+    if [[ "$SDL_MAJOR_VERSION" == "3" ]]
     then
-      BUILDTYPE=debug
+      if [ ! -f "deps/SDL$SDL_MAJOR_VERSION.aar" ]
+      then
+        install_sdl_android "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
+        install_sdl_android "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
+      else
+        mkdir -p android/augustus/libs
+        cp deps/SDL$SDL_MAJOR_VERSION.aar android/augustus/libs/SDL$SDL_MAJOR_VERSION.aar
+      fi
     else
-      BUILDTYPE=release
-    fi
-    if [ ! -f "deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar" ]
-    then
-      install_sdl_android "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
-      install_sdl_android "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
-    else
-      mkdir android/augustus/libs
-      cp deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar android/augustus/libs/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar
+  	  if [ ! -f "android/augustus.keystore" ]
+      then
+        BUILDTYPE=debug
+      else
+        BUILDTYPE=release
+      fi
+      if [ ! -f "deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar" ]
+      then
+        install_sdl_android "SDL$SDL_MAJOR_VERSION" $SDL_VERSION
+        install_sdl_android "SDL${SDL_MAJOR_VERSION}_mixer" $SDL_MIXER_VERSION
+      else
+        mkdir android/augustus/libs
+        cp deps/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar android/augustus/libs/SDL$SDL_MAJOR_VERSION-$BUILDTYPE.aar
+      fi
     fi
   elif [ "$BUILD_TARGET" == "ios" ]
   then
