@@ -270,14 +270,14 @@ if (${TARGET_PLATFORM} STREQUAL "vita")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
         ${PROJECT_SOURCE_DIR}/src/platform/file_manager_cache.c
-        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/vita/vita.c
+        ${PROJECT_SOURCE_DIR}/src/platform/vita/vita.c
         ${PROJECT_SOURCE_DIR}/src/platform/vita/vita_keyboard.c
     )
 elseif (NINTENDO_SWITCH)
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
         ${PROJECT_SOURCE_DIR}/src/platform/file_manager_cache.c
-        ${PROJECT_SOURCE_DIR}/src/platform/SDL${SDL_VERSION}/switch/switch.c
+        ${PROJECT_SOURCE_DIR}/src/platform/switch/switch.c
     )
 elseif (${TARGET_PLATFORM} STREQUAL "android")
     set(PLATFORM_FILES
