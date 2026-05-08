@@ -43,8 +43,6 @@ if ("${env:COMPILER}" -eq "msvc") {
 
         CheckSuccess("Unpack SDL and SDL mixer")
 
-        $ROOT_DIR = $PWD.Path
-
         cd "SDL${SDL_MAJOR_VERSION}-${env:SDL_VERSION}"
         mkdir build
         cd build
