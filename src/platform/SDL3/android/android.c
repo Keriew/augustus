@@ -5,6 +5,7 @@
 #include "platform/android/asset_handler.h"
 #include "platform/android/jni.h"
 #include "platform/file_manager.h"
+#include "platform/SDL3/screen.h"
 
 #include <SDL3/SDL.h>
 
@@ -200,14 +201,14 @@ JNIEXPORT void JNICALL Java_com_github_Keriew_augustus_AugustusMainActivity_gotD
 
 void platform_show_virtual_keyboard(void)
 {
-    if (!SDL_IsTextInputActive()) {
-        SDL_StartTextInput();
+    if (!SDL_TextInputActive()) {
+        SDL_StartTextInput(platform_screen_get_window());
     }
 }
 
 void platform_hide_virtual_keyboard(void)
 {
-    if (SDL_IsTextInputActive()) {
-        SDL_StopTextInput();
+    if (SDL_TextInputActive()) {
+        SDL_StopTextInput(platform_screen_get_window());
     }
 }

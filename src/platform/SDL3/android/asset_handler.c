@@ -1,4 +1,4 @@
-#include "asset_handler.h"
+#include "platform/android/asset_handler.h"
 
 #include "assets/assets.h"
 #include "core/file.h"
