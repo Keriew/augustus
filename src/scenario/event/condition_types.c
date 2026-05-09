@@ -675,6 +675,7 @@ int scenario_condition_type_population_in_area_met(const scenario_condition_t *c
             case POP_CLASS_PATRICIAN: min_type = BUILDING_HOUSE_SMALL_VILLA; max_type = BUILDING_HOUSE_LUXURY_PALACE; break;
             case POP_CLASS_PLEBEIAN:  min_type = BUILDING_HOUSE_SMALL_CASA;  max_type = BUILDING_HOUSE_GRAND_INSULA;  break;
             case POP_CLASS_SLUMS:     min_type = BUILDING_HOUSE_SMALL_TENT;  max_type = BUILDING_HOUSE_LARGE_HOVEL;   break;
+            case POP_CLASS_ALL:       min_type = BUILDING_HOUSE_SMALL_TENT;  max_type = BUILDING_HOUSE_LUXURY_PALACE; break;
             default:
                 return 0;
         }
