@@ -345,24 +345,18 @@ static int model_value_tooltip(tooltip_context *c)
 
             if (i == 6) {
                 current_value =
-                    resource_get_data(resource_get_from_industry(b_type))
-                    ->production_per_month;
+                    resource_get_data(resource_get_from_industry(b_type))->production_per_month;
 
-                default_value =
-                    resource_get_defaults(resource_get_from_industry(b_type))
-                    ->production_per_month;
+                default_value = resource_get_defaults(resource_get_from_industry(b_type))->production_per_month;
             } else {
                 model_building *model = model_get_building(b_type);
 
                 model_building *default_model =
-                    (model_building *) &building_properties_for_type(b_type)
-                    ->building_model_data;
+                    (model_building *) &building_properties_for_type(b_type)->building_model_data;
 
-                current_value =
-                    *model_get_ptr_for_building_data_type(model, i);
+                current_value = *model_get_ptr_for_building_data_type(model, i);
 
-                default_value =
-                    *model_get_ptr_for_building_data_type(default_model, i);
+                default_value = *model_get_ptr_for_building_data_type(default_model, i);
             }
 
             /* show tooltip only for modified values */
@@ -372,8 +366,8 @@ static int model_value_tooltip(tooltip_context *c)
 
             static uint8_t text[128];
 
-            snprintf((char *) text, sizeof(text),
-                "Default: %d", default_value);
+            snprintf((char *) text, sizeof(text), "%s %d",
+                translation_for(TR_EDITOR_MODEL_DATA_DEFAULT), default_value);
 
             c->precomposed_text = text;
             c->type = TOOLTIP_BUTTON;
