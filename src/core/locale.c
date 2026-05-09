@@ -122,7 +122,6 @@ language_type locale_last_determined_language(void)
     }
 }
 
-
 int locale_year_before_ad(void)
 {
     // In all languages it's "200 AD" except for English
@@ -166,3 +165,12 @@ int locale_translate_rank_autosaves(void)
     }
 }
 
+int locale_is_asian(void)
+{
+    language_type lang = locale_last_determined_language();
+
+    return lang == LANGUAGE_SIMPLIFIED_CHINESE ||
+        lang == LANGUAGE_TRADITIONAL_CHINESE ||
+        lang == LANGUAGE_JAPANESE ||
+        lang == LANGUAGE_KOREAN;
+}

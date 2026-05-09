@@ -53,15 +53,6 @@ static option_menu_item epithets_options[18] = {
 
 static int selected_god_id;
 
-static int locale_is_asian(void)
-{
-    language_type lang = locale_last_determined_language();
-    return lang == LANGUAGE_SIMPLIFIED_CHINESE ||
-        lang == LANGUAGE_TRADITIONAL_CHINESE ||
-        lang == LANGUAGE_JAPANESE ||
-        lang == LANGUAGE_KOREAN;
-}
-
 static image_button image_buttons_bottom[] = {
     {598, 395, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1}
 };
