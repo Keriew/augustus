@@ -273,8 +273,60 @@ static int desirability_tooltip(tooltip_context *c)
     return 0;
 }
 
+static int model_value_tooltip(tooltip_context *c)
+{
+    if (!model_buttons.focused_item.is_focused) {
+        return 0;
+    }
+
+    const mouse *m_global = mouse_get();
+    const mouse *m = mouse_in_dialog(m_global);
+
+    int h_level = data.items[model_buttons.focused_item.index];
+
+    for (unsigned int i = 0; i < MAX_DATA_BUTTONS; i++) {
+        int x = model_buttons.focused_item.x + data_buttons[i].x;
+        int y = model_buttons.focused_item.y + data_buttons[i].y;
+        int width = data_buttons[i].width;
+        int height = data_buttons[i].height;
+
+        if (x <= m->x && x + width > m->x &&
+            y <= m->y && y + height > m->y) {
+
+            model_house *model = model_get_house(h_level);
+
+            model_house *default_model = (model_house *) &building_properties_for_type(h_level + 10)->house_model_data;
+
+            int current_value = *model_get_ptr_for_house_data_type(model, i);
+
+            int default_value = *model_get_ptr_for_house_data_type(default_model, i);
+
+            /* show tooltip only for modified values */
+            if (current_value == default_value) {
+                continue;
+            }
+
+            static uint8_t text[128];
+
+            snprintf((char *) text, sizeof(text), "%s %d",
+                translation_for(TR_EDITOR_MODEL_DATA_DEFAULT), default_value);
+
+            c->precomposed_text = text;
+            c->type = TOOLTIP_BUTTON;
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 static void get_tooltip(tooltip_context *c)
 {
+    if (model_value_tooltip(c)) {
+        return;
+    }
+
     desirability_tooltip(c);
 }
 

@@ -292,12 +292,13 @@ static int desirability_tooltip(tooltip_context *c)
     const mouse *m = mouse_in_dialog(m_global);
 
     for (int i = 0; i < 4; i++) {
-        const uint8_t *text = translation_for(TR_EDITOR_MODEL_DATA_DES_VALUE + i);
-        int width = text_get_width(text, FONT_SMALL_PLAIN);
-        int x = data_buttons[i + 1].x + 35;
+        int x = data_buttons[i + 1].x + 30;
+        int y = 73;
+        int height = 14;
+        int width = 48;
 
         if (x <= m->x && x + width > m->x &&
-            75 <= m->y && 75 + 10 > m->y) {
+            y <= m->y && y + height > m->y) {
             c->text_group = CUSTOM_TRANSLATION;
             c->text_id = TR_EDITOR_DESIRABILITY_VALUE + i;
             c->type = TOOLTIP_BUTTON;
@@ -319,11 +320,82 @@ static void building_tooltip(const grid_box_item *item, tooltip_context *c)
     }
 }
 
+static int model_value_tooltip(tooltip_context *c)
+{
+    if (!model_buttons.focused_item.is_focused) {
+        return 0;
+    }
+
+    const mouse *m_global = mouse_get();
+    const mouse *m = mouse_in_dialog(m_global);
+
+    int b_type = data.items[model_buttons.focused_item.index];
+
+    for (unsigned int i = 0; i < NUM_DATA_BUTTONS; i++) {
+        int x = model_buttons.focused_item.x + data_buttons[i].x;
+        int y = model_buttons.focused_item.y + data_buttons[i].y;
+        int width = data_buttons[i].width;
+        int height = data_buttons[i].height;
+
+        if (x <= m->x && x + width > m->x &&
+            y <= m->y && y + height > m->y) {
+
+            int current_value;
+            int default_value;
+
+            if (i == 6) {
+                current_value =
+                    resource_get_data(resource_get_from_industry(b_type))
+                    ->production_per_month;
+
+                default_value =
+                    resource_get_defaults(resource_get_from_industry(b_type))
+                    ->production_per_month;
+            } else {
+                model_building *model = model_get_building(b_type);
+
+                model_building *default_model =
+                    (model_building *) &building_properties_for_type(b_type)
+                    ->building_model_data;
+
+                current_value =
+                    *model_get_ptr_for_building_data_type(model, i);
+
+                default_value =
+                    *model_get_ptr_for_building_data_type(default_model, i);
+            }
+
+            /* show tooltip only for modified values */
+            if (current_value == default_value) {
+                continue;
+            }
+
+            static uint8_t text[128];
+
+            snprintf((char *) text, sizeof(text),
+                "Default: %d", default_value);
+
+            c->precomposed_text = text;
+            c->type = TOOLTIP_BUTTON;
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 static void get_tooltip(tooltip_context *c)
 {
-    if (!desirability_tooltip(c)) {
-        grid_box_handle_tooltip(&model_buttons, c);
+    if (model_value_tooltip(c)) {
+        return;
     }
+
+    if (desirability_tooltip(c)) {
+        return;
+    }
+
+    grid_box_handle_tooltip(&model_buttons, c);
 }
 
 void window_model_data_show(void)
