@@ -168,11 +168,8 @@ static void draw_background(void)
     inner_panel_draw(16, 165, 35, 14);
     rich_text_init(epithet_text_buffer, 24, 165, 35, 14, 0);
 
-    if (locale_is_asian()) {
-        rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, 10, 0);
-    } else {
-        rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, 12, 0);
-    }
+    int lines = locale_is_asian() ? 10 : 12;
+    rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, lines, 0);
 
     lang_text_draw_centered(13, 1, 10, 410, 585, FONT_SMALL_PLAIN); //Right-click to Exit
 
