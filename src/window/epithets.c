@@ -53,7 +53,7 @@ static option_menu_item epithets_options[18] = {
 
 static int selected_god_id;
 
-static int locale_is_cjk(void)
+static int locale_is_asian(void)
 {
     language_type lang = locale_last_determined_language();
     return lang == LANGUAGE_SIMPLIFIED_CHINESE ||
@@ -177,7 +177,7 @@ static void draw_background(void)
     inner_panel_draw(16, 165, 35, 14);
     rich_text_init(epithet_text_buffer, 24, 165, 35, 14, 0);
 
-    if (locale_is_cjk()) {
+    if (locale_is_asian()) {
         rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, 10, 0);
     } else {
         rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, 12, 0);
