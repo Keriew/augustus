@@ -63,8 +63,7 @@ static generic_button buttons_gods_size[] = {
     {230, 56, 80, 90, button_god},
     {330, 56, 80, 90, button_god},
     {430, 56, 80, 90, button_god},
-    {530, 56, 80, 90, button_god},
-    {630, 56, 80, 90, button_god}
+    {530, 56, 80, 90, button_god}
 };
 
 static unsigned int focus_button_id;
@@ -135,14 +134,14 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 27);
-    
+
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ADVISOR_EPITHETS, 0, 15, 640, FONT_LARGE_BLACK);
     int border_image_id = assets_get_image_id("UI", "Image Border Small");
     int highlight_image_id = assets_get_image_id("UI", "Highlight");
     int base_image_id = assets_get_image_id("UI", "Pantheon_Epithet_Button_01");
     color_t border_color =  COLOR_BORDER_ORANGE;
     color_t highlight_color = COLOR_MASK_NONE;
-    
+
     for (int god = 0; god <= MAX_GODS; god++) {
         if (god == selected_god_id) {
             button_border_draw(100 * god + 25, 51, 91, 101, 1);
@@ -168,7 +167,9 @@ static void draw_background(void)
 
     inner_panel_draw(16, 165, 35, 14);
     rich_text_init(epithet_text_buffer, 24, 165, 35, 14, 0);
-    rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, 12, 0);
+
+    int lines = locale_is_asian() ? 10 : 12;
+    rich_text_draw(epithet_text_buffer, 32, 180, 35 * BLOCK_SIZE, lines, 0);
 
     lang_text_draw_centered(13, 1, 10, 410, 585, FONT_SMALL_PLAIN); //Right-click to Exit
 

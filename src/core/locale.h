@@ -66,4 +66,6 @@ int locale_paragraph_indent(void);
  */
 int locale_translate_rank_autosaves(void);
 
+int locale_is_asian(void);
+
 #endif // CORE_LOCALE_H

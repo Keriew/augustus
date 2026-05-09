@@ -745,7 +745,6 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     }
     if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         scenario_invasion_load_state(file->invasions);
-        scenario_demand_change_load_state(file->demand_changes, version);
         scenario_price_change_load_state(file->price_changes);
         scenario_allowed_building_load_state(file->allowed_buildings);
         scenario_custom_variable_load_state(file->custom_variables, version);
@@ -769,6 +768,12 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     empire_reset_map();
     if (version > SCENARIO_LAST_NO_CUSTOM_EMPIRE_MAP_IMAGE) {
         empire_load_custom_map(file->empire_map);
+    }
+    // this needs to be behind empire loading for migration to work properly
+    if (version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        scenario_demand_change_load_state(file->demand_changes, version);
+    } else {
+        scenario_demand_change_migrate_old_version();
     }
     model_reset();
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
@@ -863,7 +868,6 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
 
     if (scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
         scenario_invasion_load_state(state->invasions);
-        scenario_demand_change_load_state(state->demand_changes, scenario_version);
         scenario_price_change_load_state(state->price_changes);
         scenario_allowed_building_load_state(state->allowed_buildings);
         scenario_custom_variable_load_state(state->custom_variables, scenario_version);
@@ -973,6 +977,12 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
             empire_city_update_our_fish_and_meat_production();
         }
         empire_city_update_trading_data(scenario_empire_id());
+    }
+    // this needs to be behind empire loading for migration to work properly
+    if (scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA) {
+        scenario_demand_change_load_state(state->demand_changes, scenario_version);
+    } else {
+        scenario_demand_change_migrate_old_version();
     }
     if (version <= SAVE_GAME_LAST_GLOBAL_BUILDING_INFO) {
         figure_visited_buildings_migrate();

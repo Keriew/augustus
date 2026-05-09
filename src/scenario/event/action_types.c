@@ -636,11 +636,11 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
         return 0;
     }
 
+    int city_id = empire_city_get_for_trade_route(route_id);
+    if (city_id < 0) {
+        city_id = 0;
+    }
     if (show_message && empire_city_is_trade_route_open(route_id)) {
-        int city_id = empire_city_get_for_trade_route(route_id);
-        if (city_id < 0) {
-            city_id = 0;
-        }
         int last_amount = trade_route_limit(route_id, resource, buys);
 
         int change = amount - last_amount;
@@ -652,8 +652,14 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
             city_message_post(1, MESSAGE_TRADE_STOPPED, city_id, resource);
         }
     }
-    trade_route_set_limit(route_id, resource, amount, buys);
-    building_menu_update();
+    empire_city *empire_city = empire_city_get(city_id);
+    if (buys) {
+        empire_city_change_buying_of_resource(empire_city, resource, amount);
+    } else {
+        empire_city_change_selling_of_resource(empire_city, resource, amount);
+        building_menu_update();
+    }
+    building_dock_enable_resource_in_all_docks(resource);
 
     return 1;
 }

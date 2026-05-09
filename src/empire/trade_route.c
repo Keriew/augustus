@@ -102,11 +102,6 @@ int trade_route_legacy_increase_limit(int route_id, resource_type resource, int 
 int trade_route_legacy_decrease_limit(int route_id, resource_type resource, int buying)
 {
     route_resource *route = get_route_resource(route_id, buying);
-    if (buying) {
-        route = &array_item(routes, route_id)->buys;
-    } else {
-        route = &array_item(routes, route_id)->sells;
-    }
     switch (route->limit[resource]) {
         case 40: route->limit[resource] = 25; break;
         case 25: route->limit[resource] = 15; break;

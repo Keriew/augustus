@@ -102,8 +102,13 @@ static void init(int id)
     data.demand_change = *demand_change;
 
     for (int i = 1; i < trade_route_count(); i++) {
-        empire_city *city = empire_city_get(empire_city_get_for_trade_route(i));
-        if (city && (city->type == EMPIRE_CITY_TRADE || city->type == EMPIRE_CITY_FUTURE_TRADE)) {
+        int city_id = empire_city_get_for_trade_route(i);
+        if (city_id < 0) {
+            create_route_info(i, lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE));
+            continue;
+        }
+        empire_city *city = empire_city_get(city_id);
+        if (city->type == EMPIRE_CITY_TRADE || city->type == EMPIRE_CITY_FUTURE_TRADE) {
             const uint8_t *city_name = empire_city_get_name(city);
             create_route_info(i, city_name);
         } else {
@@ -149,7 +154,7 @@ static void draw_background(void)
 
     lang_text_draw(44, 100, 60, 198, FONT_NORMAL_BLACK);
     text_draw_number_centered(data.demand_change.amount, 350, 198, 100, FONT_NORMAL_BLACK);
-    
+
     translation_key key = data.demand_change.buys ? TR_EDITOR_DEMAND_CHANGE_BUYS : TR_EDITOR_DEMAND_CHANGE_SELLS;
     lang_text_draw_centered(CUSTOM_TRANSLATION, key, 480, 198, 100, FONT_NORMAL_BLACK);
 
