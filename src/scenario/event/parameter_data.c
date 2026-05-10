@@ -1643,13 +1643,20 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
     int values[5] = {action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5};
     xml_data_attribute_t attributes[5] = {xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5};
     for (int i = 0; i < 5; i++) {
-        if (!attributes[i].type || (action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY && i >= 2)) {
+        parameter_type p_type = attributes[i].type;
+        translation_key key = attributes[i].key;
+        if (p_type == PARAMETER_TYPE_FLEXIBLE) {
+            city_property_info_t info = city_property_get_param_info(action->parameter2);
+            key = info.param_keys[i - 2];
+            p_type = scenario_events_parameter_data_resolve_flexible_type(action, i + 1);
+        }
+        if (!p_type) {
             return;
         }
         result_text = append_text(string_from_ascii("\n"), result_text, &maxlength);
-        result_text = append_text(translation_for(attributes[i].key), result_text, &maxlength);
+        result_text = append_text(translation_for(key), result_text, &maxlength);
         result_text = append_text(string_from_ascii(":"), result_text, &maxlength);
-        result_text = translation_for_type_lookup_by_value(attributes[i].type , values[i], result_text, &maxlength);
+        result_text = translation_for_type_lookup_by_value(p_type , values[i], result_text, &maxlength);
     }
 }
 
