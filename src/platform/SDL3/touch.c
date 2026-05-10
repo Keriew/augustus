@@ -11,11 +11,23 @@ static SDL_FingerID touch_id[MAX_ACTIVE_TOUCHES];
 static SDL_TouchID trackpad_id;
 #endif
 
-static touch_coords get_touch_coordinates(float x, float y)
+static touch_coords get_touch_coordinates(float x, float y, SDL_WindowID windowID)
 {
     touch_coords coords;
-    coords.x = (int)(x * screen_width());
-    coords.y = (int)(y * screen_height());
+    float fx = x;
+    float fy = y;
+    int width = screen_width();
+    int height = screen_height();
+    SDL_Window *window = SDL_GetWindowFromID(windowID);
+    if (window) {
+        SDL_Renderer *renderer = SDL_GetRenderer(window);
+        if (renderer) {
+            SDL_RenderCoordinatesFromWindow(renderer, x, y, &fx, &fy);
+            SDL_GetWindowSize(window, &width, &height);
+        }
+    }
+    coords.x = (int) (fx * width);
+    coords.y = (int) (fy * height);
     return coords;
 }
 
@@ -50,7 +62,7 @@ void platform_touch_start(SDL_TouchFingerEvent *event)
 
 #undef FRONT_PANEL_TOUCH_ID
 #endif
-    int index = touch_create(get_touch_coordinates(event->x, event->y), event->timestamp);
+    int index = touch_create(get_touch_coordinates(event->x, event->y, event->windowID), event->timestamp / 1000000);
     if (index != MAX_ACTIVE_TOUCHES) {
         touch_id[index] = event->fingerID;
     }
@@ -58,7 +70,7 @@ void platform_touch_start(SDL_TouchFingerEvent *event)
 
 void platform_touch_move(SDL_TouchFingerEvent *event)
 {
-    touch_move(get_touch_index(event->fingerID), get_touch_coordinates(event->x, event->y), event->timestamp);
+    touch_move(get_touch_index(event->fingerID), get_touch_coordinates(event->x, event->y, event->windowID), event->timestamp);
 }
 
 void platform_touch_end(SDL_TouchFingerEvent *event)
