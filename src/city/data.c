@@ -555,6 +555,9 @@ static void load_main_data(buffer *main, int version)
     if (version > SAVE_GAME_TESTING_VERSION_BUMP_2) {
         city_data.migration.adjust_percentage_immigration = buffer_read_i32(main);
         city_data.migration.adjust_percentage_emigration = buffer_read_i32(main);
+    } else {
+        city_data.migration.adjust_percentage_immigration = 100;
+        city_data.migration.adjust_percentage_emigration = 100;
     }
     city_data.culture.population_with_venus_access = buffer_read_i32(main);
     city_data.migration.immigration_duration = buffer_read_i32(main);
