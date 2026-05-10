@@ -26,17 +26,6 @@ int scenario_condition_group_in_use(const scenario_condition_group_t *group)
     return group->type == FULFILLMENT_TYPE_ALL || group->conditions.size > 0;
 }
 
-void scenario_condition_type_init(scenario_condition_t *condition)
-{
-    switch (condition->type) {
-        case CONDITION_TYPE_TIME_PASSED:
-            scenario_condition_type_time_init(condition);
-            break;
-        default:
-            break;
-    }
-}
-
 int scenario_condition_type_is_met(scenario_condition_t *condition)
 {
     switch (condition->type) {

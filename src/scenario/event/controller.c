@@ -528,11 +528,34 @@ void scenario_events_migrate_to_formulas(void)
     }
 }
 
-void scenario_events_min_max_migrate_to_formulas(void)
+void scenario_events_min_max_migrate_to_formulas(int version)
 {
     scenario_event_t *current;
     array_foreach(scenario_events, current) //go through all events
     {
+        if (version > SCENARIO_TESTING_VERSION_BUMP_2) {
+            continue;
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
+            group = array_item(current->condition_groups, j);
+            for (unsigned int k = 0; k < group->conditions.size; k++) {
+                condition = array_item(group->conditions, k);
+                if (condition->type != CONDITION_TYPE_TIME_PASSED) {
+                    continue;
+                }
+                uint8_t buffer[32];
+                memset(buffer, 0, sizeof(buffer));
+                sprintf((char *)buffer, "{%i,%i}", condition->parameter3, condition->parameter4);
+                unsigned int id = scenario_formula_add((const uint8_t *) buffer, 0, 1000000000);
+                condition->parameter2 = id;
+            }
+        }
+
+        if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+            continue;
+        }
         scenario_action_t *action;
         for (unsigned int j = 0; j < current->actions.size; j++) { // go through all actions in event
             action = array_item(current->actions, j);

@@ -518,24 +518,11 @@ int scenario_condition_type_stats_prosperity_met(const scenario_condition_t *con
     return comparison_helper_compare_values(comparison, stat_value, value);
 }
 
-void scenario_condition_type_time_init(scenario_condition_t *condition)
-{
-    int min_months = condition->parameter2;
-    int max_months = condition->parameter3;
-
-    if (max_months < min_months) {
-        max_months = min_months;
-        condition->parameter3 = min_months;
-    }
-
-    condition->parameter4 = random_between_from_stdlib(min_months, max_months);
-}
-
 int scenario_condition_type_time_met(const scenario_condition_t *condition)
 {
     int total_months = game_time_total_months();
     int comparison = condition->parameter1;
-    int target_months = condition->parameter4;
+    int target_months = scenario_formula_evaluate_formula(condition->parameter2);
 
     return comparison_helper_compare_values(comparison, total_months, target_months);
 }

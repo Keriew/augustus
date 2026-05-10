@@ -176,7 +176,6 @@ static void draw_foreground(void)
 
 static void close_window(void)
 {
-    scenario_condition_type_init(data.condition);
     window_go_back();
 }
 

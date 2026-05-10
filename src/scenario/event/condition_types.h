@@ -41,7 +41,6 @@ int scenario_condition_type_stats_peace_met(const scenario_condition_t *conditio
 
 int scenario_condition_type_stats_prosperity_met(const scenario_condition_t *condition);
 
-void scenario_condition_type_time_init(scenario_condition_t *condition);
 int scenario_condition_type_time_met(const scenario_condition_t *condition);
 
 int scenario_condition_type_trade_route_open_met(const scenario_condition_t *condition);

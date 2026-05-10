@@ -782,8 +782,8 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
         scenario_events_migrate_to_grid_slices();
-        scenario_events_min_max_migrate_to_formulas();
     }
+    scenario_events_min_max_migrate_to_formulas(version);
     if (version <= SCENARIO_LAST_NO_HOUSE_MODELS) {
         model_reset_houses();
     }
@@ -1001,8 +1001,8 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
         scenario_events_migrate_to_grid_slices();
-        scenario_events_min_max_migrate_to_formulas();
     }
+    scenario_events_min_max_migrate_to_formulas(scenario_version);
     scenario_events_assign_parent_event_ids();
     if (version <= SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();

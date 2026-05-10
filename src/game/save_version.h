@@ -107,7 +107,7 @@ typedef enum {
 } savegame_version_t;
 
 typedef enum {
-    SCENARIO_CURRENT_VERSION = 24,
+    SCENARIO_CURRENT_VERSION = 25,
 
     SCENARIO_VERSION_NONE = 0,
     SCENARIO_LAST_UNVERSIONED = 1,
@@ -133,6 +133,7 @@ typedef enum {
     SCENARIO_LAST_LIMITED_ROUTE_COST = 21,
     SCENARIO_LAST_NO_HOUSE_MODELS = 22,
     SCENARIO_TESTING_VERSION_BUMP_1 = 23,
+    SCENARIO_TESTING_VERSION_BUMP_2 = 24,
 } scenario_version_t;
 
 typedef enum {
