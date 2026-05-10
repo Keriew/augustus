@@ -591,15 +591,6 @@ void scenario_events_population_migrate_counting(void)
                 action->parameter1 = BUILDING_HOUSE_SMALL_PALACE;
             }
         }
-        scenario_condition_group_t *group;
-        scenario_condition_t *condition;
-        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
-            group = array_item(current->condition_groups, j);
-            for (unsigned int k = 0; k < group->conditions.size; k++) {
-                condition = array_item(group->conditions, k);
-
-            }
-        }
     }
 }
 
@@ -663,8 +654,10 @@ void scenario_events_fetch_event_tiles_to_editor(void)
         scenario_action_t *action;
         for (unsigned int j = 0; j < current->actions.size; j++) {
             action = array_item(current->actions, j);
-            if (action->type == ACTION_TYPE_BUILDING_FORCE_COLLAPSE ||
-                action->type == ACTION_TYPE_CHANGE_TERRAIN) {
+            if (scenario_events_parameter_data_get_action_parameter_type(
+                action->type, 1, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE &&
+                scenario_events_parameter_data_get_action_parameter_type(
+                action->type, 2, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE) {
                 int grid_offset1 = action->parameter1;
                 int grid_offset2 = action->parameter2;
                 grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
@@ -680,20 +673,22 @@ void scenario_events_fetch_event_tiles_to_editor(void)
             group = array_item(current->condition_groups, j);
             for (unsigned int k = 0; k < group->conditions.size; k++) {
                 condition = array_item(group->conditions, k);
-                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA ||
-                    condition->type == CONDITION_TYPE_TERRAIN_IN_AREA) {
+                if (scenario_events_parameter_data_get_condition_parameter_type(
+                condition->type, 1, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE &&
+                scenario_events_parameter_data_get_condition_parameter_type(
+                condition->type, 2, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE) {
                     int grid_offset1 = condition->parameter1;
                     int grid_offset2 = condition->parameter2;
                     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
                     for (int i = 0; i < slice->size; i++) {
                         widget_map_editor_add_draw_context_event_tile(slice->grid_offsets[i], event_id);
                     }
-
                 }
             }
         }
     }
 }
+
 void scenario_events_migrate_to_grid_slices(void)
 {
     scenario_event_t *current;

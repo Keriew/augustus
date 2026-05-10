@@ -13,6 +13,7 @@
 #include "city/health.h"
 #include "city/labor.h"
 #include "city/message.h"
+#include "city/migration.h"
 #include "city/ratings.h"
 #include "city/sentiment.h"
 #include "city/trade.h"
@@ -988,6 +989,20 @@ int scenario_action_type_change_custom_variable_color_execute(scenario_action_t 
     int color_id = action->parameter2;
 
     scenario_custom_variable_set_color_group(variable_id, color_id);
+
+    return 1;
+}
+
+int scenario_action_type_change_immigration_percentage_execute(scenario_action_t *action)
+{
+    int percentage = scenario_formula_evaluate_formula(action->parameter1);
+    int immigration = action->parameter2;
+
+    if (immigration) {
+        city_migration_set_adjust_percentage_immigration(percentage);
+    } else {
+        city_migration_set_adjust_percentage_emigration(percentage);
+    }
 
     return 1;
 }

@@ -29,6 +29,8 @@ void city_data_init(void)
     city_data.emperor.gifts[GIFT_MODEST].cost = 0;
     city_data.emperor.gifts[GIFT_GENEROUS].cost = 0;
     city_data.emperor.gifts[GIFT_LAVISH].cost = 0;
+    city_data.migration.adjust_percentage_immigration = 100;
+    city_data.migration.adjust_percentage_emigration = 100;
 
     city_gods_reset();
 }
@@ -92,6 +94,8 @@ static void save_main_data(buffer *main)
     buffer_write_i32(main, city_data.migration.emigrated_today);
     buffer_write_i32(main, city_data.migration.refused_immigrants_today);
     buffer_write_i32(main, city_data.migration.percentage);
+    buffer_write_i32(main, city_data.migration.adjust_percentage_immigration);
+    buffer_write_i32(main, city_data.migration.adjust_percentage_emigration);
     buffer_write_i32(main, city_data.culture.population_with_venus_access);
     buffer_write_i32(main, city_data.migration.immigration_duration);
     buffer_write_i32(main, city_data.migration.emigration_duration);
@@ -548,6 +552,10 @@ static void load_main_data(buffer *main, int version)
     city_data.migration.emigrated_today = buffer_read_i32(main);
     city_data.migration.refused_immigrants_today = buffer_read_i32(main);
     city_data.migration.percentage = buffer_read_i32(main);
+    if (version > SAVE_GAME_TESTING_VERSION_BUMP_2) {
+        city_data.migration.adjust_percentage_immigration = buffer_read_i32(main);
+        city_data.migration.adjust_percentage_emigration = buffer_read_i32(main);
+    }
     city_data.culture.population_with_venus_access = buffer_read_i32(main);
     city_data.migration.immigration_duration = buffer_read_i32(main);
     city_data.migration.emigration_duration = buffer_read_i32(main);

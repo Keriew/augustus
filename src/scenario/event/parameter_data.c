@@ -411,6 +411,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "change_variable_color",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_VARIABLE_COLOR},
                                         .xml_parm1 = {.name = "variable_uid",   .type = PARAMETER_TYPE_CUSTOM_VARIABLE,    .min_limit = 0,    .max_limit = 99,    .key = TR_PARAMETER_TYPE_CUSTOM_VARIABLE },
                                         .xml_parm2 = {.name = "color_group",    .type = PARAMETER_TYPE_VARIABLE_COLOR,  .key = TR_EDITOR_COLOR_LABEL}, },
+    [ACTION_TYPE_IMMIGRATION_PERCENTAGE] = {.type = ACTION_TYPE_IMMIGRATION_PERCENTAGE,
+                                        .xml_attr = {.name = "change_immigration_percentage",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_IMMIGRATION_PERCENTAGE},
+                                        .xml_parm1 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
+                                        .xml_parm2 = {.name = "change_immigration",   .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_IMMIGRATION}, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
