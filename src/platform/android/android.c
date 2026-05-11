@@ -29,7 +29,7 @@ const char *android_get_c3_path(void)
     return *path ? path : NULL;
 }
 
-int android_has_directory(void)
+int android_has_c3_path(void)
 {
     return has_directory;
 }
