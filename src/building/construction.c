@@ -251,17 +251,22 @@ static int place_houses(int measure_only, int x_start, int y_start, int x_end, i
 
     int needs_road_warning = 0;
     int items_placed = 0;
+    int blocking_mask = TERRAIN_NOT_CLEAR;
+    if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        blocking_mask &= ~(TERRAIN_TREE | TERRAIN_SHRUB);
+    }
     game_undo_restore_building_state();
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+            if (map_terrain_is(grid_offset, blocking_mask)) {
                 continue;
             }
             if (measure_only) {
                 map_property_mark_constructing(grid_offset);
                 items_placed++;
             } else {
+                building_construction_auto_clear_vegetation_at(grid_offset);
                 building *b = building_create(BUILDING_HOUSE_VACANT_LOT, x, y);
                 game_undo_add_building(b);
                 if (b->id > 0) {
@@ -312,18 +317,26 @@ static int place_plaza(int x_start, int y_start, int x_end, int y_end)
     return items_placed;
 }
 
-static int place_garden(int x_start, int y_start, int x_end, int y_end, int is_overgrown_garden)
+static int place_garden(int x_start, int y_start, int x_end, int y_end, int is_overgrown_garden, int measure_only)
 {
     game_undo_restore_map(1);
 
     int x_min, y_min, x_max, y_max;
     map_grid_start_end_to_area(x_start, y_start, x_end, y_end, &x_min, &y_min, &x_max, &y_max);
 
+    int blocking_mask = TERRAIN_NOT_CLEAR;
+    if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        blocking_mask &= ~(TERRAIN_TREE | TERRAIN_SHRUB);
+    }
+
     int items_placed = 0;
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (!map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+            if (!map_terrain_is(grid_offset, blocking_mask)) {
+                if (!measure_only) {
+                    building_construction_auto_clear_vegetation_at(grid_offset);
+                }
                 items_placed++;
                 map_terrain_add(grid_offset, TERRAIN_GARDEN);
                 if (is_overgrown_garden) {
@@ -339,19 +352,27 @@ static int place_garden(int x_start, int y_start, int x_end, int y_end, int is_o
 static int place_wall(int x_start, int y_start, int x_end, int y_end, int measure_only, int construction_mode)
 {
     if (construction_mode) {
-        game_undo_restore_map(0); // map_tiles_set_wall places wall terrain, even during preview. 
-        //the restoration is done to go back to the terrain state before measuring. 
+        game_undo_restore_map(0); // map_tiles_set_wall places wall terrain, even during preview.
+        //the restoration is done to go back to the terrain state before measuring.
         //It's not needed if not using regular construction mode, e.g. repairs
     }
     int x_min, y_min, x_max, y_max;
     map_grid_start_end_to_area(x_start, y_start, x_end, y_end, &x_min, &y_min, &x_max, &y_max);
 
+    int blocking_mask = TERRAIN_NOT_CLEAR;
+    if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        blocking_mask &= ~(TERRAIN_TREE | TERRAIN_SHRUB);
+    }
+
     int items_placed = 0;
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (!map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+            if (!map_terrain_is(grid_offset, blocking_mask)) {
                 items_placed++;
+                if (!measure_only) {
+                    building_construction_auto_clear_vegetation_at(grid_offset);
+                }
                 map_tiles_set_wall(x, y);
                 if (!measure_only) {
                     building *wall = building_create(BUILDING_WALL, x, y);
@@ -392,6 +413,9 @@ static int plot_draggable_building(int x_start, int y_start, int x_end, int y_en
     if (allow_roads) {
         terrain = TERRAIN_NOT_CLEAR_EXCEPT_ROAD;
     }
+    if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        terrain &= ~(TERRAIN_TREE | TERRAIN_SHRUB);
+    }
 
     int items_placed = 0;
     for (int y = y_min; y <= y_max; y++) {
@@ -413,6 +437,14 @@ static int place_draggable_building(int x_start, int y_start, int x_end, int y_e
     map_grid_start_end_to_area(x_start, y_start, x_end, y_end, &x_min, &y_min, &x_max, &y_max);
     map_image_restore();
 
+    int auto_clear = config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES);
+    int blocking_mask = auto_clear
+        ? (TERRAIN_NOT_CLEAR & ~(TERRAIN_TREE | TERRAIN_SHRUB))
+        : TERRAIN_NOT_CLEAR;
+    int blocking_mask_except_road = auto_clear
+        ? (TERRAIN_NOT_CLEAR_EXCEPT_ROAD & ~(TERRAIN_TREE | TERRAIN_SHRUB))
+        : TERRAIN_NOT_CLEAR_EXCEPT_ROAD;
+
     int items_placed = 0;
     int gates_placed = 0;
     int gate_type = building_connectable_gate_type(type);
@@ -420,7 +452,8 @@ static int place_draggable_building(int x_start, int y_start, int x_end, int y_e
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (!map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+            if (!map_terrain_is(grid_offset, blocking_mask)) {
+                building_construction_auto_clear_vegetation_at(grid_offset);
                 items_placed++;
                 building *b = building_create(type, x, y);
                 if (building_variant_has_variants(type)) {
@@ -430,8 +463,9 @@ static int place_draggable_building(int x_start, int y_start, int x_end, int y_e
                 }
                 game_undo_add_building(b);
                 map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-            } else if (!map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR_EXCEPT_ROAD)) {
+            } else if (!map_terrain_is(grid_offset, blocking_mask_except_road)) {
                 if (gate_type) {
+                    building_construction_auto_clear_vegetation_at(grid_offset);
                     items_placed++;
                     gates_placed++;
                     building *b = building_create(gate_type, x, y);
@@ -469,6 +503,15 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     info->place_reservoir_at_end = PLACE_RESERVOIR_NO;
 
     game_undo_restore_map(0);
+
+    // For the placement check below, allow vegetation in the 3x3 reservoir
+    // footprints — we'll auto-clear them only after the whole reservoir+aqueduct
+    // operation succeeds, so a failed attempt doesn't burn the trees.
+    int reservoir_check_mask = TERRAIN_NOT_CLEAR;
+    if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        reservoir_check_mask &= ~TERRAIN_TREE & ~TERRAIN_SHRUB;
+    }
+
     int distance = calc_maximum_distance(x_start, y_start, x_end, y_end);
     if (measure_only && !data.in_progress) {
         distance = 0;
@@ -477,7 +520,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
         if (map_building_is_reservoir(x_start - 1, y_start - 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_EXISTS;
         } else if (map_tiles_are_clear_with_terrain_exception(x_start - 1, y_start - 1, 3,
-            TERRAIN_NOT_CLEAR, TERRAIN_AQUEDUCT, 1)) {
+            reservoir_check_mask, TERRAIN_AQUEDUCT, 1)) {
             info->place_reservoir_at_start = PLACE_RESERVOIR_YES;
         } else {
             info->place_reservoir_at_start = PLACE_RESERVOIR_BLOCKED;
@@ -486,7 +529,7 @@ static int place_reservoir_and_aqueducts(int measure_only, int x_start, int y_st
     if (map_building_is_reservoir(x_end - 1, y_end - 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_EXISTS;
     } else if (map_tiles_are_clear_with_terrain_exception(x_end - 1, y_end - 1, 3,
-        TERRAIN_NOT_CLEAR, TERRAIN_AQUEDUCT, 1)) {
+        reservoir_check_mask, TERRAIN_AQUEDUCT, 1)) {
         info->place_reservoir_at_end = PLACE_RESERVOIR_YES;
     } else {
         info->place_reservoir_at_end = PLACE_RESERVOIR_BLOCKED;
@@ -852,12 +895,12 @@ void building_construction_update(int x, int y, int grid_offset)
             current_cost *= items_placed;
         }
     } else if (type == BUILDING_GARDENS) {
-        int items_placed = place_garden(data.start.x, data.start.y, x, y, 0);
+        int items_placed = place_garden(data.start.x, data.start.y, x, y, 0, 1);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
     } else if (type == BUILDING_OVERGROWN_GARDENS) {
-        int items_placed = place_garden(data.start.x, data.start.y, x, y, 1);
+        int items_placed = place_garden(data.start.x, data.start.y, x, y, 1, 1);
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
@@ -1116,10 +1159,10 @@ void building_construction_place(void)
     } else if (type == BUILDING_PLAZA) {
         placement_cost *= place_plaza(x_start, y_start, x_end, y_end);
     } else if (type == BUILDING_GARDENS) {
-        placement_cost *= place_garden(x_start, y_start, x_end, y_end, 0);
+        placement_cost *= place_garden(x_start, y_start, x_end, y_end, 0, 0);
         map_routing_update_land();
     } else if (type == BUILDING_OVERGROWN_GARDENS) {
-        placement_cost *= place_garden(x_start, y_start, x_end, y_end, 1);
+        placement_cost *= place_garden(x_start, y_start, x_end, y_end, 1, 0);
         map_routing_update_land();
     } else if (type == BUILDING_LOW_BRIDGE) {
         int length = map_bridge_add(x_end, y_end, 0);
@@ -1139,6 +1182,7 @@ void building_construction_place(void)
         int cost;
         if (!building_construction_place_aqueduct(0, x_start, y_start, x_end, y_end, &cost)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            building_construction_auto_clear_finalize();
             return;
         }
         placement_cost = cost;
@@ -1149,10 +1193,16 @@ void building_construction_place(void)
         if (!place_reservoir_and_aqueducts(0, x_start, y_start, x_end, y_end, &info)) {
             map_property_clear_constructing_and_deleted();
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            building_construction_auto_clear_finalize();
             return;
         }
         unsigned int removed_aqueduct_tiles = 0;
         if (info.place_reservoir_at_start == PLACE_RESERVOIR_YES) {
+            if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+                grid_slice *footprint = map_grid_get_grid_slice_square(
+                    map_grid_offset(x_start - 1, y_start - 1), 3);
+                building_construction_prepare_terrain(footprint, CLEAR_MODE_TREES, COST_PROCESS);
+            }
             building *reservoir = building_create(BUILDING_RESERVOIR, x_start - 1, y_start - 1);
             game_undo_add_building(reservoir);
             removed_aqueduct_tiles += remove_aqueduct_tiles_for_reservoir(x_start - 1, y_start - 1);
@@ -1160,6 +1210,11 @@ void building_construction_place(void)
                 image_group(GROUP_BUILDING_RESERVOIR), TERRAIN_BUILDING);
         }
         if (info.place_reservoir_at_end == PLACE_RESERVOIR_YES) {
+            if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+                grid_slice *footprint = map_grid_get_grid_slice_square(
+                    map_grid_offset(x_end - 1, y_end - 1), 3);
+                building_construction_prepare_terrain(footprint, CLEAR_MODE_TREES, COST_PROCESS);
+            }
             building *reservoir = building_create(BUILDING_RESERVOIR, x_end - 1, y_end - 1);
             game_undo_add_building(reservoir);
             removed_aqueduct_tiles += remove_aqueduct_tiles_for_reservoir(x_end - 1, y_end - 1);
@@ -1213,6 +1268,7 @@ void building_construction_place(void)
     } else if (type == BUILDING_HOUSE_VACANT_LOT) {
         placement_cost *= place_houses(0, x_start, y_start, x_end, y_end);
     } else if (!building_construction_place_building(type, x_end, y_end, 0)) {
+        building_construction_auto_clear_finalize();
         return;
     }
 
@@ -1223,6 +1279,7 @@ void building_construction_place(void)
     }
     formation_move_herds_away(x_end, y_end);
     city_finance_process_construction(placement_cost);
+    building_construction_auto_clear_finalize();
     game_undo_finish_build(placement_cost);
 }
 

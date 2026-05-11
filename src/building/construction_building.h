@@ -7,7 +7,7 @@
 typedef enum {
     CLEAR_MODE_FORCE = 0, //removes everything, even if not removable by player
     CLEAR_MODE_RUBBLE = 1, //removes only rubble
-    CLEAR_MODE_TREES = 2, //removes only trees
+    CLEAR_MODE_TREES = 2, //removes trees and shrubs
     CLEAR_MODE_PLAYER = 3, //removes only things that player can clear, i.e. buildings, trees, rubble, roads etc.
 } clear_mode;
 
@@ -45,6 +45,22 @@ int building_construction_fill_vacant_lots(grid_slice *area);
  * @return Success/failure status of the terrain preparation
  */
 int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode clear_mode, cost_calculation cost);
+
+/**
+ * Per-tile auto-clear of vegetation. If the auto-clear-trees option is enabled and
+ * the tile contains TREE or SHRUB, removes those bits from both the live terrain
+ * and the undo backup, updates the tile image to grass and charges 3 dn. Returns 1
+ * if the tile was cleared. Image-backup / routing refresh are deferred and applied
+ * by auto_clear_finalize() so we pay the cost once per placement action.
+ */
+int building_construction_auto_clear_vegetation_at(int grid_offset);
+
+/**
+ * Finalize step paired with building_construction_auto_clear_vegetation_at.
+ * If any tile was cleared since the previous finalize, refreshes the image backup
+ * (so undo restores the cleared state visually) and the citizen routing grid.
+ */
+void building_construction_auto_clear_finalize(void);
 
 #endif // BUILDING_CONSTRUCTION_BUILDING_H
 
