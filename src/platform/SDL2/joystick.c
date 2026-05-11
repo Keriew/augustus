@@ -1,11 +1,12 @@
-#include "joystick.h"
+#include "platform/joystick.h"
 
-#include "input/joystick.h"
 #include "input/touch.h"
 #include "platform/platform.h"
 
 #include <stdio.h>
 #include <string.h>
+
+#include "SDL.h"
 
 /*
  * Stores the SDL game controller bindings associated with a mapping action.
@@ -148,33 +149,6 @@ static controller_mapping controller_mappings[] = {
 
 #define NUM_CONTROLLER_MAPPINGS (sizeof(controller_mappings) / sizeof(controller_mapping))
 
-static int use_joystick(void)
-{
-#if defined(__vita__) || defined(__SWITCH__) || defined(__ANDROID__)
-    return 1;
-#else
-    return enabled;
-#endif
-}
-
-static joystick_hat_position convert_hat_position(int value)
-{
-    joystick_hat_position position = JOYSTICK_HAT_CENTERED;
-    if (value & SDL_HAT_UP) {
-        position |= JOYSTICK_HAT_UP;
-    }
-    if (value & SDL_HAT_DOWN) {
-        position |= JOYSTICK_HAT_DOWN;
-    }
-    if (value & SDL_HAT_LEFT) {
-        position |= JOYSTICK_HAT_LEFT;
-    }
-    if (value & SDL_HAT_RIGHT) {
-        position |= JOYSTICK_HAT_RIGHT;
-    }
-    return position;
-}
-
 static void set_default_controller_mapping(joystick_model *model, SDL_GameController *controller)
 {
     for (int i = 0; i < NUM_CONTROLLER_MAPPINGS; i++) {
@@ -214,7 +188,7 @@ static void set_default_controller_mapping(joystick_model *model, SDL_GameContro
                 case SDL_CONTROLLER_BINDTYPE_HAT:
                     action->element[j].type = JOYSTICK_ELEMENT_HAT;
                     action->element[j].id = binds[j].value.hat.hat;
-                    action->element[j].position = convert_hat_position(binds[j].value.hat.hat_mask);
+                    action->element[j].position = platform_joystick_convert_hat_position(binds[j].value.hat.hat_mask);
                     break;
                 default:
                     break;
@@ -331,7 +305,7 @@ void platform_joystick_init(int force_enable)
 {
     enabled = force_enable;
 
-    if (!use_joystick()) {
+    if (!platform_joystick_is_enabled()) {
         return;
     }
     if (SDL_JoystickEventState(SDL_ENABLE) != SDL_ENABLE) {
@@ -342,46 +316,41 @@ void platform_joystick_init(int force_enable)
     }
 }
 
-void platform_joystick_device_changed(int id, int is_connected)
+int platform_joystick_is_enabled(void)
 {
-    if (!use_joystick()) {
+#if defined(__vita__) || defined(__SWITCH__) || defined(__ANDROID__)
+    return 1;
+#else
+    return enabled;
+#endif
+}
+
+void platform_joystick_device_changed(long long id, int is_connected)
+{
+    if (!platform_joystick_is_enabled()) {
         return;
     }
     if (is_connected) {
-        add_joystick(id);
+        add_joystick((int) id);
     } else {
-        remove_joystick(id);
+        remove_joystick((int) id);
     }
 }
 
-void platform_joystick_handle_axis(SDL_JoyAxisEvent *event)
+joystick_hat_position platform_joystick_convert_hat_position(int value)
 {
-    if (!use_joystick()) {
-        return;
+    joystick_hat_position position = JOYSTICK_HAT_CENTERED;
+    if (value & SDL_HAT_UP) {
+        position |= JOYSTICK_HAT_UP;
     }
-    joystick_update_element(event->which, JOYSTICK_ELEMENT_AXIS, event->axis, event->value, 0);
-}
-
-void platform_joystick_handle_trackball(SDL_JoyBallEvent *event)
-{
-    if (!use_joystick()) {
-        return;
+    if (value & SDL_HAT_DOWN) {
+        position |= JOYSTICK_HAT_DOWN;
     }
-    joystick_update_element(event->which, JOYSTICK_ELEMENT_TRACKBALL, event->ball, event->xrel, event->yrel);
-}
-
-void platform_joystick_handle_hat(SDL_JoyHatEvent *event)
-{
-    if (!use_joystick()) {
-        return;
+    if (value & SDL_HAT_LEFT) {
+        position |= JOYSTICK_HAT_LEFT;
     }
-    joystick_update_element(event->which, JOYSTICK_ELEMENT_HAT, event->hat, convert_hat_position(event->value), 0);
-}
-
-void platform_joystick_handle_button(SDL_JoyButtonEvent *event, int is_down)
-{
-    if (!use_joystick()) {
-        return;
+    if (value & SDL_HAT_RIGHT) {
+        position |= JOYSTICK_HAT_RIGHT;
     }
-    joystick_update_element(event->which, JOYSTICK_ELEMENT_BUTTON, event->button, is_down, 0);
+    return position;
 }

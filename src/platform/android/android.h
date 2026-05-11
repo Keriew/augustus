@@ -5,7 +5,10 @@
 
 #define PLATFORM_NO_USER_DIRECTORIES
 
-const char *android_show_c3_path_dialog(int again);
+int android_show_c3_path_dialog(int again);
+int android_has_c3_path(void);
+const char *android_get_c3_path(void);
+
 float android_get_screen_density(void);
 int android_get_file_descriptor(const char *filename, const char *mode);
 int android_set_base_path(const char *path);

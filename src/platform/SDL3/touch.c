@@ -1,15 +1,13 @@
-#include "touch.h"
+#include "platform/touch.h"
 
 #include "core/time.h"
 #include "game/settings.h"
 #include "graphics/screen.h"
 #include "input/touch.h"
 
-static SDL_FingerID touch_id[MAX_ACTIVE_TOUCHES];
+#include <SDL3/SDL.h>
 
-#ifdef __APPLE__
-static SDL_TouchID trackpad_id;
-#endif
+static SDL_FingerID touch_id[MAX_ACTIVE_TOUCHES];
 
 static touch_coords get_touch_coordinates(float x, float y, SDL_WindowID windowID)
 {
@@ -41,39 +39,23 @@ static int get_touch_index(SDL_FingerID id)
     return MAX_ACTIVE_TOUCHES;
 }
 
-void platform_touch_start(SDL_TouchFingerEvent *event)
+void platform_touch_start(void *event)
 {
-#ifdef __APPLE__
-    // Attempt to disable trackpad touches on MacOS
-    if (!trackpad_id) {
-        trackpad_id = SDL_GetTouchDevice(0);
-    }
-    if (event->touchId == trackpad_id) {
-        return;
-    }
-#elif defined(__vita__)
-
-#define FRONT_PANEL_TOUCH_ID 1
-
-    // Only use main screen for vita
-    if (event->touchId != FRONT_PANEL_TOUCH_ID) {
-        return;
-    }
-
-#undef FRONT_PANEL_TOUCH_ID
-#endif
-    int index = touch_create(get_touch_coordinates(event->x, event->y, event->windowID), event->timestamp / 1000000);
+    SDL_TouchFingerEvent *e = (SDL_TouchFingerEvent *)event;
+    int index = touch_create(get_touch_coordinates(e->x, e->y, e->windowID), e->timestamp / 1000000);
     if (index != MAX_ACTIVE_TOUCHES) {
-        touch_id[index] = event->fingerID;
+        touch_id[index] = e->fingerID;
     }
 }
 
-void platform_touch_move(SDL_TouchFingerEvent *event)
+void platform_touch_move(void *event)
 {
-    touch_move(get_touch_index(event->fingerID), get_touch_coordinates(event->x, event->y, event->windowID), event->timestamp);
+    SDL_TouchFingerEvent *e = (SDL_TouchFingerEvent *)event;
+    touch_move(get_touch_index(e->fingerID), get_touch_coordinates(e->x, e->y, e->windowID), e->timestamp / 1000000);
 }
 
-void platform_touch_end(SDL_TouchFingerEvent *event)
+void platform_touch_end(void *event)
 {
-    touch_end(get_touch_index(event->fingerID), event->timestamp);
+    SDL_TouchFingerEvent *e = (SDL_TouchFingerEvent *)event;
+    touch_end(get_touch_index(e->fingerID), e->timestamp / 1000000);
 }

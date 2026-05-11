@@ -14,19 +14,19 @@
 #include "input/mouse.h"
 #include "input/touch.h"
 #include "platform/file_manager.h"
-#include "platform/prefs.h"
 #include "platform/android/android.h"
 #include "platform/arguments.h"
 #include "platform/cursor.h"
 #include "platform/emscripten/emscripten.h"
 #include "platform/file_manager_cache.h"
+#include "platform/ios/ios.h"
+#include "platform/joystick.h"
+#include "platform/keyboard_input.h"
 #include "platform/platform.h"
+#include "platform/prefs.h"
 #include "platform/renderer.h"
 #include "platform/screen.h"
-#include "platform/SDL2/ios/ios.h"
-#include "platform/SDL2/joystick.h"
-#include "platform/SDL2/keyboard_input.h"
-#include "platform/SDL2/touch.h"
+#include "platform/touch.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
 #include "window/asset_previewer.h"
@@ -383,20 +383,36 @@ static void handle_event(SDL_Event *event)
             break;
 
         case SDL_JOYAXISMOTION:
-            platform_joystick_handle_axis(&event->jaxis);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jaxis.which, JOYSTICK_ELEMENT_AXIS,
+                    event->jaxis.axis, event->jaxis.value, 0);
+            }
             break;
         case SDL_JOYBALLMOTION:
-            platform_joystick_handle_trackball(&event->jball);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jball.which, JOYSTICK_ELEMENT_TRACKBALL,
+                    event->jball.ball, event->jball.xrel, event->jball.yrel);
+            }
             break;
         case SDL_JOYHATMOTION:
-            platform_joystick_handle_hat(&event->jhat);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jhat.which, JOYSTICK_ELEMENT_HAT,
+                    event->jhat.hat, platform_joystick_convert_hat_position(event->jhat.value), 0);
+            }
             break;
         case SDL_JOYBUTTONDOWN:
-            platform_joystick_handle_button(&event->jbutton, 1);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jbutton.which, JOYSTICK_ELEMENT_BUTTON,
+                    event->jbutton.button, 1, 0);
+            }
             break;
         case SDL_JOYBUTTONUP:
-            platform_joystick_handle_button(&event->jbutton, 0);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jbutton.which, JOYSTICK_ELEMENT_BUTTON,
+                    event->jbutton.button, 0, 0);
+            }
             break;
+
         case SDL_JOYDEVICEADDED:
             platform_joystick_device_changed(event->jdevice.which, 1);
             break;
@@ -530,7 +546,13 @@ static const char *ask_for_data_dir(int again)
         }
     }
 #ifdef __ANDROID__
-    return android_show_c3_path_dialog(again);
+    if (!android_show_c3_path_dialog(again)) {
+        return 0;
+    }
+    while (!android_has_c3_path()) {
+        SDL_WaitEventTimeout(NULL, 2000);
+    }
+    return android_get_c3_path();
 #elif defined __IPHONEOS__
     if (again) {
         const SDL_MessageBoxButtonData buttons[] = {

@@ -16,19 +16,19 @@
 #include "input/mouse.h"
 #include "input/touch.h"
 #include "platform/file_manager.h"
-#include "platform/prefs.h"
 #include "platform/android/android.h"
 #include "platform/arguments.h"
 #include "platform/cursor.h"
 #include "platform/emscripten/emscripten.h"
 #include "platform/file_manager_cache.h"
+#include "platform/ios/ios.h"
+#include "platform/joystick.h"
+#include "platform/keyboard_input.h"
 #include "platform/platform.h"
+#include "platform/prefs.h"
 #include "platform/renderer.h"
-#include "platform/SDL3/ios/ios.h"
-#include "platform/SDL3/joystick.h"
-#include "platform/SDL3/keyboard_input.h"
 #include "platform/SDL3/screen.h"
-#include "platform/SDL3/touch.h"
+#include "platform/touch.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
 #include "window/asset_previewer.h"
@@ -467,19 +467,34 @@ static void handle_event(SDL_Event *event)
             break;
 
         case SDL_EVENT_JOYSTICK_AXIS_MOTION:
-            platform_joystick_handle_axis(&event->jaxis);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jaxis.which, JOYSTICK_ELEMENT_AXIS,
+                    event->jaxis.axis, event->jaxis.value, 0);
+            }
             break;
         case SDL_EVENT_JOYSTICK_BALL_MOTION:
-            platform_joystick_handle_trackball(&event->jball);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jball.which, JOYSTICK_ELEMENT_TRACKBALL,
+                    event->jball.ball, event->jball.xrel, event->jball.yrel);
+            }
             break;
         case SDL_EVENT_JOYSTICK_HAT_MOTION:
-            platform_joystick_handle_hat(&event->jhat);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jhat.which, JOYSTICK_ELEMENT_HAT,
+                    event->jhat.hat, platform_joystick_convert_hat_position(event->jhat.value), 0);
+            }
             break;
         case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
-            platform_joystick_handle_button(&event->jbutton, 1);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jbutton.which, JOYSTICK_ELEMENT_BUTTON,
+                    event->jbutton.button, 1, 0);
+            }
             break;
         case SDL_EVENT_JOYSTICK_BUTTON_UP:
-            platform_joystick_handle_button(&event->jbutton, 0);
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jbutton.which, JOYSTICK_ELEMENT_BUTTON,
+                    event->jbutton.button, 0, 0);
+            }
             break;
         case SDL_EVENT_JOYSTICK_ADDED:
             platform_joystick_device_changed(event->jdevice.which, 1);
@@ -574,6 +589,9 @@ static int init_sdl(int enable_joysticks)
     SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "directsound");
 #endif
 
+    SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "0");
+    SDL_SetHint(SDL_HINT_VITA_ENABLE_BACK_TOUCH, "0");
+
     if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK)) {
         // Try starting SDL without joystick support
         if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
@@ -629,7 +647,13 @@ static const char *ask_for_data_dir(int again)
         }
     }
 #ifdef __ANDROID__
-    return android_show_c3_path_dialog(again);
+    if (!android_show_c3_path_dialog(again)) {
+        return 0;
+    }
+    while (!android_has_c3_path()) {
+        SDL_WaitEventTimeout(NULL, 2000);
+    }
+    return android_get_c3_path();
 #elif defined SDL_PLATFORM_IOS
     return ios_show_c3_path_dialog(again);
 #else

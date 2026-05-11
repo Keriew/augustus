@@ -2,8 +2,6 @@
 
 #import "GameDataPickerController.h"
 
-#import <SDL3/SDL.h>
-
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #define GAME_PATH_MAX 300

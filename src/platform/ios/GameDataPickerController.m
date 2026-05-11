@@ -1,9 +1,8 @@
 #import "GameDataPickerController.h"
 
 #import "ios.h"
-#import "platform/screen.h"
 
-#import <SDL3/SDL.h>
+#import "platform/screen.h"
 
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
