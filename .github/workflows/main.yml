@@ -36,6 +36,14 @@ jobs:
             BUILD_TARGET: linux
             DEPLOY: linux
             SKIP_UPLOAD: true
+          - name: Linux x64 (SDL3)
+            os: ubuntu-24.04
+            cache-key: linux-x64
+            SDL_VERSION: 3.4.8
+            SDL_MIXER_VERSION: 3.2.0
+            BUILD_TARGET: linux
+            DEPLOY: linux
+            SKIP_UPLOAD: true
           - name: Linux arm64
             os: ubuntu-24.04-arm
             cache-key: linux-arm64
@@ -73,6 +81,14 @@ jobs:
             SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: android
             DEPLOY: android
+          - name: Android SDL3
+            os: ubuntu-24.04
+            cache-key: android
+            SDL_VERSION: 3.4.8
+            SDL_MIXER_VERSION: 3.2.0
+            BUILD_TARGET: android
+            DEPLOY: android
+            SKIP_UPLOAD: true
           - name: Emscripten
             os: ubuntu-24.04
             cache-key: emscripten
@@ -142,21 +158,35 @@ jobs:
           - name: Windows MinGW x86
             cache-key: mingw
             COMPILER: mingw-32
+            SDL_VERSION: 2.32.8
+            SDL_MIXER_VERSION: 2.8.1        
           - name: Windows MinGW x64
             cache-key: mingw
             COMPILER: mingw-64
+            SDL_VERSION: 2.32.8
+            SDL_MIXER_VERSION: 2.8.1
+          - name: Windows MinGW x64 (SDL3)
+            cache-key: mingw
+            COMPILER: mingw-64
+            SDL_VERSION: 3.4.8
+            SDL_MIXER_VERSION: 3.2.0
+            SKIP_UPLOAD: true
           - name: Windows MSVC x64
             cache-key: msvc
             COMPILER: msvc
+            SDL_VERSION: 2.32.8
+            SDL_MIXER_VERSION: 2.8.1
             SKIP_UPLOAD: true
           - name: Windows MSVC ARM64
             cache-key: msvc-arm64
             COMPILER: msvc-arm64
+            SDL_VERSION: 2.32.8
+            SDL_MIXER_VERSION: 2.8.1
     name: ${{ matrix.name }}
     runs-on: windows-latest
     env:
-      SDL_VERSION: 2.32.8
-      SDL_MIXER_VERSION: 2.8.1
+      SDL_VERSION: ${{ matrix.SDL_VERSION }}
+      SDL_MIXER_VERSION: ${{ matrix.SDL_MIXER_VERSION }}
       COMPILER: ${{ matrix.COMPILER }}
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:

@@ -1,17 +1,17 @@
 #include "jni.h"
 
-#include "SDL.h"
+#include "core/log.h"
 
 int jni_init_function_handler(const char *class_name, jni_function_handler *handler)
 {
-    handler->env = SDL_AndroidGetJNIEnv();
+    handler->env = jni_get_env();
     if (handler->env == NULL) {
-        SDL_Log("Problem setting up JNI environment");
+        log_error("Problem setting up JNI environment", 0, 0);
         return 0;
     }
-    handler->activity = (jobject) SDL_AndroidGetActivity();
+    handler->activity = jni_get_activity();
     if (handler->activity == NULL) {
-        SDL_Log("Problem loading the activity.");
+        log_error("Problem loading the activity.", 0, 0);
         return 0;
     }
     if(class_name) {
@@ -20,7 +20,7 @@ int jni_init_function_handler(const char *class_name, jni_function_handler *hand
         handler->class = (*handler->env)->GetObjectClass(handler->env, handler->activity);
     }
     if (handler->class == NULL) {
-        SDL_Log("Problem loading class '%s'.", class_name);
+        log_error("Problem loading class '%s'.", 0, 0);
         return 0;
     }
     return 1;
@@ -34,7 +34,8 @@ int jni_get_static_method_handler(
     }
     handler->method = (*handler->env)->GetStaticMethodID(handler->env, handler->class, method_name, method_signature);
     if (handler->method == NULL) {
-        SDL_Log("Problem loading static method '%s' from class '%s'.", method_name, class_name);
+        log_error("Problem loading static method", method_name, 0);
+        log_error("From class", class_name, 0);
         return 0;
     }
     return 1;
@@ -48,7 +49,8 @@ int jni_get_method_handler(
     }
     handler->method = (*handler->env)->GetMethodID(handler->env, handler->class, method_name, method_signature);
     if (handler->method == NULL) {
-        SDL_Log("Problem loading method '%s' from class '%s'.", method_name, class_name);
+        log_error("Problem loading method", method_name, 0);
+        log_error("From class", class_name, 0);
         return 0;
     }
     return 1;

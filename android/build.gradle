@@ -13,7 +13,18 @@ buildscript {
 }
 
 ext {
-    usingAAR = file('augustus/libs/SDL2.aar').exists() || file('augustus/libs/SDL2-debug.aar').exists() || file('augustus/libs/SDL2-release.aar').exists()
+    findAAR = { dirPath, baseName ->
+        def dir = file(dirPath)
+        if (!dir.exists()) return null
+        def re = ~/^${java.util.regex.Pattern.quote(baseName)}(?:-\d+\.\d+\.\d+)?\.aar$/
+        return dir.listFiles()?.find { f -> f.isFile() && f.name ==~ re }
+    }
+    usingAAR = 0
+    if (findAAR('augustus/libs', 'SDL3') && findAAR('augustus/libs', 'SDL3_mixer')) {
+        usingAAR = 3
+    } else if (file('augustus/libs/SDL2.aar').exists() || file('augustus/libs/SDL2-debug.aar').exists() || file('augustus/libs/SDL2-release.aar').exists()) {
+        usingAAR = 2
+    }
 }
 
 tasks.register('clean', Delete) {

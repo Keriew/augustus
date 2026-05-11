@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "platform/renderer.h"
 
 #include "core/calc.h"
 #include "core/config.h"
@@ -11,6 +11,8 @@
 #include "platform/screen.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
+
+#include "SDL.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -1186,7 +1188,7 @@ static void create_renderer_interface(void)
     graphics_renderer_set_interface(&data.renderer_interface);
 }
 
-int platform_renderer_init(SDL_Window *window)
+int platform_renderer_init(void *window)
 {
     free_all_textures();
 

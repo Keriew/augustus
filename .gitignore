@@ -20,7 +20,7 @@ res/packed_assets/
 out/
 cmake-build-debug
 /data
-ext/SDL2/*/
+ext/SDL*/*/
 *~
 *.swp
 .vscode

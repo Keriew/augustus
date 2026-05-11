@@ -1,10 +1,7 @@
 #include "game/system.h"
 
-#include "platform/platform.h"
-#include "platform/screen.h"
 #include "core/log.h"
-
-#include "SDL.h"
+#include "platform/platform.h"
 
 #if (defined(__GNUC__) && !defined(__MINGW32__) && !defined(__OpenBSD__) && \
    !defined(__vita__) && !defined(__SWITCH__) && !defined(__ANDROID__) && \
@@ -15,7 +12,7 @@
 
 static void display_crash_message(void)
 {
-    platform_screen_show_error_message_box("Augustus has crashed :(",
+    system_show_error_message_box("Augustus has crashed :(",
         "There was an unrecoverable error in Augustus, which will now close.\n\n"
 #ifdef HAS_STACK_TRACE
         "The piece of code that caused the crash has been saved to augustus-log.txt.\n\n"
@@ -83,8 +80,8 @@ static const char *fetch_signal_name(int sig)
 
 static void crash_handler(int sig)
 {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Oops, crashed :(");
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Signal %d: %s", sig, fetch_signal_name(sig));
+    log_error("Oops, crashed :(", 0, 0);
+    log_error("Signal ", fetch_signal_name(sig), sig);
     backtrace_print();
     display_crash_message();
     exit_with_status(1);

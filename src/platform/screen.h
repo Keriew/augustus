@@ -22,6 +22,4 @@ void platform_screen_recreate_texture(void);
 
 int platform_screen_get_scale(void);
 
-void platform_screen_show_error_message_box(const char *title, const char *message);
-
 #endif // PLATFORM_SCREEN_H

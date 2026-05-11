@@ -1,14 +1,12 @@
-#include "platform.h"
+#include "platform/platform.h"
 
 #include "game/system.h"
 #include "platform/emscripten/emscripten.h"
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-
-static SDL_version version;
 
 const char *system_architecture(void)
 {
@@ -91,11 +89,6 @@ const char *system_OS(void)
         snprintf(full_version, 300, "Windows (unknown version)");
     }
     return full_version;
-#elif defined(__APPLE__) || defined(__MACH__)
-    #include <TargetConditionals.h>
-    #if TARGET_OS_MAC
-        return "Mac OS X";
-    #endif
 #elif defined(__GNUC__) && !defined(__SWITCH__)
     struct utsname uts;
     if (uname(&uts) == 0) {
@@ -103,56 +96,44 @@ const char *system_OS(void)
         snprintf(full_version, 300, "%s %s", uts.sysname, uts.release);
         return full_version;
     }
-#ifdef __linux__
-    return "Linux";
-#endif
-    return "Unix";
-#elif defined(__HAIKU__)
-    return "Haiku";
-#elif defined(__FreeBSD__)
-    return "FreeBSD";
-#elif defined(__NetBSD__)
-    return "NetBSD";
-#elif defined(__OpenBSD__)
-    return "OpenBSD";
-#elif defined(__vita__)
-    return "PlayStation Vita";
+    return SDL_GetPlatform();
 #elif defined(__SWITCH__)
     return "Nintendo Switch";
-#elif defined(__ANDROID__)
-    return "Android";
-#elif defined(__EMSCRIPTEN__)
-    return "Emscripten";
 #else
-    return "(unknown operating system)";
+    return SDL_GetPlatform();
 #endif
 }
 
 int platform_sdl_version_at_least(int major, int minor, int patch)
 {
-    if (version.major == 0) {
-        SDL_GetVersion(&version);
-    }
-    return SDL_VERSIONNUM(version.major, version.minor, version.patch) >= SDL_VERSIONNUM(major, minor, patch);
+    return SDL_VERSIONNUM(major, minor, patch) >= SDL_GetVersion();
 }
 
-char *platform_get_logging_path(void)
+const char *platform_get_logging_path(void)
 {
 #if defined(__ANDROID__)
-    return NULL;
+    return 0;
 #else
     return platform_get_pref_path();
 #endif
 }
 
-char *platform_get_pref_path(void)
+const char *platform_get_pref_path(void)
 {
-#if SDL_VERSION_ATLEAST(2, 0, 1)
-    if (platform_sdl_version_at_least(2, 0, 1)) {
-        return SDL_GetPrefPath("augustus", "augustus");
+    static const char *pref_path;
+    if (!pref_path) {
+        pref_path = SDL_GetPrefPath("augustus", "augustus");
     }
-#endif
-    return 0;
+    return pref_path;
+}
+
+const char *platform_get_base_path(void)
+{
+    static const char *base_path;
+    if (!base_path ) {
+        base_path = SDL_GetBasePath();
+    }
+    return base_path;
 }
 
 void exit_with_status(int status)

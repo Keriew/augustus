@@ -30,7 +30,6 @@
 #include "input/input.h"
 #include "input/scroll.h"
 #include "input/cursor.h"
-#include "platform/cursor.h"
 #include "scenario/empire.h"
 #include "scenario/invasion.h"
 #include "window/advisors.h"

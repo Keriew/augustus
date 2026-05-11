@@ -9,6 +9,8 @@
 #include "input/touch.h"
 #include "platform/switch/switch.h"
 
+#include "SDL.h"
+
 #include <switch.h>
 
 #define MAX_VKBD_TEXT_SIZE 600

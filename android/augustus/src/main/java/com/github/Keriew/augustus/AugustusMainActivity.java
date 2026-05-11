@@ -17,11 +17,20 @@ public class AugustusMainActivity extends SDLActivity {
 
     @Override
     protected String[] getLibraries() {
-        return new String[]{
+        String[] parentLibs = super.getLibraries();
+        if (parentLibs.length > 0 && parentLibs[0].equals("SDL3")) {
+             return new String[]{
+                "SDL3",
+                "SDL3_mixer",
+                "augustus"
+            };
+        } else {
+            return new String[]{
                 "SDL2",
                 "SDL2_mixer",
                 "augustus"
-        };
+            };
+        }
     }
 
     @SuppressWarnings("unused")

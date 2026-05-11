@@ -3,8 +3,6 @@
 
 #ifdef __SWITCH__
 
-#include "SDL.h"
-
 #define SWITCH_DISPLAY_WIDTH 960
 #define SWITCH_DISPLAY_HEIGHT 540
 #define SWITCH_PIXEL_WIDTH 1920
