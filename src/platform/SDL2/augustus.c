@@ -42,7 +42,7 @@
 #include <windows.h>
 #endif
 
-#if defined(USE_TINYFILEDIALOGS) || defined(__ANDROID__) || defined(__IPHONEOS__)
+#if defined(USE_TINYFILEDIALOGS) || defined(__ANDROID__) || defined(__IOS__)
 #define SHOW_FOLDER_SELECT_DIALOG
 #endif
 
@@ -73,7 +73,7 @@ static void write_to_output(FILE *output, const char *message)
     fflush(output);
 }
 
-#ifdef __IPHONEOS__
+#ifdef __IOS__
 static augustus_args args;
 static void setup(const augustus_args *args);
 #endif
@@ -452,7 +452,7 @@ static void teardown(void)
     SDL_Quit();
     teardown_logging();
 
-#ifdef __IPHONEOS__
+#ifdef __IOS__
     // iOS apps are not allowed to self-terminate. To avoid being stuck on a blank screen here, we start the game again.
     setup(&args);
 #endif
@@ -553,7 +553,7 @@ static const char *ask_for_data_dir(int again)
         SDL_WaitEventTimeout(NULL, 2000);
     }
     return android_get_c3_path();
-#elif defined __IPHONEOS__
+#elif defined __IOS__
     if (again) {
         const SDL_MessageBoxButtonData buttons[] = {
            {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "OK"},
@@ -602,7 +602,7 @@ static int pre_init(const char *custom_data_dir)
 
 #if SDL_VERSION_ATLEAST(2, 0, 1)
     if (platform_sdl_version_at_least(2, 0, 1)) {
-#ifdef __IPHONEOS__
+#ifdef __IOS__
         char *base_path = ios_get_base_path();
 #else
         char *base_path = SDL_GetBasePath();
@@ -611,13 +611,13 @@ static int pre_init(const char *custom_data_dir)
             if (platform_file_manager_set_base_path(base_path)) {
                 SDL_Log("Loading game from base path %s", base_path);
                 if (game_pre_init()) {
-#ifndef __IPHONEOS__
+#ifndef __IOS__
                     SDL_free(base_path);
 #endif
                     return 1;
                 }
             }
-#ifndef __IPHONEOS__
+#ifndef __IOS__
             SDL_free(base_path);
 #endif
         }

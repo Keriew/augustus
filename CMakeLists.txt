@@ -1113,6 +1113,7 @@ else()
     endif()
 
     if(${TARGET_PLATFORM} STREQUAL "ios")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__IOS__")
         set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -DUSE_SDL_MAIN")
         # Add SDL and SDL_Mixer headers, or they won't be found
         target_include_directories(${SHORT_NAME} PRIVATE "${SDL_EXT_DIR}/include")
