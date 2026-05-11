@@ -13,6 +13,17 @@
 static int has_directory;
 static char path[FILE_NAME_MAX];
 
+// We place this function here so only android.c is needed both for SDL2 and SDL3
+JNIEnv *jni_get_env(void)
+{
+    return SDL_AndroidGetJNIEnv();
+}
+
+jobject jni_get_activity(void)
+{
+    return SDL_AndroidGetActivity();
+}
+
 static const char *get_c3_path(void)
 {
     jni_function_handler handler;

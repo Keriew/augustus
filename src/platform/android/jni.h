@@ -15,6 +15,8 @@ typedef struct {
 #define CLASS_AUGUSTUS_ACTIVITY "com/github/Keriew/augustus/AugustusMainActivity"
 #define CLASS_FILE_MANAGER "com/github/Keriew/augustus/FileManager"
 
+JNIEnv *jni_get_env(void);
+jobject jni_get_activity(void);
 int jni_init_function_handler(const char *class_name, jni_function_handler *handler);
 int jni_get_static_method_handler(
     const char *class_name, const char *method_name, const char *method_signature, jni_function_handler *handler);
