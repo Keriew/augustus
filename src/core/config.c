@@ -128,6 +128,7 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_granary_do_not_allow_walkers",
     [CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_warehouse_do_not_allow_walkers",
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS] = "gameplay_change_houses_do_not_spawn_plebeians",
+    [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
 };
 
 static const char *ini_string_keys[] = {

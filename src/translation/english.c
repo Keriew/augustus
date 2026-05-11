@@ -2084,6 +2084,8 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_PANTHEON, "Pantheon divine powers"},
     {TR_FIGURE_TYPE_PLEBIAN, "Plebeian"},
     {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, "Houses do not spawn aimless wandering plebeians"},
+    {TR_FIGURE_TYPE_DOG, "Dog"},
+    {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, "Houses do not spawn wandering dogs"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
