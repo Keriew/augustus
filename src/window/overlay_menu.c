@@ -200,39 +200,49 @@ static overlay_menu_entry find_overlay(const overlay_menu_entry *entries, const 
 
 static int find_overlay_path(const overlay_menu_entry *entries, int target, int *out_main, int *out_sub, int *out_sub2)
 {
-    for (int i = 0; entries[i].overlay != NO_ITEM; i++) {
-        const overlay_menu_entry *e = &entries[i];
-
+    const overlay_menu_entry *menus[3];
+    int indices[3];
+    int depth = 0;
+    menus[0] = entries;
+    indices[0] = 0;
+    while (depth >= 0) {
+        const overlay_menu_entry *current_menu = menus[depth];
+        const overlay_menu_entry *e = &current_menu[indices[depth]];
+        // reached end of current menu
+        if (e->overlay == NO_ITEM) {
+            depth--;
+            // continue parent menu
+            if (depth >= 0) {
+                indices[depth]++;
+            }
+            continue;
+        }
+        // found target
         if (e->overlay == target) {
-            *out_main = target;
+            *out_main = 0;
             *out_sub = 0;
             *out_sub2 = 0;
+            if (depth == 0) {
+                *out_main = e->overlay;
+            } else if (depth == 1) {
+                *out_main = menus[0][indices[0]].overlay;
+                *out_sub = e->overlay;
+            } else if (depth == 2) {
+                *out_main = menus[0][indices[0]].overlay;
+                *out_sub = menus[1][indices[1]].overlay;
+                *out_sub2 = e->overlay;
+            }
             return 1;
         }
-
-        if (e->submenu) {
-            for (int j = 0; e->submenu[j].overlay != NO_ITEM; j++) {
-                const overlay_menu_entry *s = &e->submenu[j];
-
-                if (s->overlay == target) {
-                    *out_main = e->overlay;
-                    *out_sub = s->overlay;
-                    *out_sub2 = 0;
-                    return 1;
-                }
-
-                if (s->submenu) {
-                    for (int k = 0; s->submenu[k].overlay != NO_ITEM; k++) {
-                        if (s->submenu[k].overlay == target) {
-                            *out_main = e->overlay;
-                            *out_sub = s->overlay;
-                            *out_sub2 = target;
-                            return 1;
-                        }
-                    }
-                }
-            }
+        // descend into submenu
+        if (e->submenu != NULL && depth < 2) {
+            depth++;
+            menus[depth] = e->submenu;
+            indices[depth] = 0;
+            continue;
         }
+        // next item on same level
+        indices[depth]++;
     }
     return 0;
 }
