@@ -38,13 +38,12 @@ tasks.register('findSDL2Mixer') {
 }
 
 android {
-    compileSdk 36
-    ndkVersion "28.1.13356709"
+    compileSdk = 37
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        compileSdk 35
-        minSdkVersion 21
-        targetSdkVersion 36
+        compileSdk = 37
+        minSdkVersion 23
 
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -58,7 +57,7 @@ android {
         }
     }
     buildFeatures {
-        prefabPublishing true
+        prefabPublishing = true
     }
     buildTypes {
         debug {
@@ -66,7 +65,7 @@ android {
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     externalNativeBuild {
@@ -94,7 +93,13 @@ android {
             }
         }
     }
-    namespace 'com.github.Keriew.augustus.sdl2'
+    namespace = 'com.github.Keriew.augustus.sdl2'
+    lint {
+        targetSdk 37
+    }
+    testOptions {
+        targetSdk 37
+    }
 }
 
 repositories {

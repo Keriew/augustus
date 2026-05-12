@@ -406,6 +406,23 @@ static bool handle_event_immediate(void *unused, SDL_Event *event)
         case SDL_EVENT_WILL_ENTER_BACKGROUND:
             platform_renderer_pause();
             return 0;
+        case SDL_EVENT_DID_ENTER_FOREGROUND:
+            platform_renderer_resume();
+            // fallthrough
+        case SDL_EVENT_RENDER_TARGETS_RESET:
+            platform_renderer_invalidate_target_textures();
+            window_invalidate();
+            return 0;
+        case SDL_EVENT_RENDER_DEVICE_RESET:
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING,
+                "Render device lost",
+                "The rendering context was lost.The game will likely blackscreen.\n\n"
+                "Please restart the game to fix the issue.",
+                NULL);
+            return 0;
+        case SDL_EVENT_TERMINATING:
+            data.quit = 1;
+            return 0;
         default:
             return 1;
     }
@@ -414,20 +431,6 @@ static bool handle_event_immediate(void *unused, SDL_Event *event)
 static void handle_event(SDL_Event *event)
 {
     switch (event->type) {
-        case SDL_EVENT_DID_ENTER_FOREGROUND:
-            platform_renderer_resume();
-            // fallthrough
-        case SDL_EVENT_RENDER_TARGETS_RESET:
-            platform_renderer_invalidate_target_textures();
-            window_invalidate();
-            break;
-        case SDL_EVENT_RENDER_DEVICE_RESET:
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING,
-                "Render device lost",
-                "The rendering context was lost.The game will likely blackscreen.\n\n"
-                "Please restart the game to fix the issue.",
-                NULL);
-            break;
         case SDL_EVENT_KEY_DOWN:
             platform_handle_key_down(&event->key);
             break;
