@@ -231,7 +231,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     int handled = image_buttons_handle_mouse(m_dialog, 0, 0, image_buttons_bottom, 1, &focus_image_button_id) |
-        generic_buttons_handle_mouse(m_dialog, 0, 0, buttons_gods_size, 7, &focus_button_id);
+        generic_buttons_handle_mouse(m_dialog, 0, 0, buttons_gods_size, 6, &focus_button_id);
 
     if (focus_image_button_id) {
         focus_button_id = 0;
