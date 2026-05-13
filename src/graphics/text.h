@@ -52,6 +52,9 @@ void text_draw_number_centered_colored(
 int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_width,
     int centered, font_t font, color_t color);
 
+int text_draw_vertically_centered(const uint8_t *str,
+    int x_offset, int y_offset, int box_width, font_t font, color_t color);
+
 /**
  * @return Number of lines required to draw the text
  */
