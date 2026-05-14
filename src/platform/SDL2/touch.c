@@ -5,6 +5,8 @@
 #include "graphics/screen.h"
 #include "input/touch.h"
 
+#include "SDL.h"
+
 static SDL_FingerID touch_id[MAX_ACTIVE_TOUCHES];
 
 #ifdef __APPLE__
@@ -29,14 +31,15 @@ static int get_touch_index(SDL_FingerID id)
     return MAX_ACTIVE_TOUCHES;
 }
 
-void platform_touch_start(SDL_TouchFingerEvent *event)
+void platform_touch_start(void *event)
 {
+    SDL_TouchFingerEvent *e = (SDL_TouchFingerEvent *)event;
 #ifdef __APPLE__
     // Attempt to disable trackpad touches on MacOS
     if (!trackpad_id) {
         trackpad_id = SDL_GetTouchDevice(0);
     }
-    if (event->touchId == trackpad_id) {
+    if (e->touchId == trackpad_id) {
         return;
     }
 #elif defined(__vita__)
@@ -48,24 +51,26 @@ void platform_touch_start(SDL_TouchFingerEvent *event)
 #endif
 
     // Only use main screen for vita
-    if (event->touchId != FRONT_PANEL_TOUCH_ID) {
+    if (e->touchId != FRONT_PANEL_TOUCH_ID) {
         return;
     }
 
 #undef FRONT_PANEL_TOUCH_ID
 #endif
-    int index = touch_create(get_touch_coordinates(event->x, event->y), event->timestamp);
+    int index = touch_create(get_touch_coordinates(e->x, e->y), e->timestamp);
     if (index != MAX_ACTIVE_TOUCHES) {
-        touch_id[index] = event->fingerId;
+        touch_id[index] = e->fingerId;
     }
 }
 
-void platform_touch_move(SDL_TouchFingerEvent *event)
+void platform_touch_move(void *event)
 {
-    touch_move(get_touch_index(event->fingerId), get_touch_coordinates(event->x, event->y), event->timestamp);
+    SDL_TouchFingerEvent *e = (SDL_TouchFingerEvent *)event;
+    touch_move(get_touch_index(e->fingerId), get_touch_coordinates(e->x, e->y), e->timestamp);
 }
 
-void platform_touch_end(SDL_TouchFingerEvent *event)
+void platform_touch_end(void *event)
 {
-    touch_end(get_touch_index(event->fingerId), event->timestamp);
+    SDL_TouchFingerEvent *e = (SDL_TouchFingerEvent *)event;
+    touch_end(get_touch_index(e->fingerId), e->timestamp);
 }

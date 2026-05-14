@@ -2,495 +2,553 @@
 
 static const figure_properties properties[FIGURE_TYPE_MAX] = {
     [FIGURE_NONE] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
-    .max_damage = 0, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE,
     },
     [FIGURE_IMMIGRANT] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_IMMIGRANT,
+        .max_damage = 20,
     },
     [FIGURE_EMIGRANT] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_EMIGRANT,
+        .max_damage = 20,
     },
     [FIGURE_HOMELESS] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_HOMELESS,
+        .max_damage = 20,
     },
     [FIGURE_CART_PUSHER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_CARTPUSHER,
+        .max_damage = 20,
     },
     [FIGURE_LABOR_SEEKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 10,
     },
     [FIGURE_EXPLOSION] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
-    .max_damage = 0, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
     },
     [FIGURE_TAX_COLLECTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_TAX_COLLECTOR,
+        .max_damage = 20,
     },
     [FIGURE_ENGINEER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_ENGINEER,
+        .max_damage = 20,
     },
     [FIGURE_WAREHOUSEMAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_CARTPUSHER,
+        .max_damage = 20,
     },
     [FIGURE_PREFECT] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 50, .attack_value = 5, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PREFECT,
+        .max_damage = 50,
+        .attack_value = 5,
     },
     [FIGURE_FORT_JAVELIN] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 80, .attack_value = 4, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 4, .missile_delay = 100
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_TROOP,
+        .max_damage = 80,
+        .attack_value = 4,
+        .missile_attack_value = 4,
+        .missile_delay = 100,
     },
     [FIGURE_FORT_MOUNTED] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 120, .attack_value = 8, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_TROOP,
+        .max_damage = 120,
+        .attack_value = 8,
     },
     [FIGURE_FORT_LEGIONARY] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 150, .attack_value = 10, .defense_value = 2,
-    .missile_defense_value = 0, .missile_attack_value = 2, .missile_delay = 150
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_TROOP,
+        .max_damage = 150,
+        .attack_value = 10,
+        .defense_value = 2,
+        .missile_attack_value = 2,
+        .missile_delay = 150,
     },
     [FIGURE_FORT_STANDARD] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
-    .max_damage = 0, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE,
     },
     [FIGURE_ACTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .sound_type = FIGURE_SOUND_ACTOR,
+        .max_damage = 20,
     },
     [FIGURE_GLADIATOR] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
-    .max_damage = 100, .attack_value = 9, .defense_value = 2,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .sound_type = FIGURE_SOUND_GLADIATOR,
+        .max_damage = 100,
+        .attack_value = 9,
+        .defense_value = 2,
     },
     [FIGURE_LION_TAMER] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
-    .max_damage = 100, .attack_value = 15, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .sound_type = FIGURE_SOUND_LION_TAMER,
+        .max_damage = 100,
+        .attack_value = 15,
     },
     [FIGURE_CHARIOTEER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .sound_type = FIGURE_SOUND_CHARIOTEER,
+        .max_damage = 20,
     },
     [FIGURE_TRADE_CARAVAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_DONKEY,
+        .max_damage = 10,
     },
     [FIGURE_TRADE_SHIP] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 0, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_BOATS,
     },
     [FIGURE_TRADE_CARAVAN_DONKEY] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_DONKEY,
+        .max_damage = 10,
     },
     [FIGURE_PROTESTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 12, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_RIOTER,
+        .max_damage = 12,
     },
     [FIGURE_CRIMINAL] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 12, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_RIOTER,
+        .max_damage = 12,
     },
     [FIGURE_RIOTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 12, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_RIOTER,
+        .max_damage = 12,
     },
     [FIGURE_FISHING_BOAT] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 0, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_INDUSTRY,
     },
     [FIGURE_MARKET_TRADER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_MARKET_LADY,
+        .max_damage = 20,
     },
     [FIGURE_PRIEST] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PRIEST,
+        .max_damage = 20,
     },
     [FIGURE_SCHOOL_CHILD] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
+        .sound_type = FIGURE_SOUND_PUPILS,
+        .max_damage = 10,
     },
     [FIGURE_TEACHER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
+        .sound_type = FIGURE_SOUND_TEACHER,
+        .max_damage = 20,
     },
     [FIGURE_LIBRARIAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
+        .sound_type = FIGURE_SOUND_TEACHER,
+        .max_damage = 20,
     },
     [FIGURE_BARBER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
+        .sound_type = FIGURE_SOUND_BARBER,
+        .max_damage = 20,
     },
     [FIGURE_BATHHOUSE_WORKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
+        .sound_type = FIGURE_SOUND_BATHOUSE_LADY,
+        .max_damage = 20,
     },
     [FIGURE_DOCTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
+        .sound_type = FIGURE_SOUND_DOCTOR,
+        .max_damage = 20,
     },
     [FIGURE_SURGEON] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_HEALTH,
+        .sound_type = FIGURE_SOUND_DOCTOR,
+        .max_damage = 20,
     },
     [FIGURE_WORKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_MAP_FLAG] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
-    .max_damage = 0, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE,
     },
     [FIGURE_FLOTSAM] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
-    .max_damage = 0, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
     },
     [FIGURE_DOCKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_CARTPUSHER,
+        .max_damage = 20,
     },
     [FIGURE_MARKET_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_MARKET_LADY,
+        .max_damage = 20,
     },
     [FIGURE_PATRICIAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PATRICIAN,
+        .max_damage = 10,
     },
     [FIGURE_INDIGENOUS_NATIVE] = {
-    .category = FIGURE_CATEGORY_NATIVE | FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 40, .attack_value = 6, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_NATIVE | FIGURE_CATEGORY_HOSTILE,
+        .max_damage = 40,
+        .attack_value = 6,
     },
     [FIGURE_TOWER_SENTRY] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 50, .attack_value = 6, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 6, .missile_delay = 50
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_TROOP,
+        .max_damage = 50,
+        .attack_value = 6,
+        .missile_attack_value = 6,
+        .missile_delay = 50,
     },
     [FIGURE_ENEMY43_SPEAR] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 70, .attack_value = 5, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 4, .missile_delay = 70
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 70,
+        .attack_value = 5,
+        .missile_attack_value = 4,
+        .missile_delay = 70,
     },
     [FIGURE_ENEMY44_SWORD] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 90, .attack_value = 7, .defense_value = 1,
-    .missile_defense_value = 1, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 90,
+        .attack_value = 7,
+        .defense_value = 1,
+        .missile_defense_value = 1,
     },
     [FIGURE_ENEMY45_SWORD] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 120, .attack_value = 12, .defense_value = 2,
-    .missile_defense_value = 2, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 120,
+        .attack_value = 12,
+        .defense_value = 2,
+        .missile_defense_value = 2,
     },
     [FIGURE_ENEMY46_CAMEL] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 120, .attack_value = 7, .defense_value = 1,
-    .missile_defense_value = 0, .missile_attack_value = 5, .missile_delay = 70
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 120,
+        .attack_value = 7,
+        .defense_value = 1,
+        .missile_attack_value = 5,
+        .missile_delay = 70,
     },
     [FIGURE_ENEMY47_ELEPHANT] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 200, .attack_value = 20, .defense_value = 5,
-    .missile_defense_value = 8, .missile_attack_value = 6, .missile_delay = 70
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 200,
+        .attack_value = 20,
+        .defense_value = 5,
+        .missile_defense_value = 8,
+        .missile_attack_value = 6,
+        .missile_delay = 70,
     },
     [FIGURE_ENEMY48_CHARIOT] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 120, .attack_value = 15, .defense_value = 4,
-    .missile_defense_value = 4, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 120,
+        .attack_value = 15,
+        .defense_value = 4,
+        .missile_defense_value = 4,
     },
     [FIGURE_ENEMY49_FAST_SWORD] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 90, .attack_value = 7, .defense_value = 1,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 90,
+        .attack_value = 7,
+        .defense_value = 1,
     },
     [FIGURE_ENEMY50_SWORD] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 110, .attack_value = 10, .defense_value = 2,
-    .missile_defense_value = 2, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 110,
+        .attack_value = 10,
+        .defense_value = 2,
+        .missile_defense_value = 2,
     },
     [FIGURE_ENEMY51_SPEAR] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 70, .attack_value = 5, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 3, .missile_delay = 100
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 70,
+        .attack_value = 5,
+        .missile_attack_value = 3,
+        .missile_delay = 100,
     },
     [FIGURE_ENEMY52_MOUNTED_ARCHER] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 100, .attack_value = 6, .defense_value = 1,
-    .missile_defense_value = 0, .missile_attack_value = 4, .missile_delay = 70
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 100,
+        .attack_value = 6,
+        .defense_value = 1,
+        .missile_attack_value = 4,
+        .missile_delay = 70,
     },
     [FIGURE_ENEMY53_AXE] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 120, .attack_value = 15, .defense_value = 2,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 120,
+        .attack_value = 15,
+        .defense_value = 2,
     },
     [FIGURE_ENEMY54_GLADIATOR] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 100, .attack_value = 9, .defense_value = 2,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 100,
+        .attack_value = 9,
+        .defense_value = 2,
     },
     [FIGURE_ENEMY_CAESAR_JAVELIN] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 90, .attack_value = 4, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 4, .missile_delay = 100
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 90,
+        .attack_value = 4,
+        .missile_attack_value = 4,
+        .missile_delay = 100,
     },
     [FIGURE_ENEMY_CAESAR_MOUNTED] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 100, .attack_value = 8, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 100,
+        .attack_value = 8,
     },
     [FIGURE_ENEMY_CAESAR_LEGIONARY] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 150, .attack_value = 13, .defense_value = 2,
-    .missile_defense_value = 2, .missile_attack_value = 2, .missile_delay = 150
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 150,
+        .attack_value = 13,
+        .defense_value = 2,
+        .missile_defense_value = 2,
+        .missile_attack_value = 2,
+        .missile_delay = 150,
     },
     [FIGURE_NATIVE_TRADER] = {
-    .category = FIGURE_CATEGORY_NATIVE | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 40, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_NATIVE | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .max_damage = 40,
     },
     [FIGURE_ARROW] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 12, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
+        .max_damage = 100,
+        .missile_attack_value = 12,
     },
     [FIGURE_JAVELIN] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 20, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
+        .max_damage = 100,
+        .missile_attack_value = 20,
     },
     [FIGURE_BOLT] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 200, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
+        .max_damage = 100,
+        .missile_attack_value = 200,
     },
     [FIGURE_BALLISTA] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 200
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
+        .max_damage = 100,
+        .missile_delay = 200,
     },
     [FIGURE_CREATURE] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE,
+        .max_damage = 100,
     },
     [FIGURE_MISSIONARY] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_EDUCATION,
+        .sound_type = FIGURE_SOUND_MISSIONARY,
+        .max_damage = 20,
     },
     [FIGURE_FISH_GULLS] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
+        .max_damage = 100,
     },
     [FIGURE_DELIVERY_BOY] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_GRANARY_BOY,
+        .max_damage = 10,
     },
     [FIGURE_SHIPWRECK] = {
-    .category = FIGURE_CATEGORY_INACTIVE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE,
+        .max_damage = 100,
     },
     [FIGURE_SHEEP] = {
-    .category = FIGURE_CATEGORY_ANIMAL,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ANIMAL,
+        .max_damage = 10,
     },
     [FIGURE_WOLF] = {
-    .category = FIGURE_CATEGORY_AGGRESSIVE_ANIMAL | FIGURE_CATEGORY_ANIMAL,
-    .max_damage = 80, .attack_value = 8, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_AGGRESSIVE_ANIMAL | FIGURE_CATEGORY_ANIMAL,
+        .max_damage = 80,
+        .attack_value = 8,
     },
     [FIGURE_ZEBRA] = {
-    .category = FIGURE_CATEGORY_ANIMAL,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ANIMAL,
+        .max_damage = 20,
     },
     [FIGURE_SPEAR] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 10, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
+        .max_damage = 100,
+        .missile_attack_value = 10,
     },
     [FIGURE_HIPPODROME_HORSES] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_EFFECT,
+        .max_damage = 100,
     },
     [FIGURE_WORK_CAMP_WORKER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_WORK_CAMP_SLAVE] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_WORK_CAMP_ARCHITECT] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_ENGINEER,
+        .max_damage = 20,
     },
     [FIGURE_MESS_HALL_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 70, .attack_value = 8, .defense_value = 1,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_TROOP,
+        .max_damage = 70,
+        .attack_value = 8,
+        .defense_value = 1,
     },
     [FIGURE_MESS_HALL_COLLECTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_PRIEST_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PRIEST,
+        .max_damage = 20,
     },
     [FIGURE_BARKEEP] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .sound_type = FIGURE_SOUND_BATHOUSE_LADY,
+        .max_damage = 100,
     },
     [FIGURE_BARKEEP_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .sound_type = FIGURE_SOUND_BATHOUSE_LADY,
+        .max_damage = 20,
     },
     [FIGURE_TOURIST] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .max_damage = 20,
     },
     [FIGURE_WATCHMAN] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 50, .attack_value = 6, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 6, .missile_delay = 50
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_TROOP,
+        .max_damage = 50,
+        .attack_value = 6,
+        .missile_attack_value = 6,
+        .missile_delay = 50,
     },
     [FIGURE_WATCHTOWER_ARCHER] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 40
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .max_damage = 10,
+        .missile_delay = 40,
     },
     [FIGURE_FRIENDLY_ARROW] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 10, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
+        .max_damage = 100,
+        .missile_attack_value = 10,
     },
     [FIGURE_CARAVANSERAI_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_CRIMINAL_ROBBER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 12, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_RIOTER,
+        .max_damage = 12,
     },
     [FIGURE_CRIMINAL_LOOTER] = {
-    .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 12, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CRIMINAL | FIGURE_CATEGORY_HOSTILE,
+        .sound_type = FIGURE_SOUND_RIOTER,
+        .max_damage = 12,
     },
     [FIGURE_CARAVANSERAI_COLLECTOR] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_LIGHTHOUSE_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_MESS_HALL_FORT_SUPPLIER] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 20,
     },
     [FIGURE_DEPOT_CART_PUSHER] = {
-    .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
-    .max_damage = 20, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .sound_type = FIGURE_SOUND_OX_CART_PUSHER,
+        .max_damage = 20,
     },
     [FIGURE_FORT_INFANTRY] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 110, .attack_value = 8, .defense_value = 1,
-    .missile_defense_value = 2, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .max_damage = 110,
+        .attack_value = 8,
+        .defense_value = 1,
+        .missile_defense_value = 2,
     },
     [FIGURE_BEGGAR] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_UNEMPLOYED,
+        .max_damage = 10,
     },
     [FIGURE_FORT_ARCHER] = {
-    .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 90, .attack_value = 6, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 4, .missile_delay = 50
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_ENEMY,
+        .max_damage = 90,
+        .attack_value = 6,
+        .missile_attack_value = 4,
+        .missile_delay = 50,
     },
     [FIGURE_ENEMY_CATAPULT] = {
-    .category = FIGURE_CATEGORY_HOSTILE,
-    .max_damage = 200, .attack_value = 1, .defense_value = 0,
-    .missile_defense_value = 20, .missile_attack_value = 100, .missile_delay = 200
+        .category = FIGURE_CATEGORY_HOSTILE,
+        .max_damage = 200,
+        .attack_value = 1,
+        .missile_defense_value = 20,
+        .missile_attack_value = 100,
+        .missile_delay = 200,
     },
     [FIGURE_CATAPULT_MISSILE] = {
-    .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
-    .max_damage = 100, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 200, .missile_delay = 0
+        .category = FIGURE_CATEGORY_INACTIVE | FIGURE_CATEGORY_PROJECTILE,
+        .max_damage = 100,
+        .missile_attack_value = 200,
     },
     [FIGURE_PLEBIAN] = {
-    .category = FIGURE_CATEGORY_CITIZEN,
-    .max_damage = 10, .attack_value = 0, .defense_value = 0,
-    .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_PLEBIAN,
+        .max_damage = 10,
     },
+    [FIGURE_DOG] = {
+        .category = FIGURE_CATEGORY_CITIZEN,
+        .sound_type = FIGURE_SOUND_DOG,
+        .max_damage = 10,
+    }
 };
 
 const figure_properties *figure_properties_for_type(figure_type type)

@@ -1,2 +1,13 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
 include ':augustus'
-include ':SDL2'
+
+apply from: file('gradle/find-aar.gradle')
+
+if (ext.findAAR('../augustus/libs', 'SDL3') && ext.findAAR('../augustus/libs', 'SDL3_mixer')) {
+    println 'Found SDL3 AARs in augustus/libs - skipping SDL2 module include'
+} else {
+    println 'Did not find SDL3 AAR, using SDL2 instead'
+    include ':SDL2'
+}

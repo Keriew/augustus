@@ -6,10 +6,9 @@
 #include "platform/android/jni.h"
 #include "platform/file_manager.h"
 
-#include "SDL.h"
-
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -132,7 +131,7 @@ int asset_handler_get_directory_contents(const char *dir_name, int type,
 JNIEXPORT void JNICALL Java_com_github_Keriew_augustus_AugustusMainActivity_releaseAssetManager(JNIEnv *env, jobject thiz)
 {
     if (asset_manager) {
-        JNIEnv *env = SDL_AndroidGetJNIEnv();
+        JNIEnv *env = jni_get_env();
         (*env)->DeleteGlobalRef(env, java_asset_manager);
         asset_manager = 0;
     }

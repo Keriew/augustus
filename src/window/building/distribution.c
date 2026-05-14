@@ -939,20 +939,19 @@ static void draw_resource_orders_buttons(int x, int y, const resource_list *list
 
         int y_offset = y + 22 * i;
         image_draw(image_id, x + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
+
+        text_draw(resource_get_data(resource)->text, x + 30, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
+
         if (!scrollbar_shown) {
             image_draw(image_id, x + 390 + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
-            text_draw(resource_get_data(resource)->text, x + 30, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
             button_border_draw(x + 148, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
             button_border_draw(x + 358, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
-
             draw_button_from_state(storage->resource_state[resource], x + 148, y_offset + 5, type, resource);
         }
         if (scrollbar_shown) {
             image_draw(image_id, x + 360 + base_width, y_offset - 2 + base_height, COLOR_MASK_NONE, SCALE_NONE);
-            text_draw(resource_get_data(resource)->text, x + 30, y_offset + 4, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
             button_border_draw(x + 118, y_offset, 210, 22, data.resource_focus_button_id == i + 1);
             button_border_draw(x + 328, y_offset, 28, 22, data.partial_resource_focus_button_id == i + 1);
-
             draw_button_from_state(storage->resource_state[resource], x + 118, y_offset + 5, type, resource);
         }
 
@@ -997,6 +996,99 @@ void window_building_get_tooltip_storage_orders(int *group_id, int *text_id, int
     }
 }
 
+static void get_depot_resource_orders_count(int building_id, resource_type resource, int *source_count, int *destination_count)
+{
+    *source_count = 0;
+    *destination_count = 0;
+    int max_buildings = building_count();
+    for (int i = 1; i < max_buildings; i++) {
+        building *b = building_get(i);
+        if (!b || b->state == BUILDING_STATE_UNUSED || b->type != BUILDING_DEPOT ||
+            b->data.depot.current_order.resource_type != resource) {
+            continue;
+        }
+        if (b->data.depot.current_order.src_storage_id == building_id) {
+            (*source_count)++;
+        }
+        if (b->data.depot.current_order.dst_storage_id == building_id) {
+            (*destination_count)++;
+        }
+    }
+}
+
+const uint8_t *window_building_storage_resource_hover_tooltip(building_info_context *c)
+{
+    int x_offset = c->x_offset + 30;
+    int y_offset = window_building_get_vertical_offset(c, 28) + 46;
+
+    int building_id = data.building_id;
+    building *b = building_get(building_id);
+    if (!b) {
+        return 0;
+    }
+
+    const building_storage *s = building_storage_get(b->storage_id);
+    if (!s) {
+        return 0;
+    }
+
+    const resource_list *list = (b->type == BUILDING_GRANARY)
+        ? city_resource_get_potential_foods()
+        : city_resource_get_potential();
+
+    int width = 100;
+    int height = 16;
+
+    const mouse *m = mouse_get();
+
+    for (unsigned int i = 0; i < scrollbar.elements_in_view; i++) {
+        int list_index = i + scrollbar.scroll_position;
+        if (list_index >= list->size) {
+            break;
+        }
+
+        int y_pos = y_offset + 22 * i;
+
+        if (m->x < x_offset || m->x > x_offset + width ||
+            m->y < y_pos || m->y > y_pos + height) {
+            continue;
+        }
+
+        resource_type resource = list->items[list_index];
+
+        int source_count = 0;
+        int destination_count = 0;
+        get_depot_resource_orders_count(building_id, resource, &source_count, &destination_count);
+
+        if (source_count == 0 && destination_count == 0) {
+            return 0;
+        }
+
+        static uint8_t text[256];
+        uint8_t *cursor = text;
+
+        cursor = string_copy(resource_get_data(resource)->text, cursor, 256 - (int) (cursor - text));
+        cursor = string_copy(string_from_ascii("\n"), cursor, 256 - (int) (cursor - text));
+        cursor = string_copy(translation_for(TR_BUILDING_DEPOTS), cursor, 256 - (int) (cursor - text));
+
+        if (source_count > 0) {
+            cursor = string_copy(string_from_ascii("\n"), cursor, 256 - (int) (cursor - text));
+            cursor = string_copy(translation_for(TR_DESTRIBUTION_SOURCE), cursor, 256 - (int) (cursor - text));
+            cursor += sprintf((char *) cursor, "%d", source_count);
+        }
+
+        if (destination_count > 0) {
+            cursor = string_copy(string_from_ascii("\n"), cursor, 256 - (int) (cursor - text));
+            cursor = string_copy(translation_for(TR_DESTRIBUTION_DESTINATION), cursor, 256 - (int) (cursor - text));
+            cursor += sprintf((char *) cursor, "%d", destination_count);
+        }
+
+        return text;
+    }
+
+    return 0;
+}
+
 const uint8_t *window_building_dock_get_tooltip(building_info_context *c)
 {
     int x_offset = c->x_offset + 16;
@@ -1023,6 +1115,8 @@ const uint8_t *window_building_dock_get_tooltip(building_info_context *c)
         }
         static uint8_t text[400];
         uint8_t *cursor = text;
+        cursor = string_copy(empire_city_get_name(city), cursor, 400 - (int) (cursor - text));
+        cursor = string_copy(string_from_ascii("\n"), cursor, 400 - (int) (cursor - text));
         cursor = string_copy(lang_get_string(47, 5), cursor, 400 - (int) (cursor - text));
         cursor = string_copy(string_from_ascii(": "), cursor, 400 - (int) (cursor - text));
         int traded = 0;

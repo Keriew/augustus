@@ -22,9 +22,4 @@ void log_info(const char *msg, const char *param_str, int param_int);
  */
 void log_error(const char *msg, const char *param_str, int param_int);
 
-/**
- * Logs the repeated messages, saying how many times it was repeated
- */
-void log_repeated_messages(void);
-
 #endif // CORE_DEBUG_H

@@ -7,8 +7,9 @@
 #include "building/data_transfer.h"
 #include "building/destruction.h"
 #include "building/distribution.h"
-#include "building/industry.h"
 #include "building/granary.h"
+#include "building/image.h"
+#include "building/industry.h"
 #include "building/menu.h"
 #include "building/monument.h"
 #include "building/properties.h"
@@ -69,7 +70,7 @@ building *building_get(unsigned int id)
 int building_can_repair_type(building_type type)
 {
     if (building_monument_is_limited(type) || building_is_fort(type)) {
-        return 0; // limited monuments cannot be repaired at the moment, 
+        return 0; // limited monuments cannot be repaired at the moment,
     }   // as they are too complex to easily repair, and arent a common occurrence
     // forts have the complexity of holding formations, so are also currently excluded
     building_type repair_type = building_clone_type_from_building_type(type);
@@ -445,7 +446,7 @@ int building_repair_cost_at(int grid_offset)
     if (!b || !building_can_repair(b)) {
         return 0;
     }
-    int is_ruin = b->type == BUILDING_BURNING_RUIN || // ruins and collapsed warehouse parts all use rubble data 
+    int is_ruin = b->type == BUILDING_BURNING_RUIN || // ruins and collapsed warehouse parts all use rubble data
         b->type == BUILDING_WAREHOUSE_SPACE || b->type == BUILDING_WAREHOUSE;
 
     if (building_properties_for_type(b->type)->shared) {
@@ -483,7 +484,7 @@ static int get_rubble_data(building *b, int *og_size, int *og_grid_offset, int *
     if (!b->data.rubble.og_size && !b->data.rubble.og_grid_offset &&
         !b->data.rubble.og_orientation && !b->data.rubble.og_type) {
         return 0;
-    } 
+    }
 
     if (og_size) {
         *og_size = b->data.rubble.og_size;
@@ -615,7 +616,7 @@ int building_repair_at(int grid_offset)
     }
     int placement_cost = 0;
     og_storage_id = b->storage_id; //store the original storage id before clearing it
-    // Clear terrain and place building 
+    // Clear terrain and place building
     grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
     if (building_construction_nearby_enemy_type(grid_slice) != FIGURE_NONE) {
         city_warning_show(WARNING_ENEMY_NEARBY, NEW_WARNING_SLOT);
@@ -672,6 +673,8 @@ int building_repair_at(int grid_offset)
         new_building->state = BUILDING_STATE_CREATED;
         b->state = BUILDING_STATE_DELETED_BY_GAME; // mark old building as deleted
         figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+        map_building_tiles_add(new_building->id, new_building->x, new_building->y, new_building->size,
+            building_image_get(new_building), TERRAIN_BUILDING);
     } else {
         figure_create_explosion_cloud(x, y, og_size, 1);
     }

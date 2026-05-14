@@ -1,0 +1,8 @@
+import java.util.regex.Pattern
+
+ext.findAAR = { dirPath, baseName ->
+    def dir = file(dirPath)
+    if (!dir.exists()) return null
+    def re = ~/^${Pattern.quote(baseName)}(?:-\d+\.\d+\.\d+)?\.aar$/
+    return dir.listFiles()?.find { f -> f.isFile() && f.name ==~ re }
+}

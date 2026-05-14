@@ -158,7 +158,7 @@ static int storage_add_resource(building *b, int resource, int amount)
     return amount;
 }
 
-static void set_destination(figure *f, int building_id, int action_state)
+static void set_destination(figure *f, unsigned int building_id, int action_state)
 {
     if (!building_id) {
         return;
@@ -192,7 +192,7 @@ static void try_reroute_order_dst(figure *f, building *b)
     if (f->loads_sold_or_carrying <= 0 || f->resource_id == RESOURCE_NONE) {
         return;
     }
-    int new_dst_id = b->data.depot.current_order.dst_storage_id;
+    unsigned int new_dst_id = b->data.depot.current_order.dst_storage_id;
     // If standing at destination and destination didn't change, skip reroute
     if (f->action_state == FIGURE_ACTION_242_DEPOT_CART_PUSHER_AT_DESTINATION &&
         (new_dst_id == f->destination_building_id || new_dst_id == 0)) {
@@ -214,7 +214,7 @@ static void try_reroute_order_src(figure *f, building *depot)
         return;
     }
 
-    int new_src_id = depot->data.depot.current_order.src_storage_id;
+    unsigned int new_src_id = depot->data.depot.current_order.src_storage_id;
     building *new_src = building_get(new_src_id);
 
     // if source has changed, reroute cart

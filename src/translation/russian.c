@@ -1642,12 +1642,12 @@ static translation_string all_strings[] = {
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Туземцы используют данные конструкции для слежки за нашими действиями и выявления уязвимостей. Пока мы не устраним угрозу, охрана на башнях будет мешать нам расширяться на этой территории."},
     {TR_BUILDING_INFO_CARAVANSERAI_MONTHLY_CONSUMPTION, "Ежемесячный расход еды:"},
     {TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, "Торговые караваны и телеги с волами могут двигаться по бездорожью"},
-    {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Запрещает всем, кроме станции повозок, перемещать или забирать ресурс."},
+    {TR_TOOLTIP_BUILDING_DISTRIBUTION_MAINTAINING, "Запрещает всем, кроме станции повозок, перемещать или забирать ресурс"},
     {TR_CONFIG_STORAGE_STEP_4, "Амбары, склады и станции повозок настраиваются с шагом 4"},
     {TR_CONFIG_MOVE_SAVINGS_TO_THE_RIGHT, "Стандартный порядок элементов в верхней панели"},
     {TR_TOOLTIP_DEPOT_MOVED, "Перемещаемый ресурс:"},
     {TR_TOOLTIP_DEPOT_ORDER_TO, "в"},
-    {TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE, "Щелчок правой кнопкой уменьшает значения"},
+    {TR_TOOLTIP_RIGHT_CLICK_TO_DECREASE, "Щелчок левой кнопкой увеличивает значения, а правой уменьшает"},
     {TR_TOOLTIP_POPULATION_GOAL, "Необходимо жителей:"},
     {TR_CONFIG_PATRICIAN_DEVOLUTION_FIX, "При деградации резиденций патрициев не создаются дома 1х1"},
     {TR_CONDITION_TEXT_TIME_LEFT_UNTIL_DEFEAT, "Время до поражения:"},
@@ -2178,6 +2178,11 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_PANTHEON, "Дары Пантеона"},
     {TR_FIGURE_TYPE_PLEBIAN, "Плебей"},
     {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, "Дома не создают бесцельно блуждающих плебеев"},
+    {TR_BUILDING_DEPOTS, "Станции повозок:"},
+    {TR_DESTRIBUTION_SOURCE, "- используют как источник: "},
+    {TR_DESTRIBUTION_DESTINATION, "- используют как назначение: "},
+    {TR_FIGURE_TYPE_DOG, "Собака"},
+    {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, "Дома не создают блуждающих собак"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

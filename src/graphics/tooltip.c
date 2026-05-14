@@ -441,7 +441,7 @@ static void draw_tile_tooltip(tooltip_context *c)
                 break;
             case 3: // terrain flags and other info included
                 width = 160 + (b_id_at ? 60 : 0);
-                height = 61 + (b_id_at ? 14 : 0) + (rubble_id_at ? 14 : 0) + (num_flags * 14);
+                height = 61 + (b_id_at ? 28 : 0) + (rubble_id_at ? 14 : 0) + (num_flags * 14);
                 break;
             case 2:
                 width = 90;
@@ -501,6 +501,11 @@ static void draw_tile_tooltip(tooltip_context *c)
             if (map_building_rubble_building_id(grid_offset)) {
                 text_draw_label_and_number(string_from_ascii("r_grid: "), map_building_rubble_building_id(grid_offset),
                 "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
+                y_offset += 14;
+            }
+            if (b_id_at) {
+                text_draw_label_and_number(string_from_ascii("rotation: "), building_get(b_id_at)->subtype.orientation,
+                    "", 2, y_offset, FONT_SMALL_PLAIN, COLOR_TOOLTIP);
                 y_offset += 14;
             }
             for (int i = 0; i < num_flags; i++) {

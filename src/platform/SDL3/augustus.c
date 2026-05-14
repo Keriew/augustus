@@ -1,4 +1,6 @@
-#include "SDL.h"
+#include <SDL3/SDL.h>
+
+#include <SDL3/SDL_main.h>
 
 #include "core/config.h"
 #include "core/encoding.h"
@@ -13,25 +15,24 @@
 #include "graphics/window.h"
 #include "input/mouse.h"
 #include "input/touch.h"
+#include "platform/file_manager.h"
 #include "platform/android/android.h"
 #include "platform/arguments.h"
 #include "platform/cursor.h"
 #include "platform/emscripten/emscripten.h"
-#include "platform/file_manager.h"
 #include "platform/file_manager_cache.h"
 #include "platform/ios/ios.h"
 #include "platform/joystick.h"
 #include "platform/keyboard_input.h"
+#include "platform/log.h"
 #include "platform/platform.h"
 #include "platform/prefs.h"
 #include "platform/renderer.h"
-#include "platform/screen.h"
-#include "platform/switch/switch.h"
+#include "platform/SDL3/screen.h"
 #include "platform/touch.h"
+#include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
 #include "window/asset_previewer.h"
-
-#include "tinyfiledialogs/tinyfiledialogs.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -40,10 +41,6 @@
 
 #ifdef _MSC_VER
 #include <windows.h>
-#endif
-
-#if defined(USE_TINYFILEDIALOGS) || defined(__ANDROID__) || defined(__IPHONEOS__)
-#define SHOW_FOLDER_SELECT_DIALOG
 #endif
 
 #define INTPTR(d) (*(int*)(d))
@@ -59,98 +56,137 @@ enum {
 static struct {
     int active;
     int quit;
+    Uint32 user_event;
     struct {
         int frame_count;
         int last_fps;
         Uint32 last_update_time;
     } fps;
-    FILE *log_file;
 } data = { 1 };
 
-static void write_to_output(FILE *output, const char *message)
-{
-    fwrite(message, sizeof(char), strlen(message), output);
-    fflush(output);
-}
-
-#ifdef __IPHONEOS__
+#ifdef __IOS__
 static augustus_args args;
 static void setup(const augustus_args *args);
 #endif
 
-static void write_log(void *userdata, int category, SDL_LogPriority priority, const char *message)
-{
-    char log_text[300] = { 0 };
-    snprintf(log_text, 300, "%s %s\n", priority == SDL_LOG_PRIORITY_ERROR ? "ERROR: " : "INFO: ", message);
-    if (data.log_file) {
-        write_to_output(data.log_file, log_text);
-    }
-    // On Windows MSVC, we can at least get output to the debug window
-#if defined(_MSC_VER) && !defined(NDEBUG)
-    OutputDebugStringA(log_text);
-#else
-    write_to_output(stdout, log_text);
-#endif
-}
-
-static void backup_log(const char *filename, const char *filename_old)
-{
-    // On some platforms (vita, android), not removing the file will not empty it when reopening for writing
-    file_remove(filename_old);
-    platform_file_manager_copy_file(filename, filename_old);
-}
-
-static void setup_logging(void)
-{
-    const char *filename = "augustus-log.txt";
-    const char *backup_filename = "augustus-log-backup.txt";
-    char log_file[FILE_NAME_MAX];
-    char log_file_old[FILE_NAME_MAX];
-    char *pref_dir = platform_get_logging_path();
-    snprintf(log_file, FILE_NAME_MAX, "%s%s", pref_dir ? pref_dir : "", filename);
-    snprintf(log_file_old, FILE_NAME_MAX, "%s%s", pref_dir ? pref_dir : "", backup_filename);
-    SDL_free(pref_dir);
-    backup_log(log_file, log_file_old);
-
-    // On some platforms (vita, android), not removing the file will not empty it when reopening for writing
-    file_remove(log_file);
-    data.log_file = file_open(log_file, "wt");
-    SDL_LogSetOutputFunction(write_log, NULL);
-}
-
-static void teardown_logging(void)
-{
-    log_repeated_messages();
-
-    if (data.log_file) {
-        file_close(data.log_file);
-    }
-}
-
 static void post_event(int code)
 {
     SDL_Event event;
-    event.user.type = SDL_USEREVENT;
+    event.user.type = data.user_event;
     event.user.code = code;
     SDL_PushEvent(&event);
 }
 
 int system_supports_select_folder_dialog(void)
 {
-#ifdef USE_TINYFILEDIALOGS
+#if !defined(__VITA__) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
     return 1;
 #else
     return 0;
 #endif
 }
 
+typedef struct {
+    SDL_Mutex *mutex;
+    SDL_Condition *condition;
+    const char *folder_path;
+    int dialog_closed;
+} select_folder_dialog_data;
+
+static void folder_dialog_closed(void *userdata, const char *const *filelist, int filter)
+{
+    select_folder_dialog_data *dialog_data = (select_folder_dialog_data *)userdata;
+    SDL_LockMutex(dialog_data->mutex);
+
+    if (!filelist) {
+        printf("Error creating the file dialog window.\n");
+        dialog_data->dialog_closed = 1;
+
+        SDL_SignalCondition(dialog_data->condition);
+        SDL_UnlockMutex(dialog_data->mutex);
+
+        return;
+    }
+
+    if (!*filelist || !**filelist) {
+        dialog_data->dialog_closed = 1;
+
+        SDL_SignalCondition(dialog_data->condition);
+        SDL_UnlockMutex(dialog_data->mutex);
+
+        return;
+    }
+
+    static char folder_path[FILE_NAME_MAX];
+
+    snprintf(folder_path, FILE_NAME_MAX, "%s", filelist[0]);
+
+    dialog_data->folder_path = folder_path;
+
+    dialog_data->dialog_closed = 1;
+
+    SDL_SignalCondition(dialog_data->condition);
+    SDL_UnlockMutex(dialog_data->mutex);
+}
+
 const char *system_show_select_folder_dialog(const char *title, const char *default_path)
 {
-#ifdef USE_TINYFILEDIALOGS
-    return tinyfd_selectFolderDialog(title, default_path);
-#else
-    return 0;
-#endif
+    if (!system_supports_select_folder_dialog()) {
+        return 0;
+    }
+
+    select_folder_dialog_data dialog_data = { 0 };
+
+    dialog_data.mutex = SDL_CreateMutex();
+    if (!dialog_data.mutex) {
+        printf("Failed to create file dialog mutex. Reason: %s\n", SDL_GetError());
+        return 0;
+    }
+
+    dialog_data.condition = SDL_CreateCondition();
+    if (!dialog_data.condition) {
+        printf("Failed to create file dialog condition. Reason: %s\n", SDL_GetError());
+        SDL_DestroyMutex(dialog_data.mutex);
+        return 0;
+    }
+
+    SDL_LockMutex(dialog_data.mutex);
+    SDL_Window *window = platform_screen_get_window();
+
+    if (title) {
+        SDL_PropertiesID folder_dialog_properties = SDL_CreateProperties();
+        if (folder_dialog_properties) {
+            SDL_SetStringProperty(folder_dialog_properties, SDL_PROP_FILE_DIALOG_TITLE_STRING, title);
+            if (default_path) {
+                SDL_SetStringProperty(folder_dialog_properties, SDL_PROP_FILE_DIALOG_LOCATION_STRING, default_path);
+            }
+            if (window) {
+                SDL_SetPointerProperty(folder_dialog_properties, SDL_PROP_FILE_DIALOG_WINDOW_POINTER, window);
+            }
+            SDL_ShowFileDialogWithProperties(SDL_FILEDIALOG_OPENFOLDER, folder_dialog_closed,
+                &dialog_data, folder_dialog_properties);
+            SDL_DestroyProperties(folder_dialog_properties);
+        } else {
+            SDL_ShowOpenFolderDialog(folder_dialog_closed, &dialog_data, window, default_path, false);
+        }
+    } else {
+        SDL_ShowOpenFolderDialog(folder_dialog_closed, &dialog_data, window, default_path, false);
+    }
+
+    while (!dialog_data.dialog_closed) {
+        SDL_WaitConditionTimeout(dialog_data.condition, dialog_data.mutex, 30);
+        SDL_PumpEvents();
+    }
+
+    SDL_UnlockMutex(dialog_data.mutex);
+
+    SDL_DestroyCondition(dialog_data.condition);
+    SDL_DestroyMutex(dialog_data.mutex);
+
+    dialog_data.mutex = NULL;
+    dialog_data.condition = NULL;
+
+    return dialog_data.folder_path;
 }
 
 void system_exit(void)
@@ -166,7 +202,7 @@ void system_resize(int width, int height)
     s_width = width;
     s_height = height;
     SDL_Event event;
-    event.user.type = SDL_USEREVENT;
+    event.user.type = data.user_event;
     event.user.code = USER_EVENT_RESIZE;
     event.user.data1 = &s_width;
     event.user.data2 = &s_height;
@@ -185,15 +221,7 @@ void system_set_fullscreen(int fullscreen)
 
 uint64_t system_get_ticks(void)
 {
-#if SDL_VERSION_ATLEAST(2, 0, 18)
-    if (platform_sdl_version_at_least(2, 0, 18)) {
-        return SDL_GetTicks64();
-    } else {
-        return SDL_GetTicks();
-    }
-#else
     return SDL_GetTicks();
-#endif
 }
 
 #ifdef _WIN32
@@ -227,11 +255,26 @@ static void run_and_draw(void)
     platform_renderer_render();
 }
 
+static void handle_mouse_position(Uint32 which, Uint32 windowID, float x, float y)
+{
+    if (which != SDL_TOUCH_MOUSEID) {
+        SDL_Window *window = SDL_GetWindowFromID(windowID);
+        if (window && !SDL_GetWindowRelativeMouseMode(window)) {
+            float fx = x;
+            float fy = y;
+            SDL_Renderer *renderer = SDL_GetRenderer(window);
+            if (renderer) {
+                SDL_RenderCoordinatesFromWindow(renderer, x, y, &fx, &fy);
+            }
+            mouse_set_position((int) fx, (int) fy);
+        }
+    }
+}
+
 static void handle_mouse_button(SDL_MouseButtonEvent *event, int is_down)
 {
-    if (!SDL_GetRelativeMouseMode()) {
-        mouse_set_position(event->x, event->y);
-    }
+    handle_mouse_position(event->which, event->windowID, event->x, event->y);
+
     if (event->button == SDL_BUTTON_LEFT) {
         mouse_set_left_down(is_down);
     } else if (event->button == SDL_BUTTON_MIDDLE) {
@@ -255,44 +298,44 @@ static void handle_mouse_button(SDL_MouseButtonEvent *event, int is_down)
 
 static void handle_window_event(SDL_WindowEvent *event, int *window_active)
 {
-    switch (event->event) {
-        case SDL_WINDOWEVENT_ENTER:
+    switch (event->type) {
+            case SDL_EVENT_WINDOW_MOUSE_ENTER:
             mouse_set_inside_window(1);
             break;
-        case SDL_WINDOWEVENT_LEAVE:
+        case SDL_EVENT_WINDOW_MOUSE_LEAVE:
             mouse_set_inside_window(0);
             break;
-        case SDL_WINDOWEVENT_FOCUS_LOST:
+        case SDL_EVENT_WINDOW_FOCUS_LOST:
             mouse_set_window_focus(0);
             break;
-        case SDL_WINDOWEVENT_FOCUS_GAINED:
+        case SDL_EVENT_WINDOW_FOCUS_GAINED:
             mouse_set_window_focus(1);
             break;
-        case SDL_WINDOWEVENT_SIZE_CHANGED:
+        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
             SDL_Log("Window resized to %d x %d", (int) event->data1, (int) event->data2);
             platform_screen_resize(event->data1, event->data2, 1);
             break;
-        case SDL_WINDOWEVENT_RESIZED:
+        case SDL_EVENT_WINDOW_RESIZED:
             SDL_Log("System resize to %d x %d", (int) event->data1, (int) event->data2);
             break;
-        case SDL_WINDOWEVENT_MOVED:
+        case SDL_EVENT_WINDOW_MOVED:
             SDL_Log("Window move to coordinates x: %d y: %d\n", (int) event->data1, (int) event->data2);
             platform_screen_move(event->data1, event->data2);
             break;
 
-        case SDL_WINDOWEVENT_SHOWN:
+        case SDL_EVENT_WINDOW_SHOWN:
             SDL_Log("Window %u shown", (unsigned int) event->windowID);
 #ifdef USE_FILE_CACHE
             platform_file_manager_cache_invalidate();
 #endif
             *window_active = 1;
             break;
-        case SDL_WINDOWEVENT_HIDDEN:
+        case SDL_EVENT_WINDOW_HIDDEN:
             SDL_Log("Window %u hidden", (unsigned int) event->windowID);
             *window_active = 0;
             break;
 
-        case SDL_WINDOWEVENT_EXPOSED:
+        case SDL_EVENT_WINDOW_EXPOSED:
             SDL_Log("Window %u exposed", (unsigned int) event->windowID);
             window_invalidate();
             break;
@@ -303,11 +346,28 @@ static void handle_window_event(SDL_WindowEvent *event, int *window_active)
     }
 }
 
-static int handle_event_immediate(void *param1, SDL_Event *event)
+static bool handle_event_immediate(void *unused, SDL_Event *event)
 {
     switch (event->type) {
-        case SDL_APP_WILLENTERBACKGROUND:
+        case SDL_EVENT_WILL_ENTER_BACKGROUND:
             platform_renderer_pause();
+            return 0;
+        case SDL_EVENT_DID_ENTER_FOREGROUND:
+            platform_renderer_resume();
+            // fallthrough
+        case SDL_EVENT_RENDER_TARGETS_RESET:
+            platform_renderer_invalidate_target_textures();
+            window_invalidate();
+            return 0;
+        case SDL_EVENT_RENDER_DEVICE_RESET:
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING,
+                "Render device lost",
+                "The rendering context was lost.The game will likely blackscreen.\n\n"
+                "Please restart the game to fix the issue.",
+                NULL);
+            return 0;
+        case SDL_EVENT_TERMINATING:
+            data.quit = 1;
             return 0;
         default:
             return 1;
@@ -317,127 +377,122 @@ static int handle_event_immediate(void *param1, SDL_Event *event)
 static void handle_event(SDL_Event *event)
 {
     switch (event->type) {
-        case SDL_WINDOWEVENT:
-            handle_window_event(&event->window, &data.active);
-            break;
-        case SDL_APP_DIDENTERFOREGROUND:
-            platform_renderer_resume();
-#if SDL_VERSION_ATLEAST(2, 0, 2)
-            // fallthrough
-        case SDL_RENDER_TARGETS_RESET:
-#endif
-            platform_renderer_invalidate_target_textures();
-            window_invalidate();
-            break;
-#if SDL_VERSION_ATLEAST(2, 0, 4)
-        case SDL_RENDER_DEVICE_RESET:
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING,
-                "Render device lost",
-                "The rendering context was lost.The game will likely blackscreen.\n\n"
-                "Please restart the game to fix the issue.",
-                NULL);
-            break;
-#endif
-        case SDL_KEYDOWN:
+        case SDL_EVENT_KEY_DOWN:
             platform_handle_key_down(&event->key);
             break;
-        case SDL_KEYUP:
+        case SDL_EVENT_KEY_UP:
             platform_handle_key_up(&event->key);
             break;
-#if defined(__ANDROID__) && SDL_VERSION_ATLEAST(2, 24, 0) && !SDL_VERSION_ATLEAST(2, 24, 1)
-        case SDL_TEXTEDITING:
-            platform_handle_editing_text(&event->edit);
-            break;
-#endif
-        case SDL_TEXTINPUT:
+        case SDL_EVENT_TEXT_INPUT:
             platform_handle_text(&event->text);
             break;
-        case SDL_MOUSEMOTION:
-            if (event->motion.which != SDL_TOUCH_MOUSEID && !SDL_GetRelativeMouseMode()) {
-                mouse_set_position(event->motion.x, event->motion.y);
-            }
+        case SDL_EVENT_MOUSE_MOTION:
+            handle_mouse_position(event->motion.which, event->motion.windowID, event->motion.x, event->motion.y);
             break;
-        case SDL_MOUSEBUTTONDOWN:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
             if (event->button.which != SDL_TOUCH_MOUSEID) {
                 handle_mouse_button(&event->button, 1);
             }
             break;
-        case SDL_MOUSEBUTTONUP:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
             if (event->button.which != SDL_TOUCH_MOUSEID) {
                 handle_mouse_button(&event->button, 0);
             }
             break;
-        case SDL_MOUSEWHEEL:
+        case SDL_EVENT_MOUSE_WHEEL:
             if (event->wheel.which != SDL_TOUCH_MOUSEID) {
                 mouse_set_scroll(event->wheel.y > 0 ? SCROLL_UP : event->wheel.y < 0 ? SCROLL_DOWN : SCROLL_NONE);
             }
             break;
 
-        case SDL_FINGERDOWN:
+        case SDL_EVENT_FINGER_DOWN:
             platform_touch_start(&event->tfinger);
             break;
-        case SDL_FINGERMOTION:
+        case SDL_EVENT_FINGER_MOTION:
             platform_touch_move(&event->tfinger);
             break;
-        case SDL_FINGERUP:
+        case SDL_EVENT_FINGER_UP:
             platform_touch_end(&event->tfinger);
             break;
 
-        case SDL_JOYAXISMOTION:
-            platform_joystick_handle_axis(&event->jaxis);
+        case SDL_EVENT_JOYSTICK_AXIS_MOTION:
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jaxis.which, JOYSTICK_ELEMENT_AXIS,
+                    event->jaxis.axis, event->jaxis.value, 0);
+            }
             break;
-        case SDL_JOYBALLMOTION:
-            platform_joystick_handle_trackball(&event->jball);
+        case SDL_EVENT_JOYSTICK_BALL_MOTION:
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jball.which, JOYSTICK_ELEMENT_TRACKBALL,
+                    event->jball.ball, event->jball.xrel, event->jball.yrel);
+            }
             break;
-        case SDL_JOYHATMOTION:
-            platform_joystick_handle_hat(&event->jhat);
+        case SDL_EVENT_JOYSTICK_HAT_MOTION:
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jhat.which, JOYSTICK_ELEMENT_HAT,
+                    event->jhat.hat, platform_joystick_convert_hat_position(event->jhat.value), 0);
+            }
             break;
-        case SDL_JOYBUTTONDOWN:
-            platform_joystick_handle_button(&event->jbutton, 1);
+        case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jbutton.which, JOYSTICK_ELEMENT_BUTTON,
+                    event->jbutton.button, 1, 0);
+            }
             break;
-        case SDL_JOYBUTTONUP:
-            platform_joystick_handle_button(&event->jbutton, 0);
+        case SDL_EVENT_JOYSTICK_BUTTON_UP:
+            if (platform_joystick_is_enabled()) {
+                joystick_update_element(event->jbutton.which, JOYSTICK_ELEMENT_BUTTON,
+                    event->jbutton.button, 0, 0);
+            }
             break;
-        case SDL_JOYDEVICEADDED:
+        case SDL_EVENT_JOYSTICK_ADDED:
             platform_joystick_device_changed(event->jdevice.which, 1);
             break;
-        case SDL_JOYDEVICEREMOVED:
+        case SDL_EVENT_JOYSTICK_REMOVED:
             platform_joystick_device_changed(event->jdevice.which, 0);
             break;
 
-        case SDL_QUIT:
+        case SDL_EVENT_QUIT:
             data.quit = 1;
             break;
 
-        case SDL_USEREVENT:
-            if (event->user.code == USER_EVENT_QUIT) {
-                data.quit = 1;
-            } else if (event->user.code == USER_EVENT_RESIZE) {
-                platform_screen_set_window_size(INTPTR(event->user.data1), INTPTR(event->user.data2));
-            } else if (event->user.code == USER_EVENT_FULLSCREEN) {
-                platform_screen_set_fullscreen();
-            } else if (event->user.code == USER_EVENT_WINDOWED) {
-                platform_screen_set_windowed();
-            } else if (event->user.code == USER_EVENT_CENTER_WINDOW) {
-                platform_screen_center_window();
-            }
-            break;
-
         default:
+            if (event->type >= SDL_EVENT_WINDOW_FIRST && event->type <= SDL_EVENT_WINDOW_LAST) {
+                handle_window_event(&event->window, &data.active);
+            } else if (event->type == data.user_event) {
+                switch (event->user.code) {
+                    case USER_EVENT_QUIT:
+                        data.quit = 1;
+                        break;
+                    case USER_EVENT_RESIZE:
+                        platform_screen_set_window_size(INTPTR(event->user.data1), INTPTR(event->user.data2));
+                        break;
+                    case USER_EVENT_FULLSCREEN:
+                        platform_screen_set_fullscreen();
+                        break;
+                    case USER_EVENT_WINDOWED:
+                        platform_screen_set_windowed();
+                        break;
+                    case USER_EVENT_CENTER_WINDOW:
+                        platform_screen_center_window();
+                        break;
+                    default:
+                        break;
+                }
+            }
             break;
     }
 }
 
 static void teardown(void)
 {
-    log_repeated_messages();
     SDL_Log("Exiting game");
     game_exit();
     platform_screen_destroy();
+    platform_log_teardown();
     SDL_Quit();
-    teardown_logging();
 
-#ifdef __IPHONEOS__
+#ifdef __IOS__
     // iOS apps are not allowed to self-terminate. To avoid being stuck on a blank screen here, we start the game again.
     setup(&args);
 #endif
@@ -476,14 +531,19 @@ static int init_sdl(int enable_joysticks)
 {
     SDL_Log("Initializing SDL");
 
-    // This hint must be set before initializing SDL, otherwise it won't work
-#if SDL_VERSION_ATLEAST(2, 0, 2)
-    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+    // Windows: use directsound by default, as wasapi has issues
+    // This needs to be done here before SDL_Init, otherwise SDL may initialize the wrong driver
+#ifdef _WIN32
+    SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "directsound");
 #endif
 
-    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {
+    SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "0");
+    SDL_SetHint(SDL_HINT_VITA_ENABLE_BACK_TOUCH, "0");
+    SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+
+    if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK)) {
         // Try starting SDL without joystick support
-        if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) != 0) {
+        if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Could not initialize SDL: %s", SDL_GetError());
             return 0;
         } else {
@@ -492,23 +552,23 @@ static int init_sdl(int enable_joysticks)
     } else {
         platform_joystick_init(enable_joysticks);
     }
+    data.user_event = SDL_RegisterEvents(1);
+    if (!data.user_event) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Could not register user event: %s", SDL_GetError());
+        return 0;
+    }
+
     SDL_SetEventFilter(handle_event_immediate, 0);
-#if SDL_VERSION_ATLEAST(2, 0, 10)
+
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
-#elif SDL_VERSION_ATLEAST(2, 0, 4)
-    SDL_SetHint(SDL_HINT_ANDROID_SEPARATE_MOUSE_AND_TOUCH, "1");
-#endif
-#ifdef __ANDROID__
-    SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
-#endif
-    SDL_version version;
-    SDL_GetVersion(&version);
-    SDL_Log("SDL initialized, version %u.%u.%u", version.major, version.minor, version.patch);
+    
+    int version = SDL_GetVersion();
+    SDL_Log("SDL initialized, version %u.%u.%u",
+        SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
     return 1;
 }
 
-#ifdef SHOW_FOLDER_SELECT_DIALOG
 static const char *ask_for_data_dir(int again)
 {
     if (again) {
@@ -519,8 +579,10 @@ static const char *ask_for_data_dir(int again)
         const SDL_MessageBoxData messageboxdata = {
             SDL_MESSAGEBOX_WARNING, NULL, "Wrong folder selected",
             "The selected folder is not a proper Caesar 3 folder.\n\n"
+#ifndef __IOS__
             "Please select a path directly from either the internal storage "
             "or the SD card, otherwise the path may not be recognised.\n\n"
+#endif
             "Press OK to select another folder or Cancel to exit.",
             SDL_arraysize(buttons), buttons, NULL
         };
@@ -531,32 +593,19 @@ static const char *ask_for_data_dir(int again)
         }
     }
 #ifdef __ANDROID__
-    return android_show_c3_path_dialog(again);
-#elif defined __IPHONEOS__
-    if (again) {
-        const SDL_MessageBoxButtonData buttons[] = {
-           {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "OK"},
-           {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "Cancel"}
-        };
-        const SDL_MessageBoxData messageboxdata = {
-            SDL_MESSAGEBOX_WARNING, NULL, "Wrong folder selected",
-            "The selected folder is not a proper Caesar 3 folder.\n\n"
-            "Press OK to select another folder or Cancel to exit.",
-            SDL_arraysize(buttons), buttons, NULL
-        };
-        int result;
-        SDL_ShowMessageBox(&messageboxdata, &result);
-        if (!result) {
-            return NULL;
-        }
+    if (!android_show_c3_path_dialog(again)) {
+        return 0;
     }
-
+    while (!android_has_c3_path()) {
+        SDL_WaitEventTimeout(NULL, 2000);
+    }
+    return android_get_c3_path();
+#elif defined __IOS__
     return ios_show_c3_path_dialog(again);
 #else
     return system_show_select_folder_dialog("Please select your Caesar 3 folder", 0);
 #endif
 }
-#endif
 
 static int pre_init(const char *custom_data_dir)
 {
@@ -579,58 +628,49 @@ static int pre_init(const char *custom_data_dir)
         return 1;
     }
 
-#if SDL_VERSION_ATLEAST(2, 0, 1)
-    if (platform_sdl_version_at_least(2, 0, 1)) {
-#ifdef __IPHONEOS__
-        char *base_path = ios_get_base_path();
+#ifdef __IOS__
+    const char *base_path = ios_get_base_path();
 #else
-        char *base_path = SDL_GetBasePath();
+    const char *base_path = platform_get_base_path();
 #endif
-        if (base_path) {
-            if (platform_file_manager_set_base_path(base_path)) {
-                SDL_Log("Loading game from base path %s", base_path);
-                if (game_pre_init()) {
-#ifndef __IPHONEOS__
-                    SDL_free(base_path);
-#endif
-                    return 1;
-                }
+    if (base_path) {
+        if (platform_file_manager_set_base_path(base_path)) {
+            SDL_Log("Loading game from base path %s", base_path);
+            if (game_pre_init()) {
+                return 1;
             }
-#ifndef __IPHONEOS__
-            SDL_free(base_path);
-#endif
-        }
-    }
-#endif
-
-#ifdef SHOW_FOLDER_SELECT_DIALOG
-    const char *user_dir = pref_data_dir();
-    if (*user_dir) {
-        SDL_Log("Loading game from user pref %s", user_dir);
-        if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
-            return 1;
         }
     }
 
-    user_dir = ask_for_data_dir(0);
-    while (user_dir) {
-        SDL_Log("Loading game from user-selected dir %s", user_dir);
-        if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
-            pref_save_data_dir(user_dir);
+    if (system_supports_select_folder_dialog()) {
+
+        const char *user_dir = pref_data_dir();
+        if (*user_dir) {
+            SDL_Log("Loading game from user pref %s", user_dir);
+            if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
+                return 1;
+            }
+        }
+
+        user_dir = ask_for_data_dir(0);
+        while (user_dir) {
+            SDL_Log("Loading game from user-selected dir %s", user_dir);
+            if (platform_file_manager_set_base_path(user_dir) && game_pre_init()) {
+                pref_save_data_dir(user_dir);
 #ifdef __ANDROID__
-            SDL_AndroidShowToast("C3 files found. Path saved.", 0, 0, 0, 0);
+                SDL_ShowAndroidToast("C3 files found. Path saved.", 0, 0, 0, 0);
 #endif
-            return 1;
+                return 1;
+            }
+            user_dir = ask_for_data_dir(1);
         }
-        user_dir = ask_for_data_dir(1);
+    } else {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+            "Augustus requires the original files from Caesar 3 to run.",
+            "Please move the Augustus executable to the directory containing an existing "
+            "Caesar 3 installation, or run:\naugustus path-to-c3-directory",
+            NULL);
     }
-#else
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-        "Augustus requires the original files from Caesar 3 to run.",
-        "Move the Augustus executable to the directory containing an existing "
-        "Caesar 3 installation, or run:\naugustus path-to-c3-directory",
-        NULL);
-#endif
 
     return 0;
 }
@@ -638,12 +678,10 @@ static int pre_init(const char *custom_data_dir)
 static void setup(const augustus_args *args)
 {
     system_setup_crash_handler();
-    setup_logging();
+    platform_log_setup();
 
-    if (data.log_file) {
-        SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
-        SDL_Log("Running on: %s", system_OS());
-    }
+    SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
+    SDL_Log("Running on: %s", system_OS());
 
     if (!init_sdl(args->enable_joysticks)) {
         SDL_Log("Exiting: SDL init failed");
@@ -663,11 +701,8 @@ static void setup(const augustus_args *args)
 
     // If starting the log file failed (because, for example, the executable path isn't writable)
     // try again, placing the log file on the C3 path
-    if (!data.log_file) {
-        setup_logging();
-        // We always want this info
-        SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
-        SDL_Log("Running on: %s", system_OS());
+    if (!platform_log_is_ready()) {
+        platform_log_setup();
     }
 
     if (args->force_windowed && setting_fullscreen()) {
@@ -731,8 +766,6 @@ int main(int argc, char **argv)
     }
 
     setup(&args);
-
-
 
     mouse_set_inside_window(1);
     mouse_set_window_focus(1);

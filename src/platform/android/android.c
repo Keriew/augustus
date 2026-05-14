@@ -6,14 +6,12 @@
 #include "platform/android/jni.h"
 #include "platform/file_manager.h"
 
-#include "SDL.h"
-
 #include <string.h>
 
 static int has_directory;
 static char path[FILE_NAME_MAX];
 
-static const char *get_c3_path(void)
+const char *android_get_c3_path(void)
 {
     jni_function_handler handler;
     if (!jni_get_static_method_handler(CLASS_FILE_MANAGER, "getC3Path", "()Ljava/lang/String;", &handler)) {
@@ -31,22 +29,24 @@ static const char *get_c3_path(void)
     return *path ? path : NULL;
 }
 
-const char *android_show_c3_path_dialog(int again)
+int android_has_c3_path(void)
 {
-    jni_function_handler handler;
-    if (jni_get_method_handler(CLASS_AUGUSTUS_ACTIVITY, "showDirectorySelection", "(Z)V", &handler)) {
-        (*handler.env)->CallVoidMethod(handler.env, handler.activity, handler.method,
-            again ? JNI_TRUE : JNI_FALSE);
-    }
-    jni_destroy_function_handler(&handler);
+    return has_directory;
+}
 
+int android_show_c3_path_dialog(int again)
+{
     has_directory = 0;
 
-    while (!has_directory) {
-        SDL_WaitEventTimeout(NULL, 2000);
+    jni_function_handler handler;
+    if (!jni_get_method_handler(CLASS_AUGUSTUS_ACTIVITY, "showDirectorySelection", "(Z)V", &handler)) {
+        return 0;
     }
+    (*handler.env)->CallVoidMethod(handler.env, handler.activity, handler.method,
+        again ? JNI_TRUE : JNI_FALSE);
+    jni_destroy_function_handler(&handler);
 
-    return get_c3_path();
+    return 1;
 }
 
 float android_get_screen_density(void)
@@ -196,18 +196,4 @@ int android_remove_file(const char *filename)
 JNIEXPORT void JNICALL Java_com_github_Keriew_augustus_AugustusMainActivity_gotDirectory(JNIEnv *env, jobject thiz)
 {
     has_directory = 1;
-}
-
-void platform_show_virtual_keyboard(void)
-{
-    if (!SDL_IsTextInputActive()) {
-        SDL_StartTextInput();
-    }
-}
-
-void platform_hide_virtual_keyboard(void)
-{
-    if (SDL_IsTextInputActive()) {
-        SDL_StopTextInput();
-    }
 }

@@ -656,6 +656,31 @@ static int has_well_access(int grid_offset)
     return 0;
 }
 
+static int has_inactive_fountain_access(int grid_offset)
+{
+    // Store the last fountain found to avoid redundant checks for consecutive tiles with the same fountain access.
+    static const building *last_fountain;
+    int radius = map_water_supply_fountain_radius();
+
+    if (last_fountain && map_grid_chess_distance(last_fountain->grid_offset, grid_offset) <= radius) {
+        return 1;
+    }
+
+    // Check every fountain that doesn't have water access
+    for (building *fountain = building_first_of_type(BUILDING_FOUNTAIN); fountain; fountain = fountain->next_of_type) {
+        if (fountain == last_fountain || fountain->has_water_access) {
+            continue;
+        }
+        if ((fountain->state == BUILDING_STATE_CREATED || fountain->state == BUILDING_STATE_IN_USE) &&
+            map_grid_chess_distance(fountain->grid_offset, grid_offset) <= radius) {
+            last_fountain = fountain;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 static int is_inhabited_building(int grid_offset)
 {
     building *b = building_get(map_building_at(grid_offset));
@@ -787,6 +812,9 @@ static void draw_water_graph(int x, int y, float scale, int grid_offset)
     } else if (has_well_access(grid_offset)) {
         image_draw_isometric_footprint_from_draw_tile(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y,
             COLOR_MASK_DARK_BLUE, scale);
+    } else if (has_inactive_fountain_access(grid_offset)) {
+        image_draw_isometric_footprint_from_draw_tile(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y,
+            COLOR_MASK_GRAY, scale);
     }
 }
 

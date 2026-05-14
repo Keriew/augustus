@@ -339,17 +339,22 @@ void building_destroy_by_enemy(int x, int y, int grid_offset)
             map_building_tiles_set_rubble(b->id, x, y, b->size);
             figure_create_explosion_cloud(x, y, b->size, 0);
         } else if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
-            city_ratings_peace_building_destroyed(b->type);
-            building_destroy_by_collapse(b);
-        }
-    } else {
-        if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
-            map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
-            map_tiles_update_region_empty_land(x, y, x, y);
-            map_property_clear_plaza_earthquake_or_overgrown_garden(grid_offset);
-            map_tiles_update_all_gardens();
+            int current;
+            int max;
+            map_building_get_health(b, &current, &max);
+            if (current <= 0) {
+                city_ratings_peace_building_destroyed(b->type);
+                building_destroy_by_collapse(b);
+            }
         } else {
-            map_building_tiles_set_rubble(0, x, y, 1);
+            if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
+                map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
+                map_tiles_update_region_empty_land(x, y, x, y);
+                map_property_clear_plaza_earthquake_or_overgrown_garden(grid_offset);
+                map_tiles_update_all_gardens();
+            } else {
+                map_building_tiles_set_rubble(0, x, y, 1);
+            }
         }
     }
     figure_tower_sentry_reroute();

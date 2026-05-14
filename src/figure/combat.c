@@ -241,6 +241,7 @@ int figure_combat_get_target_for_wolf(int x, int y, int max_distance)
             case FIGURE_FRIENDLY_ARROW:
             case FIGURE_WATCHTOWER_ARCHER:
             case FIGURE_CREATURE:
+            case FIGURE_DOG:
                 continue;
         }
         if (figure_is_herd(f)) {
@@ -381,6 +382,7 @@ int figure_combat_get_missile_target_for_enemy(figure *enemy, int max_distance, 
             case FIGURE_WOLF:
             case FIGURE_ZEBRA:
             case FIGURE_SPEAR:
+            case FIGURE_DOG:
                 continue;
         }
         int distance;
@@ -437,7 +439,7 @@ void figure_combat_attack_figure_at(figure *f, int grid_offset)
             break;
         }
         figure *opponent = figure_get(opponent_id);
-        if (opponent_id == f->id || opponent->is_ghost) {
+        if (opponent_id == f->id || opponent->is_ghost || opponent->type == FIGURE_DOG) {
             // Do not allow troops to attack themselves or enemies located outside of the map
             opponent_id = opponent->next_figure_id_on_same_tile;
             continue;

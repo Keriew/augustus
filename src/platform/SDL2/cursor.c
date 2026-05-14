@@ -1,4 +1,4 @@
-#include "cursor.h"
+#include "platform/cursor.h"
 
 #include "core/config.h"
 #include "core/png_read.h"

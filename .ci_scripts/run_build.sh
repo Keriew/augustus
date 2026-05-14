@@ -2,6 +2,8 @@
 
 set -e
 
+SDL_MAJOR_VERSION="${SDL_VERSION%%.*}"
+
 case "$BUILD_TARGET" in
 "vita")
 	docker exec vitasdk /bin/bash -c "cd build && make -j4"
@@ -81,8 +83,8 @@ case "$BUILD_TARGET" in
 		cp augustus/build/outputs/apk/release/augustus-release.apk ../build/augustus.apk
 	fi
 	cd ..
-	if [ ! -f "deps/SDL2-$BUILDTYPE.aar" ]
-        then
+	if [[ "$SDL_MAJOR_VERSION" == "2" ]] && [ ! -f "deps/SDL2-$BUILDTYPE.aar" ]
+	then
 		cp android/SDL2/build/outputs/aar/SDL2-$BUILDTYPE.aar deps/SDL2-$BUILDTYPE.aar
 	fi
 	;;

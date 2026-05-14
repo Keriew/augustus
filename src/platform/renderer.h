@@ -3,9 +3,7 @@
 
 #include "graphics/color.h"
 
-#include "SDL.h"
-
-int platform_renderer_init(SDL_Window *window);
+int platform_renderer_init(void *window);
 
 int platform_renderer_create_render_texture(int width, int height);
 

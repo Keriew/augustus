@@ -1140,6 +1140,7 @@ static void get_tooltip(tooltip_context *c)
     } else if ((context.type == BUILDING_INFO_BUILDING && context.show_special_orders) || building_type_is_bridge(btype)) {
         //bridges are technically terrain, but they have special orders
         if (btype == BUILDING_GRANARY || btype == BUILDING_WAREHOUSE) {
+            precomposed_text = window_building_storage_resource_hover_tooltip(&context);
             if (context.show_special_orders == SPECIAL_ORDERS_ROADBLOCK) {
                 window_building_roadblock_get_tooltip_walker_permissions(&translation);
             } else {

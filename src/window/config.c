@@ -24,7 +24,6 @@
 #include "graphics/text.h"
 #include "graphics/weather.h"
 #include "graphics/window.h"
-#include "platform/screen.h"
 #include "sound/city.h"
 #include "sound/device.h"
 #include "sound/effect.h"
@@ -40,7 +39,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <SDL_mouse.h>
 
 #define MAX_LANGUAGE_DIRS 20
 #define MAX_WIDGETS       64
@@ -415,6 +413,7 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Destruction
@@ -849,7 +848,7 @@ static int config_set_city_sounds_volume(int key)
 static int config_mouse_unlock_fullscreen(int key)
 {
     config_change_basic(key);
-    platform_screen_update_window_grab();
+    system_update_window_grab();
     window_invalidate();
     return 1;
 }

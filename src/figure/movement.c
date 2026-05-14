@@ -19,11 +19,6 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 
-#define PALISADE_HP   60
-#define BUILDING_HP   10
-#define WALL_HP      200
-#define GATEHOUSE_HP 150
-
 static void advance_tick(figure *f)
 {
     switch (f->direction) {
@@ -649,7 +644,9 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
                 }
             }
             f->routing_path_current_tile++;
-            figure_route_advance_tile(f->routing_path_id);
+            if (f->routing_path_id > 0) {
+                figure_route_advance_tile(f->routing_path_id);
+            }
             f->previous_tile_direction = f->direction;
             f->progress_on_tile = 0;
             move_to_next_tile(f);

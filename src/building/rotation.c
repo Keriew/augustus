@@ -82,12 +82,13 @@ static void update_rotation_message(void)
 static void rotate_forward(void)
 {
     building_construction_cycle_forward();
+    building_type type = building_construction_type();
     data.rotation += 1;
     data.extra_rotation += 1;
-    if (data.rotation > MAX_ROTATION) {
+    if (data.rotation > (building_construction_type_can_cycle(type) ?
+            building_construction_type_cycle_steps(type) - 1 : MAX_ROTATION)) {
         data.rotation = 0;
     }
-    building_type type = building_construction_type();
     if (data.extra_rotation >= get_num_rotations(type)) {
         data.extra_rotation = 0;
     }
@@ -97,13 +98,15 @@ static void rotate_forward(void)
 static void rotate_backward(void)
 {
     building_construction_cycle_back();
+    building_type type = building_construction_type();
     data.rotation -= 1;
     data.extra_rotation -= 1;
     if (data.rotation < 0) {
-        data.rotation = MAX_ROTATION;
+        data.rotation = building_construction_type_can_cycle(type) ?
+            building_construction_type_cycle_steps(type) - 1 : MAX_ROTATION;
     }
     if (data.extra_rotation < 0) {
-        data.extra_rotation = get_num_rotations(building_construction_type()) - 1;
+        data.extra_rotation = get_num_rotations(type) - 1;
     }
     update_rotation_message();
 }
@@ -160,7 +163,14 @@ void building_rotation_reset_rotation(void)
 
 void building_rotation_setup_rotation(int variant)
 {
-    building_rotation_reset_rotation();
+    building_construction_reset_cycle_steps();
+    data.rotation = 0;
+    building_type type = building_construction_type();
+    if (building_construction_type_can_cycle(type)) {
+        data.extra_rotation = building_construction_type_cycled_steps(type);
+    } else {
+        data.extra_rotation = 0;
+    }
     data.warning_id = 0;
 
     for (int i = 0; i < variant; i++) {

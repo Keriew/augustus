@@ -7,13 +7,20 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.11.1'
-        classpath 'com.github.triplet.gradle:play-publisher:3.7.0'
+        classpath 'com.android.tools.build:gradle:9.2.1'
+        classpath 'com.github.triplet.gradle:play-publisher:4.0.0'
     }
 }
 
+apply from: file('gradle/find-aar.gradle')
+
 ext {
-    usingAAR = file('augustus/libs/SDL2.aar').exists() || file('augustus/libs/SDL2-debug.aar').exists() || file('augustus/libs/SDL2-release.aar').exists()
+    usingAAR = 0
+    if (findAAR('augustus/libs', 'SDL3') && findAAR('augustus/libs', 'SDL3_mixer')) {
+        usingAAR = 3
+    } else if (file('augustus/libs/SDL2.aar').exists() || file('augustus/libs/SDL2-debug.aar').exists() || file('augustus/libs/SDL2-release.aar').exists()) {
+        usingAAR = 2
+    }
 }
 
 tasks.register('clean', Delete) {

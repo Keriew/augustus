@@ -21,4 +21,6 @@ void building_state_save_to_buffer(buffer *buf, const building *b);
 
 void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_size, int save_version, int for_preview);
 
+void migrate_altar_rotations(void);
+
 #endif // BUILDING_BUILDING_STATE_H

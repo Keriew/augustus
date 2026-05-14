@@ -14,34 +14,27 @@ tasks.register('getVersion') {
         versionDetail = ""
     } else {
         try {
-            def stdout = new ByteArrayOutputStream()
-            def stderr = new ByteArrayOutputStream()
-
-            def tweakResult = exec {
+            def tweakExec = providers.exec {
                 commandLine "git", "rev-list", "--count", "HEAD", "^tags/v${versionMajor}.${versionMinor}.${versionPatch}"
-                workingDir = "../.."
-                standardOutput = stdout
-                errorOutput = stderr
+                workingDir = file("../..")
                 ignoreExitValue = true
-            }.exitValue
+            }
+            def tweakResult = tweakExec.result.get().exitValue
+            versionTweak = tweakExec.standardOutput.asText.get().trim().toInteger()
 
-            versionTweak = stdout.toString().trim().toInteger()
-            stdout.reset()
-
-            def lastCommitResult = exec {
+            def commitExec = providers.exec {
                 commandLine "git", "rev-parse", "--short", "--verify", "HEAD"
-                workingDir "../.."
-                standardOutput = stdout
-                errorOutput = stderr
+                workingDir = file("../..")
                 ignoreExitValue = true
-            }.exitValue
-            def versionCommit = stdout.toString().trim()
+            }
+            def lastCommitResult = commitExec.result.get().exitValue
+            def versionCommit = commitExec.standardOutput.asText.get().trim()
 
-            def isDirty = exec {
+            def isDirty = providers.exec {
                 commandLine "git", "diff-index", "--quiet", "HEAD", "--"
-                workingDir "../.."
+                workingDir = file("../..")
                 ignoreExitValue = true
-            }.exitValue
+            }.result.get().exitValue
 
             versionDetail = ""
             if (tweakResult == 0) {
@@ -65,22 +58,22 @@ tasks.register('getVersion') {
 }
 
 android {
-    compileSdk 36
-    ndkVersion "28.1.13356709"
+    compileSdk = 37
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        compileSdk 35
+        compileSdk = 37
         applicationId "com.github.Keriew.augustus"
-        minSdkVersion 21
-        targetSdkVersion 36
+        minSdkVersion 23
+        targetSdkVersion 37
 
         versionName getVersion.versionName
         versionCode getVersion.versionCode
 
         externalNativeBuild {
             cmake {
-                version "3.31.5"
-                arguments "-DAV1_VIDEO_SUPPORT=ON", "-DTARGET_PLATFORM=android", "-DSYSTEM_LIBS=OFF","-DANDROID_STL=c++_shared"
+                version = "4.1.2"
+                arguments "-DAV1_VIDEO_SUPPORT=ON", "-DTARGET_PLATFORM=android", "-DANDROID_STL=c++_shared"
             }
         }
         ndk {
@@ -98,7 +91,7 @@ android {
         }
     }
     buildFeatures {
-        prefab true
+        prefab = true
     }
     signingConfigs {
         release {
@@ -112,35 +105,44 @@ android {
         }
     }
     buildTypes {
-        rootProject.ext.usingAAR = false
+        rootProject.ext.usingAAR = 0
         debug {
             ext.alwaysUpdateBuildId = false
             applicationIdSuffix ".debug"
-            externalNativeBuild.cmake.arguments += "-DDRAW_FPS=1"
+            if (rootProject.ext.findAAR('augustus/libs', 'SDL3') && rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer')) {
+                rootProject.ext.usingAAR = 3
+                externalNativeBuild.cmake.arguments += "-DSDL_VERSION=3"
+                dependencies.debugImplementation files(rootProject.ext.findAAR('augustus/libs', 'SDL3'), rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer'))
+            }
             if (file('libs/SDL2-debug.aar').exists()) {
                 println 'Using pre-packed SDL2 Debug AAR'
-                rootProject.ext.usingAAR = true
+                rootProject.ext.usingAAR = 2
                 dependencies.debugImplementation files('libs/SDL2-debug.aar')
             }
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = signingConfigs.release
+            if (rootProject.ext.findAAR('augustus/libs', 'SDL3') && rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer')) {
+                rootProject.ext.usingAAR = 3
+                externalNativeBuild.cmake.arguments += "-DSDL_VERSION=3"
+                dependencies.releaseImplementation files(rootProject.ext.findAAR('augustus/libs', 'SDL3'), rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer'))
+            }
             if (file('libs/SDL2-release.aar').exists()) {
                 println 'Using pre-packed SDL2 Release AAR'
-                rootProject.ext.usingAAR = true
+                rootProject.ext.usingAAR = 2
                 dependencies.releaseImplementation files('libs/SDL2-release.aar')
             }
         }
     }
     externalNativeBuild {
         cmake {
-            version "3.31.5"
+            version = "4.1.2"
             path "../../CMakeLists.txt"
         }
     }
-    namespace 'com.github.Keriew.augustus'
+    namespace = 'com.github.Keriew.augustus'
 }
 
 /** play {
@@ -154,14 +156,18 @@ repositories {
 
 dependencies {
     if (!rootProject.ext.usingAAR) {
-        if (file('libs/SDL2.aar').exists()) {
+        if (rootProject.ext.findAAR('augustus/libs', 'SDL3') && rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer')) {
+            implementation files(rootProject.ext.findAAR('augustus/libs', 'SDL3'), rootProject.ext.findAAR('augustus/libs', 'SDL3_mixer'))
+            rootProject.ext.usingAAR = 3
+        } else if (file('libs/SDL2.aar').exists()) {
             println 'Using pre-packed SDL2 General AAR'
             implementation files('libs/SDL2.aar')
-            rootProject.ext.usingAAR = true
+            rootProject.ext.usingAAR = 2
         } else {
             println 'Pre-packed SDL2 AAR not found - building it'
             implementation project(':SDL2')
+            rootProject.ext.usingAAR = 0
         }
     }
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
 }
