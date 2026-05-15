@@ -104,7 +104,7 @@ static double parse_power(const unsigned char **s)
     return val;
 }
 
-static double parse_term(const char **s)
+static double parse_term(const unsigned char **s)
 {
     double val = parse_power(s);
     skip_spaces(s);
