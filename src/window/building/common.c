@@ -15,7 +15,6 @@
 #include "graphics/panel.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
-#include "map/building.h"
 #include "translation/translation.h"
 #include "sound/speech.h"
 
@@ -342,24 +341,4 @@ void window_building_get_risks_tooltip(const building_info_context *c, int *grou
         *group_id = 66;
         *text_id = 52 + calc_bound(b->damage_risk + 39, 0, 200) / 40;
     }
-}
-
-void window_building_draw_health(building_info_context *c)
-{
-    building *b = building_get(c->building_id);
-
-    if (!building_properties_for_type(b->type)->show_durability) {
-        return;
-    }
-
-    int current_hp;
-    int max_hp;
-
-    map_building_get_health(b, &current_hp, &max_hp);
-
-    int x = c->x_offset;
-    int y = c->y_offset + 10;
-
-    int width = text_draw_number(current_hp, '@', " / ", x + 10, y, FONT_NORMAL_BLACK, 0);
-    text_draw_number(max_hp, '@', "", x + width, y, FONT_NORMAL_BLACK, 0);
 }
