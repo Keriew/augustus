@@ -47,9 +47,6 @@
 
 #define BUILDING_ARRAY_SIZE_STEP 2000
 
-#define WATER_DESIRABILITY_RANGE 3
-#define WATER_DESIRABILITY_BONUS 15
-
 static struct {
     array(building) buildings;
     building *first_of_type[BUILDING_TYPE_MAX];
@@ -764,6 +761,18 @@ void building_update_state(void)
     }
 }
 
+int get_elevation_desirability_bonus(int grid_offset)
+{
+    switch (map_elevation_at(grid_offset)) {
+        case 0: return 0;
+        case 1: return 10;
+        case 2: return 12;
+        case 3: return 14;
+        case 4: return 16;
+        default: return 18;
+    }
+}
+
 void building_update_desirability(void)
 {
     building *b;
@@ -777,17 +786,10 @@ void building_update_desirability(void)
         int desirability = map_desirability_get_max(b->x, b->y, b->size);
 
         if (b->is_close_to_water) {
-            desirability += 10;
+            desirability += WATER_DESIRABILITY_BONUS;
         }
 
-        switch (map_elevation_at(b->grid_offset)) {
-            case 0: break;
-            case 1: desirability += 10; break;
-            case 2: desirability += 12; break;
-            case 3: desirability += 14; break;
-            case 4: desirability += 16; break;
-            default: desirability += 18; break;
-        }
+        desirability += get_elevation_desirability_bonus(b->grid_offset);
 
         // Clamp before assigning to 8-bit signed int
         if (desirability > 100) {

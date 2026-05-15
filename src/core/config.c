@@ -129,6 +129,8 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_warehouse_do_not_allow_walkers",
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS] = "gameplay_change_houses_do_not_spawn_plebeians",
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
+    [CONFIG_UI_SHOW_SHORELINE_DESIRABILITY] = "ui_show_shoreline_desirability",
+    [CONFIG_UI_SHOW_ELEVATION_DESIRABILITY] = "ui_show_elevation_desirability",
 };
 
 static const char *ini_string_keys[] = {

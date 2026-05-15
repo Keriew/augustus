@@ -2089,6 +2089,9 @@ static translation_string all_strings[] = {
     {TR_DESTRIBUTION_DESTINATION, "- используют как назначение: "},
     {TR_FIGURE_TYPE_DOG, "Собака"},
     {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, "Дома не создают блуждающих собак"},
+    {TR_CONFIG_HEADER_DESIRABILITY, "Привлекательность"},
+    {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Отображать привлекательность береговой линии в режиме наложения"},
+    {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Отображать привлекательность высоты местности в режиме наложения"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
