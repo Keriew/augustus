@@ -73,6 +73,10 @@ static int asset_close(void *asset)
 
 void *asset_handler_open_asset(const char *asset_name, const char *mode)
 {
+    if (assets_location == ASSETS_LOCATION_NONE) {
+        determine_assets_location();
+    }
+
     char location[FILE_NAME_MAX];
 
     switch (assets_location) {

@@ -1397,7 +1397,8 @@ void platform_renderer_render(void)
     SDL_SetRenderTarget(data.renderer, NULL);
     SDL_RenderCopy(data.renderer, data.render_texture, NULL, NULL);
     draw_tooltip();
-    if (platform_cursor_is_software()) {
+    if ((platform_cursor_is_forced_software_cursor() || !platform_cursor_has_hardware_cursor()) &&
+        !platform_cursor_is_disabled()) {
         draw_software_mouse_cursor();
     }
     SDL_RenderPresent(data.renderer);

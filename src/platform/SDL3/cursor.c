@@ -19,7 +19,7 @@ static struct {
     cursor_shape current_shape;
     cursor_scale current_scale;
     int disabled;
-    int software_cursor;
+    int force_software_cursor;
 } data;
 
 static const color_t mouse_colors[] = {
@@ -96,10 +96,11 @@ void system_init_cursors(int scale_percentage)
         const cursor *c = get_valid_cursor(list);
         data.surfaces[i] = generate_cursor_surface(c);
 
-        if (platform_cursor_is_software()) {
+        platform_renderer_generate_mouse_cursor_texture(i, data.surfaces[i]->w, data.surfaces[i]->pixels,
+            c->hotspot_x, c->hotspot_y);
+
+        if (data.force_software_cursor) {
             SDL_HideCursor();
-            platform_renderer_generate_mouse_cursor_texture(i, data.surfaces[i]->w, data.surfaces[i]->pixels,
-                c->hotspot_x, c->hotspot_y);
         } else {
             data.cursors[i] = SDL_CreateColorCursor(data.surfaces[i], c->hotspot_x, c->hotspot_y);
         }
@@ -111,7 +112,7 @@ void system_init_cursors(int scale_percentage)
 void system_set_cursor(int cursor_id)
 {
     data.current_shape = cursor_id;
-    if (!platform_cursor_is_software()) {
+    if (!data.force_software_cursor) {
         SDL_SetCursor(data.cursors[cursor_id]);
     }
 }
@@ -119,7 +120,7 @@ void system_set_cursor(int cursor_id)
 void system_show_cursor(void)
 {
     data.disabled = 0;
-    if (!platform_cursor_is_software()) {
+    if (!data.force_software_cursor) {
         SDL_ShowCursor();
     }
 }
@@ -130,18 +131,24 @@ void system_hide_cursor(void)
     SDL_HideCursor();
 }
 
-void platform_cursor_force_software_mode(void)
+int platform_cursor_is_disabled(void)
 {
-    data.software_cursor = 1;
+    return data.disabled;
 }
 
-int platform_cursor_is_software(void)
+void platform_cursor_force_software_mode(void)
 {
-#ifdef PLATFORM_USE_SOFTWARE_CURSOR
-    return 1;
-#else
-    return data.software_cursor;
-#endif
+    data.force_software_cursor = 1;
+}
+
+int platform_cursor_is_forced_software_cursor(void)
+{
+    return data.force_software_cursor;
+}
+
+int platform_cursor_has_hardware_cursor(void)
+{
+    return SDL_HasMouse();
 }
 
 cursor_shape platform_cursor_get_current_shape(void)

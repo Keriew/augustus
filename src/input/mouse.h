@@ -53,6 +53,11 @@ const mouse *mouse_get(void);
  */
 void mouse_set_position(int x, int y);
 
+/**
+ * Centers the mouse cursor in the window
+ */
+void mouse_center_cursor(void);
+
 void mouse_set_left_down(int down);
 
 void mouse_set_middle_down(int down);

@@ -1,6 +1,8 @@
 #include "input/mouse.h"
 
+#include "core/calc.h"
 #include "core/time.h"
+#include "game/system.h"
 #include "graphics/screen.h"
 #include "input/hotkey.h"
 
@@ -69,10 +71,18 @@ void mouse_set_position(int x, int y)
     if (x != data.x || y != data.y) {
         last_click = 0;
     }
-    data.x = x;
-    data.y = y;
+    data.x = calc_bound(x, 0, screen_width() - 1);
+    data.y = calc_bound(y, 0, screen_height() - 1);
     data.is_touch = 0;
     data.is_inside_window = 1;
+}
+
+void mouse_center_cursor(void)
+{
+    int x = screen_width() / 2;
+    int y = screen_height() / 2;
+    system_set_mouse_position(&x, &y);
+    mouse_set_position(x, y);
 }
 
 void mouse_set_left_down(int down)

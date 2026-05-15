@@ -68,8 +68,8 @@ static void log_repeated_messages(void)
 {
     for (unsigned int i = 0; i < MAX_PREVIOUS_MESSAGES; i++) {
         if (data.previous[i].count > 1) {
-            char final_message[LOG_TEXT_SIZE];
-            snprintf(final_message, LOG_TEXT_SIZE, "INFO:  Message \"%s\" repeated %u more %s.\n",
+            char final_message[LOG_TEXT_SIZE * 2];
+            snprintf(final_message, LOG_TEXT_SIZE * 2, "INFO:  Message \"%s\" repeated %u more %s.\n",
                 data.previous[i].message, data.previous[i].count - 1, data.previous[i].count == 2 ? "time" : "times");
             write_log(final_message);
         }

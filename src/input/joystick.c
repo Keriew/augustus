@@ -283,6 +283,8 @@ static int get_input_for_mapping(const joystick_info *joystick, const mapping_el
                             current_value = -joystick->trackball[element_id].delta_y;
                         }
                         break;
+                    default:
+                        break;
                 }
                 break;
             case JOYSTICK_ELEMENT_BUTTON:
@@ -413,8 +415,8 @@ static int rescale_axis(mapped_input *inputs)
     // The maximum is adjusted to account for SCE_CTRL_MODE_DIGITALANALOG_WIDE
     // where a reported maximum axis value corresponds to 80% of the full range
     // of motion of the analog stick
-    float analog_x = (float) inputs[DIRECTION_RIGHT].value - inputs[DIRECTION_LEFT].value;
-    float analog_y = (float) inputs[DIRECTION_DOWN].value - inputs[DIRECTION_UP].value;
+    float analog_x = (float) (inputs[DIRECTION_RIGHT].value - inputs[DIRECTION_LEFT].value);
+    float analog_y = (float) (inputs[DIRECTION_DOWN].value - inputs[DIRECTION_UP].value);
 
     inputs[DIRECTION_UP].value = 0;
     inputs[DIRECTION_LEFT].value = 0;
@@ -723,4 +725,9 @@ int joystick_to_mouse_and_keyboard(void)
         mouse_remove_touch();
     }
     return handled;
+}
+
+int joysticks_are_connected(void)
+{
+    return data.connected_joysticks > 0;
 }

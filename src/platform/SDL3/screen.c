@@ -10,6 +10,7 @@
 #include "graphics/menu.h"
 #include "graphics/screen.h"
 #include "platform/android/android.h"
+#include "platform/cursor.h"
 #include "platform/icon.h"
 #include "platform/renderer.h"
 #include "platform/switch/switch.h"
@@ -40,7 +41,7 @@ static struct {
 
 static int scale_logical_to_pixels(int logical_value)
 {
-    return (int) (logical_value * scale.percentage / 100 / scale.screen_density);
+    return (int) (logical_value * scale.percentage / 100 * scale.screen_density);
 }
 
 static int scale_pixels_to_logical(int pixel_value)
@@ -226,12 +227,17 @@ int platform_screen_resize(int pixel_width, int pixel_height, int save)
         setting_set_display(setting_fullscreen(), logical_width, logical_height);
     }
 
-    if (platform_renderer_create_render_texture(logical_width, logical_height)) {
-        screen_set_resolution(logical_width, logical_height);
-        return 1;
-    } else {
+    if (!platform_renderer_create_render_texture(logical_width, logical_height)) {
         return 0;
     }
+
+    screen_set_resolution(logical_width, logical_height);
+
+    if (!platform_cursor_has_hardware_cursor()) {
+        mouse_center_cursor();
+    }
+
+    return 1;
 }
 
 int system_scale_display(int display_scale_percentage)

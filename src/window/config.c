@@ -2289,10 +2289,6 @@ static void init(unsigned int page, unsigned int category, int show_background_i
         disable_widget_globally(TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE);
         disable_widget_globally(TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN);
     }
-    if (system_is_fullscreen_only()) {
-        disable_widget_globally(TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE);
-        disable_widget_globally(TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE);
-    }
 
     init_list_boxes();
 }

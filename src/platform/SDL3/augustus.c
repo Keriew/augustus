@@ -742,6 +742,12 @@ static void setup(const augustus_args *args)
     // This has to come after platform_screen_create, otherwise it fails on Nintendo Switch
     system_init_cursors(config_get(CONFIG_SCREEN_CURSOR_SCALE));
 
+    // If there's no hardware cursor support and no joysticks, let's assume there are touch controls and hide the cursor,
+    // otherwise it would be annoying to have a cursor permanently on screen with no way to move it
+    if (!platform_cursor_has_hardware_cursor() && !joysticks_are_connected()) {
+        system_hide_cursor();
+    }
+
     time_set_millis(system_get_ticks());
 
     int result = args->launch_asset_previewer ? window_asset_previewer_show() : game_init();
