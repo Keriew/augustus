@@ -9,7 +9,6 @@
 #include "core/image_group.h"
 #include "core/string.h"
 #include "editor/editor.h"
-
 #include "empire/city.h"
 #include "empire/empire.h"
 #include "empire/object.h"

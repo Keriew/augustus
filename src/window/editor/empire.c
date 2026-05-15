@@ -49,6 +49,8 @@
 #define RESOURCE_ICON_WIDTH 26 //resource icon width in px
 #define RESOURCE_ICON_HEIGHT 26
 
+#define NUM_PLUS_BUTTONS sizeof(add_resource_buttons) / sizeof(image_button)
+
 typedef struct {
     int x;
     int y;
@@ -85,16 +87,18 @@ static arrow_button arrow_buttons_empire[] = {
     {8, 48, 17, 24, button_change_empire, 1},
     {32, 48, 15, 24, button_change_empire}
 };
+
 static generic_button generic_buttons[] = {
-    {4, 48, 100, 24, button_ok},
-    {124, 48, 150, 24, button_toggle_invasions},
-    {294, 48, 150, 24, button_toggle_waypoints},
-    {464, 48, 150, 24, button_refresh},     // parameter1 determines whether hidden
-    {634, 48, 150, 24, button_export_xml},
-    {804, 48, 150, 24, button_import_xml},
-    {974, 48, 150, 24, button_empire_properties},
+    {4, 48, 70, 24, button_ok},
+    {84, 48, 150, 24, button_toggle_invasions},
+    {244, 48, 150, 24, button_toggle_waypoints},
+    {404, 48, 150, 24, button_refresh},     // parameter1 determines whether hidden
+    {564, 48, 150, 24, button_export_xml},
+    {724, 48, 150, 24, button_import_xml},
+    {884, 48, 150, 24, button_empire_properties},
     {0, 0, 0, 24, button_icon_preview},
 };
+
 static generic_button preview_button[] = {
     {0, 0, 72, 72, button_cycle_preview, button_recycle_preview},
 };
@@ -103,7 +107,6 @@ static image_button add_resource_buttons[] = {
     {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, button_none, 0, 0, 1, "UI", "Plus_Button_Idle"},
     {0, 0, 39, 24, IB_NORMAL, 0, 0, button_add_resource, button_none, 1, 0, 1, "UI", "Plus_Button_Idle"}
 };
-#define NUM_PLUS_BUTTONS sizeof(add_resource_buttons) / sizeof(image_button)
 
 static image_button edit_city_name_button[] = {
     {0, 0, 24, 24, IB_NORMAL, 0, 0, button_edit_city_name, button_none, 0, 0, 1, "UI", "Edit_Button_Idle"}
@@ -194,7 +197,7 @@ static void update_hidden_generic_buttons(void)
     update_button(3, 484);
     update_button(4, 654);
     update_button(5, 824);
-    update_button(6, 994);
+    update_button(6, 900);
     update_button(7, 334); // comes from data.panel.x_min + 564 + width + 16 < data.panel.x_max so we have to subtract 230
 }
 
@@ -974,42 +977,67 @@ static void draw_panel_buttons(const empire_city *city)
         draw_object_info();
     }
 
-    button_border_draw(data.panel.x_min + x_offset, data.y_max - 52, 100, 24, data.focus_button_id == 1);
-    lang_text_draw_centered(44, 7, data.panel.x_min + x_offset, data.y_max - 45, 100, FONT_NORMAL_GREEN);
+    int base_x = data.panel.x_min + x_offset;
+    int y_border = data.y_max - 52;
+    int y_text = data.y_max - 45;
+    int gap = 10;
+    int first_width = 70; //ok button
+    int other_width = 150;
+
+    // button 1 (OK)
+    int x1 = base_x;
+    button_border_draw(x1, y_border, first_width, 24, data.focus_button_id == 1);
+    lang_text_draw_centered(44, 7, x1, y_text, first_width, FONT_NORMAL_GREEN);
 
     if (scenario.empire.id == SCENARIO_CUSTOM_EMPIRE) {
-        button_border_draw(data.panel.x_min + 144, data.y_max - 52, 150, 24, data.focus_button_id == 2);
+        int x2 = x1 + first_width + gap;
+        int x3 = x2 + other_width + gap;
+        int x4 = x3 + other_width + gap;
+        int x5 = x4 + other_width + gap;
+        int x6 = x5 + other_width + gap;
+        int x7 = x6 + other_width + gap;
+
+        // button 2
+        button_border_draw(x2, y_border, other_width, 24, data.focus_button_id == 2);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_TOGGLE_INVASIONS,
-            data.panel.x_min + 144, data.y_max - 45, 150, FONT_NORMAL_GREEN);
+            x2, y_text, other_width, FONT_NORMAL_GREEN);
 
-        button_border_draw(data.panel.x_min + 314, data.y_max - 52, 150, 24, data.focus_button_id == 3);
+        // button 3
+        button_border_draw(x3, y_border, other_width, 24, data.focus_button_id == 3);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EMPIRE_TOGGLE_EDGES,
-            data.panel.x_min + 314, data.y_max - 45, 150, FONT_NORMAL_GREEN);
+            x3, y_text, other_width, FONT_NORMAL_GREEN);
 
+        // button 4
+        if (!generic_buttons[3].parameter1) {
+            button_border_draw(x4, y_border, other_width, 24, data.focus_button_id == 4);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REFRESH_EMPIRE,
+                x4, y_text, other_width, FONT_NORMAL_GREEN);
+        }
+
+        // button 5
+        if (!generic_buttons[4].parameter1) {
+            button_border_draw(x5, y_border, other_width, 24, data.focus_button_id == 5);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_EXPORT,
+                x5, y_text, other_width, FONT_NORMAL_GREEN);
+        }
+
+        // button 6
+        if (!generic_buttons[5].parameter1) {
+            button_border_draw(x6, y_border, other_width, 24, data.focus_button_id == 6);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_IMPORT,
+                x6, y_text, other_width, FONT_NORMAL_GREEN);
+        }
+
+        // button 7
+        if (!generic_buttons[6].parameter1) {
+            button_border_draw(x7, y_border, other_width, 24, data.focus_button_id == 7);
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_PROPERTIES,
+                x7, y_text, other_width, FONT_NORMAL_GREEN);
+        }
+
+        // button 8
         int width = lang_text_get_width(CUSTOM_TRANSLATION, data.button_is_preview ?
             TR_EDITOR_EMPIRE_TOOL : TR_EDITOR_CURRENT_ICON, FONT_NORMAL_GREEN);
-        if (!generic_buttons[3].parameter1) {
-            button_border_draw(data.panel.x_min + 484, data.y_max - 52, 150, 24, data.focus_button_id == 4);
-            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_REFRESH_EMPIRE,
-                data.panel.x_min + 484, data.y_max - 45, 150, FONT_NORMAL_GREEN);
-        }
-
-        if (!generic_buttons[4].parameter1) {
-            button_border_draw(data.panel.x_min + 654, data.y_max - 52, 150, 24, data.focus_button_id == 5);
-            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_EXPORT,
-                data.panel.x_min + 654, data.y_max - 45, 150, FONT_NORMAL_GREEN);
-        }
-        if (!generic_buttons[5].parameter1) {
-            button_border_draw(data.panel.x_min + 824, data.y_max - 52, 150, 24, data.focus_button_id == 6);
-            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_IMPORT,
-                data.panel.x_min + 824, data.y_max - 45, 150, FONT_NORMAL_GREEN);
-        }
-        if (!generic_buttons[6].parameter1) {
-            button_border_draw(data.panel.x_min + 994, data.y_max - 52, 150, 24, data.focus_button_id == 7);
-            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_EMPIRE_PROPERTIES,
-                data.panel.x_min + 994, data.y_max - 45, 150, FONT_NORMAL_GREEN);
-        }
-
         if (!generic_buttons[7].parameter1) {
             generic_buttons[7].x = data.panel.x_max - 96 - width - 12 - 20;
             generic_buttons[7].width = width + 8;
