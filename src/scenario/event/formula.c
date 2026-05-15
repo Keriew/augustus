@@ -10,7 +10,7 @@
 #include <ctype.h>
 #include <math.h>
 
-#define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x))) // simple clamp macro 
+#define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x))) // simple clamp macro
 // because mathematicians have only discovered clamping in 2023, so its not in all math.h yet
 
 static double parse_expr(const unsigned char **s);
@@ -90,21 +90,21 @@ static double parse_factor(const unsigned char **s)
     return 0.0; // fallback
 }
 
-static double parse_term(const unsigned char **s)
+static double parse_power(const unsigned char **s)
 {
     double val = parse_factor(s);
     skip_spaces(s);
-    
+
     while (**s == '^') {
         (*s)++;
         double right = parse_factor(s);
         val = pow(val, right);
     }
-    
+
     return val;
 }
 
-double parse_term(const char **s)
+static double parse_term(const char **s)
 {
     double val = parse_power(s);
     skip_spaces(s);
@@ -197,7 +197,7 @@ int scenario_event_formula_check(scenario_formula_t *s_formula)
         evaluation = CLAMP(evaluation, s_formula->min_evaluation, s_formula->max_evaluation);
         s_formula->evaluation = evaluation;
     }
-    return 1; // Valid 
+    return 1; // Valid
 }
 
 int scenario_event_formula_evaluate(scenario_formula_t *s_formula)
