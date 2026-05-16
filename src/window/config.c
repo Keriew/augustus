@@ -24,7 +24,6 @@
 #include "graphics/text.h"
 #include "graphics/weather.h"
 #include "graphics/window.h"
-#include "platform/screen.h"
 #include "sound/city.h"
 #include "sound/device.h"
 #include "sound/effect.h"
@@ -40,7 +39,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <SDL_mouse.h>
 
 #define MAX_LANGUAGE_DIRS 20
 #define MAX_WIDGETS       64
@@ -278,8 +276,12 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_GRID, TR_CONFIG_UI_SHOW_GRID, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, TR_CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_ROAMING_PATH, TR_CONFIG_SHOW_ROAMING_PATH, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_HEADER, 0, TR_CONFIG_HEADER_DESIRABILITY, NULL, 0, 1, ITEM_BASE_H, 14},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE, TR_CONFIG_SHOW_DESIRABILITY_RANGE, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_SHOW_DESIRABILITY_RANGE_ALL, TR_CONFIG_SHOW_DESIRABILITY_RANGE_ALL, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_SHORELINE_DESIRABILITY, TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SHOW_ELEVATION_DESIRABILITY, TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_SPACE, 0, 0, NULL, 0, 1, ITEM_BASE_H, 0}, //Empty space for padding between options
         {TYPE_CHECKBOX, CONFIG_UI_PAVED_ROADS_NEAR_GRANNARIES, TR_CONFIG_ENABLE_PAVED_ROADS_NEAR_GRANARIES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, TR_CONFIG_UI_BUILD_SHOW_RESERVOIR_RANGES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_HEADER, 0, TR_CONFIG_HEADER_WATER_STRUCTURE_RANGE, NULL, 0, 1, ITEM_BASE_H, 14},
@@ -410,6 +412,7 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSES_DONT_EXPAND_INTO_GARDENS, TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, TR_CONFIG_GP_CH_HOUSING_PRE_MERGE_VACANT_LOTS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Destruction
@@ -844,7 +847,7 @@ static int config_set_city_sounds_volume(int key)
 static int config_mouse_unlock_fullscreen(int key)
 {
     config_change_basic(key);
-    platform_screen_update_window_grab();
+    system_update_window_grab();
     window_invalidate();
     return 1;
 }
@@ -2284,10 +2287,6 @@ static void init(unsigned int page, unsigned int category, int show_background_i
         disable_widget_globally(TYPE_NUMERICAL_DESC, RANGE_DISPLAY_SCALE);
         disable_widget_globally(TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE);
         disable_widget_globally(TYPE_CHECKBOX, CONFIG_ORIGINAL_FULLSCREEN);
-    }
-    if (system_is_fullscreen_only()) {
-        disable_widget_globally(TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE);
-        disable_widget_globally(TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE);
     }
 
     init_list_boxes();

@@ -28,9 +28,21 @@ int platform_cursor_get_texture_size(const cursor *c);
 void platform_cursor_force_software_mode(void);
 
 /**
- * Indicates whether we're using the software cursor
- * @return Whether we're using the software cursor
+ * Indicates whether we're forcing the use of the software cursor
+ * @return Whether we're forcing the use of the software cursor
  */
-int platform_cursor_is_software(void);
+int platform_cursor_is_forced_software_cursor(void);
+
+/**
+ * Indicates whether there is an available hardware cursor
+ * @return Whether there is an available hardware cursor
+ */
+int platform_cursor_has_hardware_cursor(void);
+
+/**
+ * Indicates whether the cursor is currently disabled
+ * @return Whether the cursor is currently disabled
+ */
+int platform_cursor_is_disabled(void);
 
 #endif // PLATFORM_CURSOR_H

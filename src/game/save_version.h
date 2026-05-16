@@ -44,7 +44,7 @@ If you are unsure about anything regarding the savegame versioning, please ask o
 
 typedef enum {
 
-    SAVE_GAME_CURRENT_VERSION = 0xb0,
+    SAVE_GAME_CURRENT_VERSION = 0xb2,
 
     SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66,
     SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76,
@@ -62,7 +62,7 @@ typedef enum {
     SAVE_GAME_LAST_ZIP_COMPRESSION = 0x88,
     SAVE_GAME_LAST_ENEMY_ARMIES_BUFFER_BUG = 0x89,
     SAVE_GAME_LAST_BARRACKS_TOWER_SENTRY_REQUEST = 0x8a,
-    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here 
+    // SAVE_GAME_LAST_WITHOUT_HIGHWAYS = 0x8b, no actual changes to how games are saved. Crudelios just wants this here
     SAVE_GAME_LAST_UNVERSIONED_SCENARIOS = 0x8c,
     SAVE_GAME_LAST_EMPIRE_RESOURCES_ALWAYS_WRITE = 0x8d,
     // the difference between this version and UNVERSIONED_SCENARIOS above is this one actually saves the scenario version
@@ -100,7 +100,9 @@ typedef enum {
     SAVE_GAME_LAST_LIMITED_ROUTE_COST = 0xac,
     SAVE_GAME_LAST_NO_WATER_IN_ADVISORS = 0xad,
     SAVE_GAME_LAST_NO_SHARED_BUILDINGS = 0xae,
-    SAVE_GAME_LAST_NO_PLEBIANS = 0xaf
+    SAVE_GAME_LAST_NO_PLEBIANS = 0xaf,
+    SAVE_GAME_LAST_NO_DOG = 0xb0,
+    SAVE_GAME_LAST_ALTAR_ROTATION_FIX = 0xb1,
 } savegame_version_t;
 
 typedef enum {

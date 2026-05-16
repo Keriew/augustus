@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "platform/renderer.h"
 
 #include "core/calc.h"
 #include "core/config.h"
@@ -11,6 +11,8 @@
 #include "platform/screen.h"
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
+
+#include "SDL.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -1186,7 +1188,7 @@ static void create_renderer_interface(void)
     graphics_renderer_set_interface(&data.renderer_interface);
 }
 
-int platform_renderer_init(SDL_Window *window)
+int platform_renderer_init(void *window)
 {
     free_all_textures();
 
@@ -1395,7 +1397,8 @@ void platform_renderer_render(void)
     SDL_SetRenderTarget(data.renderer, NULL);
     SDL_RenderCopy(data.renderer, data.render_texture, NULL, NULL);
     draw_tooltip();
-    if (platform_cursor_is_software()) {
+    if ((platform_cursor_is_forced_software_cursor() || !platform_cursor_has_hardware_cursor()) &&
+        !platform_cursor_is_disabled()) {
         draw_software_mouse_cursor();
     }
     SDL_RenderPresent(data.renderer);

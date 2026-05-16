@@ -78,6 +78,7 @@ static void play_track(int track)
     }
     data.current_track = track;
 }
+
 static void play_randomised_track(int track)
 {
     const char *filename = dir_get_file(mp3_tracks[track], NOT_LOCALIZED);
@@ -127,7 +128,6 @@ void sound_music_update(int force)
 {
     int randomise = config_get(CONFIG_GENERAL_ENABLE_MUSIC_RANDOMISE);
     if (sound_device_resume_music()) {
-
         data.next_check = 10;
         return;
     }
@@ -184,15 +184,18 @@ void sound_music_update(int force)
 
     data.next_check = 10;
 }
+
 void sound_music_pause(void)
 {
     sound_device_pause_music();
 }
+
 void sound_music_resume(void)
 {
     sound_device_resume_music();
     data.next_check = 10;
 }
+
 void sound_music_stop(void)
 {
     sound_device_stop_music();

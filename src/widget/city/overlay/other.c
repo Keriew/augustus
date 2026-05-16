@@ -439,6 +439,21 @@ static int get_tooltip_water(tooltip_context *c, int grid_offset)
     return 0;
 }
 
+static int get_environmental_desirability(const int grid_offset, int ignore_config)
+{
+    const int x_position = map_grid_offset_to_x(grid_offset);
+    const int y_position = map_grid_offset_to_y(grid_offset);
+    int additional_desirability = 0;
+    if ((ignore_config || config_get(CONFIG_UI_SHOW_SHORELINE_DESIRABILITY)) &&
+        map_terrain_exists_tile_in_radius_with_type(x_position, y_position, 1, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER)) {
+        additional_desirability += BUILDING_WATER_DESIRABILITY_BONUS;
+    }
+    if (ignore_config || config_get(CONFIG_UI_SHOW_ELEVATION_DESIRABILITY)) {
+        additional_desirability += building_get_elevation_desirability_bonus(grid_offset);
+    }
+    return additional_desirability;
+}
+
 static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
 {
     int desirability;
@@ -447,8 +462,12 @@ static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
         building *b = building_get(building_id);
         desirability = b->desirability;
     } else {
-        desirability = map_desirability_get(grid_offset);
+        desirability = map_desirability_get(grid_offset) + get_environmental_desirability(grid_offset, 1);
     }
+
+    // Clamp
+    desirability = calc_bound(desirability, -100, 100);
+
     const uint8_t *text;
     if (desirability < 0) {
         text = lang_get_string(66, 91);
@@ -656,6 +675,31 @@ static int has_well_access(int grid_offset)
     return 0;
 }
 
+static int has_inactive_fountain_access(int grid_offset)
+{
+    // Store the last fountain found to avoid redundant checks for consecutive tiles with the same fountain access.
+    static const building *last_fountain;
+    int radius = map_water_supply_fountain_radius();
+
+    if (last_fountain && map_grid_chess_distance(last_fountain->grid_offset, grid_offset) <= radius) {
+        return 1;
+    }
+
+    // Check every fountain that doesn't have water access
+    for (building *fountain = building_first_of_type(BUILDING_FOUNTAIN); fountain; fountain = fountain->next_of_type) {
+        if (fountain == last_fountain || fountain->has_water_access) {
+            continue;
+        }
+        if ((fountain->state == BUILDING_STATE_CREATED || fountain->state == BUILDING_STATE_IN_USE) &&
+            map_grid_chess_distance(fountain->grid_offset, grid_offset) <= radius) {
+            last_fountain = fountain;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 static int is_inhabited_building(int grid_offset)
 {
     building *b = building_get(map_building_at(grid_offset));
@@ -787,6 +831,9 @@ static void draw_water_graph(int x, int y, float scale, int grid_offset)
     } else if (has_well_access(grid_offset)) {
         image_draw_isometric_footprint_from_draw_tile(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y,
             COLOR_MASK_DARK_BLUE, scale);
+    } else if (has_inactive_fountain_access(grid_offset)) {
+        image_draw_isometric_footprint_from_draw_tile(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y,
+            COLOR_MASK_GRAY, scale);
     }
 }
 
@@ -907,7 +954,7 @@ static void draw_desirability_graph(int x, int y, float scale, int grid_offset)
             building *b = building_get(map_building_at(grid_offset));
             desirability = b->desirability;
         } else {
-            desirability = map_desirability_get(grid_offset);
+            desirability = map_desirability_get(grid_offset) + get_environmental_desirability(grid_offset, 0);
         }
         if (desirability) {
             int offset = get_desirability_image_offset(desirability);

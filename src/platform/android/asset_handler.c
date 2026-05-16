@@ -6,10 +6,9 @@
 #include "platform/android/jni.h"
 #include "platform/file_manager.h"
 
-#include "SDL.h"
-
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -74,6 +73,10 @@ static int asset_close(void *asset)
 
 void *asset_handler_open_asset(const char *asset_name, const char *mode)
 {
+    if (assets_location == ASSETS_LOCATION_NONE) {
+        determine_assets_location();
+    }
+
     char location[FILE_NAME_MAX];
 
     switch (assets_location) {
@@ -132,7 +135,7 @@ int asset_handler_get_directory_contents(const char *dir_name, int type,
 JNIEXPORT void JNICALL Java_com_github_Keriew_augustus_AugustusMainActivity_releaseAssetManager(JNIEnv *env, jobject thiz)
 {
     if (asset_manager) {
-        JNIEnv *env = SDL_AndroidGetJNIEnv();
+        JNIEnv *env = jni_get_env();
         (*env)->DeleteGlobalRef(env, java_asset_manager);
         asset_manager = 0;
     }

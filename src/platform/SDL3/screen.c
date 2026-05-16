@@ -1,0 +1,420 @@
+#include "screen.h"
+
+#include "city/view.h"
+#include "core/calc.h"
+#include "core/config.h"
+#include "core/image.h"
+#include "game/settings.h"
+#include "game/system.h"
+#include "graphics/graphics.h"
+#include "graphics/menu.h"
+#include "graphics/screen.h"
+#include "platform/android/android.h"
+#include "platform/cursor.h"
+#include "platform/icon.h"
+#include "platform/renderer.h"
+#include "platform/switch/switch.h"
+#include "platform/vita/vita.h"
+
+#include <stdlib.h>
+
+static struct {
+    SDL_Window *window;
+} SDL;
+
+static struct {
+    int x;
+    int y;
+    int centered;
+} window_pos = { 0, 0, 1 };
+
+static struct {
+    const int WIDTH;
+    const int HEIGHT;
+} MINIMUM = { 640, 480 };
+
+static struct {
+    int requested_percentage;
+    int percentage;
+    float screen_density;
+} scale = { 100, 100, 1 };
+
+static int scale_logical_to_pixels(int logical_value)
+{
+    return (int) (logical_value * scale.percentage / 100 * scale.screen_density);
+}
+
+static int scale_pixels_to_logical(int pixel_value)
+{
+    return (int) (pixel_value * 100 / scale.percentage / scale.screen_density);
+}
+
+static int get_max_scale_percentage(int pixel_width, int pixel_height)
+{
+    int width_scale_pct = (int) (pixel_width * 100 / scale.screen_density / MINIMUM.WIDTH);
+    int height_scale_pct = (int) (pixel_height * 100 / scale.screen_density / MINIMUM.HEIGHT);
+    return SDL_min(width_scale_pct, height_scale_pct);
+}
+
+static void update_window_grab(void)
+{
+#if !defined(__APPLE__)
+    int count;
+    SDL_GetDisplays(&count);
+    // On multi-monitor setups in fullscreen, confine the cursor if the config option is enabled
+    if (setting_fullscreen() && count > 1 && config_get(CONFIG_GENERAL_UNLOCK_MOUSE)) {
+        SDL_SetWindowMouseGrab(SDL.window, true);
+    } else {
+        SDL_SetWindowMouseGrab(SDL.window, false);
+    }
+#endif
+}
+
+void system_update_window_grab(void)
+{
+    update_window_grab();
+}
+
+static void apply_max_scale(int pixel_width, int pixel_height)
+{
+    scale.percentage = scale.requested_percentage;
+    int max_scale = get_max_scale_percentage(pixel_width, pixel_height);
+    if (scale.percentage > max_scale) {
+        scale.percentage = max_scale;
+        SDL_Log("Maximum scale of %i applied (requested: %d)", scale.percentage, scale.requested_percentage);
+    }
+}
+
+static void set_scale_percentage(int new_scale, int pixel_width, int pixel_height)
+{
+#ifdef __vita__
+    scale.requested_percentage = 100;
+#else
+    scale.requested_percentage = calc_bound(new_scale, 50, 500);
+#endif
+
+    if (!pixel_width || !pixel_height) {
+        scale.percentage = scale.requested_percentage;
+        return;
+    }
+
+    apply_max_scale(pixel_width, pixel_height);
+
+    SDL_SetWindowMinimumSize(SDL.window,
+        scale_logical_to_pixels(MINIMUM.WIDTH), scale_logical_to_pixels(MINIMUM.HEIGHT));
+}
+
+#if !defined(_WIN32) && !defined(__APPLE__)
+static void set_window_icon(void)
+{
+    SDL_Surface *surface = SDL_CreateSurfaceFrom(16, 16, SDL_PIXELFORMAT_ABGR8888, platform_icon_get_pixels(), 16 * 4);
+
+    if (!surface) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create surface for icon. Reason: %s", SDL_GetError());
+    }
+    SDL_SetWindowIcon(SDL.window, surface);
+    SDL_DestroySurface(surface);
+}
+#endif
+
+SDL_Window *platform_screen_get_window(void)
+{
+    return SDL.window;
+}
+
+int platform_screen_create(const char *title, int display_scale_percentage, int display_id)
+{
+#ifdef __ANDROID__
+    scale.screen_density = android_get_screen_density();
+#endif
+    set_scale_percentage(display_scale_percentage, 0, 0);
+
+    int total_displays;
+    SDL_DisplayID *displays = SDL_GetDisplays(&total_displays);
+
+    if (display_id < 0 || display_id >= total_displays) {
+        SDL_Log("Defaulting to display 0 instead of %d (num displays: %d)", display_id, total_displays);
+        display_id = 0;
+    }
+
+    int width, height;
+    int fullscreen = system_is_fullscreen_only() ? 1 : setting_fullscreen();
+    if (fullscreen) {
+        const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(displays[display_id]);
+        width = mode->w;
+        height = mode->h;
+    } else {
+        setting_window(&width, &height);
+        width = scale_logical_to_pixels(width);
+        height = scale_logical_to_pixels(height);
+    }
+
+    platform_screen_destroy();
+
+#ifdef __ANDROID__
+    // Fix for wrong colors on some android devices
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+#endif
+
+    SDL_Log("Creating screen %d x %d on display %d, %s, driver: %s", width, height, display_id,
+        fullscreen ? "fullscreen" : "windowed", SDL_GetCurrentVideoDriver());
+ 
+    SDL_PropertiesID props = SDL_CreateProperties();
+    if (props) {
+        SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title);
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER,
+            SDL_WINDOWPOS_CENTERED_DISPLAY(displays[display_id]));
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER,
+            SDL_WINDOWPOS_CENTERED_DISPLAY(displays[display_id]));
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width);
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height);
+        SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
+        SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
+
+        SDL.window = SDL_CreateWindowWithProperties(props);
+
+        SDL_DestroyProperties(props);
+    } else {
+        SDL.window = SDL_CreateWindow(title, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    }
+
+    if (!SDL.window) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create window: %s", SDL_GetError());
+        return 0;
+    }
+
+#if !defined(_WIN32) && !defined (__APPLE__)
+    // Windows and mac don't need setting a window icon. In fact the icon gets blurry if we do
+    set_window_icon();
+#endif
+
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(SDL.window, true);
+    }
+
+    if (system_is_fullscreen_only()) {
+        SDL_GetWindowSize(SDL.window, &width, &height);
+    }
+
+    if (!platform_renderer_init(SDL.window)) {
+        return 0;
+    }
+
+    update_window_grab();
+    set_scale_percentage(display_scale_percentage, width, height);
+    return platform_screen_resize(width, height, 1);
+}
+
+void platform_screen_destroy(void)
+{
+    platform_renderer_destroy();
+    if (SDL.window) {
+        SDL_DestroyWindow(SDL.window);
+        SDL.window = 0;
+    }
+}
+
+int platform_screen_resize(int pixel_width, int pixel_height, int save)
+{
+    apply_max_scale(pixel_width, pixel_height);
+
+    int logical_width = scale_pixels_to_logical(pixel_width);
+    int logical_height = scale_pixels_to_logical(pixel_height);
+
+    if (save) {
+        setting_set_display(setting_fullscreen(), logical_width, logical_height);
+    }
+
+    if (!platform_renderer_create_render_texture(logical_width, logical_height)) {
+        return 0;
+    }
+
+    screen_set_resolution(logical_width, logical_height);
+
+    if (!platform_cursor_has_hardware_cursor()) {
+        mouse_center_cursor();
+    }
+
+    return 1;
+}
+
+int system_scale_display(int display_scale_percentage)
+{
+    int width, height;
+    SDL_GetWindowSize(SDL.window, &width, &height);
+    set_scale_percentage(display_scale_percentage, width, height);
+    platform_screen_resize(width, height, 1);
+    return scale.percentage;
+}
+
+int system_can_scale_display(int *min_scale, int *max_scale)
+{
+#ifndef __ANDROID__
+    if (system_is_fullscreen_only()) {
+        return 0;
+    }
+#endif
+    int width, height;
+    SDL_GetWindowSize(SDL.window, &width, &height);
+#ifdef __ANDROID__
+    int max_scale_current_orientation = get_max_scale_percentage(width, height);
+    int max_scale_alternative_orientation = get_max_scale_percentage(height, width);
+    if (max_scale_current_orientation < 100 && max_scale_alternative_orientation < 100) {
+        SDL_Log("Not allowing scale on Android: %d x %d = max scale %d or %d",
+            width, height, max_scale_current_orientation, max_scale_alternative_orientation);
+        return 0;
+    }
+#endif
+    if (min_scale) {
+        *min_scale = 50;
+    }
+    if (max_scale) {
+        *max_scale = get_max_scale_percentage(width, height);
+    }
+    return 1;
+}
+
+void platform_screen_move(int x, int y)
+{
+    if (!setting_fullscreen()) {
+        window_pos.x = x;
+        window_pos.y = y;
+        window_pos.centered = 0;
+    }
+}
+
+int platform_screen_get_scale(void)
+{
+    return scale.percentage;
+}
+
+void platform_screen_set_fullscreen(void)
+{
+    SDL_GetWindowPosition(SDL.window, &window_pos.x, &window_pos.y);
+    SDL_DisplayID display = SDL_GetDisplayForWindow(SDL.window);
+    const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(display);
+    SDL_Log("User to fullscreen %d x %d on display %d", mode->w, mode->h, display);
+    if (!SDL_SetWindowFullscreen(SDL.window, true)) {
+        SDL_Log("Unable to enter fullscreen: %s", SDL_GetError());
+        return;
+    }
+
+    update_window_grab();
+    setting_set_display(1, mode->w, mode->h);
+}
+
+void platform_screen_set_windowed(void)
+{
+    if (system_is_fullscreen_only()) {
+        return;
+    }
+    int logical_width, logical_height;
+    setting_window(&logical_width, &logical_height);
+    int pixel_width = scale_logical_to_pixels(logical_width);
+    int pixel_height = scale_logical_to_pixels(logical_height);
+    SDL_Log("User to windowed %d x %d on display %d", pixel_width, pixel_height, SDL_GetDisplayForWindow(SDL.window));
+    SDL_SetWindowFullscreen(SDL.window, false);
+    SDL_SetWindowSize(SDL.window, pixel_width, pixel_height);
+    if (window_pos.centered) {
+        platform_screen_center_window();
+    }
+    update_window_grab();
+    setting_set_display(0, pixel_width, pixel_height);
+}
+
+void platform_screen_set_window_size(int logical_width, int logical_height)
+{
+    if (system_is_fullscreen_only()) {
+        return;
+    }
+    int pixel_width = scale_logical_to_pixels(logical_width);
+    int pixel_height = scale_logical_to_pixels(logical_height);
+    if (setting_fullscreen()) {
+        SDL_SetWindowFullscreen(SDL.window, false);
+    } else {
+        SDL_GetWindowPosition(SDL.window, &window_pos.x, &window_pos.y);
+    }
+    if (SDL_GetWindowFlags(SDL.window) & SDL_WINDOW_MAXIMIZED) {
+        SDL_RestoreWindow(SDL.window);
+    }
+    SDL_SetWindowSize(SDL.window, pixel_width, pixel_height);
+    if (window_pos.centered) {
+        platform_screen_center_window();
+    }
+    SDL_Log("User resize to %d x %d on display %d", pixel_width, pixel_height, SDL_GetDisplayForWindow(SDL.window));
+    if (SDL_GetWindowMouseGrab(SDL.window) == true) {
+        SDL_SetWindowMouseGrab(SDL.window, false);
+    }
+    setting_set_display(0, pixel_width, pixel_height);
+}
+
+void platform_screen_center_window(void)
+{
+    SDL_DisplayID display = SDL_GetDisplayForWindow(SDL.window);
+    SDL_SetWindowPosition(SDL.window,
+        SDL_WINDOWPOS_CENTERED_DISPLAY(display), SDL_WINDOWPOS_CENTERED_DISPLAY(display));
+    window_pos.centered = 1;
+}
+
+#ifdef _WIN32
+void platform_screen_recreate_texture(void)
+{
+    // On Windows, if ctrl + alt + del is pressed during fullscreen, the rendering context may be lost for a few frames
+    // after restoring the window, preventing the texture from being recreated. This forces an attempt to recreate the
+    // texture every frame to bypass that issue.
+    if (setting_fullscreen() && platform_renderer_lost_render_texture()) {
+        const SDL_DisplayMode *mode = SDL_GetWindowFullscreenMode(SDL.window);
+        if (!mode) {
+            mode = SDL_GetDesktopDisplayMode(SDL_GetDisplayForWindow(SDL.window));
+            if (!mode) {
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to get display mode for recreating texture: %s",
+                    SDL_GetError());
+                return;
+            }
+        }
+        screen_set_resolution(scale_pixels_to_logical(mode->w), scale_pixels_to_logical(mode->h));
+        platform_renderer_create_render_texture(screen_width(), screen_height());
+    }
+}
+#endif
+
+void system_show_error_message_box(const char *title, const char *message)
+{
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, SDL.window);
+}
+
+void system_set_mouse_position(int *x, int *y)
+{
+    *x = calc_bound(*x, 0, screen_width() - 1);
+    *y = calc_bound(*y, 0, screen_height() - 1);
+    SDL_WarpMouseInWindow(SDL.window, scale_logical_to_pixels(*x), scale_logical_to_pixels(*y));
+}
+
+void system_change_window_title(const char *title)
+{
+    SDL_SetWindowTitle(SDL.window, title);
+}
+
+int system_is_fullscreen_only(void)
+{
+#if defined(__ANDROID__) || defined(__SWITCH__) || defined(__vita__)
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+void system_get_max_resolution(int *width, int *height)
+{
+    const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetDisplayForWindow(SDL.window));
+    if (!mode) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to get display mode for getting max resolution: %s", SDL_GetError());
+        *width = MINIMUM.WIDTH;
+        *height = MINIMUM.HEIGHT;
+        return;
+    }
+    *width = scale_pixels_to_logical(mode->w);
+    *height = scale_pixels_to_logical(mode->h);
+}

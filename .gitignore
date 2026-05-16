@@ -20,7 +20,7 @@ res/packed_assets/
 out/
 cmake-build-debug
 /data
-ext/SDL2/*/
+ext/SDL*/*/
 *~
 *.swp
 .vscode
@@ -41,6 +41,7 @@ local.properties
 .idea
 .cxx/
 *.log
+gradle-daemon-jvm.properties
 /android/build/
 /android/*/build/
 /android/*/release/
@@ -49,6 +50,8 @@ local.properties
 /android/play-publisher.json
 /android/augustus/src/main/play
 /android/julius/src/main/play
+/android/SDL2/src/main/java
+/android/augustus/libs
 
 # lib files
 ext/SDL2/*.zip

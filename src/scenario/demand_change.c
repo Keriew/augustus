@@ -1,5 +1,7 @@
 #include "demand_change.h"
 
+#include "building/dock.h"
+#include "building/menu.h"
 #include "city/message.h"
 #include "core/array.h"
 #include "core/log.h"
@@ -75,7 +77,14 @@ static void process_demand_change(demand_change_t *demand_change)
     } else if (amount == DEMAND_CHANGE_LEGACY_IS_FALL) {
         amount = trade_route_legacy_decrease_limit(route, resource, buys);
     } else {
-        trade_route_set_limit(route, resource, amount, buys);
+        empire_city *empire_city = empire_city_get(city_id);
+        if (buys) {
+            empire_city_change_buying_of_resource(empire_city, resource, amount);
+        } else {
+            empire_city_change_selling_of_resource(empire_city, resource, amount);
+            building_menu_update();
+        }
+        building_dock_enable_resource_in_all_docks(resource);
     }
     if (empire_city_is_trade_route_open(route)) {
         int change = amount - last_amount;
@@ -219,7 +228,13 @@ void scenario_demand_change_load_state_old_version(buffer *buf, int is_legacy_ch
             demand_change->amount = buffer_read_i32(buf);
         }
     }
-    // Migration
+
+    array_trim(demand_changes);
+}
+
+void scenario_demand_change_migrate_old_version(void)
+{
+    demand_change_t *demand_change;
     array_foreach(demand_changes, demand_change) {
         int city_id = empire_city_get_for_trade_route(demand_change->route_id);
         if (city_id < 0) {
@@ -228,6 +243,4 @@ void scenario_demand_change_load_state_old_version(buffer *buf, int is_legacy_ch
         }
         demand_change->buys = empire_city_get(city_id)->buys_resource[demand_change->resource];
     }
-    
-    array_trim(demand_changes);
 }

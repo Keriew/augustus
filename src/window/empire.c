@@ -7,6 +7,7 @@
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/image_group.h"
+#include "core/string.h"
 #include "empire/city.h"
 #include "empire/empire.h"
 #include "empire/object.h"
@@ -30,7 +31,6 @@
 #include "input/input.h"
 #include "input/scroll.h"
 #include "input/cursor.h"
-#include "platform/cursor.h"
 #include "scenario/empire.h"
 #include "scenario/invasion.h"
 #include "window/advisors.h"
@@ -44,12 +44,12 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>  
-#include <string.h>  
+#include <stdlib.h>
+#include <string.h>
 
 #define WIDTH_BORDER 16 //dimensions the border image in px, informative only
-#define HEIGHT_BORDER 136 
-#define SIDEBAR_ENTRY_HEIGHT 120 
+#define HEIGHT_BORDER 136
+#define SIDEBAR_ENTRY_HEIGHT 120
 #define BOTTOM_PANEL_HEIGHT 120
 
 #define RESOURCE_ICON_WIDTH 26 //dimensions the resource icon in px, informative only
@@ -60,13 +60,13 @@
 #define CLAMP(a, x, b) (((x) < (a)) ? (a) : \
 			((b) < (x)) ? (b) : (x))
 #define TRADE_DOT_SPACING 10 //spacing between dots in trade route line
-#define MAX_SIDEBAR_CITIES 256 
+#define MAX_SIDEBAR_CITIES 256
 #define MAX_RESOURCE_BUTTONS 256
 #define MAX_TRADE_OPEN_BUTTONS 64
 #define MAX_TRADE_EDGES 4096
 #define MAX_DOTS_PER_ROUTE 1024
 #define MAX_DOTS_ON_MAP (MAX_DOTS_PER_ROUTE * MAX_SIDEBAR_CITIES)
-#define TRADE_PULSE_DOT_MS 180 
+#define TRADE_PULSE_DOT_MS 180
 #define TRADE_DOT_ANIMATION_SCALE 160
 
 #define FONT_SPACE_WIDTH font_definition_for(FONT_NORMAL_GREEN)->space_width
@@ -76,7 +76,7 @@
 #define NO_POSITION ((unsigned int) -1) //used as an alterntive to 0 for some of new pointers
 //to avoid confusion with when relying on external indexing, which can be 0-based
 
-//typedefs 
+//typedefs
 typedef enum {
     TRADE_ICON_NONE = -1,
     TRADE_ICON_LAND = 0,
@@ -355,7 +355,7 @@ static void setup_sidebar(void)
     int map_draw_y_min = data.y_min + WIDTH_BORDER;
     int map_draw_y_max = data.y_max - BOTTOM_PANEL_HEIGHT;
 
-    data.sidebar.margin_left = 3; //margins betwene sidebar and gridbox
+    data.sidebar.margin_left = 3; //margins between sidebar and gridbox
     data.sidebar.margin_right = 3;
     data.sidebar.margin_top = 2 * BLOCK_SIZE + 6; //space for sorting buttons
     data.sidebar.margin_bottom = 6;
@@ -381,7 +381,7 @@ static void setup_sidebar_gridbox(void)
         return;
     }
 
-    int y = data.sidebar.y_min;
+    int y = data.sidebar.y_min + data.sidebar.margin_top;
     sidebar_city_count = 0;
 
     for (int i = 1; i < empire_city_get_array_size(); i++) { // skip "no city" entry
@@ -396,7 +396,7 @@ static void setup_sidebar_gridbox(void)
         entry->city_id = i;
         entry->empire_object_id = city->empire_object_id;
         entry->x = data.sidebar.x_min + data.sidebar.margin_left;
-        entry->y = y;
+        entry->y = y; // don't rely on this value since it gets wrong when the sidebar gets sorted afterwards
         y += SIDEBAR_ENTRY_HEIGHT;
         sidebar_city_count++;
     }
@@ -649,7 +649,7 @@ static void draw_paneling(void)
         image_draw(image_base + 2, data.panel.x_min, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_base + 2, data.panel.x_max - WIDTH_BORDER, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
     }
-    // Sidebar background 
+    // Sidebar background
     graphics_set_clip_rectangle(data.sidebar.x_min - WIDTH_BORDER, data.sidebar.y_min, //clipping - border, to let border be drawn OUTSIDE
         data.sidebar.width + WIDTH_BORDER, //account for width border substracted earlier to make sure textures stretch all the way
         data.sidebar.y_max - data.sidebar.y_min);
@@ -660,7 +660,7 @@ static void draw_paneling(void)
             image_draw(asset_id, x, y, COLOR_MASK_NONE, SCALE_NONE);
         }
     }
-    // Sidebar border 
+    // Sidebar border
     for (int y = data.sidebar.y_min; y < data.sidebar.y_max; y += 86) {
         image_draw(image_base, data.sidebar.x_min - WIDTH_BORDER, y, COLOR_MASK_NONE, SCALE_NONE);
     }
@@ -917,7 +917,7 @@ static void window_empire_draw_trade_route_pulses(const empire_object *route_obj
 }
 
 // -------------------------------------------------------------------------------------------------------
-//                                              FOREGROUND ELEMENTS DRAWING 
+//                                              FOREGROUND ELEMENTS DRAWING
 // -------------------------------------------------------------------------------------------------------
 
 static void draw_trade_resource(resource_type r, int trade_max, int x, int y)
@@ -1225,7 +1225,7 @@ static void draw_sidebar_city_item(const grid_box_item *item)
         // Everything fits
         image_draw(badge_id, x_offset + badge_margin, y_offset + badge_margin, COLOR_MASK_NONE, SCALE_NONE);
 
-        text_draw(name, x_offset + badge_margin + BLOCK_SIZE, y_offset + 9, FONT_LARGE_BLACK, 0);
+        text_draw_centered_ellipsized(name, x_offset + badge_margin + 8, y_offset + 9, 262 - 8, FONT_LARGE_BLACK, 0);
         if (city->is_open || draw_icon_on_top) {
             //if city is open, draw trade route icon to remind of type, same if it doesnt fit in the button
             int trade_route_icon_offset = badge_width + BLOCK_SIZE;
@@ -1237,14 +1237,14 @@ static void draw_sidebar_city_item(const grid_box_item *item)
     } else if (badge_width <= available_width) {
         // Only badge fits, check if the icon fits inside it
         image_draw(badge_id, x_offset + badge_margin, y_offset + badge_margin, COLOR_MASK_NONE, SCALE_NONE);
-        int city_name_end = text_draw(name, x_offset + badge_margin + BLOCK_SIZE, y_offset + 9, FONT_LARGE_BLACK, 0);
+        int city_name_end = text_draw_centered_ellipsized(name, x_offset + badge_margin + 8, y_offset + 9, 262 - 8, FONT_LARGE_BLACK, 0);
         int icon_fits_in_badge = (city_name_end + badge_margin + 2 + 34) <= (x_offset + badge_margin + badge_width);
         if (icon_fits_in_badge) {
             image_draw(image_id, x_offset + badge_margin + city_name_end + BLOCK_SIZE + 2, y_offset + 9 + 2 * city->is_sea_trade, COLOR_MASK_NONE, SCALE_NONE);
         }
 
     } else { // Not enough room for badge + icon
-        text_draw(name, x_offset + badge_margin, y_offset + 9, FONT_LARGE_BLACK, 0);
+        text_draw_ellipsized(name, x_offset + badge_margin, y_offset + 9, 262, FONT_LARGE_BLACK, 0);
     }
     // Move y_offset down for trade info rows
     y_offset += 44;
@@ -1547,7 +1547,7 @@ static void draw_empire_object(const empire_object *obj)
     const image *img = image_get(image_id);
     if ((((unsigned int) data.hovered_object == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) ||
         ((empire_selected_object() == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY)) {
-        // actions for currently hovered or selected city objects 
+        // actions for currently hovered or selected city objects
         if ((empire_selected_object() == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) {
             const int offsets[16][2] = {
                 {1, 0}, {0, 1}, {-1, 0}, {0, -1},
@@ -1694,7 +1694,7 @@ static void draw_city_name(const empire_city *city)
         int x_offset = (data.panel.x_min + data.panel.x_max - 332) / 2 + 64;
         int y_offset = data.y_max - 118;
         const uint8_t *city_name = empire_city_get_name(city);
-        text_draw_centered(city_name, x_offset, y_offset, 268, FONT_LARGE_BLACK, 0);
+        text_draw_centered_ellipsized(city_name, x_offset, y_offset, 268, FONT_LARGE_BLACK, 0);
     }
 }
 
@@ -1813,7 +1813,7 @@ static void process_selection(void)
     int selected_object = empire_selected_object();
     if (selected_object) {
         data.selected_city = empire_city_get_for_object(selected_object - 1);
-        //data.selected_city is array index of the empire object from the array of cities 
+        //data.selected_city is array index of the empire object from the array of cities
     } else {
         data.selected_city = 0;
     }
@@ -2126,6 +2126,108 @@ static void get_tooltip_trade_route_type(tooltip_context *c)
     }
 }
 
+static int get_city_name_tooltip_sidebar(tooltip_context *c)
+{
+    const mouse *m = mouse_get();
+    if (!is_sidebar(m)) {
+        return 0;
+    }
+    if (data.hovered_object <= 0) {
+        return 0;
+    }
+    int hovered_object = data.hovered_object - 1; // data.hovered_object always is one more than the actual object id
+    if (empire_object_get(hovered_object)->type != EMPIRE_OBJECT_CITY) {
+        return 0;
+    }
+    int city_id = empire_city_get_for_object(hovered_object);
+    if (!city_id) {
+        return 0;
+    }
+    empire_city *city = empire_city_get(city_id);
+    if (!city || city->type != EMPIRE_CITY_TRADE) {
+        return 0;
+    }
+    const uint8_t *name = empire_city_get_name(city);
+    if (!name) {
+        return 0;
+    }
+    int box_width = 262 - 8;
+    uint8_t name_ellipsized[54]; // 50 max city name and +4 for ellipsize characters
+    string_copy(name, name_ellipsized, 54);
+    text_ellipsize(name_ellipsized, FONT_LARGE_BLACK, box_width);
+
+    int x_offset = 0;
+    int y_offset = 0;
+
+    // find coordinates of the current sidebar panel
+    for (int i = 0; i < sidebar_city_count; i++) {
+        sidebar_city_entry *entry = &sidebar_cities[i];
+        if (entry->empire_object_id == hovered_object) {
+            x_offset = entry->x;
+            y_offset = SIDEBAR_ENTRY_HEIGHT * (i - sidebar_grid_box.scrollbar.scroll_position)
+                + data.sidebar.y_min + data.sidebar.margin_top;
+        }
+    }
+
+    int badge_margin = 5;
+    int side_x_offset = x_offset + badge_margin + 8;
+    int side_y_offset = y_offset + 9;
+    int name_width = text_get_width(name_ellipsized, FONT_LARGE_BLACK);
+
+    int centered_offset = (box_width - text_get_width(name_ellipsized, FONT_LARGE_BLACK)) / 2;
+    if (centered_offset < 0) {
+        centered_offset = 0;
+    }
+
+    if (m->x >= side_x_offset + centered_offset && m->x <= side_x_offset + centered_offset + name_width &&
+        m->y >= side_y_offset && m->y <= side_y_offset + 26) {
+        c->type = TOOLTIP_BUTTON;
+        c->precomposed_text = name;
+        return 1;
+    }
+
+    return 0;
+}
+
+static int get_city_name_tooltip(tooltip_context *c)
+{
+    int selected_object = empire_selected_object();
+    if (!selected_object || empire_object_get(selected_object - 1)->type != EMPIRE_OBJECT_CITY) {
+        return 0;
+    }
+
+    data.selected_city = empire_city_get_for_object(selected_object - 1);
+    const empire_city *city = empire_city_get(data.selected_city);
+    const uint8_t *name = empire_city_get_name(city);
+
+    if (!name) {
+        return 0;
+    }
+
+    int box_width = 268;
+    uint8_t name_ellipsized[54]; // 50 max city name and +4 for ellipsize characters
+    string_copy(name, name_ellipsized, 54);
+    text_ellipsize(name_ellipsized, FONT_LARGE_BLACK, box_width);
+
+    int bottom_x_offset = (data.panel.x_min + data.panel.x_max - 332) / 2 + 64;
+    int bottom_y_offset = data.y_max - 118;
+    int name_width = text_get_width(name_ellipsized, FONT_LARGE_BLACK);
+
+    int centered_offset = (box_width - text_get_width(name_ellipsized, FONT_LARGE_BLACK)) / 2;
+    if (centered_offset < 0) {
+        centered_offset = 0;
+    }
+
+    if (c->mouse_x >= bottom_x_offset + centered_offset && c->mouse_x <= bottom_x_offset + centered_offset + name_width &&
+        c->mouse_y >= bottom_y_offset && c->mouse_y <= data.y_max - 92) {
+        c->type = TOOLTIP_BUTTON;
+        c->precomposed_text = name;
+        return 1;
+    }
+
+    return 0;
+}
+
 static void get_tooltip(tooltip_context *c)
 {
     int resource = data.focus_resource;
@@ -2151,12 +2253,16 @@ static void get_tooltip(tooltip_context *c)
         c->type = TOOLTIP_BUTTON;
         c->text_group = CUSTOM_TRANSLATION;
         c->text_id = window_empire_sidebar_sort_get_sorting_arrow_is_down() ? TR_TOOLTIP_DESCENDING_ORDER : TR_TOOLTIP_ASCENDING_ORDER;
+    } else if (get_city_name_tooltip(c)) {
+        return;
+    } else if (get_city_name_tooltip_sidebar(c)) {
+        return;
     } else {
         get_tooltip_trade_route_type(c);
     }
 }
 // -------------------------------------------------------------------------------------------------------
-//                                              BUTTON HANDLERS     
+//                                              BUTTON HANDLERS
 // -------------------------------------------------------------------------------------------------------
 
 static void button_help(int param1, int param2)
@@ -2215,7 +2321,7 @@ void register_open_trade_button(int x, int y, int width, int height, int route_i
 
 
 // -------------------------------------------------------------------------------------------------------
-//                                              WINDOW SHOW 
+//                                              WINDOW SHOW
 // -------------------------------------------------------------------------------------------------------
 
 void window_empire_show(void)

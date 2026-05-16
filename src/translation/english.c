@@ -2085,6 +2085,14 @@ static translation_string all_strings[] = {
     {TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP_PANTHEON, "Pantheon divine powers"},
     {TR_FIGURE_TYPE_PLEBIAN, "Plebeian"},
     {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS, "Houses do not spawn aimless wandering plebeians"},
+    {TR_BUILDING_DEPOTS, "Cart depots:"},
+    {TR_DESTRIBUTION_SOURCE, "- used as source: "},
+    {TR_DESTRIBUTION_DESTINATION, "- used as destination: "},
+    {TR_FIGURE_TYPE_DOG, "Dog"},
+    {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, "Houses do not spawn wandering dogs"},
+    {TR_CONFIG_HEADER_DESIRABILITY, "Desirability"},
+    {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Show shoreline desirability in overlay"},
+    {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Show elevation desirability in overlay"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

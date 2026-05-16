@@ -107,6 +107,18 @@ void system_show_cursor(void);
 void system_hide_cursor(void);
 
 /**
+ * Update whether the mouse should be grabbed based on the current fullscreen and mouse unlock settings
+ */
+void system_update_window_grab(void);
+
+/**
+ * Show an error message box with the specified title and message
+ * @param title Title of the message box
+ * @param message Message to show in the message box
+ */
+void system_show_error_message_box(const char *title, const char *message);
+
+/**
  * Get the key corresponding to the symbol in the current layout
  * @param name Name of the key
  * @return Corresponding key, or KEY_TYPE_NONE if the key does not exist on the layout

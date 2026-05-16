@@ -13,21 +13,20 @@
 #define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x))) // simple clamp macro 
 // because mathematicians have only discovered clamping in 2023, so its not in all math.h yet
 
-double parse_expr(const char **s);
-static int formula_evaluate(const char *str);
+static double parse_expr(const unsigned char **s);
 
-double get_var_value(int id)
+static double get_var_value(int id)
 {
     // variables are limited to int, cast to double
     return (double) scenario_custom_variable_get_value(id);
 }
 
-void skip_spaces(const char **s)
+static void skip_spaces(const unsigned char **s)
 {
     while (isspace(**s)) (*s)++;
 }
 
-double parse_number(const char **s)
+static double parse_number(const unsigned char **s)
 {
     double val = 0.0;
     double frac = 0.0;
@@ -52,7 +51,7 @@ double parse_number(const char **s)
     return val + frac / divisor;
 }
 
-double parse_factor(const char **s)
+static double parse_factor(const unsigned char **s)
 {
     skip_spaces(s);
 
@@ -90,7 +89,7 @@ double parse_factor(const char **s)
     return 0.0; // fallback
 }
 
-double parse_term(const char **s)
+static double parse_term(const unsigned char **s)
 {
     double val = parse_factor(s);
     skip_spaces(s);
@@ -116,8 +115,7 @@ double parse_term(const char **s)
     return val;
 }
 
-
-double parse_expr(const char **s)
+static double parse_expr(const unsigned char **s)
 {
     double val = parse_term(s);
     skip_spaces(s);
@@ -134,9 +132,16 @@ double parse_expr(const char **s)
     return val;
 }
 
+static int formula_evaluate(const unsigned char *str)
+{
+    double result = parse_expr(&str);
+    // round() from <math.h> gives nearest integer (e.g. 4.5 -> 5)
+    return (int) round(result);
+}
+
 int scenario_event_formula_check(scenario_formula_t *s_formula)
 {
-    char *s = (char *) s_formula->formatted_calculation;
+    unsigned char *s = s_formula->formatted_calculation;
     s_formula->is_error = 0;
     s_formula->is_static = 1;
     while (*s) {
@@ -173,18 +178,11 @@ int scenario_event_formula_check(scenario_formula_t *s_formula)
     }
     if (s_formula->is_static) {
         // Evaluate static formula once
-        int evaluation = formula_evaluate((const char *) s_formula->formatted_calculation);
+        int evaluation = formula_evaluate(s_formula->formatted_calculation);
         evaluation = CLAMP(evaluation, s_formula->min_evaluation, s_formula->max_evaluation);
         s_formula->evaluation = evaluation;
     }
     return 1; // Valid 
-}
-
-static int formula_evaluate(const char *str)
-{
-    double result = parse_expr(&str);
-    // round() from <math.h> gives nearest integer (e.g. 4.5 -> 5)
-    return (int) round(result);
 }
 
 int scenario_event_formula_evaluate(scenario_formula_t *s_formula)
@@ -195,7 +193,7 @@ int scenario_event_formula_evaluate(scenario_formula_t *s_formula)
     if (s_formula->is_static) {
         return s_formula->evaluation;
     }
-    int evaluation = formula_evaluate((const char *) s_formula->formatted_calculation);
+    int evaluation = formula_evaluate(s_formula->formatted_calculation);
     evaluation = CLAMP(evaluation, s_formula->min_evaluation, s_formula->max_evaluation);
     s_formula->evaluation = evaluation;
     return evaluation;

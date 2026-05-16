@@ -1,9 +1,8 @@
-#include "vita.h"
+#include "platform/vita/vita.h"
 
 #include "core/file.h"
 #include "game/system.h"
 #include "graphics/screen.h"
-#include "input/mouse.h"
 #include "input/touch.h"
 #include "input/keyboard.h"
 #include "platform/vita/vita_keyboard.h"
@@ -19,20 +18,11 @@
 // max heap size is approx. 330 MB with -d ATTRIBUTE2=12, otherwise max is 192
 int _newlib_heap_size_user = 330 * 1024 * 1024;
 
-static void center_mouse_cursor(void)
-{
-    int x = screen_width() / 2;
-    int y = screen_height() / 2;
-    system_set_mouse_position(&x, &y);
-    mouse_set_position(x, y);
-}
-
 static int vkbd_requested;
 
 void platform_init_callback(void)
 {
     touch_set_mode(TOUCH_MODE_TOUCHPAD);
-    center_mouse_cursor();
 
     // Use maximum clocks
     scePowerSetArmClockFrequency(444);

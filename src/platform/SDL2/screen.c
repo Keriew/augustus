@@ -10,6 +10,7 @@
 #include "graphics/menu.h"
 #include "graphics/screen.h"
 #include "platform/android/android.h"
+#include "platform/cursor.h"
 #include "platform/icon.h"
 #include "platform/renderer.h"
 #include "platform/switch/switch.h"
@@ -42,7 +43,7 @@ static struct {
 
 static int scale_logical_to_pixels(int logical_value)
 {
-    return (int) (logical_value * scale.percentage / 100 / scale.screen_density);
+    return (int) (logical_value * scale.percentage / 100 * scale.screen_density);
 }
 
 static int scale_pixels_to_logical(int pixel_value)
@@ -69,7 +70,7 @@ static void update_window_grab(void)
 #endif
 }
 
-void platform_screen_update_window_grab(void)
+void system_update_window_grab(void)
 {
     update_window_grab();
 }
@@ -127,7 +128,7 @@ int platform_screen_create(const char *title, int display_scale_percentage, int 
     int fullscreen = system_is_fullscreen_only() ? 1 : setting_fullscreen();
     if (fullscreen) {
         SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(0, &mode);
+        SDL_GetDesktopDisplayMode(display_id, &mode);
         width = mode.w;
         height = mode.h;
     } else {
@@ -208,12 +209,17 @@ int platform_screen_resize(int pixel_width, int pixel_height, int save)
         setting_set_display(setting_fullscreen(), logical_width, logical_height);
     }
 
-    if (platform_renderer_create_render_texture(logical_width, logical_height)) {
-        screen_set_resolution(logical_width, logical_height);
-        return 1;
-    } else {
+    if (!platform_renderer_create_render_texture(logical_width, logical_height)) {
         return 0;
     }
+
+    screen_set_resolution(logical_width, logical_height);
+
+    if (!platform_cursor_has_hardware_cursor()) {
+        mouse_center_cursor();
+    }
+
+    return 1;
 }
 
 int system_scale_display(int display_scale_percentage)
@@ -353,7 +359,7 @@ void platform_screen_recreate_texture(void)
 }
 #endif
 
-void platform_screen_show_error_message_box(const char *title, const char *message)
+void system_show_error_message_box(const char *title, const char *message)
 {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, SDL.window);
 }

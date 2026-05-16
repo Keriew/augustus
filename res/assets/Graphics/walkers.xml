@@ -5000,4 +5000,81 @@
 	<!-- Note: Caesar Static frames -->
 	<image id="caesar_static_sw_01" src="caesar_static_sw_01"/>
 	<image id="caesar_static_sw_02" src="caesar_static_sw_02"/>
+	<!-- Note: Dog Portrait -->
+	<image id="dog_portrait">
+		<layer group="190" image="7"/>
+		<layer src="dog_portrait"/>
+	</image>
+	<!-- Note: Dog Walking animation frames NORTH-EAST DIRECTION 01-08 -->
+	<image id="dog_walk_ne_01" src="dog_walk_ne_01"/>
+	<image id="dog_walk_ne_02" src="dog_walk_ne_02"/>
+	<image id="dog_walk_ne_03" src="dog_walk_ne_03"/>
+	<image id="dog_walk_ne_04" src="dog_walk_ne_04"/>
+	<image id="dog_walk_ne_05" src="dog_walk_ne_05"/>
+	<image id="dog_walk_ne_06" src="dog_walk_ne_06"/>
+	<image id="dog_walk_ne_07" src="dog_walk_ne_07"/>
+	<image id="dog_walk_ne_08" src="dog_walk_ne_08"/>
+	<!-- Note: Dog Walking animation frames EAST DIRECTION 01-08 -->
+	<image id="dog_walk_e_01" src="dog_walk_e_01"/>
+	<image id="dog_walk_e_02" src="dog_walk_e_02"/>
+	<image id="dog_walk_e_03" src="dog_walk_e_03"/>
+	<image id="dog_walk_e_04" src="dog_walk_e_04"/>
+	<image id="dog_walk_e_05" src="dog_walk_e_05"/>
+	<image id="dog_walk_e_06" src="dog_walk_e_06"/>
+	<image id="dog_walk_e_07" src="dog_walk_e_07"/>
+	<image id="dog_walk_e_08" src="dog_walk_e_08"/>
+	<!-- Note: Dog Walking animation frames SOUTH-EAST DIRECTION 01-08 -->
+	<image id="dog_walk_se_01" src="dog_walk_se_01"/>
+	<image id="dog_walk_se_02" src="dog_walk_se_02"/>
+	<image id="dog_walk_se_03" src="dog_walk_se_03"/>
+	<image id="dog_walk_se_04" src="dog_walk_se_04"/>
+	<image id="dog_walk_se_05" src="dog_walk_se_05"/>
+	<image id="dog_walk_se_06" src="dog_walk_se_06"/>
+	<image id="dog_walk_se_07" src="dog_walk_se_07"/>
+	<image id="dog_walk_se_08" src="dog_walk_se_08"/>
+	<!-- Note: Dog Walking animation frames SOUTH DIRECTION 01-08 -->
+	<image id="dog_walk_s_01" src="dog_walk_s_01"/>
+	<image id="dog_walk_s_02" src="dog_walk_s_02"/>
+	<image id="dog_walk_s_03" src="dog_walk_s_03"/>
+	<image id="dog_walk_s_04" src="dog_walk_s_04"/>
+	<image id="dog_walk_s_05" src="dog_walk_s_05"/>
+	<image id="dog_walk_s_06" src="dog_walk_s_06"/>
+	<image id="dog_walk_s_07" src="dog_walk_s_07"/>
+	<image id="dog_walk_s_08" src="dog_walk_s_08"/>
+	<!-- Note: Dog Walking animation frames SOUTH-WEST DIRECTION 01-08 -->
+	<image id="dog_walk_sw_01" src="dog_walk_sw_01"/>
+	<image id="dog_walk_sw_02" src="dog_walk_sw_02"/>
+	<image id="dog_walk_sw_03" src="dog_walk_sw_03"/>
+	<image id="dog_walk_sw_04" src="dog_walk_sw_04"/>
+	<image id="dog_walk_sw_05" src="dog_walk_sw_05"/>
+	<image id="dog_walk_sw_06" src="dog_walk_sw_06"/>
+	<image id="dog_walk_sw_07" src="dog_walk_sw_07"/>
+	<image id="dog_walk_sw_08" src="dog_walk_sw_08"/>
+	<!-- Note: Dog Walking animation frames WEST DIRECTION 01-08 -->
+	<image id="dog_walk_w_01" src="dog_walk_w_01"/>
+	<image id="dog_walk_w_02" src="dog_walk_w_02"/>
+	<image id="dog_walk_w_03" src="dog_walk_w_03"/>
+	<image id="dog_walk_w_04" src="dog_walk_w_04"/>
+	<image id="dog_walk_w_05" src="dog_walk_w_05"/>
+	<image id="dog_walk_w_06" src="dog_walk_w_06"/>
+	<image id="dog_walk_w_07" src="dog_walk_w_07"/>
+	<image id="dog_walk_w_08" src="dog_walk_w_08"/>
+	<!-- Note: Dog Walking animation frames NORTH-WEST DIRECTION 01-08 -->
+	<image id="dog_walk_nw_01" src="dog_walk_nw_01"/>
+	<image id="dog_walk_nw_02" src="dog_walk_nw_02"/>
+	<image id="dog_walk_nw_03" src="dog_walk_nw_03"/>
+	<image id="dog_walk_nw_04" src="dog_walk_nw_04"/>
+	<image id="dog_walk_nw_05" src="dog_walk_nw_05"/>
+	<image id="dog_walk_nw_06" src="dog_walk_nw_06"/>
+	<image id="dog_walk_nw_07" src="dog_walk_nw_07"/>
+	<image id="dog_walk_nw_08" src="dog_walk_nw_08"/>
+	<!-- Note: Dog Walking animation frames NORTH DIRECTION 01-08 -->
+	<image id="dog_walk_n_01" src="dog_walk_n_01"/>
+	<image id="dog_walk_n_02" src="dog_walk_n_02"/>
+	<image id="dog_walk_n_03" src="dog_walk_n_03"/>
+	<image id="dog_walk_n_04" src="dog_walk_n_04"/>
+	<image id="dog_walk_n_05" src="dog_walk_n_05"/>
+	<image id="dog_walk_n_06" src="dog_walk_n_06"/>
+	<image id="dog_walk_n_07" src="dog_walk_n_07"/>
+	<image id="dog_walk_n_08" src="dog_walk_n_08"/>
 </assetlist>

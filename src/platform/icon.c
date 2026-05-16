@@ -1,6 +1,6 @@
 #include "icon.h"
 
-#include <stddef.h>
+#include <stdint.h>
 
 static uint8_t icon_pixels[] = 
     "\377\377\377\000\377\377\377\000\373\372\370\000\325\304\236\011\260\243\212U\232"

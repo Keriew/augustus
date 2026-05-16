@@ -1,4 +1,4 @@
-#include "keyboard_input.h"
+#include "platform/keyboard_input.h"
 
 #include "game/cheats.h"
 #include "game/system.h"
@@ -8,9 +8,11 @@
 #include "input/mouse.h"
 #include "input/scroll.h"
 
+#include <SDL3/SDL.h>
+
 static int is_alt_down(SDL_KeyboardEvent *event)
 {
-    return (event->keysym.mod & KMOD_ALT) != 0;
+    return (event->mod & SDL_KMOD_ALT) != 0;
 }
 
 static key_type get_key_from_scancode(SDL_Scancode scancode)
@@ -208,32 +210,33 @@ static SDL_Scancode get_scancode_from_key(key_type key)
     }
 }
 
-static key_modifier_type get_modifier(int mod)
+static key_modifier_type get_modifier(SDL_Keymod mod)
 {
     key_modifier_type key_mod = KEY_MOD_NONE;
-    if (mod & KMOD_SHIFT) {
+    if (mod & SDL_KMOD_SHIFT) {
         key_mod |= KEY_MOD_SHIFT;
     }
-    if (mod & KMOD_CTRL) {
+    if (mod & SDL_KMOD_CTRL) {
         key_mod |= KEY_MOD_CTRL;
     }
-    if (mod & KMOD_ALT) {
+    if (mod & SDL_KMOD_ALT) {
         key_mod |= KEY_MOD_ALT;
     }
-    if (mod & KMOD_GUI) {
+    if (mod & SDL_KMOD_GUI) {
         key_mod |= KEY_MOD_GUI;
     }
     return key_mod;
 }
 
-void platform_handle_key_down(SDL_KeyboardEvent *event)
+void platform_handle_key_down(void *event)
 {
+    SDL_KeyboardEvent *e = (SDL_KeyboardEvent *)event;
     // handle keyboard input keys
-    switch (event->keysym.sym) {
+    switch (e->key) {
         case SDLK_RETURN:
         case SDLK_KP_ENTER:
             // only send enter if no modifier is also down
-            if ((event->keysym.mod & (KMOD_CTRL | KMOD_ALT | KMOD_GUI)) == 0) {
+            if ((e->mod & (SDL_KMOD_CTRL | SDL_KMOD_ALT | SDL_KMOD_GUI)) == 0) {
                 keyboard_return();
             }
             break;
@@ -266,7 +269,7 @@ void platform_handle_key_down(SDL_KeyboardEvent *event)
             break;
         case SDLK_AC_BACK:
 #ifndef __ANDROID__
-            event->keysym.scancode = SDL_SCANCODE_ESCAPE;
+            e->scancode = SDL_SCANCODE_ESCAPE;
             break;
 #else
         // Hack: since Android handles the right mouse button as a back button
@@ -277,14 +280,14 @@ void platform_handle_key_down(SDL_KeyboardEvent *event)
                 mouse_set_right_down(1);
                 return;
             } else {
-                event->keysym.scancode = SDL_SCANCODE_ESCAPE;
+                e->scancode = SDL_SCANCODE_ESCAPE;
             }
             break;
 #endif
     }
 
     // handle hotkeys
-    key_type key = get_key_from_scancode(event->keysym.scancode);
+    key_type key = get_key_from_scancode(e->scancode);
 
     if (keyboard_is_capturing()) {
         // Special event keys to handle when text input is active
@@ -306,58 +309,61 @@ void platform_handle_key_down(SDL_KeyboardEvent *event)
         }
     }
 
-    key_modifier_type mod = get_modifier(event->keysym.mod);
-    hotkey_key_pressed(key, mod, event->repeat);
+    key_modifier_type mod = get_modifier(e->mod);
+    hotkey_key_pressed(key, mod, e->repeat);
 
     // handle cheats: special case since they ARE layout dependent
-    if (!event->repeat && is_alt_down(event)) {
-        switch (event->keysym.sym) {
-            case SDLK_k:
+    if (!e->repeat && is_alt_down(e)) {
+        switch (e->key) {
+            case SDLK_K:
                 game_cheat_activate();
                 break;
-            case SDLK_c:
+            case SDLK_C:
                 game_cheat_money();
                 break;
-            case SDLK_v:
+            case SDLK_V:
                 game_cheat_victory();
                 break;
-            case SDLK_b:
+            case SDLK_B:
                 game_cheat_breakpoint();
                 break;
-            case SDLK_e:
+            case SDLK_E:
                 game_cheat_show_custom_events(NULL);
                 break;
-            case SDLK_m:
+            case SDLK_M:
                 game_cheat_show_editor(NULL);
                 break;
-            case SDLK_x:
+            case SDLK_X:
                 game_cheat_console();
         }
     }
 }
 
-void platform_handle_key_up(SDL_KeyboardEvent *event)
+void platform_handle_key_up(void *event)
 {
+    SDL_KeyboardEvent *e = (SDL_KeyboardEvent *)event;
 #ifdef __ANDROID__
     // Right mouse button hack: read above for explanation
-    if ((event->keysym.sym == SDLK_ESCAPE || event->keysym.sym == SDLK_AC_BACK) && !mouse_get()->is_touch) {
+    if ((e->key == SDLK_ESCAPE || e->key == SDLK_AC_BACK) && !mouse_get()->is_touch) {
         mouse_set_right_down(0);
         return;
     }
 #endif
-    key_type key = get_key_from_scancode(event->keysym.scancode);
-    key_modifier_type mod = get_modifier(event->keysym.mod);
+    key_type key = get_key_from_scancode(e->scancode);
+    key_modifier_type mod = get_modifier(e->mod);
     hotkey_key_released(key, mod);
 }
 
-void platform_handle_editing_text(SDL_TextEditingEvent *event)
+void platform_handle_editing_text(void *event)
 {
-    keyboard_editing_text(event->text);
+    SDL_TextEditingEvent *e = (SDL_TextEditingEvent *)event;
+    keyboard_editing_text(e->text);
 }
 
-void platform_handle_text(SDL_TextInputEvent *event)
+void platform_handle_text(void *event)
 {
-    keyboard_text(event->text);
+    SDL_TextInputEvent *e = (SDL_TextInputEvent *)event;
+    keyboard_text(e->text);
 }
 
 key_type system_keyboard_key_for_symbol(const char *name)
@@ -366,7 +372,7 @@ key_type system_keyboard_key_for_symbol(const char *name)
     if (keycode == SDLK_UNKNOWN) {
         return KEY_TYPE_NONE;
     }
-    SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
+    SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode, NULL);
     if (scancode == SDL_SCANCODE_UNKNOWN) {
         return KEY_TYPE_NONE;
     }
@@ -376,7 +382,7 @@ key_type system_keyboard_key_for_symbol(const char *name)
 const char *system_keyboard_key_name(key_type key)
 {
     SDL_Scancode scancode = get_scancode_from_key(key);
-    return SDL_GetKeyName(SDL_GetKeyFromScancode(scancode));
+    return SDL_GetKeyName(SDL_GetKeyFromScancode(scancode, SDL_KMOD_NONE, false));
 }
 
 const char *system_keyboard_key_modifier_name(key_modifier_type modifier)

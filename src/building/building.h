@@ -7,6 +7,9 @@
 #include "game/resource.h"
 #include "translation/translation.h"
 
+#define BUILDING_WATER_DESIRABILITY_RANGE 3
+#define BUILDING_WATER_DESIRABILITY_BONUS 15
+
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
     ORDER_CONDITION_ALWAYS,
@@ -260,6 +263,8 @@ void building_trim(void);
 void building_update_state(void);
 
 void building_update_desirability(void);
+
+int building_get_elevation_desirability_bonus(int grid_offset);
 
 int building_is_house(building_type type);
 

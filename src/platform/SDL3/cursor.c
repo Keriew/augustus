@@ -1,4 +1,4 @@
-#include "cursor.h"
+#include "platform/cursor.h"
 
 #include "core/config.h"
 #include "core/png_read.h"
@@ -9,7 +9,7 @@
 #include "platform/switch/switch.h"
 #include "platform/vita/vita.h"
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 #include <string.h>
 
@@ -19,7 +19,7 @@ static struct {
     cursor_shape current_shape;
     cursor_scale current_scale;
     int disabled;
-    int software_cursor;
+    int force_software_cursor;
 } data;
 
 static const color_t mouse_colors[] = {
@@ -49,17 +49,15 @@ static const cursor *get_valid_cursor(const cursor *c)
 static SDL_Surface *generate_cursor_surface(const cursor *c)
 {
     int size = platform_cursor_get_texture_size(c);
-    SDL_Surface *cursor_surface =
-        SDL_CreateRGBSurface(0, size, size, 32,
-        COLOR_CHANNEL_RED, COLOR_CHANNEL_GREEN, COLOR_CHANNEL_BLUE, COLOR_CHANNEL_ALPHA);
+    SDL_Surface *cursor_surface = SDL_CreateSurface(size, size, SDL_PIXELFORMAT_ARGB8888);
     if (!cursor_surface) {
         return 0;
     }
     color_t *pixels = cursor_surface->pixels;
-    SDL_memset(pixels, 0, sizeof(color_t) * size * size);
+    memset(pixels, 0, sizeof(color_t) * size * size);
     if (c->type == CURSOR_TYPE_PNG) {
         if (!png_read(pixels, c->offset_x, c->offset_y, c->width, c->height, 0, 0, size, c->rotated)) {
-            SDL_FreeSurface(cursor_surface);
+            SDL_DestroySurface(cursor_surface);
             cursor_surface = 0;
         }
     } else {
@@ -90,18 +88,19 @@ void system_init_cursors(int scale_percentage)
     for (int i = 0; i < CURSOR_MAX; i++) {
         const cursor *list = input_cursor_data(i, data.current_scale);
         if (data.surfaces[i]) {
-            SDL_FreeSurface(data.surfaces[i]);
+            SDL_DestroySurface(data.surfaces[i]);
         }
         if (data.cursors[i]) {
-            SDL_FreeCursor(data.cursors[i]);
+            SDL_DestroyCursor(data.cursors[i]);
         }
         const cursor *c = get_valid_cursor(list);
         data.surfaces[i] = generate_cursor_surface(c);
 
-        if (platform_cursor_is_software()) {
-            SDL_ShowCursor(SDL_DISABLE);
-            platform_renderer_generate_mouse_cursor_texture(i, data.surfaces[i]->w, data.surfaces[i]->pixels,
-                c->hotspot_x, c->hotspot_y);
+        platform_renderer_generate_mouse_cursor_texture(i, data.surfaces[i]->w, data.surfaces[i]->pixels,
+            c->hotspot_x, c->hotspot_y);
+
+        if (data.force_software_cursor) {
+            SDL_HideCursor();
         } else {
             data.cursors[i] = SDL_CreateColorCursor(data.surfaces[i], c->hotspot_x, c->hotspot_y);
         }
@@ -113,7 +112,7 @@ void system_init_cursors(int scale_percentage)
 void system_set_cursor(int cursor_id)
 {
     data.current_shape = cursor_id;
-    if (!platform_cursor_is_software()) {
+    if (!data.force_software_cursor) {
         SDL_SetCursor(data.cursors[cursor_id]);
     }
 }
@@ -121,29 +120,35 @@ void system_set_cursor(int cursor_id)
 void system_show_cursor(void)
 {
     data.disabled = 0;
-    if (!platform_cursor_is_software()) {
-        SDL_ShowCursor(SDL_ENABLE);
+    if (!data.force_software_cursor) {
+        SDL_ShowCursor();
     }
 }
 
 void system_hide_cursor(void)
 {
     data.disabled = 1;
-    SDL_ShowCursor(SDL_DISABLE);
+    SDL_HideCursor();
+}
+
+int platform_cursor_is_disabled(void)
+{
+    return data.disabled;
 }
 
 void platform_cursor_force_software_mode(void)
 {
-    data.software_cursor = 1;
+    data.force_software_cursor = 1;
 }
 
-int platform_cursor_is_software(void)
+int platform_cursor_is_forced_software_cursor(void)
 {
-#ifdef PLATFORM_USE_SOFTWARE_CURSOR
-    return 1;
-#else
-    return data.software_cursor;
-#endif
+    return data.force_software_cursor;
+}
+
+int platform_cursor_has_hardware_cursor(void)
+{
+    return SDL_HasMouse();
 }
 
 cursor_shape platform_cursor_get_current_shape(void)

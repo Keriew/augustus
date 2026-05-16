@@ -105,6 +105,11 @@ static const struct cycle building_cycles[] = {
 
 #define BUILDING_CYCLES (sizeof(building_cycles) / sizeof(struct cycle))
 
+void building_construction_reset_cycle_steps(void)
+{
+    data.cycle_step = 0;
+}
+
 static unsigned int count_enabled_buildings_for_cycling(unsigned int cycle_index)
 {
     unsigned int count = 0;
@@ -153,6 +158,19 @@ int building_construction_type_cycle_steps(building_type type)
         }
     }
     return 1;
+}
+
+int building_construction_type_cycled_steps(building_type type)
+{
+    for (int i = 0; i < BUILDING_CYCLES; i++) {
+        int size = building_cycles[i].size;
+        for (int j = 0; j < size; j++) {
+            if (building_cycles[i].array[j] == type) {
+                return building_cycles[i].rotations_to_next * j;
+            }
+        }
+    }
+    return 0;
 }
 
 int building_construction_cycle_forward(void)

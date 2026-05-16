@@ -1,10 +1,12 @@
 #include "state.h"
 
+#include "assets/assets.h"
 #include "building/industry.h"
 #include "building/monument.h"
 #include "building/roadblock.h"
 #include "figure/figure.h"
 #include "game/save_version.h"
+#include "map/image.h"
 
 #define TYPE_DATA_ORIGINAL_BUFFER_SIZE 42
 #define TYPE_DATA_CURRENT_BUFFER_SIZE 26
@@ -309,7 +311,7 @@ static void read_type_data(buffer *buf, building *b, int version)
             b->monument.phase = buffer_read_i16(buf);
         }
         b->data.market.fetch_inventory_id = resource_map_legacy_inventory(buffer_read_u8(buf));
-        // As above, Ceres and Venus temples are both monuments and suppliers 
+        // As above, Ceres and Venus temples are both monuments and suppliers
     } else if (b->type == BUILDING_LARGE_TEMPLE_CERES || b->type == BUILDING_LARGE_TEMPLE_VENUS) {
         if (version <= SAVE_GAME_LAST_STATIC_RESOURCES) {
             for (int i = 0; i < RESOURCE_MAX_LEGACY; i++) {
@@ -491,7 +493,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         b->subtype.fort_figure_type = buffer_read_i16(buf);// union field, written as fort_figure_type for clarity
         b->type = get_fort_type(b); // get the correct fort type to ensure compatibility
     } else {
-        b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter        
+        b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter
     }
     b->road_network_id = buffer_read_u8(buf);
     b->monthly_levy = buffer_read_u8(buf);
@@ -579,7 +581,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     }
 
     if (save_version < SAVE_GAME_ROADBLOCK_DATA_MOVED_FROM_SUBTYPE) {
-        // Backwards compatibility - roadblock data used to be stored in b->subtype 
+        // Backwards compatibility - roadblock data used to be stored in b->subtype
         if (building_type_is_roadblock(b->type)) {
             b->data.roadblock.exceptions = b->subtype.orientation;
         }
@@ -739,10 +741,38 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         }
     }
 
-    // The following code should only be executed if the savegame includes building information that is not 
+    // The following code should only be executed if the savegame includes building information that is not
     // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next building
     if (building_buf_size > BUILDING_STATE_CURRENT_BUFFER_SIZE) {
         buffer_skip(buf, building_buf_size - BUILDING_STATE_CURRENT_BUFFER_SIZE);
+    }
+}
+
+void migrate_altar_rotations(void)
+{
+    for (int i = 1; i < building_count(); i++) {
+        building *b = building_get(i);
+        if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED && b->state != BUILDING_STATE_CREATED) {
+            continue;
+        }
+        if (b->type >= BUILDING_SHRINE_CERES && b->type <= BUILDING_SHRINE_VENUS) {
+            b->subtype.orientation = 0;
+            int image_id = map_image_at(b->grid_offset);
+            int ceres_base_image_id = assets_get_image_id("Health_Culture", "Altar_Ceres");
+            int neptune_base_image_id = assets_get_image_id("Health_Culture", "Altar_Neptune");
+            int mercury_base_image_id = assets_get_image_id("Health_Culture", "Altar_Mercury");
+            int mars_base_image_id = assets_get_image_id("Health_Culture", "Altar_Mars");
+            int venus_base_image_id = assets_get_image_id("Health_Culture", "Altar_Venus");
+
+            if (image_id == ceres_base_image_id + 1 ||
+                image_id == neptune_base_image_id + 1 ||
+                image_id == mercury_base_image_id + 1 ||
+                image_id == mars_base_image_id + 1 ||
+                image_id == venus_base_image_id + 1)
+            {
+                b->subtype.orientation = 1;
+            }
+        }
     }
 }

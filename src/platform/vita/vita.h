@@ -19,8 +19,6 @@ void platform_per_frame_callback(void);
 void platform_show_virtual_keyboard(void);
 void platform_hide_virtual_keyboard(void);
 
-#define PLATFORM_USE_SOFTWARE_CURSOR
-
 #define PLATFORM_NO_USER_DIRECTORIES
 
 #endif // __vita__

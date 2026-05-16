@@ -649,7 +649,9 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
                 }
             }
             f->routing_path_current_tile++;
-            figure_route_advance_tile(f->routing_path_id);
+            if (f->routing_path_id > 0) {
+                figure_route_advance_tile(f->routing_path_id);
+            }
             f->previous_tile_direction = f->direction;
             f->progress_on_tile = 0;
             move_to_next_tile(f);

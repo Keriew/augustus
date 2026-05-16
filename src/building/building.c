@@ -7,8 +7,9 @@
 #include "building/data_transfer.h"
 #include "building/destruction.h"
 #include "building/distribution.h"
-#include "building/industry.h"
 #include "building/granary.h"
+#include "building/image.h"
+#include "building/industry.h"
 #include "building/menu.h"
 #include "building/monument.h"
 #include "building/properties.h"
@@ -46,9 +47,6 @@
 
 #define BUILDING_ARRAY_SIZE_STEP 2000
 
-#define WATER_DESIRABILITY_RANGE 3
-#define WATER_DESIRABILITY_BONUS 15
-
 static struct {
     array(building) buildings;
     building *first_of_type[BUILDING_TYPE_MAX];
@@ -69,7 +67,7 @@ building *building_get(unsigned int id)
 int building_can_repair_type(building_type type)
 {
     if (building_monument_is_limited(type) || building_is_fort(type)) {
-        return 0; // limited monuments cannot be repaired at the moment, 
+        return 0; // limited monuments cannot be repaired at the moment,
     }   // as they are too complex to easily repair, and arent a common occurrence
     // forts have the complexity of holding formations, so are also currently excluded
     building_type repair_type = building_clone_type_from_building_type(type);
@@ -445,7 +443,7 @@ int building_repair_cost_at(int grid_offset)
     if (!b || !building_can_repair(b)) {
         return 0;
     }
-    int is_ruin = b->type == BUILDING_BURNING_RUIN || // ruins and collapsed warehouse parts all use rubble data 
+    int is_ruin = b->type == BUILDING_BURNING_RUIN || // ruins and collapsed warehouse parts all use rubble data
         b->type == BUILDING_WAREHOUSE_SPACE || b->type == BUILDING_WAREHOUSE;
 
     if (building_properties_for_type(b->type)->shared) {
@@ -483,7 +481,7 @@ static int get_rubble_data(building *b, int *og_size, int *og_grid_offset, int *
     if (!b->data.rubble.og_size && !b->data.rubble.og_grid_offset &&
         !b->data.rubble.og_orientation && !b->data.rubble.og_type) {
         return 0;
-    } 
+    }
 
     if (og_size) {
         *og_size = b->data.rubble.og_size;
@@ -615,7 +613,7 @@ int building_repair_at(int grid_offset)
     }
     int placement_cost = 0;
     og_storage_id = b->storage_id; //store the original storage id before clearing it
-    // Clear terrain and place building 
+    // Clear terrain and place building
     grid_slice *grid_slice = map_grid_get_grid_slice_square(grid_offset, size);
     if (building_construction_nearby_enemy_type(grid_slice) != FIGURE_NONE) {
         city_warning_show(WARNING_ENEMY_NEARBY, NEW_WARNING_SLOT);
@@ -672,6 +670,8 @@ int building_repair_at(int grid_offset)
         new_building->state = BUILDING_STATE_CREATED;
         b->state = BUILDING_STATE_DELETED_BY_GAME; // mark old building as deleted
         figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
+        map_building_tiles_add(new_building->id, new_building->x, new_building->y, new_building->size,
+            building_image_get(new_building), TERRAIN_BUILDING);
     } else {
         figure_create_explosion_cloud(x, y, og_size, 1);
     }
@@ -761,6 +761,18 @@ void building_update_state(void)
     }
 }
 
+int building_get_elevation_desirability_bonus(int grid_offset)
+{
+    switch (map_elevation_at(grid_offset)) {
+        case 0: return 0;
+        case 1: return 10;
+        case 2: return 12;
+        case 3: return 14;
+        case 4: return 16;
+        default: return 18;
+    }
+}
+
 void building_update_desirability(void)
 {
     building *b;
@@ -774,24 +786,13 @@ void building_update_desirability(void)
         int desirability = map_desirability_get_max(b->x, b->y, b->size);
 
         if (b->is_close_to_water) {
-            desirability += 10;
+            desirability += BUILDING_WATER_DESIRABILITY_BONUS;
         }
 
-        switch (map_elevation_at(b->grid_offset)) {
-            case 0: break;
-            case 1: desirability += 10; break;
-            case 2: desirability += 12; break;
-            case 3: desirability += 14; break;
-            case 4: desirability += 16; break;
-            default: desirability += 18; break;
-        }
+        desirability += building_get_elevation_desirability_bonus(b->grid_offset);
 
         // Clamp before assigning to 8-bit signed int
-        if (desirability > 100) {
-            desirability = 100;
-        } else if (desirability < -100) {
-            desirability = -100;
-        }
+        desirability = calc_bound(desirability, -100, 100);
 
         b->desirability = (int8_t) desirability;
     }
@@ -1060,7 +1061,7 @@ void building_make_immune_cheat(void)
 
 int building_is_close_to_water(const building *b)
 {
-    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
+    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
 }
 
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,
