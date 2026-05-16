@@ -155,7 +155,7 @@ int building_construction_auto_clear_vegetation_at(int grid_offset)
     if (!config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
         return 0;
     }
-    int veg = map_terrain_get(grid_offset) & (TERRAIN_TREE | TERRAIN_SHRUB);
+    int vegetation = map_terrain_get(grid_offset) & (TERRAIN_TREE | TERRAIN_SHRUB);
     if (!veg) {
         return 0;
     }
