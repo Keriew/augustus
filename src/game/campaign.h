@@ -133,12 +133,6 @@ const campaign_mission_info *game_campaign_advance_mission(int last_scenario_id)
 const campaign_scenario *game_campaign_get_scenario(int scenario_id);
 
 /**
- * Sets the advanced from mission value which is used to determine whether to inherit the rank
- * @param value The value to set it to. Every non 0 value is evaluated as True
- */
-void game_campaign_set_advanced_from_mission(int value);
-
-/**
  * Suspends the campaign.
  */
 void game_campaign_suspend(void);

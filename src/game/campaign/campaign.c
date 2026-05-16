@@ -24,10 +24,7 @@ static struct {
     char file_name[FILE_NAME_MAX];
     char suspended_filename[FILE_NAME_MAX];
     campaign_mission_info mission_info;
-    int advanced_from_mission;
-} data = {
-    .advanced_from_mission = 0,
-};
+} data;
 
 static void get_original_campaign_data(void)
 {
@@ -154,24 +151,15 @@ uint8_t *game_campaign_load_file(const char *filename, size_t *length)
     return campaign_file_load(filename, length);
 }
 
-void game_campaign_set_advanced_from_mission(int value)
-{
-    data.advanced_from_mission = value;
-}
-
 // Used to resolve inherited rank
 static int resolve_rank(int rank)
 {
     if (rank == RANK_INHERITED) {
-        if (data.advanced_from_mission) {
-            rank = city_emperor_rank();
-        } else {
-            const campaign_info *info = game_campaign_get_info();
-            if (!info) {
-                log_error("Unable to read campaign info!", 0, 0);
-            }
-            rank = info->starting_rank;
-        }
+        rank = city_emperor_rank();
+    } else {
+        /* rank is set to the starting rank on the mission list
+            so here we have to set it right if the mission has a different fixed rank */
+        city_emperor_set_rank(rank);
     }
     return rank;
 }

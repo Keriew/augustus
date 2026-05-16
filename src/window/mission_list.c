@@ -1,6 +1,7 @@
 #include "mission_list.h"
 
 #include "assets/assets.h"
+#include "city/emperor.h"
 #include "core/image_group.h"
 #include "core/log.h"
 #include "core/string.h"
@@ -154,6 +155,7 @@ static void generate_list(void)
     for (unsigned int item = 0, mission = 0; mission < missions_to_show; mission++, item++) {
         int scenarios_on_last_mission = mission_info ? mission_info->total_scenarios : 0;
 
+        city_emperor_set_rank(rank);
         mission_info = game_campaign_get_current_mission(current_scenario_id);
 
         if (scenarios_on_last_mission && (scenarios_on_last_mission > 1 || mission_info->total_scenarios > 1)) {

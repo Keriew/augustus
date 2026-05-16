@@ -33,7 +33,6 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(48, 128, 34, 15);
-    game_campaign_set_advanced_from_mission(1);
     const campaign_mission_info *mission = game_campaign_get_current_mission(scenario_campaign_mission());
 
     if (!mission || mission->next_rank <= CAMPAIGN_NO_RANK || mission->next_rank == scenario_campaign_rank()) {
