@@ -464,6 +464,14 @@ static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
     } else {
         desirability = map_desirability_get(grid_offset) + get_environs_desirability(grid_offset, 1);
     }
+
+    // Clamp
+    if (desirability > 100) {
+        desirability = 100;
+    } else if (desirability < -100) {
+        desirability = -100;
+    }
+
     const uint8_t *text;
     if (desirability < 0) {
         text = lang_get_string(66, 91);
