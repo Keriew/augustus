@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RANK_INHERITED 11
+#define RANK_INHERITED -1
 
 static struct {
     int active;

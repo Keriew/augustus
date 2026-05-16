@@ -15,9 +15,6 @@
 #define XML_TOTAL_ELEMENTS 5
 #define CAMPAIGN_XML_VERSION 1
 
-#define RANK_NOT_FOUND -1
-#define RANK_INHERITED 11
-
 static int xml_start_campaign(void);
 static int xml_start_description(void);
 static void xml_description_text(const char *text);
@@ -170,11 +167,7 @@ static int xml_start_mission(void)
             }
         }
     }
-    int next_rank = xml_parser_get_attribute_enum("next_rank", RANKS, 11, 0);
-    if (next_rank == RANK_NOT_FOUND) {
-        next_rank = RANK_INHERITED;
-    }
-    data.current_mission->next_rank = next_rank;
+    data.current_mission->next_rank = xml_parser_get_attribute_enum("next_rank", RANKS, 11, 0);
 
     if (xml_parser_has_attribute("max_personal_savings")) {
         data.current_mission->max_personal_savings = xml_parser_get_attribute_int("max_personal_savings");
