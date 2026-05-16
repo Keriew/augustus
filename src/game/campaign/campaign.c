@@ -3,6 +3,7 @@
 #include "core/file.h"
 #include "core/lang.h"
 #include "core/log.h"
+#include "city/emperor.h"
 #include "game/campaign/file.h"
 #include "game/campaign/mission.h"
 #include "game/campaign/original.h"
@@ -21,7 +22,10 @@ static struct {
     char file_name[FILE_NAME_MAX];
     char suspended_filename[FILE_NAME_MAX];
     campaign_mission_info mission_info;
-} data;
+    int advanced_from_mission;
+} data = {
+    .advanced_from_mission = 0,
+};
 
 static void get_original_campaign_data(void)
 {
@@ -148,6 +152,28 @@ uint8_t *game_campaign_load_file(const char *filename, size_t *length)
     return campaign_file_load(filename, length);
 }
 
+void game_campaign_set_advanced_from_mission(int value)
+{
+    data.advanced_from_mission = value;
+}
+
+// Used to resolve inherited rank
+static int resolve_rank(int rank)
+{
+    if (rank == 11) {
+        if (data.advanced_from_mission) {
+            rank = city_emperor_rank();
+        } else {
+            const campaign_info *info = game_campaign_get_info();
+            if (!info) {
+                log_error("Unable to read campaign info!", 0, 0);
+            }
+            rank = info->starting_rank;
+        }
+    }
+    return rank;
+}
+
 static int fill_mission_info(const campaign_mission *mission)
 {
     if (!mission) {
@@ -166,7 +192,7 @@ static int fill_mission_info(const campaign_mission *mission)
         data.mission_info.background_image.id = mission->background_image.id;
         data.mission_info.background_image.path = mission->background_image.path;
         data.mission_info.max_personal_savings = mission->max_personal_savings;
-        data.mission_info.next_rank = mission->next_rank;
+        data.mission_info.next_rank = resolve_rank(mission->next_rank);
         data.mission_info.first_scenario = mission->first_scenario;
         data.mission_info.total_scenarios = mission->last_scenario - mission->first_scenario + 1;
         return 1;

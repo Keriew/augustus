@@ -78,6 +78,8 @@ static void load_scenarios(void)
         data.mission.scenarios[i] = game_campaign_get_scenario(i + mission->first_scenario);
     }
     scenario_set_custom(game_campaign_is_original() ? 0 : 2);
+    // reset the advanced from mission here after the last call in the mission loading process to a function which relies on it
+    game_campaign_set_advanced_from_mission(0);
 }
 
 static void init(void)

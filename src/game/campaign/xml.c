@@ -27,7 +27,7 @@ static void xml_end_mission(void);
 static const char *RANKS[] = {
     "citizen", "clerk", "engineer", "architect", "quaestor",
     "procurator", "aedile", "praetor", "consul", "proconsul",
-    "caesar"
+    "caesar", "inherit" // inherit will be rank at the end of the mission
 };
 
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
@@ -167,7 +167,7 @@ static int xml_start_mission(void)
             }
         }
     }
-    data.current_mission->next_rank = xml_parser_get_attribute_enum("next_rank", RANKS, 11, 0);
+    data.current_mission->next_rank = xml_parser_get_attribute_enum("next_rank", RANKS, 12, 0);
 
     if (xml_parser_has_attribute("max_personal_savings")) {
         data.current_mission->max_personal_savings = xml_parser_get_attribute_int("max_personal_savings");
