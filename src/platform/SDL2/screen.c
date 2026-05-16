@@ -368,8 +368,7 @@ void system_set_mouse_position(int *x, int *y)
 {
     *x = calc_bound(*x, 0, screen_width() - 1);
     *y = calc_bound(*y, 0, screen_height() - 1);
-    SDL_WarpMouseInWindow(SDL.window,
-        calc_adjust_with_percentage(*x, scale.percentage), calc_adjust_with_percentage(*y, scale.percentage));
+    SDL_WarpMouseInWindow(SDL.window, scale_logical_to_pixels(*x), scale_logical_to_pixels(*y));
 }
 
 void system_change_window_title(const char *title)

@@ -661,7 +661,14 @@ static void setup(const augustus_args *args)
     platform_init_callback();
 #endif
 
+// On Android, there is no reliable way to check if there is a mouse connected.
+// To circumvent that and have a cursor available for joystick control,
+// we force the software cursor when there is a joystick connected.
+#ifdef __ANDROID__
+    if (joysticks_are_connected()) {
+#else
     if (args->use_software_cursor) {
+#endif
         platform_cursor_force_software_mode();
     }
 
