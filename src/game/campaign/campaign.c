@@ -15,6 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define RANK_INHERITED 11
+
 static struct {
     int active;
     int is_custom;
@@ -160,7 +162,7 @@ void game_campaign_set_advanced_from_mission(int value)
 // Used to resolve inherited rank
 static int resolve_rank(int rank)
 {
-    if (rank == 11) {
+    if (rank == RANK_INHERITED) {
         if (data.advanced_from_mission) {
             rank = city_emperor_rank();
         } else {
