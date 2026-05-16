@@ -761,7 +761,7 @@ void building_update_state(void)
     }
 }
 
-int get_elevation_desirability_bonus(int grid_offset)
+int building_get_elevation_desirability_bonus(int grid_offset)
 {
     switch (map_elevation_at(grid_offset)) {
         case 0: return 0;
@@ -786,17 +786,13 @@ void building_update_desirability(void)
         int desirability = map_desirability_get_max(b->x, b->y, b->size);
 
         if (b->is_close_to_water) {
-            desirability += WATER_DESIRABILITY_BONUS;
+            desirability += BUILDING_WATER_DESIRABILITY_BONUS;
         }
 
-        desirability += get_elevation_desirability_bonus(b->grid_offset);
+        desirability += building_get_elevation_desirability_bonus(b->grid_offset);
 
         // Clamp before assigning to 8-bit signed int
-        if (desirability > 100) {
-            desirability = 100;
-        } else if (desirability < -100) {
-            desirability = -100;
-        }
+        desirability = calc_bound(desirability, -100, 100);
 
         b->desirability = (int8_t) desirability;
     }
@@ -1065,7 +1061,7 @@ void building_make_immune_cheat(void)
 
 int building_is_close_to_water(const building *b)
 {
-    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
+    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
 }
 
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,
