@@ -30,7 +30,7 @@ static void xml_end_mission(void);
 static const char *RANKS[] = {
     "citizen", "clerk", "engineer", "architect", "quaestor",
     "procurator", "aedile", "praetor", "consul", "proconsul",
-    "caesar", "inherit" // inherit will be rank at the end of the mission
+    "caesar"
 };
 
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
@@ -170,7 +170,7 @@ static int xml_start_mission(void)
             }
         }
     }
-    int next_rank = xml_parser_get_attribute_enum("next_rank", RANKS, 12, 0);
+    int next_rank = xml_parser_get_attribute_enum("next_rank", RANKS, 11, 0);
     if (next_rank == RANK_NOT_FOUND) {
         next_rank = RANK_INHERITED;
     }
