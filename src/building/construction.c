@@ -1052,11 +1052,11 @@ void building_construction_update(int x, int y, int grid_offset)
     } else if (type == BUILDING_WAREHOUSE) {
         mark_construction(x, y, 3, TERRAIN_ALL, 0);
     } else if (building_is_fort(type)) {
-        int rotation = building_rotation_get_rotation();
-        int orientation = city_view_orientation() / 2;
-        int x_offset = FORT_X_OFFSET[rotation][orientation];
-        int y_offset = FORT_Y_OFFSET[rotation][orientation];
         if (formation_get_num_legions_cached() < formation_get_max_legions()) {
+            int rotation = building_rotation_get_rotation();
+            int orientation = city_view_orientation() / 2;
+            int x_offset = FORT_X_OFFSET[rotation][orientation];
+            int y_offset = FORT_Y_OFFSET[rotation][orientation];
             if (map_building_tiles_are_clear(x, y, 3, TERRAIN_ALL) &&
                 map_building_tiles_are_clear(x + x_offset, y + y_offset, 4, TERRAIN_ALL) &&
                 city_buildings_has_mess_hall()) {
