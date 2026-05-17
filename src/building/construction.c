@@ -854,42 +854,21 @@ static int should_mark_for_construction(building_type type)
     return 1;
 }
 
-// True if `type` is handled by an explicit branch in building_construction_update
-// (and building_construction_place) rather than falling through to
-// building_construction_place_building. For these types the auto-clear cost is
-// already accumulated by per-tile auto_clear_vegetation_at calls inside the
-// place_*** function (or, for draggable reservoir, by its own dedicated block).
-// Used by the trailing else to avoid double-counting at the hover tile.
+// Most cases overlap with building_construction_is_updatable(), so delegate to
+// it and only list the extras that have an explicit branch but aren't
+// "updatable": bridges and statues.
 static int auto_clear_handled_by_explicit_branch(building_type type)
 {
-    switch (type) {
-        case BUILDING_WALL:
-        case BUILDING_ROAD:
-        case BUILDING_HIGHWAY:
-        case BUILDING_AQUEDUCT:
-        case BUILDING_DRAGGABLE_RESERVOIR:
-        case BUILDING_PLAZA:
-        case BUILDING_GARDENS:
-        case BUILDING_OVERGROWN_GARDENS:
-        case BUILDING_HOUSE_VACANT_LOT:
-        case BUILDING_LOW_BRIDGE:
-        case BUILDING_SHIP_BRIDGE:
-        case BUILDING_HEDGE_DARK:
-        case BUILDING_HEDGE_LIGHT:
-        case BUILDING_COLONNADE:
-        case BUILDING_GARDEN_PATH:
-        case BUILDING_LOOPED_GARDEN_WALL:
-        case BUILDING_ROOFED_GARDEN_WALL:
-        case BUILDING_PANELLED_GARDEN_WALL:
-        case BUILDING_DECORATIVE_COLUMN:
-        case BUILDING_PALISADE:
-            return 1;
-        default:
-            if (type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) return 1;
-            if (type >= BUILDING_PINE_PATH && type <= BUILDING_DATE_PATH) return 1;
-            if (type >= BUILDING_GODDESS_STATUE && type <= BUILDING_SENATOR_STATUE) return 1;
-            return 0;
-    }
+  if (building_construction_is_updatable()) {
+      return 1;
+  }
+  if (type == BUILDING_LOW_BRIDGE || type == BUILDING_SHIP_BRIDGE) {
+      return 1;
+  }
+  if (type >= BUILDING_GODDESS_STATUE && type <= BUILDING_SENATOR_STATUE) {
+      return 1;
+  }
+  return 0;
 }
 
 void building_construction_update(int x, int y, int grid_offset)
