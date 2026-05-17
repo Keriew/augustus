@@ -108,6 +108,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_NOT_ACCEPTING_WAREHOUSES, "Склады и амбары ничего не принимают при постройке"},
     {TR_CONFIG_NOT_ACCEPTING_MARKETS, "Рынки ничем не торгуют при постройке"},
     {TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS, "Дома не расширяются в сады"},
+    {TR_CONFIG_GP_CH_AUTO_CLEAR_TREES, "Автоматически очищать деревья и кустарники при размещении зданий"},
     {TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, "Бродячие граждане не пропускают углы"},
     {TR_CONFIG_SHOW_MAX_POSSIBLE_PROSPERITY, "Показать макс. достижимый рейтинг процветания с текущим жильем"},
     {TR_CONFIG_AUTO_KILL_ANIMALS, "Граждане будут автоматически убивать безобидных животных"},
