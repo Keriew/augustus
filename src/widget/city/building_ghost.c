@@ -148,15 +148,24 @@ static inline int tile_grid_offset(int orientation, int index)
     return GRID_OFFSET(data.offsets[orientation][index].x, data.offsets[orientation][index].y);
 }
 
+static inline int forbidden_terrain_mask(int base)
+{
+    if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        return base & ~(TERRAIN_TREE | TERRAIN_SHRUB);
+    }
+    return base;
+}
+
 static int is_blocked_for_building(int grid_offset, int building_size, int *blocked_tiles, int check_figures)
 {
     int orientation_index = city_view_orientation() / 2;
     int blocked = 0;
     int num_tiles = building_size * building_size;
+    int forbidden_mask = forbidden_terrain_mask(TERRAIN_NOT_CLEAR);
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
         int tile_blocked = 0;
-        if (map_terrain_is(tile_offset, TERRAIN_NOT_CLEAR)) {
+        if (map_terrain_is(tile_offset, forbidden_mask)) {
             tile_blocked = 1;
         }
         if (map_has_figure_at(tile_offset)) {
@@ -509,10 +518,11 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
 
     int check_figure = ((type != BUILDING_PLAZA && type != BUILDING_ROADBLOCK) || props->size != 1) ? 1 : 0;
 
+    int forbidden_mask = forbidden_terrain_mask(TERRAIN_NOT_CLEAR);
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
-        int forbidden_terrain = map_terrain_get(tile_offset) & TERRAIN_NOT_CLEAR;
-        int discouraged_terrain = map_terrain_get(tile_offset) & TERRAIN_NOT_CLEAR;
+        int forbidden_terrain = map_terrain_get(tile_offset) & forbidden_mask;
+        int discouraged_terrain = map_terrain_get(tile_offset) & forbidden_mask;
         // forbidden terrain cannot be built on
         // discouraged terrain can be built on, but is still highlighted red,
         // to suggest e.g. that it will become unusable/be overwritten
@@ -718,12 +728,13 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
         data.reservoir_range.last_grid_offset = -1;
         data.reservoir_range.total = 0;
         int grid_offset = tile->grid_offset + RESERVOIR_GRID_OFFSETS[orientation_index];
+        int reservoir_forbidden_mask = forbidden_terrain_mask(TERRAIN_NOT_CLEAR);
         for (int i = 0; i < 9; i++) {
             int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
             int terrain = map_terrain_get(tile_offset);
 
-            int forbidden_terrain = terrain & TERRAIN_NOT_CLEAR;
-            int discouraged_terrain = terrain & TERRAIN_NOT_CLEAR;
+            int forbidden_terrain = terrain & reservoir_forbidden_mask;
+            int discouraged_terrain = terrain & reservoir_forbidden_mask;
 
             // Reservoir is allowed over aqueducts
             if (forbidden_terrain & TERRAIN_AQUEDUCT) {
@@ -789,7 +800,8 @@ static void draw_aqueduct(const map_tile *tile, int x, int y)
                 }
             } else if (!map_can_place_aqueduct_on_highway(grid_offset, 0)) {
                 blocked = 1;
-            } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR ^ TERRAIN_HIGHWAY)) {
+            } else if (map_terrain_is(grid_offset,
+                forbidden_terrain_mask(TERRAIN_NOT_CLEAR) ^ TERRAIN_HIGHWAY)) {
                 blocked = 1;
             }
         }
@@ -1251,7 +1263,7 @@ static void draw_road(const map_tile *tile, int x, int y)
         }
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && map_routing_is_gate_transformable(grid_offset)) {
         image_id = building_image_get_garden_gate_image(grid_offset);
-    } else if (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)) {
+    } else if (map_terrain_is(grid_offset, forbidden_terrain_mask(TERRAIN_NOT_CLEAR))) {
         blocked = 1;
     } else {
         image_id = image_group(GROUP_TERRAIN_ROAD);
@@ -1315,7 +1327,7 @@ static void draw_highway(const map_tile *tile, int x, int y)
     for (int i = 0; i < num_tiles; i++) {
         int tile_offset = grid_offset + tile_grid_offset(orientation_index, i);
         int terrain = map_terrain_get(tile_offset);
-        int has_forbidden_terrain = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_ROAD;
+        int has_forbidden_terrain = terrain & forbidden_terrain_mask(TERRAIN_NOT_CLEAR) & ~TERRAIN_HIGHWAY & ~TERRAIN_ROAD;
         if (fully_blocked || (has_forbidden_terrain && !(terrain & TERRAIN_AQUEDUCT)) ||
             !map_can_place_highway_under_aqueduct(tile_offset, 0)) {
             blocked_tiles[i] = 1;
