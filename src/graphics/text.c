@@ -294,6 +294,15 @@ void text_draw_centered(const uint8_t *str, int x, int y, int box_width, font_t 
     text_draw(str, offset + x, y, font, color);
 }
 
+void text_draw_centered_without_bounds(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color)
+{
+    int offset = (box_width - text_get_width(str, font)) / 2;
+    if (offset + x < 0) {
+        offset = 0;
+    }
+    text_draw(str, offset + x, y, font, color);
+}
+
 void text_draw_right_aligned(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color)
 {
     int offset = box_width - text_get_width(str, font);
@@ -684,6 +693,20 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *
         num_lines += 1;
     }
     return num_lines;
+}
+
+int text_draw_vertically_centered(const uint8_t *str,
+    int x_offset, int y_offset, int box_width, font_t font, color_t color)
+{
+    int line_height = font_definition_for(font)->line_height;
+    if (line_height < 11) {
+        line_height = 11;
+    }
+    int added_lines = text_measure_multiline(str, box_width, font, 0) - 1;
+
+    int adjusted_y_offset = (int)(y_offset - (added_lines / 2.0) * (line_height + 5));
+
+    return text_draw_multiline(str, x_offset, adjusted_y_offset, box_width, 0, font, color);
 }
 
 void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color)

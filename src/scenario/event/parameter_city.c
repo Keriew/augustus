@@ -94,16 +94,19 @@ static int unemployment_rate(scenario_action_t *action)
 
 static int population_by_housing_type(scenario_action_t *action)
 {
-
+    int level_as_int = (int) action->parameter3; // Store the int value separately
     int is_absolute = action->parameter4;
-    int is_group = ((int) action->parameter3 >= (int) HOUSE_GROUP_TENT);
+    int is_group = ((int) action->parameter3 >= (int) HOUSE_GROUP_TENT || action->parameter3 < BUILDING_HOUSE_SMALL_TENT);
     int total_pop = city_population();
     if (!total_pop) {
         return 0;
     }
+    if (level_as_int == 1) {
+        return total_pop;
+    }
     if (!is_group) {
         house_level level = action->parameter3 - 10; // convert from building_type to house_level
-        int pop_at_level = city_population_at_level(level);
+        int pop_at_level = city_population_count_at_level(level);
         if (is_absolute) {
             return pop_at_level;
         }
@@ -112,21 +115,24 @@ static int population_by_housing_type(scenario_action_t *action)
     int min = 0;
     int max = 0;
     int total = 0;
-    int level_as_int = (int) action->parameter3; // Store the int value separately
     switch (level_as_int) { // Use the int variable in switch
-        case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;   break;
-        case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;  break;
-        case HOUSE_GROUP_HOVEL:  min = HOUSE_SMALL_HOVEL;  max = HOUSE_LARGE_HOVEL;  break;
-        case HOUSE_GROUP_CASA:   min = HOUSE_SMALL_CASA;   max = HOUSE_LARGE_CASA;   break;
-        case HOUSE_GROUP_INSULA: min = HOUSE_SMALL_INSULA; max = HOUSE_GRAND_INSULA; break;
-        case HOUSE_GROUP_VILLA:  min = HOUSE_SMALL_VILLA;  max = HOUSE_GRAND_VILLA;  break;
+        case HOUSE_GROUP_TENT:   min = HOUSE_SMALL_TENT;   max = HOUSE_LARGE_TENT;    break;
+        case HOUSE_GROUP_SHACK:  min = HOUSE_SMALL_SHACK;  max = HOUSE_LARGE_SHACK;   break;
+        case HOUSE_GROUP_HOVEL:  min = HOUSE_SMALL_HOVEL;  max = HOUSE_LARGE_HOVEL;   break;
+        case HOUSE_GROUP_CASA:   min = HOUSE_SMALL_CASA;   max = HOUSE_LARGE_CASA;    break;
+        case HOUSE_GROUP_INSULA: min = HOUSE_SMALL_INSULA; max = HOUSE_GRAND_INSULA;  break;
+        case HOUSE_GROUP_VILLA:  min = HOUSE_SMALL_VILLA;  max = HOUSE_GRAND_VILLA;   break;
         case HOUSE_GROUP_PALACE: min = HOUSE_SMALL_PALACE; max = HOUSE_LUXURY_PALACE; break;
+
+        case POP_CLASS_PATRICIAN: min = HOUSE_SMALL_VILLA; max = HOUSE_LUXURY_PALACE; break;
+        case POP_CLASS_PLEBEIAN:  min = HOUSE_SMALL_CASA;  max = HOUSE_GRAND_INSULA;  break;
+        case POP_CLASS_SLUMS:     min = HOUSE_SMALL_TENT;  max = HOUSE_LARGE_HOVEL;   break;
         default:
             return 0;
     }
 
     for (int i = min; i <= max; i++) {
-        total += city_population_at_level(i);
+        total += city_population_count_at_level(i);
     }
     return is_absolute ? total : calc_percentage(total, total_pop);
 }
@@ -306,7 +312,22 @@ static int city_trade_quota_fill_percentage(scenario_action_t *action)
     return limit == 0 ? 0 : calc_percentage(traded, limit);
 }
 
+static int opened_trade_routes(scenario_action_t *action)
+{
+    int open_sea_trade_routes = empire_city_get_trade_routes_count(1, 1);
+    int open_land_trade_routes = empire_city_get_trade_routes_count(0, 1);
 
+    switch (action->parameter3) {
+        case 1:
+            return open_land_trade_routes;
+        case 2:
+            return open_sea_trade_routes;
+        case 0:
+        default:
+            return open_sea_trade_routes + open_land_trade_routes;
+    }
+    return 0;
+}
 
 int scenario_event_parameter_city_for_action(scenario_action_t *action)
 {
@@ -359,6 +380,8 @@ int scenario_event_parameter_city_for_action(scenario_action_t *action)
             return get_terrain_tiles_count(action);
         case CITY_PROPERTY_QUOTA_FILL:
             return city_trade_quota_fill_percentage(action);
+        case CITY_PROPERTY_OPENED_ROUTES:
+            return opened_trade_routes(action);
         case CITY_PROPERTY_NONE:
         case CITY_PROPERTY_MAX:
         default:
@@ -402,7 +425,7 @@ city_property_info_t city_property_get_param_info(city_property_t type)
 
         case CITY_PROPERTY_POPS_HOUSING_TYPE:
             info.count = 2;
-            info.param_types[0] = PARAMETER_TYPE_HOUSING_TYPE;
+            info.param_types[0] = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS;
             info.param_types[1] = PARAMETER_TYPE_PERCENTAGE;
             info.param_keys[0] = TR_CITY_PROPERTY_POPS_HOUSING_TYPE;
             info.param_keys[1] = TR_PARAMETER_PERCENTAGE;
@@ -461,6 +484,12 @@ city_property_info_t city_property_get_param_info(city_property_t type)
             info.param_names[0] = "route";
             info.param_names[1] = "resource";
             info.param_names[2] = "percentage_type";
+            break;
+        case CITY_PROPERTY_OPENED_ROUTES:
+            info.count = 1;
+            info.param_types[0] = PARAMETER_TYPE_ROUTE_TYPE;
+            info.param_keys[0] = TR_PARAMETER_TYPE_ROUTE_TYPE;
+            info.param_names[0] = "route_type";
             break;
             // --- Invalid / none ---
         case CITY_PROPERTY_NONE:

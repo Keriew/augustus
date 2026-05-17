@@ -665,6 +665,9 @@ const uint8_t *lang_get_string(int group, int index)
 
 const uint8_t *lang_get_building_type_string(int type)
 {
+    if (type == BUILDING_NATIVE_CROPS) {
+        type = BUILDING_NATIVE_CROPS; // debug
+    }
     if (building_is_house(type) || type == BUILDING_NATIVE_MEETING ||
         type == BUILDING_NATIVE_HUT || type == BUILDING_NATIVE_HUT_ALT ||
         type == BUILDING_NATIVE_CROPS) {

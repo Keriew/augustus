@@ -51,7 +51,7 @@ static generic_button buttons[] = {
     {316, 372, 80, 30, button_population_toggle},
     {416, 372, 180, 30, button_population_value},
     {316, 92, 80, 30, button_open_play_toggle},
-    {516, 98, 24, 24, button_reset_favor_toggle}
+    {416, 98, 24, 24, button_reset_favor_toggle}
 };
 
 static unsigned int focus_button_id;
@@ -76,10 +76,10 @@ static void draw_foreground(void)
     lang_text_draw(44, 107, 35, 101, FONT_NORMAL_BLACK);
     button_border_draw(316, 92, 80, 30, focus_button_id == 15);
     if (is_open_play) {
-        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_EDITOR_RESET_FAVOR_MONTHLY, 416, 96, 100, FONT_NORMAL_BLACK);
-        button_border_draw(516, 98, 24, 24, focus_button_id == 16); //checkbox
+        text_draw_vertically_centered(translation_for(TR_EDITOR_RESET_FAVOR_MONTHLY), 450, 105, 145, FONT_SMALL_PLAIN, 0);
+        button_border_draw(416, 98, 24, 24, focus_button_id == 16); //checkbox
         if (reset_favor) {
-            text_draw(string_from_ascii("x"), 525, 105, FONT_NORMAL_BLACK, 0);
+            text_draw(string_from_ascii("x"), 425, 103, FONT_NORMAL_BLACK, 0);
         }
     }
 
