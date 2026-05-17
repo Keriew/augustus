@@ -154,6 +154,15 @@ static const monument_type city_mint = {
     }
 };
 
+static const monument_type triumphal_arch = {
+    .phases    = 3,
+    .resources = {
+        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 12,  [RESOURCE_TIMBER] = 8},
+        { [ARCHITECTS] = 3, [RESOURCE_MARBLE] = 32, [RESOURCE_BRICKS] = 12 },
+        { NOTHING }
+    }
+};
+
 static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_TEMPLE_CERES]   = &grand_temple,
     [BUILDING_GRAND_TEMPLE_NEPTUNE] = &grand_temple,
@@ -174,7 +183,8 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_LARGE_MAUSOLEUM]      = &large_mausoleum,
     [BUILDING_SMALL_MAUSOLEUM]      = &small_mausoleum,
     [BUILDING_CARAVANSERAI]         = &caravanserai,
-    [BUILDING_CITY_MINT]            = &city_mint
+    [BUILDING_CITY_MINT]            = &city_mint,
+    [BUILDING_TRIUMPHAL_ARCH]       = &triumphal_arch
 };
 
 typedef struct {
