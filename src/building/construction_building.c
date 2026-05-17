@@ -156,10 +156,10 @@ int building_construction_auto_clear_vegetation_at(int grid_offset)
         return 0;
     }
     int vegetation = map_terrain_get(grid_offset) & (TERRAIN_TREE | TERRAIN_SHRUB);
-    if (!veg) {
+    if (!vegetation) {
         return 0;
     }
-    map_terrain_remove_with_backup(grid_offset, veg);
+    map_terrain_remove_with_backup(grid_offset, vegetation);
     track_auto_clear_at(grid_offset);
     set_cleared_tile_backup_to_grass(grid_offset);
     city_finance_process_construction(AUTO_CLEAR_COST_PER_TILE);
