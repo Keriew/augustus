@@ -47,6 +47,11 @@ static struct {
     int max_y;
 } auto_clear_state;
 
+// Accumulator for the cost-preview tooltip. Bumped by auto_clear_vegetation_at
+// and auto_clear_for_building during measure-only previews, zeroed by
+// dry_run_vegetation_reset between passes.
+static int dry_run_vegetation_cost_total;
+
 static void track_auto_clear_at(int grid_offset)
 {
     int x = map_grid_offset_to_x(grid_offset);
@@ -150,7 +155,7 @@ int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode cle
     return total_cost;
 }
 
-int building_construction_auto_clear_vegetation_at(int grid_offset)
+int building_construction_auto_clear_vegetation_at(int grid_offset, int measure_only)
 {
     if (!config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
         return 0;
@@ -159,11 +164,68 @@ int building_construction_auto_clear_vegetation_at(int grid_offset)
     if (!vegetation) {
         return 0;
     }
+    if (measure_only) {
+        dry_run_vegetation_cost_total += AUTO_CLEAR_COST_PER_TILE;
+        return AUTO_CLEAR_COST_PER_TILE;
+    }
     map_terrain_remove_with_backup(grid_offset, vegetation);
     track_auto_clear_at(grid_offset);
     set_cleared_tile_backup_to_grass(grid_offset);
     city_finance_process_construction(AUTO_CLEAR_COST_PER_TILE);
-    return 1;
+    return AUTO_CLEAR_COST_PER_TILE;
+}
+
+int building_construction_auto_clear_for_building(building_type type, int x_tl, int y_tl,
+    int measure_only)
+{
+    if (!config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        return 0;
+    }
+    int size = building_properties_for_type(type)->size;
+    if (type == BUILDING_WAREHOUSE) {
+        // Mirror place_building's size override so the preview matches placement.
+        size = 3;
+    }
+    cost_calculation mode = measure_only ? COST_MEASURE : COST_PROCESS;
+    int total = 0;
+
+    grid_slice *footprint = map_grid_get_grid_slice_square(map_grid_offset(x_tl, y_tl), size);
+    total += building_construction_prepare_terrain(footprint, CLEAR_MODE_TREES, mode);
+
+    if (building_is_fort(type)) {
+        const int offsets_x[] = { 3, -1, -4, 0 };
+        const int offsets_y[] = { -1, -4, 0, 3 };
+        int orient_index = building_rotation_get_rotation();
+        grid_slice *ground = map_grid_get_grid_slice_square(
+            map_grid_offset(x_tl + offsets_x[orient_index], y_tl + offsets_y[orient_index]), 4);
+        total += building_construction_prepare_terrain(ground, CLEAR_MODE_TREES, mode);
+    } else if (type == BUILDING_HIPPODROME) {
+        int x_offset_1, y_offset_1;
+        building_rotation_get_offset_with_rotation(5, building_rotation_get_rotation(), &x_offset_1, &y_offset_1);
+        int x_offset_2, y_offset_2;
+        building_rotation_get_offset_with_rotation(10, building_rotation_get_rotation(), &x_offset_2, &y_offset_2);
+        grid_slice *part2 = map_grid_get_grid_slice_square(
+            map_grid_offset(x_tl + x_offset_1, y_tl + y_offset_1), 5);
+        total += building_construction_prepare_terrain(part2, CLEAR_MODE_TREES, mode);
+        grid_slice *part3 = map_grid_get_grid_slice_square(
+            map_grid_offset(x_tl + x_offset_2, y_tl + y_offset_2), 5);
+        total += building_construction_prepare_terrain(part3, CLEAR_MODE_TREES, mode);
+    }
+
+    if (measure_only) {
+        dry_run_vegetation_cost_total += total;
+    }
+    return total;
+}
+
+void building_construction_dry_run_vegetation_reset(void)
+{
+    dry_run_vegetation_cost_total = 0;
+}
+
+int building_construction_dry_run_vegetation_cost(void)
+{
+    return dry_run_vegetation_cost_total;
 }
 
 void building_construction_auto_clear_finalize(void)
@@ -732,27 +794,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
     // vegetation underneath the building footprint(s) — for failures above we
     // never get here and the trees are left untouched.
     if (auto_clear_for_placement) {
-        grid_slice *footprint = map_grid_get_grid_slice_square(map_grid_offset(x, y), size);
-        building_construction_prepare_terrain(footprint, CLEAR_MODE_TREES, COST_PROCESS);
-        if (building_is_fort(type)) {
-            const int offsets_x[] = { 3, -1, -4, 0 };
-            const int offsets_y[] = { -1, -4, 0, 3 };
-            int orient_index = building_rotation_get_rotation();
-            grid_slice *ground = map_grid_get_grid_slice_square(
-                map_grid_offset(x + offsets_x[orient_index], y + offsets_y[orient_index]), 4);
-            building_construction_prepare_terrain(ground, CLEAR_MODE_TREES, COST_PROCESS);
-        } else if (type == BUILDING_HIPPODROME) {
-            int x_offset_1, y_offset_1;
-            building_rotation_get_offset_with_rotation(5, building_rotation_get_rotation(), &x_offset_1, &y_offset_1);
-            int x_offset_2, y_offset_2;
-            building_rotation_get_offset_with_rotation(10, building_rotation_get_rotation(), &x_offset_2, &y_offset_2);
-            grid_slice *part2 = map_grid_get_grid_slice_square(
-                map_grid_offset(x + x_offset_1, y + y_offset_1), 5);
-            building_construction_prepare_terrain(part2, CLEAR_MODE_TREES, COST_PROCESS);
-            grid_slice *part3 = map_grid_get_grid_slice_square(
-                map_grid_offset(x + x_offset_2, y + y_offset_2), 5);
-            building_construction_prepare_terrain(part3, CLEAR_MODE_TREES, COST_PROCESS);
-        }
+        building_construction_auto_clear_for_building(type, x, y, 0);
     }
 
     building *b;

@@ -63,15 +63,11 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
                         }
                     }
                 }
-                if (!measure_only) {
-                    building_construction_auto_clear_vegetation_at(grid_offset);
-                }
+                building_construction_auto_clear_vegetation_at(grid_offset, measure_only);
                 *items += map_tiles_set_road(x_end, y_end);
                 break;
             case ROUTED_BUILDING_AQUEDUCT:
-                if (!measure_only) {
-                    building_construction_auto_clear_vegetation_at(grid_offset);
-                }
+                building_construction_auto_clear_vegetation_at(grid_offset, measure_only);
                 *items += map_building_tiles_add_aqueduct(x_end, y_end);
                 if (!measure_only) {
                     building *aqueduct = building_create(BUILDING_AQUEDUCT, x_end, y_end);
@@ -85,16 +81,28 @@ static int place_routed_building(int x_start, int y_start, int x_end, int y_end,
             case ROUTED_BUILDING_AQUEDUCT_WITHOUT_GRAPHIC:
                 *items += 1;
                 break;
-            case ROUTED_BUILDING_HIGHWAY:
-                if (!measure_only) {
-                    // Highway is a 2x2 footprint per step.
-                    building_construction_auto_clear_vegetation_at(grid_offset);
-                    building_construction_auto_clear_vegetation_at(grid_offset + map_grid_delta(1, 0));
-                    building_construction_auto_clear_vegetation_at(grid_offset + map_grid_delta(0, 1));
-                    building_construction_auto_clear_vegetation_at(grid_offset + map_grid_delta(1, 1));
+            case ROUTED_BUILDING_HIGHWAY: {
+                // Highway is a 2x2 footprint per step. Consecutive steps overlap by 50%,
+                // so only count vegetation for tiles that weren't already highway from a
+                // previous step in this same dry-run; otherwise we'd double-count.
+                int corners[4] = {
+                    grid_offset,
+                    grid_offset + map_grid_delta(1, 0),
+                    grid_offset + map_grid_delta(0, 1),
+                    grid_offset + map_grid_delta(1, 1),
+                };
+                int was_highway[4];
+                for (int i = 0; i < 4; i++) {
+                    was_highway[i] = map_terrain_is(corners[i], TERRAIN_HIGHWAY);
                 }
                 *items += map_tiles_set_highway(x_end, y_end);
+                for (int i = 0; i < 4; i++) {
+                    if (!was_highway[i]) {
+                        building_construction_auto_clear_vegetation_at(corners[i], measure_only);
+                    }
+                }
                 break;
+            }
         }
         int direction = calc_general_direction(x_end, y_end, x_start, y_start);
         if (direction == DIR_8_NONE) {

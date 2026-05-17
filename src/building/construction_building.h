@@ -48,12 +48,14 @@ int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode cle
 
 /**
  * Per-tile auto-clear of vegetation. If the auto-clear-trees option is enabled and
- * the tile contains TREE or SHRUB, removes those bits from both the live terrain
- * and the undo backup, updates the tile image to grass and charges 3 dn. Returns 1
- * if the tile was cleared. Image-backup / routing refresh are deferred and applied
- * by auto_clear_finalize() so we pay the cost once per placement action.
+ * the tile contains TREE or SHRUB:
+ *  - measure_only=0: removes those bits from live terrain and undo backup, sets the
+ *    tile image backup to grass, charges 3 dn, and bumps the dry-run counter.
+ *  - measure_only=1: leaves the terrain untouched but bumps the dry-run counter.
+ * Returns the cost (3 or 0). Image-backup / routing refresh are deferred and
+ * applied by auto_clear_finalize() so we pay the cost once per placement action.
  */
-int building_construction_auto_clear_vegetation_at(int grid_offset);
+int building_construction_auto_clear_vegetation_at(int grid_offset, int measure_only);
 
 /**
  * Finalize step paired with building_construction_auto_clear_vegetation_at.
@@ -61,6 +63,32 @@ int building_construction_auto_clear_vegetation_at(int grid_offset);
  * (so undo restores the cleared state visually) and the citizen routing grid.
  */
 void building_construction_auto_clear_finalize(void);
+
+/**
+ * Computes all auto-clear footprints for placing `type` at (x_tl, y_tl), the
+ * top-left corner of the main footprint after orientation adjustment. The
+ * footprint size is derived from the building type (with warehouse overridden
+ * to 3x3 to match the real placement path). Handles fort (3x3 body + 4x4
+ * parade ground) and hippodrome (three 5x5 parts) special cases. Returns
+ * total cost.
+ *  - measure_only=0: clears trees + charges.
+ *  - measure_only=1: counts cost without clearing; bumps the dry-run counter.
+ */
+int building_construction_auto_clear_for_building(building_type type, int x_tl, int y_tl,
+    int measure_only);
+
+/**
+ * Resets the dry-run vegetation-cost counter. Call once at the start of a
+ * preview pass before invoking any measure-only place_*** function.
+ */
+void building_construction_dry_run_vegetation_reset(void);
+
+/**
+ * Total cost accumulated by auto_clear_vegetation_at / auto_clear_for_building
+ * calls since the most recent dry_run_vegetation_reset, in denarii. Used by the
+ * construction cost-preview tooltip.
+ */
+int building_construction_dry_run_vegetation_cost(void);
 
 #endif // BUILDING_CONSTRUCTION_BUILDING_H
 
