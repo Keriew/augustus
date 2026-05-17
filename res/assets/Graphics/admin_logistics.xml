@@ -284,7 +284,7 @@
 		<layer group="63" image="0"/>
 		<layer src="Forum_Upgrade" x="0" y="27"/>
 	</image>
-	<!-- Note: Architect's Guild OFF Variant -->
+	<!-- Note: Highway Station OFF/ON Variants -->
 	<image id="Highway_Station_OFF" src="Highway_Station_OFF" isometric="true"/>
 	<image id="Highway_Station_ON" isometric="true">
 		<layer group="this" image="Highway_Station_OFF"/>

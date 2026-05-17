@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/connectable.h"
+#include "building/highway_station.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -287,6 +288,12 @@ int building_image_get(const building *b)
                     return assets_get_image_id("Industry", "Brickworks_S_ON");
                 default:
                     return assets_get_image_id("Industry", "Brickworks_C_ON");
+            }
+        case BUILDING_HIGHWAY_STATION:
+            if (building_highway_station_is_functional((building *) b)) {
+                return assets_get_image_id("Admin_Logistics", "Highway_Station_ON");
+            } else {
+                return assets_get_image_id("Admin_Logistics", "Highway_Station_OFF");
             }
         case BUILDING_CONCRETE_MAKER:
             switch (scenario_property_climate()) {

@@ -2,10 +2,12 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
+#include "building/highway_station.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/storage.h"
 #include "building/warehouse.h"
+#include "city/buildings.h"
 #include "city/gods.h"
 #include "city/resource.h"
 #include "core/calc.h"
@@ -18,6 +20,7 @@
 #include "figure/route.h"
 #include "map/figure.h"
 #include "map/grid.h"
+#include "map/road_access.h"
 
 #define VALID_MONUMENT_RECHECK_TICKS 60
 
@@ -59,11 +62,14 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id)
         return 0;
     }
 
-    building_warehouse_try_remove_resource(warehouse, resource, num_loads);
+    int amount_taken = building_warehouse_try_remove_resource(warehouse, resource, num_loads);
+    if (amount_taken <= 0) {
+        return 0;
+    }
 
     // create slave workers
     int slave = f->id;
-    for (int i = 0; i < num_loads; i++) {
+    for (int i = 0; i < amount_taken; i++) {
         slave = create_slave_workers(slave, f->id);
     }
     return 1;
@@ -111,34 +117,56 @@ void figure_workcamp_worker_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED:
-            if (!building_monument_has_unfinished_monuments()) {
-                f->state = FIGURE_STATE_DEAD;
-                break;
-            }
-            for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
-                if (city_resource_is_stockpiled(resource) || !resource_is_storable(resource)) {
-                    continue;
-                }
-                monument_id = building_monument_get_monument(b->x, b->y, resource, b->road_network_id, 0);
-                if (!monument_id) {
-                    continue;
-                }
-                warehouse_id = building_warehouse_with_resource(f->x, f->y, resource, b->road_network_id, 0, &dst, BUILDING_STORAGE_PERMISSION_WORKCAMP);
-                if (!warehouse_id) {
-                    continue;
-                }
+            if (building_monument_has_unfinished_monuments()) {
+                for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+                    if (city_resource_is_stockpiled(resource) || !resource_is_storable(resource)) {
+                        continue;
+                    }
+                    monument_id = building_monument_get_monument(b->x, b->y, resource, b->road_network_id, 0);
+                    if (!monument_id) {
+                        continue;
+                    }
+                    warehouse_id = building_warehouse_with_resource(f->x, f->y, resource, b->road_network_id, 0, &dst, BUILDING_STORAGE_PERMISSION_WORKCAMP);
+                    if (!warehouse_id) {
+                        continue;
+                    }
 
-                f->collecting_item_id = resource;
-                f->destination_building_id = warehouse_id;
-                f->destination_x = dst.x;
-                f->destination_y = dst.y;
-                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
-                f->action_state = FIGURE_ACTION_204_WORK_CAMP_WORKER_GETTING_RESOURCES;
-                building *monument = building_get(monument_id);
-                int resources_needed = monument->resources[resource] - building_monument_resource_in_delivery(monument, resource);
-                resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
-                building_monument_add_delivery(monument_id, f->id, resource, resources_needed);
-                break;
+                    f->collecting_item_id = resource;
+                    f->destination_building_id = warehouse_id;
+                    f->destination_x = dst.x;
+                    f->destination_y = dst.y;
+                    f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
+                    f->action_state = FIGURE_ACTION_204_WORK_CAMP_WORKER_GETTING_RESOURCES;
+                    building *monument = building_get(monument_id);
+                    int resources_needed = monument->resources[resource] - building_monument_resource_in_delivery(monument, resource);
+                    resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
+                    building_monument_add_delivery(monument_id, f->id, resource, resources_needed);
+                    break;
+                }
+            }
+            // Fallback: if no monument needs delivery, supply the Highway Station if it exists and is short on stock
+            if (!f->destination_building_id) {
+                int highway_station_id = city_buildings_get_highway_station();
+                if (highway_station_id) {
+                    building *highway_station = building_get(highway_station_id);
+                    static const resource_type highway_station_resources[2] = { RESOURCE_STONE, RESOURCE_SAND };
+                    for (int i = 0; i < 2; i++) {
+                        resource_type r = highway_station_resources[i];
+                        if (highway_station->resources[r] >= 500) {
+                            continue;
+                        }
+                        warehouse_id = building_warehouse_with_resource(f->x, f->y, r, b->road_network_id, 0, &dst, BUILDING_STORAGE_PERMISSION_WORKCAMP);
+                        if (!warehouse_id) {
+                            continue;
+                        }
+                        f->collecting_item_id = r;
+                        f->destination_building_id = warehouse_id;
+                        f->destination_x = dst.x;
+                        f->destination_y = dst.y;
+                        f->action_state = FIGURE_ACTION_251_WORK_CAMP_WORKER_GETTING_FOR_HIGHWAY_STATION;
+                        break;
+                    }
+                }
             }
             if (!f->destination_building_id) {
                 f->state = FIGURE_STATE_DEAD;
@@ -208,6 +236,58 @@ void figure_workcamp_worker_action(figure *f)
                 if (f->direction == DIR_FIGURE_REROUTE) {
                     figure_route_remove(f);
                 }
+            }
+            break;
+
+        case FIGURE_ACTION_251_WORK_CAMP_WORKER_GETTING_FOR_HIGHWAY_STATION:
+            figure_movement_move_ticks(f, 1);
+            if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+                int wid = f->destination_building_id;
+                building *warehouse = building_get(wid);
+                int stored = building_warehouse_get_amount(warehouse, f->collecting_item_id);
+                int num_loads = stored < 4 ? stored : 4;
+                if (num_loads <= 0) {
+                    f->state = FIGURE_STATE_DEAD;
+                    break;
+                }
+                int amount_taken = building_warehouse_try_remove_resource(warehouse, f->collecting_item_id, num_loads);
+                if (amount_taken <= 0) {
+                    f->state = FIGURE_STATE_DEAD;
+                    break;
+                }
+                f->loads_sold_or_carrying = amount_taken;
+                int tid = city_buildings_get_highway_station();
+                if (!tid) {
+                    f->state = FIGURE_STATE_DEAD;
+                    break;
+                }
+                building *highway_station = building_get(tid);
+                map_point road;
+                if (!map_has_road_access(highway_station->x, highway_station->y, highway_station->size, &road)) {
+                    f->state = FIGURE_STATE_DEAD;
+                    break;
+                }
+                f->destination_building_id = tid;
+                f->destination_x = road.x;
+                f->destination_y = road.y;
+                f->action_state = FIGURE_ACTION_252_WORK_CAMP_WORKER_GOING_TO_HIGHWAY_STATION;
+            } else if (f->direction == DIR_FIGURE_REROUTE || f->direction == DIR_FIGURE_LOST) {
+                f->state = FIGURE_STATE_DEAD;
+            }
+            break;
+
+        case FIGURE_ACTION_252_WORK_CAMP_WORKER_GOING_TO_HIGHWAY_STATION:
+            figure_movement_move_ticks(f, 1);
+            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+                building *highway_station = building_get(f->destination_building_id);
+                if (highway_station->state == BUILDING_STATE_IN_USE && highway_station->type == BUILDING_HIGHWAY_STATION) {
+                    int loads = f->loads_sold_or_carrying ? f->loads_sold_or_carrying : 1;
+                    highway_station->resources[f->collecting_item_id] += loads * 100;
+                    building_highway_station_refresh_graphic(highway_station);
+                }
+                f->state = FIGURE_STATE_DEAD;
+            } else if (f->direction == DIR_FIGURE_REROUTE) {
+                figure_route_remove(f);
             }
             break;
     }

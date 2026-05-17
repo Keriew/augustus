@@ -226,7 +226,7 @@ int building_warehouse_for_getting(building *src, int resource, map_point *dst);
  * @return ID of the warehouse, or 0 if none found
  */
 int building_warehouse_for_storing(int src_building_id, int x, int y, int resource, int road_network_id,
-                                   int *understaffed, map_point *dst);
+    int *understaffed, map_point *dst);
 
 /**
  * @brief Find a warehouse with the resource, honoring permissions.

@@ -1007,10 +1007,10 @@ static void get_depot_resource_orders_count(int building_id, resource_type resou
             b->data.depot.current_order.resource_type != resource) {
             continue;
         }
-        if (b->data.depot.current_order.src_storage_id == building_id) {
+        if ((int) b->data.depot.current_order.src_storage_id == building_id) {
             (*source_count)++;
         }
-        if (b->data.depot.current_order.dst_storage_id == building_id) {
+        if ((int) b->data.depot.current_order.dst_storage_id == building_id) {
             (*destination_count)++;
         }
     }
@@ -1043,7 +1043,7 @@ const uint8_t *window_building_storage_resource_hover_tooltip(building_info_cont
 
     for (unsigned int i = 0; i < scrollbar.elements_in_view; i++) {
         int list_index = i + scrollbar.scroll_position;
-        if (list_index >= list->size) {
+        if (list_index >= (int) list->size) {
             break;
         }
 
