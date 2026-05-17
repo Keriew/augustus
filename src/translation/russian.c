@@ -1008,6 +1008,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HIGHWAY_STATION_FUNCTIONAL, "Шоссейная станция работает. Стоимость и ежемесячное содержание шоссе снижены вдвое."},
     {TR_BUILDING_HIGHWAY_STATION_NOT_FUNCTIONAL, "Шоссейная станция не работает. Стоимость и ежемесячное содержание шоссе начисляются в полном объеме."},
     {TR_BUILDING_HIGHWAY_STATION_MONTHLY_NEED, "Ежемесячное потребление (каждого ресурса):"},
+    {TR_BUILDING_HIGHWAY_STATION_HIGHWAY_TILES, "Протяженность шоссе в городе:"},
     {TR_BUILDING_HIGHWAY_STATION_STONE_STOCK, "Запасы камня:"},
     {TR_BUILDING_HIGHWAY_STATION_SAND_STOCK, "Запасы песка:"},
     {TR_TOOLTIP_BUTTON_HIGHWAY_STATION, "Шоссейная станция"},
