@@ -1894,6 +1894,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_COLOR_BLACK, "Noir"},
     {TR_EDITOR_COLOR_DARK_BLUE, "Bleu foncé"},
     {TR_EDITOR_RUBBLE, "Décombres"},
+    {TR_EDITOR_TOOL_WATER, "Eau"},
+    {TR_EDITOR_TOOL_SHALLOW, "Hauts-fonds"},
     {TR_PARAMETER_GRID_OFFSET_CORNER1, "Coin 1"},
     {TR_PARAMETER_GRID_OFFSET_CORNER2, "Coin 2"},
     {TR_CONDITION_TYPE_TERRAIN_IN_AREA, "Terrain dans zone"},

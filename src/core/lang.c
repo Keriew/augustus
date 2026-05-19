@@ -642,6 +642,10 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_REMOVE);
             case TR_EDITOR_RUBBLE:
                 return translation_for(TR_EDITOR_RUBBLE);
+            case TR_EDITOR_TOOL_WATER:
+                return translation_for(TR_EDITOR_TOOL_WATER);
+            case TR_EDITOR_TOOL_SHALLOW:
+                return translation_for(TR_EDITOR_TOOL_SHALLOW);
             default:
                 break;
         }
