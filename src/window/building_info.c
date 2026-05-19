@@ -911,15 +911,13 @@ static void draw_foreground(void)
             } else {
                 window_building_distributor_draw_foreground(&context);
             }
-        } else if (btype == BUILDING_TRIUMPHAL_ARCH) {
-            if (b->monument.phase == MONUMENT_FINISHED) {
-                window_building_draw_roadblock_button(&context);
-            }
         } else if (building_type_is_roadblock(btype)) {
             if (context.show_special_orders) {
                 window_building_draw_roadblock_orders_foreground(&context);
             } else {
-                window_building_draw_roadblock_button(&context);
+                if (!(btype == BUILDING_TRIUMPHAL_ARCH && b->monument.phase != MONUMENT_FINISHED)) {
+                    window_building_draw_roadblock_button(&context);
+                }
             }
         } else if (btype == BUILDING_DOCK) {
             if (context.show_special_orders) {

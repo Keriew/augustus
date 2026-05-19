@@ -2105,6 +2105,11 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_DESIRABILITY, "Desirability"},
     {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Show shoreline desirability in overlay"},
     {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Show elevation desirability in overlay"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_1, "(Supports)"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_2, "(Facade)"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_1_TEXT, "Masons are laying the stonework and erecting towering pillars for a colossal triumphal arch, forged to immortalize the valor of your armies and proclaim their victories to generations yet unborn."},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_2_TEXT, "Skilled artisans are completing the facade of the grand arch with finely carved reliefs, polished stonework, and statues honoring the courage of your soldiers, giving the monument a dignity worthy of the city’s triumphs."},
+    {TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC, "The triumphal arch DOES NOT need resources from your city to be build. All neccessary resources and laborers will be supplied by rome to extol your military success."}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
