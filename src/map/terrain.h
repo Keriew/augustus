@@ -89,6 +89,7 @@ int map_terrain_get_from_buffer_16(buffer *buf, int grid_offset);
 int map_terrain_get_from_buffer_32(buffer *buf, int grid_offset);
 
 void map_terrain_set(int grid_offset, int terrain);
+void map_terrain_set_with_tile_update(int grid_offset, int terrain);
 
 void map_terrain_add(int grid_offset, int terrain);
 
