@@ -323,7 +323,7 @@ static void set_criminal_image(figure *f)
     } else if (f->action_state == FIGURE_ACTION_228_CRIMINAL_GOING_TO_LOOT ||
         f->action_state == FIGURE_ACTION_229_CRIMINAL_GOING_TO_ROB) {//robber/looter moving
         f->image_id = assets_get_image_id("Walkers", "thief_ne_01") + dir * 12 + f->image_offset;
-    } else if (f->type != FIGURE_RIOTER && f->num_attackers > 0) {//stopped robber/looter
+    } else if (f->type != FIGURE_RIOTER) {//stopped robber/looter
         f->image_id = assets_get_image_id("Walkers", "thief_s_08");
     } else {
         f->image_id = image_group(GROUP_FIGURE_CRIMINAL) + 104 + CRIMINAL_OFFSETS[f->image_offset / 2];
