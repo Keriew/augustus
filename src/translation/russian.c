@@ -1004,7 +1004,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_HIGHWAY_STATION, "Шоссейная станция"},
     {TR_BUILDING_HIGHWAY_STATION_DESC, "Шоссейная станция обслуживает вашу сеть шоссе. При снабжении камнем и песком работниками из рабочего лагеря она снижает стоимость строительства шоссе и ежемесячные сборы вдвое. Требуется построить рабочий лагерь. Можно построить только одну шоссейную станцию."},
     {TR_BUILDING_HIGHWAY_STATION_NO_EMPLOYEES, "В этой шоссейной станции нет работников. Обслуживание шоссе приостановлено."},
-    {TR_BUILDING_HIGHWAY_STATION_NO_RESOURCES, "Этой шоссейной станции требуется больше камня и песка для обслуживания сети шоссе."},
+    {TR_BUILDING_HIGHWAY_STATION_NO_RESOURCES, "Этой шоссейной станции требуется камень и песок для обслуживания сети шоссе."},
     {TR_BUILDING_HIGHWAY_STATION_FUNCTIONAL, "Шоссейная станция работает. Стоимость и ежемесячное содержание шоссе снижены вдвое."},
     {TR_BUILDING_HIGHWAY_STATION_NOT_FUNCTIONAL, "Шоссейная станция не работает. Стоимость и ежемесячное содержание шоссе начисляются в полном объеме."},
     {TR_BUILDING_HIGHWAY_STATION_MONTHLY_NEED, "Ежемесячное потребление (каждого ресурса):"},
@@ -2105,8 +2105,8 @@ static translation_string all_strings[] = {
     {TR_FIGURE_TYPE_DOG, "Собака"},
     {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, "Дома не создают бродячих собак"},
     {TR_CONFIG_HEADER_DESIRABILITY, "Привлекательность"},
-    {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Отображать привлекательность береговой линии в режиме наложения"},
-    {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Отображать привлекательность высоты местности в режиме наложения"},
+    {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Отображать привлекательность побережья в режиме наложения"},
+    {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Отображать привлекательность возвышенности в режиме наложения"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

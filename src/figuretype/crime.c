@@ -1,5 +1,6 @@
 #include "crime.h"
 
+#include "assets/assets.h"
 #include "building/building.h"
 #include "building/destruction.h"
 #include "building/granary.h"
@@ -311,13 +312,20 @@ static void set_criminal_image(figure *f)
         dir = f->previous_tile_direction;
     }
     dir = figure_image_normalize_direction(dir);
-    if (f->action_state == FIGURE_ACTION_149_CORPSE) {
+    if (f->type != FIGURE_RIOTER && f->action_state == FIGURE_ACTION_149_CORPSE) {//robber/looter CORPSE
+        f->image_id = assets_get_image_id("Walkers", "thief_death_01") + figure_image_corpse_offset(f);
+    } else if (f->action_state == FIGURE_ACTION_149_CORPSE) {//rioter CORPSE
         f->image_id = image_group(GROUP_FIGURE_CRIMINAL) + 96 + figure_image_corpse_offset(f);
     } else if (f->direction == DIR_FIGURE_ATTACK) {
         f->image_id = image_group(GROUP_FIGURE_CRIMINAL) + 104 + CRIMINAL_OFFSETS[f->image_offset % 16];
-    } else if (f->action_state == FIGURE_ACTION_121_RIOTER_MOVING || f->action_state == FIGURE_ACTION_228_CRIMINAL_GOING_TO_LOOT || f->action_state == FIGURE_ACTION_229_CRIMINAL_GOING_TO_ROB) {
+    } else if (f->action_state == FIGURE_ACTION_121_RIOTER_MOVING) {//rioter moving
         f->image_id = image_group(GROUP_FIGURE_CRIMINAL) + dir + 8 * f->image_offset;
-    } else {
+    } else if (f->action_state == FIGURE_ACTION_228_CRIMINAL_GOING_TO_LOOT ||
+        f->action_state == FIGURE_ACTION_229_CRIMINAL_GOING_TO_ROB) {//robber/looter moving
+        f->image_id = assets_get_image_id("Walkers", "thief_ne_01") + dir * 12 + f->image_offset;
+    } else if (f->type != FIGURE_RIOTER) {//spawn robber/looter
+        f->image_id = assets_get_image_id("Walkers", "thief_s_01") + (f->wait_ticks / 4) % 12;
+    } else {//spawn rioter
         f->image_id = image_group(GROUP_FIGURE_CRIMINAL) + 104 + CRIMINAL_OFFSETS[f->image_offset / 2];
     }
 }
@@ -408,7 +416,7 @@ void figure_robber_action(figure *f)
             figure_image_increase_offset(f, 32);
             f->wait_ticks++;
             if (f->wait_ticks >= 160) {
-                int x_tile, y_tile, resource = 0, target_building_id;
+                int x_tile, y_tile, resource = 0, target_building_id; //forum, senate
                 target_building_id = formation_rioter_get_target_building_for_robbery(f->x, f->y, &x_tile, &y_tile);
 
                 if (target_building_id) {
@@ -459,7 +467,7 @@ void figure_looter_action(figure *f)
             figure_image_increase_offset(f, 32);
             f->wait_ticks++;
             if (f->wait_ticks >= 160) {
-                int target_building_id = get_looter_destination(f);
+                int target_building_id = get_looter_destination(f); //storage
 
                 if (target_building_id) {
                     f->action_state = FIGURE_ACTION_228_CRIMINAL_GOING_TO_LOOT;
