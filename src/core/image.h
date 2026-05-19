@@ -20,6 +20,11 @@
 #define IMAGE_ATLAS_BIT_OFFSET 28
 #define IMAGE_ATLAS_BIT_MASK 0x0fffffff
 
+// Image-id flag indicating the id refers to the auxiliary main file (c3.555
+// loaded in editor mode). Set on values returned by image_group_aux();
+// image_get() detects this flag and routes through aux storage.
+#define IMAGE_AUX_FLAG 0x40000000
+
 #define FOOTPRINT_WIDTH 58
 #define FOOTPRINT_HEIGHT 30
 #define FOOTPRINT_HALF_HEIGHT 15
@@ -177,6 +182,53 @@ const image *image_letter(int letter_id);
  * @return Enemy image
  */
 const image *image_get_enemy(int id);
+
+/**
+ * Gets the image id of the first image in a group of the auxiliary main file
+ * (c3.555 loaded alongside c3map.555 in editor mode). Returns 0 if aux is not loaded.
+ * @param group Image group
+ * @return Image id of first image in aux, or 0
+ */
+int image_group_aux(int group);
+
+/**
+ * Gets an image from the auxiliary main file by id (c3.555 in editor mode).
+ * Returns a dummy image if aux is not loaded.
+ * @param id Image ID within the aux file
+ * @return Image
+ */
+const image *image_get_aux(int id);
+
+/**
+ * @return non-zero if the auxiliary main file is loaded
+ */
+int image_aux_is_loaded(void);
+
+/**
+ * Returns the per-atlas pixel buffer pointers for the aux atlas while it is
+ * prepared but not yet uploaded (between image_load_main_aux_prepare and
+ * finalize). Used by the asset/layer system to compose pixels from c3.555
+ * in editor mode. Returns NULL after finalize.
+ */
+color_t **image_aux_atlas_buffers(void);
+
+/**
+ * Returns the per-atlas pixel widths (in pixels) matching image_aux_atlas_buffers.
+ * Returns NULL after finalize.
+ */
+int *image_aux_atlas_widths(void);
+
+/**
+ * Get the dimensions of an external image stored in the aux file (c3.555 in
+ * editor mode). Returns 1 on success, 0 if not aux/external or out of range.
+ */
+int image_get_external_dimensions_aux(const image *img, int *width, int *height);
+
+/**
+ * Load pixel data of an external image stored in the aux file (c3.555).
+ * Returns 1 on success.
+ */
+int image_load_external_pixels_aux(color_t *dst, const image *img, int row_width);
 
 /**
  * Copies an image
