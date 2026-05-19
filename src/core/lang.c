@@ -634,6 +634,30 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT);
             case TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER:
                 return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_WHEAT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_WHEAT);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VEGETABLES:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VEGETABLES);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_FRUIT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_FRUIT);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_OLIVE:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_OLIVE);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VINES:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VINES);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG);
             case TR_EDITOR_TOOL_EARTHQUAKE_POINT:
                 return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_POINT);
             case TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM:

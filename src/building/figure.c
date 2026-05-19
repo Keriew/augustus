@@ -2065,7 +2065,12 @@ static void update_native_crop_progress(building *b)
     if (b->data.industry.progress >= 5) {
         b->data.industry.progress = 0;
     }
-    map_image_set(b->grid_offset, image_group(GROUP_BUILDING_FARM_CROPS) + b->data.industry.progress);
+    int variant = b->subtype.orientation;
+    if (variant < 0 || variant > 5) {
+        variant = 0;
+    }
+    map_image_set(b->grid_offset,
+        image_group(GROUP_BUILDING_FARM_CROPS) + variant * 5 + b->data.industry.progress);
 }
 
 void building_figure_generate(void)

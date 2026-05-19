@@ -121,7 +121,9 @@ void scenario_editor_create(int map_size)
 }
 
 void scenario_editor_set_native_images(int image_alt_hut, int image_native_decoration,
-    int image_native_monument, int image_native_watchtower, int image_hut, int image_meeting, int image_crops)
+    int image_native_monument, int image_native_watchtower, int image_hut, int image_meeting, int image_crops,
+    int image_native_well, int image_native_meeting_alt, int image_native_hut_alt_2, int image_native_meeting_alt_2,
+    int image_native_palisade)
 {
     scenario.native_images.alt_hut = image_alt_hut;
     scenario.native_images.decoration = image_native_decoration;
@@ -130,6 +132,11 @@ void scenario_editor_set_native_images(int image_alt_hut, int image_native_decor
     scenario.native_images.hut = image_hut;
     scenario.native_images.meeting = image_meeting;
     scenario.native_images.crops = image_crops;
+    scenario.native_images.well = image_native_well;
+    scenario.native_images.meeting_alt = image_native_meeting_alt;
+    scenario.native_images.hut_alt_2 = image_native_hut_alt_2;
+    scenario.native_images.meeting_alt_2 = image_native_meeting_alt_2;
+    scenario.native_images.palisade = image_native_palisade;
 }
 
 void scenario_editor_cycle_image(int forward)

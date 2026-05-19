@@ -1,6 +1,7 @@
 #include "file_editor.h"
 
 #include "assets/assets.h"
+#include "building/building.h"
 #include "building/construction.h"
 #include "building/image.h"
 #include "building/menu.h"
@@ -10,6 +11,7 @@
 #include "city/victory.h"
 #include "city/view.h"
 #include "core/image.h"
+#include "core/image_group.h"
 #include "core/image_group_editor.h"
 #include "empire/editor.h"
 #include "empire/empire.h"
@@ -186,6 +188,24 @@ int game_file_editor_write_scenario(const char *scenario_file)
     int image_native_decoration = building_image_get_for_type(BUILDING_NATIVE_DECORATION);
     int image_native_monument = building_image_get_for_type(BUILDING_NATIVE_MONUMENT);
     int image_native_watchtower = building_image_get_for_type(BUILDING_NATIVE_WATCHTOWER);
+    int image_native_well = building_image_get_for_type(BUILDING_NATIVE_WELL);
+    int image_native_meeting_alt = building_image_get_for_type(BUILDING_NATIVE_MEETING_ALT);
+    int image_native_meeting_alt_2 = building_image_get_for_type(BUILDING_NATIVE_MEETING_ALT_2);
+    int image_native_hut_alt_2;
+    int image_native_palisade;
+    switch (scenario_property_climate()) {
+        case CLIMATE_NORTHERN:
+            image_native_hut_alt_2 = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Northern_01");
+            image_native_palisade = assets_get_image_id("Military", "Pal Wall N 01");
+            break;
+        case CLIMATE_DESERT:
+            image_native_hut_alt_2 = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Southern_01");
+            image_native_palisade = assets_get_image_id("Military", "Pal Wall S 01");
+            break;
+        default:
+            image_native_hut_alt_2 = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Central_01");
+            image_native_palisade = assets_get_image_id("Military", "Pal Wall C 01");
+    }
 
     scenario_editor_set_native_images(
         image_alt_hut,
@@ -194,12 +214,41 @@ int game_file_editor_write_scenario(const char *scenario_file)
         image_native_watchtower,
         image_group(GROUP_EDITOR_BUILDING_NATIVE),
         image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
-        image_group(GROUP_EDITOR_BUILDING_CROPS)
+        image_group(GROUP_EDITOR_BUILDING_CROPS),
+        image_native_well,
+        image_native_meeting_alt,
+        image_native_hut_alt_2,
+        image_native_meeting_alt_2,
+        image_native_palisade
     );
     scenario_distant_battle_set_roman_travel_months();
     scenario_distant_battle_set_enemy_travel_months();
 
-    if (game_file_io_write_scenario(scenario_file)) {
+    // Native crop variants are displayed as wheat in the editor; encode each variant
+    // into the per-tile image_id only for the duration of the write, then restore.
+    // Newly placed buildings are still in CREATED state — include both.
+    int crops_base = image_group(GROUP_EDITOR_BUILDING_CROPS);
+    for (building *b = building_first_of_type(BUILDING_NATIVE_CROPS); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
+            continue;
+        }
+        int variant = b->subtype.orientation;
+        if (variant < 0 || variant > 5) {
+            variant = 0;
+        }
+        map_image_set(b->grid_offset, crops_base + variant * 5);
+    }
+
+    int result = game_file_io_write_scenario(scenario_file);
+
+    for (building *b = building_first_of_type(BUILDING_NATIVE_CROPS); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
+            continue;
+        }
+        map_image_set(b->grid_offset, crops_base);
+    }
+
+    if (result) {
         scenario_editor_set_as_saved();
         return 1;
     }

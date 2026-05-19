@@ -2107,6 +2107,20 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_DESIRABILITY, "Desirability"},
     {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Show shoreline desirability in overlay"},
     {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Show elevation desirability in overlay"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL, "Native well"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT, "Native meeting hut alt"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2, "Native hut alt 2"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2, "Native meeting hut alt 2"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE, "Native palisade"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS, "Native fields"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_WHEAT, "Wheat field"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VEGETABLES, "Vegetable field"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_FRUIT, "Fruit field"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_OLIVE, "Olive field"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VINES, "Vines field"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG, "Pig field"},
+    {TR_BUILDING_NATIVE_WELL, "Native Well"},
+    {TR_BUILDING_NATIVE_WELL_DESC, "This hand-dug well draws water from the earth to sustain the local tribe. Though primitive compared to Roman aqueducts and fountains, it suffices for the natives' modest needs. The villagers gather here at dawn and dusk to draw water, exchange news, and observe the rhythms of their ancestral land."},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
