@@ -316,6 +316,17 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
     return color_mask;
 }
 
+static int overlay_should_show_building(const building *b)
+{
+    if (!config_get(CONFIG_GP_HIDE_ROADBLOCKS_ON_OVERLAYS)) {
+        int roadblock_type = building_type_is_roadblock(b->type);
+        if (roadblock_type == 1 || roadblock_type == 3) {
+            return 1;
+        }
+    }
+    return !draw_context.overlay->show_building || draw_context.overlay->show_building(b);
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -378,7 +389,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     } else if (building_id && !map_is_bridge(grid_offset)) {
         building *b = building_get(building_id);
 
-        if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
+        if (overlay_should_show_building(b)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
         } else {
             if (!building_is_farm(b->type) || is_drawable_farm_corner(grid_offset)) {
@@ -666,7 +677,7 @@ static void draw_building_top(int x, int y, int grid_offset, color_t color_mask)
 {
     building *b = building_get(map_building_at(grid_offset));
 
-    if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
+    if (overlay_should_show_building(b)) {
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
         
         // Specific buildings

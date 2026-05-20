@@ -2107,6 +2107,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_DESIRABILITY, "Desirability"},
     {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Show shoreline desirability in overlay"},
     {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Show elevation desirability in overlay"},
+    {TR_CONFIG_HIDE_ROADBLOCKS_ON_OVERLAYS, "Hide roadblocks on overlays"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

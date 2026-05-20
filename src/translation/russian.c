@@ -2107,6 +2107,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_DESIRABILITY, "Привлекательность"},
     {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Отображать привлекательность береговой линии в режиме наложения"},
     {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Отображать привлекательность высоты местности в режиме наложения"},
+    {TR_CONFIG_HIDE_ROADBLOCKS_ON_OVERLAYS, "Скрыть дорожные блоки в слоях наложения"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

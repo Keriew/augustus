@@ -132,6 +132,7 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
     [CONFIG_UI_SHOW_SHORELINE_DESIRABILITY] = "ui_show_shoreline_desirability",
     [CONFIG_UI_SHOW_ELEVATION_DESIRABILITY] = "ui_show_elevation_desirability",
+    [CONFIG_GP_HIDE_ROADBLOCKS_ON_OVERLAYS] = "gameplay_change_hide_roadblocks_on_overlays",
 };
 
 static const char *ini_string_keys[] = {
