@@ -1,10 +1,8 @@
 #include "building.h"
 
-
+#include "building/building.h"
 #include "building/properties.h"
 #include "core/calc.h"
-
-#include "building/building.h"
 #include "core/config.h"
 #include "figure/movement.h"
 #include "game/save_version.h"
