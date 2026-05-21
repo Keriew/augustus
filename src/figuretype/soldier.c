@@ -411,7 +411,7 @@ void figure_soldier_action(figure *f)
             } else if (f->direction == DIR_FIGURE_REROUTE) {
                 figure_route_remove(f);
             } else if (f->direction == DIR_FIGURE_LOST) {
-                f->state = FIGURE_STATE_DEAD;
+                figure_route_remove(f);
             }
             break;
         case FIGURE_ACTION_82_SOLDIER_RETURNING_TO_BARRACKS:
