@@ -341,7 +341,7 @@ void building_destroy_by_enemy(int x, int y, int grid_offset)
         } else if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
             int current;
             int max;
-            map_building_get_health(b, &current, &max);
+            map_building_get_health(b, grid_offset, &current, &max);
             if (current <= 0) {
                 city_ratings_peace_building_destroyed(b->type);
                 building_destroy_by_collapse(b);

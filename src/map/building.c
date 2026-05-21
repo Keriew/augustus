@@ -1,5 +1,9 @@
 #include "building.h"
 
+
+#include "building/properties.h"
+#include "core/calc.h"
+
 #include "building/building.h"
 #include "core/config.h"
 #include "figure/movement.h"
@@ -168,10 +172,9 @@ int map_building_damage_get(int grid_offset)
     return damage_grid.items[grid_offset];
 }
 
-void map_building_get_health(const building *b, int *current, int *max)
+void map_building_get_health(const building *b, int grid_offset, int *current, int *max)
 {
     int max_hp = BUILDING_HP;
-
     switch (b->type) {
         case BUILDING_WALL:
             max_hp = WALL_HP;
@@ -186,38 +189,18 @@ void map_building_get_health(const building *b, int *current, int *max)
             max_hp = PALISADE_HP;
             break;
         default:
-            max_hp = BUILDING_HP;
             break;
     }
-
-    int base_x = map_grid_offset_to_x(b->grid_offset);
-    int base_y = map_grid_offset_to_y(b->grid_offset);
-    int size = b->size;
-
     int total_damage = 0;
-    int tiles = 0;
-
-    for (int dy = 0; dy < size; dy++) {
-        for (int dx = 0; dx < size; dx++) {
-
-            int offset = map_grid_offset(base_x + dx, base_y + dy);
-
-            int dmg = map_building_damage_get(offset);
-
-            total_damage += dmg;
-            tiles++;
+    if (building_properties_for_type(b->type)->shared) {
+        total_damage = map_building_damage_get(grid_offset);
+    } else {
+        grid_slice *slice = map_grid_get_grid_slice_square(b->grid_offset, b->size);
+        for (int i = 0; i < slice->size; i++) {
+            total_damage += map_building_damage_get(slice->grid_offsets[i]);
         }
     }
-
-    int current_hp = max_hp - total_damage;
-
-    if (current_hp < 0) {
-        current_hp = 0;
-    }
-    if (current_hp > max_hp) {
-        current_hp = max_hp;
-    }
-
+    int current_hp = calc_bound(max_hp - total_damage, 0, max_hp);
     *current = current_hp;
     *max = max_hp;
 }

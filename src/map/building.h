@@ -34,7 +34,7 @@ int map_building_damage_increase(int grid_offset);
 
 int map_building_damage_get(int grid_offset);
 
-void map_building_get_health(const building *b, int *current, int *max);
+void map_building_get_health(const building *b, int grid_offset, int *current, int *max);
 
 void map_building_damage_clear(int grid_offset);
 
