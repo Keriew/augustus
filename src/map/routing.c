@@ -575,7 +575,7 @@ static inline int has_fighting_enemy(int grid_offset)
 
 static int callback_travel_citizen_land(int offset, int next_offset, int direction)
 {
-    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
+    if (terrain_land_citizen.items[next_offset] >= 0) {
         return 1;
     }
     return 0;
