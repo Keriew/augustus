@@ -3,6 +3,7 @@
 #include "core/file.h"
 #include "core/lang.h"
 #include "core/log.h"
+#include "city/emperor.h"
 #include "game/campaign/file.h"
 #include "game/campaign/mission.h"
 #include "game/campaign/original.h"
@@ -13,6 +14,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#define RANK_INHERITED -1
 
 static struct {
     int active;
@@ -148,6 +151,19 @@ uint8_t *game_campaign_load_file(const char *filename, size_t *length)
     return campaign_file_load(filename, length);
 }
 
+// Used to resolve inherited rank
+static int resolve_rank(int rank)
+{
+    if (rank == RANK_INHERITED) {
+        rank = city_emperor_rank();
+    } else {
+        /* rank is set to the starting rank on the mission list
+            so here we have to set it right if the mission has a different fixed rank */
+        city_emperor_set_rank(rank);
+    }
+    return rank;
+}
+
 static int fill_mission_info(const campaign_mission *mission)
 {
     if (!mission) {
@@ -166,7 +182,7 @@ static int fill_mission_info(const campaign_mission *mission)
         data.mission_info.background_image.id = mission->background_image.id;
         data.mission_info.background_image.path = mission->background_image.path;
         data.mission_info.max_personal_savings = mission->max_personal_savings;
-        data.mission_info.next_rank = mission->next_rank;
+        data.mission_info.next_rank = resolve_rank(mission->next_rank);
         data.mission_info.first_scenario = mission->first_scenario;
         data.mission_info.total_scenarios = mission->last_scenario - mission->first_scenario + 1;
         return 1;

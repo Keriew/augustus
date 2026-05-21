@@ -548,6 +548,11 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .category = FIGURE_CATEGORY_CITIZEN,
         .sound_type = FIGURE_SOUND_DOG,
         .max_damage = 10,
+    },
+    [FIGURE_HIGHWAY_STATION_SUPPLIER] = {
+        .category = FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_INDUSTRY,
+        .max_damage = 20, .attack_value = 0, .defense_value = 0,
+        .missile_defense_value = 0, .missile_attack_value = 0, .missile_delay = 0
     }
 };
 

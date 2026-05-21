@@ -21,6 +21,12 @@ int city_buildings_get_caravanserai(void);
 
 int city_buildings_has_city_mint(void);
 
+int city_buildings_has_workcamp(void);
+
+int city_buildings_has_highway_station(void);
+int city_buildings_get_highway_station(void);
+int city_buildings_has_working_highway_station(void);
+
 int city_buildings_triumphal_arch_available(void);
 void city_buildings_earn_triumphal_arch(void);
 void city_buildings_build_triumphal_arch(void);

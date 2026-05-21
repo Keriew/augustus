@@ -121,7 +121,7 @@ static void play_audio(void)
     data.audio_playing = 1;
     data.paths.audio[0] = 0;
     data.paths.speech[0] = 0;
-    data.paths.background_music[0] = 0;   
+    data.paths.background_music[0] = 0;
 
     custom_message_t *custom_message = custom_messages_get(scenario_victory_message());
 
@@ -235,7 +235,7 @@ static void draw_won(void)
     text_draw_number(city_rating_prosperity(), '@', " ", right_offset + width, info_y_offset, FONT_NORMAL_BLACK, 0);
 
     info_y_offset += 20;
-    
+
     width = lang_text_draw(148, 2, left_offset, info_y_offset, FONT_NORMAL_BLACK);
     text_draw_number(city_rating_peace(), '@', " ", left_offset + width, info_y_offset, FONT_NORMAL_BLACK, 0);
 
