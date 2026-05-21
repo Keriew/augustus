@@ -391,7 +391,7 @@ static void init(int grid_offset)
         context.terrain_type = TERRAIN_INFO_RUBBLE;
     } else if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
         context.terrain_type = TERRAIN_INFO_WALL;
-    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !context.building_id) {
         context.terrain_type = TERRAIN_INFO_HIGHWAY;
     } else if (!context.building_id) {
         context.terrain_type = TERRAIN_INFO_EMPTY;
