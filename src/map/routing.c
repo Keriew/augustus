@@ -581,7 +581,7 @@ static int callback_travel_citizen_land(int offset, int next_offset, int directi
     return 0;
 }
 
-int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
+int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions, int ignore_combat)
 {
     ++stats.total_routes_calculated;
     route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, 0, callback_travel_citizen_land);

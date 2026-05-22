@@ -114,7 +114,7 @@ void figure_route_add(figure *f)
                     f->destination_x, f->destination_y, direction_limit);
                 if (!can_travel) {
                     can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y,
-                        f->destination_x, f->destination_y, direction_limit);
+                        f->destination_x, f->destination_y, direction_limit, 0);
                 }
                 break;
             case TERRAIN_USAGE_ROADS:
@@ -126,7 +126,7 @@ void figure_route_add(figure *f)
                     f->destination_x, f->destination_y, direction_limit);
                 if (!can_travel) {
                     can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y,
-                        f->destination_x, f->destination_y, direction_limit);
+                        f->destination_x, f->destination_y, direction_limit, 0);
                 }
                 break;
             case TERRAIN_USAGE_ROADS_HIGHWAY:
@@ -135,7 +135,11 @@ void figure_route_add(figure *f)
                 break;
             default:
                 can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y,
-                    f->destination_x, f->destination_y, direction_limit);
+                    f->destination_x, f->destination_y, direction_limit, 0);
+                if (!can_travel) {
+                    can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y, 
+                        f->destination_x, f->destination_y, direction_limit, 1);
+                }
                 break;
         }
         if (can_travel) {
