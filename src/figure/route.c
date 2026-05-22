@@ -136,7 +136,8 @@ void figure_route_add(figure *f)
             default:
                 can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y,
                     f->destination_x, f->destination_y, direction_limit, 0);
-                if (!can_travel) {
+                if (!can_travel && (f->action_state == FIGURE_ACTION_81_SOLDIER_GOING_TO_FORT ||
+                    f->action_state == FIGURE_ACTION_148_FLEEING)) {
                     can_travel = map_routing_citizen_can_travel_over_land(f->x, f->y, 
                         f->destination_x, f->destination_y, direction_limit, 1);
                 }
