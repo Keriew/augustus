@@ -131,6 +131,8 @@ int map_terrain_exists_tile_in_area_with_type(int x, int y, int size, int terrai
 
 int map_terrain_exists_tile_in_radius_with_type(int x, int y, int size, int radius, int terrain);
 
+int map_terrain_exists_open_water_in_radius(int x, int y, int size, int radius);
+
 int map_terrain_exists_rock_in_radius(int x, int y, int size, int radius);
 
 int map_terrain_exists_clear_tile_in_radius(int x, int y, int size, int radius, int except_grid_offset,
