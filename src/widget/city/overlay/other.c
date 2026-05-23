@@ -445,7 +445,7 @@ static int get_environmental_desirability(const int grid_offset, int ignore_conf
     const int y_position = map_grid_offset_to_y(grid_offset);
     int additional_desirability = 0;
     if ((ignore_config || config_get(CONFIG_UI_SHOW_SHORELINE_DESIRABILITY)) &&
-        map_terrain_exists_tile_in_radius_with_type(x_position, y_position, 1, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER)) {
+        map_terrain_exists_tile_in_radius_with_type(x_position, y_position, 1, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER, 0)) {
         additional_desirability += BUILDING_WATER_DESIRABILITY_BONUS;
     }
     if (ignore_config || config_get(CONFIG_UI_SHOW_ELEVATION_DESIRABILITY)) {

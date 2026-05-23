@@ -142,7 +142,7 @@ static void set_rock_image(int x, int y, int grid_offset)
         if (!map_image_at(grid_offset)) {
             if (is_all_terrain_in_area(x, y, 3, TERRAIN_ROCK)) {
                 int image_id = 12 + (map_random_get(grid_offset) & 1);
-                if (map_terrain_exists_tile_in_radius_with_type(x, y, 3, 4, TERRAIN_ELEVATION)) {
+                if (map_terrain_exists_tile_in_radius_with_type(x, y, 3, 4, TERRAIN_ELEVATION, 0)) {
                     image_id += image_group(GROUP_TERRAIN_ELEVATION_ROCK);
                 } else {
                     image_id += image_group(GROUP_TERRAIN_ROCK);
@@ -150,7 +150,7 @@ static void set_rock_image(int x, int y, int grid_offset)
                 map_building_tiles_add(0, x, y, 3, image_id, TERRAIN_ROCK);
             } else if (is_all_terrain_in_area(x, y, 2, TERRAIN_ROCK)) {
                 int image_id = 8 + (map_random_get(grid_offset) & 3);
-                if (map_terrain_exists_tile_in_radius_with_type(x, y, 2, 4, TERRAIN_ELEVATION)) {
+                if (map_terrain_exists_tile_in_radius_with_type(x, y, 2, 4, TERRAIN_ELEVATION, 0)) {
                     image_id += image_group(GROUP_TERRAIN_ELEVATION_ROCK);
                 } else {
                     image_id += image_group(GROUP_TERRAIN_ROCK);
@@ -158,7 +158,7 @@ static void set_rock_image(int x, int y, int grid_offset)
                 map_building_tiles_add(0, x, y, 2, image_id, TERRAIN_ROCK);
             } else {
                 int image_id = map_random_get(grid_offset) & 7;
-                if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 4, TERRAIN_ELEVATION)) {
+                if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 4, TERRAIN_ELEVATION, 0)) {
                     image_id += image_group(GROUP_TERRAIN_ELEVATION_ROCK);
                 } else {
                     image_id += image_group(GROUP_TERRAIN_ROCK);
@@ -736,7 +736,7 @@ int map_tiles_is_paved_road(int grid_offset)
     }
     int x = map_grid_offset_to_x(grid_offset);
     int y = map_grid_offset_to_y(grid_offset);
-    if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 3, TERRAIN_HIGHWAY)) {
+    if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 3, TERRAIN_HIGHWAY, 0)) {
         return 1;
     }
     return 0;
@@ -1085,7 +1085,7 @@ static void set_water_image(int x, int y, int grid_offset)
     if (((map_terrain_get(grid_offset) & (TERRAIN_WATER | TERRAIN_BUILDING)) == TERRAIN_WATER) || map_is_bridge(grid_offset)) {
         const terrain_image *img = map_image_context_get_shore(grid_offset);
         int image_id = image_group(GROUP_TERRAIN_WATER) + img->group_offset + img->item_offset;
-        if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_BUILDING)) {
+        if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_BUILDING, 0)) {
             // fortified shore
             if (!map_is_bridge(grid_offset)) { //no fortification right under the bridge
                 int base = image_group(GROUP_TERRAIN_WATER_SHORE);
