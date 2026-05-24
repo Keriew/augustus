@@ -119,7 +119,8 @@ static int show_building_enemy(const building *b)
         || b->type == BUILDING_WATCHTOWER || b->type == BUILDING_TOWER || b->type == BUILDING_WALL
         || (building_is_fort(b->type)) || b->type == BUILDING_FORT_GROUND
         || b->type == BUILDING_BARRACKS || b->type == BUILDING_MILITARY_ACADEMY
-        || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE;
+        || b->type == BUILDING_GATEHOUSE || b->type == BUILDING_PALISADE_GATE || b->type == BUILDING_PALISADE
+        || b->type == BUILDING_AQUEDUCT;
 }
 
 static int show_figure_fire(const figure *f)
@@ -135,7 +136,11 @@ static int show_figure_damage(const figure *f)
 static int show_figure_crime(const figure *f)
 {
     const figure_properties *props = figure_properties_for_type(f->type);
-    return props->category & FIGURE_CATEGORY_ARMED || props->category & FIGURE_CATEGORY_CRIMINAL
+    if (f->type == FIGURE_BALLISTA) {
+        return 0;
+    }
+    return props->category & FIGURE_CATEGORY_ARMED
+        || props->category & FIGURE_CATEGORY_CRIMINAL
         || props->category & FIGURE_CATEGORY_PROJECTILE
         || f->type == FIGURE_FORT_STANDARD;
 }
