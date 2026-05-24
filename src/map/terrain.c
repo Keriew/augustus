@@ -104,6 +104,12 @@ void map_terrain_remove(int grid_offset, int terrain)
     terrain_grid.items[grid_offset] &= ~terrain;
 }
 
+void map_terrain_remove_with_backup(int grid_offset, int terrain)
+{
+    terrain_grid.items[grid_offset] &= ~terrain;
+    terrain_grid_backup.items[grid_offset] &= ~terrain;
+}
+
 void map_terrain_add_with_radius(int x, int y, int size, int radius, int terrain)
 {
     int x_min, y_min, x_max, y_max;

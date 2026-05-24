@@ -770,6 +770,150 @@
 	<image src="Smoke_Anim_04"/>
 	<image src="Smoke_Anim_05"/>
 	<image src="Smoke_Anim_06"/-->
+	<!-- Note: Reed Gatherer OFF - Climate Variants -->
+	<image id="Reed_Gatherer_C_OFF" src="Reed_Gatherer_C_OFF" width="118" height="78" isometric="true"/>
+	<image id="Reed_Gatherer_N_OFF" width="118" height="78" isometric="true">
+		<layer group="this" image="Reed_Gatherer_C_OFF"/>
+		<layer src="Reed_Gatherer_N_OFF" y="43"/>
+	</image>
+	<image id="Reed_Gatherer_S_OFF" width="118" height="78" isometric="true">
+		<layer group="this" image="Reed_Gatherer_C_OFF"/>
+		<layer src="Reed_Gatherer_S_OFF" y="43"/>
+	</image>
+	<!-- Note: Reed Gatherer ON Animation Frames - DO NOT USE -->
+	<image id="Reed_Gatherer_ON_01" width="118" height="78">
+		<layer src="Reed_Gatherer_ON_Base" x="21" y="28"/>
+	</image>
+	<image id="Reed_Gatherer_ON_02" width="118" height="78">
+		<layer group="this" image="Reed_Gatherer_ON_01"/>
+		<layer src="Reed_Gatherer_ON_02" x="54" y="47"/>
+	</image>
+	<image id="Reed_Gatherer_ON_03" width="118" height="78">
+		<layer group="this" image="Reed_Gatherer_ON_01"/>
+		<layer src="Reed_Gatherer_ON_03" x="38" y="44"/>
+	</image>
+	<image id="Reed_Gatherer_ON_04" width="118" height="78">
+		<layer group="this" image="Reed_Gatherer_ON_01"/>
+		<layer src="Reed_Gatherer_ON_04" x="38" y="42"/>
+	</image>
+	<image id="Reed_Gatherer_ON_05" width="118" height="78">
+		<layer group="this" image="Reed_Gatherer_ON_01"/>
+		<layer src="Reed_Gatherer_ON_05" x="35" y="37"/>
+	</image>
+	<!-- Note: Reed Gatherer ON - Climate Variants -->
+	<image id="Reed_Gatherer_C_ON" width="118" height="78" isometric="true">
+		<layer group="this" image="Reed_Gatherer_C_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Reed_Gatherer_ON_01"/>
+			<frame group="this" image="Reed_Gatherer_ON_02"/>
+			<frame group="this" image="Reed_Gatherer_ON_03"/>
+			<frame group="this" image="Reed_Gatherer_ON_04"/>
+			<frame group="this" image="Reed_Gatherer_ON_05"/>
+		</animation>
+	</image>
+	<image id="Reed_Gatherer_N_ON" width="118" height="78" isometric="true">
+		<layer group="this" image="Reed_Gatherer_N_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Reed_Gatherer_ON_01"/>
+			<frame group="this" image="Reed_Gatherer_ON_02"/>
+			<frame group="this" image="Reed_Gatherer_ON_03"/>
+			<frame group="this" image="Reed_Gatherer_ON_04"/>
+			<frame group="this" image="Reed_Gatherer_ON_05"/>
+		</animation>
+	</image>
+	<image id="Reed_Gatherer_S_ON" width="118" height="78" isometric="true">
+		<layer group="this" image="Reed_Gatherer_S_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Reed_Gatherer_ON_01"/>
+			<frame group="this" image="Reed_Gatherer_ON_02"/>
+			<frame group="this" image="Reed_Gatherer_ON_03"/>
+			<frame group="this" image="Reed_Gatherer_ON_04"/>
+			<frame group="this" image="Reed_Gatherer_ON_05"/>
+		</animation>
+	</image>
+	<!-- Note: Reeds Cart -->
+	<!--image id="Reeds_Cart_NE" width="39" height="39">
+		<layer group="97" image="0" x="0" y="0"/>
+		<layer src="Reeds_Cart_NE" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_E" width="39" height="39">
+		<layer group="97" image="1" x="0" y="0"/>
+		<layer src="Reeds_Cart_E" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_SE" width="39" height="39">
+		<layer group="97" image="2" x="0" y="0"/>
+		<layer src="Reeds_Cart_SE" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_S" width="39" height="39">
+		<layer group="97" image="3" x="0" y="0"/>
+		<layer src="Reeds_Cart_S" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_SW" width="39" height="39">
+		<layer group="97" image="4" x="0" y="0"/>
+		<layer src="Reeds_Cart_SW" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_W" width="39" height="39">
+		<layer group="97" image="5" x="0" y="0"/>
+		<layer src="Reeds_Cart_W" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_NW" width="39" height="39">
+		<layer group="97" image="6" x="0" y="0"/>
+		<layer src="Reeds_Cart_NW" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_N" width="39" height="39">
+		<layer group="97" image="7" x="0" y="0"/>
+		<layer src="Reeds_Cart_N" x="0" y="0"/>
+	</image-->
+	<!-- Note: Reeds Getting Cart -->
+	<!--image id="Reeds_Cart_Getting_NE" width="39" height="39">
+		<layer group="97" image="0" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_NE" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_Getting_E" width="39" height="39">
+		<layer group="97" image="1" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_E" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_Getting_SE" width="39" height="39">
+		<layer group="97" image="2" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_SE" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_Getting_S" width="39" height="39">
+		<layer group="97" image="3" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_S" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_Getting_SW" width="39" height="39">
+		<layer group="97" image="4" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_SW" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_Getting_W" width="39" height="39">
+		<layer group="97" image="5" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_W" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_Getting_NW" width="39" height="39">
+		<layer group="97" image="6" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_NW" x="0" y="0"/>
+	</image>
+	<image id="Reeds_Cart_Getting_N" width="39" height="39">
+		<layer group="97" image="7" x="0" y="0"/>
+		<layer src="Reeds_Cart_Getting_N" x="0" y="0"/>
+	</image-->
+	<!-- Note: Reeds Warehouse Tiles -->
+	<image id="Warehouse_Reeds_01" width="58" height="45" isometric="true">
+		<layer group="83" image="0" x="0" y="4"/>
+		<layer src="Warehouse_Reeds_01" x="0" y="0"/>
+	</image>
+	<image id="Warehouse_Reeds_02" width="58" height="45" isometric="true">
+		<layer group="83" image="0" x="0" y="4"/>
+		<layer src="Warehouse_Reeds_02" x="0" y="0"/>
+	</image>
+	<image id="Warehouse_Reeds_03" width="58" height="45" isometric="true">
+		<layer group="83" image="0" x="0" y="4"/>
+		<layer src="Warehouse_Reeds_03" x="0" y="0"/>
+	</image>
+	<image id="Warehouse_Reeds_04" width="58" height="45" isometric="true">
+		<layer group="83" image="0" x="0" y="4"/>
+		<layer src="Warehouse_Reeds_04" x="0" y="0"/>
+	</image>
 	<!-- Note: Papyrus Maker OFF - No Climate Variants -->
 	<image id="Papyrus_Maker_OFF" src="Papyrus_Maker_OFF" width="118" height="92" isometric="true"/>
 	<!-- Note: Papyrus Maker ON Animation Frames - DO NOT USE -->
@@ -803,6 +947,8 @@
 			<frame group="this" image="Papyrus_Maker_ON_05"/>
 		</animation>
 	</image>
+	<!-- Note: Reeds Overlay for Supplied Workshop - Position on Papyrus Maker - x="45" y="71" -->
+	<image id="Reeds_Supplied_Workshop" src="Reeds_Supplied_Workshop" width="28" height="18"/>
 	<!-- Note: Papyrus Cart -->
 	<image id="Papyrus_Cart_NE" width="39" height="39">
 		<layer group="97" image="0" x="0" y="0"/>
@@ -910,5 +1056,149 @@
 	</image>
 	<image id="Granary_32_food" width="19" height="21">
 		<layer group="99" image="5" x="-1" y="-1"/>
+	</image>
+	<!-- Note: Hunting Lodge OFF - Climate Variants -->
+	<image id="Hunting_Lodge_C_OFF" src="Hunting_Lodge_C_OFF" width="118" height="80" isometric="true"/>
+	<image id="Hunting_Lodge_N_OFF" width="118" height="80" isometric="true">
+		<layer group="this" image="Hunting_Lodge_C_OFF"/>
+		<layer src="Hunting_Lodge_N_OFF" y="47"/>
+	</image>
+	<image id="Hunting_Lodge_S_OFF" width="118" height="80" isometric="true">
+		<layer group="this" image="Hunting_Lodge_C_OFF"/>
+		<layer src="Hunting_Lodge_S_OFF" y="47"/>
+	</image>
+	<!-- Note: Hunting Lodge ON animation reference DO NOT USE! -->
+	<image id="Hunting_Lodge_ON_01" width="118" height="80">
+		<layer src="Hunting_Lodge_ON_Base" x="28" y="42"/>
+	</image>
+	<image id="Hunting_Lodge_ON_02" width="118" height="80">
+		<layer group="this" image="Hunting_Lodge_ON_01"/>
+		<layer src="Hunting_Lodge_ON_02" x="38" y="43"/>
+	</image>
+	<image id="Hunting_Lodge_ON_03" width="118" height="80">
+		<layer group="this" image="Hunting_Lodge_ON_01"/>
+		<layer src="Hunting_Lodge_ON_03" x="38" y="40"/>
+	</image>
+	<image id="Hunting_Lodge_ON_04" width="118" height="80">
+		<layer group="this" image="Hunting_Lodge_ON_01"/>
+		<layer src="Hunting_Lodge_ON_04" x="38" y="40"/>
+	</image>
+	<image id="Hunting_Lodge_ON_05" width="118" height="80">
+		<layer group="this" image="Hunting_Lodge_ON_01"/>
+		<layer src="Hunting_Lodge_ON_05" x="38" y="40"/>
+	</image>
+	<!-- Note: Hunting Lodge ON - Climate Variants -->
+	<image id="Hunting_Lodge_C_ON" width="118" height="80" isometric="true">
+		<layer group="this" image="Hunting_Lodge_C_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Hunting_Lodge_ON_01"/>
+			<frame group="this" image="Hunting_Lodge_ON_02"/>
+			<frame group="this" image="Hunting_Lodge_ON_03"/>
+			<frame group="this" image="Hunting_Lodge_ON_04"/>
+			<frame group="this" image="Hunting_Lodge_ON_05"/>
+		</animation>
+	</image>
+	<image id="Hunting_Lodge_N_ON" width="118" height="80" isometric="true">
+		<layer group="this" image="Hunting_Lodge_N_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Hunting_Lodge_ON_01"/>
+			<frame group="this" image="Hunting_Lodge_ON_02"/>
+			<frame group="this" image="Hunting_Lodge_ON_03"/>
+			<frame group="this" image="Hunting_Lodge_ON_04"/>
+			<frame group="this" image="Hunting_Lodge_ON_05"/>
+		</animation>
+	</image>
+	<image id="Hunting_Lodge_S_ON" width="118" height="80" isometric="true">
+		<layer group="this" image="Hunting_Lodge_S_OFF"/>
+		<animation speed="16" x="0" y="0" reversible="true">
+			<frame group="this" image="Hunting_Lodge_ON_01"/>
+			<frame group="this" image="Hunting_Lodge_ON_02"/>
+			<frame group="this" image="Hunting_Lodge_ON_03"/>
+			<frame group="this" image="Hunting_Lodge_ON_04"/>
+			<frame group="this" image="Hunting_Lodge_ON_05"/>
+		</animation>
+	</image>
+	<!-- Note: Game Meat Cart -->
+	<image id="GameMeat_Cart_NE" width="39" height="39">
+		<layer group="97" image="0" x="0" y="0"/>
+		<layer src="GameMeat_Cart_NE" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_E" width="39" height="39">
+		<layer group="97" image="1" x="0" y="0"/>
+		<layer src="GameMeat_Cart_E" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_SE" width="39" height="39">
+		<layer group="97" image="2" x="0" y="0"/>
+		<layer src="GameMeat_Cart_SE" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_S" width="39" height="39">
+		<layer group="97" image="3" x="0" y="0"/>
+		<layer src="GameMeat_Cart_S" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_SW" width="39" height="39">
+		<layer group="97" image="4" x="0" y="0"/>
+		<layer src="GameMeat_Cart_SW" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_W" width="39" height="39">
+		<layer group="97" image="5" x="0" y="0"/>
+		<layer src="GameMeat_Cart_W" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_NW" width="39" height="39">
+		<layer group="97" image="6" x="0" y="0"/>
+		<layer src="GameMeat_Cart_NW" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_N" width="39" height="39">
+		<layer group="97" image="7" x="0" y="0"/>
+		<layer src="GameMeat_Cart_N" x="0" y="0"/>
+	</image>
+	<!-- Note: Game Meat Getting Cart -->
+	<image id="GameMeat_Cart_Getting_NE" width="39" height="39">
+		<layer group="97" image="0" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_NE" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_Getting_E" width="39" height="39">
+		<layer group="97" image="1" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_E" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_Getting_SE" width="39" height="39">
+		<layer group="97" image="2" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_SE" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_Getting_S" width="39" height="39">
+		<layer group="97" image="3" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_S" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_Getting_SW" width="39" height="39">
+		<layer group="97" image="4" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_SW" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_Getting_W" width="39" height="39">
+		<layer group="97" image="5" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_W" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_Getting_NW" width="39" height="39">
+		<layer group="97" image="6" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_NW" x="0" y="0"/>
+	</image>
+	<image id="GameMeat_Cart_Getting_N" width="39" height="39">
+		<layer group="97" image="7" x="0" y="0"/>
+		<layer src="GameMeat_Cart_Getting_N" x="0" y="0"/>
+	</image>
+	<!-- Note: Game Meat Warehouse Tiles -->
+	<image id="Warehouse_GameMeat_01" width="58" height="44" isometric="true">
+		<layer group="83" image="0" x="0" y="3"/>
+		<layer src="Warehouse_GameMeat_01" x="0" y="0"/>
+	</image>
+	<image id="Warehouse_GameMeat_02" width="58" height="44" isometric="true">
+		<layer group="83" image="0" x="0" y="3"/>
+		<layer src="Warehouse_GameMeat_02" x="0" y="0"/>
+	</image>
+	<image id="Warehouse_GameMeat_03" width="58" height="44" isometric="true">
+		<layer group="83" image="0" x="0" y="3"/>
+		<layer src="Warehouse_GameMeat_03" x="0" y="0"/>
+	</image>
+	<image id="Warehouse_GameMeat_04" width="58" height="44" isometric="true">
+		<layer group="83" image="0" x="0" y="3"/>
+		<layer src="Warehouse_GameMeat_04" x="0" y="0"/>
 	</image>
 </assetlist>
