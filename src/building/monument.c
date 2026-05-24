@@ -313,7 +313,7 @@ int building_monument_get_monument(int x, int y, int resource, int road_network_
     int min_dist = INFINITE;
     building *min_building = 0;
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
-        if (!MONUMENT_TYPES[type]) {
+        if (!MONUMENT_TYPES[type] || type == BUILDING_TRIUMPHAL_ARCH) { // triumphal arch should not be a destiantion for work camps
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -512,6 +512,8 @@ int building_monument_progress(building *b)
             city_message_post(1, MESSAGE_HIPPODROME_COMPLETE, 0, b->grid_offset);
         } else if (b->type == BUILDING_CARAVANSERAI) {
             city_message_post(1, MESSAGE_CARAVANSERAI_COMPLETE, 0, b->grid_offset);
+        } else if (b-type == BUILDING_TRIUMPHAL_ARCH) {
+            // post message
         }
     }
     return 1;
