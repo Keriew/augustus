@@ -94,6 +94,11 @@ void map_terrain_add(int grid_offset, int terrain);
 
 void map_terrain_remove(int grid_offset, int terrain);
 
+// Same as map_terrain_remove, but also clears the bits from the terrain backup
+// so a subsequent map_terrain_restore() (preview undo or user undo) does not
+// reintroduce them. Used for changes that should persist past undo.
+void map_terrain_remove_with_backup(int grid_offset, int terrain);
+
 void map_terrain_add_with_radius(int x, int y, int size, int radius, int terrain);
 
 void map_terrain_remove_with_radius(int x, int y, int size, int radius, int terrain);
