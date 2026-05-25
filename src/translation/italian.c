@@ -1550,7 +1550,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "La directory utente selezionata non è scrivibile.\n\nSeleziona una directory utente diversa."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "La directory utente selezionata non è scrivibile. Non potrai salvare le tue partite.\nSeleziona una directory utente diversa dalla finestra delle opzioni nel menu principale."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Imposta dir. utente"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Directory utente:" },
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Directory utente:" },
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Percorso utente cambiato"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Il percorso utente è stato modificato con successo.\nVuoi copiarvi i tuoi file?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Sovrascrivere file esistenti"},

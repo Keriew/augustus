@@ -1567,7 +1567,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "The selected user directory is not writable.\n\nPlease select a different user directory."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "The selected user directory is not writable.\n\nYou will not be able to save your games.\nPlease select a different user directory from the options window on the main menu."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Set user directory"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "User directory:" },
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "User directory:" },
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "User path changed"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "The user path was successfully changed.\nDo you want to copy over your files?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Overwrite existing files"},

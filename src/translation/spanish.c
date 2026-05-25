@@ -1474,7 +1474,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "No se puede escribir en el directorio de usuario seleccionado.\n\nSeleccione otro directorio de usuario."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "No se puede escribir en el directorio de usuario seleccionado.\n\nNo podrás guardar tus partidas.\nSeleccione otro directorio de usuario en la ventana de opciones del menú principal."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Establecer directorio de usuario"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Directorio de usuario:" },
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Directorio de usuario:" },
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Ruta de usuario modificada"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "La ruta de usuario se ha modificado correctamente.\n¿Quieres copiar tus archivos?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Sobrescribir archivos existentes"},

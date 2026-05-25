@@ -1548,7 +1548,7 @@ static translation_string all_strings[] = {
     { TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "Ο επιλεγμένος κατάλογος χρήστη δεν είναι εγγράψιμος.\n\nΕπιλέξτε έναν διαφορετικό κατάλογο χρήστη." },
     { TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "Ο επιλεγμένος κατάλογος χρήστη δεν είναι εγγράψιμος.\n\nΔεν θα μπορείτε να αποθηκεύσετε τα παιχνίδια σας.\nΕπιλέξτε έναν διαφορετικό κατάλογο χρήστη από το παράθυρο επιλογών στο κύριο μενού." },
     { TR_USER_DIRECTORIES_WINDOW_TITLE, "Ορισμός καταλόγου χρήστη" },
-    { TR_USER_DIRETORIES_WINDOW_USER_PATH, "Κατάλογος χρήστη:" },
+    { TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Κατάλογος χρήστη:" },
     { TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Η διαδρομή χρήστη άλλαξε" },
     { TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Η διαδρομή χρήστη άλλαξε με επιτυχία.\nΘέλετε να αντιγράψετε τα αρχεία σας;" },
     { TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Αντικατάσταση υπαρχόντων αρχείων" },

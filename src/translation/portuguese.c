@@ -1570,7 +1570,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "O caminho de usuário foi modificado com sucesso.\nDeseja copiar e substituir os seus arquivos?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Caminho de usuário alterado"},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Selecionar diretório de usuário"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Diretório de usuário:" },
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Diretório de usuário:" },
     {TR_WARNING_NO_ARMOURY, "Constrói um arsenal para distribuir armas para o quartel" },
     {TR_WINDOW_ADVISOR_JAVELIN, "Lanceiros" },
     {TR_WINDOW_ADVISOR_LEGIONARIES, "Legionários" },

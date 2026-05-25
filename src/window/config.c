@@ -202,7 +202,7 @@ static int preview_weather_radio_buttons(int selected_key);
 
 // ---------- General ----------------------
 static config_widget page_general[] = {
-    {TYPE_SELECT, SELECT_USER_DIRECTORY, TR_USER_DIRETORIES_WINDOW_USER_PATH, display_text_user_directory, 0, 1, ITEM_BASE_H, 8},
+    {TYPE_SELECT, SELECT_USER_DIRECTORY, TR_USER_DIRECTORIES_WINDOW_USER_PATH, display_text_user_directory, 0, 1, ITEM_BASE_H, 8},
     {TYPE_SELECT, SELECT_LANGUAGE, TR_CONFIG_LANGUAGE_LABEL, display_text_language, 0, 1, ITEM_BASE_H, 8},
     {TYPE_SELECT, SELECT_PLAYER_NAME, TR_CONFIG_DEFAULT_PLAYER_NAME, display_text_player_name, 0, 1, ITEM_BASE_H, 8},
 

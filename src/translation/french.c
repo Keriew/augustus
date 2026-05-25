@@ -1567,7 +1567,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "Le répertoire défini est protégé en écriture.\n\nVeuillez sélectionner un répertoire différent."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "Le répertoire défini est protégé en écriture.\n\nVous ne pourrez pas sauvegarder vos parties.\nVeuillez sélectionner un autre répertoire depuis le menu Options."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Définir le répertoire"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Répertoire :" },
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Répertoire :" },
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Répertoire modifié"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Le chemin du répertoire a été modifié avec succès.\nVoulez-vous y copier vos fichiers ?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Écraser les fichiers existants"},

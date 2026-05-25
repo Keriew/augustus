@@ -1567,7 +1567,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "Выбранный каталог пользователя недоступен для записи.\n\nПожалуйста, выберите другой каталог пользователя."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "Выбранный каталог пользователя недоступен для записи.\n\nВы не сможете сохранить свои игры.\nПожалуйста, выберите другой каталог пользователя в окне опций главного меню."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Настройка"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Каталог пользов.:"},
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Каталог пользов.:"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Путь пользователя изменен"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Путь пользователя был успешно изменен.\nНе хотите ли вы скопировать свои файлы?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Перезаписать существующие файлы"},

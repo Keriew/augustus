@@ -1193,7 +1193,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "Kan ej skriva i den valda användarmappen.\\n\\nVar god välj en annan mapp."},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "Kan ej skriva i den valda användarmappen.\\n\\nDet kommer inte gå att spara spelet.\\nVar god välj en annan mapp från inställningsmenyn på huvudmenyn."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Välj en användarmapp"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Användarmapp:"},
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Användarmapp:"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Sökväg ändrad"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Användarmappen har ändrats.\\nVill du kopiera över dina filer till den?"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Ersätt filerna"},

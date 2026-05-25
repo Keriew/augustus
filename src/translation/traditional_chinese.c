@@ -1546,7 +1546,7 @@ static translation_string all_strings[] = {
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "沒有權限使用這個文件夾。\n\n請選擇其他文件夾。"},
     {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "沒有權限使用這個文件夾。\n\n遊戲將不能保存。\n請在主菜單中選擇另一個可用的文件夾。"},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "設置"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Augustus玩家目錄"},
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Augustus玩家目錄"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Augustus玩家目錄已變更"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "成功修改Augustus玩家目錄。立即複製所有文件？"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "覆蓋已有文件"},
