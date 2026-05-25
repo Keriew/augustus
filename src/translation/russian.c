@@ -1955,7 +1955,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_DEMAND_CHANGE_SELLS, "продажа"},
     {TR_EDITOR_VIEW_CURRENT_EMPIRE, "Просмотр империи"},
     {TR_EDITOR_CREATE_NEW_EMPIRE, "Создать империю"},
-    {TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, "Умное размещение границ империи"},
+    {TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACEMENT, "Умное размещение границ империи"},
     {TR_CONFIG_CATEGORY_UI_EMPIRE, "Империя"},
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE_SAVE, "Сохранение империи"},
     {TR_EDITOR_EMPIRE_EXPORT, "Экспорт империи"},

@@ -1954,7 +1954,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_DEMAND_CHANGE_SELLS, "Vende"},
     {TR_EDITOR_VIEW_CURRENT_EMPIRE, "Mostra impero attuale"},
     {TR_EDITOR_CREATE_NEW_EMPIRE, "Crea un nuovo impero"},
-    {TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, "Abilita posizionamento intelligente confini"},
+    {TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACEMENT, "Abilita posizionamento intelligente confini"},
     {TR_CONFIG_CATEGORY_UI_EMPIRE, "Impero"},
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE_SAVE, "Salva impero"},
     {TR_EDITOR_EMPIRE_EXPORT, "Esporta impero"},

@@ -1931,7 +1931,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_DEMAND_CHANGE_SELLS, "出售"},
     {TR_EDITOR_VIEW_CURRENT_EMPIRE, "查看当前帝国"},
     {TR_EDITOR_CREATE_NEW_EMPIRE, "创建新帝国"},
-    {TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT, "启用智能边界放置"},
+    {TR_CONFIG_UI_EMPIRE_SMART_BORDER_PLACEMENT, "启用智能边界放置"},
     {TR_CONFIG_CATEGORY_UI_EMPIRE, "帝国"},
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE_SAVE, "保存帝国"},
     {TR_EDITOR_EMPIRE_EXPORT, "导出帝国"},
