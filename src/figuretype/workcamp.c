@@ -141,6 +141,19 @@ void figure_workcamp_worker_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED:
+            if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+                int triumphal_arch_id = building_monument_get_unfinished_triumphal_arch(&dst);
+                if (!triumphal_arch_id) {
+                    break;
+                }
+                f->terrain_usage = TERRAIN_USAGE_ANY;
+                f->destination_building_id = triumphal_arch_id;
+                f->destination_x = dst.x;
+                f->destination_y = dst.y;
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
+                f->action_state = FIGURE_ACTION_254_WORK_CAMP_WORKER_GOING_TO_TRIUMPHAL_ARCH;
+                break;
+            }
             if (building_monument_has_unfinished_monuments()) {
                 for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
                     if (city_resource_is_stockpiled(resource) || !resource_is_storable(resource)) {
@@ -150,7 +163,8 @@ void figure_workcamp_worker_action(figure *f)
                     if (!monument_id) {
                         continue;
                     }
-                    warehouse_id = building_warehouse_with_resource(f->x, f->y, resource, b->road_network_id, 0, &dst, BUILDING_STORAGE_PERMISSION_WORKCAMP);
+                    warehouse_id = building_warehouse_with_resource(f->x, f->y, resource, b->road_network_id, 0, &dst,
+                        BUILDING_STORAGE_PERMISSION_WORKCAMP);
                     if (!warehouse_id) {
                         continue;
                     }
@@ -322,6 +336,15 @@ void figure_workcamp_worker_action(figure *f)
                 figure_route_remove(f);
             }
             break;
+        case FIGURE_ACTION_254_WORK_CAMP_WORKER_GOING_TO_TRIUMPHAL_ARCH:
+            figure_movement_move_ticks(f, 1);
+            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
+                building *triumphal_arch = building_get(f->destination_building_id);
+                if (triumphal_arch->state == BUILDING_STATE_IN_USE && triumphal_arch->type == BUILDING_TRIUMPHAL_ARCH) {
+
+                }
+                f->state = FIGURE_STATE_DEAD;
+            }
     }
 
     workcamp_worker_image_update(f);

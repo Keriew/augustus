@@ -27,6 +27,7 @@ int building_monument_access_point(building *b, map_point *dst);
 int building_monument_add_module(building *b, int module_type);
 int building_monument_deliver_resource(building *b, int resource);
 int building_monument_get_monument(int x, int y, int resource, int road_network_id, map_point *dst);
+int building_monument_get_unfinished_triumphal_arch(map_point *dst);
 int building_monument_has_unfinished_monuments(void);
 void building_monument_set_phase(building *b, int phase);
 int building_monument_is_monument(const building *b);
@@ -65,4 +66,4 @@ int building_monument_is_construction_halted(building *b);
 int building_monument_toggle_construction_halted(building *b);
 int building_monument_is_unfinished_monument(const building *b);
 
-#endif // BUILDING_MONUMENT_H 
+#endif // BUILDING_MONUMENT_H

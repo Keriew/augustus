@@ -347,6 +347,20 @@ int building_monument_get_monument(int x, int y, int resource, int road_network_
     return 0;
 }
 
+int building_monument_get_unfinished_triumphal_arch(map_point *dst)
+{
+    for (building *b = building_first_of_type(BUILDING_TRIUMPHAL_ARCH); b; b = b->next_of_type) {
+        if (b->monument.phase != MONUMENT_FINISHED) {
+            if (dst) {
+                dst->x = b->x + 1; // add 1 to get the center tile
+                dst->y = b->y + 1;
+            }
+            return b->id;
+        }
+    }
+    return 0;
+}
+
 int building_monument_has_unfinished_monuments(void)
 {
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
@@ -512,7 +526,7 @@ int building_monument_progress(building *b)
             city_message_post(1, MESSAGE_HIPPODROME_COMPLETE, 0, b->grid_offset);
         } else if (b->type == BUILDING_CARAVANSERAI) {
             city_message_post(1, MESSAGE_CARAVANSERAI_COMPLETE, 0, b->grid_offset);
-        } else if (b-type == BUILDING_TRIUMPHAL_ARCH) {
+        } else if (b->type == BUILDING_TRIUMPHAL_ARCH) {
             // post message
         }
     }
