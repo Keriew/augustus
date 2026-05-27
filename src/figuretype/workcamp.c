@@ -142,15 +142,14 @@ void figure_workcamp_worker_action(figure *f)
             break;
         case FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED:
             if (b->type == BUILDING_TRIUMPHAL_ARCH) {
-                int triumphal_arch_id = building_monument_get_unfinished_triumphal_arch(&dst);
-                if (!triumphal_arch_id) {
+                if (!building_monument_access_point(b, &dst)) {
                     break;
                 }
-                f->destination_building_id = triumphal_arch_id;
+                f->destination_building_id = f->building_id;
                 f->destination_x = dst.x;
                 f->destination_y = dst.y;
                 f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
-                f->action_state = FIGURE_ACTION_254_WORK_CAMP_WORKER_GOING_TO_TRIUMPHAL_ARCH;
+                f->action_state = FIGURE_ACTION_205_WORK_CAMP_WORKER_GOING_TO_MONUMENT;
                 break;
             }
             if (building_monument_has_unfinished_monuments()) {
@@ -335,18 +334,6 @@ void figure_workcamp_worker_action(figure *f)
                 figure_route_remove(f);
             }
             break;
-        case FIGURE_ACTION_254_WORK_CAMP_WORKER_GOING_TO_TRIUMPHAL_ARCH:
-            figure_movement_move_ticks(f, 1);
-            if (f->direction == DIR_FIGURE_AT_DESTINATION || f->direction == DIR_FIGURE_LOST) {
-                building *triumphal_arch = building_get(f->destination_building_id);
-                if (triumphal_arch->state == BUILDING_STATE_IN_USE && triumphal_arch->type == BUILDING_TRIUMPHAL_ARCH) {
-
-                }
-                f->state = FIGURE_STATE_DEAD;
-            } else if (f->direction == DIR_FIGURE_REROUTE) {
-                figure_route_remove(f);
-            }
-            break;
     }
 
     workcamp_worker_image_update(f);
@@ -503,11 +490,10 @@ void figure_workcamp_architect_action(figure *f)
             break;
         case FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED:
             if (b->type == BUILDING_TRIUMPHAL_ARCH) {
-                int triumphal_arch_id = building_monument_get_unfinished_triumphal_arch(&dst);
-                if (!triumphal_arch_id) {
+                if (!building_monument_access_point(b, &dst)) {
                     break;
                 }
-                f->destination_building_id = triumphal_arch_id;
+                f->destination_building_id = f->building_id;
                 f->destination_x = dst.x;
                 f->destination_y = dst.y;
                 building_monument_add_delivery(f->destination_building_id, f->id, RESOURCE_NONE, 10);

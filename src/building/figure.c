@@ -1931,7 +1931,7 @@ static void spawn_triumphal_arch_builders(building *b)
         if (phase != b->monument.phase) {
             continue;
         }
-        int all_resources_supplied = 1;
+
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             int resources_needed = b->resources[r] - building_monument_resource_in_delivery(b, r);
             resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
@@ -1952,7 +1952,7 @@ static void spawn_triumphal_arch_builders(building *b)
             for (int i = 0; i < resources_needed; i++) {
                 slave_id = create_slave_workers(slave_id, f->id);
             }
-            // break so not all resources get supllied at once
+            // break so not all resources get supplied at once
             break;
         }
 

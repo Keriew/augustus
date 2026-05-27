@@ -352,20 +352,6 @@ int building_monument_get_monument(int x, int y, int resource, int road_network_
     return 0;
 }
 
-int building_monument_get_unfinished_triumphal_arch(map_point *dst)
-{
-    for (building *b = building_first_of_type(BUILDING_TRIUMPHAL_ARCH); b; b = b->next_of_type) {
-        if (b->monument.phase != MONUMENT_FINISHED) {
-            if (dst) {
-                dst->x = b->x + 1; // add 1 to get the center tile
-                dst->y = b->y + 1;
-            }
-            return b->id;
-        }
-    }
-    return 0;
-}
-
 int building_monument_has_unfinished_monuments(void)
 {
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
@@ -396,6 +382,9 @@ void building_monument_set_phase(building *b, int phase)
     }
     b->monument.phase = phase;
     map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+    if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+        map_terrain_add_triumphal_arch_roads(b->x, b->y, b->subtype.orientation);
+    }
     if (b->monument.phase != MONUMENT_FINISHED) {
         for (int resource = 0; resource < RESOURCE_MAX; resource++) {
             b->resources[resource] =
