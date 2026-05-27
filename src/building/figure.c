@@ -1931,7 +1931,7 @@ static void spawn_triumphal_arch_builders(building *b)
         if (phase != b->monument.phase) {
             continue;
         }
-
+        int all_resources_supplied = 1;
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             int resources_needed = b->resources[r] - building_monument_resource_in_delivery(b, r);
             resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
@@ -1956,7 +1956,7 @@ static void spawn_triumphal_arch_builders(building *b)
             break;
         }
 
-        if (b->resources[ARCHITECTS] > 0) {
+        if (!building_monument_needs_resources(b) && b->resources[ARCHITECTS] > 0) {
             // spawn architect
             figure *f = figure_create(FIGURE_WORK_CAMP_ARCHITECT, city_map_entry_point()->x, city_map_entry_point()->y, DIR_4_BOTTOM);
             f->action_state = FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED;
