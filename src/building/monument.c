@@ -218,6 +218,11 @@ int building_monument_deliver_resource(building *b, int resource)
 
 int building_monument_access_point(building *b, map_point *dst)
 {
+    if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+        dst->x = b->x + 1;
+        dst->y = b->y + 1;
+        return 1;
+    }
     if (b->size < 3 || b->type == BUILDING_HIPPODROME) {
         dst->x = b->x;
         dst->y = b->y;

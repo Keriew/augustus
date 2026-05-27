@@ -1908,12 +1908,13 @@ static int create_slave_workers(int leader_id, int first_figure_id)
     figure *f = figure_get(first_figure_id);
     figure *slave = figure_create(FIGURE_WORK_CAMP_SLAVE, f->x, f->y, 0);
     f = figure_get(first_figure_id);
+    building *b = building_get(f->building_id);
     slave->leading_figure_id = leader_id;
     slave->collecting_item_id = f->collecting_item_id;
     slave->building_id = f->building_id;
     slave->destination_building_id = f->building_id;
-    slave->destination_x = f->destination_x;
-    slave->destination_y = f->destination_y;
+    slave->destination_x = b->x + 1; // destination not set yet so we have to set it manually
+    slave->destination_y = b->y + 1;
     slave->action_state = FIGURE_ACTION_209_WORK_CAMP_SLAVE_FOLLOWING;
     slave->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
     building_monument_add_delivery(slave->destination_building_id, slave->id, slave->collecting_item_id, 1);
@@ -1922,16 +1923,19 @@ static int create_slave_workers(int leader_id, int first_figure_id)
 
 static void spawn_triumphal_arch_builders(building *b)
 {
+    if (building_monument_has_delivery_for_worker(b->figure_id)) {
+        return;
+    }
     if (b->monument.phase == 1) {
         int all_resources_supplied = 1;
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            int resources_needed = building_monument_resources_needed_for_monument_type(BUILDING_TRIUMPHAL_ARCH, r, 1)
-                - building_monument_resource_in_delivery(b, r);
+            int resources_needed = b->resources[r] - building_monument_resource_in_delivery(b, r);
+
+            all_resources_supplied = 0;
+            resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
             if (!resources_needed) {
                 continue;
             }
-            all_resources_supplied = 0;
-            resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
 
             // spawn work camp worker
             figure *f = figure_create(FIGURE_WORK_CAMP_WORKER, city_map_entry_point()->x, city_map_entry_point()->y, DIR_4_BOTTOM);
