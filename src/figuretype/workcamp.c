@@ -486,8 +486,8 @@ static void set_architect_graphic(figure *f, int working)
 void figure_workcamp_architect_action(figure *f)
 {
     int working = 0;
-    f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
     building *b = building_get(f->building_id);
+    f->terrain_usage = b->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS : TERRAIN_USAGE_ROADS_HIGHWAY;
     building *monument;
     map_point dst;
     if (b->state != BUILDING_STATE_IN_USE || b->figure_id != f->id) {
@@ -502,6 +502,19 @@ void figure_workcamp_architect_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED:
+            if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+                int triumphal_arch_id = building_monument_get_unfinished_triumphal_arch(&dst);
+                if (!triumphal_arch_id) {
+                    break;
+                }
+                f->destination_building_id = triumphal_arch_id;
+                f->destination_x = dst.x;
+                f->destination_y = dst.y;
+                building_monument_add_delivery(f->destination_building_id, f->id, RESOURCE_NONE, 10);
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
+                f->action_state = FIGURE_ACTION_207_WORK_CAMP_ARCHITECT_GOING_TO_MONUMENT;
+                break;
+            }
             if (!building_monument_has_unfinished_monuments()) {
                 f->state = FIGURE_STATE_DEAD;
             } else {

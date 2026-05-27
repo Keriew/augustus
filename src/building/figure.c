@@ -42,6 +42,7 @@
 
 #define BEGGAR_UNEMPLOYMENT_THRESHOLD 6
 #define VALID_MONUMENT_RECHECK_TICKS 60
+#define ARCHITECTS RESOURCE_NONE
 
 static struct {
     int beggar_counter;
@@ -1923,15 +1924,16 @@ static int create_slave_workers(int leader_id, int first_figure_id)
 
 static void spawn_triumphal_arch_builders(building *b)
 {
-    if (building_monument_has_delivery_for_worker(b->figure_id)) {
+    if (building_monument_has_delivery_for_building(b->id)) {
         return;
     }
-    if (b->monument.phase == 1) {
-        int all_resources_supplied = 1;
+    for (int phase = 1; phase < 3; phase++) {
+        if (phase != b->monument.phase) {
+            continue;
+        }
+
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             int resources_needed = b->resources[r] - building_monument_resource_in_delivery(b, r);
-
-            all_resources_supplied = 0;
             resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
             if (!resources_needed) {
                 continue;
@@ -1948,19 +1950,19 @@ static void spawn_triumphal_arch_builders(building *b)
             // spawn slaves
             int slave_id = f->id;
             for (int i = 0; i < resources_needed; i++) {
-                create_slave_workers(slave_id, f->id);
+                slave_id = create_slave_workers(slave_id, f->id);
             }
             // break so not all resources get supllied at once
             break;
         }
 
-        if (all_resources_supplied) {
-            // spawn architects
+        if (b->resources[ARCHITECTS] > 0) {
+            // spawn architect
+            figure *f = figure_create(FIGURE_WORK_CAMP_ARCHITECT, city_map_entry_point()->x, city_map_entry_point()->y, DIR_4_BOTTOM);
+            f->action_state = FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED;
+            b->figure_id = f->id;
+            f->building_id = b->id;
         }
-
-    }
-    if (b->monument.phase == 2) {
-        // spawn figures for the second phase
     }
 }
 

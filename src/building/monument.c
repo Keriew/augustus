@@ -575,6 +575,17 @@ int building_monument_has_delivery_for_worker(int figure_id)
     return 0;
 }
 
+int building_monument_has_delivery_for_building(int monument_id)
+{
+    monument_delivery *delivery;
+    array_foreach(monument_deliveries, delivery) {
+        if (delivery->destination_id == monument_id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void building_monument_remove_delivery(int figure_id)
 {
     monument_delivery *delivery;
