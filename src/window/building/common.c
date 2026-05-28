@@ -9,10 +9,12 @@
 #include "city/resource.h"
 #include "city/view.h"
 #include "core/calc.h"
+#include "core/string.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/rich_text.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "translation/translation.h"
@@ -250,9 +252,19 @@ void window_building_draw_monument_construction_process(building_info_context *c
                 c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4),
                 0, FONT_NORMAL_BLACK, 0);
         } else {
-            height += text_draw_multiline(translation_for(tr_construction_desc),
-                c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4),
-                0, FONT_NORMAL_BLACK, 0);
+            if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+                // "DOES NOT" needs to be drawn in red
+                uint8_t triumphal_desc[512];
+                string_copy(translation_for(TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC), triumphal_desc, 512);
+                rich_text_reset(0);
+                rich_text_set_fonts(FONT_NORMAL_BLACK, FONT_NORMAL_GREEN, FONT_NORMAL_RED, 5);
+                rich_text_init(triumphal_desc, c->x_offset + 32, c->y_offset + 200, (c->width_blocks - 4), c->height_blocks, 0);
+                rich_text_draw(triumphal_desc, c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4), c->height_blocks, 0);
+            } else {
+                height += text_draw_multiline(translation_for(tr_construction_desc),
+                    c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4),
+                    0, FONT_NORMAL_BLACK, 0);
+            }
         }
         if (c->height_blocks > 28) {
             int phase_offset = b->monument.phase % 2;

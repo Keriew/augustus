@@ -151,7 +151,7 @@ void window_building_draw_triumphal_arch(building_info_context *c)
             c->x_offset + 32, c->y_offset + 120, COLOR_MASK_NONE);
     } else {
         window_building_draw_monument_construction_process(c, TR_BUILDING_TRIUMPHAL_ARCH_PHASE_1,
-            TR_BUILDING_TRIUMPHAL_ARCH_PHASE_1_TEXT, TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC);
+            TR_BUILDING_TRIUMPHAL_ARCH_PHASE_1_TEXT, 0);
     }
 }
 
