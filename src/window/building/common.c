@@ -225,7 +225,7 @@ void window_building_draw_monument_construction_process(building_info_context *c
     building *b = building_get(c->building_id);
 
     if (b->monument.phase != MONUMENT_FINISHED) {
-        if (!c->has_road_access) {
+        if (!c->has_road_access && b->type != BUILDING_TRIUMPHAL_ARCH) { // triumphal arch always has road access since it contains roads
             window_building_draw_description(c, CUSTOM_TRANSLATION,
                 TR_WINDOW_BUILDING_INFO_WARNING_NO_MONUMENT_ROAD_ACCESS);
             text_draw_multiline(translation_for(tr_construction_desc),
