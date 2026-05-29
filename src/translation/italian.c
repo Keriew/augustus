@@ -1110,10 +1110,10 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_MESSAGES_IMPORT_FULL, "Importa messaggi personalizzati" },
     {TR_EDITOR_CUSTOM_MESSAGES_EXPORT_FULL, "Esporta messaggi personalizzati" },
     {TR_EDITOR_UNABLE_TO_LOAD_CUSTOM_MESSAGES_TITLE, "Impossibile caricare i messaggi personalizzati"},
-    {TR_EDITOR_SCENARIO_SELECT_INTRO, "Seleziona messaggio introduzione"},
-    {TR_EDITOR_SCENARIO_DESELECT_INTRO, "Deseleziona messaggio introduzione"},
-    {TR_EDITOR_SCENARIO_SELECT_VICTORY, "Scegli il messaggio di vittoria"},
-    {TR_EDITOR_SCENARIO_DESELECT_VICTORY, "Rimuovi il messaggio di vittoria"},
+    {TR_EDITOR_SCENARIO_SELECT_INTRO, "Messaggio introduzione"},
+    {TR_EDITOR_SCENARIO_DESELECT_INTRO, "Deselez. intro"},
+    {TR_EDITOR_SCENARIO_SELECT_VICTORY, "Messaggio vittoria"},
+    {TR_EDITOR_SCENARIO_DESELECT_VICTORY, "Deselez. mess. vittoria"},
     {TR_EDITOR_CUSTOM_VARIABLES_TITLE, "Variabili personalizzate"},
     {TR_EDITOR_CUSTOM_VARIABLES_COUNT, "Variabili totali: "},
     {TR_EDITOR_CUSTOM_VARIABLES_ID, "ID"},
@@ -1261,11 +1261,11 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_MERCURY, "Tempio piccolo di Mercurio"},
     {TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_MARS, "Tempio piccolo di Marte"},
     {TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_VENUS, "Tempio piccolo di Venere"},
-    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_CERES, "Tempio Grandioso di Cerere"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
-    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_NEPTUNE, "Tempio Grandioso di Nettuno"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande 
-    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MERCURY, "Tempio Grandioso di Mercurio"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
-    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MARS, "Tempio Grandioso di Marte"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
-    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_VENUS, "Tempio Grandioso di Venere"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
+    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_CERES, "Tempio Grande di Cerere"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
+    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_NEPTUNE, "Tempio Grande di Nettuno"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande 
+    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MERCURY, "Tempio Grande di Mercurio"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
+    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MARS, "Tempio Grande di Marte"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
+    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_VENUS, "Tempio Grande di Venere"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
     {TR_PARAMETER_VALUE_DYNAMIC_RESOLVE, "..."},
     {TR_PARAMETER_VALUE_NONE, "Nessuno"},
     {TR_PARAMETER_VALUE_MESSAGE_CITY_IN_DEBT, "Città in debito"},
@@ -1747,7 +1747,7 @@ static translation_string all_strings[] = {
     {TR_CITY_WARNING_WORKCAMP_NEEDED, "Questo edifiìcio necessita un campo di lavoro funzionante"},
     {TR_CITY_WARNING_BUILD_WORKCAMP, "Costruisci un campo di lavoro"},
     {TR_BUILDING_HIGHWAY_STATION, "Stazione delle Strade Rapide"},
-    {TR_BUILDING_HIGHWAY_STATION_DESC, "La Stazione provvede alla manutenzione della tua rede stradale Rapida. Se fornita di pietre e sabbia dai lavoratori dei campi di lavoro, dimezza il costo in anticipo per le nuove strade rapide e dimezza i tributi mensili di tutte le strade rapide. Richiede un Campo di Lavoro per essere costruita. Solo una Stazione può essere edificata."},
+    {TR_BUILDING_HIGHWAY_STATION_DESC, "La Stazione ospita lavoratori che costruiscono e effettuano la manutenzione alla tua rete stradale rapida. Un pronto approvvigionamento di pietra e sabbia, distribuito da un campo di lavoro, dimezza il costo di costruizione per le nuove strade rapide e dimezza i tributi mensili di tutte le strade rapide."},
     {TR_BUILDING_HIGHWAY_STATION_NO_EMPLOYEES, "La Stazione non ha impiegati. La manutenzione delle strade rapide è sospesa."},
     {TR_BUILDING_HIGHWAY_STATION_NO_RESOURCES, "La stazione ha bisogno di pietra e sabbia per la manutenzione la rete stradale rapida"},
     {TR_BUILDING_HIGHWAY_STATION_FUNCTIONAL, "La Stazione è operativa. Il costo e i tributi delle strade rapide sono dimezzati."},
