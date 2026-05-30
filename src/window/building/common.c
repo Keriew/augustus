@@ -205,14 +205,34 @@ static void window_building_draw_monument_resources_needed(building_info_context
                 continue;
             }
             int resource_delivered_amount = resource_needed_amount - b->resources[r];
+            int deliveries_needed =  ceil(b->resources[r] / 4.0);
             image_draw(resource_get_data(r)->image.icon, c->x_offset + 32, c->y_offset + y_offset + 10,
                 COLOR_MASK_NONE, SCALE_NONE);
             int width = text_draw_number(resource_delivered_amount, '@', "/",
                 c->x_offset + 64, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
             width += text_draw_number(resource_needed_amount, '@', " ",
                 c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
-            text_draw(resource_get_data(r)->text, c->x_offset + 54 + width, c->y_offset + y_offset + 15,
+            width += text_draw(resource_get_data(r)->text, c->x_offset + 54 + width, c->y_offset + y_offset + 15,
                 FONT_NORMAL_WHITE, 0);
+            if (!resource_is_storable(r)) {
+                continue;
+            }
+            int key = b->type == BUILDING_TRIUMPHAL_ARCH ?
+                TR_BUILDING_INFO_DELIVERIES_FROM_ROME : TR_BUILDING_INFO_DELIVERIES;
+            if (deliveries_needed == 1) {
+                key -= 1;
+            }
+            if (deliveries_needed <= 0) {
+                key = TR_BUILDING_INFO_DELIVERIES_DONE;
+                width += text_draw(string_from_ascii("("), c->x_offset + 54 + width, c->y_offset + y_offset + 15,
+                    FONT_NORMAL_WHITE, 0);
+                width -= text_get_width(string_from_ascii(" "), FONT_NORMAL_WHITE); // text_draw adds a space which we don't want so we subtract it
+            } else {
+                width += text_draw_number(deliveries_needed, '(', "",
+                    c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
+            }
+            lang_text_draw(CUSTOM_TRANSLATION, key, c->x_offset + 54 + width, c->y_offset + y_offset + 15,
+                FONT_NORMAL_WHITE);
             y_offset += 20;
         }
     } else {
