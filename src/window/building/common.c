@@ -205,7 +205,6 @@ static void window_building_draw_monument_resources_needed(building_info_context
                 continue;
             }
             int resource_delivered_amount = resource_needed_amount - b->resources[r];
-            int deliveries_needed =  ceil(b->resources[r] / 4.0);
             image_draw(resource_get_data(r)->image.icon, c->x_offset + 32, c->y_offset + y_offset + 10,
                 COLOR_MASK_NONE, SCALE_NONE);
             int width = text_draw_number(resource_delivered_amount, '@', "/",
@@ -214,33 +213,10 @@ static void window_building_draw_monument_resources_needed(building_info_context
                 c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
             width += text_draw(resource_get_data(r)->text, c->x_offset + 54 + width, c->y_offset + y_offset + 15,
                 FONT_NORMAL_WHITE, 0);
-            if (!resource_is_storable(r)) {
-                continue;
+            if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+                lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME,
+                    c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE);
             }
-            int key = b->type == BUILDING_TRIUMPHAL_ARCH ?
-                TR_BUILDING_INFO_DELIVERIES_FROM_ROME : TR_BUILDING_INFO_DELIVERIES;
-            if (deliveries_needed == 1) {
-                key -= 1;
-            }
-            if (deliveries_needed <= 0) {
-                key = TR_BUILDING_INFO_DELIVERIES_DONE;
-                width += text_draw(string_from_ascii("("), c->x_offset + 54 + width, c->y_offset + y_offset + 15,
-                    FONT_NORMAL_WHITE, 0);
-                width -= text_get_width(string_from_ascii(" "), FONT_NORMAL_WHITE); // text_draw adds a space which we don't want so we subtract it
-            } else {
-                if (b->type != BUILDING_TRIUMPHAL_ARCH) {
-                    width += lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_INFO_MONUMENT_MINIMUM,
-                        c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE);
-                } else {
-                    width += text_draw(string_from_ascii("("), c->x_offset + 54 + width, c->y_offset + y_offset + 15,
-                        FONT_NORMAL_WHITE, 0);
-                    width -= text_get_width(string_from_ascii(" "), FONT_NORMAL_WHITE); // text_draw adds a space which we don't want so we subtract it
-                }
-                width += text_draw_number(deliveries_needed, '\0', "",
-                    c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
-            }
-            lang_text_draw(CUSTOM_TRANSLATION, key, c->x_offset + 54 + width, c->y_offset + y_offset + 15,
-                FONT_NORMAL_WHITE);
             y_offset += 20;
         }
     } else {
