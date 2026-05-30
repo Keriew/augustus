@@ -228,7 +228,15 @@ static void window_building_draw_monument_resources_needed(building_info_context
                     FONT_NORMAL_WHITE, 0);
                 width -= text_get_width(string_from_ascii(" "), FONT_NORMAL_WHITE); // text_draw adds a space which we don't want so we subtract it
             } else {
-                width += text_draw_number(deliveries_needed, '(', "",
+                if (b->type != BUILDING_TRIUMPHAL_ARCH) {
+                    width += lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_INFO_MONUMENT_MINIMUM,
+                        c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE);
+                } else {
+                    width += text_draw(string_from_ascii("("), c->x_offset + 54 + width, c->y_offset + y_offset + 15,
+                        FONT_NORMAL_WHITE, 0);
+                    width -= text_get_width(string_from_ascii(" "), FONT_NORMAL_WHITE); // text_draw adds a space which we don't want so we subtract it
+                }
+                width += text_draw_number(deliveries_needed, '\0', "",
                     c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
             }
             lang_text_draw(CUSTOM_TRANSLATION, key, c->x_offset + 54 + width, c->y_offset + y_offset + 15,

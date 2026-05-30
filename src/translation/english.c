@@ -2118,7 +2118,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_DELIVERIES, "deliveries)"},
     {TR_BUILDING_INFO_DELIVERY_FROM_ROME, "delivery from rome)"},
     {TR_BUILDING_INFO_DELIVERIES_FROM_ROME, "deliveries from rome)"},
-    {TR_BUILDING_INFO_DELIVERIES_DONE, "done)"}
+    {TR_BUILDING_INFO_DELIVERIES_DONE, "done)"},
+    {TR_BUILDING_INFO_MONUMENT_MINIMUM, "(min."}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
