@@ -2108,6 +2108,14 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_DESIRABILITY, "Desirability"},
     {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Show shoreline desirability in overlay"},
     {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Show elevation desirability in overlay"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_1, "(Supports)"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_2, "(Facade)"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_1_TEXT, "Masons are laying the stonework and erecting towering pillars for a colossal triumphal arch, forged to immortalize the valor of your armies and proclaim their victories to generations yet unborn."},
+    {TR_BUILDING_TRIUMPHAL_ARCH_PHASE_2_TEXT, "Skilled artisans are completing the facade of the grand arch with finely carved reliefs, polished stonework, and statues honoring the courage of your soldiers, giving the monument a dignity worthy of the city’s triumphs."},
+    {TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC, "The triumphal arch does not need resources from your city to be build. All neccessary resources and laborers will be supplied by rome to extol your military success."},
+    {TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE, "Triumphal arch completed"},
+    {TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, "The triumphal arch now stands complete, its towering stonework and finely carved facade honoring the courage of our soldiers and the victories they have secured for the city. May it stand for generations as a symbol of strength, sacrifice, and civic pride."},
+    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Supplied by Rome)"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

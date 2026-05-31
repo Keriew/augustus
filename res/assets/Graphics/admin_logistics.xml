@@ -190,6 +190,7 @@
 	<image id="Cart_Depot_Sand" src="Cart_Depot_Sand"/>
 	<image id="Cart_Depot_Stone" src="Cart_Depot_Stone"/>
 	<image id="Cart_Depot_Bricks" src="Cart_Depot_Bricks"/>
+	<image id="Cart_Depot_GameMeat" src="Cart_Depot_GameMeat"/>
 	<!-- Note: Fix for flickering upgraded fountain on desert maps (Image provided by Ouaz and crudelios)-->
 	<image id="Frame_Flickering_Fix">
 		<layer group="53" image="7"/>
@@ -288,6 +289,10 @@
 	<image id="Highway_Station_OFF" src="Highway_Station_OFF" isometric="true"/>
 	<image id="Highway_Station_ON" isometric="true">
 		<layer group="this" image="Highway_Station_OFF"/>
-		<layer src="Highway_Station_ON" x="0" y="0"/>
+		<layer src="Highway_Station_ON" x="22" y="36"/>
 	</image>
+	<!-- Note: Highway Station Stocked with Sand - Position x="78" y="86" -->
+	<image id="Highway_Station_Sand" src="Highway_Station_Sand" width="20" height="14"/>
+	<!-- Note: Highway Station Stocked with Stone - Position x="103" y="76" -->
+	<image id="Highway_Station_Stone" src="Highway_Station_Stone" width="21" height="15"/>
 </assetlist>
