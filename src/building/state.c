@@ -741,6 +741,10 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         }
     }
 
+    if (save_version <= SAVE_GAME_LAST_NO_TRIUMPHAL_ARCH_MONUMENT && b->type == BUILDING_TRIUMPHAL_ARCH) {
+        b->monument.phase = MONUMENT_FINISHED;
+    }
+
     // The following code should only be executed if the savegame includes building information that is not
     // supported on this specific version of Augustus. The extra bytes in the buffer must be skipped in order
     // to prevent reading bogus data for the next building

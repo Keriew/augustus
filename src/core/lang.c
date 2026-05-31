@@ -318,6 +318,11 @@ void load_augustus_messages(void)
     m = &data.message_entries[i];
     set_message_parameters(m, TR_CITY_MESSAGE_TITLE_GOVERNOR_RANK_CHANGE, 0, 0, MESSAGE_TYPE_RANK_CHANGE);
     i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE,
+        TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, 0, MESSAGE_TYPE_BUILDING_COMPLETION);
+    i += 1;
 }
 
 

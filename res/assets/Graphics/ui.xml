@@ -221,8 +221,12 @@
 	<image id="Panelling_Stone_02" src="Panelling_Stone_02"/>
 	<image id="Panelling_Concrete_01" src="Panelling_Concrete_01"/>
 	<image id="Panelling_Concrete_02" src="Panelling_Concrete_02"/>
+	<image id="Panelling_Reeds_01" src="Panelling_Reeds_01"/>
+	<image id="Panelling_Reeds_02" src="Panelling_Reeds_02"/>
 	<image id="Panelling_Papyrus_01" src="Panelling_Papyrus_01"/>
 	<image id="Panelling_Papyrus_02" src="Panelling_Papyrus_02"/>
+	<image id="Panelling_GameMeat_01" src="Panelling_GameMeat_01"/>
+	<image id="Panelling_GameMeat_02" src="Panelling_GameMeat_02"/>
 	<!-- Note: Standards for custom legions by MSTVD -->
 	<image id="11Legion_Elephants" src="11Legion_Elephants"/>
 	<image id="12Legion_Thunder_Bolts" src="12Legion_Thunder_Bolts"/>
@@ -1460,5 +1464,23 @@
 	<image id="Reservoir_Range_Overlay_Icon" isometric="true">
 		<layer group="20" image="11"/>
 		<layer src="reservoir_range_mask" mask="alpha"/>
+	</image>
+	<!-- Editor animal flag and lair buttons -->
+	<image id="Button_AnimalFlag_Idle" src="Button_AnimalFlag_Idle"/>
+	<image id="Button_AnimalFlag_Hover" src="Button_AnimalFlag_Hover"/>
+	<image id="Button_AnimalFlag_Click" src="Button_AnimalFlag_Click"/>
+	<image id="Button_AnimalLair_Idle" src="Button_AnimalLair_Idle"/>
+	<image id="Button_AnimalLair_Hover" src="Button_AnimalLair_Hover"/>
+	<image id="Button_AnimalLair_Click" src="Button_AnimalLair_Click"/>
+	<!-- Note: UI button for accessing Trade Ledger -->
+	<image id="Trade_Ledger_Button_Idle" width="40" height="40">
+		<layer group="128" image="9" x="0" y="0"/>
+		<layer src="Advisor_Button_UH" x="5" y="4"/>
+		<layer src="Trade_Ledger_UH" x="0" y="0"/>
+	</image>
+	<image id="Trade_Ledger_Button_Click" width="40" height="40">
+		<layer group="128" image="22" x="0" y="0"/>
+		<layer src="Advisor_Button_H" x="5" y="4"/>
+		<layer src="Trade_Ledger_H" x="0" y="0"/>
 	</image>
 </assetlist>
