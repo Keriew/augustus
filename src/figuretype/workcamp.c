@@ -123,8 +123,8 @@ static void workcamp_worker_image_update(figure *f)
 
 void figure_workcamp_worker_action(figure *f)
 {
-    f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
     building *b = building_get(f->building_id);
+    f->terrain_usage = b->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS_HIGHWAY : TERRAIN_USAGE_ROADS_HIGHWAY;
     int monument_id;
     int warehouse_id;
     map_point dst;
@@ -141,6 +141,17 @@ void figure_workcamp_worker_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED:
+            if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+                if (!building_monument_access_point(b, &dst)) {
+                    break;
+                }
+                f->destination_building_id = f->building_id;
+                f->destination_x = dst.x;
+                f->destination_y = dst.y;
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
+                f->action_state = FIGURE_ACTION_205_WORK_CAMP_WORKER_GOING_TO_MONUMENT;
+                break;
+            }
             if (building_monument_has_unfinished_monuments()) {
                 for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
                     if (city_resource_is_stockpiled(resource) || !resource_is_storable(resource)) {
@@ -150,7 +161,8 @@ void figure_workcamp_worker_action(figure *f)
                     if (!monument_id) {
                         continue;
                     }
-                    warehouse_id = building_warehouse_with_resource(f->x, f->y, resource, b->road_network_id, 0, &dst, BUILDING_STORAGE_PERMISSION_WORKCAMP);
+                    warehouse_id = building_warehouse_with_resource(f->x, f->y, resource, b->road_network_id, 0, &dst,
+                        BUILDING_STORAGE_PERMISSION_WORKCAMP);
                     if (!warehouse_id) {
                         continue;
                     }
@@ -330,7 +342,8 @@ void figure_workcamp_worker_action(figure *f)
 void figure_workcamp_slave_action(figure *f)
 {
     f->is_ghost = 0;
-    f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
+    f->terrain_usage = building_get(f->building_id)->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS_HIGHWAY
+        : TERRAIN_USAGE_ROADS_HIGHWAY;
     figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
     figure *leader = figure_get(f->leading_figure_id);
@@ -460,8 +473,8 @@ static void set_architect_graphic(figure *f, int working)
 void figure_workcamp_architect_action(figure *f)
 {
     int working = 0;
-    f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
     building *b = building_get(f->building_id);
+    f->terrain_usage = b->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS_HIGHWAY : TERRAIN_USAGE_ROADS_HIGHWAY;
     building *monument;
     map_point dst;
     if (b->state != BUILDING_STATE_IN_USE || b->figure_id != f->id) {
@@ -476,6 +489,18 @@ void figure_workcamp_architect_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED:
+            if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+                if (!building_monument_access_point(b, &dst)) {
+                    break;
+                }
+                f->destination_building_id = f->building_id;
+                f->destination_x = dst.x;
+                f->destination_y = dst.y;
+                building_monument_add_delivery(f->destination_building_id, f->id, RESOURCE_NONE, 10);
+                f->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
+                f->action_state = FIGURE_ACTION_207_WORK_CAMP_ARCHITECT_GOING_TO_MONUMENT;
+                break;
+            }
             if (!building_monument_has_unfinished_monuments()) {
                 f->state = FIGURE_STATE_DEAD;
             } else {
