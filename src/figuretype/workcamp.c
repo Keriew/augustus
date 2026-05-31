@@ -124,7 +124,7 @@ static void workcamp_worker_image_update(figure *f)
 void figure_workcamp_worker_action(figure *f)
 {
     building *b = building_get(f->building_id);
-    f->terrain_usage = b->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS : TERRAIN_USAGE_ROADS_HIGHWAY;
+    f->terrain_usage = b->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS_HIGHWAY : TERRAIN_USAGE_ROADS_HIGHWAY;
     int monument_id;
     int warehouse_id;
     map_point dst;
@@ -342,7 +342,7 @@ void figure_workcamp_worker_action(figure *f)
 void figure_workcamp_slave_action(figure *f)
 {
     f->is_ghost = 0;
-    f->terrain_usage = building_get(f->building_id)->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS
+    f->terrain_usage = building_get(f->building_id)->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS_HIGHWAY
         : TERRAIN_USAGE_ROADS_HIGHWAY;
     figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
@@ -474,7 +474,7 @@ void figure_workcamp_architect_action(figure *f)
 {
     int working = 0;
     building *b = building_get(f->building_id);
-    f->terrain_usage = b->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS : TERRAIN_USAGE_ROADS_HIGHWAY;
+    f->terrain_usage = b->type == BUILDING_TRIUMPHAL_ARCH ? TERRAIN_USAGE_PREFER_ROADS_HIGHWAY : TERRAIN_USAGE_ROADS_HIGHWAY;
     building *monument;
     map_point dst;
     if (b->state != BUILDING_STATE_IN_USE || b->figure_id != f->id) {

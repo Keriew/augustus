@@ -14,7 +14,6 @@
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
-#include "graphics/rich_text.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "translation/translation.h"
@@ -205,14 +204,17 @@ static void window_building_draw_monument_resources_needed(building_info_context
                 continue;
             }
             int resource_delivered_amount = resource_needed_amount - b->resources[r];
-            image_draw(resource_get_data(r)->image.icon, c->x_offset + 32, c->y_offset + y_offset + 10,
+            const image *img = image_get(resource_get_data(r)->image.icon);
+            int icon_x = (24 - img->original.width) / 2;
+
+            image_draw(resource_get_data(r)->image.icon, c->x_offset + 32 + icon_x, c->y_offset + y_offset + 10,
                 COLOR_MASK_NONE, SCALE_NONE);
-            int width = text_draw_number(resource_delivered_amount, '@', "/",
-                c->x_offset + 64, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
-            width += text_draw_number(resource_needed_amount, '@', " ",
-                c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
-            width += text_draw(resource_get_data(r)->text, c->x_offset + 54 + width, c->y_offset + y_offset + 15,
+            int width = text_draw(resource_get_data(r)->text, c->x_offset + 65, c->y_offset + y_offset + 15,
                 FONT_NORMAL_WHITE, 0);
+            width += text_draw_number(resource_delivered_amount, '@', "/",
+                c->x_offset + 65 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
+            width += text_draw_number(resource_needed_amount, '@', " ",
+                c->x_offset + 65 + width - 10, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
             if (b->type == BUILDING_TRIUMPHAL_ARCH) {
                 lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME,
                     c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE);
@@ -242,7 +244,8 @@ void window_building_draw_monument_construction_process(building_info_context *c
             c->x_offset + 32, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
         width += text_draw_number(b->monument.phase, '@', "/",
             c->x_offset + 32 + width, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
-        width += text_draw_number(building_monument_phases(b->type) - 1, '@', "",
+        width -= text_get_width(string_from_ascii(" "), FONT_NORMAL_WHITE) - 2;
+        width += text_draw_number(building_monument_phases(b->type) - 1, 0, "",
             c->x_offset + 32 + width, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
         text_draw(translation_for(tr_phase_name + b->monument.phase - 1),
             c->x_offset + 32 + width, c->y_offset + 50, FONT_NORMAL_BLACK, 0);
@@ -255,21 +258,10 @@ void window_building_draw_monument_construction_process(building_info_context *c
             height += text_draw_multiline(translation_for(TR_BUILDING_MONUMENT_CONSTRUCTION_HALTED),
                 c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4),
                 0, FONT_NORMAL_BLACK, 0);
-        } else {
-            if (b->type == BUILDING_TRIUMPHAL_ARCH) {
-                // "DOES NOT" needs to be drawn in red
-                uint8_t triumphal_desc[512];
-                string_copy(translation_for(TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC), triumphal_desc, 512);
-                rich_text_reset(0);
-                rich_text_set_fonts(FONT_NORMAL_BLACK, FONT_NORMAL_GREEN, FONT_NORMAL_RED, 5);
-                rich_text_init(triumphal_desc, c->x_offset + 32, c->y_offset + 200, (c->width_blocks - 4), c->height_blocks, 0);
-                rich_text_draw(triumphal_desc, c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4), c->height_blocks, 0);
-            } else {
-                height += text_draw_multiline(translation_for(tr_construction_desc),
-                    c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4),
-                    0, FONT_NORMAL_BLACK, 0);
-            }
         }
+        height += text_draw_multiline(translation_for(tr_construction_desc),
+            c->x_offset + 32, c->y_offset + 200 + height, BLOCK_SIZE * (c->width_blocks - 4),
+            0, FONT_NORMAL_BLACK, 0);
         if (c->height_blocks > 28) {
             int phase_offset = b->monument.phase % 2;
             image_draw_border(assets_get_image_id("UI", "Large_Banner_Border"),
