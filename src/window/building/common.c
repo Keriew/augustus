@@ -205,9 +205,10 @@ static void window_building_draw_monument_resources_needed(building_info_context
             }
             int resource_delivered_amount = resource_needed_amount - b->resources[r];
             const image *img = image_get(resource_get_data(r)->image.icon);
-            int icon_x = (24 - img->original.width) / 2;
+            int icon_x = (24 - img->original.width + 1) / 2;  //max icon width  24
+            int icon_y = (22 - img->original.height + 1) / 2; //max icon height 22
 
-            image_draw(resource_get_data(r)->image.icon, c->x_offset + 32 + icon_x, c->y_offset + y_offset + 10,
+            image_draw(resource_get_data(r)->image.icon, c->x_offset + 32 + icon_x, c->y_offset + y_offset + 10 + icon_y,
                 COLOR_MASK_NONE, SCALE_NONE);
             int width = text_draw(resource_get_data(r)->text, c->x_offset + 65, c->y_offset + y_offset + 15,
                 FONT_NORMAL_WHITE, 0);
