@@ -6,6 +6,7 @@
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
+#include "city/buildings.h"
 #include "city/view.h"
 #include "city/warning.h"
 #include "core/config.h"
@@ -262,7 +263,7 @@ static void draw_menu_buttons(void)
         int resource_icon = produced_resource_icon(type);
         int text_offset = MENU_TEXT_X_OFFSET;
         if (resource_icon >= 0 && config_get(CONFIG_UI_CV_BUILD_MENU_ICONS)) {
-            draw_resource_icon_scaled(resource_icon, item_x_align + MENU_TEXT_X_OFFSET + 2 + 
+            draw_resource_icon_scaled(resource_icon, item_x_align + MENU_TEXT_X_OFFSET + 2 +
                 (building_monument_type_is_monument(type) + building_rotation_type_has_rotations(type)) * MENU_ICON_WIDTH,
                 data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i + 2, MENU_RESOURCE_ICON_SIZE);
             text_offset += MENU_RESOURCE_ICON_SIZE + 4; // Shift text right to make room for icon + padding
@@ -283,6 +284,11 @@ static void draw_menu_buttons(void)
             type = BUILDING_RESERVOIR;
         }
         int cost = model_get_building(type)->cost;
+        if (type == BUILDING_HIGHWAY) {
+            if (city_buildings_has_working_highway_station()) {
+                cost /= 2;
+            }
+        }
         if (cost) {
             text_draw_money(cost, x_offset - MENU_ITEM_MONEY_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,

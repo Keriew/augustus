@@ -1470,4 +1470,15 @@
 	<image id="Button_AnimalLair_Idle" src="Button_AnimalLair_Idle"/>
 	<image id="Button_AnimalLair_Hover" src="Button_AnimalLair_Hover"/>
 	<image id="Button_AnimalLair_Click" src="Button_AnimalLair_Click"/>
+	<!-- Note: UI button for accessing Trade Ledger -->
+	<image id="Trade_Ledger_Button_Idle" width="40" height="40">
+		<layer group="128" image="9" x="0" y="0"/>
+		<layer src="Advisor_Button_UH" x="5" y="4"/>
+		<layer src="Trade_Ledger_UH" x="0" y="0"/>
+	</image>
+	<image id="Trade_Ledger_Button_Click" width="40" height="40">
+		<layer group="128" image="22" x="0" y="0"/>
+		<layer src="Advisor_Button_H" x="5" y="4"/>
+		<layer src="Trade_Ledger_H" x="0" y="0"/>
+	</image>
 </assetlist>
