@@ -670,8 +670,10 @@ int building_repair_at(int grid_offset)
         new_building->state = BUILDING_STATE_CREATED;
         b->state = BUILDING_STATE_DELETED_BY_GAME; // mark old building as deleted
         figure_create_explosion_cloud(new_building->x, new_building->y, og_size, 1);
-        map_building_tiles_add(new_building->id, new_building->x, new_building->y, new_building->size,
-            building_image_get(new_building), TERRAIN_BUILDING);
+        if (building_variant_has_variants(new_building->type) || new_building->subtype.orientation) {
+            map_building_tiles_add(new_building->id, new_building->x, new_building->y, new_building->size,
+                building_image_get(new_building), TERRAIN_BUILDING);
+        }
     } else {
         figure_create_explosion_cloud(x, y, og_size, 1);
     }
@@ -817,6 +819,7 @@ int building_is_active(const building *b)
         case BUILDING_NYMPHAEUM:
         case BUILDING_SMALL_MAUSOLEUM:
         case BUILDING_LARGE_MAUSOLEUM:
+        case BUILDING_TRIUMPHAL_ARCH:
             return b->monument.phase == MONUMENT_FINISHED;
         case BUILDING_WHARF:
             return b->num_workers > 0 && b->data.industry.fishing_boat_id;
