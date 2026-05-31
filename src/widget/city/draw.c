@@ -558,6 +558,26 @@ static void draw_workshop_raw_material_storage(const building *b, int x, int y, 
     }
 }
 
+static void draw_highway_station_stock(const building *b, int x, int y, color_t color_mask)
+{
+    if (b->type != BUILDING_HIGHWAY_STATION) {
+        return;
+    }
+    // Documented positions (Sand 78/86, Stone 103/76) are measured
+    // from the top-left of the full building image. The (x, y) passed here is the
+    // draw-tile origin; the building image's top-left sits 58px higher (28px top
+    // part + FOOTPRINT_HALF_HEIGHT * (3 tiles - 1) = 30px footprint offset).
+    int y_image_top = y - 58;
+    if (b->resources[RESOURCE_SAND] > 0) {
+        int image_id = assets_get_image_id("Admin_Logistics", "Highway_Station_Sand");
+        image_draw(image_id, x + 78, y_image_top + 86, color_mask, draw_context.scale);
+    }
+    if (b->resources[RESOURCE_STONE] > 0) {
+        int image_id = assets_get_image_id("Admin_Logistics", "Highway_Station_Stone");
+        image_draw(image_id, x + 103, y_image_top + 76, color_mask, draw_context.scale);
+    }
+}
+
 static void get_mothball_icon_position(const building *b, int *x, int *y)
 {
     const image *img = image_get(building_image_get(b));
@@ -674,6 +694,7 @@ static void draw_building_top(int x, int y, int grid_offset, color_t color_mask)
         draw_mothball_icon(b, x, y, grid_offset, color_mask);
         draw_entertainment_spectators(b, x, y, color_mask);
         draw_workshop_raw_material_storage(b, x, y, color_mask);
+        draw_highway_station_stock(b, x, y, color_mask);
 
         return;
     }

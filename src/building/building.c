@@ -819,6 +819,7 @@ int building_is_active(const building *b)
         case BUILDING_NYMPHAEUM:
         case BUILDING_SMALL_MAUSOLEUM:
         case BUILDING_LARGE_MAUSOLEUM:
+        case BUILDING_TRIUMPHAL_ARCH:
             return b->monument.phase == MONUMENT_FINISHED;
         case BUILDING_WHARF:
             return b->num_workers > 0 && b->data.industry.fishing_boat_id;

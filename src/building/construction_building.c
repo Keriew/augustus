@@ -436,6 +436,7 @@ static void add_to_map(int type, building *b, int size, int orientation, int wat
             break;
         case BUILDING_TRIUMPHAL_ARCH:
             b->subtype.orientation = orientation;
+            building_monument_set_phase(b, MONUMENT_START);
             add_building(b);
             map_orientation_update_buildings();
             map_terrain_add_triumphal_arch_roads(b->x, b->y, orientation);
@@ -574,7 +575,7 @@ int building_construction_fill_vacant_lots(grid_slice *area)
 int building_construction_place_building(building_type type, int x, int y, int exact_coordinates)
 {
     int grid_offset = map_grid_offset(x, y);
-    
+
     int terrain_mask = TERRAIN_ALL;
     if ((building_type_is_roadblock(type) && !(type == BUILDING_GRANARY || type == BUILDING_WAREHOUSE)) ||
         (config_get(CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT) &&
@@ -587,7 +588,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
     } else if (type == BUILDING_RESERVOIR || type == BUILDING_DRAGGABLE_RESERVOIR) {
         terrain_mask = ~TERRAIN_AQUEDUCT;
     }
-    //allow building granaries and warehouses over all road, BUT, 
+    //allow building granaries and warehouses over all road, BUT,
     //the building ghost is set up to SUGGEST placing it over crossroads only
 
     int size = building_properties_for_type(type)->size;
