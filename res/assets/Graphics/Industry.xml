@@ -1201,4 +1201,8 @@
 		<layer group="83" image="0" x="0" y="3"/>
 		<layer src="Warehouse_GameMeat_04" x="0" y="0"/>
 	</image>
+	<!-- Note: Haystack Climate Variant -->
+	<image id="Haystack_C" src="Haystack_C" isometric="true"/>
+	<image id="Haystack_N" src="Haystack_N" isometric="true"/>
+	<image id="Haystack_S" src="Haystack_S" isometric="true"/>
 </assetlist>

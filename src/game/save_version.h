@@ -44,7 +44,7 @@ If you are unsure about anything regarding the savegame versioning, please ask o
 
 typedef enum {
 
-    SAVE_GAME_CURRENT_VERSION = 0xb3,
+    SAVE_GAME_CURRENT_VERSION = 0xb4,
 
     SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66,
     SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76,
@@ -104,6 +104,7 @@ typedef enum {
     SAVE_GAME_LAST_NO_DOG = 0xb0,
     SAVE_GAME_LAST_ALTAR_ROTATION_FIX = 0xb1,
     SAVE_GAME_LAST_NO_HIGHWAY_STATION = 0xb2,
+    SAVE_GAME_LAST_NO_TRIUMPHAL_ARCH_MONUMENT = 0xb3,
 } savegame_version_t;
 
 typedef enum {
