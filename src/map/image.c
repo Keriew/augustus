@@ -23,6 +23,12 @@ void map_image_set(int grid_offset, int image_id)
     images.items[grid_offset] = image_id;
 }
 
+void map_image_set_with_backup(int grid_offset, int image_id)
+{
+    images.items[grid_offset] = image_id;
+    images_backup.items[grid_offset] = image_id;
+}
+
 void map_image_backup(void)
 {
     map_grid_copy_u32(images.items, images_backup.items);

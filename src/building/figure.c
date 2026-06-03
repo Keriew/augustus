@@ -14,11 +14,13 @@
 #include "building/properties.h"
 #include "building/tavern.h"
 #include "building/temple.h"
+#include "building/highway_station.h"
 #include "building/warehouse.h"
 #include "city/buildings.h"
 #include "city/data_private.h"
 #include "city/entertainment.h"
 #include "city/games.h"
+#include "city/map.h"
 #include "city/message.h"
 #include "city/population.h"
 #include "core/calc.h"
@@ -27,6 +29,7 @@
 #include "figure/figure.h"
 #include "figure/formation_legion.h"
 #include "figure/movement.h"
+#include "figuretype/workcamp.h"
 #include "game/resource.h"
 #include "map/building_tiles.h"
 #include "map/desirability.h"
@@ -38,6 +41,8 @@
 #include "scenario/scenario.h"
 
 #define BEGGAR_UNEMPLOYMENT_THRESHOLD 6
+#define VALID_MONUMENT_RECHECK_TICKS 60
+#define ARCHITECTS RESOURCE_NONE
 
 static struct {
     int beggar_counter;
@@ -970,6 +975,27 @@ static void spawn_lighthouse_supplier(building *b, int x, int y)
     send_supplier_to_destination(f, dst_building_id);
 }
 
+static void spawn_highway_station_supplier(building *b, int x, int y)
+{
+    if (b->figure_id) {
+        figure *f = figure_get(b->figure_id);
+        if (f->state != FIGURE_STATE_ALIVE ||
+            (f->type != FIGURE_HIGHWAY_STATION_SUPPLIER && f->type != FIGURE_LABOR_SEEKER)) {
+            b->figure_id = 0;
+        }
+        return;
+    }
+    int dst_building_id = building_highway_station_get_storage_destination(b);
+    if (dst_building_id == 0) {
+        return;
+    }
+    figure *f = figure_create(FIGURE_HIGHWAY_STATION_SUPPLIER, x, y, DIR_0_TOP);
+    f->building_id = b->id;
+    b->figure_id = f->id;
+    f->collecting_item_id = b->data.market.fetch_inventory_id;
+    send_supplier_to_destination(f, dst_building_id);
+}
+
 static void set_bathhouse_graphic(building *b)
 {
     if (b->state != BUILDING_STATE_IN_USE) {
@@ -1724,7 +1750,6 @@ static void spawn_figure_work_camp(building *b)
             b->figure_id = f->id;
             f->building_id = b->id;
         }
-
     }
 }
 
@@ -1865,6 +1890,80 @@ static void spawn_figure_lighthouse(building *b)
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
             spawn_lighthouse_supplier(b, road.x, road.y);
+        }
+    }
+}
+
+static void spawn_figure_highway_station(building *b)
+{
+    // The Highway Station has no dedicated supplier walker. Workcamp workers deliver
+    // stone and sand to it (see figure_workcamp_worker_action). We only need to
+    // recruit workforce for the building itself.
+    check_labor_problem(b);
+    map_point road;
+    if (map_has_road_access(b->x, b->y, b->size, &road)) {
+        spawn_labor_seeker(b, road.x, road.y, 100);
+    }
+}
+
+static int create_slave_workers(int leader_id, int first_figure_id)
+{
+    figure *f = figure_get(first_figure_id);
+    figure *slave = figure_create(FIGURE_WORK_CAMP_SLAVE, f->x, f->y, 0);
+    f = figure_get(first_figure_id);
+    building *b = building_get(f->building_id);
+    slave->leading_figure_id = leader_id;
+    slave->collecting_item_id = f->collecting_item_id;
+    slave->building_id = f->building_id;
+    slave->destination_building_id = f->building_id;
+    slave->destination_x = b->x + 1; // destination not set yet so we have to set it manually
+    slave->destination_y = b->y + 1;
+    slave->action_state = FIGURE_ACTION_209_WORK_CAMP_SLAVE_FOLLOWING;
+    slave->wait_ticks = VALID_MONUMENT_RECHECK_TICKS;
+    building_monument_add_delivery(slave->destination_building_id, slave->id, slave->collecting_item_id, 1);
+    return slave->id;
+}
+
+static void spawn_triumphal_arch_builders(building *b)
+{
+    if (building_monument_has_delivery_for_building(b->id)) {
+        return;
+    }
+    for (int phase = 1; phase < 3; phase++) {
+        if (phase != b->monument.phase) {
+            continue;
+        }
+
+        for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+            int resources_needed = b->resources[r] - building_monument_resource_in_delivery(b, r);
+            resources_needed = calc_bound(resources_needed, 0, CARTLOADS_PER_MONUMENT_DELIVERY);
+            if (!resources_needed) {
+                continue;
+            }
+
+            // spawn work camp worker
+            figure *f = figure_create(FIGURE_WORK_CAMP_WORKER, city_map_entry_point()->x, city_map_entry_point()->y, DIR_4_BOTTOM);
+            f->action_state = FIGURE_ACTION_203_WORK_CAMP_WORKER_CREATED;
+            f->building_id = b->id;
+            b->figure_id = f->id;
+            f->collecting_item_id = r;
+            building_monument_add_delivery(b->id, f->id, r, resources_needed);
+
+            // spawn slaves
+            int slave_id = f->id;
+            for (int i = 0; i < resources_needed; i++) {
+                slave_id = create_slave_workers(slave_id, f->id);
+            }
+            // break so not all resources get supplied at once
+            break;
+        }
+
+        if (!building_monument_needs_resources(b) && b->resources[ARCHITECTS] > 0) {
+            // spawn architect
+            figure *f = figure_create(FIGURE_WORK_CAMP_ARCHITECT, city_map_entry_point()->x, city_map_entry_point()->y, DIR_4_BOTTOM);
+            f->action_state = FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED;
+            b->figure_id = f->id;
+            f->building_id = b->id;
         }
     }
 }
@@ -2046,7 +2145,7 @@ void building_figure_generate(void)
             continue;
         }
         if (b->type == BUILDING_WAREHOUSE_SPACE || (b->type == BUILDING_HIPPODROME && b->prev_part_building_id) ||
-            building_monument_is_unfinished_monument(b)) {
+            (building_monument_is_unfinished_monument(b) && b->type != BUILDING_TRIUMPHAL_ARCH)) {
             continue;
         }
 
@@ -2213,6 +2312,9 @@ void building_figure_generate(void)
                 case BUILDING_LIGHTHOUSE:
                     spawn_figure_lighthouse(b);
                     break;
+                case BUILDING_HIGHWAY_STATION:
+                    spawn_figure_highway_station(b);
+                    break;
                 case BUILDING_TAVERN:
                     spawn_figure_tavern(b);
                     break;
@@ -2227,6 +2329,9 @@ void building_figure_generate(void)
                     break;
                 case BUILDING_ARMOURY:
                     spawn_figure_armoury(b);
+                    break;
+                case BUILDING_TRIUMPHAL_ARCH:
+                    spawn_triumphal_arch_builders(b);
                     break;
             }
         }

@@ -101,7 +101,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_offset = 26,
         .fire_proof = 1,
         .draw_desirability_range = 1,
-        .show_durability = 1,
         .event_data.attr = "wall",
         .shared = 1,
         .building_model_data = {.cost = 12, .desirability_value = 0, .desirability_step = 0,
@@ -887,7 +886,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_offset = 1,
         .sound_id = SOUND_CITY_TOWER,
         .draw_desirability_range = 1,
-        .show_durability = 1,
         .event_data.attr = "gatehouse",
         .building_model_data = {.cost = 100, .desirability_value = -4, .desirability_step = 1,
             .desirability_step_size = 1, .desirability_range = 3, .laborers = 0}
@@ -898,7 +896,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .image_group = 17,
         .sound_id = SOUND_CITY_TOWER,
         .draw_desirability_range = 1,
-        .show_durability = 1,
         .event_data.attr = "tower",
         .building_model_data = {.cost = 150, .desirability_value = -8, .desirability_step = 1,
             .desirability_step_size = 2, .desirability_range = 3, .laborers = 6}
@@ -1946,7 +1943,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .fire_proof = 1,
         .sound_id = SOUND_CITY_WATCHTOWER,
         .draw_desirability_range = 1,
-        .show_durability = 1,
         .custom_asset.group = "Military",
         .custom_asset.id = "Watchtower C OFF",
         .event_data.attr = "watchtower",
@@ -1986,7 +1982,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .fire_proof = 1,
         .draw_desirability_range = 1,
-        .show_durability = 1,
         .custom_asset.group = "Military",
         .custom_asset.id = "Pal Wall C 01",
         .event_data.attr = "palisade",
@@ -2015,7 +2010,6 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .size = 1,
         .fire_proof = 1,
         .draw_desirability_range = 1,
-        .show_durability = 1,
         .custom_asset.group = "Military",
         .custom_asset.id = "Palisade_Gate",
         .event_data.attr = "palisade_gate",
@@ -2253,6 +2247,16 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "native_watchtower",
         .building_model_data = {.cost = 0, .desirability_value = -10, .desirability_step = 1,
             .desirability_step_size = 2, .desirability_range = 4, .laborers = 0}
+     },
+     [BUILDING_HIGHWAY_STATION] = {
+        .size = 3,
+        .fire_proof = 1,
+        .draw_desirability_range = 1,
+        .custom_asset.group = "Admin_Logistics",
+        .custom_asset.id = "Highway_Station_OFF",
+        .event_data.attr = "highway_station",
+        .building_model_data = {.cost = 200, .desirability_value = -2, .desirability_step = 1,
+            .desirability_step_size = 1, .desirability_range = 3, .laborers = 12}
      },
 };
 

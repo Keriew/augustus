@@ -24,8 +24,8 @@ jobs:
           - name: Linux x64
             os: ubuntu-24.04
             cache-key: linux-x64
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
             BUILD_TARGET: linux
             DEPLOY: linux
           - name: Linux x64 (old SDL versions)
@@ -40,30 +40,30 @@ jobs:
             os: ubuntu-24.04
             cache-key: linux-x64
             SDL_VERSION: 3.4.8
-            SDL_MIXER_VERSION: 3.2.0
+            SDL_MIXER_VERSION: 3.2.2
             BUILD_TARGET: linux
             DEPLOY: linux
             SKIP_UPLOAD: true
           - name: Linux arm64
             os: ubuntu-24.04-arm
             cache-key: linux-arm64
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
             BUILD_TARGET: linux
             DEPLOY: linux
             SKIP_UPLOAD: true
           - name: macOS
             os: macos-latest
             cache-key: macos
-            SDL_VERSION: 2.32.8
+            SDL_VERSION: 2.32.10
             SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: mac
             DEPLOY: mac
           - name: iOS
             os: macos-latest
             cache-key: ios
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
             BUILD_TARGET: ios
             DEPLOY: ios
           - name: Nintendo Switch
@@ -77,15 +77,15 @@ jobs:
           - name: Android
             os: ubuntu-24.04
             cache-key: android
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
             BUILD_TARGET: android
             DEPLOY: android
           - name: Android SDL3
             os: ubuntu-24.04
             cache-key: android
             SDL_VERSION: 3.4.8
-            SDL_MIXER_VERSION: 3.2.0
+            SDL_MIXER_VERSION: 3.2.2
             BUILD_TARGET: android
             DEPLOY: android
             SKIP_UPLOAD: true
@@ -158,24 +158,24 @@ jobs:
           - name: Windows MinGW x86
             cache-key: mingw
             COMPILER: mingw-32
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1        
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
           - name: Windows MinGW x64
             cache-key: mingw
             COMPILER: mingw-64
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
           - name: Windows MinGW x64 (SDL3)
             cache-key: mingw
             COMPILER: mingw-64
             SDL_VERSION: 3.4.8
-            SDL_MIXER_VERSION: 3.2.0
+            SDL_MIXER_VERSION: 3.2.2
             SKIP_UPLOAD: true
           - name: Windows MSVC x64
             cache-key: msvc
             COMPILER: msvc
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
             SKIP_UPLOAD: true
           - name: Windows MSVC ARM64
             cache-key: msvc-arm64

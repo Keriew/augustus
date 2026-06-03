@@ -1,5 +1,6 @@
 #include "buildings.h"
 
+#include "building/highway_station.h"
 #include "city/data_private.h"
 #include "core/calc.h"
 
@@ -52,6 +53,11 @@ int city_buildings_has_city_mint(void)
     return get_first_working_building(BUILDING_CITY_MINT)->id != 0;
 }
 
+int city_buildings_has_workcamp(void)
+{
+    return get_first_working_building(BUILDING_WORKCAMP)->id != 0;
+}
+
 int city_buildings_get_mess_hall(void)
 {
     return get_first_working_building(BUILDING_MESS_HALL)->id;
@@ -75,6 +81,25 @@ int city_buildings_has_caravanserai(void)
 int city_buildings_get_caravanserai(void)
 {
     return get_first_working_building(BUILDING_CARAVANSERAI)->id;
+}
+
+int city_buildings_has_highway_station(void)
+{
+    return city_buildings_get_highway_station() != 0;
+}
+
+int city_buildings_get_highway_station(void)
+{
+    return get_first_working_building(BUILDING_HIGHWAY_STATION)->id;
+}
+
+int city_buildings_has_working_highway_station(void)
+{
+    int id = city_buildings_get_highway_station();
+    if (!id) {
+        return 0;
+    }
+    return building_highway_station_is_functional(building_get(id));
 }
 
 int city_buildings_triumphal_arch_available(void)

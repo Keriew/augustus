@@ -56,6 +56,7 @@ int building_type_is_distributor(building_type type)
         case BUILDING_MESS_HALL:
         case BUILDING_TAVERN:
         case BUILDING_LIGHTHOUSE:
+        case BUILDING_HIGHWAY_STATION:
         case BUILDING_SMALL_TEMPLE_VENUS:
         case BUILDING_LARGE_TEMPLE_VENUS:
         case BUILDING_SMALL_TEMPLE_CERES:

@@ -439,6 +439,21 @@ static int get_tooltip_water(tooltip_context *c, int grid_offset)
     return 0;
 }
 
+static int get_environmental_desirability(const int grid_offset, int ignore_config)
+{
+    const int x_position = map_grid_offset_to_x(grid_offset);
+    const int y_position = map_grid_offset_to_y(grid_offset);
+    int additional_desirability = 0;
+    if ((ignore_config || config_get(CONFIG_UI_SHOW_SHORELINE_DESIRABILITY)) &&
+        map_terrain_exists_tile_in_radius_with_type(x_position, y_position, 1, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER)) {
+        additional_desirability += BUILDING_WATER_DESIRABILITY_BONUS;
+    }
+    if (ignore_config || config_get(CONFIG_UI_SHOW_ELEVATION_DESIRABILITY)) {
+        additional_desirability += building_get_elevation_desirability_bonus(grid_offset);
+    }
+    return additional_desirability;
+}
+
 static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
 {
     int desirability;
@@ -447,8 +462,12 @@ static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
         building *b = building_get(building_id);
         desirability = b->desirability;
     } else {
-        desirability = map_desirability_get(grid_offset);
+        desirability = map_desirability_get(grid_offset) + get_environmental_desirability(grid_offset, 1);
     }
+
+    // Clamp
+    desirability = calc_bound(desirability, -100, 100);
+
     const uint8_t *text;
     if (desirability < 0) {
         text = lang_get_string(66, 91);
@@ -935,7 +954,7 @@ static void draw_desirability_graph(int x, int y, float scale, int grid_offset)
             building *b = building_get(map_building_at(grid_offset));
             desirability = b->desirability;
         } else {
-            desirability = map_desirability_get(grid_offset);
+            desirability = map_desirability_get(grid_offset) + get_environmental_desirability(grid_offset, 0);
         }
         if (desirability) {
             int offset = get_desirability_image_offset(desirability);

@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/connectable.h"
+#include "building/highway_station.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/rotation.h"
@@ -288,6 +289,12 @@ int building_image_get(const building *b)
                 default:
                     return assets_get_image_id("Industry", "Brickworks_C_ON");
             }
+        case BUILDING_HIGHWAY_STATION:
+            if (building_highway_station_is_functional((building *) b)) {
+                return assets_get_image_id("Admin_Logistics", "Highway_Station_ON");
+            } else {
+                return assets_get_image_id("Admin_Logistics", "Highway_Station_OFF");
+            }
         case BUILDING_CONCRETE_MAKER:
             switch (scenario_property_climate()) {
                 case CLIMATE_NORTHERN:
@@ -477,18 +484,17 @@ int building_image_get(const building *b)
         {
             int map_orientation = city_view_orientation();
             int orientation_is_top_bottom = map_orientation == DIR_0_TOP || map_orientation == DIR_4_BOTTOM;
-            if (b->subtype.orientation == 1) {
-                if (orientation_is_top_bottom) {
-                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH);
-                } else {
-                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH) + 2;
-                }
-            } else {
-                if (orientation_is_top_bottom) {
-                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH) + 2;
-                } else {
-                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH);
-                }
+            int is_rotated = (b->subtype.orientation == 1 && !orientation_is_top_bottom) ||
+                (b->subtype.orientation != 1 && orientation_is_top_bottom);
+            switch (b->monument.phase) {
+                case MONUMENT_START:
+                    return assets_get_image_id("Monuments", is_rotated ? "Triumphal_Arch_Construction_01_R" :
+                        "Triumphal_Arch_Construction_01");
+                case 2:
+                    return assets_get_image_id("Monuments", is_rotated ? "Triumphal_Arch_Construction_02_R" :
+                        "Triumphal_Arch_Construction_02");
+                default:
+                    return image_group(GROUP_BUILDING_TRIUMPHAL_ARCH) + (is_rotated * 2);
             }
         }
         case BUILDING_SENATE:
