@@ -143,9 +143,10 @@ static int show_figure_crime(const figure *f)
     if (f->type == FIGURE_BALLISTA) {
         return 0;
     }
-    return props->category & FIGURE_CATEGORY_LAW_ENFORCEMENT
+    return props->category & FIGURE_CATEGORY_ARMED
         || props->category & FIGURE_CATEGORY_CRIMINAL
-        || props->category & FIGURE_CATEGORY_PROJECTILE;
+        || props->category & FIGURE_CATEGORY_PROJECTILE
+        || f->type == FIGURE_FORT_STANDARD;
 }
 
 static int show_figure_problems(const figure *f)
