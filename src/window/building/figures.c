@@ -504,8 +504,8 @@ static void draw_cartpusher(building_info_context *c, figure *f)
             || f->action_state == FIGURE_ACTION_235_CARTPUSHER_GOING_TO_ROME) {
             text_draw(translation_for(TR_FIGURES_CARTPUSHER_GOING_TO_ROME), x_base, y_base, FONT_NORMAL_BROWN, 0);
         } else {
-            building *to_building = 0;
-            building *from_building = 0;
+            building *to_building = NULL;
+            building *from_building = NULL;
 
             if (is_returning) {
                 width = lang_text_draw(129, 16, x_base, y_base, FONT_NORMAL_BROWN); //returning to
