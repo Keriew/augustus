@@ -960,6 +960,7 @@ static void draw_foreground(void)
             window_building_draw_roadblock_button(&context);
         }
     }
+    window_building_draw_health(&context);
 
     // general buttons
     if (context.show_special_orders ||
