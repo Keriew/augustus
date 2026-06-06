@@ -189,16 +189,20 @@ void map_building_get_health(const building *b, int grid_offset, int *current, i
         default:
             break;
     }
-    int total_damage = 0;
+    int current_hp = max_hp;
     if (building_properties_for_type(b->type)->shared) {
-        total_damage = map_building_damage_get(grid_offset);
+        int damage = map_building_damage_get(grid_offset);
+        current_hp = calc_bound(max_hp - damage, 0, max_hp);
     } else {
         grid_slice *slice = map_grid_get_grid_slice_square(b->grid_offset, b->size);
         for (int i = 0; i < slice->size; i++) {
-            total_damage += map_building_damage_get(slice->grid_offsets[i]);
+            int tile_damage = map_building_damage_get(slice->grid_offsets[i]);
+            int tile_hp = calc_bound(max_hp - tile_damage, 0, max_hp);
+            if (tile_hp < current_hp) {
+                current_hp = tile_hp;
+            }
         }
     }
-    int current_hp = calc_bound(max_hp - total_damage, 0, max_hp);
     *current = current_hp;
     *max = max_hp;
 }
