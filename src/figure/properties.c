@@ -211,7 +211,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .attack_value = 6,
     },
     [FIGURE_TOWER_SENTRY] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_LAW_ENFORCEMENT | FIGURE_CATEGORY_LAW_ENFORCEMENT,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .sound_type = FIGURE_SOUND_TROOP,
         .max_damage = 50,
         .attack_value = 6,
