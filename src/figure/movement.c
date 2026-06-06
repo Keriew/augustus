@@ -216,6 +216,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
                     switch (b->type) {
                         case BUILDING_PALISADE:
                         case BUILDING_PALISADE_GATE:
+                        case BUILDING_WATCHTOWER:
                             max_damage = PALISADE_HP;
                             break;
                         default:

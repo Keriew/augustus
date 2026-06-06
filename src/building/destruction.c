@@ -339,13 +339,8 @@ void building_destroy_by_enemy(int x, int y, int grid_offset)
             map_building_tiles_set_rubble(b->id, x, y, b->size);
             figure_create_explosion_cloud(x, y, b->size, 0);
         } else if (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED) {
-            int current;
-            int max;
-            map_building_get_health(b, grid_offset, &current, &max);
-            if (current <= 0) {
-                city_ratings_peace_building_destroyed(b->type);
-                building_destroy_by_collapse(b);
-            }
+            city_ratings_peace_building_destroyed(b->type);
+            building_destroy_by_collapse(b);
         } else {
             if (map_terrain_is(grid_offset, TERRAIN_GARDEN)) {
                 map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
