@@ -48,7 +48,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .max_damage = 20,
     },
     [FIGURE_PREFECT] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .sound_type = FIGURE_SOUND_PREFECT,
         .max_damage = 50,
         .attack_value = 5,
@@ -85,14 +85,14 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .max_damage = 20,
     },
     [FIGURE_GLADIATOR] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .sound_type = FIGURE_SOUND_GLADIATOR,
         .max_damage = 100,
         .attack_value = 9,
         .defense_value = 2,
     },
     [FIGURE_LION_TAMER] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_ENTERTAINMENT | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .sound_type = FIGURE_SOUND_LION_TAMER,
         .max_damage = 100,
         .attack_value = 15,
@@ -211,7 +211,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .attack_value = 6,
     },
     [FIGURE_TOWER_SENTRY] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_LAW_ENFORCEMENT | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .sound_type = FIGURE_SOUND_TROOP,
         .max_damage = 50,
         .attack_value = 6,
@@ -423,7 +423,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .max_damage = 20,
     },
     [FIGURE_MESS_HALL_SUPPLIER] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .sound_type = FIGURE_SOUND_TROOP,
         .max_damage = 70,
         .attack_value = 8,
@@ -454,7 +454,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .max_damage = 20,
     },
     [FIGURE_WATCHMAN] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .sound_type = FIGURE_SOUND_TROOP,
         .max_damage = 50,
         .attack_value = 6,
@@ -462,7 +462,7 @@ static const figure_properties properties[FIGURE_TYPE_MAX] = {
         .missile_delay = 50,
     },
     [FIGURE_WATCHTOWER_ARCHER] = {
-        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN,
+        .category = FIGURE_CATEGORY_ARMED | FIGURE_CATEGORY_CITIZEN | FIGURE_CATEGORY_LAW_ENFORCEMENT,
         .max_damage = 10,
         .missile_delay = 40,
     },
