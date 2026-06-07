@@ -224,21 +224,31 @@ int map_terrain_exists_tile_in_area_with_type(int x, int y, int size, int terrai
     return 0;
 }
 
-int map_terrain_exists_tile_in_radius_with_type(int x, int y, int size, int radius, int terrain, int require_open_water)
+int map_terrain_exists_tile_in_radius_with_type(int x, int y, int size, int radius, int terrain)
 {
     int x_min, y_min, x_max, y_max;
     map_grid_get_area(x, y, size, radius, &x_min, &y_min, &x_max, &y_max);
 
     for (int yy = y_min; yy <= y_max; yy++) {
         for (int xx = x_min; xx <= x_max; xx++) {
+            if (map_terrain_is(map_grid_offset(xx, yy), terrain)) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int map_terrain_exists_open_water_in_radius(int x, int y, int size, int radius)
+{
+    int x_min, y_min, x_max, y_max;
+    map_grid_get_area(x, y, size, radius, &x_min, &y_min, &x_max, &y_max);
+    for (int yy = y_min; yy <= y_max; yy++) {
+        for (int xx = x_min; xx <= x_max; xx++) {
             int offset = map_grid_offset(xx, yy);
-            if (!map_terrain_is(offset, terrain)) {
-                continue;
+            if (map_terrain_is(offset, TERRAIN_WATER) && map_routing_distance(offset) > 0) {
+                return 1;
             }
-            if (require_open_water && map_routing_distance(offset) <= 0) {
-                continue;
-            }
-            return 1;
         }
     }
     return 0;

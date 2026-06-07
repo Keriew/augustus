@@ -1064,7 +1064,7 @@ void building_make_immune_cheat(void)
 
 int building_is_close_to_water(const building *b)
 {
-    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER, 0);
+    return map_terrain_exists_tile_in_radius_with_type(b->x, b->y, b->size, BUILDING_WATER_DESIRABILITY_RANGE, TERRAIN_WATER);
 }
 
 void building_save_state(buffer *buf, buffer *highest_id, buffer *highest_id_ever,

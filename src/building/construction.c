@@ -293,7 +293,7 @@ static int place_houses(int measure_only, int x_start, int y_start, int x_end, i
                     items_placed++;
                     map_building_tiles_add(b->id, x, y, 1,
                         image_group(GROUP_BUILDING_HOUSE_VACANT_LOT), TERRAIN_BUILDING);
-                    if (!map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_ROAD, 0)) {
+                    if (!map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_ROAD)) {
                         needs_road_warning = 1;
                     }
                 }
@@ -1360,7 +1360,7 @@ static void set_warning(int *warning_id, int warning)
 int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
 {
     if (data.required_terrain.meadow) {
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 3, 1, TERRAIN_MEADOW, 0)) {
+        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 3, 1, TERRAIN_MEADOW)) {
             set_warning(warning_id, WARNING_MEADOW_NEEDED);
             return 0;
         }
@@ -1370,12 +1370,12 @@ int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
             return 0;
         }
     } else if (data.required_terrain.tree) {
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 1, TERRAIN_SHRUB | TERRAIN_TREE, 0)) {
+        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 1, TERRAIN_SHRUB | TERRAIN_TREE)) {
             set_warning(warning_id, WARNING_TREE_NEEDED);
             return 0;
         }
     } else if (data.required_terrain.water) {
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 3, TERRAIN_WATER, 0)) {
+        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 3, TERRAIN_WATER)) {
             set_warning(warning_id, WARNING_WATER_NEEDED);
             return 0;
         }
@@ -1385,15 +1385,15 @@ int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
             return 0;
         }
     } else if (data.required_terrain.distant_water) {
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 9, TERRAIN_WATER, 0)) {
+        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 9, TERRAIN_WATER)) {
             set_warning(warning_id, WARNING_WATER_NEEDED_FOR_BUILDING);
             return 0;
         }
-
     } else if (data.required_terrain.open_water) {
         map_point river_entry = scenario_map_river_entry();
         map_routing_calculate_distances_water_boat(river_entry.x, river_entry.y);
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 3, 9, TERRAIN_WATER, 1)) {
+
+        if (!map_terrain_exists_open_water_in_radius(x, y, 3, 9)) {
             set_warning(warning_id, WARNING_OPEN_WATER_NEEDED_FOR_BUILDING);
             return 0;
         }
