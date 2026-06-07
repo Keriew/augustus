@@ -391,7 +391,7 @@ static void init(int grid_offset)
         context.terrain_type = TERRAIN_INFO_RUBBLE;
     } else if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
         context.terrain_type = TERRAIN_INFO_WALL;
-    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !context.building_id) {
         context.terrain_type = TERRAIN_INFO_HIGHWAY;
     } else if (!context.building_id) {
         context.terrain_type = TERRAIN_INFO_EMPTY;
@@ -959,6 +959,13 @@ static void draw_foreground(void)
         } else {
             window_building_draw_roadblock_button(&context);
         }
+    }
+
+    // Do not display building health (show_durability) in special windows
+    if (context.type == BUILDING_INFO_BUILDING &&
+        !context.show_special_orders &&
+        context.depot_selection == 0) {
+        window_building_draw_health(&context);
     }
 
     // general buttons

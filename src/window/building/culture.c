@@ -33,7 +33,6 @@ static void button_add_module_prompt(const generic_button *button);
 static void button_hold_games(const generic_button *button);
 static void button_race_bet(const generic_button *button);
 
-
 static void draw_temple(building_info_context *c, const char *sound_file, int group_id);
 
 static generic_button add_module_button[] = {
@@ -147,7 +146,6 @@ static void draw_culture_info(building_info_context *c, int help_id, const char 
 void window_building_draw_clinic(building_info_context *c)
 {
     draw_culture_info(c, 65, "wavs/clinic.wav", 81);
-
 }
 
 void window_building_draw_hospital(building_info_context *c)
@@ -1140,7 +1138,6 @@ void window_building_draw_arena(building_info_context *c)
     }
 }
 
-
 int window_building_handle_mouse_hippodrome(const mouse *m, building_info_context *c)
 {
     building *b = building_get(c->building_id);
@@ -1222,6 +1219,8 @@ void window_building_draw_hippodrome_background(building_info_context *c)
             text_draw_multiline(translation_for(TR_WINDOW_RACE_BLUE_HORSE_DESCRIPTION +
                 city_data.games.chosen_horse - 1), c->x_offset + 125, c->y_offset + y_offset + 240, 320,
                 0, FONT_NORMAL_BLACK, 0);
+        } else {
+            window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 160, 73, 1);
         }
         text_draw_centered(translation_for(city_data.games.chosen_horse ? TR_WINDOW_IN_PROGRESS_BET_BUTTON :
             TR_WINDOW_RACE_BET_TITLE), c->x_offset + 88, c->y_offset + y_offset + 351, 300, FONT_NORMAL_BLACK, 0);

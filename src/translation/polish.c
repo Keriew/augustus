@@ -1521,7 +1521,7 @@ static translation_string all_strings[] = {
     // TODO {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT, "The selected user directory is not writable.\n\nPlease select a different user directory."},
     // TODO {TR_USER_DIRECTORIES_NOT_WRITEABLE_TEXT_DETAILED, "The selected user directory is not writable.\n\nYou will not be able to save your games.\nPlease select a different user directory from the options window on the main menu."},
     {TR_USER_DIRECTORIES_WINDOW_TITLE, "Wybierz folder użytkownika"},
-    {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Folder użytkownika:" },
+    {TR_USER_DIRECTORIES_WINDOW_USER_PATH, "Folder użytkownika:" },
     {TR_SELECT_NONE, "Cofnij wybór"},
     {TR_SELECT_ALL, "Wybierz wszystkie"},
     {TR_SELECTED, "Wybrany/e"},
