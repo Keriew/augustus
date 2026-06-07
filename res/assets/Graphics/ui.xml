@@ -101,7 +101,7 @@
 	<image id="Rotate Build Icon" src="Rotation_Panel"/>
 	<image id="Expand Menu Icon" src="Expand_Panel"/>
 	<image id="Expand Menu Icon Left">
-		<layer src="Expand Menu Icon" invert="horizontal"/>
+		<layer group="this" image="Expand Menu Icon" invert="horizontal"/>
 	</image>
 	<!-- Note: Hippodrome racing UI button -->
 	<image id="Hipp_Racing_Button" src="Hippodrome_Betting_Select_Button"/>
