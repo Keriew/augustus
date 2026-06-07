@@ -962,9 +962,7 @@ static void draw_foreground(void)
     }
 
     // Do not display building health (show_durability) in special windows
-    if (context.type == BUILDING_INFO_BUILDING &&
-        !context.show_special_orders &&
-        context.depot_selection == 0) {
+    if (!context.show_special_orders && context.depot_selection == 0) {
         window_building_draw_health(&context);
     }
 
