@@ -14,6 +14,8 @@
 #include "scenario/data.h"
 #include "scenario/property.h"
 
+#define PLEB_PERCENTAGE 45
+
 typedef enum {
     LABOR_CATEGORY_NONE = 0,
     LABOR_CATEGORY_INDUSTRY_COMMERCE,
@@ -220,6 +222,7 @@ void city_labor_calculate_workers(int num_plebs, int num_patricians)
     if (config_get(CONFIG_GP_CH_FIXED_WORKERS)) {
         venus_blessing_modifier = city_god_venus_bonus_employment();
         city_data.population.working_age = calc_adjust_with_percentage(num_plebs, 38 + venus_blessing_modifier);
+        city_data.population.working_age = calc_adjust_with_percentage(num_plebs, PLEB_PERCENTAGE + venus_blessing_modifier);
         city_data.labor.workers_available = city_data.population.working_age;
     } else {
         city_data.population.working_age = calc_adjust_with_percentage(city_population_people_of_working_age(), 60);
@@ -241,7 +244,7 @@ static int is_industry_disabled(building *b)
 }
 
 static int should_have_workers(building *b, int category, int check_access)
-{    
+{
     if (category == LABOR_CATEGORY_NONE) {
         return 0;
     }
@@ -407,7 +410,7 @@ static void set_building_worker_weight(void)
                 b->percentage_houses_covered = water_per_10k_per_building;
             } else {
                 b->percentage_houses_covered = 0;
-                
+
                 if (b->houses_covered) {
                     b->percentage_houses_covered =
                         calc_percentage(100 * b->houses_covered,
@@ -489,7 +492,7 @@ static void allocate_workers_to_non_water_buildings(void)
             if (b->type != BUILDING_LATRINES && (!should_have_workers(b, cat, 0) || b->percentage_houses_covered <= 0)) {
                 continue;
             }
-            
+
             int required_workers = model_get_building(b->type)->laborers;
             if (category_workers_needed[cat - 1]) {
                 int num_workers = calc_adjust_with_percentage(

@@ -573,18 +573,25 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
+static int routing_ignore_combat = 0;
+
 static int callback_travel_citizen_land(int offset, int next_offset, int direction)
 {
-    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
+    if (terrain_land_citizen.items[next_offset] >= 0) {
+        if (!routing_ignore_combat && has_fighting_friendly(next_offset)) {
+            return 0;
+        }
         return 1;
     }
     return 0;
 }
 
-int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
+int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions, int ignore_combat)
 {
     ++stats.total_routes_calculated;
+    routing_ignore_combat = ignore_combat;
     route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, 0, callback_travel_citizen_land);
+    routing_ignore_combat = 0;
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 

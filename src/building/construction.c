@@ -41,6 +41,7 @@
 #include "map/water.h"
 #include "map/water_supply.h"
 #include "scenario/allowed_building.h"
+#include "scenario/map.h"
 
 #define MAX_CYCLE_SIZE 10
 
@@ -76,6 +77,7 @@ static struct {
         int water;
         int wall;
         int distant_water;
+        int open_water;
     } required_terrain;
     int draw_as_constructing;
     int start_offset_x_view;
@@ -649,6 +651,7 @@ void building_construction_set_type(building_type type, int setup_rotation)
         data.required_terrain.meadow = 0;
         data.required_terrain.distant_water = 0;
         data.start.grid_offset = 0;
+        data.required_terrain.open_water = 0;
 
         switch (type) {
             case BUILDING_WHEAT_FARM:
@@ -675,8 +678,11 @@ void building_construction_set_type(building_type type, int setup_rotation)
                 data.required_terrain.wall = 1;
                 break;
             case BUILDING_LIGHTHOUSE:
+                data.required_terrain.open_water = 1;
+                break;
             case BUILDING_SAND_PIT:
                 data.required_terrain.distant_water = 1;
+                break;
             default:
                 break;
         }
@@ -1064,7 +1070,8 @@ void building_construction_update(int x, int y, int grid_offset)
             data.draw_as_constructing = 1;
         }
     } if (data.required_terrain.meadow || data.required_terrain.rock || data.required_terrain.tree ||
-        data.required_terrain.water || data.required_terrain.wall || data.required_terrain.distant_water) {
+        data.required_terrain.water || data.required_terrain.wall || data.required_terrain.distant_water
+        || data.required_terrain.open_water) {
         // never mark as constructing
     } else {
         if (should_mark_for_construction(type)) {
@@ -1350,7 +1357,6 @@ static void set_warning(int *warning_id, int warning)
     }
 }
 
-
 int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
 {
     if (data.required_terrain.meadow) {
@@ -1379,8 +1385,16 @@ int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
             return 0;
         }
     } else if (data.required_terrain.distant_water) {
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 3, 9, TERRAIN_WATER)) {
+        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 9, TERRAIN_WATER)) {
             set_warning(warning_id, WARNING_WATER_NEEDED_FOR_BUILDING);
+            return 0;
+        }
+    } else if (data.required_terrain.open_water) {
+        map_point river_entry = scenario_map_river_entry();
+        map_routing_calculate_distances_water_boat(river_entry.x, river_entry.y);
+
+        if (!map_terrain_exists_open_water_in_radius(x, y, 3, 9)) {
+            set_warning(warning_id, WARNING_OPEN_WATER_NEEDED_FOR_BUILDING);
             return 0;
         }
     }

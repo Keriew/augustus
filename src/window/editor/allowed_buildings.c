@@ -175,8 +175,21 @@ static void draw_allowed_building(const grid_box_item *item)
             x_offset = 20;
             y_offset = -4;
         }
-        draw_button(lang_get_building_type_string(current_menu->building), current_menu->building,
-            item->x + x_offset, item->y + y_offset, item->width - x_offset, item->height, item->is_focused);
+
+        const uint8_t *name = lang_get_building_type_string(current_menu->building);
+        switch (current_menu->building) {
+            case BUILDING_BRICKWORKS:
+                name = translation_for(TR_RESOURCE_BRICKS);
+                break;
+            case BUILDING_CONCRETE_MAKER:
+                name = translation_for(TR_RESOURCE_CONCRETE);
+                break;
+            default:
+                break;
+        }
+
+        draw_button(name, current_menu->building, item->x + x_offset, item->y + y_offset,
+            item->width - x_offset, item->height, item->is_focused);
     } else if (current_menu->type == ITEM_TYPE_MENU) {
         if (building_menu_is_submenu(current_menu->menu)) {
             int width = text_draw(string_from_ascii(" -"), item->x + 4, item->y + 8, FONT_NORMAL_BLACK, 0);

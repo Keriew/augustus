@@ -217,12 +217,12 @@ static void draw_blocked_tile(int x, int y, int grid_offset)
 
 static void draw_malus_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_NEGATIVE_RANGE, data.scale);
+    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, COLOR_MASK_NEGATIVE_RANGE, data.scale);
 }
 
 static void draw_bonus_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_POSITIVE_RANGE, data.scale);
+    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y, COLOR_MASK_POSITIVE_RANGE, data.scale);
 }
 
 static void draw_well_range(int x, int y, int grid_offset)
@@ -237,7 +237,7 @@ static void draw_fountain_range(int x, int y, int grid_offset)
 
 static void draw_latrines_range(int x, int y, int grid_offset)
 {
-    image_draw(image_group(GROUP_TERRAIN_FLAT_TILE), x, y,
+    image_draw(assets_lookup_image_id(ASSET_UI_FOUNTAIN_RANGE), x, y,
         COLOR_MASK_DARK_GREEN & ALPHA_FONT_SEMI_TRANSPARENT, data.scale);
 }
 

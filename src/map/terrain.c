@@ -239,6 +239,21 @@ int map_terrain_exists_tile_in_radius_with_type(int x, int y, int size, int radi
     return 0;
 }
 
+int map_terrain_exists_open_water_in_radius(int x, int y, int size, int radius)
+{
+    int x_min, y_min, x_max, y_max;
+    map_grid_get_area(x, y, size, radius, &x_min, &y_min, &x_max, &y_max);
+    for (int yy = y_min; yy <= y_max; yy++) {
+        for (int xx = x_min; xx <= x_max; xx++) {
+            int offset = map_grid_offset(xx, yy);
+            if (map_terrain_is(offset, TERRAIN_WATER) && map_routing_distance(offset) > 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 int map_terrain_exists_rock_in_radius(int x, int y, int size, int radius)
 {
     int x_min, y_min, x_max, y_max;
