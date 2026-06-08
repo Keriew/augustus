@@ -278,7 +278,7 @@ static int place_object(int mouse_x, int mouse_y)
     int y = editor_empire_mouse_to_empire_y(mouse_y) - ((full->obj.height / 2) * !is_edge);
     empire_transform_coordinates(&x, &y);
     // find nearest before assigning coordinates so it doesn't always find itself
-    if (is_edge && config_get(CONFIG_UI_EMPIRE_SMART_BORDER_PLACMENT)) {
+    if (is_edge && config_get(CONFIG_UI_EMPIRE_SMART_BORDER_PLACEMENT)) {
         int nearest_id = empire_object_get_nearest_of_type(x, y, EMPIRE_OBJECT_BORDER_EDGE);
         data.foreach_param1 = empire_object_get(nearest_id)->order_index;
         data.foreach_param2 = 1;

@@ -69,6 +69,7 @@ static struct {
     int last_intensity;
     int last_active;
     int is_sound_playing;
+    int is_wind_playing;
     int weather_duration_left;
     weather_type displayed_type;
     weather_type last_type;
@@ -451,9 +452,27 @@ static void draw_rain(void)
     }
 }
 
+static void start_wind_sound(void)
+{
+    if (data.is_wind_playing) {
+        return;
+    }
+    sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/Wind.ogg",
+        SOUND_TYPE_EFFECTS, setting_sound(SOUND_TYPE_EFFECTS)->volume, 100, 100, 1);
+    data.is_wind_playing = 1;
+}
+
+static void stop_wind_sound(void)
+{
+    if (!data.is_wind_playing) {
+        return;
+    }
+    sound_device_stop_type(SOUND_TYPE_EFFECTS);
+    data.is_wind_playing = 0;
+}
+
 void update_weather(void)
 {
-
     render_weather_overlay();
     update_current_particle_count();
     if (window_is(WINDOW_CONFIG)) { //preview weather in config menu
@@ -483,9 +502,10 @@ void update_weather(void)
     }
 
     if (!config_get(CONFIG_UI_DRAW_WEATHER)) {
-        if (data.is_sound_playing) {
+        if (data.is_sound_playing || data.is_wind_playing) {
             sound_device_stop_type(SOUND_TYPE_EFFECTS);
             data.is_sound_playing = 0;
+            data.is_wind_playing = 0;
         }
         weather_stop();
         return;
@@ -511,13 +531,17 @@ void update_weather(void)
         data.last_elements_count = 0;
     }
 
-    if ((data.weather_config.type == WEATHER_NONE || data.weather_config.active == 0) && data.current_particle_count == 0) {
+    if ((data.weather_config.type == WEATHER_NONE ||
+        data.weather_config.active == 0) && data.current_particle_count == 0) {
         if (data.is_sound_playing) {
             sound_device_stop_type(SOUND_TYPE_EFFECTS);
             data.is_sound_playing = 0;
         }
+        start_wind_sound();
         weather_stop();
         return;
+    } else {
+        stop_wind_sound();
     }
 
     // SNOW
@@ -557,6 +581,8 @@ void weather_reset(void)
 {
     weather_stop();
     sound_device_stop_type(SOUND_TYPE_EFFECTS);
+    data.is_sound_playing = 0;
+    data.is_wind_playing = 0;
 }
 
 void city_weather_update(int month)
@@ -602,6 +628,7 @@ void city_weather_update(int month)
             data.weather_duration_left = random_between_from_stdlib(1, WEATHER_MAX_DURATION[duration_setting]);
             // Play sounds only if weather is enabled
             if (config_get(CONFIG_UI_DRAW_WEATHER)) {
+                stop_wind_sound();
                 if (WEATHER_RAIN == type) {
                     if (intensity > 800) {
                         sound_device_play_file_on_channel_panned(ASSETS_DIRECTORY "/Sounds/HeavyRain.ogg",
