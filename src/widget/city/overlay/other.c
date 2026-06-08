@@ -456,6 +456,10 @@ static int get_environmental_desirability(const int grid_offset, int ignore_conf
 
 static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
 {
+    if (map_terrain_is(grid_offset, TERRAIN_IMPASSABLE_EARTHQUAKE)) {
+        c->precomposed_text = lang_get_string(66, 91);
+        return 1;
+    }
     int desirability;
     if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         int building_id = map_building_at(grid_offset);
@@ -911,25 +915,25 @@ const city_overlay *city_overlay_for_sentiment(void)
 
 static int get_desirability_image_offset(int desirability)
 {
-    if (desirability <= 0) {
+    if (desirability < -10) {      //deep red
         return 0;
-    } else if (desirability < 10) {
+    } else if (desirability < 0) { //pale red
         return 1;
-    } else if (desirability < 25) {
+    } else if (desirability < 10) {//deep orange 0-9
         return 2;
-    } else if (desirability < 40) {
+    } else if (desirability < 20) {//pale orange 10-19
         return 3;
-    } else if (desirability < 50) {
+    } else if (desirability < 30) {//deep yellow 20-29
         return 4;
-    } else if (desirability < 60) {
+    } else if (desirability < 40) {//pale yellow 30-39
         return 5;
-    } else if (desirability < 70) {
+    } else if (desirability < 52) {//pale green 40-51
         return 6;
-    } else if (desirability < 80) {
+    } else if (desirability < 65) {//deep green 52-64 (52 -> houses start receiving sentiment incentives)
         return 7;
-    } else if (desirability < 90) {
+    } else if (desirability < 80) {//cyan 65-79
         return 8;
-    } else {
+    } else {                       //blue 80 to 100
         return 9;
     }
 }
