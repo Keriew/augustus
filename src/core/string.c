@@ -4,7 +4,6 @@
 
 #include <ctype.h>
 #include <stddef.h>
-#include "string.h"
 
 int string_equals(const uint8_t *a, const uint8_t *b)
 {
