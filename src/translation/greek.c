@@ -1477,6 +1477,7 @@ static translation_string all_strings[] = {
     { TR_CHEAT_EDITOR_WARNING_TITLE, "Προειδοποίηση" },
     { TR_CHEAT_EDITOR_WARNING_TEXT, "Η εκτέλεση του προγράμματος επεξεργασίας χαρτών από τη λειτουργία πόλης μπορεί να καταστρέψει την αποθήκευση ή να προκαλέσει σφάλμα στο παιχνίδι.\n\nΠροχωρήστε με δική σας ευθύνη και βεβαιωθείτε ότι έχετε δημιουργήσει αντίγραφο ασφαλείας της τρέχουσας αποθήκευσης." },
     { TR_MAIN_MENU_SELECT_CAMPAIGN, "Έναρξη νέας εκστρατείας" },
+    { TR_MAIN_MENU_TERRAIN_GENERATOR, "Terrain generator" },
     { TR_WINDOW_SELECT_CAMPAIGN, "Επιλέξτε μια εκστρατεία" },
     { TR_WINDOW_CAMPAIGN_AUTHOR, "Συγγραφέας:" },
     { TR_WINDOW_CAMPAIGN_NO_DESC, "Καμία περιγραφή" },
