@@ -85,6 +85,8 @@ unsigned int building_construction_clear_select(int x_start, int y_start, int x_
                 continue;
             } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) { // keep the "bridge is free" bug from C3
                 continue;
+            } else if (map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
+                continue;
             } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
                 items_placed++;
             } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
@@ -123,6 +125,9 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
 
             int grid_offset = map_grid_offset(x, y);
             if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
+                continue;
+            }
+            if (map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
                 continue;
             }
 

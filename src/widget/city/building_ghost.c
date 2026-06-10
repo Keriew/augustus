@@ -981,6 +981,13 @@ static void draw_bridge(const map_tile *tile, int x, int y, building_type type)
     grid_slice blocked_tiles = { .size = 0 };
     int end_grid_offset = map_bridge_calculate_length_direction(tile->x, tile->y, &length, &direction, &blocked_tiles);
 
+    for (int i = 0; i < blocked_tiles.size; i++) {
+        if (map_terrain_is(blocked_tiles.grid_offsets[i], TERRAIN_MARSHLAND)) {
+            building_construction_set_cost(0);
+            return;
+        }
+    }
+
     int dir = direction - city_view_orientation();
     if (dir < 0) {
         dir += 8;

@@ -377,6 +377,8 @@ static void init(int grid_offset)
         } else {
             context.terrain_type = TERRAIN_INFO_ROCK;
         }
+    } else if (map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
+        context.terrain_type = TERRAIN_INFO_MARSHLAND;
     } else if ((map_terrain_get(grid_offset) & (TERRAIN_WATER | TERRAIN_BUILDING)) == TERRAIN_WATER) {
         context.terrain_type = TERRAIN_INFO_WATER;
     } else if (map_terrain_is(grid_offset, TERRAIN_SHRUB)) {
