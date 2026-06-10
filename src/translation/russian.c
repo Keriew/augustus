@@ -417,6 +417,7 @@ static translation_string all_strings[] = {
     {TR_FIGURE_TYPE_CARAVANSERAI_COLLECTOR, "Сборщик"},
     {TR_BUILDING_CARAVANSERAI_POLICY_TITLE, "Торговая политика"},
     {TR_BUILDING_CARAVANSERAI_NO_POLICY, "Не выбрана политика наземной торговли"},
+    {TR_BUILDING_CARAVANSERAI_NOT_WORKING, "Караван-сарай не работает!"},
     {TR_BUILDING_CARAVANSERAI_POLICY_TEXT, "Выберите торговую политику в вашем городе."},
     {TR_BUILDING_CARAVANSERAI_POLICY_1_TITLE, "Соглашение по продаже"},
     {TR_BUILDING_CARAVANSERAI_POLICY_1, "Вы продаете товары на 20% дороже, но и покупаете на 10% дороже."},
@@ -439,6 +440,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LIGHTHOUSE_NO_TIMBER, "Остатки древесины на исходе, и хранители маяка изо всех сил пытаются найти топливо, чтобы не погас огонь. Кораблям, приближающимся к твоим берегам, все труднее разглядеть угасающий свет маяка."},
     {TR_BUILDING_LIGHTHOUSE_POLICY_TITLE, "Морская торговая политика"},
     {TR_BUILDING_LIGHTHOUSE_NO_POLICY, "Не выбрана"},
+    {TR_BUILDING_LIGHTHOUSE_NOT_WORKING, "Маяк не работает!"},
     {TR_BUILDING_LIGHTHOUSE_POLICY_TEXT, "Выберите морскую торговую политику в вашем городе."},
     {TR_BUILDING_LIGHTHOUSE_POLICY_1_TITLE, "Соглашение по продаже"},
     {TR_BUILDING_LIGHTHOUSE_POLICY_1, "Вы продаете товары кораблям на 20% дороже, но и покупаете от них на 10% дороже."},
@@ -2115,7 +2117,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC, "Для постройки триумфальной арки не нужны ресурсы из вашего города. Все необходимые материалы и рабочая сила будут предоставлены Римом."},
     {TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE, "Триумфальная арка построена"},
     {TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, "Триумфальная арка завершена. Ее возвышающаяся каменная кладка и искусно украшенный фасад прославляют мужество наших солдат и победы, которые они принесли городу. Пусть она стоит многие поколения как символ силы, самопожертвования и гражданской доблести."},
-    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Поставляется Римом)"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Предоставлено Римом)"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
