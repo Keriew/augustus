@@ -74,6 +74,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_MESSAGE_ALERTS, "Remplacer les messages urgents par des bandeaux d'alerte"},
     {TR_CONFIG_UI_SHOW_GRID, "Afficher la grille complète"},
     {TR_CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION, "Afficher la grille partielle en plaçant un bâtiment"},
+    {TR_CONFIG_UI_CLIMATE_GRID_COLORS, "Adapter la couleur de la grille complète au climat de la carte"},
     {TR_CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS, "Toujours afficher les boutons de rotation"},
     {TR_CONFIG_FIX_IMMIGRATION_BUG, "Corrige le bug d'immigration en mode très difficile"},
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "Corrige le bug des fantômes de 100 ans"},

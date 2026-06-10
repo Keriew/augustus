@@ -45,6 +45,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_MESSAGE_ALERTS] = "ui_message_alerts",
     [CONFIG_UI_SHOW_GRID] = "ui_show_grid",
     [CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION] = "ui_show_partial_grid_around_construction",
+    [CONFIG_UI_CLIMATE_GRID_COLORS] = "ui_climate_grid_colors",
     [CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS] = "ui_always_show_rotation_buttons",
     [CONFIG_UI_SHOW_ROAMING_PATH] = "ui_show_roaming_path",
     [CONFIG_UI_DRAW_CLOUD_SHADOWS] = "ui_draw_cloud_shadows",

@@ -27,7 +27,8 @@
 #include "map/terrain.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/controller.h"
-#include "scenario/empire.h" 
+#include "scenario/empire.h"
+#include "scenario/property.h"
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
@@ -99,6 +100,21 @@ int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
     return 0;
 }
 
+static color_t full_grid_color(void)
+{
+    if (!config_get(CONFIG_UI_CLIMATE_GRID_COLORS)) {
+        return COLOR_GRID;
+    }
+    switch (scenario_property_climate()) {
+        case CLIMATE_DESERT:
+            return COLOR_GRID_DESERT;
+        case CLIMATE_NORTHERN:
+            return COLOR_GRID_NORTHERN;
+        default:
+            return COLOR_GRID_CENTRAL;
+    }
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     if (grid_offset < 0 || !map_property_is_draw_tile(grid_offset)) {
@@ -127,7 +143,7 @@ static void draw_footprint(int x, int y, int grid_offset)
         if (!grid_id) {
             grid_id = assets_get_image_id("UI", "Grid_Full");
         }
-        image_draw(grid_id, x, y, COLOR_GRID, draw_context.scale);
+        image_draw(grid_id, x, y, full_grid_color(), draw_context.scale);
     }
 }
 
