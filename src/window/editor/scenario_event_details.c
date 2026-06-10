@@ -1085,6 +1085,10 @@ static int index_of_copied_group_id(unsigned int group_id)
 
 static void button_copy_selected(const generic_button *button)
 {
+    if (data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
+        data.actions.selection_type == CHECKBOX_NO_SELECTION) {
+        return;
+    }
     array_init(data.copied_actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.event->actions.constructor,
         data.event->actions.in_use);
     array_init(data.copied_condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
