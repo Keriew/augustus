@@ -8,6 +8,7 @@
 #include "core/config.h"
 #include "core/image_group.h"
 #include "core/string.h"
+#include "editor/editor.h"
 #include "empire/city.h"
 #include "empire/empire.h"
 #include "empire/object.h"
@@ -193,7 +194,7 @@ static void animation_draw_scaled(const image *img, int image_id, int new_animat
 static int open_trade_button_icon_fits(const empire_city *city, const open_trade_button_style *style, trade_icon_type icon_type);
 static void draw_sidebar_city_item(const grid_box_item *item);
 static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_offset,
-    int start_x, int start_y, int end_x, int end_y, int interval, int remaining);
+    int start_x, int start_y, int end_x, int end_y, int interval, int remaining, color_t color_mask);
 void window_empire_collect_trade_edges(void);
 static void window_empire_draw_trade_route_pulses(const empire_object *route_object, int x_offset, int y_offset);
 // 'styles' get functions
@@ -805,6 +806,12 @@ void window_empire_draw_static_trade_waypoints(const empire_object *route_object
     if (scenario_empire_id() != SCENARIO_CUSTOM_EMPIRE) {
         return;
     }
+    const full_empire_object *full_route = empire_object_get_full(route_object->id);
+
+    if (!editor_is_active() && full_route->route_hidden) {
+        return;
+    }
+
     int is_sea_route = route_object->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE;
 
     int image_id = assets_get_image_id("UI", is_sea_route ? "SeaRouteDot" : "LandRouteDot");
@@ -832,13 +839,14 @@ void window_empire_draw_static_trade_waypoints(const empire_object *route_object
 
         trade_edge *edge = &g_trade_edges[edge_index];
 
+        color_t color_mask = editor_is_active() && full_route->route_hidden ? ALPHA_MASK_SEMI_TRANSPARENT : 0;
         int draw_image_id = edge->drawn ? 0 : image_id;
         remaining_spacing = draw_images_at_interval(draw_image_id, x_offset, y_offset, edge->x1, edge->y1,
-                                                    edge->x2, edge->y2, TRADE_DOT_SPACING, remaining_spacing);
+            edge->x2, edge->y2, TRADE_DOT_SPACING, remaining_spacing, color_mask);
 
         edge->drawn = 1; // mark as processed for this frame
     }
-    if (config_get(CONFIG_UI_ANIMATE_TRADE_ROUTES)) {
+    if (config_get(CONFIG_UI_ANIMATE_TRADE_ROUTES) && !full_route->route_hidden) {
         window_empire_draw_trade_route_pulses(route_object, x_offset, y_offset);
     }
 }
@@ -1388,7 +1396,7 @@ static void draw_background(void)
 }
 
 static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_offset,
-    int start_x, int start_y, int end_x, int end_y, int interval, int remaining)
+    int start_x, int start_y, int end_x, int end_y, int interval, int remaining, color_t color_mask)
 {
     int x_diff = end_x - start_x;
     int y_diff = end_y - start_y;
@@ -1406,7 +1414,7 @@ static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_o
         for (int j = 0; j <= num_dots; j++) {
             int x = calc_adjust_with_percentage(j * interval + offset, x_factor) + start_x;
             int y = calc_adjust_with_percentage(j * interval + offset, y_factor) + start_y;
-            image_draw(image_id, x_draw_offset + x, y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+            image_draw(image_id, x_draw_offset + x, y_draw_offset + y, color_mask, SCALE_NONE);
         }
     }
     return remaining;
@@ -1446,14 +1454,15 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
         int y = y_offset;
         if (image_id) {
             const image *img = image_get(image_id);
-            draw_images_at_interval(image_id, x, y, last_x, last_y, obj->x, obj->y, border->width, remaining);
+            draw_images_at_interval(image_id, x, y, last_x, last_y, obj->x, obj->y, border->width,
+                remaining, COLOR_MASK_NONE);
             if (img->animation && img->animation->speed_id) {
                 animation_offset = empire_object_update_animation(obj, image_id);
                 x += img->animation->sprite_offset_x;
                 y += img->animation->sprite_offset_y;
             }
             remaining = draw_images_at_interval(image_id + animation_offset, x, y, last_x, last_y, obj->x, obj->y,
-                border->width, remaining);
+                border->width, remaining, COLOR_MASK_NONE);
         } else {
             remaining = border->width;
         }
@@ -1470,11 +1479,11 @@ void window_empire_draw_border(const empire_object *border, int x_offset, int y_
         animation_offset = empire_object_update_animation(border, image_id);
     }
     draw_images_at_interval(image_id, x_offset, y_offset, last_x, last_y, first_edge->x, first_edge->y,
-        border->width, remaining);
+        border->width, remaining, COLOR_MASK_NONE);
     if (animation_offset) {
         draw_images_at_interval(image_id + animation_offset,
                 x_offset + img->animation->sprite_offset_x, y_offset + img->animation->sprite_offset_y,
-                last_x, last_y, first_edge->x, first_edge->y, border->width, remaining);
+                last_x, last_y, first_edge->x, first_edge->y, border->width, remaining, COLOR_MASK_NONE);
     }
 }
 
@@ -1484,11 +1493,17 @@ static void draw_empire_object(const empire_object *obj)
         return;
     }
     if (obj->type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj->type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        if (!empire_city_is_trade_route_open(obj->trade_route_id)) {
-            return; // dont draw the icon if route is closed
+        if (!empire_city_is_trade_route_open(obj->trade_route_id) || empire_object_get_full(obj->id)->route_hidden) {
+            return; // dont draw the icon if route is closed or hidden
+        }
+        if (empire_object_get_full(empire_city_get(empire_city_get_for_trade_route
+            (obj->trade_route_id))->empire_object_id + 1)->route_hidden) {
+            // perform more complex check in case it's a vanilla empire since there the icon trade route isn't always the first
+            return;
         }
     }
     int x, y, image_id;
+    color_t color_mask = COLOR_MASK_NONE;
     if (scenario_empire_is_expanded()) {
         x = obj->expanded.x;
         y = obj->expanded.y;
@@ -1497,6 +1512,14 @@ static void draw_empire_object(const empire_object *obj)
         x = obj->x;
         y = obj->y;
         image_id = obj->image_id;
+    }
+    if (image_id > image_group(GROUP_EMPIRE_TRADE_LAND) && image_id < image_group(GROUP_EMPIRE_TRADE_LAND) + 16 &&
+        empire_object_get_full(empire_city_get(empire_city_get_for_trade_route(obj->trade_route_id))->empire_object_id + 1)->route_hidden) {
+        if (editor_is_active()) {
+            color_mask = ALPHA_MASK_SEMI_TRANSPARENT;
+        } else {
+            return;
+        }
     }
     if (obj->type == EMPIRE_OBJECT_BORDER) {
         window_empire_draw_border(obj, data.x_draw_offset, data.y_draw_offset);
@@ -1555,6 +1578,10 @@ static void draw_empire_object(const empire_object *obj)
                 {1, 1}, {-1, 1}, {-1, -1}, {1, -1},
                 {3, 3}, {-3, 3}, {-3, -3}, {3, -3}
             }; // 3 an 1 offsets worked best in testing, other values can be used for readability if necessary
+            if (obj->empire_city_icon == EMPIRE_CITY_ICON_BUTTON) {
+                image_draw(image_id + 2, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+                return;
+            }
             for (int i = 0; i < 16; i++) {
                 int dx = offsets[i][0];
                 int dy = offsets[i][1];
@@ -1565,10 +1592,15 @@ static void draw_empire_object(const empire_object *obj)
 
             image_draw_scaled_centered(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 130);
 
-            int new_animation = empire_object_update_animation(obj, image_id);
-            animation_draw_scaled(img, image_id, new_animation, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 130);
-
+            if (img->animation && img->animation->speed_id) {
+                int new_animation = empire_object_update_animation(obj, image_id);
+                animation_draw_scaled(img, image_id, new_animation, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 130);
+            }
         } else {
+            if (obj->empire_city_icon == EMPIRE_CITY_ICON_BUTTON) {
+                image_draw(image_id + 1, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+                return;
+            }
             image_draw_scaled_centered(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, 120);
 
             if (img->animation && img->animation->speed_id) {
@@ -1578,20 +1610,20 @@ static void draw_empire_object(const empire_object *obj)
         }
 
     } else {
-        image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, color_mask, SCALE_NONE);
         if (img->animation && img->animation->speed_id) {
             int new_animation = empire_object_update_animation(obj, image_id);
             image_draw(image_id + new_animation,
                 data.x_draw_offset + x + img->animation->sprite_offset_x,
                 data.y_draw_offset + y + img->animation->sprite_offset_y,
-                COLOR_MASK_NONE, SCALE_NONE);
+                color_mask, SCALE_NONE);
         }
     }
 
     // Manually fix the Hagia Sophia
     if (obj->image_id == 8122) {
         image_id = assets_lookup_image_id(ASSET_HAGIA_SOPHIA_FIX);
-        image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_id, data.x_draw_offset + x, data.y_draw_offset + y, color_mask, SCALE_NONE);
     }
 }
 

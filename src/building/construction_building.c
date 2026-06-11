@@ -135,7 +135,7 @@ int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode cle
                 break;
         }
         if (map_terrain_is(g_offset, terrain_mask_to_remove)) {
-            total_cost += (cost == COST_FREE) ? 0 : 3; // base cost per tile is 50% more than regular clear
+            total_cost += (cost == COST_FREE) ? 0 : model_get_building(BUILDING_REPAIR_LAND)->cost; // base cost per tile is the cost of repair land
             if (cost != COST_MEASURE) {
                 // Auto-clear of vegetation persists through undo (preview restore + user undo).
                 // Other clear modes (clear-land tool, rubble, force) keep normal restore-on-undo.

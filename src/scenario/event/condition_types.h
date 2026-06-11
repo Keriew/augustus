@@ -41,7 +41,6 @@ int scenario_condition_type_stats_peace_met(const scenario_condition_t *conditio
 
 int scenario_condition_type_stats_prosperity_met(const scenario_condition_t *condition);
 
-void scenario_condition_type_time_init(scenario_condition_t *condition);
 int scenario_condition_type_time_met(const scenario_condition_t *condition);
 
 int scenario_condition_type_trade_route_open_met(const scenario_condition_t *condition);
@@ -55,5 +54,16 @@ int scenario_condition_type_tax_rate_met(const scenario_condition_t *condition);
 int scenario_condition_type_check_formulas(const scenario_condition_t *condition);
 
 int scenario_condition_type_terrain_count_area_met(const scenario_condition_t *condition);
+
+int scenario_condition_type_count_enemies_in_city_met(const scenario_condition_t *condition);
+
+int scenario_condition_type_land_trade_problems_met(const scenario_condition_t *condition);
+int scenario_condition_type_sea_trade_problems_met(const scenario_condition_t *condition);
+
+int scenario_condition_type_months_since_last_festival_met(const scenario_condition_t *condition);
+
+int scenario_condition_type_desirability_in_area_met(const scenario_condition_t *condition);
+
+int scenario_condition_type_population_in_area_met(const scenario_condition_t *condition);
 
 #endif // CONDITION_TYPES_H
