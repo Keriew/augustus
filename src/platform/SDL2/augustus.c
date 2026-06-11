@@ -172,10 +172,19 @@ static void run_and_draw(void)
     platform_renderer_render();
 }
 
+static int scale_window_to_logical(int value)
+{
+    int scale = platform_screen_get_scale();
+    if (scale <= 0) {
+        return value;
+    }
+    return value * 100 / scale;
+}
+
 static void handle_mouse_button(SDL_MouseButtonEvent *event, int is_down)
 {
     if (!SDL_GetRelativeMouseMode()) {
-        mouse_set_position(event->x, event->y);
+        mouse_set_position(scale_window_to_logical(event->x), scale_window_to_logical(event->y));
     }
     if (event->button == SDL_BUTTON_LEFT) {
         mouse_set_left_down(is_down);
@@ -299,7 +308,8 @@ static void handle_event(SDL_Event *event)
             break;
         case SDL_MOUSEMOTION:
             if (event->motion.which != SDL_TOUCH_MOUSEID && !SDL_GetRelativeMouseMode()) {
-                mouse_set_position(event->motion.x, event->motion.y);
+                mouse_set_position(scale_window_to_logical(event->motion.x),
+                    scale_window_to_logical(event->motion.y));
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
