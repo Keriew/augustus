@@ -2,6 +2,7 @@
 
 #include "assets/assets.h"
 #include "building/building.h"
+#include "building/connectable.h"
 #include "building/image.h"
 #include "core/buffer.h"
 #include "core/file.h"
@@ -653,14 +654,58 @@ static void update_native_images(int old_climate, int new_climate)
     for (building *b = building_first_of_type(BUILDING_NATIVE_HUT_ALT); b; b = b->next_of_type) {
         map_image_set(b->grid_offset, alt_native_hut_new_image_id + map_image_at(b->grid_offset) - alt_native_hut_old_image_id);
     }
-    building_type native_buildings[] = { BUILDING_NATIVE_DECORATION, BUILDING_NATIVE_MONUMENT, BUILDING_NATIVE_WATCHTOWER };
-    for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]); i++) {
+
+    // Hellenised Hut alt 2: 3 variants per climate, preserve variant index across climate change.
+    int hut_alt_2_old_image_id;
+    int hut_alt_2_new_image_id;
+    switch (old_climate) {
+        case CLIMATE_NORTHERN:
+            hut_alt_2_old_image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Northern_01"); break;
+        case CLIMATE_DESERT:
+            hut_alt_2_old_image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Southern_01"); break;
+        default:
+            hut_alt_2_old_image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Central_01");
+    }
+    switch (new_climate) {
+        case CLIMATE_NORTHERN:
+            hut_alt_2_new_image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Northern_01"); break;
+        case CLIMATE_DESERT:
+            hut_alt_2_new_image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Southern_01"); break;
+        default:
+            hut_alt_2_new_image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Central_01");
+    }
+    for (building *b = building_first_of_type(BUILDING_NATIVE_HUT_ALT_2); b; b = b->next_of_type) {
+        map_image_set(b->grid_offset, hut_alt_2_new_image_id + map_image_at(b->grid_offset) - hut_alt_2_old_image_id);
+    }
+
+    building_type native_buildings[] = {
+        BUILDING_NATIVE_DECORATION, BUILDING_NATIVE_MONUMENT, BUILDING_NATIVE_WATCHTOWER,
+        BUILDING_NATIVE_WELL,
+    };
+    for (int i = 0; i < (int) (sizeof(native_buildings) / sizeof(native_buildings[0])); i++) {
         building_type type = native_buildings[i];
         int image_id = building_image_get_for_type(type);
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             map_building_tiles_add(b->id, b->x, b->y, b->size, image_id, TERRAIN_BUILDING);
         }
     }
+
+    building_type meeting_buildings[] = {
+        BUILDING_NATIVE_MEETING_ALT, BUILDING_NATIVE_MEETING_ALT_2,
+    };
+    for (int i = 0; i < (int) (sizeof(meeting_buildings) / sizeof(meeting_buildings[0])); i++) {
+        building_type type = meeting_buildings[i];
+        int image_id = building_image_get_for_type(type);
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            map_building_tiles_add(b->id, b->x, b->y, b->size, image_id, TERRAIN_BUILDING);
+        }
+    }
+
+    // Palisade: re-set image based on new climate, then refresh connectivity offsets
+    for (building *b = building_first_of_type(BUILDING_NATIVE_PALISADE); b; b = b->next_of_type) {
+        map_image_set(b->grid_offset, building_image_get(b));
+    }
+    building_connectable_update_connections();
 }
 
 static void fix_animation_offsets(void)

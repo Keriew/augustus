@@ -10,7 +10,9 @@ void scenario_editor_set_as_saved(void);
 void scenario_editor_set_as_unsaved(void);
 
 void scenario_editor_set_native_images(int image_alt_hut, int image_native_decoration,
-    int image_native_monument, int image_native_watchtower, int image_hut, int image_meeting, int image_crops);
+    int image_native_monument, int image_native_watchtower, int image_hut, int image_meeting, int image_crops,
+    int image_native_well, int image_native_meeting_alt, int image_native_hut_alt_2, int image_native_meeting_alt_2,
+    int image_native_palisade);
 
 void scenario_editor_cycle_image(int forward);
 

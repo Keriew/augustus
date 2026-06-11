@@ -47,6 +47,7 @@ static const building_type connectable_buildings[] = {
     BUILDING_HEDGE_GATE_DARK,
     BUILDING_HEDGE_GATE_LIGHT,
     BUILDING_PALISADE_GATE,
+    BUILDING_NATIVE_PALISADE,
 };
 
 static const int MAX_CONNECTABLE_BUILDINGS = sizeof(connectable_buildings) / sizeof(building_type);
@@ -402,12 +403,13 @@ int building_connectable_get_garden_gate_offset(int grid_offset)
 
 static int is_palisade_wall_or_gate(building_type type)
 {
-    return type == BUILDING_PALISADE || type == BUILDING_PALISADE_GATE;
+    return type == BUILDING_PALISADE || type == BUILDING_PALISADE_GATE ||
+           type == BUILDING_NATIVE_PALISADE;
 }
 
 static int is_palisade_wall(building_type type)
 {
-    return type == BUILDING_PALISADE;
+    return type == BUILDING_PALISADE || type == BUILDING_NATIVE_PALISADE;
 }
 
 int building_connectable_get_palisade_offset(int grid_offset)
@@ -487,6 +489,7 @@ int building_connectable_num_variants(building_type type)
         case BUILDING_ROOFED_GARDEN_WALL:
         case BUILDING_PANELLED_GARDEN_WALL:
         case BUILDING_PALISADE:
+        case BUILDING_NATIVE_PALISADE:
             return BUILDING_CONNECTABLE_ROTATION_LIMIT_HEDGES;
         default:
             return BUILDING_CONNECTABLE_ROTATION_LIMIT_PATHS;
