@@ -52,21 +52,21 @@ static scrollbar_type scrollbar = {
 };
 
 static generic_button buttons[] = {
-    {44, EVENTS_Y_OFFSET + (0 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 1},
-    {44, EVENTS_Y_OFFSET + (1 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 2},
-    {44, EVENTS_Y_OFFSET + (2 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 3},
-    {44, EVENTS_Y_OFFSET + (3 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 4},
-    {44, EVENTS_Y_OFFSET + (4 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 5},
-    {44, EVENTS_Y_OFFSET + (5 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 6},
-    {44, EVENTS_Y_OFFSET + (6 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 7},
-    {44, EVENTS_Y_OFFSET + (7 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 8},
-    {44, EVENTS_Y_OFFSET + (8 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 9},
-    {44, EVENTS_Y_OFFSET + (9 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_event, 0, 10},
-    {44, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 11}, // add new
-    {44, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12}, // import
-    {44, EVENTS_Y_OFFSET + (14 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 13}, // export
-    {44, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // clear
-    {255, 60, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables}                                   // variables
+    {44, EVENTS_Y_OFFSET + (0 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 1}, // adding 24 because of the extra space for the checkbox
+    {44, EVENTS_Y_OFFSET + (1 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 2},
+    {44, EVENTS_Y_OFFSET + (2 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 3},
+    {44, EVENTS_Y_OFFSET + (3 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 4},
+    {44, EVENTS_Y_OFFSET + (4 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 5},
+    {44, EVENTS_Y_OFFSET + (5 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 6},
+    {44, EVENTS_Y_OFFSET + (6 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 7},
+    {44, EVENTS_Y_OFFSET + (7 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 8},
+    {44, EVENTS_Y_OFFSET + (8 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 9},
+    {44, EVENTS_Y_OFFSET + (9 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 10},
+    {68, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 11}, // add new
+    {68, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12}, // import
+    {68, EVENTS_Y_OFFSET + (14 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 13}, // export
+    {68, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // clear
+    {WINDOW_WIDTH * BLOCK_SIZE - BUTTON_WIDTH / 2, 60, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables} // variables
 };
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
@@ -154,7 +154,7 @@ static void draw_foreground(void)
                 }
             }
             // Label and text
-            large_label_draw(68, buttons[i].y, buttons[i].width / BLOCK_SIZE, data.focus_button_id == i + 1);
+            large_label_draw(68, buttons[i].y, (buttons[i].width - 24) / BLOCK_SIZE, data.focus_button_id == i + 1);
             color_t color = color_from_state(list_item->event->state);
 
             if (list_item->event->state != EVENT_STATE_UNDEFINED) {
@@ -202,17 +202,22 @@ static void draw_foreground(void)
 
 static void button_event(const generic_button *button)
 {
-    if (mouse_in_dialog(mouse_get())->x < 68) {
-        return; // don't edit event when ticking the checkbox
-    }
     int target_index = button->parameter1 - 1 + scrollbar.scroll_position;
     event_list_item *list_item = array_item(data.list, target_index);
+    const mouse *m = mouse_in_dialog(mouse_get());
+    if (m->x < 68) {
+        if (m->x < 64) {
+            list_item->selected = !list_item->selected;
+        }
+        return; // don't access event when ticking the checkbox
+    }
     if (!list_item->event) {
         return;
     }
-    if (list_item->event->state != EVENT_STATE_UNDEFINED) {
-        window_editor_scenario_event_details_show(list_item->event->id);
+    if (list_item->event->state == EVENT_STATE_UNDEFINED) {
+        return;
     }
+    window_editor_scenario_event_details_show(list_item->event->id);
 }
 
 static void on_scroll(void)
