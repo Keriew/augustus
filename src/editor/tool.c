@@ -29,7 +29,8 @@
 #include <string.h>
 
 #define TERRAIN_PAINT_MASK ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING |\
-                            TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW)
+                            TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW |\
+                            TERRAIN_SHALLOW_WATER)
 
 static struct {
     int active;
@@ -148,6 +149,7 @@ int editor_tool_is_brush(void)
         case TOOL_GRASS:
         case TOOL_TREES:
         case TOOL_WATER:
+        case TOOL_SHALLOW:
         case TOOL_SHRUB:
         case TOOL_ROCKS:
         case TOOL_MEADOW:
@@ -239,9 +241,17 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             }
             break;
         case TOOL_WATER:
-            if (!(terrain & TERRAIN_WATER) && !(terrain & TERRAIN_ELEVATION_ROCK)) {
+            if (!(terrain & TERRAIN_ELEVATION_ROCK) &&
+                (!(terrain & TERRAIN_WATER) || (terrain & TERRAIN_SHALLOW_WATER))) {
                 terrain &= TERRAIN_PAINT_MASK;
                 terrain |= TERRAIN_WATER;
+                map_property_clear_future_earthquake(grid_offset);
+            }
+            break;
+        case TOOL_SHALLOW:
+            if (!(terrain & TERRAIN_ELEVATION_ROCK)) {
+                terrain &= TERRAIN_PAINT_MASK;
+                terrain |= TERRAIN_WATER | TERRAIN_SHALLOW_WATER;
                 map_property_clear_future_earthquake(grid_offset);
             }
             break;
@@ -318,6 +328,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_region_trees(x_min, y_min, x_max, y_max);
             break;
         case TOOL_WATER:
+        case TOOL_SHALLOW:
         case TOOL_ROCKS:
             map_image_context_reset_water();
             map_tiles_update_all_rocks();
