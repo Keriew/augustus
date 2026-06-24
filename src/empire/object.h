@@ -42,6 +42,7 @@ typedef struct {
     int city_buys_resource[RESOURCE_MAX];
     empire_object obj;
     empire_city_icon_type empire_city_icon;
+    int route_hidden;
 } full_empire_object;
 
 #define BASE_ORNAMENT_IMAGE_ID 3356
@@ -82,6 +83,8 @@ static const map_point ORNAMENT_POSITIONS[TOTAL_ORNAMENTS] = {
     { 1431, 961 }, { 1300, 500 }, { 1347, 648 }, { 1707, 783 }, { 1704, 876 },
     {  829, 720 }, { 1347, 745 }, { 1640, 922 }
 };
+
+#define BASE_BORDER_FLAG_IMAGE_ID 3323
 
 void empire_object_clear(void);
 

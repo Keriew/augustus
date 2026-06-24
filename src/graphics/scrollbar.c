@@ -20,15 +20,6 @@ enum {
 
 static void text_scroll(int is_down, int num_lines);
 
-static image_button image_button_scroll_up = {
-    0, 0, SCROLL_BUTTON_WIDTH, SCROLL_BUTTON_HEIGHT, IB_SCROLL,
-    GROUP_OK_CANCEL_SCROLL_BUTTONS, 8, text_scroll, button_none, 0, 1, 1
-};
-static image_button image_button_scroll_down = {
-    0, 0, SCROLL_BUTTON_WIDTH, SCROLL_BUTTON_HEIGHT, IB_SCROLL,
-    GROUP_OK_CANCEL_SCROLL_BUTTONS, 12, text_scroll, button_none, 1, 1, 1
-};
-
 static scrollbar_type *current;
 
 void scrollbar_init(scrollbar_type *scrollbar, unsigned int scroll_position, unsigned int total_elements)
@@ -43,6 +34,11 @@ void scrollbar_init(scrollbar_type *scrollbar, unsigned int scroll_position, uns
     scrollbar->max_scroll_position = max_scroll_position;
     scrollbar->is_dragging_scrollbar_dot = 0;
     scrollbar->touch_drag_state = TOUCH_DRAG_NONE;
+    
+    scrollbar->image_button_scroll_up = (image_button){0, 0, SCROLL_BUTTON_WIDTH, SCROLL_BUTTON_HEIGHT, IB_SCROLL,
+        GROUP_OK_CANCEL_SCROLL_BUTTONS, 8, text_scroll, button_none, 0, 1, 1};
+    scrollbar->image_button_scroll_down = (image_button){0, 0, SCROLL_BUTTON_WIDTH, SCROLL_BUTTON_HEIGHT, IB_SCROLL,
+        GROUP_OK_CANCEL_SCROLL_BUTTONS, 12, text_scroll, button_none, 1, 1, 1};
 }
 
 void scrollbar_reset(scrollbar_type *scrollbar, unsigned int scroll_position)
@@ -69,9 +65,9 @@ void scrollbar_update_total_elements(scrollbar_type *scrollbar, unsigned int tot
 void scrollbar_draw(scrollbar_type *scrollbar)
 {
     if (scrollbar->max_scroll_position > 0 || scrollbar->always_visible) {
-        image_buttons_draw(scrollbar->x, scrollbar->y, &image_button_scroll_up, 1);
+        image_buttons_draw(scrollbar->x, scrollbar->y, &scrollbar->image_button_scroll_up, 1);
         image_buttons_draw(scrollbar->x, scrollbar->y + scrollbar->height - SCROLL_BUTTON_HEIGHT,
-            &image_button_scroll_down, 1);
+            &scrollbar->image_button_scroll_down, 1);
 
         int pct;
         if (scrollbar->scroll_position <= 0) {
@@ -184,12 +180,12 @@ int scrollbar_handle_mouse(scrollbar_type *scrollbar, const mouse *m, int in_dia
         }
 
         if (image_buttons_handle_mouse(m,
-            scrollbar->x, scrollbar->y, &image_button_scroll_up, 1, 0)) {
+            scrollbar->x, scrollbar->y, &scrollbar->image_button_scroll_up, 1, 0)) {
             return 1;
         }
         if (image_buttons_handle_mouse(m,
             scrollbar->x, scrollbar->y + scrollbar->height - SCROLL_BUTTON_HEIGHT,
-            &image_button_scroll_down, 1, 0)) {
+            &scrollbar->image_button_scroll_down, 1, 0)) {
             return 1;
         }
     }

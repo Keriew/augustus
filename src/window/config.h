@@ -17,6 +17,7 @@ typedef enum {
     CATEGORY_UI_CITY_VIEW = 3,
     CATEGORY_UI_WEATHER = 4,
     CATEGORY_UI_EMPIRE = 5,
+    CATEGORY_UI_EDITOR = 6,
     CATEGORY_UI_COUNT
 } ui_config_category;
 
