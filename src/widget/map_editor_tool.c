@@ -78,6 +78,8 @@ static void draw_building(const map_tile *tile, int x_view, int y_view, building
     } else {
         int image_id;
         if (type == BUILDING_NATIVE_CROPS) {
+            // Editor always shows wheat for any crop variant; in-game decoding
+            // uses the saved per-tile offset.
             image_id = image_group(GROUP_EDITOR_BUILDING_CROPS);
         } else if (type == BUILDING_NATIVE_HUT_ALT) {
             switch (scenario_property_climate()) {
@@ -90,8 +92,20 @@ static void draw_building(const map_tile *tile, int x_view, int y_view, building
                 default:
                     image_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
             };
+        } else if (type == BUILDING_NATIVE_HUT_ALT_2) {
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Northern_01");
+                    break;
+                case CLIMATE_DESERT:
+                    image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Southern_01");
+                    break;
+                default:
+                    image_id = assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Central_01");
+            };
         } else if (type == BUILDING_NATIVE_DECORATION || type == BUILDING_NATIVE_MONUMENT ||
-            type == BUILDING_NATIVE_WATCHTOWER) {
+            type == BUILDING_NATIVE_WATCHTOWER || type == BUILDING_NATIVE_WELL ||
+            type == BUILDING_NATIVE_MEETING_ALT || type == BUILDING_NATIVE_MEETING_ALT_2) {
             image_id = building_image_get_for_type(type);
         } else {
             image_id = image_group(props->image_group) + props->image_offset;
@@ -252,6 +266,18 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_NATIVE_HUT_ALT:
             draw_building(tile, x, y, BUILDING_NATIVE_HUT_ALT);
             break;
+        case TOOL_NATIVE_HUT_ALT_2:
+            draw_building(tile, x, y, BUILDING_NATIVE_HUT_ALT_2);
+            break;
+        case TOOL_NATIVE_MEETING_ALT:
+            draw_building(tile, x, y, BUILDING_NATIVE_MEETING_ALT);
+            break;
+        case TOOL_NATIVE_MEETING_ALT_2:
+            draw_building(tile, x, y, BUILDING_NATIVE_MEETING_ALT_2);
+            break;
+        case TOOL_NATIVE_WELL:
+            draw_building(tile, x, y, BUILDING_NATIVE_WELL);
+            break;
         case TOOL_NATIVE_FIELD:
             draw_building(tile, x, y, BUILDING_NATIVE_CROPS);
             break;
@@ -263,6 +289,18 @@ void map_editor_tool_draw(const map_tile *tile)
             break;
         case TOOL_NATIVE_WATCHTOWER:
             draw_building(tile, x, y, BUILDING_NATIVE_WATCHTOWER);
+            break;
+        case TOOL_NATIVE_PALISADE:
+            if (editor_tool_is_in_use()) {
+                const map_tile *start_tile = editor_tool_get_start_tile();
+                if (start_tile && start_tile->grid_offset) {
+                    draw_selection_rectangle(tile, start_tile, COLOR_MASK_GREEN);
+                } else {
+                    draw_flat_tile(x, y, COLOR_MASK_GREEN);
+                }
+            } else {
+                draw_flat_tile(x, y, COLOR_MASK_GREEN);
+            }
             break;
         case TOOL_EARTHQUAKE_POINT:
         case TOOL_ENTRY_POINT:

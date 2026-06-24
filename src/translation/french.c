@@ -2107,6 +2107,20 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_DESIRABILITY, "Attrait"},
     {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Voir l'attrait des rivages sur la carte d'attrait"},
     {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Voir l'attrait des hauteurs sur la carte d'attrait"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL, "Puits indigène"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT, "Hutte de réunion alt"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2, "Hutte indigène alt 2"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2, "Hutte de réunion alt 2"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE, "Palissade indigène"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS, "Champs indigènes"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_WHEAT, "Champ de blé"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VEGETABLES, "Champ de légumes"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_FRUIT, "Champ de fruits"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_OLIVE, "Champ d'oliviers"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VINES, "Champ de vignes"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG, "Champ de porcs"},
+    {TR_BUILDING_NATIVE_WELL, "Puits indigène"},
+    {TR_BUILDING_NATIVE_WELL_DESC, "Ce puits creusé à la main puise l'eau de la terre pour abreuver la tribu locale. Bien que rudimentaire comparé aux aqueducs et fontaines romains, il suffit aux modestes besoins des indigènes. Les villageois s'y rassemblent à l'aube et au crépuscule pour puiser de l'eau, échanger les nouvelles, et observer les rythmes de leurs terres ancestrales."},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

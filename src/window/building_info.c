@@ -162,11 +162,16 @@ static int get_height_id(void)
             case BUILDING_RESERVOIR:
             case BUILDING_NATIVE_HUT:
             case BUILDING_NATIVE_HUT_ALT:
+            case BUILDING_NATIVE_HUT_ALT_2:
             case BUILDING_NATIVE_MEETING:
+            case BUILDING_NATIVE_MEETING_ALT:
+            case BUILDING_NATIVE_MEETING_ALT_2:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_NATIVE_DECORATION:
             case BUILDING_NATIVE_MONUMENT:
             case BUILDING_NATIVE_WATCHTOWER:
+            case BUILDING_NATIVE_WELL:
+            case BUILDING_NATIVE_PALISADE:
             case BUILDING_MISSION_POST:
             case BUILDING_GATEHOUSE:
             case BUILDING_TOWER:
@@ -796,9 +801,11 @@ static void draw_background(void)
             window_building_draw_fort(&context);
         } else if (btype == BUILDING_BURNING_RUIN) {
             window_building_draw_burning_ruin(&context);
-        } else if (btype == BUILDING_NATIVE_HUT || btype == BUILDING_NATIVE_HUT_ALT) {
+        } else if (btype == BUILDING_NATIVE_HUT || btype == BUILDING_NATIVE_HUT_ALT ||
+            btype == BUILDING_NATIVE_HUT_ALT_2) {
             window_building_draw_native_hut(&context);
-        } else if (btype == BUILDING_NATIVE_MEETING) {
+        } else if (btype == BUILDING_NATIVE_MEETING || btype == BUILDING_NATIVE_MEETING_ALT ||
+            btype == BUILDING_NATIVE_MEETING_ALT_2) {
             window_building_draw_native_meeting(&context);
         } else if (btype == BUILDING_NATIVE_CROPS) {
             window_building_draw_native_crops(&context);
@@ -808,6 +815,10 @@ static void draw_background(void)
             window_building_draw_native_monument(&context);
         } else if (btype == BUILDING_NATIVE_WATCHTOWER) {
             window_building_draw_native_watchtower(&context);
+        } else if (btype == BUILDING_NATIVE_WELL) {
+            window_building_draw_native_well(&context);
+        } else if (btype == BUILDING_NATIVE_PALISADE) {
+            window_building_draw_native_palisade(&context);
         } else if (btype == BUILDING_MISSION_POST) {
             window_building_draw_mission_post(&context);
         } else if (btype == BUILDING_WATCHTOWER) {

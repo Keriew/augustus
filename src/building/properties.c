@@ -2218,6 +2218,55 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .building_model_data = {.cost = 200, .desirability_value = -2, .desirability_step = 1,
             .desirability_step_size = 1, .desirability_range = 3, .laborers = 12}
      },
+     [BUILDING_NATIVE_WELL] = {
+        .size = 1,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Native_Well_Central",
+        .event_data.attr = "native_well",
+        .building_model_data = {.cost = 0, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
+     },
+     [BUILDING_NATIVE_MEETING_ALT] = {
+        .size = 2,
+        .sound_id = SOUND_CITY_NATIVE_HUT,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Native_Meeting_Hut_Central_01",
+        .event_data.attr = "native_meeting_alt",
+        .building_model_data = {.cost = 50, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
+     },
+     [BUILDING_NATIVE_HUT_ALT_2] = {
+        .size = 1,
+        .sound_id = SOUND_CITY_NATIVE_HUT,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Hellenised_Hut_Central_01",
+        .event_data.attr = "native_hut_alt_2",
+        .building_model_data = {.cost = 50, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
+     },
+     [BUILDING_NATIVE_MEETING_ALT_2] = {
+        .size = 2,
+        .sound_id = SOUND_CITY_NATIVE_HUT,
+        .fire_proof = 1,
+        .custom_asset.group = "Terrain_Maps",
+        .custom_asset.id = "Hellenised_Meeting_Hut_Central_01",
+        .event_data.attr = "native_meeting_alt_2",
+        .building_model_data = {.cost = 50, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
+     },
+     [BUILDING_NATIVE_PALISADE] = {
+        .size = 1,
+        .fire_proof = 1,
+        .draw_desirability_range = 1,
+        .custom_asset.group = "Military",
+        .custom_asset.id = "Pal Wall C 01",
+        .event_data.attr = "native_palisade",
+        .building_model_data = {.cost = 0, .desirability_value = 0, .desirability_step = 0,
+            .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
+     },
 };
 
 void building_properties_init(void)

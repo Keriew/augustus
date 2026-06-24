@@ -50,11 +50,25 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     {7, 8, 9, -1},
     {10, 11, 12, 13, 14, 15, 16, 17, -1},
     {18, 19, -1},
-    {20, TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, 21, 22,
-    TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT,
-    TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, TR_EDITOR_RUBBLE,-1},
+    {20, TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2, 21,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE,
+    TR_EDITOR_RUBBLE, -1},
     {23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, -1},
     {TR_EDITOR_TOOL_EARTHQUAKE_POINT, TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, TR_EDITOR_TOOL_EARTHQUAKE_REMOVE, -1},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_WHEAT,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VEGETABLES,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_FRUIT,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_OLIVE,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VINES,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG, -1},
 };
 
 static struct {
@@ -171,13 +185,24 @@ static void button_menu_item(const generic_button *button)
             switch (index) {
                 case 0: editor_tool_set_type(TOOL_NATIVE_HUT); break;
                 case 1: editor_tool_set_type(TOOL_NATIVE_HUT_ALT); break;
-                case 2: editor_tool_set_type(TOOL_NATIVE_CENTER); break;
-                case 3: editor_tool_set_type(TOOL_NATIVE_FIELD); break;
-                case 4: editor_tool_set_type(TOOL_NATIVE_DECORATION); break;
-                case 5: editor_tool_set_type(TOOL_NATIVE_MONUMENT); break;
-                case 6: editor_tool_set_type(TOOL_NATIVE_WATCHTOWER); break;
-                case 7: editor_tool_set_type(TOOL_NATIVE_RUINS); break;
+                case 2: editor_tool_set_type(TOOL_NATIVE_HUT_ALT_2); break;
+                case 3: editor_tool_set_type(TOOL_NATIVE_CENTER); break;
+                case 4: editor_tool_set_type(TOOL_NATIVE_MEETING_ALT); break;
+                case 5: editor_tool_set_type(TOOL_NATIVE_MEETING_ALT_2); break;
+                case 6:
+                    // Open the Native Fields submenu instead of placing a building
+                    window_editor_build_menu_show(MENU_NATIVE_FIELDS);
+                    return;
+                case 7: editor_tool_set_type(TOOL_NATIVE_DECORATION); break;
+                case 8: editor_tool_set_type(TOOL_NATIVE_MONUMENT); break;
+                case 9: editor_tool_set_type(TOOL_NATIVE_WATCHTOWER); break;
+                case 10: editor_tool_set_type(TOOL_NATIVE_WELL); break;
+                case 11: editor_tool_set_type(TOOL_NATIVE_PALISADE); break;
+                case 12: editor_tool_set_type(TOOL_NATIVE_RUINS); break;
             }
+            break;
+        case MENU_NATIVE_FIELDS:
+            editor_tool_set_with_id(TOOL_NATIVE_FIELD, index);
             break;
         case MENU_INVASION_POINTS:
             editor_tool_set_with_id(TOOL_INVASION_POINT, index);
