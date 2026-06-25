@@ -190,14 +190,18 @@ static int reload_language(int is_editor, int reload_images)
     return 1;
 }
 
-int game_init_editor(void)
+static int game_init_editor_internal(int generated, int size, int generator_algorithm)
 {
     if (!reload_language(1, 0)) {
         return 0;
     }
 
     game_file_editor_clear_data();
-    game_file_editor_create_scenario(2);
+    if (generated) {
+        game_file_editor_create_scenario_generated(size, generator_algorithm);
+    } else {
+        game_file_editor_create_scenario(2);
+    }
 
     if (city_view_is_sidebar_collapsed()) {
         city_view_toggle_sidebar();
@@ -206,6 +210,16 @@ int game_init_editor(void)
     editor_set_active(1);
     window_editor_map_show();
     return 1;
+}
+
+int game_init_editor(void)
+{
+    return game_init_editor_internal(0, 0, 0);
+}
+
+int game_init_editor_generated(int size, int generator_algorithm)
+{
+    return game_init_editor_internal(1, size, generator_algorithm);
 }
 
 void game_exit_editor(void)
