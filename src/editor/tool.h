@@ -33,7 +33,8 @@ typedef enum {
     TOOL_EARTHQUAKE_CUSTOM = 30,
     TOOL_EARTHQUAKE_CUSTOM_REMOVE = 31,
     TOOL_NATIVE_RUINS = 32,
-    TOOL_SELECT_LAND = 33
+    TOOL_SELECT_LAND = 33,
+    TOOL_SHALLOW = 34
 } tool_type;
 
 tool_type editor_tool_type(void);
