@@ -2107,6 +2107,10 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_DESIRABILITY, "Attrait"},
     {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Voir l'attrait des rivages sur la carte d'attrait"},
     {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Voir l'attrait des hauteurs sur la carte d'attrait"},
+    {TR_EDITOR_TOOL_MARSHLAND, "Marais"},
+    {TR_EDITOR_TOOL_WATER, "Eau"},
+    {TR_TERRAIN_MARSHLAND, "Marais"},
+    {TR_TERRAIN_MARSHLAND_DESC, "Un marécage fétide. Le marais est infranchissable et c'est un nid à maladies : il réduit l'attrait des environs et propage la maladie aux habitations proches. Aucun citoyen respectable ne veut vivre à proximité."},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)
