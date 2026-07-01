@@ -303,7 +303,7 @@ void building_destroy_last_placed(void)
 
 void building_destroy_increase_enemy_damage(int grid_offset, int max_damage)
 {
-    if (map_building_damage_increase(grid_offset) > max_damage) {
+    if (map_building_damage_increase(grid_offset) >= max_damage) {
         building_destroy_by_enemy(map_grid_offset_to_x(grid_offset),
             map_grid_offset_to_y(grid_offset), grid_offset);
     }
