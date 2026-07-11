@@ -101,6 +101,8 @@ static const uint8_t *get_text_for_warning(warning_type type)
             return translation_for(TR_CITY_WARNING_WORKCAMP_NEEDED);
         case WARNING_BUILD_WORKCAMP:
             return translation_for(TR_CITY_WARNING_BUILD_WORKCAMP);
+        case WARNING_OPEN_WATER_NEEDED_FOR_BUILDING:
+            return translation_for(TR_WARNING_OPEN_WATER_NEEDED_FOR_BUILDING);
         default:
             return lang_get_string(19, type - 2);
     }

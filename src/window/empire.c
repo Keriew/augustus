@@ -602,12 +602,13 @@ static void draw_paneling(void)
 
     graphics_set_clip_rectangle(data.panel.x_min, data.y_min,
         data.panel.x_max - data.panel.x_min, data.y_max - data.y_min);
-
+    int masked_panel_bottom = assets_lookup_image_id(ASSET_UI_EMP_PANEL_HOR);
+    int masked_panel_sidebar = assets_lookup_image_id(ASSET_UI_EMP_PANEL_HOR); // change _HOR to _VER for rotated
     // bottom panel background
     for (int x = data.panel.x_min; x < data.panel.x_max; x += 70) {
-        image_draw(image_base + 3, x, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
-        image_draw(image_base + 3, x, data.y_max - 80, COLOR_MASK_NONE, SCALE_NONE);
-        image_draw(image_base + 3, x, data.y_max - 40, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(masked_panel_bottom, x, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(masked_panel_bottom, x, data.y_max - 80, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(masked_panel_bottom, x, data.y_max - 40, COLOR_MASK_NONE, SCALE_NONE);
     }
 
     // horizontal bar borders
@@ -637,7 +638,7 @@ static void draw_paneling(void)
     }
 
     graphics_reset_clip_rectangle();
-
+    int dragging_crossbar = assets_lookup_image_id(ASSET_UI_EMP_PANEL_XBAR_DRAG);
     // crossbars
     image_draw(image_base + 2, data.x_min, data.y_min, COLOR_MASK_NONE, SCALE_NONE);
     image_draw(image_base + 2, data.x_min, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
@@ -646,6 +647,8 @@ static void draw_paneling(void)
     image_draw(image_base + 2, data.x_max - WIDTH_BORDER, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
     image_draw(image_base + 2, data.panel.x_max - WIDTH_BORDER, data.y_max - WIDTH_BORDER, COLOR_MASK_NONE, SCALE_NONE);
 
+    image_draw(dragging_crossbar, data.sidebar.x_min - WIDTH_BORDER, data.y_min, COLOR_MASK_NONE, SCALE_NONE);
+    image_draw(dragging_crossbar, data.sidebar.x_min - WIDTH_BORDER, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
     if (bottom_panel_is_larger) {
         image_draw(image_base + 2, data.panel.x_min, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
         image_draw(image_base + 2, data.panel.x_max - WIDTH_BORDER, data.y_max - BOTTOM_PANEL_HEIGHT, COLOR_MASK_NONE, SCALE_NONE);
@@ -654,11 +657,12 @@ static void draw_paneling(void)
     graphics_set_clip_rectangle(data.sidebar.x_min - WIDTH_BORDER, data.sidebar.y_min, //clipping - border, to let border be drawn OUTSIDE
         data.sidebar.width + WIDTH_BORDER, //account for width border substracted earlier to make sure textures stretch all the way
         data.sidebar.y_max - data.sidebar.y_min);
-    int asset_id = assets_lookup_image_id(ASSET_UI_VERTICAL_EMPIRE_PANEL);
 
-    for (int x = data.sidebar.x_min; x <= data.sidebar.x_max; x += 40) {
-        for (int y = data.sidebar.y_min; y < data.sidebar.y_max; y += 70) {
-            image_draw(asset_id, x, y, COLOR_MASK_NONE, SCALE_NONE);
+    int asset_w = image_get(masked_panel_sidebar)->width;
+    int asset_h = image_get(masked_panel_sidebar)->height;
+    for (int x = data.sidebar.x_min; x <= data.sidebar.x_max; x += asset_w) {
+        for (int y = data.sidebar.y_min; y < data.sidebar.y_max; y += asset_h) {
+            image_draw(masked_panel_sidebar, x, y, COLOR_MASK_NONE, SCALE_NONE);
         }
     }
     // Sidebar border
@@ -1646,8 +1650,8 @@ static void animation_draw_scaled(const image *img, int image_id, int new_animat
 
     // Apply animation sprite offset if present, to the already centered position
     if (img->animation) {
-         anim_x += img->animation->sprite_offset_x;
-         anim_y += img->animation->sprite_offset_y;
+        anim_x += img->animation->sprite_offset_x;
+        anim_y += img->animation->sprite_offset_y;
     }
 
     image_draw(image_id + new_animation, anim_x, anim_y, color, 100.0f / draw_scale_percent);

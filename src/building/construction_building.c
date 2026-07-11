@@ -103,6 +103,7 @@ static void add_fort(int type, building *fort)
         fort->y + offsets_y[building_rotation_get_rotation()]);
     game_undo_add_building(ground);
     fort = building_get(id);
+    fort->data.fort.orientation = building_rotation_get_rotation();
     ground->prev_part_building_id = fort->id;
     fort->next_part_building_id = ground->id;
     ground->next_part_building_id = 0;

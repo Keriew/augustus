@@ -41,7 +41,7 @@ typedef struct building {
     unsigned char size;
     unsigned char house_is_merged;
     unsigned char house_size;
-    unsigned char x; //these are not grid coordinates but image coordinates
+    unsigned char x; // these are not grid coordinates but image coordinates
     unsigned char y;
     short grid_offset;
     building_type type;
@@ -169,6 +169,9 @@ typedef struct building {
         struct {
             order current_order;
         } depot;
+        struct {
+            short orientation; // can't be in subtype because there's fort_figure_type already
+        } fort;
     } data;
     struct {
         int upgrades;
