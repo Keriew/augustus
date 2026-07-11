@@ -409,7 +409,7 @@ static void button_open_variables(const generic_button *button)
 
 static void handle_check_all_none_tooltip(tooltip_context *c)
 {
-    if (data.focus_button_id == 16) {
+    if (data.focus_button_id == 18) {
         if (data.active_events > 0) {
             c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
                 data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
