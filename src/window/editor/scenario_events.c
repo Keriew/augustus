@@ -72,9 +72,9 @@ static generic_button buttons[] = {
     {44, EVENTS_Y_OFFSET + (8 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 9},
     {44, EVENTS_Y_OFFSET + (9 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 10},
     {68, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 11}, // add new
-    {68, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12}, // import
-    {68, EVENTS_Y_OFFSET + (14 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 13}, // export
-    {68, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // delete selected
+    {68, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12}, // delete selected
+    {68, EVENTS_Y_OFFSET + (14 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 13}, // import
+    {68, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // export
     {WINDOW_WIDTH * BLOCK_SIZE - BUTTON_WIDTH / 2, 60, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables}, // variables
     {44, EVENTS_Y_OFFSET - 24, 20, 20, button_click, 0, 15} // select all/none
 };
@@ -83,16 +83,36 @@ static generic_button buttons[] = {
 static struct {
     unsigned int focus_button_id;
     unsigned int total_events;
+    unsigned int active_events;
     array(event_list_item) list;
     checkbox_selection_type selection_type;
     int do_not_ask_again_for_delete_event;
 } data;
+
+static void update_selection_type(void);
+
+static void count_active_events(void)
+{
+    data.active_events = 0;
+    event_list_item *list_item;
+    array_foreach(data.list, list_item) {
+        if (!list_item->event) {
+            continue;
+        }
+        if (list_item->event->state == EVENT_STATE_UNDEFINED) {
+            continue;
+        }
+        data.active_events++;
+    }
+}
 
 static void init_list(void)
 {
     data.total_events = scenario_events_get_count();
     array_init(data.list, sizeof(event_list_item), 0, 0);
     populate_list();
+    count_active_events();
+    update_selection_type();
     scrollbar_init(&scrollbar, 0, data.total_events);
 }
 
@@ -198,20 +218,20 @@ static void draw_foreground(void)
     for (size_t i = 10; i < MAX_BUTTONS - 1; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE, data.focus_button_id == i + 1 ? 1 : 0);
     }
-    if (data.total_events > 0) {
+    if (data.active_events > 0) {
         button_border_draw(buttons[15].x, buttons[15].y, 20, 20, data.focus_button_id == 16);
     }
     generic_button *btn = &buttons[10];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_ADD, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
     btn = &buttons[11];
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_IMPORT, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
     btn = &buttons[12];
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_EXPORT, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_IMPORT, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
     btn = &buttons[13];
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_EXPORT, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
     btn = &buttons[14];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TITLE, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
@@ -228,6 +248,12 @@ static void update_selection_type(void)
     uint8_t all_selected = 1;
     event_list_item *list_item;
     array_foreach(data.list, list_item) {
+        if (!list_item->event) {
+            continue;
+        }
+        if (list_item->event->state == EVENT_STATE_UNDEFINED) {
+            continue;
+        }
         some_selected |= list_item->selected;
         all_selected &= list_item->selected;
         if (some_selected != all_selected) {
@@ -294,6 +320,8 @@ static void delete_selected(int is_ok, int checked)
         }
         scenario_event_delete(item->event);
     }
+    count_active_events();
+    update_selection_type();
 }
 
 static void select_all(void)
@@ -320,10 +348,6 @@ static void button_click(const generic_button *button)
     if (type == 11) {
         add_new_event();
     } else if (type == 12) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_LOAD);
-    } else if (type == 13) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_SAVE);
-    } else if (type == 14) {
         if (!data.do_not_ask_again_for_delete_event && config_get(CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS)) {
             const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENTS_CONFIRM_TITLE);
             const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENTS_CONFIRM_TEXT);
@@ -333,6 +357,10 @@ static void button_click(const generic_button *button)
             delete_selected(1, 1);
         }
         data.total_events = scenario_events_get_count();
+    } else if (type == 13) {
+        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_LOAD);
+    } else if (type == 14) {
+        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_SAVE);
     } else if (type == 15) {
         if (data.selection_type == CHECKBOX_ALL_SELECTED) {
             select_none();
@@ -350,7 +378,7 @@ static void button_open_variables(const generic_button *button)
 static void handle_check_all_none_tooltip(tooltip_context *c)
 {
     if (data.focus_button_id == 16) {
-        if (data.total_events > 0) {
+        if (data.active_events > 0) {
             c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
                 data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
             c->type = TOOLTIP_BUTTON;
