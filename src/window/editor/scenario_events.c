@@ -1,6 +1,8 @@
 #include "scenario_events.h"
 
 #include "assets/assets.h"
+#include "core/config.h"
+#include "core/lang.h"
 #include "core/string.h"
 #include "editor/editor.h"
 #include "graphics/button.h"
@@ -26,11 +28,12 @@
 #include "window/editor/scenario_event_details.h"
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
+#include "window/popup_dialog.h"
 
 #define WINDOW_WIDTH 27 // in blocks
-#define WINDOW_HEIGHT 38
+#define WINDOW_HEIGHT 39
 
-#define EVENTS_Y_OFFSET 100
+#define EVENTS_Y_OFFSET 116
 #define EVENTS_ROW_HEIGHT 31
 #define MAX_VISIBLE_ROWS 10
 #define BUTTON_WIDTH 320
@@ -39,6 +42,12 @@ typedef struct {
     scenario_event_t *event;
     int selected;
 } event_list_item;
+
+typedef enum {
+    CHECKBOX_NO_SELECTION = 0,
+    CHECKBOX_SOME_SELECTED = 1,
+    CHECKBOX_ALL_SELECTED = 2
+} checkbox_selection_type;
 
 static void on_scroll(void);
 static void button_click(const generic_button *button);
@@ -65,8 +74,9 @@ static generic_button buttons[] = {
     {68, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 11}, // add new
     {68, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12}, // import
     {68, EVENTS_Y_OFFSET + (14 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 13}, // export
-    {68, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // clear
-    {WINDOW_WIDTH * BLOCK_SIZE - BUTTON_WIDTH / 2, 60, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables} // variables
+    {68, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // delete selected
+    {WINDOW_WIDTH * BLOCK_SIZE - BUTTON_WIDTH / 2, 60, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables}, // variables
+    {44, EVENTS_Y_OFFSET - 24, 20, 20, button_click, 0, 15} // select all/none
 };
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
@@ -74,6 +84,8 @@ static struct {
     unsigned int focus_button_id;
     unsigned int total_events;
     array(event_list_item) list;
+    checkbox_selection_type selection_type;
+    int do_not_ask_again_for_delete_event;
 } data;
 
 static void init_list(void)
@@ -138,6 +150,16 @@ static void draw_foreground(void)
     text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENTS_COUNT), data.total_events, "",
         30, 70, FONT_NORMAL_PLAIN, COLOR_BLACK);
 
+    int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
+    const image *img = image_get(checkmark_id);
+    if (data.selection_type == CHECKBOX_SOME_SELECTED) {
+        text_draw(string_from_ascii("-"), buttons[15].x + 8, buttons[15].y + 4,
+            FONT_NORMAL_BLACK, 0);
+    } else if (data.selection_type == CHECKBOX_ALL_SELECTED) {
+        image_draw(checkmark_id, buttons[15].x + (20 - img->original.width) / 2,
+             buttons[15].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
+    }
+
     for (unsigned int i = 0; i < MAX_VISIBLE_ROWS; i++) {
         event_list_item *list_item = array_item(data.list, i + scrollbar.scroll_position);
         if (list_item->event) {
@@ -147,8 +169,6 @@ static void draw_foreground(void)
                 button_border_draw(buttons[i].x, buttons[i].y + selection_button_y_offset, 20, 20,
                     data.focus_button_id == i + 1 && mouse_in_dialog(mouse_get())->x < 64);
                 if (list_item->selected) {
-                    int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
-                    const image *img = image_get(checkmark_id);
                     image_draw(checkmark_id, buttons[i].x + (20 - img->original.width) / 2,
                         buttons[i].y + selection_button_y_offset + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
                 }
@@ -175,10 +195,12 @@ static void draw_foreground(void)
         }
     }
 
-    for (size_t i = 10; i < MAX_BUTTONS; i++) {
+    for (size_t i = 10; i < MAX_BUTTONS - 1; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE, data.focus_button_id == i + 1 ? 1 : 0);
     }
-
+    if (data.total_events > 0) {
+        button_border_draw(buttons[15].x, buttons[15].y, 20, 20, data.focus_button_id == 16);
+    }
     generic_button *btn = &buttons[10];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_ADD, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
@@ -189,33 +211,50 @@ static void draw_foreground(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_EXPORT, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
     btn = &buttons[13];
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_CLEAR, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
     btn = &buttons[14];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TITLE, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
-    lang_text_draw_centered(13, 3, 0, 600, WINDOW_WIDTH * BLOCK_SIZE, FONT_NORMAL_BLACK); // Right-click to Continue
+    lang_text_draw_centered(13, 3, 0, WINDOW_HEIGHT * BLOCK_SIZE - 8, WINDOW_WIDTH * BLOCK_SIZE, FONT_NORMAL_BLACK); // Right-click to Continue
 
     scrollbar_draw(&scrollbar);
     graphics_reset_dialog();
+}
+
+static void update_selection_type(void)
+{
+    uint8_t some_selected = 0;
+    uint8_t all_selected = 1;
+    event_list_item *list_item;
+    array_foreach(data.list, list_item) {
+        some_selected |= list_item->selected;
+        all_selected &= list_item->selected;
+        if (some_selected != all_selected) {
+            data.selection_type = CHECKBOX_SOME_SELECTED;
+            return;
+        }
+    }
+    data.selection_type = some_selected ? CHECKBOX_ALL_SELECTED : CHECKBOX_NO_SELECTION;
 }
 
 static void button_event(const generic_button *button)
 {
     int target_index = button->parameter1 - 1 + scrollbar.scroll_position;
     event_list_item *list_item = array_item(data.list, target_index);
-    const mouse *m = mouse_in_dialog(mouse_get());
-    if (m->x < 68) {
-        if (m->x < 64) {
-            list_item->selected = !list_item->selected;
-        }
-        return; // don't access event when ticking the checkbox
-    }
     if (!list_item->event) {
         return;
     }
     if (list_item->event->state == EVENT_STATE_UNDEFINED) {
         return;
+    }
+    const mouse *m = mouse_in_dialog(mouse_get());
+    if (m->x < 68) {
+        if (m->x < 64) {
+            list_item->selected = !list_item->selected;
+            update_selection_type();
+        }
+        return; // don't access event when ticking the checkbox
     }
     window_editor_scenario_event_details_show(list_item->event->id);
 }
@@ -237,6 +276,44 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 }
 
+static void delete_selected(int is_ok, int checked)
+{
+    if (!is_ok) {
+        return;
+    }
+    if (checked) {
+        data.do_not_ask_again_for_delete_event = 1;
+    }
+    event_list_item *item;
+    array_foreach(data.list, item) {
+        if (!item->event) {
+            continue;
+        }
+        if (!item->selected) {
+            continue;
+        }
+        scenario_event_delete(item->event);
+    }
+}
+
+static void select_all(void)
+{
+    event_list_item *list_item;
+    array_foreach(data.list, list_item) {
+        list_item->selected = 1;
+    }
+    data.selection_type = CHECKBOX_ALL_SELECTED;
+}
+
+static void select_none(void)
+{
+    event_list_item *list_item;
+    array_foreach(data.list, list_item) {
+        list_item->selected = 0;
+    }
+    data.selection_type = CHECKBOX_NO_SELECTION;
+}
+
 static void button_click(const generic_button *button)
 {
     int type = button->parameter1;
@@ -247,8 +324,21 @@ static void button_click(const generic_button *button)
     } else if (type == 13) {
         window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_SAVE);
     } else if (type == 14) {
-        scenario_events_clear();
+        if (!data.do_not_ask_again_for_delete_event && config_get(CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS)) {
+            const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENTS_CONFIRM_TITLE);
+            const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENTS_CONFIRM_TEXT);
+            const uint8_t *check_text = lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_OVERWRITE_FILE_DO_NOT_ASK_AGAIN);
+            window_popup_dialog_show_confirmation(title, text, check_text, delete_selected);
+        } else {
+            delete_selected(1, 1);
+        }
         data.total_events = scenario_events_get_count();
+    } else if (type == 15) {
+        if (data.selection_type == CHECKBOX_ALL_SELECTED) {
+            select_none();
+        } else {
+            select_all();
+        }
     }
 }
 
@@ -257,13 +347,30 @@ static void button_open_variables(const generic_button *button)
     window_editor_custom_variables_show(0);
 }
 
+static void handle_check_all_none_tooltip(tooltip_context *c)
+{
+    if (data.focus_button_id == 16) {
+        if (data.total_events > 0) {
+            c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
+                data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
+            c->type = TOOLTIP_BUTTON;
+        }
+    }
+}
+
+static void get_tooltip(tooltip_context *c)
+{
+    handle_check_all_none_tooltip(c);
+}
+
 void window_editor_scenario_events_show(void)
 {
     window_type window = {
         WINDOW_EDITOR_SCENARIO_EVENTS,
         draw_background,
         draw_foreground,
-        handle_input
+        handle_input,
+        get_tooltip
     };
     init();
     window_show(&window);

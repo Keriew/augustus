@@ -1085,7 +1085,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENTS_IMPORT_FULL, "Импорт событий"},
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT, "Экспорт"},
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT_FULL, "Экспорт событий"},
-    {TR_EDITOR_SCENARIO_EVENTS_CLEAR, "Очистить все события"},
     {TR_EDITOR_SCENARIO_EVENTS_COUNT, "Событий:"},
     {TR_EDITOR_SCENARIO_EVENTS_CONDITIONS, "условия"},
     {TR_EDITOR_SCENARIO_EVENTS_ACTIONS, "действия"},

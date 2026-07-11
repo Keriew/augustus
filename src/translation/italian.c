@@ -1040,7 +1040,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_CUSTOM_EMPIRE_TITLE, "Caricamento impero"},
     {TR_EDITOR_UNABLE_TO_LOAD_EMPIRE_TITLE, "Impossibile caricare impero personalizzato"},
     {TR_EDITOR_UNABLE_TO_LOAD_EMPIRE_MESSAGE, "Controlla il file augustus-log.txt Nella tua cartella Augustus per maggiori dettagli."},
-    {TR_EDITOR_SHORT_ROUTE_TEXT, "std"}, // si suppone abbreviazione di "road" rt, quindi std 
+    {TR_EDITOR_SHORT_ROUTE_TEXT, "std"}, // si suppone abbreviazione di "road" rt, quindi std
     {TR_EDITOR_TOGGLE_INVASIONS, "Invasioni on/off"},
     {TR_EDITOR_REFRESH_EMPIRE, "Aggiorna (F5)"},
     {TR_EDITOR_CURRENT_COORDS, "Coordinate Correnti: "},
@@ -1068,7 +1068,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENTS_IMPORT_FULL, "Importa eventi scenario" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT, "Esporta" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT_FULL, "Esporta eventi scenario" },
-    {TR_EDITOR_SCENARIO_EVENTS_CLEAR, "Pulisci gli eventi" },
     {TR_EDITOR_SCENARIO_EVENTS_COUNT, "eventi dello scenario" },
     {TR_EDITOR_SCENARIO_EVENTS_CONDITIONS, "condizioni" },
     {TR_EDITOR_SCENARIO_EVENTS_ACTIONS, "azioni" },
@@ -1262,7 +1261,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_MARS, "Tempio piccolo di Marte"},
     {TR_PARAMETER_VALUE_BUILDING_SMALL_TEMPLE_VENUS, "Tempio piccolo di Venere"},
     {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_CERES, "Tempio Grande di Cerere"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
-    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_NEPTUNE, "Tempio Grande di Nettuno"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande 
+    {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_NEPTUNE, "Tempio Grande di Nettuno"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
     {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MERCURY, "Tempio Grande di Mercurio"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
     {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_MARS, "Tempio Grande di Marte"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
     {TR_PARAMETER_VALUE_BUILDING_LARGE_TEMPLE_VENUS, "Tempio Grande di Venere"}, // Meglio Grandioso rispetto a Grande, visto già il tempio large è definito Grande
@@ -1425,7 +1424,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_INFO_CARTLOAD, "carretto." },
     {TR_BUILDING_INFO_CARTLOADS, "carretti." },
     {TR_HOTKEY_SHOW_OVERLAY_RISKS_NATIVE, "Overlay nativi"},
-    {TR_BUILDING_PANELLED_GARDEN_WALL, "Mura di giardino a pannelli"}, 
+    {TR_BUILDING_PANELLED_GARDEN_WALL, "Mura di giardino a pannelli"},
     {TR_BUILDING_LOOPED_GARDEN_WALL_GATE, "Porta delle mura del giardino"},
     {TR_BUILDING_LOOPED_GARDEN_WALL_GATE_DESC, "Questa piccola entrata controlla il movimento delle persone dentro e fuori dai posti più appartati della città." },
     {TR_BUILDING_PANELLED_GARDEN_WALL_GATE, "Porta delle mura del giardino a pannelli" },

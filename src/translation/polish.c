@@ -1053,7 +1053,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_DESELECT_INTRO, "Odznacz wstęp do scenariusza"},
     {TR_EDITOR_SCENARIO_EVENTS_ACTIONS, "działania" },
     {TR_EDITOR_SCENARIO_EVENTS_ADD, "Dodaj nowe wydarzenie"},
-    {TR_EDITOR_SCENARIO_EVENTS_CLEAR, "Usuń wszystkie wydarzenia" },
     {TR_EDITOR_SCENARIO_EVENTS_CONDITIONS, "warunki" },
     {TR_EDITOR_SCENARIO_EVENTS_COUNT, "wydarzenia scenariusza" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT, "Eksportuj" },

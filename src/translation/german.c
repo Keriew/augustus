@@ -156,7 +156,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ROTATE_MANUALLY, "Drehe Torhaus und Triumphbogen mit Schnelltaste"},
     {TR_CONFIG_SCHOOL_WALKERS, "Vergrößere Laufreichweite von Schülern"},
     {TR_CONFIG_SCROLL_SPEED, "Scrollgeschwindigkeit:"},
-    {TR_CONFIG_SHOW_CONSTRUCTION_SIZE, "Zeige Konstruktionsgröße beim Bauen"},	
+    {TR_CONFIG_SHOW_CONSTRUCTION_SIZE, "Zeige Konstruktionsgröße beim Bauen"},
     {TR_CONFIG_SHOW_DESIRABILITY_RANGE, "Beim Bau eines Nymphäums oder Mausoleums Attraktivität zeigen"},
     {TR_CONFIG_SHOW_INTRO_VIDEO, "Intro-Videos abspielen"},
     {TR_CONFIG_SHOW_MARKET_RANGE, "Zeige die Reichweite beim Bau von Märkten" },
@@ -203,8 +203,8 @@ static translation_string all_strings[] = {
     {TR_USER_DIRETORIES_WINDOW_USER_PATH, "Benutzerverzeichnis:" },
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TITLE, "Benutzerpfad geändert"},
     {TR_USER_DIRECTORIES_USER_PATH_CHANGED_TEXT, "Der Benutzerpfad wurde erfolgreich geändert.\nMöchten Sie Ihre Dateien kopieren?"},
-    {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Vorhandene Dateien überschreiben"},	
-	/* Sidebar */	
+    {TR_USER_DIRECTORIES_USER_PATH_CHANGED_OVERWRITE, "Vorhandene Dateien überschreiben"},
+	/* Sidebar */
 	{TR_SIDEBAR_EXTRA_INVASIONS, "Invasionen"},
     {TR_SIDEBAR_EXTRA_INVASION_UNDERWAY, "Invasion im Gange"},
     {TR_SIDEBAR_EXTRA_NO_INVASIONS, "Keine Invasionen"},
@@ -477,7 +477,7 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_TRADE_NO_BUYERS, "Niemand kauft diese Ressource."},
     {TR_ADVISOR_TRADE_NO_SELLERS, "Niemand verkauft diese Ressource."},
     {TR_ADVISOR_TRADE_NOT_IMPORTING, "kein Import"},
-    {TR_ADVISOR_TRADE_NOT_EXPORTING, "kein Export"},	
+    {TR_ADVISOR_TRADE_NOT_EXPORTING, "kein Export"},
     {TR_ADVISOR_TRADE_RESOURCE_NOT_STORABLE, "Kann nicht gelagert werden."},
     {TR_ADVISOR_TRADE_RESOURCE_NOT_STORABLE_OR_TRADABLE, "Ressource kann nicht gelagert oder gehandelt werden."},
     {TR_ADVISOR_OPEN_TO_IMPORT, "Öffnet Handelsroute für Import"},
@@ -638,7 +638,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_OVERLAY_TAVERN_5, "Dieses Haus wurde kürzlich von einer Gastwirtin mit Wein versorgt."},
     {TR_TOOLTIP_OVERLAY_TAVERN_6, "Dieses Haus wurde kürzlich von einer Gastwirtin mit Wein und Fleisch versorgt. Hoch die Gläser!"},
     {TR_ZOOM, "Zoom:"},
-	/* Besondere Befehle */	
+	/* Besondere Befehle */
     {TR_MARKET_SPECIAL_ORDERS_HEADER, "Zu sammelnde Waren"},
     {TR_MARKET_TRADING, "Handel"},
     {TR_MARKET_NOT_TRADING, "kein Handel"},
@@ -749,7 +749,7 @@ static translation_string all_strings[] = {
 	/* Gebäude - Dock */
     {TR_BUILDING_DOCK_CITIES_CONFIG_DESC, "Städte mit eröffneter Seeroute:"},
     {TR_BUILDING_DOCK_CITIES_NO_ROUTES, "Es wurden keine Seerouten eröffnet."},
-    /* Gebäude - Forts */	
+    /* Gebäude - Forts */
     {TR_BUILDING_FORT_LEGIONARIES, "Legionäre" },
     {TR_BUILDING_FORT_JAVELIN, "Hilfstruppen - Wurfspeere" },
     {TR_BUILDING_FORT_MOUNTED, "Hilfstruppen - Berittene" },
@@ -798,7 +798,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_CARAVANSERAI_POLICY_3_TITLE, "Consilium Quantitas Terrae"},
     {TR_BUILDING_CARAVANSERAI_POLICY_3, "Mengenpolitik: Handelskarawanen tragen 4 zusätzliche Waren, aber die Karawanserei verbraucht 20 % mehr Nahrung."},
     {TR_BUILDING_CARAVANSERAI_NO_EMPLOYEES, "Diese Karawanserei hat keine Angestellten. Lebensmittel können nicht abgeholt werden." },
-	/* Gebäude - Karrendepot */	
+	/* Gebäude - Karrendepot */
     {TR_BUILDING_DEPOT, "Karren-Depot"},
     {TR_BUILDING_CAT_DEPOT, "Katzen-Depot"},
     {TR_BUILDING_DEPOT_DESC, "Das Karren-Depot sendet Karren aus, um die Waren je nach Auftrag zwischen Lagerhäusern und Silos umzuschlagen. Karren müssen nach jeder Lieferung zum Depot zurückkehren."},
@@ -841,7 +841,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_COLOSSEUM_PHASE_3_TEXT, "Anmutige Bögen ragen in den Himmel, um das mächtige Kolosseum in die Höhe zu halten."},
     {TR_BUILDING_COLOSSEUM_PHASE_4_TEXT, "Das Kolosseum ragt in den Himmel, seine Wände sind mit schimmerndem Marmor und Statuen verkleidet."},
     {TR_BUILDING_COLOSSEUM_NEEDS_WORKERS, "Das Kolosseum ist unterbesetzt. Es werden mehr Arbeiter benötigt, damit alle Ihre Bürger die Spiele genießen können."},
-    {TR_WINDOW_BUILDING_GAMES_REMAINING_DURATION, "Die Großen Spiele werden fortgesetzt für weitere"}, // ...XX Days, 
+    {TR_WINDOW_BUILDING_GAMES_REMAINING_DURATION, "Die Großen Spiele werden fortgesetzt für weitere"}, // ...XX Days,
     {TR_WINDOW_GAMES_OPTION_1, "Naumachie abhalten"},
     {TR_WINDOW_GAMES_OPTION_2, "Tierhetze abhalten"},
     {TR_WINDOW_GAMES_OPTION_3, "Kalendae des Januarius abhalten"},
@@ -855,7 +855,7 @@ static translation_string all_strings[] = {
     {TR_WINDOW_GAMES_COST, "Kosten:"},
     {TR_WINDOW_GAMES_PERSONAL_FUNDS, "(Sparguthaben)"},
     {TR_WINDOW_GAMES_NOT_ENOUGH_FUNDS, "Nicht genügend Sparguthaben."},
-    {TR_WINDOW_GAMES_NOT_ENOUGH_RESOURCES, "Nicht genügend Ressourcen gelagert."}, 	
+    {TR_WINDOW_GAMES_NOT_ENOUGH_RESOURCES, "Nicht genügend Ressourcen gelagert."},
     {TR_WINDOW_GAMES_NO_VENUE, "Anlage nicht gebaut oder hat keine Arbeiter."},
     {TR_WINDOW_GAMES_NO_WATER_ACCESS, "Die Anlage hat keinen Zugang zu einem Reservoir."},
     /* Gebäude - Lararium und Mausoleen */
@@ -1088,11 +1088,11 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LEGION_STARVING, "Schwach vor Hunger"},
     {TR_BUILDING_LEGION_FOOD_BONUS, "Reichhaltiges Nahrungsangebot steigert die Moral"},
     {TR_BUILDING_LEGION_FOOD_STATUS, "Versorgungsstatus"},
-    /* Gebäude - Wachturm */	
+    /* Gebäude - Wachturm */
 	{TR_BUILDING_WATCHTOWER, "Wachturm"},
     {TR_BUILDING_WATCHTOWER_DESC, "Bogenschützen auf den Zinnen dieses Turms halten wachsam Ausschau nach jedem Anzeichen von Eindringlingen, während Wächter unten auf den Straßen patrouillieren."},
     {TR_BUILDING_WATCHTOWER_DESC_NO_SOLDIERS, "Dieser Wachturm braucht einen Wächter aus der Kaserne, bevor er unsere Stadt schützen kann."},
-    /* Gebäude - Waffenkammer */	
+    /* Gebäude - Waffenkammer */
     {TR_BUILDING_ARMOURY, "Waffenkammer" },
     {TR_BUILDING_ARMOURY_DESC, "Die Waffenkammer sorgt dafür, dass unsere Soldaten schnell und effizient mit Waffen versorgt werden. Diese Barbaren sind der römischen Logistik nicht gewachsen!" },
     {TR_BUILDING_ARMOURY_NO_EMPLOYEES, "Ohne Zugang zu Mitarbeitern kann die Waffenkammer keine Waffen an unsere Soldaten liefern. Möge Mars uns beschützen, denn die unbewaffneten Legionen werden es sicher nicht tun!"},
@@ -1371,7 +1371,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENT_STATE_UNDEFINED, "Undefiniert"},
     {TR_EDITOR_SCENARIO_EVENTS_ACTIONS, "Aktionen" },
     {TR_EDITOR_SCENARIO_EVENTS_ADD, "+ neues Event"},
-    {TR_EDITOR_SCENARIO_EVENTS_CLEAR, "Alle Ereignisse löschen" },
     {TR_EDITOR_SCENARIO_EVENTS_CONDITIONS, "Bedingungen" },
     {TR_EDITOR_SCENARIO_EVENTS_COUNT, "Szenario-Ereignisse" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT, "Exportieren" },

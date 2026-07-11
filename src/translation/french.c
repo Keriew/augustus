@@ -1085,7 +1085,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENTS_IMPORT_FULL, "Importer les événements de scénario" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT, "Exporter" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT_FULL, "Exporter les événements de scénario" },
-    {TR_EDITOR_SCENARIO_EVENTS_CLEAR, "Supprimer tous les événements" },
     {TR_EDITOR_SCENARIO_EVENTS_COUNT, "évén. de scénario" },
     {TR_EDITOR_SCENARIO_EVENTS_CONDITIONS, "conditions" },
     {TR_EDITOR_SCENARIO_EVENTS_ACTIONS, "actions" },

@@ -1067,7 +1067,6 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SCENARIO_EVENTS_IMPORT_FULL, "수입 시나리오 이벤트" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT, "수출" },
     {TR_EDITOR_SCENARIO_EVENTS_EXPORT_FULL, "수출 시나리오 이벤트" },
-    {TR_EDITOR_SCENARIO_EVENTS_CLEAR, "모든 이벤트 지우기" },
     {TR_EDITOR_SCENARIO_EVENTS_COUNT, "시나리오 이벤트" },
     {TR_EDITOR_SCENARIO_EVENTS_CONDITIONS, "조건" },
     {TR_EDITOR_SCENARIO_EVENTS_ACTIONS, "액션" },

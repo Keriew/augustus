@@ -84,7 +84,6 @@ static void button_add_new_action(const generic_button *button);
 static void button_copy_selected(const generic_button *button);
 static void button_delete_selected(const generic_button *button);
 static void button_paste_selected(const generic_button *button);
-static void button_delete_event(const generic_button *button);
 static void button_copy_event(const generic_button *button);
 static void button_paste_event(const generic_button *button);
 static void button_repeat_type(const generic_button *button);
@@ -144,7 +143,6 @@ static struct {
         unsigned int bottom;
     } focus_button;
     int do_not_ask_again_for_delete;
-    int do_not_ask_again_for_delete_event;
 } data;
 
 static input_box event_name_input = {
@@ -211,7 +209,6 @@ static generic_button bottom_buttons[] = {
 
     {137, 414, 122, 25, button_copy_event},
     {259, 414, 122, 25, button_paste_event, 0, 0, DISABLE_ON_NO_COPY_EVENT},
-    {381, 414, 122, 25, button_delete_event},
 
     {503, 414, 122, 25, button_add_new_action},
 
@@ -579,7 +576,7 @@ static void draw_background(void)
         bottom_buttons[0].x, bottom_buttons[0].y + 7, bottom_buttons[0].width, FONT_SMALL_PLAIN);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
-        bottom_buttons[7].x, bottom_buttons[7].y + 7, bottom_buttons[7].width, FONT_SMALL_PLAIN);
+        bottom_buttons[6].x, bottom_buttons[6].y + 7, bottom_buttons[6].width, FONT_SMALL_PLAIN);
 
 
     // --- Selected operations ---
@@ -602,8 +599,8 @@ static void draw_background(void)
     }
 
     if (data.did_copy_event) {
-        graphics_fill_rect(bottom_buttons[5].x, bottom_buttons[5].y,
-            bottom_buttons[5].width, bottom_buttons[5].height,
+        graphics_fill_rect(bottom_buttons[4].x, bottom_buttons[4].y,
+            bottom_buttons[4].width, bottom_buttons[4].height,
             COLOR_MASK_LIGHT_OLIVE_GREEN);
     }
 
@@ -629,13 +626,9 @@ static void draw_background(void)
         bottom_buttons[5].x, bottom_buttons[5].y + 7, bottom_buttons[5].width,
         font_paste_event, color_paste_event);
 
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_DELETE,
-        bottom_buttons[6].x, bottom_buttons[6].y + 7, bottom_buttons[6].width,
-        FONT_SMALL_PLAIN, COLOR_RED);
-
     // --- OK ---
-    lang_text_draw_centered(18, 3, bottom_buttons[8].x, bottom_buttons[8].y + 7,
-        bottom_buttons[8].width, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(18, 3, bottom_buttons[7].x, bottom_buttons[7].y + 7,
+        bottom_buttons[7].width, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
 }
@@ -1011,32 +1004,6 @@ static void button_add_new_action(const generic_button *button)
     scenario_event_action_create(data.event, type);
     select_no_actions();
     window_request_refresh();
-}
-
-static void delete_event(int is_ok, int checked)
-{
-    if (!is_ok) {
-        return;
-    }
-    if (checked) {
-        data.do_not_ask_again_for_delete_event = 1;
-    }
-    scenario_event_delete(data.event);
-    stop_input();
-    window_go_back();
-
-}
-static void button_delete_event(const generic_button *button)
-{
-    if (!data.do_not_ask_again_for_delete_event && config_get(CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS)) {
-        const uint8_t *title = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TITLE);
-        const uint8_t *text = lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENT_CONFIRM_TEXT);
-        const uint8_t *check_text = lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_OVERWRITE_FILE_DO_NOT_ASK_AGAIN);
-        stop_input();
-        window_popup_dialog_show_confirmation(title, text, check_text, delete_event);
-    } else {
-        delete_event(1, 1);
-    }
 }
 
 static void copy_formulas_action(scenario_action_t *action, int **params, int index)
