@@ -233,7 +233,7 @@ static void draw_foreground(void)
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE, data.focus_button_id == i + 1 ? 1 : 0);
     }
     if (data.active_events > 0) {
-        button_border_draw(buttons[17].x, buttons[17].y, 20, 20, data.focus_button_id == 17);
+        button_border_draw(buttons[17].x, buttons[17].y, 20, 20, data.focus_button_id == 18);
     }
     generic_button *btn = &buttons[10];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_ADD, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
