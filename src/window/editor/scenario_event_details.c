@@ -197,13 +197,13 @@ static dropdown_button repeat_interval_dropdown;
 #define NUM_BOTTOM_BUTTONS (sizeof(bottom_buttons) / sizeof(generic_button))
 
 static generic_button bottom_buttons[] = {
-    {15, 414, 122, 25, button_add_new_condition},
+    {15, 415, 305, 25, button_add_new_condition},
 
     {15, 440, 178, 25, button_copy_selected, 0, 0, DISABLE_ON_NO_SELECTION},
     {193, 440, 178, 25, button_paste_selected, 0, 0, DISABLE_ON_NO_COPY_SELECTED},
     {371, 440, 178, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
 
-    {503, 414, 122, 25, button_add_new_action},
+    {320, 415, 305, 25, button_add_new_action},
 
     {549, 440, 76, 25, button_ok},
 };
@@ -565,11 +565,15 @@ static void draw_background(void)
     // --- Bottom buttons text ---
 
     // --- Add buttons ---
+    graphics_fill_rect(bottom_buttons[0].x, bottom_buttons[0].y, bottom_buttons[0].width, bottom_buttons[0].height,
+        COLOR_MASK_LIGHT_OLIVE_GREEN);
+    graphics_fill_rect(bottom_buttons[4].x, bottom_buttons[4].y, bottom_buttons[4].width, bottom_buttons[4].height,
+        COLOR_MASK_LIGHT_OLIVE_GREEN);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CONDITION_ADD,
-        bottom_buttons[0].x, bottom_buttons[0].y + 7, bottom_buttons[0].width, FONT_SMALL_PLAIN);
+        bottom_buttons[0].x, bottom_buttons[0].y + 7, bottom_buttons[0].width, FONT_NORMAL_GREEN);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
-        bottom_buttons[4].x, bottom_buttons[4].y + 7, bottom_buttons[4].width, FONT_SMALL_PLAIN);
+        bottom_buttons[4].x, bottom_buttons[4].y + 7, bottom_buttons[4].width, FONT_NORMAL_GREEN);
 
 
     // --- Selected operations ---
@@ -585,8 +589,7 @@ static void draw_background(void)
     // --- Highlights ---
     if (data.did_copy_selected) {
         graphics_fill_rect(bottom_buttons[2].x, bottom_buttons[2].y,
-            bottom_buttons[2].width, bottom_buttons[2].height,
-            COLOR_MASK_LIGHT_OLIVE_GREEN);
+            bottom_buttons[2].width, bottom_buttons[2].height, COLOR_MASK_LIGHT_OLIVE_GREEN);
     }
 
     // --- Selected buttons text ---
