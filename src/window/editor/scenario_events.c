@@ -189,7 +189,13 @@ static void draw_foreground(void)
     }
 
     for (unsigned int i = 0; i < MAX_VISIBLE_ROWS; i++) {
-        event_list_item *list_item = array_item(data.list, i + scrollbar.scroll_position);
+        unsigned int index = i + scrollbar.scroll_position;
+        event_list_item *list_item = array_item(data.list, index);
+
+        if (index >= data.list.size) {
+            continue;
+        }
+
         if (list_item->event) {
             // Checkbox
             if (list_item->event->state != EVENT_STATE_UNDEFINED) {
@@ -281,6 +287,11 @@ static void update_selection_type(void)
 static void button_event(const generic_button *button)
 {
     int target_index = button->parameter1 - 1 + scrollbar.scroll_position;
+
+    if (target_index < 0 || target_index >= (int) data.list.size) {
+        return;
+    }
+
     event_list_item *list_item = array_item(data.list, target_index);
     if (!list_item->event) {
         return;
