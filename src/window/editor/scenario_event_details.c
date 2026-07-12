@@ -20,6 +20,7 @@
 #include "input/input.h"
 #include "scenario/event/event.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/copy.h"
 #include "scenario/event/data.h"
 #include "scenario/event/parameter_data.h"
 #include "widget/dropdown_button.h"
@@ -65,7 +66,6 @@ enum {
     DISABLE_ON_NO_REPEAT = 1,
     DISABLE_ON_NO_SELECTION = 2,
     DISABLE_ON_NO_COPY_SELECTED = 3,
-    DISABLE_ON_NO_COPY_EVENT = 4,
 };
 
 enum {
@@ -84,8 +84,6 @@ static void button_add_new_action(const generic_button *button);
 static void button_copy_selected(const generic_button *button);
 static void button_delete_selected(const generic_button *button);
 static void button_paste_selected(const generic_button *button);
-static void button_copy_event(const generic_button *button);
-static void button_paste_event(const generic_button *button);
 static void button_repeat_type(const generic_button *button);
 static void button_repeat_times(const generic_button *button);
 static void button_repeat_between(const generic_button *button);
@@ -111,9 +109,7 @@ typedef struct {
 static struct {
     uint8_t event_name[EVENT_NAME_LENGTH];
     scenario_event_t *event;
-    scenario_event_t copied_event;
     array(int) copied_group_ids;
-    int did_copy_event;
     array(scenario_condition_group_t) copied_condition_groups;
     array(scenario_action_t) copied_actions;
     int did_copy_selected;
@@ -206,9 +202,6 @@ static generic_button bottom_buttons[] = {
     {15, 440, 178, 25, button_copy_selected, 0, 0, DISABLE_ON_NO_SELECTION},
     {193, 440, 178, 25, button_paste_selected, 0, 0, DISABLE_ON_NO_COPY_SELECTED},
     {371, 440, 178, 25, button_delete_selected, 0, 0, DISABLE_ON_NO_SELECTION},
-
-    {137, 414, 122, 25, button_copy_event},
-    {259, 414, 122, 25, button_paste_event, 0, 0, DISABLE_ON_NO_COPY_EVENT},
 
     {503, 414, 122, 25, button_add_new_action},
 
@@ -576,13 +569,11 @@ static void draw_background(void)
         bottom_buttons[0].x, bottom_buttons[0].y + 7, bottom_buttons[0].width, FONT_SMALL_PLAIN);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_ACTION_ADD,
-        bottom_buttons[6].x, bottom_buttons[6].y + 7, bottom_buttons[6].width, FONT_SMALL_PLAIN);
+        bottom_buttons[4].x, bottom_buttons[4].y + 7, bottom_buttons[4].width, FONT_SMALL_PLAIN);
 
 
     // --- Selected operations ---
     color_t color_paste = data.did_copy_selected ? 0 : COLOR_FONT_LIGHT_GRAY;
-    color_t color_paste_event = data.did_copy_event ? 0 : COLOR_FONT_LIGHT_GRAY;
-    font_t font_paste_event = data.did_copy_event ? FONT_SMALL_PLAIN : FONT_SMALL_PLAIN;
 
     color_t color_copy = (data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
         data.actions.selection_type == CHECKBOX_NO_SELECTION) ? COLOR_FONT_LIGHT_GRAY : 0;
@@ -595,12 +586,6 @@ static void draw_background(void)
     if (data.did_copy_selected) {
         graphics_fill_rect(bottom_buttons[2].x, bottom_buttons[2].y,
             bottom_buttons[2].width, bottom_buttons[2].height,
-            COLOR_MASK_LIGHT_OLIVE_GREEN);
-    }
-
-    if (data.did_copy_event) {
-        graphics_fill_rect(bottom_buttons[4].x, bottom_buttons[4].y,
-            bottom_buttons[4].width, bottom_buttons[4].height,
             COLOR_MASK_LIGHT_OLIVE_GREEN);
     }
 
@@ -617,18 +602,9 @@ static void draw_background(void)
         bottom_buttons[3].x, bottom_buttons[3].y + 7, bottom_buttons[3].width,
         FONT_SMALL_PLAIN, color_delete);
 
-    // --- Event buttons ---
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_COPY,
-        bottom_buttons[4].x, bottom_buttons[4].y + 7, bottom_buttons[4].width,
-        FONT_SMALL_PLAIN);
-
-    lang_text_draw_centered_colored(CUSTOM_TRANSLATION, TR_EDITOR_PASTE,
-        bottom_buttons[5].x, bottom_buttons[5].y + 7, bottom_buttons[5].width,
-        font_paste_event, color_paste_event);
-
     // --- OK ---
-    lang_text_draw_centered(18, 3, bottom_buttons[7].x, bottom_buttons[7].y + 7,
-        bottom_buttons[7].width, FONT_SMALL_PLAIN);
+    lang_text_draw_centered(18, 3, bottom_buttons[5].x, bottom_buttons[5].y + 7,
+        bottom_buttons[5].width, FONT_SMALL_PLAIN);
 
     graphics_reset_dialog();
 }
@@ -722,8 +698,7 @@ static void draw_foreground(void)
         if ((bottom_buttons[i].parameter2 == DISABLE_ON_NO_SELECTION &&
             data.conditions.selection_type == CHECKBOX_NO_SELECTION &&
             data.actions.selection_type == CHECKBOX_NO_SELECTION) ||
-            (bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_SELECTED && !data.did_copy_selected) ||
-            (bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_EVENT && !data.did_copy_event)) {
+            (bottom_buttons[i].parameter2 == DISABLE_ON_NO_COPY_SELECTED && !data.did_copy_selected)) {
             focus = 0;
         }
 
@@ -1006,38 +981,6 @@ static void button_add_new_action(const generic_button *button)
     window_request_refresh();
 }
 
-static void copy_formulas_action(scenario_action_t *action, int **params, int index)
-{
-    int *param_value = params[index - 1];
-    parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
-        action->type, index, NULL, NULL);
-    if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
-        scenario_formula_t *formula = scenario_formula_get(*param_value);
-        if (!formula) {
-            return;
-        }
-        unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
-            formula->min_evaluation, formula->max_evaluation);
-        *param_value = id;
-    }
-}
-
-static void copy_formulas_condition(scenario_condition_t *condition, int **params, int index)
-{
-    int *param_value = params[index - 1];
-    parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
-        condition->type, index, NULL, NULL);
-    if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
-        scenario_formula_t *formula = scenario_formula_get(*param_value);
-        if (!formula) {
-            return;
-        }
-        unsigned int id = scenario_formula_add(scenario_formula_get_string(*param_value),
-            formula->min_evaluation, formula->max_evaluation);
-        *param_value = id;
-    }
-}
-
 static int index_of_copied_group_id(unsigned int group_id)
 {
     int *group_id_ptr;
@@ -1149,96 +1092,6 @@ static void button_paste_selected(const generic_button *button)
     scenario_events_assign_parent_single_event_ids(data.event);
     select_no_conditions();
     select_no_actions();
-    update_groups();
-    window_request_refresh();
-}
-
-static void button_copy_event(const generic_button *button)
-{
-    data.copied_event.state = data.event->state;
-    data.copied_event.repeat_days_min = data.event->repeat_days_min;
-    data.copied_event.repeat_days_max = data.event->repeat_days_max;
-    data.copied_event.repeat_interval = data.event->repeat_interval;
-    data.copied_event.max_number_of_repeats = data.event->max_number_of_repeats;
-    data.copied_event.execution_count = data.event->execution_count;
-    data.copied_event.days_until_active = data.event->days_until_active;
-    string_copy(data.event->name, data.copied_event.name, EVENT_NAME_LENGTH);
-    array_init(data.copied_event.actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.event->actions.constructor,
-        data.event->actions.in_use);
-    array_init(data.copied_event.condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
-        data.event->condition_groups.constructor, data.event->condition_groups.in_use);
-    for (unsigned int i = 0; i < data.event->actions.size; i++) {
-        scenario_action_t *action;
-        array_new_item(data.copied_event.actions, action);
-        *action = *array_item(data.event->actions, i);
-
-        scenario_parameters_foreach_in_action(action, copy_formulas_action);
-    }
-
-    for (unsigned int i = 0; i < data.event->condition_groups.size; i++) {
-        scenario_condition_group_t *group;
-        array_new_item(data.copied_event.condition_groups, group);
-        scenario_condition_group_t *original_group = array_item(data.event->condition_groups, i);
-        group->type = original_group->type;
-        array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
-            original_group->conditions.in_use);
-        for (unsigned int j = 0; j < original_group->conditions.size; j++) {
-            scenario_condition_t *condition;
-            array_new_item(group->conditions, condition);
-            *condition = *array_item(original_group->conditions, j);
-
-            scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
-        }
-    }
-    data.did_copy_event = 1;
-
-    // refresh needed to draw text in the right color
-    window_request_refresh();
-}
-
-static void button_paste_event(const generic_button *button)
-{
-    if (!data.did_copy_event) {
-        return;
-    }
-    int event_id = data.event->id;
-    data.event->state = data.copied_event.state;
-    data.event->repeat_days_min = data.copied_event.repeat_days_min;
-    data.event->repeat_days_max = data.copied_event.repeat_days_max;
-    data.event->repeat_interval = data.copied_event.repeat_interval;
-    data.event->max_number_of_repeats = data.copied_event.max_number_of_repeats;
-    data.event->execution_count = data.copied_event.execution_count;
-    data.event->days_until_active = data.copied_event.days_until_active;
-    string_copy(data.copied_event.name, data.event->name, EVENT_NAME_LENGTH);
-    array_init(data.event->actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, data.copied_event.actions.constructor,
-        data.copied_event.actions.in_use);
-    array_init(data.event->condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
-        data.copied_event.condition_groups.constructor, data.copied_event.condition_groups.in_use);
-    for (unsigned int i = 0; i < data.copied_event.actions.size; i++) {
-        scenario_action_t *action;
-        array_new_item(data.event->actions, action);
-        *action = *array_item(data.copied_event.actions, i);
-
-        scenario_parameters_foreach_in_action(action, copy_formulas_action);
-    }
-
-    for (unsigned int i = 0; i < data.copied_event.condition_groups.size; i++) {
-        scenario_condition_group_t *group;
-        array_new_item(data.event->condition_groups, group);
-        scenario_condition_group_t *original_group = array_item(data.copied_event.condition_groups, i);
-        group->type = original_group->type;
-        array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
-            original_group->conditions.in_use);
-        for (unsigned int j = 0; j < original_group->conditions.size; j++) {
-            scenario_condition_t *condition;
-            array_new_item(group->conditions, condition);
-            *condition = *array_item(original_group->conditions, j);
-
-            scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
-        }
-    }
-    data.event->id = event_id;
-    scenario_events_assign_parent_single_event_ids(data.event);
     update_groups();
     window_request_refresh();
 }

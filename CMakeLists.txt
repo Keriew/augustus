@@ -8,7 +8,7 @@ string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
 set(SDL_VERSION "2" CACHE STRING "SDL Version to use. Supported versions: 2, 3")
 set_property(CACHE SDL_VERSION PROPERTY STRINGS 2 3)
-    
+
 option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
 option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
@@ -36,7 +36,7 @@ if(${TARGET_PLATFORM} STREQUAL "emscripten" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE
         message(FATAL_ERROR "Please define EMSDK to point to your Emscripten SDK path!")
     endif()
 endif()
-    
+
 if(${TARGET_PLATFORM} STREQUAL "ios")
 
     set(CMAKE_SYSTEM_NAME "iOS")
@@ -53,9 +53,9 @@ if(${TARGET_PLATFORM} STREQUAL "ios")
 
     # Disable stuff that breaks the build and we don't need.
     if (SDL_VERSION STREQUAL "2")
-        set(SDL2MIXER_WAVPACK OFF) 
-        set(SDL2MIXER_OPUS OFF) 
-        set(SDL2MIXER_MIDI OFF) 
+        set(SDL2MIXER_WAVPACK OFF)
+        set(SDL2MIXER_OPUS OFF)
+        set(SDL2MIXER_MIDI OFF)
         set(SDL2MIXER_MOD OFF)
     else()
         set(SDLMIXER_WAVPACK OFF)
@@ -566,6 +566,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/copy.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/formula.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_city.c
@@ -798,7 +799,7 @@ endif()
 
 set(IOS_FILES "")
 if(${TARGET_PLATFORM} STREQUAL "ios")
-    set(IOS_FILES 
+    set(IOS_FILES
         ${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets
         ${ASSET_SOURCES}
     )

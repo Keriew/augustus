@@ -3,6 +3,7 @@
 #include "assets/assets.h"
 #include "core/config.h"
 #include "core/lang.h"
+#include "core/log.h"
 #include "core/string.h"
 #include "editor/editor.h"
 #include "graphics/button.h"
@@ -19,6 +20,7 @@
 #include "scenario/editor_events.h"
 #include "scenario/event/event.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/copy.h"
 #include "scenario/event/parameter_data.h"
 #include "scenario/property.h"
 #include "window/city.h"
@@ -37,6 +39,8 @@
 #define EVENTS_ROW_HEIGHT 31
 #define MAX_VISIBLE_ROWS 10
 #define BUTTON_WIDTH 320
+
+#define SCENARIO_EVENTS_SIZE_STEP 50
 
 typedef struct {
     scenario_event_t *event;
@@ -87,6 +91,7 @@ static struct {
     unsigned int total_events;
     unsigned int active_events;
     array(event_list_item) list;
+    array(scenario_event_t) copied_events;
     checkbox_selection_type selection_type;
     int do_not_ask_again_for_delete_event;
     int did_copy_events;
@@ -222,7 +227,7 @@ static void draw_foreground(void)
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE, data.focus_button_id == i + 1 ? 1 : 0);
     }
     if (data.active_events > 0) {
-        button_border_draw(buttons[17].x, buttons[17].y, 20, 20, data.focus_button_id == 16);
+        button_border_draw(buttons[17].x, buttons[17].y, 20, 20, data.focus_button_id == 17);
     }
     generic_button *btn = &buttons[10];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_ADD, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
@@ -353,12 +358,105 @@ static void select_none(void)
 
 static void copy_selected(void)
 {
+    if (!array_init(data.copied_events, SCENARIO_EVENTS_SIZE_STEP, scenario_event_new, scenario_event_is_active)) {
+        log_error("Unable to allocate enough memory for copying scenario events. The game will now crash.", 0, 0);
+    }
+    event_list_item *list_item;
+    array_foreach(data.list, list_item) {
+        if (!list_item->event) {
+            continue;
+        }
+        if (!list_item->selected) {
+            continue;
+        }
+        scenario_event_t *event = list_item->event;
+        scenario_event_t *copied_event;
+        array_new_item(data.copied_events, copied_event);
 
+        copied_event->state = event->state;
+        copied_event->repeat_days_min = event->repeat_days_min;
+        copied_event->repeat_days_max = event->repeat_days_max;
+        copied_event->repeat_interval = event->repeat_interval;
+        copied_event->max_number_of_repeats = event->max_number_of_repeats;
+        copied_event->execution_count = event->execution_count;
+        copied_event->days_until_active = event->days_until_active;
+        string_copy(event->name, copied_event->name, EVENT_NAME_LENGTH);
+        array_init(copied_event->actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, event->actions.constructor,
+            event->actions.in_use);
+        array_init(copied_event->condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
+            event->condition_groups.constructor, event->condition_groups.in_use);
+        for (unsigned int i = 0; i < event->actions.size; i++) {
+            scenario_action_t *action;
+            array_new_item(copied_event->actions, action);
+            *action = *array_item(event->actions, i);
+
+            scenario_parameters_foreach_in_action(action, copy_formulas_action);
+        }
+
+        for (unsigned int i = 0; i < event->condition_groups.size; i++) {
+            scenario_condition_group_t *group;
+            array_new_item(copied_event->condition_groups, group);
+            scenario_condition_group_t *original_group = array_item(event->condition_groups, i);
+            group->type = original_group->type;
+            array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
+                original_group->conditions.in_use);
+            for (unsigned int j = 0; j < original_group->conditions.size; j++) {
+                scenario_condition_t *condition;
+                array_new_item(group->conditions, condition);
+                *condition = *array_item(original_group->conditions, j);
+
+                scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+            }
+        }
+        data.did_copy_events = 1;
+    }
 }
 
 static void paste_selected(void)
 {
+    scenario_event_t *copied_event;
+    array_foreach(data.copied_events, copied_event) {
+        scenario_event_t *event = scenario_event_create(0, 0, 0);
 
+        event->state = copied_event->state;
+        event->repeat_days_min = copied_event->repeat_days_min;
+        event->repeat_days_max = copied_event->repeat_days_max;
+        event->repeat_interval = copied_event->repeat_interval;
+        event->max_number_of_repeats = copied_event->max_number_of_repeats;
+        event->execution_count = copied_event->execution_count;
+        event->days_until_active = copied_event->days_until_active;
+        string_copy(copied_event->name, event->name, EVENT_NAME_LENGTH);
+        array_init(event->actions, SCENARIO_ACTIONS_ARRAY_SIZE_STEP, copied_event->actions.constructor,
+            copied_event->actions.in_use);
+        array_init(event->condition_groups, SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP,
+            copied_event->condition_groups.constructor, copied_event->condition_groups.in_use);
+        for (unsigned int i = 0; i < copied_event->actions.size; i++) {
+            scenario_action_t *action;
+            array_new_item(event->actions, action);
+            *action = *array_item(copied_event->actions, i);
+
+            scenario_parameters_foreach_in_action(action, copy_formulas_action);
+        }
+
+        for (unsigned int i = 0; i < copied_event->condition_groups.size; i++) {
+            scenario_condition_group_t *group;
+            array_new_item(event->condition_groups, group);
+            scenario_condition_group_t *original_group = array_item(copied_event->condition_groups, i);
+            group->type = original_group->type;
+            array_init(group->conditions, SCENARIO_CONDITIONS_ARRAY_SIZE_STEP, original_group->conditions.constructor,
+                original_group->conditions.in_use);
+            for (unsigned int j = 0; j < original_group->conditions.size; j++) {
+                scenario_condition_t *condition;
+                array_new_item(group->conditions, condition);
+                *condition = *array_item(original_group->conditions, j);
+
+                scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+            }
+        }
+        scenario_events_assign_parent_single_event_ids(event);
+    }
+
+    init_list();
 }
 
 static void button_click(const generic_button *button)
