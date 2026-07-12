@@ -37,7 +37,7 @@
 
 #define EVENTS_Y_OFFSET 116
 #define EVENTS_ROW_HEIGHT 31
-#define MAX_VISIBLE_ROWS 10
+#define MAX_VISIBLE_ROWS 11
 #define BUTTON_WIDTH 320
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
@@ -75,14 +75,15 @@ static generic_button buttons[] = {
     {44, EVENTS_Y_OFFSET + (7 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 8},
     {44, EVENTS_Y_OFFSET + (8 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 9},
     {44, EVENTS_Y_OFFSET + (9 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 10},
-    {68, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 11}, // add new
-    {68, EVENTS_Y_OFFSET + (14 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12}, // delete selected
-    {68, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 13}, // import
-    {68 + BUTTON_WIDTH / 2, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // export
+    {44, EVENTS_Y_OFFSET + (10 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH + 24, EVENTS_ROW_HEIGHT, button_event, 0, 11},
+    {68, EVENTS_Y_OFFSET + (11 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 12}, // add new
+    {68, EVENTS_Y_OFFSET + (14 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH, EVENTS_ROW_HEIGHT, button_click, 0, 13}, // delete selected
+    {68, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 14}, // import
+    {68 + BUTTON_WIDTH / 2, EVENTS_Y_OFFSET + (15 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 15}, // export
     {WINDOW_WIDTH * BLOCK_SIZE - BUTTON_WIDTH / 2, 60, BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_open_variables}, // variables
-    {68, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 15}, // copy
-    {68 + BUTTON_WIDTH / 2, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 16}, // paste
-    {44, EVENTS_Y_OFFSET - 24, 20, 20, button_click, 0, 17} // select all/none
+    {68, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 16}, // copy
+    {68 + BUTTON_WIDTH / 2, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 17}, // paste
+    {44, EVENTS_Y_OFFSET - 24, 20, 20, button_click, 0, 18} // select all/none
 };
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
@@ -181,11 +182,11 @@ static void draw_foreground(void)
     int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);
     const image *img = image_get(checkmark_id);
     if (data.selection_type == CHECKBOX_SOME_SELECTED) {
-        text_draw(string_from_ascii("-"), buttons[17].x + 8, buttons[17].y + 4,
+        text_draw(string_from_ascii("-"), buttons[18].x + 8, buttons[18].y + 4,
             FONT_NORMAL_BLACK, 0);
     } else if (data.selection_type == CHECKBOX_ALL_SELECTED) {
-        image_draw(checkmark_id, buttons[17].x + (20 - img->original.width) / 2,
-             buttons[17].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(checkmark_id, buttons[18].x + (20 - img->original.width) / 2,
+             buttons[18].y + (20 - img->original.height) / 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 
     for (unsigned int i = 0; i < MAX_VISIBLE_ROWS; i++) {
@@ -229,31 +230,31 @@ static void draw_foreground(void)
         }
     }
 
-    for (size_t i = 10; i < MAX_BUTTONS - 1; i++) {
+    for (size_t i = 11; i < MAX_BUTTONS - 1; i++) {
         large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE, data.focus_button_id == i + 1 ? 1 : 0);
     }
     if (data.active_events > 0) {
-        button_border_draw(buttons[17].x, buttons[17].y, 20, 20, data.focus_button_id == 18);
+        button_border_draw(buttons[18].x, buttons[18].y, 20, 20, data.focus_button_id == 19);
     }
-    generic_button *btn = &buttons[10];
+    generic_button *btn = &buttons[11];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_ADD, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
-    btn = &buttons[11];
+    btn = &buttons[12];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_DELETE_SELECTED, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
-    btn = &buttons[12];
+    btn = &buttons[13];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_IMPORT, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
-    btn = &buttons[13];
+    btn = &buttons[14];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_EXPORT, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
-    btn = &buttons[14];
+    btn = &buttons[15];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_CUSTOM_VARIABLES_TITLE, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
-    btn = &buttons[15];
+    btn = &buttons[16];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_COPY_SELECTED, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
-    btn = &buttons[16];
+    btn = &buttons[17];
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_PASTE_SELECTED, btn->x, btn->y + 8, btn->width, FONT_NORMAL_GREEN);
 
     lang_text_draw_centered(13, 3, 0, WINDOW_HEIGHT * BLOCK_SIZE - 8, WINDOW_WIDTH * BLOCK_SIZE, FONT_NORMAL_BLACK); // Right-click to Continue
@@ -473,9 +474,9 @@ static void paste_selected(void)
 static void button_click(const generic_button *button)
 {
     int type = button->parameter1;
-    if (type == 11) {
+    if (type == 12) {
         add_new_event();
-    } else if (type == 12) {
+    } else if (type == 13) {
         if (data.selection_type == CHECKBOX_NO_SELECTION) {
             return;
         }
@@ -488,21 +489,21 @@ static void button_click(const generic_button *button)
             delete_selected(1, 1);
         }
         data.total_events = scenario_events_get_count();
-    } else if (type == 13) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_LOAD);
     } else if (type == 14) {
-        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_SAVE);
+        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_LOAD);
     } else if (type == 15) {
+        window_file_dialog_show(FILE_TYPE_SCENARIO_EVENTS, FILE_DIALOG_SAVE);
+    } else if (type == 16) {
         if (data.selection_type == CHECKBOX_NO_SELECTION) {
             return;
         }
         copy_selected();
-    } else if (type == 16) {
+    } else if (type == 17) {
         if (!data.did_copy_events) {
             return;
         }
         paste_selected();
-    } else if (type == 17) {
+    } else if (type == 18) {
         if (data.selection_type == CHECKBOX_ALL_SELECTED) {
             select_none();
         } else {
@@ -518,7 +519,7 @@ static void button_open_variables(const generic_button *button)
 
 static void handle_check_all_none_tooltip(tooltip_context *c)
 {
-    if (data.focus_button_id == 18) {
+    if (data.focus_button_id == 19) {
         if (data.active_events > 0) {
             c->precomposed_text = lang_get_string(CUSTOM_TRANSLATION,
                 data.selection_type == CHECKBOX_ALL_SELECTED ? TR_SELECT_NONE : TR_SELECT_ALL);
