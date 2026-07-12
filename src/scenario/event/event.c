@@ -6,10 +6,7 @@
 #include "game/save_version.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/condition_handler.h"
-
-#define SCENARIO_ACTIONS_ARRAY_SIZE_STEP 20
-#define SCENARIO_CONDITIONS_ARRAY_SIZE_STEP 20
-#define SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP 2
+#include "scenario/event/data.h"
 
 static int action_in_use(const scenario_action_t *action)
 {
@@ -41,7 +38,6 @@ void scenario_event_init(scenario_event_t *event)
         group = array_item(event->condition_groups, i);
         for (unsigned int j = 0; j < group->conditions.size; j++) {
             condition = array_item(group->conditions, j);
-            scenario_condition_type_init(condition);
             condition->parent_event_id = event_id;
         }
     }
@@ -179,7 +175,7 @@ static int conditions_fulfilled(scenario_event_t *event)
     if (event->actions.size == 0) {
         return 0;
     }
-    
+
     scenario_condition_group_t *group;
     array_foreach(event->condition_groups, group) {
         int group_fulfilled = 0;

@@ -229,7 +229,7 @@ typedef struct {
     buffer *deliveries;
     buffer *custom_empire;
     buffer *visited_buildings;
-    buffer *building_model_data;
+    buffer *model_data;
     buffer *rubble_grid;
     buffer *production_rates;
 } savegame_state;
@@ -639,7 +639,7 @@ static void init_savegame_data(savegame_version_t version)
         state->message_media_metadata = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
     }
     if (version_data.features.custom_model_data) {
-        state->building_model_data = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
+        state->model_data = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
     }
     state->max_game_year = create_savegame_piece(4, 0);
     state->earthquake = create_savegame_piece(60, 0);
@@ -782,7 +782,10 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
         scenario_events_migrate_to_grid_slices();
-        scenario_events_min_max_migrate_to_formulas();
+    }
+    scenario_events_min_max_migrate_to_formulas(version);
+    if (version <= SCENARIO_LAST_NO_HOUSE_MODELS) {
+        model_reset_houses();
     }
     resource_init();
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
@@ -791,6 +794,9 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     scenario_events_assign_parent_event_ids();
     if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
+    }
+    if (version <= SCENARIO_TESTING_VERSION_BUMP_1) {
+        scenario_events_population_migrate_counting();
     }
 
     buffer_skip(file->end_marker, 4);
@@ -907,7 +913,10 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
 
     model_reset();
     if (version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
-        model_load_model_data(state->building_model_data);
+        model_load_model_data(state->model_data);
+    }
+    if (version <= SAVE_GAME_LAST_NO_HOUSE_MODELS) {
+        model_reset_houses();
     }
 
     resource_init();
@@ -992,11 +1001,14 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_events_migrate_to_formulas();
         scenario_events_migrate_to_resolved_display_names();
         scenario_events_migrate_to_grid_slices();
-        scenario_events_min_max_migrate_to_formulas();
     }
+    scenario_events_min_max_migrate_to_formulas(scenario_version);
     scenario_events_assign_parent_event_ids();
     if (version <= SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
+    }
+    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_1) {
+        scenario_events_population_migrate_counting();
     }
 }
 
@@ -1041,7 +1053,7 @@ static void savegame_save_to_state(savegame_state *state)
     game_time_save_state(state->game_time);
     random_save_state(state->random_iv);
 
-    model_save_model_data(state->building_model_data);
+    model_save_model_data(state->model_data);
     scenario_emperor_change_save_state(state->emperor_change_time, state->emperor_change_state);
     empire_save_state(state->empire);
     empire_save_custom_map(state->empire_map);

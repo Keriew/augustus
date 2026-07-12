@@ -128,6 +128,7 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_granary_do_not_allow_walkers",
     [CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_warehouse_do_not_allow_walkers",
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS] = "gameplay_change_houses_do_not_spawn_plebeians",
+    [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = "ui_editor_show_deletion_warnings",
     [CONFIG_GP_CH_AUTO_CLEAR_TREES] = "gameplay_change_auto_clear_trees",
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
     [CONFIG_UI_SHOW_SHORELINE_DESIRABILITY] = "ui_show_shoreline_desirability",
@@ -205,7 +206,8 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_WT_PREVIEW_HEAVY_RAIN] = 0,
     [CONFIG_UI_WT_SANDSTORM_SIZE] = 0,
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = 2,
-    [CONFIG_UI_WT_WEATHER_DURATION] = 1
+    [CONFIG_UI_WT_WEATHER_DURATION] = 1,
+    [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = 1,
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };
