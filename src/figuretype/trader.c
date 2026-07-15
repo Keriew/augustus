@@ -954,6 +954,13 @@ void figure_trade_ship_action(figure *f)
                         int entrance_grid_offset = map_grid_offset(river_entry.x, river_entry.y);
                         int entrance_distance = map_grid_chess_distance(f->grid_offset, entrance_grid_offset);
                         river_spot = exit_distance < entrance_distance ? river_exit : river_entry;
+
+                        // Fix unreachable river exit for trade ships (low bridge)
+                        map_routing_calculate_distances_water_boat(f->x, f->y);
+                        if (map_routing_distance(map_grid_offset(river_spot.x, river_spot.y)) == 0) {
+                            river_spot = (river_spot.x == river_exit.x && river_spot.y == river_exit.y)
+                                ? river_entry : river_exit;
+                        }
                     } else {
                         river_spot = river_entry;
                     }
