@@ -3,6 +3,7 @@
 #include "building/building.h"
 #include "building/image.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "map/building.h"
 #include "map/figure.h"
 #include "map/grid.h"
@@ -60,7 +61,13 @@ static int is_blocked_tile(int grid_offset)
     if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
         return map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ROAD | TERRAIN_BUILDING);
     }
-    return map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR);
+    int forbidden = TERRAIN_NOT_CLEAR;
+    if (config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES)) {
+        // Trees and shrubs are cleared automatically on placement, so they don't
+        // block waterside buildings (dock, wharf, shipyard)
+        forbidden &= ~(TERRAIN_TREE | TERRAIN_SHRUB);
+    }
+    return map_terrain_is(grid_offset, forbidden);
 }
 
 int map_water_determine_orientation(int x, int y, int size, int adjust_xy,
