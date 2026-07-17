@@ -314,8 +314,13 @@ static void init(void)
     data.selected_button = NO_POSITION; // no button selected
     data.trade_route_anim_start = 0;
     window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
+    int sorting = config_get(CONFIG_UI_EMPIRE_SIDEBAR_SORT_METHOD); // restore last used sorting method
+    if (sorting < 0 || sorting >= MAX_SORTING_KEY) {
+        sorting = SORT_BY_NAME; // fall back to default on invalid config value
+    }
+    window_empire_sidebar_sort_set_current_sorting(sorting);
+    window_empire_sidebar_sort_set_sorting_reversed(config_get(CONFIG_UI_EMPIRE_SIDEBAR_SORT_REVERSED) != 0);
     if (!data.sidebar.initialised) {
-        window_empire_sidebar_sort_set_current_sorting(SORT_BY_NAME); // default sorting method
         window_empire_sidebar_sort_set_current_filtering(FILTER_NONE); // default to no filtering
         window_empire_sidebar_sort_set_selected_filter_resource(RESOURCE_NONE); // no resource selected
     }

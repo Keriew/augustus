@@ -132,6 +132,10 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
     [CONFIG_UI_SHOW_SHORELINE_DESIRABILITY] = "ui_show_shoreline_desirability",
     [CONFIG_UI_SHOW_ELEVATION_DESIRABILITY] = "ui_show_elevation_desirability",
+    [CONFIG_UI_EMPIRE_SIDEBAR_SORT_METHOD] = "ui_empire_sidebar_sort_method",
+    [CONFIG_UI_EMPIRE_SIDEBAR_SORT_REVERSED] = "ui_empire_sidebar_sort_reversed",
+    [CONFIG_UI_AUTO_CYCLE_TEMPLES] = "ui_auto_cycle_temples",
+    [CONFIG_UI_AUTO_CYCLE_GARDENS] = "ui_auto_cycle_gardens",
 };
 
 static const char *ini_string_keys[] = {

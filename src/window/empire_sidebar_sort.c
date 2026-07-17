@@ -11,6 +11,7 @@
 #include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/grid_box.h"
+#include "core/config.h"
 #include "core/image_group.h"
 #include "core/string.h"
 #include "input/mouse.h"
@@ -460,6 +461,7 @@ int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
         if (m->left.went_up) {
             // Toggle sorting order
             window_empire_sidebar_sort_set_sorting_reversed(!window_empire_sidebar_sort_get_sorting_reversed());
+            config_set(CONFIG_UI_EMPIRE_SIDEBAR_SORT_REVERSED, window_empire_sidebar_sort_get_sorting_reversed());
             return 1; // Block further input
         }
         return 1; // Block further input when hovering over arrow
@@ -499,6 +501,7 @@ int window_empire_sidebar_sort_handle_expanding_buttons_input(const mouse *m)
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_SORT_METHOD &&
                            btn->button_type < BUTTON_INDEX_FIRST_FILTER_METHOD) {
                     window_empire_sidebar_sort_set_current_sorting(btn->button_type - BUTTON_INDEX_FIRST_SORT_METHOD);
+                    config_set(CONFIG_UI_EMPIRE_SIDEBAR_SORT_METHOD, window_empire_sidebar_sort_get_current_sorting());
                     window_empire_sidebar_sort_set_expanded_main(NO_POSITION);
                     return 1;
                 } else if (btn->button_type >= BUTTON_INDEX_FIRST_FILTER_METHOD &&

@@ -188,6 +188,18 @@ static int is_auto_cycle_button(building_type type)
         (type == BUILDING_MENU_GARDENS && data.selected_submenu == BUILD_MENU_GARDENS);
 }
 
+static auto_cycle_group selected_auto_cycle_group(void)
+{
+    switch (data.selected_submenu) {
+        case BUILD_MENU_SMALL_TEMPLES:
+        case BUILD_MENU_LARGE_TEMPLES:
+        case BUILD_MENU_SHRINES:
+            return AUTO_CYCLE_GROUP_TEMPLES;
+        default:
+            return AUTO_CYCLE_GROUP_GARDENS;
+    }
+}
+
 static int produced_resource_icon(building_type type)
 {
     resource_type r = resource_get_from_industry(type);
@@ -253,7 +265,8 @@ static void draw_menu_buttons(void)
                 item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
                 MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
             }
-            lang_text_draw_centered(18, 5 - building_construction_is_auto_cycling(), x_offset - MENU_ITEM_MONEY_OFFSET,
+            lang_text_draw_centered(18, 5 - building_construction_is_auto_cycling(selected_auto_cycle_group()),
+                x_offset - MENU_ITEM_MONEY_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i, MENU_ITEM_MONEY_OFFSET,
                 FONT_NORMAL_GREEN);
             continue;
@@ -406,7 +419,7 @@ static void button_menu_item(int item)
     building_type type = building_menu_type(data.selected_submenu, item);
 
     if (is_auto_cycle_button(type)) {
-        building_construction_toggle_auto_cycle();
+        building_construction_toggle_auto_cycle(selected_auto_cycle_group());
         window_invalidate();
         return;
     }
