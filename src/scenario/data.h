@@ -132,9 +132,9 @@ extern struct scenario_t {
         int meeting;
         int crops;
         int well;
-        int meeting_alt;
+        int large_hut_alt;
         int hut_alt_2;
-        int meeting_alt_2;
+        int large_hut_alt_2;
         int palisade;
     } native_images;
 

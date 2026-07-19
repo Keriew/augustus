@@ -641,12 +641,12 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER);
             case TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL:
                 return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL);
-            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT:
-                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT);
             case TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2:
                 return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2);
-            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2:
-                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2);
+            case TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT_2:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT_2);
             case TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE:
                 return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE);
             case TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS:

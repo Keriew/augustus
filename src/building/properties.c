@@ -2227,13 +2227,13 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .building_model_data = {.cost = 0, .desirability_value = 0, .desirability_step = 0,
             .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
-     [BUILDING_NATIVE_MEETING_ALT] = {
+     [BUILDING_NATIVE_LARGE_HUT_ALT] = {
         .size = 2,
         .sound_id = SOUND_CITY_NATIVE_HUT,
         .fire_proof = 1,
         .custom_asset.group = "Terrain_Maps",
         .custom_asset.id = "Native_Meeting_Hut_Central_01",
-        .event_data.attr = "native_meeting_alt",
+        .event_data.attr = "native_large_hut_alt",
         .building_model_data = {.cost = 50, .desirability_value = 0, .desirability_step = 0,
             .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
@@ -2247,13 +2247,13 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .building_model_data = {.cost = 50, .desirability_value = 0, .desirability_step = 0,
             .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },
-     [BUILDING_NATIVE_MEETING_ALT_2] = {
+     [BUILDING_NATIVE_LARGE_HUT_ALT_2] = {
         .size = 2,
         .sound_id = SOUND_CITY_NATIVE_HUT,
         .fire_proof = 1,
         .custom_asset.group = "Terrain_Maps",
         .custom_asset.id = "Hellenised_Meeting_Hut_Central_01",
-        .event_data.attr = "native_meeting_alt_2",
+        .event_data.attr = "native_large_hut_alt_2",
         .building_model_data = {.cost = 50, .desirability_value = 0, .desirability_step = 0,
             .desirability_step_size = 0, .desirability_range = 0, .laborers = 0}
      },

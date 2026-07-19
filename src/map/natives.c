@@ -48,8 +48,8 @@ static int has_building_on_native_land(int x, int y, int size, int radius)
                     type != BUILDING_NATIVE_HUT_ALT &&
                     type != BUILDING_NATIVE_HUT_ALT_2 &&
                     type != BUILDING_NATIVE_MEETING &&
-                    type != BUILDING_NATIVE_MEETING_ALT &&
-                    type != BUILDING_NATIVE_MEETING_ALT_2 &&
+                    type != BUILDING_NATIVE_LARGE_HUT_ALT &&
+                    type != BUILDING_NATIVE_LARGE_HUT_ALT_2 &&
                     type != BUILDING_NATIVE_CROPS &&
                     type != BUILDING_NATIVE_DECORATION &&
                     type != BUILDING_NATIVE_MONUMENT &&
@@ -71,9 +71,8 @@ static int has_building_on_native_land(int x, int y, int size, int radius)
 
 static void determine_meeting_center(void)
 {
-    building_type native_hut_kind[] = { BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT, BUILDING_NATIVE_HUT_ALT_2 };
-    building_type meeting_kind[] = { BUILDING_NATIVE_MEETING, BUILDING_NATIVE_MEETING_ALT,
-        BUILDING_NATIVE_MEETING_ALT_2 };
+    building_type native_hut_kind[] = { BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT, BUILDING_NATIVE_HUT_ALT_2,
+        BUILDING_NATIVE_LARGE_HUT_ALT, BUILDING_NATIVE_LARGE_HUT_ALT_2 };
 
     for (int kind_idx = 0; kind_idx < sizeof(native_hut_kind) / sizeof(native_hut_kind[0]); ++kind_idx) {
         // Determine closest meeting center for hut
@@ -83,13 +82,11 @@ static void determine_meeting_center(void)
             }
             int min_dist = 1000;
             int min_meeting_id = 0;
-            for (int m_idx = 0; m_idx < sizeof(meeting_kind) / sizeof(meeting_kind[0]); ++m_idx) {
-                for (building *m = building_first_of_type(meeting_kind[m_idx]); m; m = m->next_of_type) {
-                    int dist = calc_maximum_distance(b->x, b->y, m->x, m->y);
-                    if (dist < min_dist) {
-                        min_dist = dist;
-                        min_meeting_id = m->id;
-                    }
+            for (building *m = building_first_of_type(BUILDING_NATIVE_MEETING); m; m = m->next_of_type) {
+                int dist = calc_maximum_distance(b->x, b->y, m->x, m->y);
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    min_meeting_id = m->id;
                 }
             }
             b->subtype.native_meeting_center_id = min_meeting_id;
@@ -129,9 +126,9 @@ void map_natives_init(void)
     int scenario_image_monument = scenario.native_images.monument;
     int scenario_image_watchtower = scenario.native_images.watchtower;
     int scenario_image_well = scenario.native_images.well;
-    int scenario_image_meeting_alt = scenario.native_images.meeting_alt;
+    int scenario_image_large_hut_alt = scenario.native_images.large_hut_alt;
     int scenario_image_hut_alt_2 = scenario.native_images.hut_alt_2;
-    int scenario_image_meeting_alt_2 = scenario.native_images.meeting_alt_2;
+    int scenario_image_large_hut_alt_2 = scenario.native_images.large_hut_alt_2;
     int scenario_image_palisade = scenario.native_images.palisade;
     int native_image = image_group(GROUP_BUILDING_NATIVE);
     int native_hut_alt_image = native_hut_alt_get_image_id();
@@ -185,15 +182,15 @@ void map_natives_init(void)
                 map_image_set(grid_offset + map_grid_delta(1, 0), native_image + 2);
                 map_image_set(grid_offset + map_grid_delta(0, 1), native_image + 2);
                 map_image_set(grid_offset + map_grid_delta(1, 1), native_image + 2);
-            } else if (scenario_image_meeting_alt != 0 && image_id == scenario_image_meeting_alt) {
-                type = BUILDING_NATIVE_MEETING_ALT;
+            } else if (scenario_image_large_hut_alt != 0 && image_id == scenario_image_large_hut_alt) {
+                type = BUILDING_NATIVE_LARGE_HUT_ALT;
                 int img = building_image_get_for_type(type);
                 map_image_set(grid_offset, img);
                 map_image_set(grid_offset + map_grid_delta(1, 0), img);
                 map_image_set(grid_offset + map_grid_delta(0, 1), img);
                 map_image_set(grid_offset + map_grid_delta(1, 1), img);
-            } else if (scenario_image_meeting_alt_2 != 0 && image_id == scenario_image_meeting_alt_2) {
-                type = BUILDING_NATIVE_MEETING_ALT_2;
+            } else if (scenario_image_large_hut_alt_2 != 0 && image_id == scenario_image_large_hut_alt_2) {
+                type = BUILDING_NATIVE_LARGE_HUT_ALT_2;
                 int img = building_image_get_for_type(type);
                 map_image_set(grid_offset, img);
                 map_image_set(grid_offset + map_grid_delta(1, 0), img);
@@ -217,9 +214,17 @@ void map_natives_init(void)
                     b->subtype.orientation = (image_id - image_crops) / 5;
                     break;
                 case BUILDING_NATIVE_MEETING:
-                case BUILDING_NATIVE_MEETING_ALT:
-                case BUILDING_NATIVE_MEETING_ALT_2:
                     b->sentiment.native_anger = 100;
+                    map_building_set(grid_offset + map_grid_delta(1, 0), b->id);
+                    map_building_set(grid_offset + map_grid_delta(0, 1), b->id);
+                    map_building_set(grid_offset + map_grid_delta(1, 1), b->id);
+                    mark_native_land(b->x, b->y, 2, 6);
+                    break;
+                case BUILDING_NATIVE_LARGE_HUT_ALT:
+                case BUILDING_NATIVE_LARGE_HUT_ALT_2:
+                    // 2x2 variants of the native hut: occupy four tiles but behave like huts
+                    b->sentiment.native_anger = 100;
+                    b->figure_spawn_delay = random_bit;
                     map_building_set(grid_offset + map_grid_delta(1, 0), b->id);
                     map_building_set(grid_offset + map_grid_delta(0, 1), b->id);
                     map_building_set(grid_offset + map_grid_delta(1, 1), b->id);
@@ -257,9 +262,9 @@ void map_natives_init_editor(void)
     int scenario_image_monument = scenario.native_images.monument;
     int scenario_image_watchtower = scenario.native_images.watchtower;
     int scenario_image_well = scenario.native_images.well;
-    int scenario_image_meeting_alt = scenario.native_images.meeting_alt;
+    int scenario_image_large_hut_alt = scenario.native_images.large_hut_alt;
     int scenario_image_hut_alt_2 = scenario.native_images.hut_alt_2;
-    int scenario_image_meeting_alt_2 = scenario.native_images.meeting_alt_2;
+    int scenario_image_large_hut_alt_2 = scenario.native_images.large_hut_alt_2;
     int scenario_image_palisade = scenario.native_images.palisade;
 
     int grid_offset = map_data.start_offset;
@@ -309,15 +314,15 @@ void map_natives_init_editor(void)
                 map_image_set(grid_offset + map_grid_delta(1, 0), native_image + 2);
                 map_image_set(grid_offset + map_grid_delta(0, 1), native_image + 2);
                 map_image_set(grid_offset + map_grid_delta(1, 1), native_image + 2);
-            } else if (scenario_image_meeting_alt != 0 && image_id == scenario_image_meeting_alt) {
-                type = BUILDING_NATIVE_MEETING_ALT;
+            } else if (scenario_image_large_hut_alt != 0 && image_id == scenario_image_large_hut_alt) {
+                type = BUILDING_NATIVE_LARGE_HUT_ALT;
                 int img = building_image_get_for_type(type);
                 map_image_set(grid_offset, img);
                 map_image_set(grid_offset + map_grid_delta(1, 0), img);
                 map_image_set(grid_offset + map_grid_delta(0, 1), img);
                 map_image_set(grid_offset + map_grid_delta(1, 1), img);
-            } else if (scenario_image_meeting_alt_2 != 0 && image_id == scenario_image_meeting_alt_2) {
-                type = BUILDING_NATIVE_MEETING_ALT_2;
+            } else if (scenario_image_large_hut_alt_2 != 0 && image_id == scenario_image_large_hut_alt_2) {
+                type = BUILDING_NATIVE_LARGE_HUT_ALT_2;
                 int img = building_image_get_for_type(type);
                 map_image_set(grid_offset, img);
                 map_image_set(grid_offset + map_grid_delta(1, 0), img);
@@ -339,8 +344,8 @@ void map_natives_init_editor(void)
                 int crop_offset = image_id - image_crops;
                 b->subtype.orientation = crop_offset / 5;
             }
-            if (type == BUILDING_NATIVE_MEETING || type == BUILDING_NATIVE_MEETING_ALT ||
-                type == BUILDING_NATIVE_MEETING_ALT_2) {
+            if (type == BUILDING_NATIVE_MEETING || type == BUILDING_NATIVE_LARGE_HUT_ALT ||
+                type == BUILDING_NATIVE_LARGE_HUT_ALT_2) {
                 map_building_set(grid_offset + map_grid_delta(1, 0), b->id);
                 map_building_set(grid_offset + map_grid_delta(0, 1), b->id);
                 map_building_set(grid_offset + map_grid_delta(1, 1), b->id);
@@ -361,7 +366,7 @@ void map_natives_check_land(int update_behavior)
     }
 
     building_type native_buildings[] = { BUILDING_NATIVE_HUT, BUILDING_NATIVE_HUT_ALT, BUILDING_NATIVE_HUT_ALT_2,
-        BUILDING_NATIVE_MEETING, BUILDING_NATIVE_MEETING_ALT, BUILDING_NATIVE_MEETING_ALT_2,
+        BUILDING_NATIVE_MEETING, BUILDING_NATIVE_LARGE_HUT_ALT, BUILDING_NATIVE_LARGE_HUT_ALT_2,
         BUILDING_NATIVE_WATCHTOWER };
 
     for (int i = 0; i < sizeof(native_buildings) / sizeof(native_buildings[0]); i++) {

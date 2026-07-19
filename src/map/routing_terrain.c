@@ -155,6 +155,9 @@ static int get_land_type_noncitizen(int grid_offset)
         case BUILDING_BURNING_RUIN:
         case BUILDING_NATIVE_HUT:
         case BUILDING_NATIVE_HUT_ALT:
+        case BUILDING_NATIVE_HUT_ALT_2:
+        case BUILDING_NATIVE_LARGE_HUT_ALT:
+        case BUILDING_NATIVE_LARGE_HUT_ALT_2:
         case BUILDING_NATIVE_MEETING:
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_DECORATION:

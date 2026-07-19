@@ -691,7 +691,7 @@ static void update_native_images(int old_climate, int new_climate)
     }
 
     building_type meeting_buildings[] = {
-        BUILDING_NATIVE_MEETING_ALT, BUILDING_NATIVE_MEETING_ALT_2,
+        BUILDING_NATIVE_LARGE_HUT_ALT, BUILDING_NATIVE_LARGE_HUT_ALT_2,
     };
     for (int i = 0; i < (int) (sizeof(meeting_buildings) / sizeof(meeting_buildings[0])); i++) {
         building_type type = meeting_buildings[i];

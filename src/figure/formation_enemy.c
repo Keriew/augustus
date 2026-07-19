@@ -273,8 +273,8 @@ static int get_structures_on_native_land(int *dst_x, int *dst_y)
 
     building_type native_buildings[] = {
         BUILDING_NATIVE_MEETING,
-        BUILDING_NATIVE_MEETING_ALT,
-        BUILDING_NATIVE_MEETING_ALT_2,
+        BUILDING_NATIVE_LARGE_HUT_ALT,
+        BUILDING_NATIVE_LARGE_HUT_ALT_2,
         BUILDING_NATIVE_WATCHTOWER,
         BUILDING_NATIVE_HUT,
         BUILDING_NATIVE_HUT_ALT,
@@ -332,8 +332,8 @@ static void set_native_target_building(formation *m)
             case BUILDING_NATIVE_HUT_ALT_2:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_NATIVE_MEETING:
-            case BUILDING_NATIVE_MEETING_ALT:
-            case BUILDING_NATIVE_MEETING_ALT_2:
+            case BUILDING_NATIVE_LARGE_HUT_ALT:
+            case BUILDING_NATIVE_LARGE_HUT_ALT_2:
             case BUILDING_NATIVE_MONUMENT:
             case BUILDING_NATIVE_WATCHTOWER:
             case BUILDING_NATIVE_DECORATION:

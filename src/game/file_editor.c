@@ -189,8 +189,8 @@ int game_file_editor_write_scenario(const char *scenario_file)
     int image_native_monument = building_image_get_for_type(BUILDING_NATIVE_MONUMENT);
     int image_native_watchtower = building_image_get_for_type(BUILDING_NATIVE_WATCHTOWER);
     int image_native_well = building_image_get_for_type(BUILDING_NATIVE_WELL);
-    int image_native_meeting_alt = building_image_get_for_type(BUILDING_NATIVE_MEETING_ALT);
-    int image_native_meeting_alt_2 = building_image_get_for_type(BUILDING_NATIVE_MEETING_ALT_2);
+    int image_native_large_hut_alt = building_image_get_for_type(BUILDING_NATIVE_LARGE_HUT_ALT);
+    int image_native_large_hut_alt_2 = building_image_get_for_type(BUILDING_NATIVE_LARGE_HUT_ALT_2);
     int image_native_hut_alt_2;
     int image_native_palisade;
     switch (scenario_property_climate()) {
@@ -216,9 +216,9 @@ int game_file_editor_write_scenario(const char *scenario_file)
         image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
         image_group(GROUP_EDITOR_BUILDING_CROPS),
         image_native_well,
-        image_native_meeting_alt,
+        image_native_large_hut_alt,
         image_native_hut_alt_2,
-        image_native_meeting_alt_2,
+        image_native_large_hut_alt_2,
         image_native_palisade
     );
     scenario_distant_battle_set_roman_travel_months();

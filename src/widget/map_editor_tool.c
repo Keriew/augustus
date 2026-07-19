@@ -105,7 +105,7 @@ static void draw_building(const map_tile *tile, int x_view, int y_view, building
             };
         } else if (type == BUILDING_NATIVE_DECORATION || type == BUILDING_NATIVE_MONUMENT ||
             type == BUILDING_NATIVE_WATCHTOWER || type == BUILDING_NATIVE_WELL ||
-            type == BUILDING_NATIVE_MEETING_ALT || type == BUILDING_NATIVE_MEETING_ALT_2) {
+            type == BUILDING_NATIVE_LARGE_HUT_ALT || type == BUILDING_NATIVE_LARGE_HUT_ALT_2) {
             image_id = building_image_get_for_type(type);
         } else {
             image_id = image_group(props->image_group) + props->image_offset;
@@ -269,11 +269,11 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_NATIVE_HUT_ALT_2:
             draw_building(tile, x, y, BUILDING_NATIVE_HUT_ALT_2);
             break;
-        case TOOL_NATIVE_MEETING_ALT:
-            draw_building(tile, x, y, BUILDING_NATIVE_MEETING_ALT);
+        case TOOL_NATIVE_LARGE_HUT_ALT:
+            draw_building(tile, x, y, BUILDING_NATIVE_LARGE_HUT_ALT);
             break;
-        case TOOL_NATIVE_MEETING_ALT_2:
-            draw_building(tile, x, y, BUILDING_NATIVE_MEETING_ALT_2);
+        case TOOL_NATIVE_LARGE_HUT_ALT_2:
+            draw_building(tile, x, y, BUILDING_NATIVE_LARGE_HUT_ALT_2);
             break;
         case TOOL_NATIVE_WELL:
             draw_building(tile, x, y, BUILDING_NATIVE_WELL);

@@ -164,8 +164,8 @@ static int get_height_id(void)
             case BUILDING_NATIVE_HUT_ALT:
             case BUILDING_NATIVE_HUT_ALT_2:
             case BUILDING_NATIVE_MEETING:
-            case BUILDING_NATIVE_MEETING_ALT:
-            case BUILDING_NATIVE_MEETING_ALT_2:
+            case BUILDING_NATIVE_LARGE_HUT_ALT:
+            case BUILDING_NATIVE_LARGE_HUT_ALT_2:
             case BUILDING_NATIVE_CROPS:
             case BUILDING_NATIVE_DECORATION:
             case BUILDING_NATIVE_MONUMENT:
@@ -802,10 +802,10 @@ static void draw_background(void)
         } else if (btype == BUILDING_BURNING_RUIN) {
             window_building_draw_burning_ruin(&context);
         } else if (btype == BUILDING_NATIVE_HUT || btype == BUILDING_NATIVE_HUT_ALT ||
-            btype == BUILDING_NATIVE_HUT_ALT_2) {
+            btype == BUILDING_NATIVE_HUT_ALT_2 || btype == BUILDING_NATIVE_LARGE_HUT_ALT ||
+            btype == BUILDING_NATIVE_LARGE_HUT_ALT_2) {
             window_building_draw_native_hut(&context);
-        } else if (btype == BUILDING_NATIVE_MEETING || btype == BUILDING_NATIVE_MEETING_ALT ||
-            btype == BUILDING_NATIVE_MEETING_ALT_2) {
+        } else if (btype == BUILDING_NATIVE_MEETING) {
             window_building_draw_native_meeting(&context);
         } else if (btype == BUILDING_NATIVE_CROPS) {
             window_building_draw_native_crops(&context);

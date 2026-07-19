@@ -622,8 +622,8 @@ static void show_overlay_from_grid_offset(int grid_offset)
         case BUILDING_NATIVE_HUT_ALT:
         case BUILDING_NATIVE_HUT_ALT_2:
         case BUILDING_NATIVE_MEETING:
-        case BUILDING_NATIVE_MEETING_ALT:
-        case BUILDING_NATIVE_MEETING_ALT_2:
+        case BUILDING_NATIVE_LARGE_HUT_ALT:
+        case BUILDING_NATIVE_LARGE_HUT_ALT_2:
             overlay = OVERLAY_NATIVE;
             break;
         case BUILDING_WAREHOUSE:

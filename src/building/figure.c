@@ -1613,25 +1613,8 @@ static void spawn_figure_dock(building *b)
     }
 }
 
-static void spawn_figure_native_hut(building *b)
+static void native_hut_spawn_indigenous_native(building *b)
 {
-    if (b->type == BUILDING_NATIVE_HUT) {
-        map_image_set(b->grid_offset, image_group(GROUP_BUILDING_NATIVE) + (map_random_get(b->grid_offset) & 1));
-    } else {
-        int image_group_id;
-        switch (scenario_property_climate()) {
-            case CLIMATE_NORTHERN:
-                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
-                break;
-            case CLIMATE_DESERT:
-                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
-                break;
-            default:
-                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
-        }
-        map_image_set(b->grid_offset, image_group_id + (map_random_get(b->grid_offset) & 1));
-    }
-
     if (has_figure_of_type(b, FIGURE_INDIGENOUS_NATIVE)) {
         return;
     }
@@ -1647,6 +1630,27 @@ static void spawn_figure_native_hut(building *b)
             b->figure_id = f->id;
         }
     }
+}
+
+static void spawn_figure_native_hut(building *b)
+{
+    if (b->type == BUILDING_NATIVE_HUT) {
+        map_image_set(b->grid_offset, image_group(GROUP_BUILDING_NATIVE) + (map_random_get(b->grid_offset) & 1));
+    } else if (b->type == BUILDING_NATIVE_HUT_ALT) {
+        int image_group_id;
+        switch (scenario_property_climate()) {
+            case CLIMATE_NORTHERN:
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Northern_01");
+                break;
+            case CLIMATE_DESERT:
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Southern_01");
+                break;
+            default:
+                image_group_id = assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01");
+        }
+        map_image_set(b->grid_offset, image_group_id + (map_random_get(b->grid_offset) & 1));
+    }
+    native_hut_spawn_indigenous_native(b);
 }
 
 static void spawn_figure_native_meeting(building *b)
@@ -2272,6 +2276,13 @@ void building_figure_generate(void)
                 case BUILDING_NATIVE_HUT:
                 case BUILDING_NATIVE_HUT_ALT:
                     spawn_figure_native_hut(b);
+                    break;
+                case BUILDING_NATIVE_HUT_ALT_2:
+                case BUILDING_NATIVE_LARGE_HUT_ALT:
+                case BUILDING_NATIVE_LARGE_HUT_ALT_2:
+                    // Tiles and images are fully set at init/placement; do not rewrite them
+                    // here — the large hut assets are composited masks over map images
+                    native_hut_spawn_indigenous_native(b);
                     break;
                 case BUILDING_NATIVE_MEETING:
                     spawn_figure_native_meeting(b);

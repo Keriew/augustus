@@ -51,9 +51,9 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     {10, 11, 12, 13, 14, 15, 16, 17, -1},
     {18, 19, -1},
     {20, TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT,
-    TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2, 21,
-    TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT,
-    TR_EDITOR_SCENARIO_BUILDING_NATIVE_MEETING_ALT_2,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT,
+    TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT_2, 21,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT,
@@ -186,9 +186,9 @@ static void button_menu_item(const generic_button *button)
                 case 0: editor_tool_set_type(TOOL_NATIVE_HUT); break;
                 case 1: editor_tool_set_type(TOOL_NATIVE_HUT_ALT); break;
                 case 2: editor_tool_set_type(TOOL_NATIVE_HUT_ALT_2); break;
-                case 3: editor_tool_set_type(TOOL_NATIVE_CENTER); break;
-                case 4: editor_tool_set_type(TOOL_NATIVE_MEETING_ALT); break;
-                case 5: editor_tool_set_type(TOOL_NATIVE_MEETING_ALT_2); break;
+                case 3: editor_tool_set_type(TOOL_NATIVE_LARGE_HUT_ALT); break;
+                case 4: editor_tool_set_type(TOOL_NATIVE_LARGE_HUT_ALT_2); break;
+                case 5: editor_tool_set_type(TOOL_NATIVE_CENTER); break;
                 case 6:
                     // Open the Native Fields submenu instead of placing a building
                     window_editor_build_menu_show(MENU_NATIVE_FIELDS);

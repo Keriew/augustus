@@ -368,9 +368,9 @@ void scenario_save_state(buffer *buf)
     buffer_write_i32(buf, scenario.native_images.watchtower);
 
     buffer_write_i32(buf, scenario.native_images.well);
-    buffer_write_i32(buf, scenario.native_images.meeting_alt);
+    buffer_write_i32(buf, scenario.native_images.large_hut_alt);
     buffer_write_i32(buf, scenario.native_images.hut_alt_2);
-    buffer_write_i32(buf, scenario.native_images.meeting_alt_2);
+    buffer_write_i32(buf, scenario.native_images.large_hut_alt_2);
     buffer_write_i32(buf, scenario.native_images.palisade);
 
     buffer_write_i32(buf, scenario.intro_custom_message_id);
@@ -558,15 +558,15 @@ void scenario_load_state(buffer *buf, int version)
     }
     if (version > SCENARIO_LAST_NO_MORE_NATIVE_BUILDINGS) {
         scenario.native_images.well = buffer_read_i32(buf);
-        scenario.native_images.meeting_alt = buffer_read_i32(buf);
+        scenario.native_images.large_hut_alt = buffer_read_i32(buf);
         scenario.native_images.hut_alt_2 = buffer_read_i32(buf);
-        scenario.native_images.meeting_alt_2 = buffer_read_i32(buf);
+        scenario.native_images.large_hut_alt_2 = buffer_read_i32(buf);
         scenario.native_images.palisade = buffer_read_i32(buf);
     } else {
         scenario.native_images.well = 0;
-        scenario.native_images.meeting_alt = 0;
+        scenario.native_images.large_hut_alt = 0;
         scenario.native_images.hut_alt_2 = 0;
-        scenario.native_images.meeting_alt_2 = 0;
+        scenario.native_images.large_hut_alt_2 = 0;
         scenario.native_images.palisade = 0;
     }
 
