@@ -1131,4 +1131,8 @@ void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, 
 
     extra.incorrect_houses = buffer_read_i32(corrupt_houses);
     extra.unfixable_houses = buffer_read_i32(corrupt_houses);
+
+    if (save_version <= SAVE_GAME_LAST_NO_FORT_ORIENTATION) {
+        migrate_fort_rotations();
+    }
 }
