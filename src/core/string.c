@@ -60,7 +60,7 @@ int string_length(const uint8_t *str)
     if (!str) {
         return 0;
     }
-    
+
     int length = 0;
     while (*str) {
         length++;
@@ -140,6 +140,50 @@ int string_from_int(uint8_t *dst, int value, int force_plus_sign)
 
     dst[total_chars] = 0;
 
+    return total_chars;
+}
+
+int string_from_float(uint8_t *dst, float value, int decimal_places, int force_plus_sign)
+{
+    int total_chars = 0;
+
+    if (decimal_places < 0) {
+        decimal_places = 0;
+    } else if (decimal_places > 5) {
+        decimal_places = 5; // why would we ever need more than 5 decimal places? This ain't nuclear physics
+    }
+
+    if (value < 0.0f) {
+        dst[total_chars++] = '-';
+        value = -value;
+    } else if (force_plus_sign) {
+        dst[total_chars++] = '+';
+    }
+
+    int scale = 1;
+    for (int i = 0; i < decimal_places; i++) {
+        scale *= 10;
+    }
+
+    // Round once at full precision so carry into whole part is handled.
+    int64_t scaled = (int64_t) (value * (float) scale + 0.5f);
+    int int_part = (int) (scaled / scale);
+    int fractional_digits = (int) (scaled % scale);
+
+    total_chars += string_from_int(&dst[total_chars], int_part, 0);
+
+    if (decimal_places > 0) {
+        dst[total_chars++] = '.';
+
+        // Emit exactly decimal_places digits, including leading zeros.
+        int divisor = scale / 10;
+        while (divisor > 0) {
+            dst[total_chars++] = (uint8_t) ('0' + ((fractional_digits / divisor) % 10));
+            divisor /= 10;
+        }
+    }
+
+    dst[total_chars] = 0;
     return total_chars;
 }
 

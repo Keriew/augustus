@@ -879,7 +879,7 @@
 	<image id="Mercury Complex On" width="418" height="231" isometric="true">
 		<layer group="this" image="Mercury Complex Off"/>
 		<animation speed="1" x="135" y="117">
-			<frame group ="this" image="Mercury worshippers"/>
+			<frame group="this" image="Mercury worshippers"/>
 		</animation>
 	</image>
 	<!-- Note: Mercury Complex Module Animation Reference Assets (DO NOT USE!!) -->
@@ -1249,69 +1249,67 @@
 	<image id="Venus_CM_BG">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
 	</image>
-
 	<!-- Now bake BG + each overlay frame (same indices you used) -->
 	<image id="Venus_CM_0">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105"/>
+		<layer src="Venus_Temple_Complex_Module_01"/>
 	</image>
 	<image id="Venus_CM_1">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="1"/>
+		<layer src="Venus_Temple_Complex_Module_02"/>
 	</image>
 	<image id="Venus_CM_10">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="10"/>
+		<layer src="Venus_Temple_Complex_Module_03"/>
 	</image>
 	<image id="Venus_CM_11">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="11"/>
+		<layer src="Venus_Temple_Complex_Module_04"/>
 	</image>
 	<image id="Venus_CM_19">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="19"/>
+		<layer src="Venus_Temple_Complex_Module_05"/>
 	</image>
 	<image id="Venus_CM_20">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="20"/>
+		<layer src="Venus_Temple_Complex_Module_01"/>
 	</image>
 	<image id="Venus_CM_28">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="28"/>
+		<layer src="Venus_Temple_Complex_Module_02"/>
 	</image>
 	<image id="Venus_CM_29">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="29"/>
+		<layer src="Venus_Temple_Complex_Module_03"/>
 	</image>
 	<image id="Venus_CM_37">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="37"/>
+		<layer src="Venus_Temple_Complex_Module_04"/>
 	</image>
 	<image id="Venus_CM_38">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="38"/>
+		<layer src="Venus_Temple_Complex_Module_05"/>
 	</image>
 	<image id="Venus_CM_46">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="46"/>
+		<layer src="Venus_Temple_Complex_Module_01"/>
 	</image>
 	<image id="Venus_CM_47">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="47"/>
+		<layer src="Venus_Temple_Complex_Module_02"/>
 	</image>
 	<image id="Venus_CM_55">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="55"/>
+		<layer src="Venus_Temple_Complex_Module_03"/>
 	</image>
 	<image id="Venus_CM_64">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="64"/>
+		<layer src="Venus_Temple_Complex_Module_04"/>
 	</image>
 	<image id="Venus_CM_65">
 		<layer src="Venus_Temple_Complex_Module_Layer" x="-40" y="-22"/>
-		<layer group="105" image="65"/>
+		<layer src="Venus_Temple_Complex_Module_05"/>
 	</image>
-
 	<!-- Note: Venus Complex Module Animation (Priests bless schools, baths & hospitals) -->
 	<image id="Venus Complex Module" width="418" height="231" isometric="true">
 		<layer group="this" image="Venus Complex Off"/>
@@ -1333,8 +1331,6 @@
 			<frame group="this" image="Venus_CM_65"/>
 		</animation>
 	</image>
-
-
 	<!-- Note: Venus Complex Module2 Animation Reference Assets (DO NOT USE!!) -->
 	<image id="Venus_Temple_Complex_Module2_01" width="150" height="95">
 		<layer src="Venus_Temple_Complex_Module2_Base" x="0" y="0"/>

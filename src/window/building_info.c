@@ -391,7 +391,7 @@ static void init(int grid_offset)
         context.terrain_type = TERRAIN_INFO_RUBBLE;
     } else if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
         context.terrain_type = TERRAIN_INFO_WALL;
-    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
+    } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY) && !context.building_id) {
         context.terrain_type = TERRAIN_INFO_HIGHWAY;
     } else if (!context.building_id) {
         context.terrain_type = TERRAIN_INFO_EMPTY;
@@ -428,7 +428,7 @@ static void init(int grid_offset)
                 break;
         }
         switch (b->type) {
-            //TODO: this information should be derived from b->has_road_access. 
+            //TODO: this information should be derived from b->has_road_access.
             //context information should not differ from building properties
             case BUILDING_GRANARY:
                 context.has_road_access = map_has_road_access_granary(b->x, b->y, 0);
@@ -915,7 +915,9 @@ static void draw_foreground(void)
             if (context.show_special_orders) {
                 window_building_draw_roadblock_orders_foreground(&context);
             } else {
-                window_building_draw_roadblock_button(&context);
+                if (!(btype == BUILDING_TRIUMPHAL_ARCH && b->monument.phase != MONUMENT_FINISHED)) {
+                    window_building_draw_roadblock_button(&context);
+                }
             }
         } else if (btype == BUILDING_DOCK) {
             if (context.show_special_orders) {
@@ -957,6 +959,11 @@ static void draw_foreground(void)
         } else {
             window_building_draw_roadblock_button(&context);
         }
+    }
+
+    // Do not display building health (show_durability) in special windows
+    if (!context.show_special_orders && context.depot_selection == 0) {
+        window_building_draw_health(&context);
     }
 
     // general buttons
@@ -1149,6 +1156,10 @@ static void get_tooltip(tooltip_context *c)
                 window_building_roadblock_get_tooltip_walker_permissions(&translation);
             } else {
                 window_building_get_tooltip_storage_orders(&group_id, &text_id, &translation);
+            }
+        } else if (btype == BUILDING_TRIUMPHAL_ARCH) {
+            if (b->monument.phase == MONUMENT_FINISHED) {
+                window_building_roadblock_get_tooltip_walker_permissions(&translation);
             }
         } else if (building_type_is_roadblock(btype)) {
             window_building_roadblock_get_tooltip_walker_permissions(&translation);

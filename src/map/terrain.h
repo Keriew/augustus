@@ -94,6 +94,11 @@ void map_terrain_add(int grid_offset, int terrain);
 
 void map_terrain_remove(int grid_offset, int terrain);
 
+// Same as map_terrain_remove, but also clears the bits from the terrain backup
+// so a subsequent map_terrain_restore() (preview undo or user undo) does not
+// reintroduce them. Used for changes that should persist past undo.
+void map_terrain_remove_with_backup(int grid_offset, int terrain);
+
 void map_terrain_add_with_radius(int x, int y, int size, int radius, int terrain);
 
 void map_terrain_remove_with_radius(int x, int y, int size, int radius, int terrain);
@@ -125,6 +130,8 @@ int map_terrain_has_adjacent_y_with_type(int grid_offset, int terrain);
 int map_terrain_exists_tile_in_area_with_type(int x, int y, int size, int terrain);
 
 int map_terrain_exists_tile_in_radius_with_type(int x, int y, int size, int radius, int terrain);
+
+int map_terrain_exists_open_water_in_radius(int x, int y, int size, int radius);
 
 int map_terrain_exists_rock_in_radius(int x, int y, int size, int radius);
 

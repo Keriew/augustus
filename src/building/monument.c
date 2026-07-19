@@ -154,6 +154,15 @@ static const monument_type city_mint = {
     }
 };
 
+static const monument_type triumphal_arch = {
+    .phases    = 3,
+    .resources = {
+        { [ARCHITECTS] = 1, [RESOURCE_STONE] = 12,  [RESOURCE_TIMBER] = 8},
+        { [ARCHITECTS] = 3, [RESOURCE_MARBLE] = 32, [RESOURCE_BRICKS] = 12 },
+        { NOTHING }
+    }
+};
+
 static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_GRAND_TEMPLE_CERES]   = &grand_temple,
     [BUILDING_GRAND_TEMPLE_NEPTUNE] = &grand_temple,
@@ -174,7 +183,8 @@ static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
     [BUILDING_LARGE_MAUSOLEUM]      = &large_mausoleum,
     [BUILDING_SMALL_MAUSOLEUM]      = &small_mausoleum,
     [BUILDING_CARAVANSERAI]         = &caravanserai,
-    [BUILDING_CITY_MINT]            = &city_mint
+    [BUILDING_CITY_MINT]            = &city_mint,
+    [BUILDING_TRIUMPHAL_ARCH]       = &triumphal_arch
 };
 
 typedef struct {
@@ -208,6 +218,11 @@ int building_monument_deliver_resource(building *b, int resource)
 
 int building_monument_access_point(building *b, map_point *dst)
 {
+    if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+        dst->x = b->x + 1;
+        dst->y = b->y + 1;
+        return 1;
+    }
     if (b->size < 3 || b->type == BUILDING_HIPPODROME) {
         dst->x = b->x;
         dst->y = b->y;
@@ -303,7 +318,7 @@ int building_monument_get_monument(int x, int y, int resource, int road_network_
     int min_dist = INFINITE;
     building *min_building = 0;
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
-        if (!MONUMENT_TYPES[type]) {
+        if (!MONUMENT_TYPES[type] || type == BUILDING_TRIUMPHAL_ARCH) { // triumphal arch should not be a destiantion for work camps
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -367,6 +382,9 @@ void building_monument_set_phase(building *b, int phase)
     }
     b->monument.phase = phase;
     map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
+    if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+        map_terrain_add_triumphal_arch_roads(b->x, b->y, b->subtype.orientation);
+    }
     if (b->monument.phase != MONUMENT_FINISHED) {
         for (int resource = 0; resource < RESOURCE_MAX; resource++) {
             b->resources[resource] =
@@ -502,6 +520,8 @@ int building_monument_progress(building *b)
             city_message_post(1, MESSAGE_HIPPODROME_COMPLETE, 0, b->grid_offset);
         } else if (b->type == BUILDING_CARAVANSERAI) {
             city_message_post(1, MESSAGE_CARAVANSERAI_COMPLETE, 0, b->grid_offset);
+        } else if (b->type == BUILDING_TRIUMPHAL_ARCH) {
+            city_message_post(1, MESSAGE_TRIUMPHAL_ARCH_COMPLETE, 0, b->grid_offset);
         }
     }
     return 1;
@@ -538,6 +558,17 @@ int building_monument_has_delivery_for_worker(int figure_id)
     monument_delivery *delivery;
     array_foreach(monument_deliveries, delivery) {
         if (delivery->walker_id == figure_id && delivery->destination_id > 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int building_monument_has_delivery_for_building(int monument_id)
+{
+    monument_delivery *delivery;
+    array_foreach(monument_deliveries, delivery) {
+        if (delivery->destination_id == monument_id) {
             return 1;
         }
     }

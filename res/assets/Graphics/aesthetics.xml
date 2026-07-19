@@ -407,8 +407,14 @@
 	<image id="C Garden Wall 04" src="Garden_Wall_A_Corner_02" isometric="true"/>
 	<image id="C Garden Wall 05" src="Garden_Wall_A_Corner_03" isometric="true"/>
 	<image id="C Garden Wall 06" src="Garden_Wall_A_Corner_04" isometric="true"/>
-	<image id="C Garden Wall 07" src="Garden_Wall_A_Intersection_01" isometric="true"/>
-	<image id="C Garden Wall 08" src="Garden_Wall_A_Intersection_02" isometric="true"/>
+	<image id="C Garden Wall 07" width="58" height="46" isometric="true">
+		<layer src="Garden_Wall_A_R"/>
+		<layer src="Garden_Wall_A_Intersection_01" x="11" y="0"/>
+	</image>
+	<image id="C Garden Wall 08" width="58" height="46" isometric="true">
+		<layer src="Garden_Wall_A"/>
+		<layer src="Garden_Wall_A_Intersection_02" x="27" y="0"/>
+	</image>
 	<image id="C Garden Wall 09" src="Garden_Wall_A_Intersection_03" isometric="true"/>
 	<image id="C Garden Wall 10" src="Garden_Wall_A_Intersection_04" isometric="true"/>
 	<image id="C Garden Wall 11" src="Garden_Wall_A_Intersection_4w" isometric="true"/>
@@ -434,11 +440,27 @@
 	<image id="R Garden Wall 04" src="Garden_Wall_B_Corner_02" isometric="true"/>
 	<image id="R Garden Wall 05" src="Garden_Wall_B_Corner_03" isometric="true"/>
 	<image id="R Garden Wall 06" src="Garden_Wall_B_Corner_04" isometric="true"/>
-	<image id="R Garden Wall 07" src="Garden_Wall_B_Intersection_01" isometric="true"/>
-	<image id="R Garden Wall 08" src="Garden_Wall_B_Intersection_02" isometric="true"/>
-	<image id="R Garden Wall 09" src="Garden_Wall_B_Intersection_03" isometric="true"/>
-	<image id="R Garden Wall 10" src="Garden_Wall_B_Intersection_04" isometric="true"/>
-	<image id="R Garden Wall 11" src="Garden_Wall_B_Intersection_4w" isometric="true"/>
+	<image id="R Garden Wall 07" isometric="true">
+		<layer src="Garden_Wall_B_R"/>
+		<layer src="Garden_Wall_B_Intersection_01" x="10" y="0"/>
+	</image>
+	<image id="R Garden Wall 08" isometric="true">
+		<layer src="Garden_Wall_B"/>
+		<layer src="Garden_Wall_B_Intersection_02" x="29" y="0"/>
+	</image>
+	<image id="R Garden Wall 09" width="58" height="48" isometric="true">
+		<layer src="Garden_Wall_B_Corner_02" x="0" y="5"/>
+		<layer src="Garden_Wall_B_Intersection_01" x="10" y="0"/>
+	</image>
+	<image id="R Garden Wall 10" width="58" height="48" isometric="true">
+		<layer src="Garden_Wall_B_Corner_02" x="0" y="5"/>
+		<layer src="Garden_Wall_B_Intersection_02" x="29" y="0"/>
+	</image>
+	<image id="R Garden Wall 11" width="58" height="48" isometric="true">
+		<layer src="Garden_Wall_B_Corner_02" x="0" y="5"/>
+		<layer src="Garden_Wall_B_Intersection_02" x="29" y="0"/>
+		<layer src="Garden_Wall_B_Intersection_01" x="10" y="0"/>
+	</image>
 	<!-- Note: Assets for 'Roofed Garden wall gate' with rotation variant -->
 	<image id="Garden_Gate_B" width="58" height="56" isometric="true">
 		<layer src="Garden_Gate_B" x="0" y="12"/>

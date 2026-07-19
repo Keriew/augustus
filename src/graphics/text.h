@@ -12,6 +12,7 @@ void text_draw_cursor(int x_offset, int y_offset, int is_insert);
 
 int text_get_width(const uint8_t *str, font_t font);
 int text_get_number_width(int value, char prefix, const char *postfix, font_t font);
+int text_get_number_float_width(float value, int decimal_places, char prefix, const char *postfix, font_t font);
 unsigned int text_get_max_length_for_width(
     const uint8_t *str, int length, font_t font, unsigned int requested_width, int invert);
 void text_ellipsize(uint8_t *str, font_t font, int requested_width);
@@ -29,6 +30,10 @@ int text_draw_number(int value, char prefix, const char *postfix, int x, int y, 
 void text_draw_number_finances(int value, int x, int y, font_t font, color_t color);
 int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
         int x, int y, font_t font, color_t color, float scale);
+int text_draw_number_float(float value, int decimal_places, char prefix, const char *postfix,
+    int x, int y, font_t font, color_t color);
+int text_draw_number_float_scaled(float value, int decimal_places, char prefix, const uint8_t *postfix,
+    int x, int y, font_t font, color_t color, float scale);
 int text_draw_money(int value, int x_offset, int y_offset, font_t font);
 void text_draw_with_money(const uint8_t *text, int value, const char *prefix, const char *postfix,
     int x_offset, int y_offset, int box_width, font_t font, color_t color);
@@ -47,6 +52,13 @@ void text_draw_number_centered_postfix(
     int value, const char *postfix, int x_offset, int y_offset, int box_width, font_t font);
 void text_draw_number_centered_colored(
     int value, int x_offset, int y_offset, int box_width, font_t font, color_t color);
+void text_draw_number_float_centered(float value, int decimal_places, int x_offset, int y_offset, int box_width, font_t font);
+void text_draw_number_float_centered_prefix(
+    float value, int decimal_places, char prefix, int x_offset, int y_offset, int box_width, font_t font);
+void text_draw_number_float_centered_postfix(
+    float value, int decimal_places, const char *postfix, int x_offset, int y_offset, int box_width, font_t font);
+void text_draw_number_float_centered_colored(
+    float value, int decimal_places, int x_offset, int y_offset, int box_width, font_t font, color_t color);
 
 int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_width,
     int centered, font_t font, color_t color);

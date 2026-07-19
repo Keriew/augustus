@@ -100,4 +100,6 @@ void window_building_draw_risks(building_info_context *c, int x_offset, int y_of
 
 void window_building_get_risks_tooltip(const building_info_context *c, int *group_id, int *text_id);
 
+void window_building_draw_health(building_info_context *c);
+
 #endif // WINDOW_BUILDING_COMMON_H

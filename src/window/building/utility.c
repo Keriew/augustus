@@ -355,6 +355,7 @@ void window_building_draw_aqueduct(building_info_context *c)
 
 void window_building_draw_fountain(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_HEALTH;
     c->help_id = 61;
     window_building_play_sound(c, "wavs/fountain.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
@@ -380,6 +381,7 @@ void window_building_draw_fountain(building_info_context *c)
 
 void window_building_draw_well(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_HEALTH;
     c->help_id = 62;
     window_building_play_sound(c, "wavs/well.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
@@ -402,6 +404,7 @@ void window_building_draw_well(building_info_context *c)
 
 void window_building_draw_latrines(building_info_context *c)
 {
+    c->advisor_button = ADVISOR_HEALTH;
     if (rand() % 10 == 0) {
         window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Latrines.ogg");
     } else {

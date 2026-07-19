@@ -1,7 +1,10 @@
 #include "building.h"
 
 #include "building/building.h"
+#include "building/properties.h"
+#include "core/calc.h"
 #include "core/config.h"
+#include "figure/movement.h"
 #include "game/save_version.h"
 #include "map/grid.h"
 #include "map/terrain.h"
@@ -160,4 +163,46 @@ int map_building_is_reservoir(int x, int y)
         }
     }
     return 1;
+}
+
+int map_building_damage_get(int grid_offset)
+{
+    return damage_grid.items[grid_offset];
+}
+
+void map_building_get_health(const building *b, int grid_offset, int *current, int *max)
+{
+    int max_hp = BUILDING_HP;
+    switch (b->type) {
+        case BUILDING_WALL:
+            max_hp = WALL_HP;
+            break;
+        case BUILDING_TOWER:
+        case BUILDING_GATEHOUSE:
+            max_hp = GATEHOUSE_HP;
+            break;
+        case BUILDING_WATCHTOWER:
+        case BUILDING_PALISADE:
+        case BUILDING_PALISADE_GATE:
+            max_hp = PALISADE_HP;
+            break;
+        default:
+            break;
+    }
+    int current_hp = max_hp;
+    if (building_properties_for_type(b->type)->shared) {
+        int damage = map_building_damage_get(grid_offset);
+        current_hp = calc_bound(max_hp - damage, 0, max_hp);
+    } else {
+        grid_slice *slice = map_grid_get_grid_slice_square(b->grid_offset, b->size);
+        for (int i = 0; i < slice->size; i++) {
+            int tile_damage = map_building_damage_get(slice->grid_offsets[i]);
+            int tile_hp = calc_bound(max_hp - tile_damage, 0, max_hp);
+            if (tile_hp < current_hp) {
+                current_hp = tile_hp;
+            }
+        }
+    }
+    *current = current_hp;
+    *max = max_hp;
 }

@@ -8,6 +8,7 @@
 #include "city/ratings.h"
 #include "city/resource.h"
 #include "core/array.h"
+#include "core/config.h"
 #include "core/log.h"
 #include "core/random.h"
 #include "game/resource.h"
@@ -44,7 +45,8 @@ static void make_request_visible_and_send_message(scenario_request *request)
 {
     request->visible = 1;
     request->amount.requested = random_between_from_stdlib(request->amount.min, request->amount.max);
-    if (city_resource_count_warehouses_amount(request->resource) >= (int) request->amount.requested) {
+    int config_setting = config_get(CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN);
+    if (city_resource_get_total_amount(request->resource, config_setting) >= (int) request->amount.requested) {
         request->can_comply_dialog_shown = 1;
     }
     int requested = request->amount.requested;
@@ -124,8 +126,9 @@ void scenario_request_show_ready_message(scenario_request *request)
         resource_type resource = request->resource;
         int resource_amount = city_resource_get_amount_for_request(resource, request->amount.requested);
         if (resource_amount >= (int) request->amount.requested) {
-            request->can_comply_dialog_shown = 1;
             city_message_post(1, MESSAGE_REQUEST_CAN_COMPLY, request->id, 0);
+            request->can_comply_dialog_shown = 1;
+
         }
     }
 }

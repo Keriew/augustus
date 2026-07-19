@@ -46,18 +46,38 @@ static const int FIGURE_TYPE_TO_BIG_FIGURE_IMAGE[] = {
     8, 8, 34, 39, 33, 43, 27, 48, 63, 8, //50-59
     8, 8, 8, 8, 53, 8, 38, 62, 54, 55, //60-69
     56, 8, 8, 58, 0, 7, 50, 0, 14, 3, //70-79
-    3, 58, 50, 0, 0, 3, 15, 15, 0, 51, //80-89
+    3, 58, 50, 0, 0, 3, 0, 0, 0, 51, //80-89
     0, 0, 7, 17, 7, 0, 0, 13, 0, 0, 0, //90-99
 };
 // Starting with FIGURE_WORK_CAMP_WORKER = 73,
 static const int NEW_FIGURE_TYPES[] = {
-    TR_FIGURE_TYPE_WORK_CAMP_WORKER, TR_FIGURE_TYPE_WORK_CAMP_SLAVE, TR_FIGURE_TYPE_WORK_CAMP_ARCHITECT,
-    TR_FIGURE_TYPE_MESS_HALL_SUPPLIER, TR_FIGURE_TYPE_MESS_HALL_COLLECTOR, TR_FIGURE_TYPE_PRIEST_SUPPLIER,
-    TR_FIGURE_TYPE_BARKEEP, TR_FIGURE_TYPE_BARKEEP_SUPPLIER, TR_FIGURE_TYPE_TOURIST,
-    TR_FIGURE_TYPE_WATCHMAN, 0, 0, TR_FIGURE_TYPE_CARAVANSERAI_SUPPLIER, TR_FIGURE_TYPE_ROBBER,
-    TR_FIGURE_TYPE_LOOTER, TR_FIGURE_TYPE_CARAVANSERAI_COLLECTOR, TR_FIGURE_TYPE_LIGHTHOUSE_SUPPLIER,
-    TR_FIGURE_TYPE_MESS_HALL_COLLECTOR, 0, TR_BUILDING_FORT_AUXILIA_INFANTRY, TR_FIGURE_TYPE_BEGGAR,
-    TR_BUILDING_FORT_ARCHERS, TR_FIGURE_ENEMY_CATAPULT, 0, TR_FIGURE_TYPE_PLEBIAN, TR_FIGURE_TYPE_DOG, 0
+    TR_FIGURE_TYPE_WORK_CAMP_WORKER,//73
+    TR_FIGURE_TYPE_WORK_CAMP_SLAVE,
+    TR_FIGURE_TYPE_WORK_CAMP_ARCHITECT,
+    TR_FIGURE_TYPE_MESS_HALL_SUPPLIER,
+    TR_FIGURE_TYPE_MESS_HALL_COLLECTOR,
+    TR_FIGURE_TYPE_PRIEST_SUPPLIER,
+    TR_FIGURE_TYPE_BARKEEP,
+    TR_FIGURE_TYPE_BARKEEP_SUPPLIER,//80
+    TR_FIGURE_TYPE_TOURIST,
+    TR_FIGURE_TYPE_WATCHMAN,
+    0,
+    0,
+    TR_FIGURE_TYPE_CARAVANSERAI_SUPPLIER,
+    TR_FIGURE_TYPE_ROBBER,//86
+    TR_FIGURE_TYPE_LOOTER,//87
+    TR_FIGURE_TYPE_CARAVANSERAI_COLLECTOR,
+    TR_FIGURE_TYPE_LIGHTHOUSE_SUPPLIER,
+    TR_FIGURE_TYPE_MESS_HALL_COLLECTOR,//90
+    0,
+    TR_BUILDING_FORT_AUXILIA_INFANTRY,
+    TR_FIGURE_TYPE_BEGGAR,
+    TR_BUILDING_FORT_ARCHERS,
+    TR_FIGURE_ENEMY_CATAPULT,
+    0,
+    TR_FIGURE_TYPE_PLEBIAN,//97
+    TR_FIGURE_TYPE_DOG,//98
+    0
 };
 
 static generic_button figure_buttons[] = {
@@ -96,6 +116,9 @@ static int big_people_image(figure_type type)
     switch (type) {
         case FIGURE_WORK_CAMP_SLAVE:
             return assets_get_image_id("Walkers", "Slave Portrait");
+        case FIGURE_CRIMINAL_ROBBER:
+        case FIGURE_CRIMINAL_LOOTER:
+            return assets_get_image_id("Walkers", "thief_Portrait");
         case FIGURE_CARAVANSERAI_SUPPLIER:
             return assets_get_image_id("Walkers", "caravanserai_overseer_portrait");
         case FIGURE_CARAVANSERAI_COLLECTOR:
@@ -436,15 +459,29 @@ static void draw_cartpusher(building_info_context *c, figure *f)
         width = lang_text_draw(64, f->type, c->x_offset + 92, c->y_offset + 139, FONT_NORMAL_BROWN);
     }
 
-    if (f->resource_id != RESOURCE_NONE) {
-        image_draw(resource_get_data(f->resource_id)->image.icon,
-            c->x_offset + 92 + width, c->y_offset + 135, COLOR_MASK_NONE, SCALE_NONE);
+    if (f->collecting_item_id != RESOURCE_NONE) {
+        if (f->resource_id != RESOURCE_NONE) {
+            width += lang_text_draw(129, 18, c->x_offset + 92 + width, c->y_offset + 139, FONT_NORMAL_BROWN); //Returning with
+        } else {
+            width += lang_text_draw(129, 17, c->x_offset + 92 + width, c->y_offset + 139, FONT_NORMAL_BROWN); //Collecting
+        }
     }
 
-    if (f->loads_sold_or_carrying > 0 && f->resource_id != RESOURCE_NONE &&
-        !cartpusher_returning_empty(f)) {
-        text_draw_number(f->loads_sold_or_carrying, 'x', "",
-            c->x_offset + 118 + width, c->y_offset + 139, FONT_NORMAL_BROWN, COLOR_MASK_NONE);
+    if (f->collecting_item_id != RESOURCE_NONE || f->resource_id != RESOURCE_NONE) {
+        int res_id = (f->collecting_item_id != RESOURCE_NONE) ? f->collecting_item_id : f->resource_id;
+
+        const image *img = image_get(resource_get_data(res_id)->image.icon);
+        int icon_x = (24 - img->original.width + 1) / 2;    //max width  24
+        int icon_y = (22 - img->original.height + 1) / 2;   //max height 22
+
+        image_draw(resource_get_data(res_id)->image.icon, c->x_offset + 92 + width + icon_x, c->y_offset + 133 + icon_y,
+            COLOR_MASK_NONE, SCALE_NONE);
+        width += 24;
+    }
+
+    if (f->loads_sold_or_carrying > 0 && f->resource_id != RESOURCE_NONE && !cartpusher_returning_empty(f)) {
+        width += text_draw_number(f->loads_sold_or_carrying, 'x', "",
+            c->x_offset + 92 + width, c->y_offset + 139, FONT_NORMAL_BROWN, COLOR_MASK_NONE);
     }
 
     int phrase_height = lang_text_draw_multiline(130, 21 * (c->figure.sound_id - 1) + c->figure.phrase_id + 1,
@@ -468,6 +505,17 @@ static void draw_cartpusher(building_info_context *c, figure *f)
             is_returning = 1;
             break;
     }
+
+    int is_getting = 0;
+    switch (f->action_state) {
+        case FIGURE_ACTION_54_WAREHOUSEMAN_GETTING_FOOD:
+        case FIGURE_ACTION_57_WAREHOUSEMAN_GETTING_RESOURCE:
+        case FIGURE_ACTION_56_WAREHOUSEMAN_RETURNING_WITH_FOOD:
+        case FIGURE_ACTION_59_WAREHOUSEMAN_RETURNING_WITH_RESOURCE:
+            is_getting = 1;
+            break;
+    }
+
     if (f->action_state != FIGURE_ACTION_132_DOCKER_IDLING) {
         int x_base = c->x_offset + 40;
         int y_base = c->y_offset + 216;
@@ -479,29 +527,41 @@ static void draw_cartpusher(building_info_context *c, figure *f)
             || f->action_state == FIGURE_ACTION_235_CARTPUSHER_GOING_TO_ROME) {
             text_draw(translation_for(TR_FIGURES_CARTPUSHER_GOING_TO_ROME), x_base, y_base, FONT_NORMAL_BROWN, 0);
         } else {
+            building *to_building = NULL;
+            building *from_building = NULL;
+
             if (is_returning) {
                 width = lang_text_draw(129, 16, x_base, y_base, FONT_NORMAL_BROWN); //returning to
-                width += lang_text_draw(41, source_building->type, x_base + width, y_base, FONT_NORMAL_BROWN); //type
-                if (source_building->storage_id) {
-                    width += text_draw_number(source_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
-                }
-                width += lang_text_draw(129, 14, x_base + width, y_base, FONT_NORMAL_BROWN);
-                if (last_destination_building) {
-                    width += lang_text_draw(41, last_destination_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
-                    if (last_destination_building->storage_id) {
-                        width += text_draw_number(last_destination_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
-                    }
+                to_building = source_building;
+                if (is_getting) {
+                    from_building = target_building;
+                } else {
+                    from_building = last_destination_building;
                 }
             } else {
                 width = lang_text_draw(129, 15, x_base, y_base, FONT_NORMAL_BROWN); //going to
-                width += lang_text_draw(41, target_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
-                if (target_building->storage_id) {
-                    width += text_draw_number(target_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
+                if (is_getting) {
+                    to_building = source_building;
+                    from_building = target_building;
+                } else {
+                    to_building = target_building;
+                    from_building = source_building;
                 }
-                width += lang_text_draw(129, 14, x_base + width, y_base, FONT_NORMAL_BROWN); //from 
-                width += lang_text_draw(41, source_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
-                if (source_building->storage_id) {
-                    width += text_draw_number(source_building->storage_id, 0, "", x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE); //from number
+            }
+
+            if (to_building) {
+                width += lang_text_draw(41, to_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                if (to_building->storage_id) {
+                    width += text_draw_number(to_building->storage_id, 0, "",
+                        x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE);
+                }
+            }
+            width += lang_text_draw(129, 14, x_base + width, y_base, FONT_NORMAL_BROWN); //from
+            if (from_building) {
+                width += lang_text_draw(41, from_building->type, x_base + width, y_base, FONT_NORMAL_BROWN);
+                if (from_building->storage_id) {
+                    width += text_draw_number(from_building->storage_id, 0, "",
+                        x_base + width, y_base, FONT_NORMAL_BROWN, COLOR_MASK_NONE);
                 }
             }
         }

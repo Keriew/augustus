@@ -4,6 +4,10 @@
 #include "figure/figure.h"
 
 #define FIGURE_REROUTE_DESTINATION_TICKS 120
+#define PALISADE_HP     60
+#define BUILDING_HP     10
+#define WALL_HP        200
+#define GATEHOUSE_HP   150
 
 void figure_movement_init_roaming(figure *f);
 

@@ -46,6 +46,7 @@ int building_monument_resource_in_delivery(building *b, int resource_id);
 void building_monument_remove_delivery(int figure_id);
 void building_monument_add_delivery(unsigned int monument_id, int figure_id, int resource_id, int num_loads);
 int building_monument_has_delivery_for_worker(int figure_id);
+int building_monument_has_delivery_for_building(int monument_id);
 void building_monument_remove_all_deliveries(unsigned int monument_id);
 int building_monument_get_id(building_type type);
 int building_monument_upgraded(building_type type);
@@ -65,4 +66,4 @@ int building_monument_is_construction_halted(building *b);
 int building_monument_toggle_construction_halted(building *b);
 int building_monument_is_unfinished_monument(const building *b);
 
-#endif // BUILDING_MONUMENT_H 
+#endif // BUILDING_MONUMENT_H

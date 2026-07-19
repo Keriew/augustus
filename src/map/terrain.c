@@ -104,6 +104,12 @@ void map_terrain_remove(int grid_offset, int terrain)
     terrain_grid.items[grid_offset] &= ~terrain;
 }
 
+void map_terrain_remove_with_backup(int grid_offset, int terrain)
+{
+    terrain_grid.items[grid_offset] &= ~terrain;
+    terrain_grid_backup.items[grid_offset] &= ~terrain;
+}
+
 void map_terrain_add_with_radius(int x, int y, int size, int radius, int terrain)
 {
     int x_min, y_min, x_max, y_max;
@@ -226,6 +232,21 @@ int map_terrain_exists_tile_in_radius_with_type(int x, int y, int size, int radi
     for (int yy = y_min; yy <= y_max; yy++) {
         for (int xx = x_min; xx <= x_max; xx++) {
             if (map_terrain_is(map_grid_offset(xx, yy), terrain)) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int map_terrain_exists_open_water_in_radius(int x, int y, int size, int radius)
+{
+    int x_min, y_min, x_max, y_max;
+    map_grid_get_area(x, y, size, radius, &x_min, &y_min, &x_max, &y_max);
+    for (int yy = y_min; yy <= y_max; yy++) {
+        for (int xx = x_min; xx <= x_max; xx++) {
+            int offset = map_grid_offset(xx, yy);
+            if (map_terrain_is(offset, TERRAIN_WATER) && map_routing_distance(offset) > 0) {
                 return 1;
             }
         }

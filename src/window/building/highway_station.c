@@ -36,10 +36,11 @@ void window_building_draw_highway_station(building_info_context *c)
     int text_width = BLOCK_SIZE * (c->width_blocks - 4);
 
     int need = building_highway_station_monthly_need();
+    int highway_tiles = building_highway_station_highway_blocks();
     int stone_units = b->resources[RESOURCE_STONE] / 100;
     int sand_units = b->resources[RESOURCE_SAND] / 100;
 
-    int y = c->y_offset + 64;
+    int y = c->y_offset + 56;
 
     // Stocks block
     y += draw_resource_row(x_text, y, resource_get_data(RESOURCE_STONE)->image.icon,
@@ -51,6 +52,12 @@ void window_building_draw_highway_station(building_info_context *c)
     int width = text_draw(translation_for(TR_BUILDING_HIGHWAY_STATION_MONTHLY_NEED),
         x_text, y, FONT_NORMAL_BLACK, 0);
     text_draw_number(need, '@', " ", x_text + width, y, FONT_NORMAL_BLACK, 0);
+    y += ROW_HEIGHT;
+
+    // Highway tile count in the city
+    width = text_draw(translation_for(TR_BUILDING_HIGHWAY_STATION_HIGHWAY_TILES),
+        x_text, y, FONT_NORMAL_BLACK, 0);
+    text_draw_number(highway_tiles, '@', " ", x_text + width, y, FONT_NORMAL_BLACK, 0);
     y += ROW_HEIGHT + 4;
 
     // Status line — green when functional (bonus active), red when not

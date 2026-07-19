@@ -5,6 +5,47 @@
 #include "core/string.h"
 #include "graphics/text.h"
 
+
+void lang_text_fragment_label(lang_fragment *f, int text_group, int text_id)
+{
+    f->type = LANG_FRAG_LABEL;
+    f->text_group = text_group;
+    f->text_id = text_id;
+}
+
+void lang_text_fragment_amount(lang_fragment *f, int text_group, int text_id, int number)
+{
+    f->type = LANG_FRAG_AMOUNT;
+    f->text_group = text_group;
+    f->text_id = text_id;
+    f->number = number;
+}
+
+void lang_text_fragment_number(lang_fragment *f, int number)
+{
+    f->type = LANG_FRAG_NUMBER;
+    f->number = number;
+}
+
+void lang_text_fragment_float(lang_fragment *f, float number, int decimal_places)
+{
+    f->type = LANG_FRAG_FLOAT;
+    f->float_number = number;
+    f->decimal_places = decimal_places;
+}
+
+void lang_text_fragment_text(lang_fragment *f, const uint8_t *text)
+{
+    f->type = LANG_FRAG_TEXT;
+    f->text = text;
+}
+
+void lang_text_fragment_space(lang_fragment *f, int space_width)
+{
+    f->type = LANG_FRAG_SPACE;
+    f->space_width = space_width;
+}
+
 int lang_text_get_width(int group, int number, font_t font)
 {
     const uint8_t *str = lang_get_string(group, number);
@@ -185,6 +226,9 @@ int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t fon
             case LANG_FRAG_SPACE:
                 width += f->space_width;
                 break;
+            case LANG_FRAG_FLOAT:
+                width += text_get_number_float_width(f->float_number, f->decimal_places, '\0', "", font);
+                break;
         }
     }
     return width;
@@ -210,6 +254,9 @@ int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, f
                 break;
             case LANG_FRAG_SPACE:
                 width += f->space_width;
+                break;
+            case LANG_FRAG_FLOAT:
+                width += text_draw_number_float(f->float_number, 2, '\0', "", x + width, y, font, color);
                 break;
         }
     }
@@ -244,6 +291,9 @@ int lang_text_draw_sequence_multiline(const lang_fragment *seq, int count, int x
                 break;
             case LANG_FRAG_SPACE:
                 fragment_width = f->space_width;
+                break;
+            case LANG_FRAG_FLOAT:
+                fragment_width = text_get_number_float_width(f->float_number, f->decimal_places, '\0', "", font);
                 break;
         }
 
@@ -287,6 +337,10 @@ int lang_text_draw_sequence_multiline(const lang_fragment *seq, int count, int x
                         case LANG_FRAG_SPACE:
                             current_x += f->space_width;
                             break;
+                        case LANG_FRAG_FLOAT:
+                            current_x += text_draw_number_float(f->float_number, f->decimal_places, '\0', "",
+                                current_x, current_y, font, color);
+                            break;
                         default:
                             break;
                     }
@@ -310,6 +364,10 @@ int lang_text_draw_sequence_multiline(const lang_fragment *seq, int count, int x
                     break;
                 case LANG_FRAG_SPACE:
                     current_x += f->space_width;
+                    break;
+                case LANG_FRAG_FLOAT:
+                    current_x += text_draw_number_float(f->float_number, f->decimal_places, '\0', "",
+                        current_x, current_y, font, color);
                     break;
             }
         }
@@ -360,6 +418,9 @@ static int lang_text_draw_sequence_ellipsized_internal(const lang_fragment *seq,
             case LANG_FRAG_SPACE:
                 fragment_width = f->space_width;
                 break;
+            case LANG_FRAG_FLOAT:
+                fragment_width = text_get_number_float_width(f->float_number, f->decimal_places, '\0', "", font);
+                break;
         }
 
         // Check if this fragment fits in the remaining width
@@ -382,6 +443,10 @@ static int lang_text_draw_sequence_ellipsized_internal(const lang_fragment *seq,
                 case LANG_FRAG_SPACE:
                     width += f->space_width;
                     break;
+                case LANG_FRAG_FLOAT:
+                    width += text_draw_number_float(f->float_number, f->decimal_places, '\0', "",
+                        x + width, y, font, color);
+                    break;
             }
             remaining_width -= fragment_width;
         } else {
@@ -402,8 +467,9 @@ static int lang_text_draw_sequence_ellipsized_internal(const lang_fragment *seq,
                 case LANG_FRAG_AMOUNT:
                 case LANG_FRAG_NUMBER:
                 case LANG_FRAG_SPACE:
+                case LANG_FRAG_FLOAT:
                     // For non-text fragments, just draw them (they'll overflow or be cut off)
-                    // Numbers/amounts don't ellipsize well, so we just skip them if they don't fit
+                    // Numbers/amounts/floats don't ellipsize well, so we just skip them if they don't fit
                     break;
             }
 
@@ -525,6 +591,14 @@ int lang_text_concatenate_sequence(const lang_fragment *seq, int count, uint8_t 
                     cursor++;
                     remaining--;
                 }
+                break;
+
+            case LANG_FRAG_FLOAT:
+                len = string_from_float(number_buffer, f->float_number, f->decimal_places, 0);
+                if (len > remaining) len = remaining;
+                string_copy(number_buffer, cursor, len + 1);
+                cursor += len;
+                remaining -= len;
                 break;
         }
     }

@@ -318,6 +318,11 @@ void load_augustus_messages(void)
     m = &data.message_entries[i];
     set_message_parameters(m, TR_CITY_MESSAGE_TITLE_GOVERNOR_RANK_CHANGE, 0, 0, MESSAGE_TYPE_RANK_CHANGE);
     i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE,
+        TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, 0, MESSAGE_TYPE_BUILDING_COMPLETION);
+    i += 1;
 }
 
 
@@ -549,9 +554,9 @@ const uint8_t *lang_get_string(int group, int index)
             case BUILDING_SAND_PIT:
                 return translation_for(TR_BUILDING_SAND_PIT);
             case BUILDING_BRICKWORKS:
-                return translation_for(TR_RESOURCE_BRICKS);
+                return translation_for(TR_BUILDING_BRICKWORKS);
             case BUILDING_CONCRETE_MAKER:
-                return translation_for(TR_RESOURCE_CONCRETE);
+                return translation_for(TR_BUILDING_CONCRETE_MAKER);
             case BUILDING_LOOPED_GARDEN_GATE:
                 return translation_for(TR_BUILDING_LOOPED_GARDEN_WALL_GATE);
             case BUILDING_PANELLED_GARDEN_WALL:

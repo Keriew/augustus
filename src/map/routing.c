@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/connectable.h"
+#include "core/config.h"
 #include "core/time.h"
 #include "map/building.h"
 #include "map/figure.h"
@@ -327,15 +328,27 @@ static int callback_calc_distance_build_wall(int next_offset, int dist, int dire
     return 1;
 }
 
+// Tile blocks pathfinding only because of trees/shrubs; auto-clear will remove them
+// at placement, so the building-route BFS may step through such tiles.
+static int is_only_vegetation_obstacle(int grid_offset)
+{
+    int not_clear = map_terrain_get(grid_offset) & TERRAIN_NOT_CLEAR;
+    return not_clear && !(not_clear & ~(TERRAIN_TREE | TERRAIN_SHRUB));
+}
+
 static int can_build_highway(int next_offset, int check_highway_routing)
 {
+    int auto_clear = config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES);
     int size = 2;
     for (int x = 0; x < size; x++) {
         for (int y = 0; y < size; y++) {
             int offset = next_offset + map_grid_delta(x, y);
             int terrain = map_terrain_get(offset);
-            if ((terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_ROAD) && !(terrain & TERRAIN_AQUEDUCT)) {
-                return 0;
+            int forbidden = terrain & TERRAIN_NOT_CLEAR & ~TERRAIN_HIGHWAY & ~TERRAIN_ROAD;
+            if (forbidden && !(terrain & TERRAIN_AQUEDUCT)) {
+                if (!auto_clear || (forbidden & ~(TERRAIN_TREE | TERRAIN_SHRUB))) {
+                    return 0;
+                }
             } else if (!map_can_place_highway_under_aqueduct(offset, check_highway_routing)) {
                 return 0;
             }
@@ -367,8 +380,12 @@ static int callback_calc_distance_build_road(int next_offset, int dist, int dire
             }
             break;
         case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
-        case CITIZEN_N1_BLOCKED: // non-empty land
             blocked = 1;
+            break;
+        case CITIZEN_N1_BLOCKED: // non-empty land
+            if (!(config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES) && is_only_vegetation_obstacle(next_offset))) {
+                blocked = 1;
+            }
             break;
         default:
             if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
@@ -393,8 +410,12 @@ static int callback_calc_distance_build_aqueduct(int next_offset, int dist, int 
     switch (terrain_land_citizen.items[next_offset]) {
         case CITIZEN_N3_AQUEDUCT:
         case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
-        case CITIZEN_N1_BLOCKED: // non-empty land
             blocked = 1;
+            break;
+        case CITIZEN_N1_BLOCKED: // non-empty land
+            if (!(config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES) && is_only_vegetation_obstacle(next_offset))) {
+                blocked = 1;
+            }
             break;
         default:
             if (map_terrain_is(next_offset, TERRAIN_BUILDING)) {
@@ -490,7 +511,9 @@ int map_routing_calculate_distances_for_building(routed_building_type type, int 
     }
 
     if (!can_place_initial_road_or_aqueduct(source_offset, type != ROUTED_BUILDING_ROAD)) {
-        return 0;
+        if (!(config_get(CONFIG_GP_CH_AUTO_CLEAR_TREES) && is_only_vegetation_obstacle(source_offset))) {
+            return 0;
+        }
     }
     if (map_terrain_is(source_offset, TERRAIN_ROAD) &&
         type != ROUTED_BUILDING_ROAD && !map_can_place_aqueduct_on_road(source_offset)) {
@@ -550,18 +573,25 @@ static inline int has_fighting_enemy(int grid_offset)
     return fighting_data.status.items[grid_offset] & 2;
 }
 
+static int routing_ignore_combat = 0;
+
 static int callback_travel_citizen_land(int offset, int next_offset, int direction)
 {
-    if (terrain_land_citizen.items[next_offset] >= 0 && !has_fighting_friendly(next_offset)) {
+    if (terrain_land_citizen.items[next_offset] >= 0) {
+        if (!routing_ignore_combat && has_fighting_friendly(next_offset)) {
+            return 0;
+        }
         return 1;
     }
     return 0;
 }
 
-int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions)
+int map_routing_citizen_can_travel_over_land(int src_x, int src_y, int dst_x, int dst_y, int num_directions, int ignore_combat)
 {
     ++stats.total_routes_calculated;
+    routing_ignore_combat = ignore_combat;
     route_queue_from_to(src_x, src_y, dst_x, dst_y, num_directions, 0, callback_travel_citizen_land);
+    routing_ignore_combat = 0;
     return distance.determined.items[map_grid_offset(dst_x, dst_y)] != 0;
 }
 
