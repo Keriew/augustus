@@ -251,6 +251,8 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         if (!map_routing_is_wall_passable(target_grid_offset)) {
             f->direction = DIR_FIGURE_REROUTE;
         }
+    } else if (f->type == FIGURE_WOLF && map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE ^ TERRAIN_ELEVATION)) {
+        f->direction = DIR_FIGURE_REROUTE; // don't let wolves walk through gatehouses build after they chose their destination
     } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP)) {
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
             building *b = building_get(map_building_at(target_grid_offset));

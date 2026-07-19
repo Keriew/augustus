@@ -11,6 +11,9 @@ typedef uint32_t color_t;
 #define COLOR_WHITE 0xffffffff
 
 #define COLOR_GRID 0xff180800
+#define COLOR_GRID_CENTRAL 0xff162d39
+#define COLOR_GRID_DESERT 0xff464646
+#define COLOR_GRID_NORTHERN 0xff131b1f
 
 #define COLOR_SG2_TRANSPARENT 0xfff700ff
 #define COLOR_TOOLTIP 0xff424242

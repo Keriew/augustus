@@ -60,7 +60,6 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_OX] = assets_get_image_id("Walkers", "Ox_Portrait");
     data.asset_lookup[ASSET_UI_RISKS] = assets_get_image_id("UI", "Risk_Widget_Collapse");
     data.asset_lookup[ASSET_UI_SELECTION_CHECKMARK] = assets_get_image_id("UI", "Selection_Checkmark");
-    data.asset_lookup[ASSET_UI_VERTICAL_EMPIRE_PANEL] = assets_get_image_id("UI", "Empire_panel_texture_vertical");
     data.asset_lookup[ASSET_UI_GEAR_ICON] = assets_get_image_id("UI", "gear_icon");
     data.asset_lookup[ASSET_UI_COPY_ICON] = assets_get_image_id("UI", "copy_icon");
     data.asset_lookup[ASSET_UI_PASTE_ICON] = assets_get_image_id("UI", "paste_icon");
@@ -80,6 +79,9 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_EMP_ICON_12] = assets_get_image_id("UI", "Empire_Icon_Trade_01");        // tr_sea
     data.asset_lookup[ASSET_UI_EMP_ICON_13] = assets_get_image_id("UI", "Empire_Icon_Trade_02");        // tr_land
     data.asset_lookup[ASSET_UI_EMP_ICON_OLD_WATCHTOWER] = assets_get_image_id("UI", "Empire_Icon_Watchtower"); // tower
+    data.asset_lookup[ASSET_UI_EMP_PANEL_HOR] = assets_get_image_id("UI", "Empire_Panel_01"); // horizontal panel
+    data.asset_lookup[ASSET_UI_EMP_PANEL_VER] = assets_get_image_id("UI", "Empire_Panel_01b"); // vertical panel
+    data.asset_lookup[ASSET_UI_EMP_PANEL_XBAR_DRAG] = assets_get_image_id("UI", "Empire_Panel_02"); // crossbar
 
     // font assets - keep last
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");

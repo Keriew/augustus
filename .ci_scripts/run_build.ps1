@@ -9,7 +9,7 @@ if ($SDL_MAJOR_VERSION -eq "3") {
 }
 
 if ("${env:COMPILER}" -eq "msvc") {
-    cmake -G "Visual Studio 17 2022" -A x64 -DAV1_VIDEO_SUPPORT=ON $CMAKE_SDL_VERSION "$CMAKE_SDL_PREFIX" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    cmake -G "Visual Studio 18 2026" -A x64 -DAV1_VIDEO_SUPPORT=ON $CMAKE_SDL_VERSION "$CMAKE_SDL_PREFIX" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     cmake --build . -j 4 --config RelWithDebInfo
 } elseif ("${env:COMPILER}" -eq "msvc-arm64") {
     cmake -G "Ninja" -DAV1_VIDEO_SUPPORT=ON $CMAKE_SDL_VERSION "$CMAKE_SDL_PREFIX" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..

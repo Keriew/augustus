@@ -44,6 +44,11 @@ static struct {
     color_t reservoir_range_color;
 } water_building_ghost_settings;
 
+static struct {
+    const building *last_fountain;
+    const building *last_well;
+} cached_water_buildings;
+
 static const uint8_t *prefix_value_to_tooltip_text(int value, const uint8_t *message)
 {
     static uint8_t text[TOOLTIP_WITH_PREFIX_MAX_LENGTH];
@@ -456,6 +461,10 @@ static int get_environmental_desirability(const int grid_offset, int ignore_conf
 
 static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
 {
+    if (map_terrain_is(grid_offset, TERRAIN_IMPASSABLE_EARTHQUAKE)) {
+        c->precomposed_text = lang_get_string(66, 91);
+        return 1;
+    }
     int desirability;
     if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         int building_id = map_building_at(grid_offset);
@@ -654,7 +663,7 @@ static int has_well_access(int grid_offset)
     }
 
     // Store the last well found to avoid redundant checks for consecutive tiles with the same well access.
-    static const building *last_well;
+    const building *last_well = cached_water_buildings.last_well;
     int radius = map_water_supply_well_radius();
 
     if (last_well && map_grid_chess_distance(last_well->grid_offset, grid_offset) <= radius) {
@@ -667,7 +676,7 @@ static int has_well_access(int grid_offset)
             continue;
         }
         if (well->state == BUILDING_STATE_IN_USE && map_grid_chess_distance(well->grid_offset, grid_offset) <= radius) {
-            last_well = well;
+            cached_water_buildings.last_well = well;
             return 1;
         }
     }
@@ -678,7 +687,7 @@ static int has_well_access(int grid_offset)
 static int has_inactive_fountain_access(int grid_offset)
 {
     // Store the last fountain found to avoid redundant checks for consecutive tiles with the same fountain access.
-    static const building *last_fountain;
+    const building *last_fountain = cached_water_buildings.last_fountain;
     int radius = map_water_supply_fountain_radius();
 
     if (last_fountain && map_grid_chess_distance(last_fountain->grid_offset, grid_offset) <= radius) {
@@ -692,7 +701,7 @@ static int has_inactive_fountain_access(int grid_offset)
         }
         if ((fountain->state == BUILDING_STATE_CREATED || fountain->state == BUILDING_STATE_IN_USE) &&
             map_grid_chess_distance(fountain->grid_offset, grid_offset) <= radius) {
-            last_fountain = fountain;
+            cached_water_buildings.last_fountain = fountain;
             return 1;
         }
     }
@@ -843,6 +852,9 @@ const city_overlay *city_overlay_for_water(void)
     water_building_ghost_settings.show_fountain_well_range = 1;
     water_building_ghost_settings.reservoir_range_color = COLOR_MASK_NONE;
 
+    cached_water_buildings.last_well = 0;
+    cached_water_buildings.last_fountain = 0;
+
     static city_overlay overlay = {
         .type = OVERLAY_WATER,
         .show_building = show_building_water,
@@ -862,6 +874,9 @@ const city_overlay *city_overlay_for_water_building_ghost(int show_reservoir_ran
     water_building_ghost_settings.show_reservoir_range = show_reservoir_range;
     water_building_ghost_settings.show_fountain_well_range = show_fountain_well_ranges;
     water_building_ghost_settings.reservoir_range_color = ALPHA_FONT_SEMI_TRANSPARENT;
+
+    cached_water_buildings.last_well = 0;
+    cached_water_buildings.last_fountain = 0;
 
     static city_overlay overlay = {
         .draw_layer = draw_water_graph
@@ -911,25 +926,25 @@ const city_overlay *city_overlay_for_sentiment(void)
 
 static int get_desirability_image_offset(int desirability)
 {
-    if (desirability <= 0) {
+    if (desirability < -10) {      //deep red
         return 0;
-    } else if (desirability < 10) {
+    } else if (desirability < 0) { //pale red
         return 1;
-    } else if (desirability < 25) {
+    } else if (desirability < 10) {//deep orange 0-9
         return 2;
-    } else if (desirability < 40) {
+    } else if (desirability < 20) {//pale orange 10-19
         return 3;
-    } else if (desirability < 50) {
+    } else if (desirability < 30) {//deep yellow 20-29
         return 4;
-    } else if (desirability < 60) {
+    } else if (desirability < 40) {//pale yellow 30-39
         return 5;
-    } else if (desirability < 70) {
+    } else if (desirability < 52) {//pale green 40-51
         return 6;
-    } else if (desirability < 80) {
+    } else if (desirability < 65) {//deep green 52-64 (52 -> houses start receiving sentiment incentives)
         return 7;
-    } else if (desirability < 90) {
+    } else if (desirability < 80) {//cyan 65-79
         return 8;
-    } else {
+    } else {                       //blue 80 to 100
         return 9;
     }
 }

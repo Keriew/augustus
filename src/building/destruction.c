@@ -53,6 +53,7 @@ static void destroy_on_fire(building *b, int plagued)
     b->damage_risk = 0;
     if (b->house_size && b->house_population) {
         city_population_remove_home_removed(b->house_population);
+        b->subtype.house_level = 0; // reset house level
     }
     // save original info for rubble data
     int og_type = b->type;
@@ -208,6 +209,9 @@ void building_destroy_by_collapse(building *b)
     b->state = BUILDING_STATE_RUBBLE;
     if (b->type == BUILDING_TOWER) {
         figure_kill_tower_sentries_in_building(b);
+    }
+    if (b->house_size && b->house_population) {
+        b->subtype.house_level = 0; // reset house level
     }
     set_rubble_grid_info_for_all_parts(b);
     map_building_tiles_set_rubble(b->id, b->x, b->y, b->size);

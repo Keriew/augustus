@@ -144,7 +144,7 @@ static int xml_read_info(void)
     if (!filename) {
         return 0;
     }
-    string_copy(string_from_ascii(filename), (uint8_t *)data.info_filename, 128);
+    string_copy(string_from_ascii(filename), (uint8_t *) data.info_filename, 128);
     return 0;
 }
 
@@ -332,7 +332,7 @@ static int xml_start_city(void)
                                           "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
     const char *name = xml_parser_get_attribute_string("name");
     if (name) {
-        string_copy((const uint8_t *)name, city_obj->city_custom_name, sizeof(city_obj->city_custom_name));
+        string_copy((const uint8_t *) name, city_obj->city_custom_name, sizeof(city_obj->city_custom_name));
     } else {
         city_obj->city_name_id = xml_parser_get_attribute_int("name_id");
     }
@@ -355,9 +355,6 @@ static int xml_start_city(void)
         future_trade_after_icon = xml_parser_get_attribute_enum("icon_after", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
     } else {
         city_icon_type = xml_parser_get_attribute_enum("icon", city_icons, 18, EMPIRE_CITY_ICON_DEFAULT + 1);
-    }
-    if (city_icon_type == EMPIRE_CITY_ICON_DEFAULT) {
-        city_icon_type = empire_object_get_random_icon_for_empire_object(city_obj);
     }
 
     city_obj->empire_city_icon = city_icon_type;

@@ -316,6 +316,21 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
     return color_mask;
 }
 
+static color_t full_grid_color(void)
+{
+    if (!config_get(CONFIG_UI_CLIMATE_GRID_COLORS)) {
+        return COLOR_GRID;
+    }
+    switch (scenario_property_climate()) {
+        case CLIMATE_DESERT:
+            return COLOR_GRID_DESERT;
+        case CLIMATE_NORTHERN:
+            return COLOR_GRID_NORTHERN;
+        default:
+            return COLOR_GRID_CENTRAL;
+    }
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     sound_city_progress_ambient();
@@ -391,7 +406,7 @@ static void draw_footprint(int x, int y, int grid_offset)
 
     // Grid is drawn by the renderer directly at zoom > 200%
     if (!building_id && config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
-        image_draw(assets_lookup_image_id(ASSET_UI_GRID), x, y, COLOR_GRID, draw_context.scale);
+        image_draw(assets_lookup_image_id(ASSET_UI_GRID), x, y, full_grid_color(), draw_context.scale);
     }
 
     draw_roamer_frequency(x, y, grid_offset);

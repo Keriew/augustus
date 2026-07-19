@@ -535,7 +535,8 @@ int figure_rioter_collapse_building(figure *f)
         if (b->house_size && b->subtype.house_level < HOUSE_SMALL_CASA) {
             continue;
         }
-        if (b->fire_proof) {
+        if (b->fire_proof && b->type != BUILDING_GATEHOUSE &&
+            b->type != BUILDING_PALISADE && b->type != BUILDING_PALISADE_GATE) {
             continue;
         }
         city_message_apply_sound_interval(MESSAGE_CAT_RIOT_COLLAPSE);

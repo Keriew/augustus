@@ -45,7 +45,6 @@
 	<image id="Panth M2 Icon" src="Pantheon_Temple_Complex_Module2_Banner"/>
 	<image id="Venus M Icon" src="Venus_Temple_Complex_Module_Banner"/>
 	<image id="Venus M2 Icon" src="Venus_Temple_Complex_Module2_Banner"/>
-
 	<!-- Note: Banner images for Construction Sites -->
 	<image id="Construction_Banner_01" src="Construction_Banner_01"/>
 	<image id="Construction_Banner_02" src="Construction_Banner_02"/>
@@ -1391,10 +1390,6 @@
 	<image id="18Legion_Camels" src="18Legion_Camels"/>
 	<image id="19Legion_Dolphins" src="19Legion_Dolphins"/>
 	<image id="20Legion_Sea_Goats" src="20Legion_Sea_Goats"/>
-	<!-- Note: Empire background texture, vertical version -->
-	<image id="Empire_panel_texture_vertical">
-		<layer group="172" image="3" rotate="90" x="0" y="0" width="70" height="40"/>
-	</image>
 	<image id="Empire_sidebar_city_badge_corner" width="12" height="33">
 		<layer group="172" image="8" invert="horizontal" y="-59"/>
 	</image>
@@ -1465,7 +1460,7 @@
 		<layer group="20" image="11"/>
 		<layer src="reservoir_range_mask" mask="alpha"/>
 	</image>
-	<!-- Editor animal flag and lair buttons -->
+	<!-- Note: Editor animal flag and lair buttons -->
 	<image id="Button_AnimalFlag_Idle" src="Button_AnimalFlag_Idle"/>
 	<image id="Button_AnimalFlag_Hover" src="Button_AnimalFlag_Hover"/>
 	<image id="Button_AnimalFlag_Click" src="Button_AnimalFlag_Click"/>
@@ -1483,4 +1478,50 @@
 		<layer src="Advisor_Button_H" x="5" y="4"/>
 		<layer src="Trade_Ledger_H" x="0" y="0"/>
 	</image>
+	<!-- Note: Empire Map panel background -->
+	<image id="Empire_Panel_01" width="70" height="40">
+		<layer group="172" image="3" x="0" y="0"/>
+		<layer src="Empire_Panel_01" x="0" y="0"/>
+	</image>
+	<!-- Note: Empire background texture, vertical version -->
+	<image id="Empire_Panel_01b">
+		<layer group="this" image="Empire_Panel_01" rotate="90" x="0" y="0" width="70" height="40"/>
+	</image>
+	<!-- Note: Empire Map sidebar corner (for drag-able side) -->
+	<image id="Empire_Panel_02" src="Empire_Panel_02"/>
+	<!-- Note: Scrollbar/slider buttons -->
+	<image id="Scrollbar_Down_01" src="Scrollbar_Down_01"/>
+	<image id="Scrollbar_Down_02" src="Scrollbar_Down_02"/>
+	<image id="Scrollbar_Down_03" src="Scrollbar_Down_03"/>
+	<image id="Scrollbar_Down_04" src="Scrollbar_Down_04"/>
+	<image id="Scrollbar_Up_01" src="Scrollbar_Up_01"/>
+	<image id="Scrollbar_Up_02" src="Scrollbar_Up_02"/>
+	<image id="Scrollbar_Up_03" src="Scrollbar_Up_03"/>
+	<image id="Scrollbar_Up_04" src="Scrollbar_Up_04"/>
+	<image id="Scrollbar_Middle_01" src="Scrollbar_Middle_01"/>
+	<image id="Scrollbar_Middle_02" src="Scrollbar_Middle_02"/>
+	<image id="Scrollbar_Middle_03" src="Scrollbar_Middle_03"/>
+	<image id="Scrollbar_Middle_04" src="Scrollbar_Middle_04"/>
+	<image id="Scrollbar_Middle_01b">
+		<layer group="this" image="Scrollbar_Middle_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Middle_02b">
+		<layer group="this" image="Scrollbar_Middle_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Middle_03b">
+		<layer group="this" image="Scrollbar_Middle_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Middle_04b">
+		<layer group="this" image="Scrollbar_Middle_04" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Minus_01" src="Scrollbar_Minus_01"/>
+	<image id="Scrollbar_Minus_02" src="Scrollbar_Minus_02"/>
+	<image id="Scrollbar_Minus_03" src="Scrollbar_Minus_03"/>
+	<image id="Scrollbar_Minus_04" src="Scrollbar_Minus_04"/>
+	<image id="Scrollbar_Plus_01" src="Scrollbar_Plus_01"/>
+	<image id="Scrollbar_Plus_02" src="Scrollbar_Plus_02"/>
+	<image id="Scrollbar_Plus_03" src="Scrollbar_Plus_03"/>
+	<image id="Scrollbar_Plus_04" src="Scrollbar_Plus_04"/>
+	<image id="Scrollbar_Dark_End" src="Scrollbar_Dark_End"/>
+	<image id="Scrollbar_Dark_Mid" src="Scrollbar_Dark_Mid"/>
 </assetlist>
