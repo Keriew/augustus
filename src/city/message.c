@@ -166,7 +166,7 @@ static void show_message_popup(int message_id)
         if (msg->message_type == MESSAGE_REQUEST_CAN_COMPLY && msg->param1) {
             // param1 = request id
             const scenario_request *request = scenario_request_get(msg->param1);
-            if (request->can_comply_dialog_shown == 1 || request->state > 2) { // dispatched or ignored
+            if (request->can_comply_dialog_shown == 1 || request->state >= 2) { // dispatched or ignored
                 return;  // nothing to show
             }
         }

@@ -221,7 +221,6 @@ void city_labor_calculate_workers(int num_plebs, int num_patricians)
 
     if (config_get(CONFIG_GP_CH_FIXED_WORKERS)) {
         venus_blessing_modifier = city_god_venus_bonus_employment();
-        city_data.population.working_age = calc_adjust_with_percentage(num_plebs, 38 + venus_blessing_modifier);
         city_data.population.working_age = calc_adjust_with_percentage(num_plebs, PLEB_PERCENTAGE + venus_blessing_modifier);
         city_data.labor.workers_available = city_data.population.working_age;
     } else {

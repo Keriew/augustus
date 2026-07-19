@@ -66,6 +66,16 @@ int string_to_int(const uint8_t *str);
 int string_from_int(uint8_t *dst, int value, int force_plus_sign);
 
 /**
+ * Converts float to string
+ * @param dst Output string
+ * @param value Value to write
+ * @param decimal_places Number of decimal places to write, from 0 to 5
+ * @param force_plus_sign Force plus sign in front of positive value
+ * @return Total number of characters written to dst
+ */
+int string_from_float(uint8_t *dst, float value, int decimal_places, int force_plus_sign);
+
+/**
  * Compares two strings similar to how strcmp does.
  * Compares the lowercase of the two strings, so uppercase is treated equal to lowercase.
  * @param a String A
