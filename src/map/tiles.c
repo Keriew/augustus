@@ -26,6 +26,7 @@
 #include "map/routing_terrain.h"
 #include "map/terrain.h"
 #include "scenario/map.h"
+#include "scenario/property.h"
 
 
 
@@ -1086,8 +1087,8 @@ static void set_water_image(int x, int y, int grid_offset)
         const terrain_image *img = map_image_context_get_shore(grid_offset);
         int image_id = image_group(GROUP_TERRAIN_WATER) + img->group_offset + img->item_offset;
         if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_BUILDING)) {
-            // fortified shore
-            if (!map_is_bridge(grid_offset)) { //no fortification right under the bridge
+            // fortified shore -- but not under a marsh overlay (its wall sprite would draw over it)
+            if (!map_is_bridge(grid_offset) && !map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
                 int base = image_group(GROUP_TERRAIN_WATER_SHORE);
                 switch (img->group_offset) {
                     case 8: image_id = base + 10; break;
@@ -1133,6 +1134,132 @@ void map_tiles_set_water(int x, int y)
 {
     map_terrain_add(map_grid_offset(x, y), TERRAIN_WATER);
     foreach_region_tile(x - 1, y - 1, x + 1, y + 1, set_water_image);
+}
+
+// --- Overlay-terrain autotiling ---
+//
+// The tileset sprite is chosen from the 8 same-type neighbours
+// the iso diamond's 4 EDGES are NE/SE/SW/NW, its 4 VERTICES are N/E/S/W. Map-orthogonal neighbours
+// drive the edges, map-diagonal neighbours drive the vertices, with zero rotational offset:
+//     edge NE<-mapN  SE<-mapE  SW<-mapS  NW<-mapW
+//     vtx  N <-mapNW E <-mapNE S <-mapSE W <-mapSW
+// Rules: an EDGE is SOLID when its orthogonal neighbour is same-type (the side merges), OPEN when
+// not. A VERTEX carries a notch unless the sand/marsh reaches it (both flanking edges solid AND the
+// corner diagonal present). Fully surrounded -> full tile (variants 1-8). Isolated -> 80
+//
+// Signature bits: edges open NE=1,SE=2,SW=4,NW=8 ; vertex notch N=16,E=32,S=64,W=128.
+typedef struct { unsigned char sig; unsigned char sprite; } overlay_sig;
+static const overlay_sig OVERLAY_SIG_TABLE[] = {
+    {0xC4, 9}, {0x98, 13}, {0x31, 17}, {0x62, 21},
+    {0xDC, 25}, {0xB9, 29}, {0x73, 33}, {0xE6, 37},
+    {0xF5, 41}, {0xFA, 43},
+    {0xFE, 45}, {0xFD, 46}, {0xFB, 47}, {0xF7, 48},
+    {0xFF, 80},
+    {0xA0, 49}, {0x50, 50},
+    {0x80, 51}, {0x10, 52}, {0x20, 53}, {0x40, 54},
+    {0x90, 55}, {0x30, 56}, {0x60, 57}, {0xC0, 58},
+    {0xB0, 59}, {0x70, 60}, {0xE0, 61}, {0xD0, 62},
+    {0xF0, 63},
+    {0xD4, 64}, {0xE4, 65}, {0xF4, 66},
+    {0xB8, 67}, {0xD8, 68}, {0xF8, 69},
+    {0x71, 70}, {0xB1, 71}, {0xF1, 72},
+    {0xE2, 73}, {0x72, 74}, {0xF2, 75},
+    {0xFC, 76}, {0xF9, 77}, {0xF3, 78}, {0xF6, 79},
+};
+
+// Compute the overlay sprite offset (0-based) for a tile, from its 8 neighbours of `terrain`.
+// Map edge tiles count as same-type so masses flush to the map border have no artificial edge.
+static int overlay_tile_offset(int grid_offset, int terrain)
+{
+    // same[] indexed by map direction 0=N 1=NE 2=E 3=SE 4=S 5=SW 6=W 7=NW.
+    // A neighbour OUTSIDE the playable map counts as same-type, so an overlay mass flush against
+    // the map border joins it (no artificial edge drawn towards the void).
+    int same[8];
+    for (int i = 0; i < 8; i++) {
+        int n = grid_offset + map_grid_direction_delta(i);
+        int nx = map_grid_offset_to_x(n);
+        int ny = map_grid_offset_to_y(n);
+        same[i] = (!map_grid_is_inside(nx, ny, 1)) || map_terrain_is(n, terrain) ? 1 : 0;
+    }
+    // Rotate map directions into screen space according to the camera. Each 90 deg step = +2 dirs.
+    int rot = city_view_orientation(); // 0,2,4,6
+    int o[8];
+    for (int i = 0; i < 8; i++) {
+        o[i] = same[(i + rot) & 7];
+    }
+    // screen-fixed orthogonals: o0=N o2=E o4=S o6=W ; diagonals o1=NE o3=SE o5=SW o7=NW
+    int n_ = o[0], e_ = o[2], s_ = o[4], w_ = o[6];
+    int ne = o[1], se = o[3], sw = o[5], nw = o[7];
+    if (n_ && e_ && s_ && w_ && ne && se && sw && nw) {
+        return -1; // fully surrounded -> caller picks a full-tile variant (1-8)
+    }
+    int edge_ne = !n_, edge_se = !e_, edge_sw = !s_, edge_nw = !w_;
+    int sig = 0;
+    if (edge_ne) sig |= 0x01;
+    if (edge_se) sig |= 0x02;
+    if (edge_sw) sig |= 0x04;
+    if (edge_nw) sig |= 0x08;
+    // A vertex is notched unless the terrain reaches it: both flanking edges solid and the corner
+    // diagonal present.
+    if (edge_nw || edge_ne || !nw) sig |= 0x10; // N
+    if (edge_ne || edge_se || !ne) sig |= 0x20; // E
+    if (edge_se || edge_sw || !se) sig |= 0x40; // S
+    if (edge_sw || edge_nw || !sw) sig |= 0x80; // W
+    for (unsigned int i = 0; i < sizeof(OVERLAY_SIG_TABLE) / sizeof(OVERLAY_SIG_TABLE[0]); i++) {
+        if (OVERLAY_SIG_TABLE[i].sig == sig) {
+            return OVERLAY_SIG_TABLE[i].sprite - 1; // 0-based offset
+        }
+    }
+    return -1; // no exact match (treat as full tile)
+}
+
+static int marshland_base_image(void)
+{
+    return assets_get_image_id("Terrain_Maps", "Marshland_C_01");
+}
+
+static void set_overlay_native_ground(int grid_offset)
+{
+    if (map_terrain_is(grid_offset, TERRAIN_WATER | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
+        return;
+    }
+    int image_id = map_property_is_alternate_terrain(grid_offset)
+        ? image_group(GROUP_TERRAIN_GRASS_2) : image_group(GROUP_TERRAIN_GRASS_1);
+    map_image_set(grid_offset, image_id + (map_random_get(grid_offset) & 7));
+}
+
+static void set_marshland_image(int x, int y, int grid_offset)
+{
+    if (!map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
+        map_marsh_image_set(grid_offset, 0);
+        return;
+    }
+    set_overlay_native_ground(grid_offset);
+    int base = marshland_base_image();
+    if (base <= 0) {
+        base = assets_get_image_id("Terrain_Maps", "Marshland_C_01");
+    }
+    int offset = overlay_tile_offset(grid_offset, TERRAIN_MARSHLAND);
+    if (offset < 0) {
+        offset = map_random_get(grid_offset) % 8; // fully-surrounded / no-edge: full-tile variant 1-8
+    }
+    map_marsh_image_set(grid_offset, base + offset);
+    map_property_mark_draw_tile(grid_offset);
+}
+
+static void update_marshland_tile(int x, int y, int grid_offset)
+{
+    set_marshland_image(x, y, grid_offset);
+}
+
+void map_tiles_update_all_marshland(void)
+{
+    foreach_map_tile(update_marshland_tile);
+}
+
+void map_tiles_update_region_marshland(int x_min, int y_min, int x_max, int y_max)
+{
+    foreach_region_tile(x_min, y_min, x_max, y_max, update_marshland_tile);
 }
 
 static void set_aqueduct(int grid_offset)
@@ -1460,6 +1587,7 @@ void map_tiles_update_all(void)
 
     map_tiles_update_all_elevation();
     map_tiles_update_all_water();
+    map_tiles_update_all_marshland();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
     foreach_map_tile(set_tree_image);

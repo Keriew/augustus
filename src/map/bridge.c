@@ -84,13 +84,13 @@ int map_bridge_calculate_length_direction(int x, int y, int *length, int *direct
         if (i == 0) {
             //check for an inaccessible tile before the bridge starts
             int previous_offset = grid_offset - 2 * bridge.direction_grid_delta;
-            if (map_terrain_is(previous_offset, TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING)) {
+            if (map_terrain_is(previous_offset, TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING | TERRAIN_MARSHLAND)) {
                 blocking_tiles->grid_offsets[blocking_tiles->size++] = previous_offset;
                 bridge.end_grid_offset = 0;
             }
         }
         int next_offset = grid_offset + bridge.direction_grid_delta;
-        if (map_terrain_is(next_offset, TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING)) {
+        if (map_terrain_is(next_offset, TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING | TERRAIN_MARSHLAND)) {
             blocking_tiles->grid_offsets[blocking_tiles->size++] = next_offset;
             bridge.end_grid_offset = 0;
             break;
