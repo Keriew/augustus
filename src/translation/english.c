@@ -2116,7 +2116,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC, "The triumphal arch does not need resources from your city to be build. All necessary resources and laborers will be supplied by Rome."},
     {TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE, "Triumphal arch completed"},
     {TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, "The triumphal arch now stands complete, its towering stonework and finely carved facade honoring the courage of our soldiers and the victories they have secured for the city. May it stand for generations as a symbol of strength, sacrifice and civic pride."},
-    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Supplied by Rome)"}
+    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Supplied by Rome)"},
+    {TR_WARNING_ENEMIES_PREVENT_BRIDGE_DESTRUCTION, "You can not destroy bridges while an invasion is ongoing!"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
