@@ -396,6 +396,7 @@ void formation_legion_update(void)
                     f->action_state != FIGURE_ACTION_149_CORPSE &&
                     f->action_state != FIGURE_ACTION_148_FLEEING) {
                     f->action_state = FIGURE_ACTION_148_FLEEING;
+                    f->wait_ticks = 0; // immediatly update the route to the exit
                     figure_route_remove(f);
                 }
             }
