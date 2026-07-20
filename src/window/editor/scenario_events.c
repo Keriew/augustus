@@ -176,7 +176,7 @@ static void draw_foreground(void)
     outer_panel_draw(16, 16, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     text_draw_centered(translation_for(TR_EDITOR_SCENARIO_EVENTS_TITLE), 0, 30, WINDOW_WIDTH * BLOCK_SIZE, FONT_LARGE_BLACK, 0);
-    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENTS_COUNT), data.total_events, "",
+    text_draw_label_and_number(translation_for(TR_EDITOR_SCENARIO_EVENTS_COUNT), data.active_events, "",
         30, 70, FONT_NORMAL_PLAIN, COLOR_BLACK);
 
     int checkmark_id = assets_lookup_image_id(ASSET_UI_SELECTION_CHECKMARK);

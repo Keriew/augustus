@@ -798,6 +798,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     if (version <= SCENARIO_TESTING_VERSION_BUMP_1) {
         scenario_events_population_migrate_counting();
     }
+    building_monument_reset_stages();
 
     buffer_skip(file->end_marker, 4);
 }
@@ -1010,6 +1011,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version <= SAVE_GAME_TESTING_VERSION_BUMP_1) {
         scenario_events_population_migrate_counting();
     }
+    building_monument_reset_stages();
 }
 
 static void savegame_save_to_state(savegame_state *state)
