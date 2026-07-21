@@ -24,8 +24,6 @@
 #include "sound/effect.h"
 #include "sound/speech.h"
 
-#define FLEEING_ENEMY_WAIT_TICKS 300
-
 static void enemy_initial(figure *f, formation *m)
 {
     map_figure_update(f);
@@ -189,40 +187,15 @@ static void enemy_action(figure *f, formation *m)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_148_FLEEING:
-        {
-            f->wait_ticks++;
-            if (f->wait_ticks >= FLEEING_ENEMY_WAIT_TICKS) {
-                f->wait_ticks = 0;
-                map_point dst = {f->source_x, f->source_y};
-                if (config_get(CONFIG_GP_CH_ENEMIES_RETREAT_FAST)) {
-                    if (f->type == FIGURE_ENEMY_CAESAR_LEGIONARY) {
-                        dst = scenario_map_entry();
-                    } else {
-                        int min_distance = 1000000;
-                        for (int i = 0; i < scenario_editor_count_invasion_points(); i++) {
-                            map_point invasion_point = scenario_editor_invasion_point(i);
-                            if (map_routing_noncitizen_can_travel_over_land(f->x, f->y,
-                                invasion_point.x, invasion_point.y, 8, 0, 15000)) {
-                                int distance = map_routing_distance(f->grid_offset);
-                                if (distance < min_distance) {
-                                    min_distance = distance;
-                                    dst = invasion_point;
-                                }
-                            }
-                        }
-                    }
-                }
-                f->destination_x = dst.x;
-                f->destination_y = dst.y;
-            }
-            figure_movement_move_ticks(f, f->speed_multiplier * 2); // enemies go double the speed when retreating
+            f->destination_x = f->source_x;
+            f->destination_y = f->source_y;
+            figure_movement_move_ticks(f, f->speed_multiplier * (config_get(CONFIG_GP_CH_ENEMIES_RETREAT_FAST) ? 2 : 1));
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {
                 f->state = FIGURE_STATE_DEAD;
             }
             break;
-        }
         case FIGURE_ACTION_151_ENEMY_INITIAL:
             enemy_initial(f, m);
             break;
