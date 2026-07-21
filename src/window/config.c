@@ -142,7 +142,7 @@ typedef struct {
     int subtype;
     translation_key description;          //  label / header text key
     const uint8_t *(*get_display_text)(void);
-    int y_offset; //  kept for compatibility 
+    int y_offset; //  kept for compatibility
     int enabled; //  runtime on/off
     int height;
     int margin_top;  //  extra spacing before (can be used instead of TYPE_SPACE)
@@ -394,7 +394,6 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_ROAMERS_DONT_SKIP_CORNERS, TR_CONFIG_ROAMERS_DONT_SKIP_CORNERS, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
-        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CARAVANS_MOVE_OFF_ROAD, TR_CONFIG_CARAVANS_MOVE_OFF_ROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_GETTING_GRANARIES_GO_OFFROAD, TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
@@ -420,6 +419,11 @@ static config_widget city_mgmt_widgets_by_category[CATEGORY_CITY_COUNT][MAX_WIDG
     {
         {TYPE_CHECKBOX, CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, TR_CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_GP_CH_AUTO_CLEAR_TREES, TR_CONFIG_GP_CH_AUTO_CLEAR_TREES, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+    },
+    // Military
+    {
+        {TYPE_CHECKBOX, CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD, TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_GP_CH_ENEMIES_RETREAT_FAST, TR_CONFIG_GP_CH_ENEMIES_RETREAT_FAST, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
     }
 };
 
@@ -567,6 +571,7 @@ static const translation_key city_mgmt_category_keys[CATEGORY_CITY_COUNT] = {
     TR_CONFIG_CATEGORY_MANAGEMENT_ROADBLOCKS,
     TR_CONFIG_CATEGORY_MANAGEMENT_HOUSING,
     TR_CONFIG_CATEGORY_MANAGEMENT_DESTRUCTION,
+    TR_CONFIG_CATEGORY_MANAGEMENT_MILITARY,
 };
 
 
@@ -917,7 +922,7 @@ static int config_change_string_player_name(int key)
     return 1;
 }
 
-//Display text functions 
+//Display text functions
 
 static uint8_t *percent_buf(int key)
 {
@@ -1379,7 +1384,7 @@ static void button_change_user_directory(const generic_button *button)
     window_user_path_setup_show(0);
 }
 
-// Category list boxes 
+// Category list boxes
 static int page_is_category(unsigned int page)
 {
     return (page < CONFIG_PAGES) ? page_is_category_helper[page] : 0;

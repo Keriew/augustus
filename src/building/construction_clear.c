@@ -198,9 +198,10 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
                 items_placed++;
                 map_aqueduct_remove(grid_offset);
             } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) { // only bridges fall here
+                int figures_on_bridge = map_bridge_has_figures(grid_offset);
                 if (city_figures_total_invading_enemies() > 3) { // 3 is also the amount to determine immigration
                     city_warning_show(WARNING_ENEMIES_PREVENT_BRIDGE_DESTRUCTION, NEW_WARNING_SLOT);
-                } else if (map_bridge_has_figures(grid_offset) && !config_get(CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES)) {
+                } else if (figures_on_bridge == 2 || (figures_on_bridge && !config_get(CONFIG_GP_CH_ALWAYS_DESTROY_BRIDGES))) {
                     city_warning_show(WARNING_PEOPLE_ON_BRIDGE, NEW_WARNING_SLOT);
                 } else if (confirm.bridge_confirmed == 1) {
                     map_bridge_remove(grid_offset, 0);

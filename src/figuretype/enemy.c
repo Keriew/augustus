@@ -4,6 +4,7 @@
 #include "city/figures.h"
 #include "city/sound.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/image.h"
 #include "figure/combat.h"
 #include "figure/formation.h"
@@ -193,18 +194,20 @@ static void enemy_action(figure *f, formation *m)
             if (f->wait_ticks >= FLEEING_ENEMY_WAIT_TICKS) {
                 f->wait_ticks = 0;
                 map_point dst = {f->source_x, f->source_y};
-                if (f->type == FIGURE_ENEMY_CAESAR_LEGIONARY) {
-                    dst = scenario_map_entry();
-                } else {
-                    int min_distance = 1000000;
-                    for (int i = 0; i < scenario_editor_count_invasion_points(); i++) {
-                        map_point invasion_point = scenario_editor_invasion_point(i);
-                        if (map_routing_noncitizen_can_travel_over_land(f->x, f->y,
-                            invasion_point.x, invasion_point.y, 8, 0, 15000)) {
-                            int distance = map_routing_distance(f->grid_offset);
-                            if (distance < min_distance) {
-                                min_distance = distance;
-                                dst = invasion_point;
+                if (config_get(CONFIG_GP_CH_ENEMIES_RETREAT_FAST)) {
+                    if (f->type == FIGURE_ENEMY_CAESAR_LEGIONARY) {
+                        dst = scenario_map_entry();
+                    } else {
+                        int min_distance = 1000000;
+                        for (int i = 0; i < scenario_editor_count_invasion_points(); i++) {
+                            map_point invasion_point = scenario_editor_invasion_point(i);
+                            if (map_routing_noncitizen_can_travel_over_land(f->x, f->y,
+                                invasion_point.x, invasion_point.y, 8, 0, 15000)) {
+                                int distance = map_routing_distance(f->grid_offset);
+                                if (distance < min_distance) {
+                                    min_distance = distance;
+                                    dst = invasion_point;
+                                }
                             }
                         }
                     }
