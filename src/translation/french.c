@@ -2116,7 +2116,21 @@ static translation_string all_strings[] = {
     {TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC, "La construction de l'arc de triomphe ne nécessite pas de ressources issues de votre cité. Ces dernières ainsi que la main-d'œuvre seront fournies par Rome."},
     {TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE, "Arc de triomphe achevé"},
     {TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, "L'arc de triomphe est achevé. Sa stature imposante et sa façade finement taillée rendent honneur à la bravoure de nos soldats et à leurs victoires pour la grandeur de la cité. Qu'il trône avec éclat pour des générations comme symbole de la force, du sacrifice, et de la fierté citoyenne."},
-    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(fourni par Rome)"}
+    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(fourni par Rome)"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL, "Puits indigène"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT, "Grande hutte indigène"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2, "Hutte indigène alt 2"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT_2, "Grande hutte indigène alt"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE, "Palissade indigène"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELDS, "Champs indigènes"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_WHEAT, "Champ de blé"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VEGETABLES, "Champ de légumes"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_FRUIT, "Champ de fruits"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_OLIVE, "Champ d'oliviers"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VINES, "Champ de vignes"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG, "Champ de porcs"},
+    {TR_BUILDING_NATIVE_WELL, "Puits indigène"},
+    {TR_BUILDING_NATIVE_WELL_DESC, "Ce puits creusé à la main puise l'eau de la terre pour abreuver la tribu locale. Bien que rudimentaire comparé aux aqueducs et fontaines romains, il suffit aux modestes besoins des indigènes. Les villageois s'y rassemblent à l'aube et au crépuscule pour puiser de l'eau, échanger les nouvelles, et observer les rythmes de leurs terres ancestrales."},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)
