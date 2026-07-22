@@ -376,7 +376,7 @@ void formation_caesar_retreat(void)
     }
 }
 
-int formation_has_low_morale(formation *m)
+int formation_has_low_morale(const formation *m)
 {
     return m->months_low_morale || m->months_very_low_morale;
 }

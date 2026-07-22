@@ -34,7 +34,7 @@ int map_bridge_building_length(void)
 }
 
 int building_type_is_bridge(building_type type)
-//technically should be elsewhere, but this is the best place for now, to centralise bridge logic since it's an exemption. 
+//technically should be elsewhere, but this is the best place for now, to centralise bridge logic since it's an exemption.
 {
     return type == BUILDING_LOW_BRIDGE || type == BUILDING_SHIP_BRIDGE;
 }
@@ -398,6 +398,9 @@ int map_bridge_has_figures(int grid_offset)
     int current = start;
     // find lower end of the bridge
     while (map_is_bridge(current) && map_building_at(current) == building_id) {
+        if (map_has_figure_category_at(current, FIGURE_CATEGORY_HOSTILE | FIGURE_CATEGORY_AGGRESSIVE_ANIMAL)) {
+            return 2;
+        }
         if (map_has_figure_category_at(current, FIGURE_CATEGORY_ALL ^ FIGURE_CATEGORY_INACTIVE)) {
             return 1;
         }
