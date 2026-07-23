@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include "core/buffer.h"
 
-#define TERRAIN_LAST_FLAG TERRAIN_HIGHWAY_BOTTOM_RIGHT
-#define TERRAIN_NUM_FLAGS  (21)  // bits
+#define TERRAIN_LAST_FLAG TERRAIN_SHALLOW_WATER
+#define TERRAIN_NUM_FLAGS  (22)  // bits
 #define KEY_MAX_LEN 32 // max length of a single key - only debugging purposes
 
 enum {
@@ -31,6 +31,7 @@ enum {
     TERRAIN_HIGHWAY_BOTTOM_LEFT = 1 << 18,
     TERRAIN_HIGHWAY_TOP_RIGHT = 1 << 19,
     TERRAIN_HIGHWAY_BOTTOM_RIGHT = 1 << 20,
+    TERRAIN_SHALLOW_WATER = 1 << 21,
 
     // Combined
     TERRAIN_HIGHWAY = TERRAIN_HIGHWAY_TOP_LEFT | TERRAIN_HIGHWAY_BOTTOM_LEFT |

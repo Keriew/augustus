@@ -1899,6 +1899,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_COLOR_BLACK, "Black"},
     {TR_EDITOR_COLOR_DARK_BLUE, "Dark Blue"},
     {TR_EDITOR_RUBBLE, "Rubble"},
+    {TR_EDITOR_TOOL_WATER, "Water"},
+    {TR_EDITOR_TOOL_SHALLOW, "Shallows"},
     {TR_PARAMETER_GRID_OFFSET_CORNER1, "Corner 1"},
     {TR_PARAMETER_GRID_OFFSET_CORNER2, "Corner 2"},
     {TR_CONDITION_TYPE_TERRAIN_IN_AREA, "Terrain in area"},
