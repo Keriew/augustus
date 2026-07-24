@@ -62,6 +62,9 @@ int building_get_efficiency(const building *b)
     int production_for_resource = resource_production_per_month(resource);
 
     int percentage = calc_percentage(b->data.industry.average_production_per_month, production_for_resource);
+    if (b->type == BUILDING_WHARF) {
+        return percentage;
+    }
     return calc_bound(percentage, 0, 100);
 }
 
