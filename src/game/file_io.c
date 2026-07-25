@@ -232,6 +232,7 @@ typedef struct {
     buffer *model_data;
     buffer *rubble_grid;
     buffer *production_rates;
+    buffer *monument_stages;
 } savegame_state;
 
 typedef struct {
@@ -292,6 +293,7 @@ typedef struct {
         int custom_model_data;
         int rubble_grid;
         int custom_production_rates;
+        int monument_stages;
     } features;
 } savegame_version_data;
 
@@ -536,6 +538,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
     version_data->features.custom_production_rates = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
+    version_data->features.monument_stages = version > SAVE_GAME_TESTING_VERSION_BUMP_3;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -713,6 +716,9 @@ static void init_savegame_data(savegame_version_t version)
     if (version_data.features.custom_production_rates) {
         state->production_rates = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
     }
+    if (version_data.features.monument_stages) {
+        state->monument_stages = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
 }
 
 static void scenario_load_from_state(scenario_state *file, scenario_version_t version)
@@ -881,6 +887,11 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
         scenario_events_clear();
     }
     scenario_map_init();
+    // do this before loading buildings
+    building_monument_reset_stages();
+    if (version > SAVE_GAME_TESTING_VERSION_BUMP_3) {
+        building_monument_load_stages(state->monument_stages);
+    }
 
     map_building_load_state(state->building_grid, state->building_damage_grid, state->rubble_grid, version);
     map_terrain_load_state(state->terrain_grid, version > SAVE_GAME_LAST_ORIGINAL_TERRAIN_DATA_SIZE_VERSION,
@@ -1011,7 +1022,6 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version <= SAVE_GAME_TESTING_VERSION_BUMP_1) {
         scenario_events_population_migrate_counting();
     }
-    building_monument_reset_stages();
 }
 
 static void savegame_save_to_state(savegame_state *state)
@@ -1103,6 +1113,8 @@ static void savegame_save_to_state(savegame_state *state)
     figure_visited_buildings_save_state(state->visited_buildings);
 
     production_rates_save(state->production_rates);
+
+    building_monument_save_stages(state->monument_stages);
 }
 
 static int get_scenario_version(FILE *fp)

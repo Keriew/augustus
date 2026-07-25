@@ -284,6 +284,12 @@ void building_monument_stage_resource_set(building_type b_type, int stage, resou
     if (stage >= monument->phases - 1) {
         monument->phases = stage + 1;
     }
+    for (building *b = building_first_of_type(b_type); b; b = b->next_of_type) {
+        if (b->monument.phase != stage + 1) {
+            continue;
+        }
+        b->resources[r] = amount;
+    }
 }
 
 int building_monument_deliver_resource(building *b, int resource)

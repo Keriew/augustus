@@ -24,7 +24,8 @@ typedef enum {
 } module_type;
 
 void building_monument_reset_stages(void);
-
+void building_monument_save_stages(buffer *buf);
+void building_monument_load_stages(buffer *buf);
 void building_monument_stage_resource_set(building_type b_type, int stage, resource_type r, int amount);
 
 int building_monument_access_point(building *b, map_point *dst);
