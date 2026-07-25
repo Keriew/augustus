@@ -29,7 +29,7 @@
 #include <string.h>
 
 #define TERRAIN_PAINT_MASK ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING |\
-                            TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW)
+                            TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW | TERRAIN_MARSHLAND)
 
 static struct {
     int active;
@@ -151,6 +151,7 @@ int editor_tool_is_brush(void)
         case TOOL_SHRUB:
         case TOOL_ROCKS:
         case TOOL_MEADOW:
+        case TOOL_MARSHLAND:
         case TOOL_NATIVE_RUINS:
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
@@ -169,7 +170,7 @@ static int raise_land_tile(int x, int y, int grid_offset, int terrain)
         if (!(terrain & (TERRAIN_ACCESS_RAMP | TERRAIN_ELEVATION))) {
             map_property_set_multi_tile_size(grid_offset, 1);
             map_elevation_set(grid_offset, elevation + 1);
-            terrain &= ~(TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_GARDEN | TERRAIN_ROAD);
+            terrain &= ~(TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MARSHLAND);
         }
     }
     return terrain;
@@ -239,7 +240,8 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             }
             break;
         case TOOL_WATER:
-            if (!(terrain & TERRAIN_WATER) && !(terrain & TERRAIN_ELEVATION_ROCK)) {
+            if ((!(terrain & TERRAIN_WATER) || (terrain & TERRAIN_MARSHLAND)) &&
+                !(terrain & TERRAIN_ELEVATION_ROCK)) {
                 terrain &= TERRAIN_PAINT_MASK;
                 terrain |= TERRAIN_WATER;
                 map_property_clear_future_earthquake(grid_offset);
@@ -255,6 +257,15 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             if (!(terrain & TERRAIN_MEADOW)) {
                 terrain &= TERRAIN_PAINT_MASK;
                 terrain |= TERRAIN_MEADOW;
+            }
+            break;
+        case TOOL_MARSHLAND:
+            // Marsh is an OVERLAY: it adds the TERRAIN_MARSHLAND flag and is drawn on top of the
+            // native terrain tile (land / water / coast), which keeps its own image and autotiling.
+            if (!(terrain & TERRAIN_MARSHLAND) && !(terrain & TERRAIN_ELEVATION_ROCK)) {
+                terrain &= ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_GARDEN);
+                terrain |= TERRAIN_MARSHLAND;
+                map_property_clear_future_earthquake(grid_offset);
             }
             break;
         case TOOL_NATIVE_RUINS:
@@ -310,30 +321,42 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_all_rocks();
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             break;
         case TOOL_TREES:
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
             map_tiles_update_region_trees(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             break;
         case TOOL_WATER:
         case TOOL_ROCKS:
             map_image_context_reset_water();
             map_tiles_update_all_rocks();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             break;
         case TOOL_SHRUB:
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
             map_tiles_update_region_shrub(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             break;
         case TOOL_MEADOW:
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
+            break;
+        case TOOL_MARSHLAND:
+            map_image_context_reset_water();
+            map_tiles_update_region_water(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
+            map_tiles_update_all_rocks();
+            map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             break;
         case TOOL_NATIVE_RUINS:
             // Rubble doesn't need terrain updates, just refresh the rubble graphics
@@ -350,6 +373,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_all_rocks();
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             break;
         case TOOL_EARTHQUAKE_CUSTOM:
         {
@@ -479,6 +503,7 @@ static void update_terrain_after_elevation_changes(void)
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
     map_tiles_update_all_water();
+    map_tiles_update_all_marshland();
 
     scenario_editor_set_as_unsaved();
 }

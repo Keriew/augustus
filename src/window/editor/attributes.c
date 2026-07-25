@@ -16,6 +16,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "map/tiles.h"
 #include "scenario/demand_change.h"
 #include "scenario/editor.h"
 #include "scenario/invasion.h"
@@ -368,6 +369,7 @@ static void button_change_climate(const generic_button *button)
 {
     scenario_editor_cycle_climate();
     image_load_climate(scenario_property_climate(), editor_is_active(), 0, 0);
+    map_tiles_update_all_marshland();
     widget_minimap_invalidate();
     window_request_refresh();
 }
