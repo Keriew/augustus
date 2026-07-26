@@ -18,7 +18,7 @@
 #include "map/terrain.h"
 
 #define MAX_HOUSE_LEVELS 20
-
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 static building_levy_for_type building_levies[] = {
     {BUILDING_FORT_ARCHERS, FORT_LEVY_MONTHLY},
@@ -351,7 +351,7 @@ static void pay_monthly_salary(void)
 static void pay_monthly_building_levies(void)
 {
     int levies = 0;
-    for (int i = 0; i < (int) (sizeof(building_levies) / sizeof(building_levies[0])); i++) {
+    for (int i = 0; i < (int) ARRAY_SIZE(building_levies); i++) {
         building_type type = building_levies[i].type;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             b->monthly_levy = building_levies[i].amount;
@@ -381,7 +381,7 @@ static void pay_monthly_building_levies(void)
 
 static void activate_monthly_tourism(void)
 {
-    for (int i = 0; i < BUILDINGS_WITH_TOURISM; i++) {
+    for (int i = 0; i < (int) ARRAY_SIZE(tourism_modifiers); i++) {
         building_type type = tourism_modifiers[i].type;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state != BUILDING_STATE_IN_USE || !b->num_workers) {
