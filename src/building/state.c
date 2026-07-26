@@ -580,10 +580,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
         }
 
         if (((b->type >= BUILDING_LARGE_TEMPLE_CERES && b->type <= BUILDING_LARGE_TEMPLE_VENUS) ||
-            b->type == BUILDING_ORACLE ||
-            b->type == BUILDING_NYMPHAEUM ||
-            b->type == BUILDING_SMALL_MAUSOLEUM ||
-            b->type == BUILDING_LARGE_MAUSOLEUM) && !b->monument.phase) {
+            b->type == BUILDING_ORACLE) && !b->monument.phase) {
             b->monument.phase = MONUMENT_FINISHED;
         }
 
