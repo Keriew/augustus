@@ -2115,7 +2115,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_TRIUMPHAL_ARCH_CONSTRUCTION_DESC, "Для постройки триумфальной арки не нужны ресурсы из вашего города. Все необходимые материалы и рабочая сила будут предоставлены Римом."},
     {TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE, "Триумфальная арка построена"},
     {TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, "Триумфальная арка завершена. Ее возвышающаяся каменная кладка и искусно украшенный фасад прославляют мужество наших солдат и победы, которые они принесли городу. Пусть она стоит многие поколения как символ силы, самопожертвования и гражданской доблести."},
-    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Поставляется Римом)"},
+    {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Предоставлено Римом)"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
