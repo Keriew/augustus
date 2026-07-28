@@ -15,6 +15,7 @@
 #include "scenario/editor_map.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
+#include "translation/translation.h"
 #include "widget/map_editor.h"
 #include "widget/minimap.h"
 #include "widget/sidebar/common.h"
@@ -34,7 +35,7 @@ static image_button buttons_build[] = {
     {84, 123, 71, 23, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 48, button_attributes, button_none, 1, 0, 1},
     {13, 267, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 0, button_build_tool, button_none, TOOL_GRASS, 0, 1},
     {63, 267, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 3, button_build_tool, button_none, TOOL_TREES, 0, 1},
-    {113, 267, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 6, button_build_tool, button_none, TOOL_WATER, 0, 1},
+    {113, 267, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 6, button_build_menu, button_none, MENU_WATER, 0, 1},
     {13, 303, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 21, button_build_menu, button_none, MENU_ELEVATION, 0, 1},
     {63, 303, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 12, button_build_tool, button_none, TOOL_SHRUB, 0, 1},
     {113, 303, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 15, button_build_tool, button_none, TOOL_ROCKS, 0, 1},
@@ -62,11 +63,16 @@ static void draw_status(void)
 
     int selected_tool = editor_tool_type();
     int brush_size = editor_tool_brush_size() - 1;
-    lang_text_draw(49, selected_tool, text_offset, 178, FONT_NORMAL_WHITE);
+    if (selected_tool == TOOL_SHALLOW) {
+        text_draw(translation_for(TR_EDITOR_TOOL_SHALLOW), text_offset, 178, FONT_NORMAL_WHITE, 0);
+    } else {
+        lang_text_draw(49, selected_tool, text_offset, 178, FONT_NORMAL_WHITE);
+    }
     switch (selected_tool) {
         case TOOL_GRASS:
         case TOOL_TREES:
         case TOOL_WATER:
+        case TOOL_SHALLOW:
         case TOOL_SHRUB:
         case TOOL_ROCKS:
         case TOOL_MEADOW:
