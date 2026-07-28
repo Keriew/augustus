@@ -30,6 +30,9 @@ static building_type get_clone_type_from_building(building *b, building_type clo
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_HUT:
         case BUILDING_NATIVE_HUT_ALT:
+        case BUILDING_NATIVE_HUT_ALT_2:
+        case BUILDING_NATIVE_LARGE_HUT_ALT:
+        case BUILDING_NATIVE_LARGE_HUT_ALT_2:
         case BUILDING_NATIVE_MEETING:
         case BUILDING_NATIVE_DECORATION:
         case BUILDING_NATIVE_MONUMENT:
