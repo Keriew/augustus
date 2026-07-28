@@ -2116,6 +2116,7 @@ static translation_string all_strings[] = {
     {TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE, "Триумфальная арка построена"},
     {TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, "Триумфальная арка завершена. Ее возвышающаяся каменная кладка и искусно украшенный фасад прославляют мужество наших солдат и победы, которые они принесли городу. Пусть она стоит многие поколения как символ силы, самопожертвования и гражданской доблести."},
     {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Предоставлено Римом)"},
+    {TR_CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES, "Автоудаление стандартных сообщений через 5 лет"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

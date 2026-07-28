@@ -137,6 +137,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_EMPIRE_SIDEBAR_SORT_REVERSED] = "ui_empire_sidebar_sort_reversed",
     [CONFIG_UI_AUTO_CYCLE_TEMPLES] = "ui_auto_cycle_temples",
     [CONFIG_UI_AUTO_CYCLE_GARDENS] = "ui_auto_cycle_gardens",
+    [CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES] = "ui_auto_delete_old_common_messages",
 };
 
 static const char *ini_string_keys[] = {
