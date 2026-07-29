@@ -1097,9 +1097,6 @@ static void generate_monument_type_mappings(void)
         return;
     }
     for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
-        if(type==117) {
-            int debug;
-        }
         const building_properties *props = building_properties_for_type(type);
         if (!props->event_data.attr) {
             continue;
