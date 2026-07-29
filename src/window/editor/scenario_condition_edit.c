@@ -71,6 +71,7 @@ static struct {
     unsigned int formula_index;
     scenario_condition_t *condition;
     scenario_condition_data_t *xml_info;
+    resource_type available_resources[RESOURCE_MAX];
 } data;
 
 static uint8_t *translation_for_param_value(parameter_type type, int value)
@@ -327,21 +328,22 @@ static void set_parameter_being_edited(int value)
 
 static void set_resource_value(int value)
 {
+    resource_type resource = data.available_resources[value];
     switch (data.parameter_being_edited) {
         case 1:
-            data.condition->parameter1 = value + 1;
+            data.condition->parameter1 = resource;
             return;
         case 2:
-            data.condition->parameter2 = value + 1;
+            data.condition->parameter2 = resource;
             return;
         case 3:
-            data.condition->parameter3 = value + 1;
+            data.condition->parameter3 = resource;
             return;
         case 4:
-            data.condition->parameter4 = value + 1;
+            data.condition->parameter4 = resource;
             return;
         case 5:
-            data.condition->parameter5 = value + 1;
+            data.condition->parameter5 = resource;
             return;
         default:
             return;
@@ -351,11 +353,17 @@ static void set_resource_value(int value)
 static void resource_selection(const generic_button *button)
 {
     static const uint8_t *resource_texts[RESOURCE_MAX];
-    for (resource_type resource = RESOURCE_MIN_FOOD; resource < RESOURCE_MAX; resource++) {
-        resource_texts[resource - 1] = resource_get_data(resource)->text;
+    int total_resources = 0;
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+        if (!resource_is_storable(resource)) {
+            continue;
+        }
+        resource_texts[total_resources] = resource_get_data(resource)->text;
+        data.available_resources[total_resources] = resource;
+        total_resources++;
     }
     window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
-        resource_texts, RESOURCE_MAX - 1, set_resource_value);
+        resource_texts, total_resources, set_resource_value);
 }
 
 static void custom_message_selection(void)

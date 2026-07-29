@@ -530,6 +530,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_ROUTE_TYPE:
         case PARAMETER_TYPE_VARIABLE_COLOR:
         case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_MONUMENT:
             return xml_import_special_parse_type(attr, resolved_type, target);
         case PARAMETER_TYPE_ROUTE_RESOURCE:
             return xml_import_special_parse_number(attr, target);
@@ -546,6 +547,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
             return xml_import_special_parse_min_max_number(attr, target);
         case PARAMETER_TYPE_RESOURCE:
         case PARAMETER_TYPE_RESOURCE_ALL:
+        case PARAMETER_TYPE_RESOURCE_MONUMENT:
             return xml_import_special_parse_resource(attr, target);
         case PARAMETER_TYPE_ROUTE:
             return xml_import_special_parse_route(attr, target);
@@ -649,8 +651,8 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
     }
 
     const char *value = xml_parser_get_attribute_string(attr->name);
-    for (resource_type i = RESOURCE_MIN; i < RESOURCE_ALL; i++) {
-        const char *resource_name = resource_get_data(i)->xml_attr_name;
+    for (resource_type i = RESOURCE_NONE; i < RESOURCE_ALL; i++) { // starting at RESOURCE_NONE to cover Architects
+        const char *resource_name = i ? resource_get_data(i)->xml_attr_name : "architects";
         if (xml_parser_compare_multiple(resource_name, value)) {
             *target = (int) i;
             return 1;

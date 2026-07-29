@@ -1,6 +1,7 @@
 #include "parameter_data.h"
 
 #include "building/menu.h"
+#include "building/monument.h"
 #include "building/properties.h"
 #include "city/constants.h"
 #include "city/ratings.h"
@@ -25,6 +26,8 @@
 
 #define UNLIMITED 1000000000 //fits in 32bit signed/unsigned int
 #define NEGATIVE_UNLIMITED -1000000000 //fits in 32bit signed int
+
+#define ARCHITECTS RESOURCE_NONE
 
 static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
     [CONDITION_TYPE_TIME_PASSED] = {.type = CONDITION_TYPE_TIME_PASSED,
@@ -379,7 +382,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "housing_level",       .type = PARAMETER_TYPE_HOUSING_TYPE,   .key = TR_PARAMETER_TYPE_HOUSING_TYPE },
                                         .xml_parm2 = {.name = "house_data_type",     .type = PARAMETER_TYPE_HOUSE_DATA_TYPE, .key = TR_PARAMETER_DATA_TYPE},
                                         .xml_parm3 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
-                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_NUMBER },
+                                            .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
     [ACTION_TYPE_LOCK_TRADE_ROUTE]     = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
@@ -415,6 +418,12 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,           .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm2 = {.name = "change_immigration",   .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_IMMIGRATION}, },
+    [ACTION_TYPE_CHANGE_MONUMENT_RESOURCES] = {.type = ACTION_TYPE_CHANGE_MONUMENT_RESOURCES,
+                                        .xml_attr = {.name = "change_monument_resources",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_MONUMENT_RESOURCES},
+                                        .xml_parm1 = {.name = "monument_type",        .type = PARAMETER_TYPE_MONUMENT,    .key = TR_PARAMETER_TYPE_MONUMENT },
+                                        .xml_parm2 = {.name = "stage",   .type = PARAMETER_TYPE_NUMBER,     .min_limit = 1,    .max_limit = 5,         .key = TR_PARAMETER_MONUMENT_STAGE},
+                                        .xml_parm3 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE_MONUMENT,         .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm4 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -617,6 +626,9 @@ static unsigned int special_attribute_mappings_allowed_buildings_size;
 
 static special_attribute_mapping_t special_attribute_mappings_model_buildings[BUILDING_TYPE_MAX];
 static unsigned int special_attribute_mappings_model_buildings_size;
+
+static special_attribute_mapping_t special_attribute_mappings_monuments[BUILDING_TYPE_MAX];
+static unsigned int special_attribute_mappings_monument_type_size;
 
 static special_attribute_mapping_t special_attribute_mappings_standard_message[] = {
     {.type = PARAMETER_TYPE_STANDARD_MESSAGE,            .text = "none",                      .value = 0,                    .key = TR_PARAMETER_VALUE_NONE },
@@ -1079,6 +1091,31 @@ static void generate_model_mappings(void)
     }
 }
 
+static void generate_monument_type_mappings(void)
+{
+    if (special_attribute_mappings_monument_type_size > 0) {
+        return;
+    }
+    for (building_type type = BUILDING_NONE; type < BUILDING_TYPE_MAX; type++) {
+        if(type==117) {
+            int debug;
+        }
+        const building_properties *props = building_properties_for_type(type);
+        if (!props->event_data.attr) {
+            continue;
+        }
+        if (!building_monument_type_is_monument(type)) {
+            continue;
+        }
+        special_attribute_mapping_t *mapping = &special_attribute_mappings_monuments[special_attribute_mappings_monument_type_size];
+        mapping->type = PARAMETER_TYPE_MONUMENT;
+        mapping->text = props->event_data.attr;
+        mapping->value = type;
+        mapping->key = props->event_data.key ? props->event_data.key : TR_PARAMETER_VALUE_DYNAMIC_RESOLVE;
+        special_attribute_mappings_monument_type_size++;
+    }
+}
+
 static void generate_submenu_mappings(build_menu_group menu)
 {
     unsigned int menu_items = building_menu_count_all_items(menu);
@@ -1190,6 +1227,9 @@ special_attribute_mapping_t *scenario_events_parameter_data_get_attribute_mappin
             return &special_attribute_mappings_variable_color[index];
         case PARAMETER_TYPE_HOUSING_TYPE:
             return &special_attribute_mappings_housing[index];
+        case PARAMETER_TYPE_MONUMENT:
+            generate_monument_type_mappings();
+            return &special_attribute_mappings_monuments[index];
         default:
             return 0;
     }
@@ -1266,6 +1306,9 @@ int scenario_events_parameter_data_get_mappings_size(parameter_type type)
             return SPECIAL_ATTRIBUTE_MAPPINGS_VARIABLE_COLOR_SIZE;
         case PARAMETER_TYPE_HOUSING_TYPE:
             return SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE;
+        case PARAMETER_TYPE_MONUMENT:
+            generate_monument_type_mappings();
+            return special_attribute_mappings_monument_type_size;
         default:
             return 0;
     }
@@ -1365,6 +1408,10 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return window_editor_select_city_trade_route_encode_route_resource(1, RESOURCE_MAX + 1);
         case PARAMETER_TYPE_ROUTE:
             return 1; // there should be at least one route
+        case PARAMETER_TYPE_MONUMENT:
+            return BUILDING_GRAND_TEMPLE_CERES;
+        case PARAMETER_TYPE_RESOURCE_MONUMENT:
+            return ARCHITECTS;
         default:
             return 0;
     }
@@ -1437,6 +1484,7 @@ const uint8_t *scenario_events_parameter_data_get_display_string(special_attribu
         case PARAMETER_TYPE_BUILDING:
         case PARAMETER_TYPE_BUILDING_COUNTING:
         case PARAMETER_TYPE_MODEL:
+        case PARAMETER_TYPE_MONUMENT:
             if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
                 return lang_get_building_type_string(entry->value);
             } else {
@@ -1595,6 +1643,12 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
                 return;
             }
             const uint8_t *text = window_editor_select_city_trade_route_show_get_selected_name(value);
+            result_text = string_copy(text, result_text, maxlength);
+            return;
+        }
+        case PARAMETER_TYPE_RESOURCE_MONUMENT:
+        {
+            const uint8_t *text = value == ARCHITECTS ? translation_for(TR_RESOURCE_ARCHITECTS) : resource_get_data(value)->text;
             result_text = string_copy(text, result_text, maxlength);
             return;
         }

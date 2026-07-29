@@ -77,12 +77,12 @@ static int export_attribute_route(xml_data_attribute_t *attr, int target)
 
 static int export_attribute_resource(xml_data_attribute_t *attr, int target)
 {
-    if (target < RESOURCE_MIN || target > RESOURCE_ALL) {
+    if (target < RESOURCE_NONE || target > RESOURCE_ALL) {
         log_exporting_error("Error while exporting resource.");
         return 0;
     }
 
-    const char *resource_name = resource_get_data(target)->xml_attr_name;
+    const char *resource_name = target ? resource_get_data(target)->xml_attr_name : "architect";
     char resource_name_to_use[50];
 
     const char *next = strchr(resource_name, '|');
@@ -157,6 +157,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_ROUTE_TYPE:
         case PARAMETER_TYPE_VARIABLE_COLOR:
         case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_MONUMENT:
             return export_attribute_by_type(attr, resolved_type, target);
         case PARAMETER_TYPE_BUILDING_COUNTING:
             return export_attribute_by_type(attr, PARAMETER_TYPE_BUILDING, target);
@@ -176,6 +177,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
             return export_attribute_number(attr, target);
         case PARAMETER_TYPE_RESOURCE:
         case PARAMETER_TYPE_RESOURCE_ALL:
+        case PARAMETER_TYPE_RESOURCE_MONUMENT:
             return export_attribute_resource(attr, target);
         case PARAMETER_TYPE_ROUTE:
             return export_attribute_route(attr, target);

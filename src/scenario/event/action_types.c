@@ -4,6 +4,7 @@
 #include "building/dock.h"
 #include "building/granary.h"
 #include "building/menu.h"
+#include "building/monument.h"
 #include "building/properties.h"
 #include "building/warehouse.h"
 #include "city/data_private.h"
@@ -1003,6 +1004,19 @@ int scenario_action_type_change_immigration_percentage_execute(scenario_action_t
     } else {
         city_migration_set_adjust_percentage_emigration(percentage);
     }
+
+    return 1;
+}
+
+int scenario_action_type_change_monument_resources_execute(scenario_action_t *action)
+{
+    int type = action->parameter1;
+    int stage = action->parameter2;
+    stage--;
+    int resource = action->parameter3;
+    int amount = scenario_formula_evaluate_formula(action->parameter4);
+
+    building_monument_stage_resource_set(type, stage, resource, amount);
 
     return 1;
 }

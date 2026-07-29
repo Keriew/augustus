@@ -102,4 +102,6 @@ int scenario_action_type_change_custom_variable_color_execute(scenario_action_t 
 
 int scenario_action_type_change_immigration_percentage_execute(scenario_action_t *action);
 
+int scenario_action_type_change_monument_resources_execute(scenario_action_t *action);
+
 #endif // ACTION_TYPES_H

@@ -77,6 +77,7 @@ static struct {
     unsigned int formula_index;
     scenario_action_t *action;
     scenario_action_data_t *xml_info;
+    resource_type available_resources[RESOURCE_MAX];
 } data;
 
 static uint8_t *translation_for_param_value(parameter_type type, int value)
@@ -361,6 +362,30 @@ static void set_parameter_being_edited(int value)
 
 static void set_resource_value(int value)
 {
+    resource_type resource = data.available_resources[value];
+    switch (data.parameter_being_edited) {
+        case 1:
+            data.action->parameter1 = resource;
+            return;
+        case 2:
+            data.action->parameter2 = resource;
+            return;
+        case 3:
+            data.action->parameter3 = resource;
+            return;
+        case 4:
+            data.action->parameter4 = resource;
+            return;
+        case 5:
+            data.action->parameter5 = resource;
+            return;
+        default:
+            return;
+    }
+}
+
+static void set_all_resource_value(int value)
+{
     switch (data.parameter_being_edited) {
         case 1:
             data.action->parameter1 = value + 1;
@@ -382,14 +407,43 @@ static void set_resource_value(int value)
     }
 }
 
+static void set_monument_resource_value(int value)
+{
+    switch (data.parameter_being_edited) {
+        case 1:
+            data.action->parameter1 = value;
+            return;
+        case 2:
+            data.action->parameter2 = value;
+            return;
+        case 3:
+            data.action->parameter3 = value;
+            return;
+        case 4:
+            data.action->parameter4 = value;
+            return;
+        case 5:
+            data.action->parameter5 = value;
+            return;
+        default:
+            return;
+    }
+}
+
 static void resource_selection(const generic_button *button)
 {
     static const uint8_t *resource_texts[RESOURCE_MAX];
-    for (resource_type resource = RESOURCE_MIN_FOOD; resource < RESOURCE_MAX; resource++) {
-        resource_texts[resource - 1] = resource_get_data(resource)->text;
+    int total_resources = 0;
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+        if (!resource_is_storable(resource)) {
+            continue;
+        }
+        resource_texts[total_resources] = resource_get_data(resource)->text;
+        data.available_resources[total_resources] = resource;
+        total_resources++;
     }
     window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
-        resource_texts, RESOURCE_MAX - 1, set_resource_value);
+        resource_texts, total_resources, set_resource_value);
 }
 
 static void all_resource_selection(const generic_button *button)
@@ -399,7 +453,17 @@ static void all_resource_selection(const generic_button *button)
         resource_texts[resource - 1] = resource_get_data(resource)->text;
     }
     window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
-        resource_texts, RESOURCE_ALL - 1, set_resource_value);
+        resource_texts, RESOURCE_ALL - 1, set_all_resource_value);
+}
+
+static void monument_resource_selection(const generic_button *button)
+{
+    static const uint8_t *resource_texts[RESOURCE_MAX];
+    for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_MAX; resource++) {
+        resource_texts[resource] = resource ? resource_get_data(resource)->text : translation_for(TR_RESOURCE_ARCHITECTS);
+    }
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
+        resource_texts, RESOURCE_MAX, set_monument_resource_value);
 }
 
 static void custom_message_selection(void)
@@ -619,6 +683,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_ROUTE_TYPE:
         case PARAMETER_TYPE_VARIABLE_COLOR:
         case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_MONUMENT:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:
@@ -657,6 +722,9 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             return;
         case PARAMETER_TYPE_GRID_OFFSET:
             start_grid_offset_selection();
+            return;
+        case PARAMETER_TYPE_RESOURCE_MONUMENT:
+            monument_resource_selection(button);
             return;
         default:
             return;

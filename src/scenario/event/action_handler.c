@@ -109,6 +109,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_custom_variable_color_execute(action);
         case ACTION_TYPE_IMMIGRATION_PERCENTAGE:
             return scenario_action_type_change_immigration_percentage_execute(action);
+        case ACTION_TYPE_CHANGE_MONUMENT_RESOURCES:
+            return scenario_action_type_change_monument_resources_execute(action);
         default:
             return 0;
     }
