@@ -1,8 +1,7 @@
 #include "building.h"
 
-#include "building/connectable.h"
-
 #include "building/clone.h"
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/construction_building.h"
 #include "building/construction_clear.h"
