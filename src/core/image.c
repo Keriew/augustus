@@ -584,6 +584,26 @@ static void make_font_white(const image *img, const image_atlas_data *atlas_data
     }
 }
 
+static void invert_font_colors(const image *img, const image_atlas_data *atlas_data)
+{
+    color_t *pixels = atlas_data->buffers[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
+    int width = atlas_data->image_widths[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
+
+    pixels += img->atlas.y_offset * width + img->atlas.x_offset;
+
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+            if ((pixels[x] & COLOR_CHANNEL_ALPHA) != ALPHA_TRANSPARENT) {
+                color_t alpha = pixels[x] & COLOR_CHANNEL_ALPHA;
+                color_t rgb = pixels[x] & 0x00ffffff;
+
+                pixels[x] = alpha | (~rgb & 0x00ffffff);
+            }
+        }
+        pixels += width;
+    }
+}
+
 static void make_plain_fonts_white(const image *img_info, const image_atlas_data *atlas_data, int start_offset)
 {
     int limit = font_definition_for(FONT_NORMAL_BLACK)->image_offset -

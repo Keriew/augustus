@@ -2,6 +2,9 @@
 #define CITY_FINANCE_H
 
 #include "building/type.h"
+#include "city/resource.h"
+#include "core/buffer.h"
+#include "game/save_version.h"
 
 #define SMALL_TEMPLE_LEVY_MONTHLY 4
 #define FORT_LEVY_MONTHLY 8
@@ -28,6 +31,52 @@ typedef struct {
     int coverage;
     int count;
 } tourism_for_type;
+
+typedef struct {
+    int price;                      // final price per cart
+    unsigned short empire_city_id;  // trader's origin city
+    unsigned char storage_id;       // where trade took place
+    unsigned char month;            // 1-12
+    unsigned char resource_id;      // resource_type can be converted back and forth
+    unsigned short trader_id;       // !! ACTUAL f->trader_id, not the f->id !!
+    signed char quantity;           // amount traded at this price - negative for exports, positive for imports
+} transaction_t; // 12 bytes babyyyyy
+
+typedef struct {
+    int year; // one trade ledger dataset per year, then archive and reset. 
+    int transactions; // number of transactions for the year - used for transaction history
+    // transactions count not yet wired - implement with history
+    int stock[RESOURCE_MAX]; // in stock at the end of the year
+
+    int imported[RESOURCE_MAX];  // cartloads, unsigned
+    int exported[RESOURCE_MAX];  // cartloads, unsigned
+
+    int produced[RESOURCE_MAX];  // cartloads, unsigned
+    int consumed[RESOURCE_MAX];  // cartloads, unsigned
+    int balance[RESOURCE_MAX];   // in denarii, signed
+} trade_ledger_data; //at the end of the year, archive this data. Saves should store up to 7 years
+
+typedef struct {
+    struct {
+        int taxes;
+        int exports;
+        int donated;
+        int total;
+    } income;
+    struct {
+        int imports;
+        int wages;
+        int construction;
+        int interest;
+        int salary;
+        int sundries;
+        int tribute;
+        int total;
+        int levies;
+    } expenses;
+    int net_in_out;
+    int balance;
+} finance_overview;
 
 int city_finance_treasury(void);
 
@@ -77,29 +126,32 @@ void city_finance_estimate_taxes(void);
 
 void city_finance_handle_month_change(void);
 
+void city_finance_trade_ledger_add_produced(resource_type resource);
+
+void city_finance_trade_ledger_add_consumed(resource_type resource, int quantity); // caesar's requests - avoids loops
+
+void city_finance_trade_ledger_add_imported(resource_type resource);
+
+void city_finance_trade_ledger_add_exported(resource_type resource);
+
+void city_finance_trade_ledger_add_balance(resource_type resource, int balance);
+
+int city_finance_trade_ledger_get_produced(resource_type resource, int years_ago);
+
+int city_finance_trade_ledger_get_consumed(resource_type resource, int years_ago);
+
+int city_finance_trade_ledger_get_imported(resource_type resource, int years_ago);
+
+int city_finance_trade_ledger_get_exported(resource_type resource, int years_ago);
+
+int city_finance_trade_ledger_get_balance(resource_type resource, int years_ago);
+
+int city_finance_trade_ledger_get_stock(resource_type resource, int years_ago);
+
 void city_finance_handle_year_change(void);
 
-typedef struct {
-    struct {
-        int taxes;
-        int exports;
-        int donated;
-        int total;
-    } income;
-    struct {
-        int imports;
-        int wages;
-        int construction;
-        int interest;
-        int salary;
-        int sundries;
-        int tribute;
-        int total;
-        int levies;
-    } expenses;
-    int net_in_out;
-    int balance;
-} finance_overview;
+void city_finance_record_trade_into_ledger(unsigned short trader_id, int price, unsigned short empire_city_id,
+     unsigned char storage_id, unsigned char month, resource_type resource, unsigned char is_import);
 
 int city_finance_tourism_income_last_month(void);
 
@@ -109,6 +161,16 @@ const finance_overview *city_finance_overview_last_year(void);
 
 const finance_overview *city_finance_overview_this_year(void);
 
+const finance_overview *city_finance_overview_for_year(int years_ago);
+
+int city_finance_overview_years_stored(void);
+
+void city_finance_ledger_init(void);
+
 int city_finance_spawn_tourist(void);
+
+void city_finance_ledger_save_state(buffer *buf);
+
+void city_finance_ledger_load_state(buffer *buf, savegame_version_t version);
 
 #endif // CITY_FINANCE_H

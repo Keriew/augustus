@@ -16,6 +16,7 @@
 #include "game/settings.h"
 #include "game/system.h"
 #include "graphics/button.h"
+#include "graphics/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -62,11 +63,16 @@ typedef enum {
 
 #define REFRESHED_INFO_TIME_MS 5000
 
+#define TOP_PANEL_HEIGHT_BLOCKS 10
+#define ASSET_LIST_TOP_BLOCK 13
+
 static void draw_asset_entry(const list_box_item *item);
 static void select_asset(unsigned int index, int unused);
 static void handle_tooltip(const list_box_item *item, tooltip_context *c);
 static void button_top(const generic_button *button);
 static void button_toggle_animation_frames(const generic_button *button);
+static void draw_bounds_checkbox_clicked(checkbox_button *button);
+static void draw_selected_asset_metrics(void);
 
 static generic_button buttons[NUM_BUTTONS] = {
     { 0, 25, 180, 20, button_top, 0, BUTTON_CHANGE_ASSET_GROUP },
@@ -79,6 +85,19 @@ static generic_button buttons[NUM_BUTTONS] = {
 
 static generic_button toggle_animation_button = {
     0, 0, 0, 20, button_toggle_animation_frames
+};
+
+static const lang_fragment draw_bounds_sequence[] = {
+    { .type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Draw bounds" },
+};
+
+static checkbox_button draw_bounds_checkbox = {
+    .width = 130,
+    .height = 20,
+    .left_click_handler = draw_bounds_checkbox_clicked,
+    .font = FONT_NORMAL_BLACK,
+    .sequence = draw_bounds_sequence,
+    .sequence_size = 1,
 };
 
 static const int ZOOM_VALUES[] = { 50, 100, 200, 400 };
@@ -118,6 +137,7 @@ static struct {
     asset_entry *entries;
     char *selected_asset_id;
     int hide_animation_frames;
+    int draw_bounds;
     int scale;
     struct {
         int enabled;
@@ -281,6 +301,7 @@ static void set_initial_options(void)
     data.animation.enabled = 1;
     data.animation.frame = 1;
     data.hide_animation_frames = 1;
+    data.draw_bounds = 0;
     data.scale = 100;
 }
 
@@ -349,6 +370,41 @@ static void draw_asset(void)
             y_offset + img->animation->sprite_offset_y - (img->top ? img->top->original.height - HALF_TYLE_Y_SIZE : 0),
             COLOR_MASK_NONE, scale);
     }
+
+    if (data.draw_bounds) {
+        int asset_x = x_offset;
+        int asset_y = img->is_isometric ? (y_offset - img->height / 2) : y_offset;
+
+        // Match the renderer path used by image_draw(): destination coords and size are divided by draw scale.
+        int scaled_x = (int) (asset_x / scale);
+        int scaled_y = (int) (asset_y / scale);
+        int scaled_w = (int) (asset_width / scale);
+        int scaled_h = (int) (asset_height / scale);
+
+        // Border sits exactly 1px outside the asset bounds with no overlap.
+        int border_x = scaled_x - 1;
+        int border_y = scaled_y - 1;
+        int border_w = scaled_w + 2;
+        int border_h = scaled_h + 2;
+        int zoom_percent = calc_percentage(100, data.scale);
+        int border_thickness = zoom_percent / 100;
+        if (border_thickness < 1) {
+            border_thickness = 1;
+        }
+
+        if (border_w > 1 && border_h > 1) {
+            for (int i = 0; i < border_thickness; i++) {
+                int x1 = border_x - i;
+                int y1 = border_y - i;
+                int x2 = border_x + border_w - 1 + i;
+                int y2 = border_y + border_h - 1 + i;
+                graphics_draw_line(x1, x2, y1, y1, COLOR_RED);
+                graphics_draw_line(x1, x2, y2, y2, COLOR_RED);
+                graphics_draw_line(x1, x1, y1, y2, COLOR_RED);
+                graphics_draw_line(x2, x2, y1, y2, COLOR_RED);
+            }
+        }
+    }
 }
 
 static void draw_refreshed_info(void)
@@ -367,6 +423,44 @@ static void draw_refreshed_info(void)
     text_draw_centered(text, x_offset, y_offset + 4, label_width, FONT_NORMAL_WHITE, 0);
 }
 
+static void draw_selected_asset_metrics(void)
+{
+    if (!data.active_group || list_box_get_total_items(&list_box) == 0 ||
+        list_box_get_selected_index(&list_box) == LIST_BOX_NO_SELECTION) {
+        return;
+    }
+
+    int image_id = get_current_asset_index() + IMAGE_MAIN_ENTRIES;
+    const image *img = image_get(image_id);
+    int display_width = img->is_isometric ? img->width : img->original.width;
+    int display_height = img->is_isometric ? img->height : img->original.height;
+    int animation_sprites = img->animation ? img->animation->num_sprites : 0;
+
+    int x = data.x_offset_top + 16;
+    int y = 136;
+    int next_x = x;
+    next_x += text_draw(string_from_ascii("Size"), x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw_number(display_width, '@', "", next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw(string_from_ascii("x"), next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw_number(display_height, '\0', "", next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += 15; //gap
+    next_x += text_draw(string_from_ascii("Original"), next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw_number(img->original.width, '@', "", next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw(string_from_ascii("x"), next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw_number(img->original.height, '\0', "", next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += 15; //gap
+    next_x += text_draw(string_from_ascii("ID"), next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw_number(image_id, '@', "", next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += 15; //gap
+    next_x += text_draw(string_from_ascii("Anim"), next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+    next_x += text_draw_number(animation_sprites, '@', "", next_x, y, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+
+    draw_bounds_checkbox.x = next_x + 15;
+    draw_bounds_checkbox.y = y - 2;
+    draw_bounds_checkbox.is_checked = data.draw_bounds;
+    checkbox_button_draw(&draw_bounds_checkbox);
+}
+
 static void draw_background(void)
 {
     graphics_clear_screen();
@@ -381,7 +475,7 @@ static void draw_background(void)
 
     data.x_offset_top = (screen_width() - 39 * BLOCK_SIZE) / 2;
 
-    outer_panel_draw(data.x_offset_top, 8, 40, 7);
+    outer_panel_draw(data.x_offset_top, 8, 40, TOP_PANEL_HEIGHT_BLOCKS);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_TITLE,
         data.x_offset_top + 16, 24, 530, FONT_LARGE_BLACK);
 
@@ -412,18 +506,20 @@ static void draw_background(void)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_QUIT,
         data.x_offset_top + 546, 79, 80, FONT_NORMAL_BLACK);
 
+    draw_selected_asset_metrics();
+
     if (data.showing_refresh_info) {
         draw_refreshed_info();
     }
 
-    int outer_height_blocks = (screen_height() - 11 * BLOCK_SIZE) / BLOCK_SIZE;
+    int outer_height_blocks = (screen_height() - (ASSET_LIST_TOP_BLOCK + 1) * BLOCK_SIZE) / BLOCK_SIZE;
 
-    outer_panel_draw(8, 10 * BLOCK_SIZE, list_box.width_blocks + 3, outer_height_blocks);
+    outer_panel_draw(8, ASSET_LIST_TOP_BLOCK * BLOCK_SIZE, list_box.width_blocks + 3, outer_height_blocks);
     lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_ASSET_PREVIEWER_ASSET,
-        32, 11 * BLOCK_SIZE, FONT_NORMAL_BLACK);
+        32, (ASSET_LIST_TOP_BLOCK + 1) * BLOCK_SIZE, FONT_NORMAL_BLACK);
     list_box.height_blocks = outer_height_blocks - 4;
     list_box.x = 24;
-    list_box.y = 12 * BLOCK_SIZE;
+    list_box.y = (ASSET_LIST_TOP_BLOCK + 2) * BLOCK_SIZE;
     list_box_request_refresh(&list_box);
     toggle_animation_button.x = list_box.x + 2;
     toggle_animation_button.y = list_box.y + list_box.height_blocks * BLOCK_SIZE;
@@ -626,6 +722,13 @@ static void handle_input(const mouse *m, const hotkeys *h)
     if (!generic_buttons_handle_mouse(m, data.x_offset_top + 16, 60, buttons, NUM_BUTTONS, &data.focus_button_id)) {
         generic_buttons_handle_mouse(m, 0, 0, &toggle_animation_button, 1, &data.animation_button_focused);
     }
+    checkbox_button_handle_mouse(&draw_bounds_checkbox, m);
+}
+
+static void draw_bounds_checkbox_clicked( checkbox_button *button)
+{
+    data.draw_bounds = button->is_checked;
+    window_invalidate();
 }
 
 static void handle_tooltip(const list_box_item *item, tooltip_context *c)

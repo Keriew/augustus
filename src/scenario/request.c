@@ -228,6 +228,7 @@ void scenario_request_dispatch(int id)
         if (amount_left > 0 && resource_is_food(request->resource)) {
             building_granaries_send_resources_to_rome(request->resource, amount_left);
         }
+        city_finance_trade_ledger_add_consumed(request->resource, amount);
     }
 }
 

@@ -492,8 +492,11 @@ void figure_docker_action(figure *f)
                 }
                 if (try_import_resource(f->destination_building_id, f->resource_id,
                     trade_city_id, f->loads_sold_or_carrying)) {
-                    int trader_id = figure_get(b->data.dock.trade_ship_id)->trader_id;
-                    trader_record_sold_resource(trader_id, f->resource_id);
+                    int ship_id = b->data.dock.trade_ship_id;
+                    figure *ship = figure_get(ship_id);
+                    unsigned short trader_id = ship->trader_id;
+                    int storage_id = building_get(f->destination_building_id)->storage_id;
+                    trader_record_sold_resource(ship_id, trader_id, f->resource_id, storage_id);
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
                     f->action_state = FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING;
@@ -526,8 +529,11 @@ void figure_docker_action(figure *f)
                 f->destination_y = f->source_y;
                 f->wait_ticks = 0;
                 if (try_export_resource(f->destination_building_id, f->resource_id, trade_city_id)) {
-                    int trader_id = figure_get(b->data.dock.trade_ship_id)->trader_id;
-                    trader_record_bought_resource(trader_id, f->resource_id);
+                    int ship_id = b->data.dock.trade_ship_id;
+                    figure *ship = figure_get(ship_id);
+                    unsigned short trader_id = ship->trader_id;
+                    int storage_id = building_get(f->destination_building_id)->storage_id;
+                    trader_record_bought_resource(ship_id, trader_id, f->resource_id, storage_id);
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
                     f->action_state = FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING;

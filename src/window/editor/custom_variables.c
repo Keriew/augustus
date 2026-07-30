@@ -148,7 +148,7 @@ static void init_color_dropdown(void)
                 color_dropdown_options[dd_anchors][j].font = FONT_SMALL_PLAIN; //white font for dark colors
             }
         }
-        dropdown_button_init(&color_dropdowns[dd_anchors], color_dropdown_options[dd_anchors], COLOR_BUTTONS_COUNT, COLOR_DROPDOWN_WIDTH, 2, 4);
+        dropdown_button_init(&color_dropdowns[dd_anchors], color_dropdown_options[dd_anchors], COLOR_BUTTONS_COUNT, COLOR_DROPDOWN_WIDTH, 0, 2, 4);
         color_dropdowns[dd_anchors].selected_callback = button_edit_color;
     }
 }
@@ -730,14 +730,14 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
     if (data.expanded_dropdown != -1 && data.custom_variables_in_use) { // handle dropdowns, starting with expanded
-        if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[data.expanded_dropdown])) {
+        if (dropdown_button_handle_mouse(&color_dropdowns[data.expanded_dropdown], m_dialog)) {
             window_invalidate();
             return;
         }
 
     } else {
         for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; ++i) {
-            if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[i])) {
+            if (dropdown_button_handle_mouse(&color_dropdowns[i], m_dialog)) {
                 window_invalidate();
                 return;
             }

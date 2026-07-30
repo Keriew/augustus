@@ -11,6 +11,7 @@
 #include "core/config.h"
 #include "core/image.h"
 #include "city/data_private.h"
+#include "city/finance.h"
 #include "figure/combat.h"
 #include "figure/image.h"
 #include "figure/movement.h"
@@ -82,6 +83,7 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
         return 0;
     }
     int amount_taken = building_granary_try_remove_resource(granary, resource, granary_loads_take);
+    city_finance_trade_ledger_add_consumed(resource, amount_taken);
 
     // create delivery boys
     int type = FIGURE_DELIVERY_BOY;
@@ -113,6 +115,8 @@ static int take_resource_from_generic_building(figure *f, int building_id)
         return 0;
     }
     b->resources[RESOURCE_WINE] -= num_loads;
+    //TODO: no generic b->resources manipulation is allowed - use storage buildings APIs instead.
+    city_finance_trade_ledger_add_consumed(RESOURCE_WINE, num_loads);
 
     // create delivery boys
     int priest_id = f->id;
@@ -130,7 +134,8 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
         return take_resource_from_generic_building(f, warehouse_id);
     }
     int num_loads;
-    int stored = building_warehouse_get_available_amount(warehouse, f->collecting_item_id);
+    resource_type resource = f->collecting_item_id;
+    int stored = building_warehouse_get_available_amount(warehouse, resource);
     if (stored < max_amount) {
         num_loads = stored;
     } else {
@@ -139,7 +144,8 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
     if (num_loads <= 0) {
         return 0;
     }
-    int amount_taken = building_warehouse_try_remove_resource(warehouse, f->collecting_item_id, num_loads);
+    int amount_taken = building_warehouse_try_remove_resource(warehouse, resource, num_loads);
+    city_finance_trade_ledger_add_consumed(resource, amount_taken);
     if (amount_taken <= 0) {
         return 0;
     }
