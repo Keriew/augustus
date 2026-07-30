@@ -171,9 +171,22 @@ int scenario_event_formula_check(scenario_formula_t *s_formula)
     unsigned char *s = s_formula->formatted_calculation;
     s_formula->is_error = 0;
     s_formula->is_static = 1;
+    int num_open_curly_brackets = 0;
+    int num_closed_curly_brackets = 0;
+    int num_commas = 0;
     while (*s) {
         if (*s == ',') {
-            s_formula->is_static = 0; // found random value
+            if (num_open_curly_brackets <= num_closed_curly_brackets) {
+                s_formula->is_error = 1;
+                return 0; // Invalid: comma is outside of curly brackets
+            }
+            num_commas++;
+        }
+        if (*s == '{') {
+            num_open_curly_brackets++;
+        }
+        if (*s == '}') {
+            num_closed_curly_brackets++;
         }
         if (*s == '[') {
             s++; // Move past '['
@@ -214,6 +227,13 @@ int scenario_event_formula_check(scenario_formula_t *s_formula)
         } else {
             s++;
         }
+    }
+    if (!(num_open_curly_brackets == num_closed_curly_brackets && num_open_curly_brackets == num_commas)) {
+        s_formula->is_error = 1;
+        return 0; // Invalid: Either { without matching } or } without { or to few or excess commas set
+    }
+    if (num_commas > 0) {
+        s_formula->is_static = 0; // Found a random value
     }
     if (s_formula->is_static) {
         // Evaluate static formula once
