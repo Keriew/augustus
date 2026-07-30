@@ -558,7 +558,7 @@ void city_message_delete(int message_id)
     city_message_sort_and_compact();
 }
 
-void city_message_auto_delete_old_common_messages(void)
+void city_message_clear_old_messages(void)
 {
     if (!config_get(CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES)) {
         return;
@@ -574,7 +574,7 @@ void city_message_auto_delete_old_common_messages(void)
             continue;
         }
         if (current_year - msg->year >= 5) {
-            msg->message_type = 0;
+            city_message_delete(i);
             changed = 1;
         }
     }

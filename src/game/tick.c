@@ -69,7 +69,7 @@ static void advance_year(void)
     game_undo_disable();
     game_time_advance_year();
 
-    city_message_auto_delete_old_common_messages();
+    city_message_clear_old_messages();
 
     scenario_empire_process_expansion();
     city_population_request_yearly_update();
