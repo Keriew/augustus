@@ -16,8 +16,8 @@
 #define HALF_TILE_WIDTH_PIXELS 30
 #define HALF_TILE_HEIGHT_PIXELS 15
 
-static const int X_DIRECTION_FOR_ORIENTATION[] = {1,  1, -1, -1};
-static const int Y_DIRECTION_FOR_ORIENTATION[] = {1, -1, -1,  1};
+static const int X_DIRECTION_FOR_ORIENTATION[] = { 1,  1, -1, -1 };
+static const int Y_DIRECTION_FOR_ORIENTATION[] = { 1, -1, -1,  1 };
 
 static struct {
     int screen_width;
@@ -52,19 +52,25 @@ static void check_camera_boundaries(void)
         city_view_set_scale(max_scale);
         return;
     }
+    int allowance = map_grid_width() / 10; // extra 10%
+    if (!config_get(CONFIG_UI_SCROLL_CAMERA_UNLOCKED)) {
+        allowance = 0; // disable allowance, use original bounds calculations
+    }
     int grid_height = map_grid_height() * 2;
     int x_min = (VIEW_X_MAX - map_grid_width()) / 2;
     int y_min = (VIEW_Y_MAX - grid_height) / 2;
-    if (data.viewport.width_tiles >= map_grid_width() + 4) {
+    if (data.viewport.width_tiles >= map_grid_width() + allowance + 4) {
         data.camera.tile.x = x_min - 1 - (data.viewport.width_tiles - map_grid_width()) / 2;
         data.camera.pixel.x = TILE_WIDTH_PIXELS -
             ((calc_adjust_with_percentage(data.viewport.width_pixels + 2, data.scale) / 2) % TILE_WIDTH_PIXELS);
     } else {
-        if (data.camera.tile.x < x_min - 1) {
-            data.camera.tile.x = x_min - 1;
-            data.camera.pixel.x = 0;
+        if (data.camera.tile.x < x_min - allowance - 1) {
+            data.camera.tile.x = x_min - allowance - 1;
+            int zoom_adjust = calc_adjust_with_percentage(data.viewport.width_pixels + 2, data.scale) / 2 % TILE_WIDTH_PIXELS;
+            zoom_adjust = allowance ? zoom_adjust : 0;
+            data.camera.pixel.x = 0 - zoom_adjust;
         }
-        int max_x_tile = VIEW_X_MAX - x_min - data.viewport.width_tiles;
+        int max_x_tile = VIEW_X_MAX - x_min - data.viewport.width_tiles + allowance;
         int max_x_pixel = TILE_WIDTH_PIXELS -
             (calc_adjust_with_percentage(data.viewport.width_pixels + 2, data.scale) % TILE_WIDTH_PIXELS);
         if (data.camera.tile.x > max_x_tile || (data.camera.tile.x == max_x_tile && data.camera.pixel.x > max_x_pixel)) {
@@ -72,19 +78,23 @@ static void check_camera_boundaries(void)
             data.camera.pixel.x = max_x_pixel;
         }
     }
-    if (data.viewport.height_tiles >= grid_height + 4) {
+    if (data.viewport.height_tiles >= grid_height + allowance * 2 + 4) {
         data.camera.tile.y = (y_min - (data.viewport.height_tiles - grid_height) / 2) & ~1;
         data.camera.pixel.y = TILE_HEIGHT_PIXELS -
             (((calc_adjust_with_percentage(data.viewport.height_pixels, data.scale) + TILE_HEIGHT_PIXELS) / 2) %
             TILE_HEIGHT_PIXELS);
-    } else {    
-        if (data.camera.tile.y < y_min - 2) {
-            data.camera.tile.y = y_min - 1;
-            data.camera.pixel.y = 0;
+    } else {
+        int min_y_tile = (y_min - allowance * 2 - 2) & ~1;
+
+        if (data.camera.tile.y < min_y_tile) {
+            data.camera.tile.y = min_y_tile;
+            int percent_adjust = calc_adjust_with_percentage(data.viewport.height_pixels, data.scale);
+            int y_zoom_adjust = ((percent_adjust + TILE_HEIGHT_PIXELS) / 2) % TILE_HEIGHT_PIXELS;
+            data.camera.pixel.y = -(allowance ? y_zoom_adjust : 0);
         }
-        int max_y_tile = (VIEW_Y_MAX - y_min - data.viewport.height_tiles) & ~1;
+        int max_y_tile = (VIEW_Y_MAX - y_min - data.viewport.height_tiles + allowance * 2) & ~1;
         int max_y_pixel = TILE_HEIGHT_PIXELS -
-                (calc_adjust_with_percentage(data.viewport.height_pixels, data.scale) % TILE_HEIGHT_PIXELS);
+            (calc_adjust_with_percentage(data.viewport.height_pixels, data.scale) % TILE_HEIGHT_PIXELS);
         if (data.camera.tile.y > max_y_tile || (data.camera.tile.y == max_y_tile && data.camera.pixel.y > max_y_pixel)) {
             data.camera.tile.y = max_y_tile;
             data.camera.pixel.y = max_y_pixel;
@@ -153,9 +163,9 @@ static void calculate_lookup(void)
         for (int x = 0; x < GRID_SIZE; x++) {
             int grid_offset = x + GRID_SIZE * y;
             if (map_image_at(grid_offset) < 6) {
-                view_to_grid_offset_lookup[x_view/2][y_view] = -1;
+                view_to_grid_offset_lookup[x_view / 2][y_view] = -1;
             } else {
-                view_to_grid_offset_lookup[x_view/2][y_view] = grid_offset;
+                view_to_grid_offset_lookup[x_view / 2][y_view] = grid_offset;
             }
             x_view += x_view_step;
             y_view += y_view_step;
@@ -341,7 +351,7 @@ void city_view_adjust_camera_from_obstruction(int grid_offset, int size, const p
     if (!objective_is_obstructed(&objective, obstruction)) {
         return;
     }
-    
+
     enum {
         LEFT = 0,
         RIGHT = 1,
