@@ -83,6 +83,7 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
         return 0;
     }
     int amount_taken = building_granary_try_remove_resource(granary, resource, granary_loads_take);
+    int amount_taken_units = amount_taken * RESOURCE_ONE_LOAD;
     city_finance_trade_ledger_add_consumed(resource, amount_taken);
 
     // create delivery boys
@@ -115,8 +116,9 @@ static int take_resource_from_generic_building(figure *f, int building_id)
         return 0;
     }
     b->resources[RESOURCE_WINE] -= num_loads;
-    //TODO: no generic b->resources manipulation is allowed - use storage buildings APIs instead.
-    city_finance_trade_ledger_add_consumed(RESOURCE_WINE, num_loads);
+    //TODO!!: no generic b->resources manipulation is allowed - use storage buildings APIs instead.
+    int units_taken = num_loads * RESOURCE_ONE_LOAD;
+    city_finance_trade_ledger_add_consumed(RESOURCE_WINE, units_taken);
 
     // create delivery boys
     int priest_id = f->id;
@@ -145,7 +147,8 @@ static int take_resource_from_warehouse(figure *f, int warehouse_id, int max_amo
         return 0;
     }
     int amount_taken = building_warehouse_try_remove_resource(warehouse, resource, num_loads);
-    city_finance_trade_ledger_add_consumed(resource, amount_taken);
+    int amount_taken_units = amount_taken * RESOURCE_ONE_LOAD;
+    city_finance_trade_ledger_add_consumed(resource, amount_taken_units);
     if (amount_taken <= 0) {
         return 0;
     }

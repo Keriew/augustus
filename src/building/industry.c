@@ -355,9 +355,9 @@ void building_industry_start_new_production(building *b)
     if (has_raw_materials) {
         for (int i = 0; i < num_raw_materials; i++) {
             resource_type raw_material = chain[i].raw_material;
-            int raw_cartloads = chain[i].raw_amount / 100;
+            int raw_units = chain[i].raw_amount; // units, not cartloads
             b->resources[raw_material] -= chain[i].raw_amount;
-            city_finance_trade_ledger_add_consumed(raw_material, raw_cartloads);
+            city_finance_trade_ledger_add_consumed(raw_material, raw_units);
         }
     }
     b->data.industry.has_raw_materials = has_raw_materials;

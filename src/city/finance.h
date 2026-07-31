@@ -52,7 +52,7 @@ typedef struct {
     int exported[RESOURCE_MAX];  // cartloads, unsigned
 
     int produced[RESOURCE_MAX];  // cartloads, unsigned
-    int consumed[RESOURCE_MAX];  // cartloads, unsigned
+    int consumed[RESOURCE_MAX];  // units(!), unsigned
     int balance[RESOURCE_MAX];   // in denarii, signed
 } trade_ledger_data; //at the end of the year, archive this data. Saves should store up to 7 years
 
@@ -126,9 +126,15 @@ void city_finance_estimate_taxes(void);
 
 void city_finance_handle_month_change(void);
 
+/** @brief Adds produced resources to the trade ledger.
+* @param resource The resource type that was produced. */
 void city_finance_trade_ledger_add_produced(resource_type resource);
 
-void city_finance_trade_ledger_add_consumed(resource_type resource, int quantity); // caesar's requests - avoids loops
+/** @brief Adds consumed resources to the trade ledger. Also covers ceasar's requests.
+* @param resource The resource type that was consumed.
+* @param quantity The quantity of the resource that was consumed, measured in units, not cartloads!
+*                 This is due to industry often consuming less than a full cartload. */
+void city_finance_trade_ledger_add_consumed(resource_type resource, int quantity);
 
 void city_finance_trade_ledger_add_imported(resource_type resource);
 
@@ -138,6 +144,10 @@ void city_finance_trade_ledger_add_balance(resource_type resource, int balance);
 
 int city_finance_trade_ledger_get_produced(resource_type resource, int years_ago);
 
+/** @brief Gets consumed resources from the trade ledger.
+* @param resource The resource type that was consumed.
+* @param years_ago How many years ago to get the data for.
+* @return The quantity of the resource that was consumed, measured in cartloads. */
 int city_finance_trade_ledger_get_consumed(resource_type resource, int years_ago);
 
 int city_finance_trade_ledger_get_imported(resource_type resource, int years_ago);

@@ -620,7 +620,9 @@ int city_finance_trade_ledger_get_consumed(resource_type resource, int years_ago
     if (years_ago < 0 || years_ago > trade_ledgers_count) {
         return 0;
     }
-    return trade_ledgers[years_ago].consumed[resource];
+    int consumed = trade_ledgers[years_ago].consumed[resource];
+    consumed = consumed < RESOURCE_ONE_LOAD ? consumed : consumed / RESOURCE_ONE_LOAD;
+    return consumed; // cartloads
 }
 
 int city_finance_trade_ledger_get_imported(resource_type resource, int years_ago)
@@ -652,13 +654,12 @@ int city_finance_trade_ledger_get_stock(resource_type resource, int years_ago)
     if (years_ago < 0 || years_ago > trade_ledgers_count) {
         return 0;
     }
-    // update from city resource - not point in duplicating the efforts
+    // update from city resource - no point in duplicating the efforts
     if (years_ago == 0) {
         trade_ledgers[0].stock[resource] = city_resource_get_total_amount(resource, 0);
     }
     return trade_ledgers[years_ago].stock[resource];
 }
-
 
 void city_finance_handle_year_change(void)
 {
