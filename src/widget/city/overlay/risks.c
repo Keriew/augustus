@@ -82,11 +82,11 @@ static int show_building_problems(const building *b)
     if (b->has_plague || b->state == BUILDING_STATE_MOTHBALLED) {
         return 1;
     }
-    
+
     if (!b->num_workers && building_get_laborers(b->type)) {
         return 1;
     }
-    
+
     if (b->type == BUILDING_FOUNTAIN || b->type == BUILDING_BATHHOUSE ||
          b->type == BUILDING_LARGE_POND || b->type == BUILDING_SMALL_POND) {
         if (!b->has_water_access) {
@@ -114,7 +114,7 @@ static int show_building_problems(const building *b)
         }
     } else if (b->type == BUILDING_DEPOT &&
         (!b->data.depot.current_order.src_storage_id ||
-         !b->data.depot.current_order.dst_storage_id)) {
+            !b->data.depot.current_order.dst_storage_id)) {
         return 1;
     } else if (b->type == BUILDING_MARKET &&
          building_distribution_check_if_accepts_nothing(b)) {
@@ -347,7 +347,7 @@ static void get_building_health(int x, int y, float scale, int grid_offset)
     // border
     graphics_draw_rect(draw_x, draw_y, bar_width, bar_height, COLOR_BLACK);
     // background
-    graphics_fill_rect(draw_x + 1, draw_y + 1, bar_width - 2, bar_height - 2, COLOR_FONT_LIGHT_GRAY);
+    graphics_fill_rect(draw_x + 1, draw_y + 1, bar_width - 2, bar_height - 2, COLOR_LIGHT_GRAY);
     // current hp
     graphics_fill_rect(draw_x + 1, draw_y + 1, fill_width, bar_height - 2, hp_color);
 }
