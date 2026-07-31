@@ -2161,6 +2161,7 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_TT_BALANCE, "Сортировать по балансу средств"},
     {TR_UI_LEDGER_DISABLED_1, "Эта функция пока недоступна."},
     {TR_UI_LEDGER_DISABLED_2, "Ваши писцы усердно трудятся над этой функцией, но им нужно еще немного времени."},
+    {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Расширить границы прокрутки камеры"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
