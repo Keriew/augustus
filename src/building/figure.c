@@ -1525,6 +1525,7 @@ static void spawn_figure_wharf(building *b)
             b->figure_id = f->id;
             f->wait_ticks = 30;
             f->loads_sold_or_carrying = 1;
+            city_finance_trade_ledger_add_produced(RESOURCE_FISH);
         }
     }
 }

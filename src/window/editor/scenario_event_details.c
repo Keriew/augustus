@@ -387,7 +387,7 @@ static void dropdown_init(void)
     repeat_interval_dropdown.selected_callback = set_repeat_interval_type;
     repeat_interval_dropdown.selected_index =
         data.event->repeat_interval ? data.event->repeat_interval : REPEAT_INTERVAL_DAYS;
-    dropdown_button_init_simple(dd_x, dd_y, repeat_interval_frags, 4, &repeat_interval_dropdown);
+    dropdown_button_init_simple(dd_x, dd_y, 0, 0, repeat_interval_frags, 4, &repeat_interval_dropdown, 0, 0);
 
 }
 
@@ -690,7 +690,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         generic_buttons_handle_mouse(m_dialog, 0, 0, select_all_none_buttons, 2, &data.focus_button.select_all_none) ||
         generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons, NUM_BOTTOM_BUTTONS, &data.focus_button.bottom) ||
         grid_box_handle_input(data.focused_grid_box, m_dialog, 1) ||
-        dropdown_button_handle_mouse(m_dialog, &repeat_interval_dropdown)) {
+        dropdown_button_handle_mouse(&repeat_interval_dropdown, m_dialog)) {
         return;
     }
     if (input_go_back_requested(m, h)) {

@@ -596,6 +596,7 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/screen.c
     ${PROJECT_SOURCE_DIR}/src/graphics/screenshot.c
     ${PROJECT_SOURCE_DIR}/src/graphics/scrollbar.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/tab_view.c
     ${PROJECT_SOURCE_DIR}/src/graphics/text.c
     ${PROJECT_SOURCE_DIR}/src/graphics/tooltip.c
     ${PROJECT_SOURCE_DIR}/src/graphics/video.c
@@ -624,6 +625,7 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/overlay.c
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/risks.c
     ${PROJECT_SOURCE_DIR}/src/widget/dropdown_button.c
+    ${PROJECT_SOURCE_DIR}/src/widget/grid_picker.c
     ${PROJECT_SOURCE_DIR}/src/widget/input_box.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_tool.c
@@ -737,6 +739,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/select_list.c
     ${PROJECT_SOURCE_DIR}/src/window/set_salary.c
     ${PROJECT_SOURCE_DIR}/src/window/text_input.c
+    ${PROJECT_SOURCE_DIR}/src/window/trade_ledger.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_opened.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_prices.c
     ${PROJECT_SOURCE_DIR}/src/window/user_path_setup.c

@@ -9,10 +9,7 @@
 #define MAX_SORTING_BUTTONS 64
 
 #define BUTTON_INDEX_SORT_MAIN 0
-#define BUTTON_INDEX_FILTER_MAIN 1
-#define BUTTON_INDEX_FIRST_SORT_METHOD (BUTTON_INDEX_FILTER_MAIN + 1) // 2
-#define BUTTON_INDEX_FIRST_FILTER_METHOD (BUTTON_INDEX_FIRST_SORT_METHOD + MAX_SORTING_KEY)
-#define BUTTON_INDEX_FILTERING_RESOURCES 100
+#define BUTTON_INDEX_FIRST_SORT_METHOD (BUTTON_INDEX_SORT_MAIN + 1)
 
 // Enums
 typedef enum {
@@ -25,15 +22,14 @@ typedef enum {
 } sort_method;
 
 typedef enum {
-    FILTER_BY_RESOURCE,
-    FILTER_BY_RESOURCE_SELL,
-    FILTER_BY_RESOURCE_BUY,
-    FILTER_BY_OPEN,
-    FILTER_BY_CLOSED,
-    FILTER_BY_LAND,
-    FILTER_BY_SEA,
-    FILTER_NONE,
-    MAX_FILTER_KEY
+    FILTER_NONE = 0,
+    FILTER_BY_RESOURCE = 1 << 0,
+    FILTER_BY_RESOURCE_SELL = 1 << 1,
+    FILTER_BY_RESOURCE_BUY = 1 << 2,
+    FILTER_BY_OPEN = 1 << 3,
+    FILTER_BY_CLOSED = 1 << 4,
+    FILTER_BY_LAND = 1 << 5,
+    FILTER_BY_SEA = 1 << 6,
 } filter_method;
 
 typedef struct {
@@ -55,7 +51,6 @@ resource_type window_empire_sidebar_sort_get_selected_filter_resource(void);
 int window_empire_sidebar_sort_get_hovered_sorting_button(void);
 int window_empire_sidebar_sort_get_sorting_reversed(void);
 int window_empire_sidebar_sort_get_expanded_main(void);
-int window_empire_sidebar_sort_get_resource_selection_active(void);
 int window_empire_sidebar_sort_count_trade_resources(const empire_city *city, int is_sell);
 void window_empire_sidebar_sort_set_current_sorting(int sorting);
 void window_empire_sidebar_sort_set_current_filtering(int filtering);
@@ -63,7 +58,6 @@ void window_empire_sidebar_sort_set_selected_filter_resource(resource_type resou
 void window_empire_sidebar_sort_set_hovered_sorting_button(int button);
 void window_empire_sidebar_sort_set_sorting_reversed(int reversed);
 void window_empire_sidebar_sort_set_expanded_main(int expanded);
-void window_empire_sidebar_sort_set_resource_selection_active(int active);
 
 void window_empire_sidebar_sort_reset_hovered_sorting_button(void);
 

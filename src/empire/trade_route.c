@@ -7,6 +7,8 @@
 
 #include <string.h>
 
+#define MAX_TRADE_HISTORY_YEARS 7
+
 typedef struct {
     int limit[RESOURCE_MAX];
     int traded[RESOURCE_MAX];
@@ -15,9 +17,79 @@ typedef struct {
 typedef struct {
     route_resource buys;
     route_resource sells;
+    unsigned char open; // needed for ledger
 } trade_route;
 
-static array(trade_route) routes;
+typedef array(trade_route) trade_route_array;
+static trade_route_array routes;
+static trade_route_array trade_history[MAX_TRADE_HISTORY_YEARS];
+static unsigned char years_stored = 0;
+
+static int init_trade_route_array(trade_route_array *route_array, int routes_to_load)
+{
+    return array_init(*route_array, LEGACY_MAX_ROUTES, 0, 0) && array_expand(*route_array, routes_to_load);
+}
+
+static int trade_route_array_buffer_size(const trade_route_array *route_array)
+{
+    return sizeof(int32_t) + (int) route_array->size * (int) (sizeof(int32_t) * RESOURCE_MAX * 4 + sizeof(uint8_t));
+}
+
+static int get_trade_history_buffer_size(void)
+{
+    int buf_size = sizeof(uint8_t);
+    for (int i = 0; i < MAX_TRADE_HISTORY_YEARS; i++) {
+        buf_size += trade_route_array_buffer_size(&trade_history[i]);
+    }
+    return buf_size;
+}
+
+static void save_trade_route_array_state(buffer *buf, const trade_route_array *route_array)
+{
+    buffer_write_i32(buf, route_array->size);
+
+    trade_route *route;
+    array_foreach(*route_array, route)
+    {
+        for (int i = 0; i < 2; i++) {
+            for (resource_type r = 0; r < RESOURCE_MAX; r++) {
+                buffer_write_i32(buf, i ? route->buys.limit[r] : route->sells.limit[r]);
+                buffer_write_i32(buf, i ? route->buys.traded[r] : route->sells.traded[r]);
+            }
+        }
+        buffer_write_u8(buf, route->open);
+    }
+}
+
+static int load_trade_route_array_state(buffer *buf, trade_route_array *route_array, int version, int default_open_from_city)
+{
+    int routes_to_load = buffer_read_i32(buf);
+    if (!init_trade_route_array(route_array, routes_to_load)) {
+        return 0;
+    }
+
+    for (int i = 0; i < routes_to_load; i++) {
+        trade_route *route = array_next(*route_array);
+        for (int j = 0; j < 2; j++) {
+            for (int r = 0; r < resource_total_mapped(); r++) {
+                resource_type remapped = resource_remap(r);
+                if (j) {
+                    route->buys.limit[remapped] = buffer_read_i32(buf);
+                    route->buys.traded[remapped] = buffer_read_i32(buf);
+                } else {
+                    route->sells.limit[remapped] = buffer_read_i32(buf);
+                    route->sells.traded[remapped] = buffer_read_i32(buf);
+                }
+            }
+        }
+        if (version > SAVE_GAME_LAST_NO_LEDGER) {
+            route->open = buffer_read_u8(buf);
+        } else if (default_open_from_city) {
+            route->open = empire_city_is_trade_route_open(i);
+        }
+    }
+    return 1;
+}
 
 int trade_route_init(void)
 {
@@ -25,9 +97,32 @@ int trade_route_init(void)
         log_error("Unable to create memory for trade routes. The game will now crash.", 0, 0);
         return 0;
     }
+
     // Discard route 0
     array_advance(routes);
+
+    for (int i = 0; i < MAX_TRADE_HISTORY_YEARS; i++) {
+        if (!array_init(trade_history[i], LEGACY_MAX_ROUTES, 0, 0)) {
+            log_error("Unable to create memory for trade route history. The game will now crash.", 0, 0);
+            return 0;
+        }
+    }
+    years_stored = 0;
     return 1;
+}
+
+int trade_route_set_open(int route_id)
+{
+    array_item(routes, route_id)->open = 1;
+    return array_item(routes, route_id)->open;
+}
+
+int trade_route_was_open(int route_id, int year)
+{
+    if (year < 0 || year >= MAX_TRADE_HISTORY_YEARS) {
+        return 0;
+    }
+    return array_item(trade_history[year], route_id)->open;
 }
 
 int trade_route_new(void)
@@ -68,6 +163,38 @@ int trade_route_traded(int route_id, resource_type resource, int buying)
 {
     return buying ? array_item(routes, route_id)->buys.traded[resource] :
         array_item(routes, route_id)->sells.traded[resource];
+}
+
+int trade_route_get_history_years_stored(void)
+{
+    return years_stored;
+}
+
+int trade_route_history_limit(int route_id, resource_type resource, int buying, int year)
+{
+    if (year < 0 || year >= MAX_TRADE_HISTORY_YEARS) {
+        return 0;
+    }
+    if (buying) {
+        return array_item(trade_history[year], route_id)->buys.limit[resource];
+    } else {
+        return array_item(trade_history[year], route_id)->sells.limit[resource];
+    }
+}
+
+int trade_route_history_traded(int route_id, resource_type resource, int buying, int year)
+{
+    if (year < 0 || year >= MAX_TRADE_HISTORY_YEARS) {
+        return 0;
+    }
+    if (array_item(trade_history[year], route_id)->open == 0) {
+        return -1;
+    }
+    if (buying) {
+        return array_item(trade_history[year], route_id)->buys.traded[resource];
+    } else {
+        return array_item(trade_history[year], route_id)->sells.traded[resource];
+    }
 }
 
 void trade_route_set_limit(int route_id, resource_type resource, int amount, int buying)
@@ -133,44 +260,90 @@ int trade_route_limit_reached(int route_id, resource_type resource, int buying)
     return route->traded[resource] >= route->limit[resource];
 }
 
+static int copy_trade_route_array(trade_route_array *dest, const trade_route_array *src)
+{
+    if (!array_expand(*dest, src->size)) {
+        return 0;
+    }
+
+    dest->size = src->size;
+
+    for (unsigned int i = 0; i < src->size; i++) {
+        trade_route *src_route = array_item(*src, i);
+        trade_route *dest_route = array_item(*dest, i);
+
+        *dest_route = *src_route;
+    }
+
+    return 1;
+}
+
+void trade_route_save_history(void)
+{
+    // Shift older years towards the end:
+    // [5] -> [6], [4] -> [5], ..., [0] -> [1]
+    for (int i = MAX_TRADE_HISTORY_YEARS - 1; i > 0; i--) {
+        if (!copy_trade_route_array(&trade_history[i], &trade_history[i - 1])) {
+            log_error("Unable to expand trade route history.", 0, 0);
+            return;
+        }
+    }
+
+    // move current routes as the [0] history entry
+    if (!copy_trade_route_array(&trade_history[0], &routes)) {
+        log_error("Unable to expand trade route history.", 0, 0);
+    }
+    years_stored = years_stored < MAX_TRADE_HISTORY_YEARS ? years_stored + 1 : MAX_TRADE_HISTORY_YEARS;
+}
+
 void trade_routes_save_state(buffer *trade_routes)
 {
-    int buf_size = sizeof(int32_t) * RESOURCE_MAX * 2 * routes.size * 2;
-    uint8_t *buf_data = malloc(buf_size + sizeof(int32_t));
-    buffer_init(trade_routes, buf_data, buf_size + sizeof(int32_t));
-    buffer_write_i32(trade_routes, routes.size);
+    uint8_t *buf_data = malloc(trade_route_array_buffer_size(&routes));
+    buffer_init(trade_routes, buf_data, trade_route_array_buffer_size(&routes));
+    save_trade_route_array_state(trade_routes, &routes);
+}
 
-    trade_route *route;
-    array_foreach(routes, route) {
-        for (int i = 0; i < 2; i++) {
-            for (resource_type r = 0; r < RESOURCE_MAX; r++) {
-                buffer_write_i32(trade_routes, i ? route->buys.limit[r] : route->sells.limit[r]);
-                buffer_write_i32(trade_routes, i ? route->buys.traded[r] : route->sells.traded[r]);
-            }
+void trade_routes_load_state(buffer *trade_routes, int version)
+{
+    if (!load_trade_route_array_state(trade_routes, &routes, version, 1)) {
+        log_error("Unable to create memory for trade routes. The game will now crash.", 0, 0);
+    }
+}
+
+void trade_history_save_state(buffer *buf)
+{
+    uint8_t *buf_data = malloc(get_trade_history_buffer_size());
+    buffer_init(buf, buf_data, get_trade_history_buffer_size());
+
+    buffer_write_u8(buf, years_stored);
+
+    for (int i = 0; i < MAX_TRADE_HISTORY_YEARS; i++) {
+        save_trade_route_array_state(buf, &trade_history[i]);
+    }
+}
+
+void trade_history_clear_state(void)
+{
+    years_stored = 0;
+    for (int i = 0; i < MAX_TRADE_HISTORY_YEARS; i++) {
+        if (!init_trade_route_array(&trade_history[i], 0)) {
+            log_error("Unable to create memory for trade route history. The game will now crash.", 0, 0);
+            return;
         }
     }
 }
 
-void trade_routes_load_state(buffer *trade_routes)
+void trade_history_load_state(buffer *buf, int version)
 {
-    int routes_to_load = buffer_read_i32(trade_routes);
-    if (!array_init(routes, LEGACY_MAX_ROUTES, 0, 0) || !array_expand(routes, routes_to_load)) {
-        log_error("Unable to create memory for trade routes. The game will now crash.", 0, 0);
-        return;
+    years_stored = buffer_read_u8(buf);
+    if (years_stored > MAX_TRADE_HISTORY_YEARS) {
+        years_stored = MAX_TRADE_HISTORY_YEARS;
     }
-    for (int i = 0; i < routes_to_load; i++) {
-        trade_route *route = array_next(routes);
-        for (int j = 0; j < 2; j++) {
-            for (int r = 0; r < resource_total_mapped(); r++) {
-                resource_type remapped = resource_remap(r);
-                if (j) {
-                    route->buys.limit[remapped] = buffer_read_i32(trade_routes);
-                    route->buys.traded[remapped] = buffer_read_i32(trade_routes);
-                } else {
-                    route->sells.limit[remapped] = buffer_read_i32(trade_routes);
-                    route->sells.traded[remapped] = buffer_read_i32(trade_routes);
-                }
-            }
+
+    for (int i = 0; i < MAX_TRADE_HISTORY_YEARS; i++) {
+        if (!load_trade_route_array_state(buf, &trade_history[i], version, 0)) {
+            log_error("Unable to create memory for trade route history. The game will now crash.", 0, 0);
+            return;
         }
     }
 }
@@ -184,6 +357,7 @@ void trade_routes_migrate_to_buys_sells(buffer *limit, buffer *traded, int versi
     }
     for (int i = 0; i < routes_to_load; i++) {
         trade_route *route = array_next(routes);
+        route->open = empire_city_is_trade_route_open(i);
         int city_id = empire_city_get_for_trade_route(i);
         if (city_id < 0) {
             continue;

@@ -55,6 +55,7 @@ struct cycle {
     unsigned int size;
     unsigned int rotations_to_next;
     building_type array[MAX_CYCLE_SIZE];
+    auto_cycle_group group;
 };
 
 enum {
@@ -83,7 +84,6 @@ static struct {
     int start_offset_x_view;
     int start_offset_y_view;
     int cycle_step;
-    int auto_cycling;
 } data;
 
 static int last_items_cleared;
@@ -93,16 +93,16 @@ static const int FORT_Y_OFFSET[4][4] = { {-1,-1,0,0},{-4,-4,-3,-3},{0,0,1,1},{3,
 
 static const struct cycle building_cycles[] = {
     { 5, 1, { BUILDING_SMALL_TEMPLE_CERES, BUILDING_SMALL_TEMPLE_NEPTUNE, BUILDING_SMALL_TEMPLE_MERCURY,
-      BUILDING_SMALL_TEMPLE_MARS,  BUILDING_SMALL_TEMPLE_VENUS }},
+      BUILDING_SMALL_TEMPLE_MARS,  BUILDING_SMALL_TEMPLE_VENUS }, AUTO_CYCLE_GROUP_TEMPLES },
     { 5, 1, {BUILDING_LARGE_TEMPLE_CERES, BUILDING_LARGE_TEMPLE_NEPTUNE, BUILDING_LARGE_TEMPLE_MERCURY,
-      BUILDING_LARGE_TEMPLE_MARS,  BUILDING_LARGE_TEMPLE_VENUS}},
+      BUILDING_LARGE_TEMPLE_MARS,  BUILDING_LARGE_TEMPLE_VENUS}, AUTO_CYCLE_GROUP_TEMPLES },
     { 5, 2, { BUILDING_SHRINE_CERES, BUILDING_SHRINE_NEPTUNE, BUILDING_SHRINE_MERCURY,
-      BUILDING_SHRINE_MARS,  BUILDING_SHRINE_VENUS }},
+      BUILDING_SHRINE_MARS,  BUILDING_SHRINE_VENUS }, AUTO_CYCLE_GROUP_TEMPLES },
     { 9, 2, {BUILDING_GARDEN_PATH, BUILDING_DATE_PATH, BUILDING_ELM_PATH,  BUILDING_FIG_PATH,  BUILDING_FIR_PATH,
-      BUILDING_OAK_PATH,  BUILDING_PALM_PATH, BUILDING_PINE_PATH, BUILDING_PLUM_PATH}},
+      BUILDING_OAK_PATH,  BUILDING_PALM_PATH, BUILDING_PINE_PATH, BUILDING_PLUM_PATH}, AUTO_CYCLE_GROUP_GARDENS },
     { 8, 1, {BUILDING_DATE_TREE, BUILDING_ELM_TREE,  BUILDING_FIG_TREE,  BUILDING_FIR_TREE,
-      BUILDING_OAK_TREE,  BUILDING_PALM_TREE, BUILDING_PINE_TREE, BUILDING_PLUM_TREE }},
-    { 2, 1, {BUILDING_GARDENS, BUILDING_OVERGROWN_GARDENS }},
+      BUILDING_OAK_TREE,  BUILDING_PALM_TREE, BUILDING_PINE_TREE, BUILDING_PLUM_TREE }, AUTO_CYCLE_GROUP_GARDENS },
+    { 2, 1, {BUILDING_GARDENS, BUILDING_OVERGROWN_GARDENS }, AUTO_CYCLE_GROUP_GARDENS },
 };
 
 #define BUILDING_CYCLES (sizeof(building_cycles) / sizeof(struct cycle))
@@ -247,14 +247,31 @@ int building_construction_cycle_back(void)
     return 0;
 }
 
-int building_construction_is_auto_cycling(void)
+static config_key auto_cycle_config_key(auto_cycle_group group)
 {
-    return data.auto_cycling;
+    return group == AUTO_CYCLE_GROUP_TEMPLES ? CONFIG_UI_AUTO_CYCLE_TEMPLES : CONFIG_UI_AUTO_CYCLE_GARDENS;
 }
 
-void building_construction_toggle_auto_cycle(void)
+static auto_cycle_group auto_cycle_group_for_type(building_type type)
 {
-    data.auto_cycling ^= 1;
+    for (unsigned int i = 0; i < BUILDING_CYCLES; i++) {
+        for (unsigned int j = 0; j < building_cycles[i].size; j++) {
+            if (building_cycles[i].array[j] == type) {
+                return building_cycles[i].group;
+            }
+        }
+    }
+    return AUTO_CYCLE_GROUP_TEMPLES;
+}
+
+int building_construction_is_auto_cycling(auto_cycle_group group)
+{
+    return config_get(auto_cycle_config_key(group)) != 0;
+}
+
+void building_construction_toggle_auto_cycle(auto_cycle_group group)
+{
+    config_set(auto_cycle_config_key(group), !building_construction_is_auto_cycling(group));
 }
 
 static void mark_construction(int x, int y, int size, int terrain, int absolute_xy)
@@ -1339,7 +1356,8 @@ void building_construction_place(void)
         return;
     }
 
-    if (data.auto_cycling && building_construction_type_can_cycle(data.type)) {
+    if (building_construction_type_can_cycle(data.type) &&
+        building_construction_is_auto_cycling(auto_cycle_group_for_type(data.type))) {
         for (int i = 0; i < building_construction_type_cycle_steps(data.type); i++) {
             building_rotation_rotate_forward();
         }

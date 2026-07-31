@@ -9,8 +9,13 @@
 #include "city/data_private.h"
 #include "city/culture.h"
 #include "city/festival.h"
+#include "city/resource.h"
+#include "core/array.h"
+#include "core/buffer.h"
 #include "core/calc.h"
+#include "core/log.h"
 #include "core/random.h"
+#include "empire/trade_prices.h"
 #include "game/difficulty.h"
 #include "game/time.h"
 #include "figuretype/entertainer.h"
@@ -18,7 +23,7 @@
 #include "map/terrain.h"
 
 #define MAX_HOUSE_LEVELS 20
-
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 static building_levy_for_type building_levies[] = {
     {BUILDING_FORT_ARCHERS, FORT_LEVY_MONTHLY},
@@ -30,27 +35,27 @@ static building_levy_for_type building_levies[] = {
     {BUILDING_SMALL_TEMPLE_NEPTUNE, SMALL_TEMPLE_LEVY_MONTHLY },
     {BUILDING_SMALL_TEMPLE_MERCURY, SMALL_TEMPLE_LEVY_MONTHLY },
     {BUILDING_SMALL_TEMPLE_MARS, SMALL_TEMPLE_LEVY_MONTHLY },
-    {BUILDING_SMALL_TEMPLE_VENUS, SMALL_TEMPLE_LEVY_MONTHLY },
+    {BUILDING_SMALL_TEMPLE_VENUS, SMALL_TEMPLE_LEVY_MONTHLY },//10
     {BUILDING_LARGE_TEMPLE_CERES, LARGE_TEMPLE_LEVY_MONTHLY },
     {BUILDING_LARGE_TEMPLE_NEPTUNE, LARGE_TEMPLE_LEVY_MONTHLY },
     {BUILDING_LARGE_TEMPLE_MERCURY, LARGE_TEMPLE_LEVY_MONTHLY },
-    {BUILDING_LARGE_TEMPLE_MARS, LARGE_TEMPLE_LEVY_MONTHLY }, // 10
+    {BUILDING_LARGE_TEMPLE_MARS, LARGE_TEMPLE_LEVY_MONTHLY },
     {BUILDING_LARGE_TEMPLE_VENUS, LARGE_TEMPLE_LEVY_MONTHLY },
     {BUILDING_ORACLE, SMALL_TEMPLE_LEVY_MONTHLY },
     {BUILDING_TOWER, TOWER_LEVY_MONTHLY },
     {BUILDING_LIGHTHOUSE, LIGHTHOUSE_LEVY_MONTHLY },
     {BUILDING_GRAND_TEMPLE_CERES, GRAND_TEMPLE_LEVY_MONTHLY},
-    {BUILDING_GRAND_TEMPLE_NEPTUNE, GRAND_TEMPLE_LEVY_MONTHLY},
+    {BUILDING_GRAND_TEMPLE_NEPTUNE, GRAND_TEMPLE_LEVY_MONTHLY},//20
     {BUILDING_GRAND_TEMPLE_MERCURY, GRAND_TEMPLE_LEVY_MONTHLY},
     {BUILDING_GRAND_TEMPLE_MARS, GRAND_TEMPLE_LEVY_MONTHLY},
     {BUILDING_GRAND_TEMPLE_VENUS, GRAND_TEMPLE_LEVY_MONTHLY},
-    {BUILDING_PANTHEON, PANTHEON_LEVY_MONTHLY}, // 20
+    {BUILDING_PANTHEON, PANTHEON_LEVY_MONTHLY},
     {BUILDING_COLOSSEUM, COLOSSEUM_LEVY_MONTHLY},
     {BUILDING_HIPPODROME, HIPPODROME_LEVY_MONTHLY},
     {BUILDING_SMALL_MAUSOLEUM, SMALL_MAUSOLEUM_LEVY_MONTHLY},
     {BUILDING_LARGE_MAUSOLEUM, SMALL_MAUSOLEUM_LEVY_MONTHLY},
     {BUILDING_NYMPHAEUM, SMALL_TEMPLE_LEVY_MONTHLY},
-    {BUILDING_CARAVANSERAI, CARAVANSERAI_LEVY_MONTHLY },
+    {BUILDING_CARAVANSERAI, CARAVANSERAI_LEVY_MONTHLY },//30
 };
 
 static tourism_for_type tourism_modifiers[] = {
@@ -68,6 +73,22 @@ static tourism_for_type tourism_modifiers[] = {
     {BUILDING_PANTHEON, 3, 0, 0}
 };
 
+#define TRANSACTION_STEP_SIZE 100
+#define FINANCE_OVERVIEW_HISTORY_YEARS 6
+
+static trade_ledger_data trade_ledgers[8]; // 7 years of data + current year
+static short trade_ledgers_count;
+static finance_overview finance_overviews[FINANCE_OVERVIEW_HISTORY_YEARS];
+static unsigned char finance_overview_years_stored;
+static array(transaction_t) current_year_transactions; // array of transaction structs for the current year
+static array(transaction_t) last_year_transactions; // array of transaction structs for the last year
+// transaction histories are only stored for current and last year - throw in a joke to explain 'why' to the players
+// we could store more but i dont want crudelios to blame me for the savegame bloat
+
+static void trade_ledger_year_change(void);
+static void archive_last_year_finance_overview(void);
+
+
 int city_finance_treasury(void)
 {
     return city_data.finance.treasury;
@@ -83,7 +104,6 @@ void city_finance_treasury_add_miscellaneous(int amount)
     city_finance_treasury_add(amount);
     city_data.finance.misc_this_year += amount;
 }
-
 
 int city_finance_out_of_money(void)
 {
@@ -351,7 +371,7 @@ static void pay_monthly_salary(void)
 static void pay_monthly_building_levies(void)
 {
     int levies = 0;
-    for (int i = 0; i < BUILDINGS_WITH_LEVIES; i++) {
+    for (int i = 0; i < (int) ARRAY_SIZE(building_levies); i++) {
         building_type type = building_levies[i].type;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             b->monthly_levy = building_levies[i].amount;
@@ -381,7 +401,7 @@ static void pay_monthly_building_levies(void)
 
 static void activate_monthly_tourism(void)
 {
-    for (int i = 0; i < BUILDINGS_WITH_TOURISM; i++) {
+    for (int i = 0; i < (int) ARRAY_SIZE(tourism_modifiers); i++) {
         building_type type = tourism_modifiers[i].type;
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state != BUILDING_STATE_IN_USE || !b->num_workers) {
@@ -546,11 +566,241 @@ static void pay_tribute(void)
     last_year->expenses.total = last_year->expenses.tribute + expenses;
 }
 
+static int get_ledger_year(int years_ago)
+{
+    if (years_ago < 0 || years_ago > trade_ledgers_count) {
+        return 0;
+    }
+    if (!trade_ledgers[years_ago].year) { // just a sanity check - will need to run on older saves
+        trade_ledgers[years_ago].year = (int) (game_time_year() - years_ago);
+    }
+    return trade_ledgers[years_ago].year;
+}
+
+void city_finance_trade_ledger_add_produced(resource_type resource)
+{
+    trade_ledgers[0].produced[resource]++;
+    return;
+}
+
+void city_finance_trade_ledger_add_consumed(resource_type resource, int quantity)
+{
+    trade_ledgers[0].consumed[resource] += quantity;
+    return;
+}
+
+void city_finance_trade_ledger_add_imported(resource_type resource)
+{
+    trade_ledgers[0].imported[resource]++;
+    return;
+}
+
+void city_finance_trade_ledger_add_exported(resource_type resource)
+{
+    trade_ledgers[0].exported[resource]++;
+    return;
+}
+
+void city_finance_trade_ledger_add_balance(resource_type resource, int balance)
+{
+    trade_ledgers[0].balance[resource] += balance;
+    return;
+}
+
+int city_finance_trade_ledger_get_produced(resource_type resource, int years_ago)
+{
+    if (years_ago < 0 || years_ago > trade_ledgers_count) {
+        return 0;
+    }
+    return trade_ledgers[years_ago].produced[resource];
+}
+
+int city_finance_trade_ledger_get_consumed(resource_type resource, int years_ago)
+{
+    if (years_ago < 0 || years_ago > trade_ledgers_count) {
+        return 0;
+    }
+    return trade_ledgers[years_ago].consumed[resource];
+}
+
+int city_finance_trade_ledger_get_imported(resource_type resource, int years_ago)
+{
+    if (years_ago < 0 || years_ago > trade_ledgers_count) {
+        return 0;
+    }
+    return trade_ledgers[years_ago].imported[resource];
+}
+
+int city_finance_trade_ledger_get_exported(resource_type resource, int years_ago)
+{
+    if (years_ago < 0 || years_ago > trade_ledgers_count) {
+        return 0;
+    }
+    return trade_ledgers[years_ago].exported[resource];
+}
+
+int city_finance_trade_ledger_get_balance(resource_type resource, int years_ago)
+{
+    if (years_ago < 0 || years_ago > trade_ledgers_count) {
+        return 0;
+    }
+    return trade_ledgers[years_ago].balance[resource];
+}
+
+int city_finance_trade_ledger_get_stock(resource_type resource, int years_ago)
+{
+    if (years_ago < 0 || years_ago > trade_ledgers_count) {
+        return 0;
+    }
+    // update from city resource - not point in duplicating the efforts
+    if (years_ago == 0) {
+        trade_ledgers[0].stock[resource] = city_resource_get_total_amount(resource, 0);
+    }
+    return trade_ledgers[years_ago].stock[resource];
+}
+
+
 void city_finance_handle_year_change(void)
 {
+    archive_last_year_finance_overview();
     reset_taxes();
+    trade_ledger_year_change();
     copy_amounts_to_last_year();
     pay_tribute();
+
+}
+
+static int get_transaction_index(unsigned short trader_id, int price, unsigned short empire_city_id,
+     unsigned char storage_id, unsigned char month, resource_type resource, unsigned char is_import)
+{
+    // O(n) instead of O(1) like array_item, but it shouldn't be called often enough to matter at all.
+    // If game lags during transactions, then the answer is storing the id in the transaction_t.
+    // small increase in structure size, but still completely manageable
+
+    unsigned char resource_id = (unsigned char) resource;
+    // find the transaction in the current year transactions array that matches the given parameters
+    for (unsigned int i = 0; i < current_year_transactions.size; i++) {
+        transaction_t *tx = array_item(current_year_transactions, i);
+        unsigned char tx_is_import = tx->quantity < 0 ? 0 : 1;
+        if (tx->trader_id == trader_id &&
+            tx->month == month &&
+            tx->resource_id == resource_id &&
+            tx->price == price &&
+            tx->storage_id == storage_id &&
+            tx->empire_city_id == empire_city_id &&
+            tx_is_import == is_import) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void city_finance_record_trade_into_ledger(unsigned short trader_id, int price, unsigned short empire_city_id,
+     unsigned char storage_id, unsigned char month, resource_type resource, unsigned char is_import)
+{
+    int transaction_index = get_transaction_index(trader_id, price, empire_city_id, storage_id, month, resource, is_import);
+    if (transaction_index >= 0) {
+        // there's already a transaction that matches the parameters this year
+        transaction_t *tx = array_item(current_year_transactions, transaction_index);
+        tx->quantity += is_import ? 1 : -1;
+    } else {
+        // new transaction - add to the array
+        transaction_t new_transaction = {
+            .trader_id = trader_id,
+            .price = price,
+            .empire_city_id = empire_city_id,
+            .storage_id = storage_id,
+            .month = month,
+            .resource_id = (unsigned char) resource,
+            .quantity = is_import ? -1 : 1
+        };
+        transaction_t *tx;
+        array_new_item(current_year_transactions, tx);
+        *tx = new_transaction;
+    }
+}
+
+static int transfer_transactions_to_last_year(void) // AI solution for array transfer
+{
+    // 1) Clear destination first (your required sequence)
+    array_clear(last_year_transactions);
+
+    // 2) Initialize destination container
+    if (!array_init(last_year_transactions, TRANSACTION_STEP_SIZE,
+        current_year_transactions.constructor, current_year_transactions.in_use)) {
+        return 0;
+    }
+
+    // 3) Copy payload
+    if (current_year_transactions.size > 0) {
+        if (!array_expand(last_year_transactions, current_year_transactions.size)) {
+            array_clear(last_year_transactions);
+            return 0;
+        }
+
+        for (unsigned int i = 0; i < current_year_transactions.size; i++) {
+            memcpy(array_item(last_year_transactions, i),
+                   array_item(current_year_transactions, i),
+                   sizeof(*array_item(current_year_transactions, i)));
+        }
+        last_year_transactions.size = current_year_transactions.size;
+    }
+
+    // 4) Clear source only after successful copy
+    array_clear(current_year_transactions);
+    return 1;
+}
+
+static void trade_ledger_year_change(void)
+{
+    // EOD 22/06/2026 notes
+    // next time - connect the production, consumption, import and export - DONE
+    // import and export - decide if directly tied to transactions array or not - DONE, not directly, separate counts
+    // add save/load for transactions array and ledger asap for testing -todo
+    // pull the data from the ledger to the display and check if behaves as expected -todo
+    // for display use lang_text_draw_month_year_max_width() - draws month year
+
+    for (int i = 0; i < RESOURCE_MAX; i++) {
+        trade_ledgers[0].stock[i] = city_resource_get_total_amount((resource_type) i, 0);
+    }
+
+    if (trade_ledgers_count < 7) {
+        trade_ledgers_count++;
+    }
+
+    for (int i = trade_ledgers_count; i > 0; i--) {
+        trade_ledgers[i] = trade_ledgers[i - 1];
+    }
+
+    memset(&trade_ledgers[0], 0, sizeof(trade_ledgers[0]));
+    trade_ledgers[0].year = game_time_year();
+
+    if (!transfer_transactions_to_last_year()) {
+        log_error("Failed to transfer transactions to last year. Game will probably crash.", 0, 0);
+        return;
+    }
+
+    if (!array_init(current_year_transactions, TRANSACTION_STEP_SIZE, 0, 0)) {
+        log_error("Failed to allocate memory for current year transactions. Game will probably crash.", 0, 0);
+        return;
+    }
+}
+
+static void archive_last_year_finance_overview(void)
+{
+    if (finance_overview_years_stored >= FINANCE_OVERVIEW_HISTORY_YEARS) {
+        finance_overview_years_stored = FINANCE_OVERVIEW_HISTORY_YEARS;
+    } else if (trade_ledgers_count > 0 || finance_overview_years_stored > 0) {
+        finance_overview_years_stored++;
+    } else {
+        return;
+    }
+
+    for (int i = finance_overview_years_stored - 1; i > 0; i--) {
+        finance_overviews[i] = finance_overviews[i - 1];
+    }
+
+    finance_overviews[0] = city_data.finance.last_year;
 }
 
 int city_finance_tourism_income_last_month(void)
@@ -571,6 +821,201 @@ const finance_overview *city_finance_overview_last_year(void)
 const finance_overview *city_finance_overview_this_year(void)
 {
     return &city_data.finance.this_year;
+}
+
+const finance_overview *city_finance_overview_for_year(int years_ago)
+{
+    if (years_ago <= 0) {
+        return &city_data.finance.this_year;
+    }
+    if (years_ago == 1) {
+        return &city_data.finance.last_year;
+    }
+    if (years_ago - 2 < finance_overview_years_stored) {
+        return &finance_overviews[years_ago - 2];
+    }
+    return 0;
+}
+
+int city_finance_overview_years_stored(void)
+{
+    return finance_overview_years_stored;
+}
+
+void city_finance_ledger_init(void)
+{
+    trade_ledgers_count = 0;
+    memset(trade_ledgers, 0, sizeof(trade_ledgers));
+    finance_overview_years_stored = 0;
+    memset(finance_overviews, 0, sizeof(finance_overviews));
+    array_init(current_year_transactions, TRANSACTION_STEP_SIZE, 0, 0);
+    array_init(last_year_transactions, TRANSACTION_STEP_SIZE, 0, 0);
+}
+
+static size_t finance_overview_saved_size(void)
+{
+    return sizeof(int32_t) * 15;
+}
+
+static void write_finance_overview(buffer *buf, const finance_overview *overview)
+{
+    buffer_write_i32(buf, overview->income.taxes);
+    buffer_write_i32(buf, overview->income.exports);
+    buffer_write_i32(buf, overview->income.donated);
+    buffer_write_i32(buf, overview->income.total);
+    buffer_write_i32(buf, overview->expenses.imports);
+    buffer_write_i32(buf, overview->expenses.wages);
+    buffer_write_i32(buf, overview->expenses.construction);
+    buffer_write_i32(buf, overview->expenses.interest);
+    buffer_write_i32(buf, overview->expenses.salary);
+    buffer_write_i32(buf, overview->expenses.sundries);
+    buffer_write_i32(buf, overview->expenses.tribute);
+    buffer_write_i32(buf, overview->expenses.total);
+    buffer_write_i32(buf, overview->expenses.levies);
+    buffer_write_i32(buf, overview->net_in_out);
+    buffer_write_i32(buf, overview->balance);
+}
+
+static void read_finance_overview(buffer *buf, finance_overview *overview)
+{
+    overview->income.taxes = buffer_read_i32(buf);
+    overview->income.exports = buffer_read_i32(buf);
+    overview->income.donated = buffer_read_i32(buf);
+    overview->income.total = buffer_read_i32(buf);
+    overview->expenses.imports = buffer_read_i32(buf);
+    overview->expenses.wages = buffer_read_i32(buf);
+    overview->expenses.construction = buffer_read_i32(buf);
+    overview->expenses.interest = buffer_read_i32(buf);
+    overview->expenses.salary = buffer_read_i32(buf);
+    overview->expenses.sundries = buffer_read_i32(buf);
+    overview->expenses.tribute = buffer_read_i32(buf);
+    overview->expenses.total = buffer_read_i32(buf);
+    overview->expenses.levies = buffer_read_i32(buf);
+    overview->net_in_out = buffer_read_i32(buf);
+    overview->balance = buffer_read_i32(buf);
+}
+
+void city_finance_ledger_save_state(buffer *buf)
+{
+    size_t current_count = current_year_transactions.size;
+    size_t last_count = last_year_transactions.size;
+    size_t tx_size = 4 + 2 + 1 + 1 + 1 + 2 + 1; // 12 bytes per transaction
+    size_t total_size = sizeof(int16_t) // trade_ledgers_count
+        + 8 * (sizeof(int32_t) * 2 + sizeof(int32_t) * RESOURCE_MAX * 6) // 8 ledger entries
+        + sizeof(int32_t) + current_count * tx_size // current year transactions
+        + sizeof(int32_t) + last_count * tx_size    // last year transactions
+        + sizeof(uint8_t) + FINANCE_OVERVIEW_HISTORY_YEARS * finance_overview_saved_size();
+
+    buffer_init_dynamic(buf, total_size);
+
+    buffer_write_i16(buf, trade_ledgers_count);
+    for (int i = 0; i < 8; i++) {
+        buffer_write_i32(buf, trade_ledgers[i].year);
+        buffer_write_i32(buf, trade_ledgers[i].transactions);
+        for (int r = 0; r < RESOURCE_MAX; r++) { buffer_write_i32(buf, trade_ledgers[i].stock[r]); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { buffer_write_i32(buf, trade_ledgers[i].imported[r]); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { buffer_write_i32(buf, trade_ledgers[i].exported[r]); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { buffer_write_i32(buf, trade_ledgers[i].produced[r]); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { buffer_write_i32(buf, trade_ledgers[i].consumed[r]); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { buffer_write_i32(buf, trade_ledgers[i].balance[r]); }
+    }
+
+    buffer_write_i32(buf, (int32_t) current_count);
+    transaction_t *tx;
+    array_foreach(current_year_transactions, tx)
+    {
+        buffer_write_i32(buf, tx->price);
+        buffer_write_u16(buf, tx->empire_city_id);
+        buffer_write_u8(buf, tx->storage_id);
+        buffer_write_u8(buf, tx->month);
+        buffer_write_u8(buf, tx->resource_id);
+        buffer_write_u16(buf, tx->trader_id);
+        buffer_write_i8(buf, tx->quantity);
+    }
+
+    buffer_write_i32(buf, (int32_t) last_count);
+    array_foreach(last_year_transactions, tx)
+    {
+        buffer_write_i32(buf, tx->price);
+        buffer_write_u16(buf, tx->empire_city_id);
+        buffer_write_u8(buf, tx->storage_id);
+        buffer_write_u8(buf, tx->month);
+        buffer_write_u8(buf, tx->resource_id);
+        buffer_write_u16(buf, tx->trader_id);
+        buffer_write_i8(buf, tx->quantity);
+    }
+
+    buffer_write_u8(buf, finance_overview_years_stored);
+    for (int i = 0; i < FINANCE_OVERVIEW_HISTORY_YEARS; i++) {
+        write_finance_overview(buf, &finance_overviews[i]);
+    }
+}
+
+void city_finance_ledger_load_state(buffer *buf, savegame_version_t version)
+{
+    buffer_load_dynamic(buf);
+
+    trade_ledgers_count = buffer_read_i16(buf);
+    for (int i = 0; i < 8; i++) {
+        trade_ledgers[i].year = buffer_read_i32(buf);
+        trade_ledgers[i].transactions = buffer_read_i32(buf);
+        for (int r = 0; r < RESOURCE_MAX; r++) { trade_ledgers[i].stock[r] = buffer_read_i32(buf); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { trade_ledgers[i].imported[r] = buffer_read_i32(buf); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { trade_ledgers[i].exported[r] = buffer_read_i32(buf); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { trade_ledgers[i].produced[r] = buffer_read_i32(buf); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { trade_ledgers[i].consumed[r] = buffer_read_i32(buf); }
+        for (int r = 0; r < RESOURCE_MAX; r++) { trade_ledgers[i].balance[r] = buffer_read_i32(buf); }
+    }
+
+    array_clear(current_year_transactions);
+    int count = buffer_read_i32(buf);
+    if (!array_init(current_year_transactions, TRANSACTION_STEP_SIZE, 0, 0) ||
+        !array_expand(current_year_transactions, count)) {
+        log_error("Failed to allocate memory for current year transactions during load.", 0, 0);
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        transaction_t *tx = array_next(current_year_transactions);
+        tx->price = buffer_read_i32(buf);
+        tx->empire_city_id = buffer_read_u16(buf);
+        tx->storage_id = buffer_read_u8(buf);
+        tx->month = buffer_read_u8(buf);
+        tx->resource_id = buffer_read_u8(buf);
+        tx->trader_id = buffer_read_u16(buf);
+        tx->quantity = buffer_read_i8(buf);
+    }
+
+    array_clear(last_year_transactions);
+    count = buffer_read_i32(buf);
+    if (!array_init(last_year_transactions, TRANSACTION_STEP_SIZE, 0, 0) ||
+        !array_expand(last_year_transactions, count)) {
+        log_error("Failed to allocate memory for last year transactions during load.", 0, 0);
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        transaction_t *tx = array_next(last_year_transactions);
+        tx->price = buffer_read_i32(buf);
+        tx->empire_city_id = buffer_read_u16(buf);
+        tx->storage_id = buffer_read_u8(buf);
+        tx->month = buffer_read_u8(buf);
+        tx->resource_id = buffer_read_u8(buf);
+        tx->trader_id = buffer_read_u16(buf);
+        tx->quantity = buffer_read_i8(buf);
+    }
+
+    finance_overview_years_stored = 0;
+    memset(finance_overviews, 0, sizeof(finance_overviews));
+    if (version <= SAVE_GAME_LAST_NO_FINANCE_OVERVIEW_HISTORY) {
+        return;
+    }
+
+    finance_overview_years_stored = buffer_read_u8(buf);
+    if (finance_overview_years_stored > FINANCE_OVERVIEW_HISTORY_YEARS) {
+        finance_overview_years_stored = FINANCE_OVERVIEW_HISTORY_YEARS;
+    }
+    for (int i = 0; i < FINANCE_OVERVIEW_HISTORY_YEARS; i++) {
+        read_finance_overview(buf, &finance_overviews[i]);
+    }
 }
 
 int city_finance_spawn_tourist(void)
