@@ -284,21 +284,13 @@ static void get_building_health(int x, int y, float scale, int grid_offset)
     if (!building_properties_for_type(b->type)->show_durability) {
         return;
     }
-
-    // Do not display health bars for this buildings
-    //if (b->type == BUILDING_WALL || b->type == BUILDING_PALISADE || b->type == BUILDING_PALISADE_GATE) {
-    //    return;
-    //}
-
     int current_hp;
     int max_hp;
     map_building_get_health(b, grid_offset, &current_hp, &max_hp);
-
     // Do not display health bars for buildings at full health
     if (current_hp >= max_hp || max_hp <= 0) {
         return;
     }
-
     int center_x = (x + 30 * b->size);
     int center_y = y;
     if (img->top) {
@@ -306,11 +298,9 @@ static void get_building_health(int x, int y, float scale, int grid_offset)
     }
     center_x = (int) (center_x / scale);
     center_y = (int) (center_y / scale);
-
     int bar_width = 30;
     int bar_height = 6;
     int y_offset = 75;
-
     switch (b->type) {
         case BUILDING_TOWER:
             y_offset = 85;
@@ -327,19 +317,17 @@ static void get_building_health(int x, int y, float scale, int grid_offset)
     }
     int draw_x = center_x - bar_width / 2;
     int draw_y = center_y + y_offset / scale;
-
     color_t hp_color;
     int percent = current_hp * 100 / max_hp;
     if (percent > 75) {
-        hp_color = COLOR_FONT_GREEN;
+        hp_color = COLOR_GREEN;
     } else if (percent > 50) {
-        hp_color = COLOR_FONT_ORANGE_LIGHT;
+        hp_color = COLOR_ORANGE_LIGHT;
     } else if (percent > 25) {
-        hp_color = COLOR_FONT_ORANGE;
+        hp_color = COLOR_ORANGE;
     } else {
-        hp_color = COLOR_FONT_RED;
+        hp_color = COLOR_RED;
     }
-
     int fill_width = (bar_width - 2) * percent / 100;
     if (percent > 0 && fill_width < 1) {
         fill_width = 1;
@@ -352,6 +340,22 @@ static void get_building_health(int x, int y, float scale, int grid_offset)
     graphics_fill_rect(draw_x + 1, draw_y + 1, fill_width, bar_height - 2, hp_color);
 }
 
+static int get_tooltip_enemy(tooltip_context *c, int grid_offset)
+{
+    building *b = building_get(map_building_at(grid_offset));
+    if (!building_properties_for_type(b->type)->show_durability) {
+        return 0;
+    }
+    int current_hp;
+    int max_hp;
+    map_building_get_health(b, grid_offset, &current_hp, &max_hp);
+    if (current_hp >= max_hp || max_hp <= 0) {
+        return 0;
+    }
+    c->precomposed_text = health_prefix_to_tooltip_text(current_hp, max_hp, 0);
+    return 1;
+}
+
 static int get_tooltip_damage(tooltip_context *c, int grid_offset)
 {
     if (!map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
@@ -361,34 +365,19 @@ static int get_tooltip_damage(tooltip_context *c, int grid_offset)
     if (b->type == BUILDING_ROADBLOCK) {
         return 0;
     }
-    int text_id;
     if (b->damage_risk <= 0) {
-        text_id = 52;
+        return 52;
     } else if (b->damage_risk <= 40) {
-        text_id = 53;
+        return 53;
     } else if (b->damage_risk <= 80) {
-        text_id = 54;
+        return 54;
     } else if (b->damage_risk <= 120) {
-        text_id = 55;
+        return 55;
     } else if (b->damage_risk <= 160) {
-        text_id = 56;
+        return 56;
     } else {
-        text_id = 57;
+        return 57;
     }
-    if (building_properties_for_type(b->type)->show_durability) {
-        int current_hp;
-        int max_hp;
-        map_building_get_health(b, grid_offset, &current_hp, &max_hp);
-        const building_properties *props = building_properties_for_type(b->type);
-        if (props->fire_proof) {
-            c->precomposed_text = health_prefix_to_tooltip_text(current_hp, max_hp, 0);
-        } else {
-            const uint8_t *message = lang_get_string(66, text_id);
-            c->precomposed_text = health_prefix_to_tooltip_text(current_hp, max_hp, message);
-        }
-        return 1;
-    }
-    return text_id;
 }
 
 static int get_tooltip_crime(tooltip_context *c, int grid_offset)
@@ -520,8 +509,7 @@ const city_overlay *city_overlay_for_damage(void)
         .show_building = show_building_damage,
         .show_figure = show_figure_damage,
         .get_column_height = get_column_height_damage,
-        .get_tooltip = get_tooltip_damage,
-        .draw_layer = get_building_health
+        .get_tooltip = get_tooltip_damage
     };
     return &overlay;
 }
@@ -582,7 +570,8 @@ const city_overlay *city_overlay_for_enemy(void)
         .type = OVERLAY_ENEMY,
         .show_building = show_building_enemy,
         .show_figure = show_figure_enemy,
-        .draw_layer = get_building_health
+        .draw_layer = get_building_health,
+        .get_tooltip = get_tooltip_enemy
     };
     return &overlay;
 }

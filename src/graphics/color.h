@@ -10,6 +10,9 @@ typedef uint32_t color_t;
 #define COLOR_RED 0xffff0000
 #define COLOR_WHITE 0xffffffff
 #define COLOR_LIGHT_GRAY 0xffb3b3b3
+#define COLOR_GREEN 0xff00cc00
+#define COLOR_ORANGE 0xffff5a08
+#define COLOR_ORANGE_LIGHT 0xffffa500
 
 #define COLOR_GRID 0xff180800
 #define COLOR_GRID_CENTRAL 0xff162d39
