@@ -20,8 +20,9 @@
 #include "city/trade.h"
 #include "city/victory.h"
 #include "city/view.h"
-#include "core/random.h"
 #include "core/calc.h"
+#include "core/random.h"
+#include "core/string.h"
 #include "empire/city.h"
 #include "empire/object.h"
 #include "empire/trade_prices.h"
@@ -1017,6 +1018,19 @@ int scenario_action_type_change_monument_resources_execute(scenario_action_t *ac
     int amount = scenario_formula_evaluate_formula(action->parameter4);
 
     building_monument_stage_resource_set(type, stage, resource, amount);
+
+    return 1;
+}
+
+int scenario_action_type_rename_city_execute(scenario_action_t *action)
+{
+    int city_id = action->parameter1;
+    const uint8_t *name = scenario_text_get_text(action->parameter2);
+
+    full_empire_object *city_obj = empire_object_get_full(empire_city_get(city_id)->empire_object_id);
+    if (city_obj) {
+        string_copy(name, city_obj->city_custom_name, 50);
+    }
 
     return 1;
 }

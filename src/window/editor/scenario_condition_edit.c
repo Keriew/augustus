@@ -483,7 +483,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             window_editor_select_city_trade_route_show(set_param_value);
             return;
         case PARAMETER_TYPE_FUTURE_CITY:
-            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE);
+            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE, 0);
             return;
         case PARAMETER_TYPE_RESOURCE:
             resource_selection(button);

@@ -19,13 +19,17 @@
 #include <string.h>
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
-#define SCENARIO_FORMULAS_SIZE_STEP 500
+#define SCENARIO_FORMULAS_SIZE_STEP 100
+#define SCENARIO_TEXTS_SIZE_STEP 25
 
 static array(scenario_event_t) scenario_events;
 static array(scenario_formula_t) scenario_formulas;
+static array(scenario_text_t) scenario_texts;
 
 static void formulas_save_state(buffer *buf);
 static void formulas_load_state(buffer *buf);
+static void texts_save_state(buffer *buf);
+static void texts_load_state(buffer *buf);
 
 void scenario_events_init(void)
 {
@@ -38,6 +42,54 @@ void scenario_events_init(void)
 static void new_formula(scenario_formula_t *formula, unsigned int id)
 {
     formula->id = id;
+}
+
+static void new_text(scenario_text_t *text, unsigned int id)
+{
+    text->id = id;
+}
+
+unsigned int scenario_text_get_new(const uint8_t *initial_text)
+{
+    scenario_text_t *text = array_advance(scenario_texts);
+
+    if (!text) {
+        log_error("Unable to allocate memory for a new scenario text. The game will now crash.", 0, 0);
+        return 0;
+    }
+    string_copy(initial_text, text->text, MAX_SCENARIO_TEXT_LENGTH - 1);
+
+    return text->id;
+}
+
+scenario_text_t *scenario_text_get(unsigned int id)
+{
+    if (id == 0 || id >= scenario_texts.size) {
+        log_error("Invalid scenario text index.", 0, 0);
+        return NULL;
+    }
+    return array_item(scenario_texts, id);
+}
+
+const uint8_t *scenario_text_get_text(unsigned int id)
+{
+    if (id == 0 || id >= scenario_texts.size) {
+        log_error("Invalid scenario text index.", 0, 0);
+        return NULL;
+    }
+    scenario_text_t *text = array_item(scenario_texts, id);
+
+    return text->text;
+}
+
+void scenario_text_change(unsigned int id, const uint8_t *new_text)
+{
+    if (id == 0 || id >= scenario_texts.size) {
+        log_error("Invalid scenario text ID.", 0, 0);
+        return;
+    }
+    scenario_text_t *text = array_item(scenario_texts, id);
+    string_copy(new_text, text->text, MAX_SCENARIO_TEXT_LENGTH - 1);
 }
 
 unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_limit, int max_limit)
@@ -121,12 +173,16 @@ void scenario_events_clear(void)
         log_error("Unable to allocate enough memory for the scenario events array. The game will now crash.", 0, 0);
     }
 
-    // Clear formulas
+    // Clear formulas and texts
     if (!array_init(scenario_formulas, SCENARIO_FORMULAS_SIZE_STEP, new_formula, 0)) {
         log_error("Unable to allocate enough memory for the scenario formulas array. The game will now crash.", 0, 0);
     }
+    if (!array_init(scenario_texts, SCENARIO_TEXTS_SIZE_STEP, new_text, 0)) {
+        log_error("Unable to allocate enough memory for the scenario texts array. The game will now crash.", 0, 0);
+    }
 
     array_advance(scenario_formulas); // Reserve ID 0 as invalid
+    array_advance(scenario_texts); // Reserve ID 0 as invalid
 }
 
 scenario_event_t *scenario_event_get(int event_id)
@@ -253,12 +309,13 @@ static void actions_save_state(buffer *buf)
 
 }
 
-void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas)
+void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas, buffer *buf_texts)
 {
     info_save_state(buf_events);
     conditions_save_state(buf_conditions);
     actions_save_state(buf_actions);
     formulas_save_state(buf_formulas);
+    texts_save_state(buf_texts);
 }
 
 static void info_load_state(buffer *buf, int scenario_version)
@@ -410,8 +467,52 @@ static void formulas_load_state(buffer *buf)
     }
 }
 
+static void texts_save_state(buffer *buf)
+{
+    int struct_size =
+        sizeof(uint32_t)                              // id
+        + sizeof(uint8_t) * MAX_SCENARIO_TEXT_LENGTH; // text
+    buffer_init_dynamic_array(buf, scenario_texts.size, struct_size);
+
+    scenario_text_t *text;
+
+    array_foreach(scenario_texts, text) {
+        if (array_index == 0) {
+            continue; // Skip index 0 as it's reserved for invalid texts
+        }
+        buffer_write_u32(buf, text->id);
+        buffer_write_raw(buf, text->text, MAX_SCENARIO_TEXT_LENGTH);
+    }
+}
+
+static void texts_load_state(buffer *buf)
+{
+    size_t array_size = buffer_load_dynamic_array(buf);
+
+    if (!array_init(scenario_texts, SCENARIO_TEXTS_SIZE_STEP, new_text, 0) ||
+        !array_expand(scenario_texts, array_size)) {
+        log_error("Unable to allocate enough memory for the scenario texts array. The game will now crash.", 0, 0);
+    }
+
+    array_advance(scenario_texts); // Advance once to skip index 0, which is reserved for invalid texts
+
+    for (size_t i = 0; i < array_size; ++i) {
+
+        scenario_text_t *text = array_advance(scenario_texts);
+
+        unsigned int id = buffer_read_u32(buf);
+        if (id != text->id) {
+            log_error("Text ID mismatch during loading. Something has gone wrong.", 0, 0);
+            return;
+        }
+
+        buffer_read_raw(buf, text->text, MAX_SCENARIO_TEXT_LENGTH);
+        text->text[MAX_SCENARIO_TEXT_LENGTH - 1] = '\0'; // ensure safety
+    }
+}
+
 void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas,
-     int scenario_version)
+     buffer *buf_texts, int scenario_version)
 {
     scenario_events_clear();
     info_load_state(buf_events, scenario_version);
@@ -423,6 +524,9 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
     actions_load_state(buf_actions, scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         formulas_load_state(buf_formulas);
+    }
+    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_3) {
+        texts_load_state(buf_texts);
     }
 
     scenario_event_t *current;

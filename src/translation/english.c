@@ -2235,7 +2235,10 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_CHANGE_MONUMENT_RESOURCES, "Change monument resources needed"},
     {TR_PARAMETER_TYPE_MONUMENT, "Monument type"},
     {TR_PARAMETER_MONUMENT_STAGE, "Phase"},
-    {TR_RESOURCE_ARCHITECTS, "Architects"}
+    {TR_RESOURCE_ARCHITECTS, "Architects"},
+    {TR_ACTION_TYPE_RENAME_CITY, "Change city name"},
+    {TR_PARAMETER_TYPE_CITY, "City"},
+    {TR_PARAMETER_NAME, "Name"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

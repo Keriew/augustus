@@ -424,6 +424,10 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "stage",   .type = PARAMETER_TYPE_NUMBER,     .min_limit = 1,    .max_limit = 5,         .key = TR_PARAMETER_MONUMENT_STAGE},
                                         .xml_parm3 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE_MONUMENT,         .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm4 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
+    [ACTION_TYPE_RENAME_CITY]           = {.type = ACTION_TYPE_RENAME_CITY,
+                                        .xml_attr = {.name = "rename_city",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_RENAME_CITY},
+                                        .xml_parm1 = {.name = "city",          .type = PARAMETER_TYPE_CITY,    .key = TR_PARAMETER_TYPE_CITY },
+                                        .xml_parm2 = {.name = "name",          .type = PARAMETER_TYPE_CUSTOM_TEXT,      .key = TR_PARAMETER_NAME}, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -1610,6 +1614,7 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             return;
         }
         case PARAMETER_TYPE_FUTURE_CITY:
+        case PARAMETER_TYPE_CITY:
         {
             empire_city *city = empire_city_get(value);
             if (city) {
@@ -1647,6 +1652,14 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
         {
             const uint8_t *text = value == ARCHITECTS ? translation_for(TR_RESOURCE_ARCHITECTS) : resource_get_data(value)->text;
             result_text = string_copy(text, result_text, maxlength);
+            return;
+        }
+        case PARAMETER_TYPE_CUSTOM_TEXT:
+        {
+            const uint8_t *text_string = scenario_text_get_text(value);
+            if (text_string) {
+                result_text = string_copy(text_string, result_text, maxlength);
+            }
             return;
         }
         default:

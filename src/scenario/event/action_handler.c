@@ -111,6 +111,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_immigration_percentage_execute(action);
         case ACTION_TYPE_CHANGE_MONUMENT_RESOURCES:
             return scenario_action_type_change_monument_resources_execute(action);
+        case ACTION_TYPE_RENAME_CITY:
+            return scenario_action_type_rename_city_execute(action);
         default:
             return 0;
     }

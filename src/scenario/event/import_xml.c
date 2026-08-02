@@ -57,6 +57,8 @@ static int xml_import_special_parse_custom_message(xml_data_attribute_t *attr, i
 static int xml_import_special_parse_custom_variable(xml_data_attribute_t *attr, int *target);
 static int xml_import_special_parse_formula(xml_data_attribute_t *attr, int *target);
 static int xml_import_special_parse_number(xml_data_attribute_t *attr, int *target);
+static int xml_import_special_parse_city(xml_data_attribute_t *attr, int *target);
+static int xml_import_special_parse_text(xml_data_attribute_t *attr, int *target);
 
 static condition_types get_condition_type_from_element_name(const char *name);
 static action_types get_action_type_from_element_name(const char *name);
@@ -563,6 +565,10 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
             // FLEXIBLE should have been resolved before calling this function
             xml_import_log_error("Unresolved FLEXIBLE parameter type encountered during import");
             return 0;
+        case PARAMETER_TYPE_CITY:
+            return xml_import_special_parse_city(attr, target);
+        case PARAMETER_TYPE_CUSTOM_TEXT:
+            return xml_import_special_parse_text(attr, target);
         default:
             xml_import_log_error("Something is very wrong. Failed to find attribute type.");
             return 0;
@@ -632,6 +638,31 @@ static int xml_import_special_parse_future_city(xml_data_attribute_t *attr, int 
             xml_import_log_error("Can only target cities with the future_trade type");
             return 0;
         }
+    } else {
+        xml_import_log_error("Could not find city");
+        return 0;
+    }
+}
+
+static int xml_import_special_parse_city(xml_data_attribute_t *attr, int *target)
+{
+    if (!attr->name) {
+        return 0;
+    }
+
+    int has_attr = xml_parser_has_attribute(attr->name);
+    if (!has_attr) {
+        xml_import_log_error("Missing attribute.");
+        return 0;
+    }
+
+    const char *value = xml_parser_get_attribute_string(attr->name);
+    const uint8_t *converted_name = string_from_ascii(value);
+    int city_id = empire_city_get_id_by_name(converted_name);
+    empire_city *city = empire_city_get(city_id);
+    if (city) {
+        *target = city_id;
+        return 1;
     } else {
         xml_import_log_error("Could not find city");
         return 0;
@@ -823,6 +854,31 @@ static int xml_import_special_parse_formula(xml_data_attribute_t *attr, int *tar
         return 1;
     } else {
         xml_import_log_error("Could not create formula from imported string.");
+        return 0;
+    }
+}
+
+static int xml_import_special_parse_text(xml_data_attribute_t *attr, int *target)
+{
+    if (!attr->name) {
+        return 1;
+    }
+
+    int has_attr = xml_parser_has_attribute(attr->name);
+    if (!has_attr) {
+        xml_import_log_error("Missing attribute.");
+        return 0;
+    }
+
+    const char *value = xml_parser_get_attribute_string(attr->name);
+    const uint8_t *converted_text = string_from_ascii(value);
+    unsigned int text_id = scenario_text_get_new(converted_text);
+
+    if (text_id) {
+        *target = text_id;
+        return 1;
+    } else {
+        xml_import_log_error("Could not create scenario text from imported string.");
         return 0;
     }
 }

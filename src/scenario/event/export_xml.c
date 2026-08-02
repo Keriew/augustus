@@ -169,6 +169,7 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
         case PARAMETER_TYPE_REQUEST:
             return export_attribute_number(attr, target);
         case PARAMETER_TYPE_FUTURE_CITY:
+        case PARAMETER_TYPE_CITY:
             return export_attribute_future_city(attr, target);
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
         case PARAMETER_TYPE_NUMBER:
@@ -200,6 +201,13 @@ static int export_parse_attribute_with_resolved_type(xml_data_attribute_t *attr,
             }
             return 1;
         }
+        case PARAMETER_TYPE_CUSTOM_TEXT:
+            if (!attr->name) {
+                return 1;
+            }
+            const uint8_t *text = scenario_text_get_text(target);
+            xml_exporter_add_attribute_encoded_text(attr->name, text);
+            return 1;
         case PARAMETER_TYPE_UNDEFINED:
             return 1;
         case PARAMETER_TYPE_FLEXIBLE:

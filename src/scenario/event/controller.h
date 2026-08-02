@@ -11,6 +11,11 @@ typedef enum {
     SCENARIO_EVENTS_VERSION_INITIAL = 1,
 } scenario_events_version;
 
+unsigned int scenario_text_get_new(const uint8_t *initial_text);
+scenario_text_t *scenario_text_get(unsigned int id);
+const uint8_t *scenario_text_get_text(unsigned int id);
+void scenario_text_change(unsigned int id, const uint8_t *new_text);
+
 unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_limit, int max_limit);
 void scenario_formula_change(unsigned int id, const uint8_t *formatted_calculation, int min_eval, int max_eval);
 const uint8_t *scenario_formula_get_string(unsigned int id);
@@ -25,8 +30,8 @@ scenario_event_t *scenario_event_create(int repeat_min, int repeat_max, int max_
 void scenario_event_delete(scenario_event_t *event);
 int scenario_events_get_count(void);
 
-void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas);
-void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas, int is_new_version);
+void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas, buffer *buf_texts);
+void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas, buffer *buf_texts, int is_new_version);
 
 void scenario_events_process_all(void);
 void scenario_events_progress_paused(int days_passed);

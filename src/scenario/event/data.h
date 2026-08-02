@@ -13,6 +13,7 @@
 #define CONDITION_GROUP_STRUCT_SIZE (2 * sizeof(uint32_t) + 1 * sizeof(uint16_t) + 1 * sizeof(uint8_t))
 #define CONDITION_STRUCT_SIZE (5 * sizeof(int32_t) + 1 * sizeof(int16_t))
 #define MAX_FORMULA_LENGTH 100
+#define MAX_SCENARIO_TEXT_LENGTH 128
 
 typedef enum {
     EVENT_STATE_UNDEFINED = 0,
@@ -120,6 +121,7 @@ typedef enum {
     ACTION_TYPE_CHANGE_VARIABLE_COLOR = 50,
     ACTION_TYPE_IMMIGRATION_PERCENTAGE = 51,
     ACTION_TYPE_CHANGE_MONUMENT_RESOURCES = 52,
+    ACTION_TYPE_RENAME_CITY = 53,
     ACTION_TYPE_MAX,
     // helper constants
     ACTION_TYPE_MIN = ACTION_TYPE_ADJUST_FAVOR,
@@ -189,13 +191,18 @@ typedef struct {
 } scenario_event_t;
 
 typedef struct {
-    unsigned int id; //this number should correspond to the index in array
-    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; //use [custom_variable_id] to get custom variables in the formula
+    unsigned int id; // this number should correspond to the index in array
+    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; // use [custom_variable_id] to get custom variables in the formula
     int evaluation; // the last evaluated result of the formula, or in case of static - the only evaluation
     unsigned char is_static; // flag to indicate if formula needs to be re-evaluated every time or whether its static
     unsigned char is_error; // flag to indicate an error in formula that will prevent it from evaluation
-    int min_evaluation; //limits are inherited from xml parameters on adding to the array
-    int max_evaluation; //they cannot be set afterwards, because they are dictated by the kind of number expected to be returned
+    int min_evaluation; // limits are inherited from xml parameters on adding to the array
+    int max_evaluation; // they cannot be set afterwards, because they are dictated by the kind of number expected to be returned
 } scenario_formula_t;
+
+typedef struct {
+    unsigned int id; // this number should correspond to the index in array
+    uint8_t text[MAX_SCENARIO_TEXT_LENGTH]; // the actual text which is used in the action/condition
+} scenario_text_t;
 
 #endif // SCENARIO_EVENT_DATA_H

@@ -75,6 +75,8 @@ static struct {
     int formula_min_limit;
     int formula_max_limit;
     unsigned int formula_index;
+    unsigned int text_index;
+    uint8_t text[MAX_SCENARIO_TEXT_LENGTH];
     scenario_action_t *action;
     scenario_action_data_t *xml_info;
     resource_type available_resources[RESOURCE_MAX];
@@ -90,8 +92,10 @@ static uint8_t *translation_for_param_value(parameter_type type, int value)
 static void init(scenario_action_t *action)
 {
     data.action = action;
-    memset(data.formula, 0, MAX_TEXT_LENGTH);
+    memset(data.formula, 0, MAX_FORMULA_LENGTH);
     data.formula_index = 0;  // Reset formula index when switching actions
+    memset(data.text, 0, MAX_SCENARIO_TEXT_LENGTH);
+    data.text_index = 0;  // Reset text index when switching actions
     data.parameter_being_edited = 0;
     data.parameter_being_edited_current_value = 0;
 }
@@ -528,6 +532,22 @@ static void set_formula_value(const uint8_t *formula)
     window_invalidate();
 }
 
+static void set_text_value(const uint8_t *text)
+{
+    string_copy(text, data.text, MAX_SCENARIO_TEXT_LENGTH - 1);
+    data.text[MAX_SCENARIO_TEXT_LENGTH - 1] = 0;
+    // Add text to list and get its index
+    if (!data.text_index) {
+        data.text_index = scenario_text_get_new(data.text);
+        set_param_value(data.text_index);
+    } else {
+        // Update existing text
+        scenario_text_change(data.text_index, data.text);
+        set_param_value(data.text_index);
+    }
+    window_invalidate();
+}
+
 static void create_evaluation_formula(xml_data_attribute_t *parameter)
 {
     int current_index = get_param_value();
@@ -560,8 +580,29 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
         memset(data.formula, 0, MAX_FORMULA_LENGTH); //clear if not assigned to prevent last formula from peeking through
         data.formula_index = 0;  // Reset formula index for new formulas
     }
-    window_text_input_expanded_show(string_from_ascii("FORMULA"), string_from_ascii("..."), data.formula, MAX_FORMULA_LENGTH,
-         set_formula_value, INPUT_BOX_CHARS_FORMULAS);
+    window_text_input_expanded_show(translation_for(TR_PARAMETER_TYPE_FORMULA), string_from_ascii("..."), data.formula,
+        MAX_FORMULA_LENGTH, set_formula_value, INPUT_BOX_CHARS_FORMULAS);
+}
+
+static void create_scenario_text(xml_data_attribute_t *parameter)
+{
+    unsigned int current_index = get_param_value();
+    if (current_index > 0) { // a custom text already exists
+        const uint8_t *src = scenario_text_get_text(current_index);
+        if (src) {
+            string_copy(src, data.text, MAX_SCENARIO_TEXT_LENGTH - 1);
+            data.text[MAX_SCENARIO_TEXT_LENGTH - 1] = '\0';
+            data.text_index = current_index;
+        } else {
+            memset(data.text, 0, MAX_SCENARIO_TEXT_LENGTH);
+            data.text_index = 0;  // Reset if text not found
+        }
+    } else {
+        memset(data.text, 0, MAX_SCENARIO_TEXT_LENGTH); //clear if not assigned to prevent last text from peeking through
+        data.text_index = 0;  // Reset text index for new texts
+    }
+    window_text_input_expanded_show(translation_for(parameter->key), string_from_ascii("..."), data.text,
+        MAX_SCENARIO_TEXT_LENGTH, set_text_value, INPUT_BOX_CHARS_ALL_SUPPORTED);
 }
 
 static void custom_variable_selection(void)
@@ -696,7 +737,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             window_editor_select_city_trade_route_show(set_param_value);
             return;
         case PARAMETER_TYPE_FUTURE_CITY:
-            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE);
+            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE, 0);
             return;
         case PARAMETER_TYPE_RESOURCE:
             resource_selection(button);
@@ -725,6 +766,12 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             return;
         case PARAMETER_TYPE_RESOURCE_MONUMENT:
             monument_resource_selection(button);
+            return;
+        case PARAMETER_TYPE_CITY:
+            window_editor_select_city_by_type_show(set_param_value, 0, 1);
+            return;
+        case PARAMETER_TYPE_CUSTOM_TEXT:
+            create_scenario_text(parameter);
             return;
         default:
             return;
