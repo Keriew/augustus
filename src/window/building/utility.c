@@ -273,7 +273,7 @@ void window_building_draw_burning_ruin(building_info_context *c)
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
 }
 
-static void trigger_building_repair(const complex_button *button)
+static void trigger_building_repair(complex_button *button)
 {
     building_repair_at(button->parameters[0]);
     window_invalidate();
@@ -545,7 +545,7 @@ static void button_go_to_orders(const generic_button *button)
 
 int window_building_handle_rubble_button(const mouse *m, building_info_context *c)
 {
-    return complex_button_handle_mouse(m, repair_building_button);
+    return complex_button_handle_mouse(repair_building_button, m);
 }
 
 int window_building_handle_mouse_roadblock_button(const mouse *m, building_info_context *c)

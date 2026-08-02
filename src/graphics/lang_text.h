@@ -36,7 +36,7 @@ typedef struct {
  * Convenience helpers that populate a caller-owned @ref lang_fragment.
  * @{
  */
-/** Initialises @p f as a lang string label (group + id). */
+ /** Initialises @p f as a lang string label (group + id). */
 void lang_text_fragment_label(lang_fragment *f, int text_group, int text_id);
 /** Initialises @p f as a number with a singular/plural lang string (group + id + number). */
 void lang_text_fragment_amount(lang_fragment *f, int text_group, int text_id, int number);
@@ -79,7 +79,7 @@ int lang_text_draw_multiline(int group, int number, int x_offset, int y_offset, 
  * Functions that operate on an array of @ref lang_fragment (a "sequence").
  * @{
  */
-/** Returns the total pixel width of the sequence (no trailing space). */
+ /** Returns the total pixel width of the sequence (no trailing space). */
 int lang_text_get_sequence_width(const lang_fragment *seq, int count, font_t font);
 /** Draws the sequence left-aligned at (@p x, @p y). Returns the width drawn. */
 int lang_text_draw_sequence(const lang_fragment *seq, int count, int x, int y, font_t font, color_t color);
@@ -108,6 +108,7 @@ int lang_text_draw_sequence_centered_ellipsized(const lang_fragment *seq, int co
  * Returns the number of bytes written, excluding the null terminator.
  */
 int lang_text_concatenate_sequence(const lang_fragment *seq, int count, uint8_t *dst, int dst_size);
+void lang_text_draw_sequence_with_shadow(const lang_fragment *sequence, int seq_size, int x, int y, int width, font_t font, color_t primary, color_t secondary, int centered, int sunken);
 /** @} */
 
 #endif // GRAPHICS_LANG_TEXT_H

@@ -316,6 +316,14 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
     return color_mask;
 }
 
+static int overlay_should_show_roadblock(const building *b)
+{
+    if (b->type == BUILDING_ROADBLOCK) {
+        return 1;
+    }
+    return !draw_context.overlay->show_building || draw_context.overlay->show_building(b);
+}
+
 static color_t full_grid_color(void)
 {
     if (!config_get(CONFIG_UI_CLIMATE_GRID_COLORS)) {
@@ -393,7 +401,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     } else if (building_id && !map_is_bridge(grid_offset)) {
         building *b = building_get(building_id);
 
-        if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
+        if (overlay_should_show_roadblock(b)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
         } else {
             if (!building_is_farm(b->type) || is_drawable_farm_corner(grid_offset)) {
@@ -701,7 +709,7 @@ static void draw_building_top(int x, int y, int grid_offset, color_t color_mask)
 {
     building *b = building_get(map_building_at(grid_offset));
 
-    if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
+    if (overlay_should_show_roadblock(b)) {
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
         
         // Specific buildings

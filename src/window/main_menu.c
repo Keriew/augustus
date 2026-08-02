@@ -84,8 +84,11 @@ static void draw_foreground(void)
     graphics_in_dialog();
 
     for (unsigned int i = 0; i < MAX_BUTTONS; i++) {
-        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE,
-            data.focus_button_id == i + 1 ? 1 : 0);
+        large_label_draw_custom_size(buttons[i].x, buttons[i].y, buttons[i].width, buttons[i].height);
+        if (data.focus_button_id == i + 1) {
+            graphics_shade_rect(buttons[i].x, buttons[i].y, buttons[i].width, buttons[i].height, 2);
+            // if buttons are replaced with complex_button structures, the shading should be drawn there
+        }
     }
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_SELECT_CAMPAIGN, 192, 137, 256, FONT_NORMAL_GREEN);
