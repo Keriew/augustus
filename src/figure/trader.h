@@ -9,9 +9,15 @@
  * Trade figure extra info
  */
 
+enum trader_type {
+    TRADER_SEA = 0,
+    TRADER_LAND = 1,
+    TRADER_NATIVE = 2, // subtype of land, for most intents and purposes
+};
+
 /**
- * Clears all traders
- */
+  * Clears all traders
+  */
 void traders_clear(void);
 
 /**
@@ -21,18 +27,34 @@ void traders_clear(void);
 int trader_create(void);
 
 /**
+ * Check whether a trader is a land or sea trader
+ * @param figure_id Figure ID of the trader
+ * @return TRADER_LAND, TRADER_SEA, or TRADER_NATIVE
+ */
+int trader_is_land_by_figure_id(int figure_id);
+
+/**
+ * Check whether city is a land or sea route by empire city ID
+ * @param empire_city_id Empire city ID to check
+ * @return TRADER_LAND, TRADER_SEA, or TRADER_NATIVE
+ */
+int trader_is_land_by_empire_city_id(unsigned short empire_city_id);
+
+/**
  * Record that the trader has bought a resource from the city
  * @param trader_id Trader
  * @param resource Resource bought
+ * @param storage_id Storage building ID where the trade took place
  */
-void trader_record_bought_resource(int trader_id, resource_type resource);
+void trader_record_bought_resource(int figure_id, unsigned short trader_id, resource_type resource, int storage_id);
 
 /**
  * Record that the trader has sold a resource to the city
  * @param trader_id Trader
  * @param resource Resource sold
+ * @param storage_id Storage building ID where the trade took place
  */
-void trader_record_sold_resource(int trader_id, resource_type resource);
+void trader_record_sold_resource(int figure_id, unsigned short trader_id, resource_type resource, int storage_id);
 
 /**
  * Gets the amount bought of the given resource

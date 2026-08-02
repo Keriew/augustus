@@ -9,6 +9,7 @@
 #include "building/storage.h"
 #include "city/data.h"
 #include "city/emperor.h"
+#include "city/finance.h"
 #include "city/map.h"
 #include "city/message.h"
 #include "city/military.h"
@@ -104,6 +105,7 @@ static void clear_scenario_data(void)
     city_victory_reset();
     building_construction_clear_type();
     city_data_init();
+    city_finance_ledger_init();
     city_message_init_scenario();
     game_state_init();
     game_animation_init();

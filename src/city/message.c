@@ -558,6 +558,30 @@ void city_message_delete(int message_id)
     city_message_sort_and_compact();
 }
 
+void city_message_clear_old_messages(void)
+{
+    if (!config_get(CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES)) {
+        return;
+    }
+    int current_year = game_time_year();
+    int changed = 0;
+    for (int i = 0; i < MAX_MESSAGES; i++) {
+        city_message *msg = &data.messages[i];
+        if (!msg->message_type) {
+            continue;
+        }
+        if (msg->message_type == MESSAGE_CUSTOM_MESSAGE) {
+            continue;
+        }
+        if (current_year - msg->year >= 5) {
+            city_message_delete(i);
+            changed = 1;
+        }
+    }
+    if (changed)
+        city_message_sort_and_compact();
+}
+
 int city_message_count(void)
 {
     return data.total_messages;

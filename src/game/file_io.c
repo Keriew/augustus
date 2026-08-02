@@ -9,6 +9,7 @@
 #include "building/storage.h"
 #include "city/culture.h"
 #include "city/data.h"
+#include "city/finance.h"
 #include "city/message.h"
 #include "city/view.h"
 #include "core/dir.h"
@@ -214,6 +215,7 @@ typedef struct {
     buffer *trade_route_limit;  // legacy buffers
     buffer *trade_route_traded; // only used for reading old scenarios
     buffer *trade_routes;
+    buffer *trade_history;
     buffer *building_barracks_tower_sentry;
     buffer *building_extra_sequence;
     buffer *routing_counters;
@@ -235,6 +237,7 @@ typedef struct {
     buffer *rubble_grid;
     buffer *production_rates;
     buffer *monument_stages;
+    buffer *finance_ledger;
 } savegame_state;
 
 typedef struct {
@@ -692,6 +695,9 @@ static void init_savegame_data(savegame_version_t version)
     state->gladiator_revolt = create_savegame_piece(16, 0);
     if (version > SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         state->trade_routes = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+        if (version > SAVE_GAME_LAST_NO_LEDGER) {
+            state->trade_history = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+        }
     } else {
         state->trade_route_limit = create_savegame_piece(version_data.piece_sizes.trade_route_limit, 1);
         state->trade_route_traded = create_savegame_piece(version_data.piece_sizes.trade_route_traded, 1);
@@ -733,6 +739,9 @@ static void init_savegame_data(savegame_version_t version)
     }
     if (version_data.features.monument_stages) {
         state->monument_stages = create_savegame_piece(PIECE_SIZE_DYNAMIC, 1);
+    }
+    if (version > SAVE_GAME_LAST_NO_LEDGER) {
+        state->finance_ledger = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
     }
 }
 
@@ -978,9 +987,15 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     building_storage_load_state(state->building_storages, version);
     scenario_gladiator_revolt_load_state(state->gladiator_revolt);
     if (scenario_version > SCENARIO_LAST_NO_EMPIRE_EDITOR) {
-        trade_routes_load_state(state->trade_routes);
+        trade_routes_load_state(state->trade_routes, version);
+        if (version > SAVE_GAME_LAST_NO_LEDGER) {
+            trade_history_load_state(state->trade_history, version);
+        } else {
+            trade_history_clear_state();
+        }
     } else {
         trade_routes_migrate_to_buys_sells(state->trade_route_limit, state->trade_route_traded, version);
+        trade_history_clear_state();
     }
     map_routing_load_state(state->routing_counters);
     enemy_armies_load_state(state->enemy_armies, state->enemy_army_totals);
@@ -1033,6 +1048,9 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     scenario_events_assign_parent_event_ids();
     if (version <= SAVE_GAME_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
+    }
+    if (version > SAVE_GAME_LAST_NO_LEDGER) {
+        city_finance_ledger_load_state(state->finance_ledger, version);
     }
     if (version <= SAVE_GAME_TESTING_VERSION_BUMP_1) {
         scenario_events_population_migrate_counting();
@@ -1116,6 +1134,7 @@ static void savegame_save_to_state(savegame_state *state)
     building_storage_save_state(state->building_storages);
     scenario_gladiator_revolt_save_state(state->gladiator_revolt);
     trade_routes_save_state(state->trade_routes);
+    trade_history_save_state(state->trade_history);
     map_routing_save_state(state->routing_counters);
     enemy_armies_save_state(state->enemy_armies, state->enemy_army_totals);
     scenario_invasion_warning_save_state(state->last_invasion_id, state->invasion_warnings);
@@ -1129,6 +1148,7 @@ static void savegame_save_to_state(savegame_state *state)
 
     production_rates_save(state->production_rates);
 
+    city_finance_ledger_save_state(state->finance_ledger);
     building_monument_save_stages(state->monument_stages);
 }
 

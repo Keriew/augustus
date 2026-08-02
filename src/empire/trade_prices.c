@@ -10,6 +10,12 @@
 
 #define MIN_PRICE 1
 
+// TODO:
+// * Use of land_trader, is_land, is_sea_trade, etc. across the codebase is very inconsistent.
+// Create an enum for trade_type {LAND, SEA, NATIVE} and use that everywhere. 
+// * buy and sell parameters of the trade_price can be expanded to include the modifiers.
+// Instead of calculating them on the fly, we can store them and update when policies change.
+
 struct trade_price {
     int32_t buy;
     int32_t sell;
@@ -125,7 +131,8 @@ int trade_price_sell(resource_type resource, int land_trader)
     return calc_adjust_with_percentage(prices[resource].sell, 100 + trade_factor_sell(land_trader));
 }
 
-int trade_factor_sign(int land_trader, int is_sell) { //return sign of price compared to base
+int trade_factor_sign(int land_trader, int is_sell)
+{ //return sign of price compared to base
     int factor = is_sell ? trade_factor_sell(land_trader) : trade_factor_buy(land_trader);
 
     if (factor > 0) {
@@ -172,7 +179,7 @@ int trade_price_set_sell(resource_type resource, int new_price)
     } else {
         prices[resource].sell = new_price;
     }
-    
+
     return 1;
 }
 

@@ -45,6 +45,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_MESSAGE_ALERTS] = "ui_message_alerts",
     [CONFIG_UI_SHOW_GRID] = "ui_show_grid",
     [CONFIG_UI_SHOW_PARTIAL_GRID_AROUND_CONSTRUCTION] = "ui_show_partial_grid_around_construction",
+    [CONFIG_UI_CLIMATE_GRID_COLORS] = "ui_climate_grid_colors",
     [CONFIG_UI_ALWAYS_SHOW_ROTATION_BUTTONS] = "ui_always_show_rotation_buttons",
     [CONFIG_UI_SHOW_ROAMING_PATH] = "ui_show_roaming_path",
     [CONFIG_UI_DRAW_CLOUD_SHADOWS] = "ui_draw_cloud_shadows",
@@ -133,6 +134,16 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
     [CONFIG_UI_SHOW_SHORELINE_DESIRABILITY] = "ui_show_shoreline_desirability",
     [CONFIG_UI_SHOW_ELEVATION_DESIRABILITY] = "ui_show_elevation_desirability",
+    [CONFIG_UI_EMPIRE_SIDEBAR_SORT_METHOD] = "ui_empire_sidebar_sort_method",
+    [CONFIG_UI_EMPIRE_SIDEBAR_SORT_REVERSED] = "ui_empire_sidebar_sort_reversed",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_ROUTE_TYPE] = "ui_empire_sidebar_filter_route_type",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_ROUTE_OPEN] = "ui_empire_sidebar_filter_route_open",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_RESOURCE_TYPE] = "ui_empire_sidebar_filter_resource_type",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_RESOURCE] = "ui_empire_sidebar_filter_resource",
+    [CONFIG_UI_AUTO_CYCLE_TEMPLES] = "ui_auto_cycle_temples",
+    [CONFIG_UI_AUTO_CYCLE_GARDENS] = "ui_auto_cycle_gardens",
+    [CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES] = "ui_auto_delete_old_common_messages",
+    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = "ui_scroll_camera_unlocked",
 };
 
 static const char *ini_string_keys[] = {
@@ -208,6 +219,8 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = 2,
     [CONFIG_UI_WT_WEATHER_DURATION] = 1,
     [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = 1,
+    [CONFIG_UI_CLIMATE_GRID_COLORS] = 1,
+    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = 1
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

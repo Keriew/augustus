@@ -52,6 +52,7 @@ typedef enum {
     // empire and dialog
     WINDOW_EMPIRE,
     WINDOW_TRADE_OPENED,
+    WINDOW_TRADE_LEDGER,
     // options dialogs
     WINDOW_DIFFICULTY_OPTIONS,
     WINDOW_DISPLAY_OPTIONS,

@@ -78,8 +78,8 @@ void empire_editor_set_tool(empire_tool tool)
 
 void empire_editor_change_tool(int amount)
 {
-    if ((int)data.current_tool + amount < EMPIRE_TOOL_MIN) {
-        data.current_tool = EMPIRE_TOOL_MAX - ((int)data.current_tool - amount) + 1;
+    if ((int) data.current_tool + amount < EMPIRE_TOOL_MIN) {
+        data.current_tool = EMPIRE_TOOL_MAX - ((int) data.current_tool - amount) + 1;
     } else {
         data.current_tool += amount;
     }
@@ -154,7 +154,7 @@ static void shift_edge_indices(const empire_object *const_obj)
     if (const_obj->order_index < data.foreach_param1) {
         return;
     }
-    if (const_obj->parent_object_id != empire_object_get_border()->id) {
+    if ((unsigned int) const_obj->parent_object_id != empire_object_get_border()->id) {
         return;
     }
     empire_object *obj = empire_object_get(const_obj->id);
@@ -320,7 +320,8 @@ static int place_object(int mouse_x, int mouse_y)
     return 1;
 }
 
-static int create_trade_route_default(full_empire_object *full) {
+static int create_trade_route_default(full_empire_object *full)
+{
     full_empire_object *route_obj = empire_object_get_new();
     if (!route_obj) {
         log_error("Error creating new object - out of memory", 0, 0);
