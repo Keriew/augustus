@@ -106,7 +106,7 @@ typedef enum {
     SAVE_GAME_LAST_NO_HIGHWAY_STATION = 0xb2,
     SAVE_GAME_LAST_NO_TRIUMPHAL_ARCH_MONUMENT = 0xb3,
     SAVE_GAME_LAST_NO_FORT_ORIENTATION = 0xb4,
-    SAVE_GAME_LAST_NO_LEDGER = 0xb5, // only existed in test versions, never on master. 
+    SAVE_GAME_LAST_NO_LEDGER = 0xb5, // only existed in test versions, never on master.
     SAVE_GAME_LAST_NO_FINANCE_OVERVIEW_HISTORY = 0xb6,
     SAVE_GAME_LAST_NO_HOUSE_MODELS = 0xb7,
     SAVE_GAME_TESTING_VERSION_BUMP_1 = 0xb8,
@@ -116,7 +116,7 @@ typedef enum {
 } savegame_version_t;
 
 typedef enum {
-    SCENARIO_CURRENT_VERSION = 26,
+    SCENARIO_CURRENT_VERSION = 27,
 
     SCENARIO_VERSION_NONE = 0,
     SCENARIO_LAST_UNVERSIONED = 1,
@@ -143,7 +143,8 @@ typedef enum {
     SCENARIO_LAST_NO_HOUSE_MODELS = 22,
     SCENARIO_TESTING_VERSION_BUMP_1 = 23,
     SCENARIO_TESTING_VERSION_BUMP_2 = 24,
-    SCENARIO_TESTING_VERSION_BUMP_3 = 25
+    SCENARIO_TESTING_VERSION_BUMP_3 = 25,
+    SCENARIO_TESTING_VERSION_BUMP_4 = 26
 } scenario_version_t;
 
 typedef enum {

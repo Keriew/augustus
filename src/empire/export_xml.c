@@ -113,6 +113,17 @@ static void export_city(const empire_object *obj)
         const char *route_type = empire_object_is_sea_trade_route(obj->trade_route_id) ? "sea" : "land";
         xml_exporter_add_attribute_text("trade_route_type", route_type);
 
+        xml_exporter_new_element("resource_cost");
+        for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+            if (city->route_resource_cost[r]) {
+                xml_exporter_new_element("resource");
+                xml_exporter_add_attribute_text("type", resource_get_data(r)->xml_attr_name);
+                xml_exporter_add_attribute_int("amount", city->route_resource_cost[r]);
+                xml_exporter_close_element();
+            }
+        }
+        xml_exporter_close_element();
+
         xml_exporter_new_element("sells");
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             if (city->city_sells_resource[r]) {
