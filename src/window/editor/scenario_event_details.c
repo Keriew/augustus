@@ -1015,6 +1015,7 @@ static void button_copy_selected(const generic_button *button)
         *action = *array_item(data.event->actions, i);
 
         scenario_parameters_foreach_in_action(action, copy_formulas_action);
+        scenario_parameters_foreach_in_action(action, copy_texts_action);
     }
 
     if (data.conditions.selection_type != CHECKBOX_NO_SELECTION) {
@@ -1049,6 +1050,7 @@ static void button_copy_selected(const generic_button *button)
             *condition = *data.conditions.list[i].condition;
 
             scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+            scenario_parameters_foreach_in_condition(condition, copy_texts_condition);
         }
     }
     data.did_copy_selected = 1;
@@ -1068,6 +1070,7 @@ static void button_paste_selected(const generic_button *button)
         *action = *array_item(data.copied_actions, i);
 
         scenario_parameters_foreach_in_action(action, copy_formulas_action);
+        scenario_parameters_foreach_in_action(action, copy_texts_action);
     }
 
     for (unsigned int i = 0; i < data.copied_condition_groups.size; i++) {
@@ -1089,6 +1092,7 @@ static void button_paste_selected(const generic_button *button)
             *condition = *array_item(original_group->conditions, j);
 
             scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+            scenario_parameters_foreach_in_condition(condition, copy_texts_condition);
         }
     }
 

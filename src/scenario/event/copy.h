@@ -12,4 +12,7 @@
 void copy_formulas_action(scenario_action_t *action, int **params, int index);
 void copy_formulas_condition(scenario_condition_t *condition, int **params, int index);
 
+void copy_texts_action(scenario_action_t *action, int **params, int index);
+void copy_texts_condition(scenario_condition_t *condition, int **params, int index);
+
 #endif // SCENARIO_EVENTS_EXPORT_XML_H

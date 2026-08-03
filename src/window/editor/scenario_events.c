@@ -403,6 +403,7 @@ static void copy_selected(void)
             *action = *array_item(event->actions, i);
 
             scenario_parameters_foreach_in_action(action, copy_formulas_action);
+            scenario_parameters_foreach_in_action(action, copy_texts_action);
         }
 
         for (unsigned int i = 0; i < event->condition_groups.size; i++) {
@@ -418,6 +419,7 @@ static void copy_selected(void)
                 *condition = *array_item(original_group->conditions, j);
 
                 scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+                scenario_parameters_foreach_in_condition(condition, copy_texts_condition);
             }
         }
         data.did_copy_events = 1;
@@ -448,6 +450,7 @@ static void paste_selected(void)
             *action = *array_item(copied_event->actions, i);
 
             scenario_parameters_foreach_in_action(action, copy_formulas_action);
+            scenario_parameters_foreach_in_action(action, copy_texts_action);
         }
 
         for (unsigned int i = 0; i < copied_event->condition_groups.size; i++) {
@@ -463,6 +466,7 @@ static void paste_selected(void)
                 *condition = *array_item(original_group->conditions, j);
 
                 scenario_parameters_foreach_in_condition(condition, copy_formulas_condition);
+                scenario_parameters_foreach_in_condition(condition, copy_texts_condition);
             }
         }
         scenario_events_assign_parent_single_event_ids(event);

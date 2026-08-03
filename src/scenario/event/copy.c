@@ -34,3 +34,33 @@ void copy_formulas_condition(scenario_condition_t *condition, int **params, int 
         *param_value = id;
     }
 }
+
+void copy_texts_action(scenario_action_t *action, int **params, int index)
+{
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
+        action->type, index, NULL, NULL);
+    if (p_type == PARAMETER_TYPE_CUSTOM_TEXT) {
+        scenario_text_t *text = scenario_text_get(*param_value);
+        if (!text) {
+            return;
+        }
+        unsigned int id = scenario_text_get_new(scenario_text_get_text(*param_value));
+        *param_value = id;
+    }
+}
+
+void copy_texts_condition(scenario_condition_t *condition, int **params, int index)
+{
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
+        condition->type, index, NULL, NULL);
+    if (p_type == PARAMETER_TYPE_CUSTOM_TEXT) {
+        scenario_text_t *text = scenario_text_get(*param_value);
+        if (!text) {
+            return;
+        }
+        unsigned int id = scenario_text_get_new(scenario_text_get_text(*param_value));
+        *param_value = id;
+    }
+}
