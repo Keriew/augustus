@@ -2278,6 +2278,8 @@ typedef enum {
     TR_UI_LEDGER_DISABLED_2, // placeholders, will be removed when the ledger is finished
     TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED,
     TR_UI_LEDGER_ONLY_CURRENT_YEAR,
+    TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP,
+    TR_EMPIRE_ROUTE_COST_DN,
     TRANSLATION_MAX_KEY
 } translation_key;
 

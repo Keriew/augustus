@@ -28,6 +28,7 @@
 #include "scenario/data.h"
 #include "scenario/editor.h"
 #include "scenario/empire.h"
+#include "window/editor/edit_route_cost.h"
 #include "window/editor/empire_properties.h"
 #include "window/editor/map.h"
 #include "window/empire.h"
@@ -79,6 +80,7 @@ static void button_set_index(const generic_button *button);
 static void button_after_icon(const generic_button *button);
 static void button_route_type(const generic_button *button);
 static void button_route_cost(const generic_button *button);
+static void button_advanced_route_cost(const generic_button *button);
 static void button_empire_tools(int param1, int param2);
 static void button_hide_route(const generic_button *button);
 static void button_hide_edge(const generic_button *button);
@@ -125,7 +127,7 @@ static generic_button top_buttons[] = {
 
 static generic_button trade_city_buttons[] = {
     {184, 0, 24, 24, button_route_type},
-    {0, 0, 120, 24, button_route_cost},
+    {0, 0, 120, 24, button_route_cost, button_advanced_route_cost},
     {140, 0, 24, 24, button_after_icon}
 };
 
@@ -1234,6 +1236,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
             window_invalidate();
         }
     } else {
+        if (h->escape_pressed) {
+            button_ok(NULL);
+        }
         if (is_outside_map(m->x, m->y)) {
             return;
         }
@@ -1247,7 +1252,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
                 if (data.coordinates.active) {
                     data.coordinates.active = 0;
                 } else {
-                    window_editor_map_show();
+                    button_ok(NULL);
                 }
             }
         }
@@ -1565,6 +1570,15 @@ static void button_route_cost(const generic_button *button)
         ((data.y_min + data.y_max) - 15 * BLOCK_SIZE) / 2 - screen_dialog_offset_y(), NULL, 6, 1, 999999, set_opening_cost);
 }
 
+static void button_advanced_route_cost(const generic_button *button)
+{
+    if (button->parameter1) {
+        return;
+    }
+    unsigned int city_object_id = empire_city_get(data.selected_city)->empire_object_id;
+    window_editor_edit_route_cost_show(city_object_id);
+}
+
 static void set_tool(int value)
 {
     empire_editor_set_tool(value);
@@ -1652,9 +1666,14 @@ static int generic_button_tooltips(tooltip_context *c)
                     c->text_id = TR_EMPIRE_TOOLTIP_ROUTE_TYPE;
                     break;
                 case 1:
-                    c->text_group = CUSTOM_TRANSLATION;
-                    c->text_id = TR_EMPIRE_TOOLTIP_ROUTE_COST;
+                {
+                    const uint8_t *description = translation_for(TR_EMPIRE_TOOLTIP_ROUTE_COST);
+                    const uint8_t *help = translation_for(TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP);
+                    static char formatted_text[256];
+                    snprintf(formatted_text, sizeof(formatted_text), "%s\n %s", description, help);
+                    c->precomposed_text = (const uint8_t *) formatted_text;
                     break;
+                }
                 case 2:
                 {
                     const uint8_t *raw_text = translation_for(TR_EMPIRE_TOOLTIP_AFTER_ICON);

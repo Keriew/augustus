@@ -2285,7 +2285,9 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_DISABLED_1, "This feature is not yet available."},
     {TR_UI_LEDGER_DISABLED_2, "Your scribes are working hard to build this feature, but they need more time."},
     {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds" },
-    {TR_UI_LEDGER_ONLY_CURRENT_YEAR , "You only started your governorship this year!"}
+    {TR_UI_LEDGER_ONLY_CURRENT_YEAR , "You only started your governorship this year!"},
+    {TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP, "Right Click: Advanced cost options"},
+    {TR_EMPIRE_ROUTE_COST_DN, "Route Cost (Dn):"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
