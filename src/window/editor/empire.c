@@ -703,7 +703,7 @@ static void draw_city_info(const empire_city *city)
                         break;
                     }
                     draw_resource(r, OUR_CITY, resource_x_offset, y_offset - 9, sell_buttons[r].highlighted);
-                    sell_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
+                    sell_buttons[r] = (resource_button){resource_x_offset, y_offset - 9, 1, 0};
                     resource_x_offset += 32;
                 } else {
                     sell_buttons[r] = (resource_button){0, 0, 0, 0};
@@ -750,7 +750,7 @@ static void draw_city_info(const empire_city *city)
                         break;
                     }
                     width = draw_resource(r, max_trade, resource_x_offset, y_offset - 9, sell_buttons[r].highlighted);
-                    sell_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
+                    sell_buttons[r] = (resource_button){resource_x_offset, y_offset - 9, 1, 0};
                     resource_x_offset += 32 + width;
                 } else {
                     sell_buttons[r] = (resource_button){0, 0, 0, 0};
@@ -785,7 +785,7 @@ static void draw_city_info(const empire_city *city)
                         break;
                     }
                     width = draw_resource(r, max_trade, resource_x_offset, y_offset - 9, buy_buttons[r].highlighted);
-                    buy_buttons[r] = (resource_button){resource_x_offset, y_offset, 1, 0};
+                    buy_buttons[r] = (resource_button){resource_x_offset, y_offset - 9, 1, 0};
                     resource_x_offset += 32 + width;
                 } else {
                     buy_buttons[r] = (resource_button){0, 0, 0, 0};
