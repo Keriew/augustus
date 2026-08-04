@@ -199,14 +199,16 @@ void empire_object_load(buffer *buf, int version)
             }
         } else if (obj->type == EMPIRE_OBJECT_CITY) {
             for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
-                full->city_sells_resource[resource_remap(r)] = buffer_read_i16(buf);
+                full->city_sells_resource[resource_remap(r)] = (version > SCENARIO_TESTING_VERSION_BUMP_5) ?
+                    buffer_read_u32(buf) : buffer_read_i16(buf);
             }
             for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
-                full->city_buys_resource[resource_remap(r)] = buffer_read_i16(buf);
+                full->city_buys_resource[resource_remap(r)] = (version > SCENARIO_TESTING_VERSION_BUMP_5) ?
+                    buffer_read_u32(buf) : buffer_read_i16(buf);
             }
-            if (version > SCENARIO_TESTING_VERSION_BUMP_4) {
+            if (version > SCENARIO_TESTING_VERSION_BUMP_5) {
                 for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
-                    full->route_resource_cost[resource_remap(r)] = buffer_read_i16(buf);
+                    full->route_resource_cost[resource_remap(r)] = buffer_read_u32(buf);
                 }
             }
         }
@@ -291,7 +293,7 @@ void empire_object_save(buffer *buf)
         return;
     }
     int size_per_obj = 88;
-    int size_per_city = size_per_obj + 6 * (RESOURCE_MAX - RESOURCE_MIN);
+    int size_per_city = size_per_obj + 3 * sizeof(int32_t) * (RESOURCE_MAX - RESOURCE_MIN);
     int total_size = 0;
 
     full_empire_object *full;
@@ -334,13 +336,13 @@ void empire_object_save(buffer *buf)
         buffer_write_u32(buf, full->trade_route_cost);
         if (obj->type == EMPIRE_OBJECT_CITY) {
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                buffer_write_i16(buf, full->city_sells_resource[r]);
+                buffer_write_u32(buf, full->city_sells_resource[r]);
             }
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                buffer_write_i16(buf, full->city_buys_resource[r]);
+                buffer_write_u32(buf, full->city_buys_resource[r]);
             }
             for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-                buffer_write_i16(buf, full->route_resource_cost[r]);
+                buffer_write_u32(buf, full->route_resource_cost[r]);
             }
         }
         buffer_write_u8(buf, obj->invasion_path_id);
