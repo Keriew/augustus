@@ -128,7 +128,7 @@ static void draw_foreground(void)
         }
     }
 
-    // Add resource buttons
+    // Add resource button
     int estimated_width = 8 + add_resource_button[0].width;
     if (resource_x_offset + estimated_width >= (WINDOW_WIDTH - 1) * BLOCK_SIZE) {
         // if the button doesn't fit in this row put it in the next one
