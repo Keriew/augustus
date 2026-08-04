@@ -65,5 +65,6 @@ void building_monument_delivery_load_state(buffer *list, int includes_array_size
 int building_monument_is_construction_halted(building *b);
 int building_monument_toggle_construction_halted(building *b);
 int building_monument_is_unfinished_monument(const building *b);
+int building_monument_get_monument_for_architect_guild(building *guild);
 
 #endif // BUILDING_MONUMENT_H

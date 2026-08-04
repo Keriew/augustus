@@ -1768,7 +1768,7 @@ static void spawn_figure_architect_guild(building *b)
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
             b->figure_spawn_delay = 0;
-            if (building_monument_get_monument(road.x, road.y, RESOURCE_NONE, b->road_network_id, 0)) {
+            if (building_monument_get_monument_for_architect_guild(b)) {
                 figure *f = figure_create(FIGURE_WORK_CAMP_ARCHITECT, road.x, road.y, DIR_4_BOTTOM);
                 f->action_state = FIGURE_ACTION_206_WORK_CAMP_ARCHITECT_CREATED;
                 b->figure_id = f->id;

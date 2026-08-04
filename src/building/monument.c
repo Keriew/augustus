@@ -10,6 +10,7 @@
 #include "core/calc.h"
 #include "core/log.h"
 #include "empire/city.h"
+#include "figure/figure.h"
 #include "map/building_tiles.h"
 #include "map/grid.h"
 #include "map/orientation.h"
@@ -835,4 +836,83 @@ int building_monument_toggle_construction_halted(building *b)
 int building_monument_is_unfinished_monument(const building *b)
 {
     return building_monument_is_monument(b) && b->monument.phase != MONUMENT_FINISHED;
+}
+
+
+static int building_monument_architect_guild_busy(building *b)
+{
+    if (b->figure_id <= 0) {
+        return 0;
+    }
+    figure *f = figure_get(b->figure_id);
+    if (!f->state || f->building_id != b->id) {
+        b->figure_id = 0;
+        return 0;
+    }
+    return f->type == FIGURE_WORK_CAMP_ARCHITECT;
+}
+
+
+building *building_monument_get_nearest_architect_guild(building *monument)
+{
+    int min_dist = INFINITE;
+    building *min_building = 0;
+    for (building *b = building_first_of_type(BUILDING_ARCHITECT_GUILD); b; b = b->next_of_type) {
+        if (!map_has_road_access(b->x, b->y, b->size, 0)) {
+            continue;
+        }
+        if (b->road_network_id != monument->road_network_id) {
+            continue;
+        }
+        if (building_monument_has_labour_problems(b)) {
+            continue;
+        }
+        // Guild is already maintaining another monument
+        if (building_monument_architect_guild_busy(b)) {
+            continue;
+        }
+        int dist = calc_maximum_distance(b->road_access_x, b->road_access_y, monument->road_access_x, monument->road_access_y);
+        if (dist < min_dist) {
+            min_dist = dist;
+            min_building = b;
+        }
+    }
+    return min_building;
+}
+
+// What monument should this guild maintain?
+int building_monument_get_monument_for_architect_guild(building *guild)
+{
+    int min_dist = INFINITE;
+    building *min_building = 0;
+    for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
+        if (!MONUMENT_TYPES[type] || type == BUILDING_TRIUMPHAL_ARCH) {// triumphal arch should not be a destiantion for work camps
+            continue;
+        }
+        for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+            if (b->monument.phase == MONUMENT_FINISHED ||
+                b->monument.phase < MONUMENT_START ||
+                building_monument_is_construction_halted(b) ||
+                building_monument_needs_resources(b)) {
+                continue;
+            }
+            if (!map_has_road_access(b->x, b->y, b->size, 0)) {
+                continue;
+            }
+            if (b->road_network_id != guild->road_network_id) {
+                continue;
+            }
+            // This monument should be maintained by this guild
+            if (building_monument_get_nearest_architect_guild(b) != guild) {
+                continue;
+            }
+            int dist = calc_maximum_distance(guild->road_access_x, guild->road_access_y,
+                b->road_access_x, b->road_access_y);
+            if (dist < min_dist) {
+                min_dist = dist;
+                min_building = b;
+            }
+        }
+    }
+    return min_building ? min_building->id : 0;
 }

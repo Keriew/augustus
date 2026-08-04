@@ -174,8 +174,6 @@ static int get_height_id(void)
             case BUILDING_GOVERNORS_HOUSE:
             case BUILDING_GOVERNORS_VILLA:
             case BUILDING_GOVERNORS_PALACE:
-            case BUILDING_WORKCAMP:
-            case BUILDING_ARCHITECT_GUILD:
             case BUILDING_OBELISK:
             case BUILDING_HEDGE_DARK:
             case BUILDING_HEDGE_LIGHT:
@@ -195,6 +193,8 @@ static int get_height_id(void)
             case BUILDING_LION_HOUSE:
             case BUILDING_ACTOR_COLONY:
             case BUILDING_CHARIOT_MAKER:
+            case BUILDING_WORKCAMP:
+            case BUILDING_ARCHITECT_GUILD:
                 return HEIGHT_2_18_BLOCKS;
 
                 //320px

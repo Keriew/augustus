@@ -2161,8 +2161,14 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_TT_BALANCE, "Sort by Denarii Balance"},
     {TR_UI_LEDGER_DISABLED_1, "This feature is not yet available."},
     {TR_UI_LEDGER_DISABLED_2, "Your scribes are working hard to build this feature, but they need more time."},
-    {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds" },
-    {TR_UI_LEDGER_ONLY_CURRENT_YEAR , "You only started your governorship this year!"},
+    {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds"},
+    {TR_UI_LEDGER_ONLY_CURRENT_YEAR, "You only started your governorship this year!"},
+    {TR_BUILDING_WORK_CAMP_STATUS_WAITING, "Idling"},
+    {TR_BUILDING_WORK_CAMP_STATUS_GETTING_RESOURCES, "Getting resources"},
+    {TR_BUILDING_WORK_CAMP_STATUS_DELIVERING_RESOURCES, "Delivering resources to"},
+    {TR_BUILDING_ARCHITECT_GUILD_STATUS_WAITING, "Awaiting new projects"},
+    {TR_BUILDING_ARCHITECT_GUILD_STATUS_GOING_TO_WORK, "Heading to"},
+    {TR_BUILDING_ARCHITECT_GUILD_STATUS_WORKING, "Supervising construction of"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
