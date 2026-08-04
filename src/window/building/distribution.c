@@ -37,6 +37,7 @@
 #include "scenario/property.h"
 #include "sound/speech.h"
 #include "translation/translation.h"
+#include "window/building/depot.h"
 #include "window/building_info.h"
 #include "window/option_popup.h"
 
@@ -996,26 +997,6 @@ void window_building_get_tooltip_storage_orders(int *group_id, int *text_id, int
     }
 }
 
-static void get_depot_resource_orders_count(int building_id, resource_type resource, int *source_count, int *destination_count)
-{
-    *source_count = 0;
-    *destination_count = 0;
-    int max_buildings = building_count();
-    for (int i = 1; i < max_buildings; i++) {
-        building *b = building_get(i);
-        if (!b || b->state == BUILDING_STATE_UNUSED || b->type != BUILDING_DEPOT ||
-            b->data.depot.current_order.resource_type != resource) {
-            continue;
-        }
-        if ((int) b->data.depot.current_order.src_storage_id == building_id) {
-            (*source_count)++;
-        }
-        if ((int) b->data.depot.current_order.dst_storage_id == building_id) {
-            (*destination_count)++;
-        }
-    }
-}
-
 const uint8_t *window_building_storage_resource_hover_tooltip(building_info_context *c)
 {
     int x_offset = c->x_offset + 30;
@@ -1058,7 +1039,7 @@ const uint8_t *window_building_storage_resource_hover_tooltip(building_info_cont
 
         int source_count = 0;
         int destination_count = 0;
-        get_depot_resource_orders_count(building_id, resource, &source_count, &destination_count);
+        window_building_get_depot_resource_orders_count(building_id, resource, &source_count, &destination_count);
 
         if (source_count == 0 && destination_count == 0) {
             return 0;
