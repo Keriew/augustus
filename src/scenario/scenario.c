@@ -120,7 +120,11 @@ static void calculate_buffer_offsets(int scenario_version)
     next_start_offset = buffer_offsets.emperor_change + 8;
 
     buffer_offsets.random_events = next_start_offset;
-    next_start_offset = buffer_offsets.random_events + 36;
+    if (scenario_version > SCENARIO_LAST_NO_QUARRY_COLLAPSE) {
+        next_start_offset = buffer_offsets.random_events + 38;
+    } else {
+        next_start_offset = buffer_offsets.random_events + 36;
+    }
 
     buffer_offsets.fishing = next_start_offset;
     next_start_offset = buffer_offsets.fishing + MAX_FISH_POINTS * 4;
@@ -211,6 +215,8 @@ int scenario_get_state_buffer_size_by_savegame_version(int savegame_version)
         calculate_buffer_offsets(SCENARIO_LAST_NO_EXTRA_NATIVE_BUILDINGS);
     } else if (savegame_version <= SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         calculate_buffer_offsets(SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA);
+    } else if (savegame_version <= SAVE_GAME_LAST_NO_QUARRY_COLLAPSE) {
+        calculate_buffer_offsets(SCENARIO_LAST_NO_QUARRY_COLLAPSE);
     } else {
         calculate_buffer_offsets(SCENARIO_CURRENT_VERSION);
     }
@@ -282,6 +288,7 @@ void scenario_save_state(buffer *buf)
     buffer_write_i32(buf, scenario.random_events.contaminated_water);
     buffer_write_i32(buf, scenario.random_events.iron_mine_collapse);
     buffer_write_i32(buf, scenario.random_events.clay_pit_flooded);
+    buffer_write_i32(buf, scenario.random_events.quarry_collapse);
 
     for (int i = 0; i < MAX_FISH_POINTS; i++) {
         buffer_write_i16(buf, scenario.fishing_points[i].x);
@@ -450,7 +457,9 @@ void scenario_load_state(buffer *buf, int version)
     scenario.random_events.contaminated_water = buffer_read_i32(buf);
     scenario.random_events.iron_mine_collapse = buffer_read_i32(buf);
     scenario.random_events.clay_pit_flooded = buffer_read_i32(buf);
-
+    if (version > SCENARIO_LAST_NO_QUARRY_COLLAPSE) {
+        scenario.random_events.quarry_collapse = buffer_read_i32(buf);
+    }
     for (int i = 0; i < MAX_FISH_POINTS; i++) {
         scenario.fishing_points[i].x = buffer_read_i16(buf);
     }

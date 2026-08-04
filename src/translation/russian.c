@@ -2162,6 +2162,15 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_DISABLED_1, "Эта функция пока недоступна."},
     {TR_UI_LEDGER_DISABLED_2, "Ваши писцы усердно трудятся над этой функцией, но им нужно еще немного времени."},
     {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Расширить границы прокрутки камеры"},
+    {TR_EDITOR_SCENARIO_EVENTS_MINE_COLLAPSED, "Обрушение рудников"},
+    {TR_CITY_MESSAGE_TITLE_MINE_COLLAPSED, "Обрушение рудника"},
+    {TR_CITY_MESSAGE_TEXT_MINE_COLLAPSED, "Произошло ужасное событие. На одном из наших рудников произошло обрушение! Причина крылась, вероятно, под землей, поэтому наши инженеры ничего не могли сделать."},
+    {TR_EDITOR_SCENARIO_EVENTS_PIT_COLLAPSED, "Затопление карьеров"},
+    {TR_CITY_MESSAGE_TITLE_PIT_COLLAPSED, "Затопление карьера"},
+    {TR_CITY_MESSAGE_TEXT_PIT_COLLAPSED, "Один из наших карьеров затопило. Нам пришлось разрушить его, чтобы с другими ничего не произошло."},
+    {TR_EDITOR_SCENARIO_EVENTS_QUARRY_COLLAPSED, "Обвал карьеров"},
+    {TR_CITY_MESSAGE_TITLE_QUARRY_COLLAPSED, "Обвал карьера"},
+    {TR_CITY_MESSAGE_TEXT_QUARRY_COLLAPSED, "Произошло ужасное событие. На одном из наших карьеров произошел обвал! Наши инженеры были бессильны предотвратить эту катастрофу."},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

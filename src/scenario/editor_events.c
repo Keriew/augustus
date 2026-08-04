@@ -176,3 +176,14 @@ void scenario_editor_clay_pit_flooded_toggle_enabled(void)
     scenario.random_events.clay_pit_flooded = !scenario.random_events.clay_pit_flooded;
     scenario_editor_set_as_unsaved();
 }
+
+int scenario_editor_quarry_collapse_enabled(void)
+{
+    return scenario.random_events.quarry_collapse;
+}
+
+void scenario_editor_quarry_collapse_toggle_enabled(void)
+{
+    scenario.random_events.quarry_collapse = !scenario.random_events.quarry_collapse;
+    scenario_editor_set_as_unsaved();
+}

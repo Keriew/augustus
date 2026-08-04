@@ -312,6 +312,7 @@ static void save_main_data(buffer *main)
     }
     buffer_write_u16(main, city_data.building.months_since_last_destroyed_iron_mine);
     buffer_write_u16(main, city_data.building.months_since_last_flooded_clay_pit);
+    buffer_write_u16(main, city_data.building.months_since_last_destroyed_quarry);
     buffer_write_i16(main, city_data.sentiment.blessing_festival_boost);
     buffer_write_i16(main, city_data.figure.animals);
     buffer_write_i16(main, city_data.trade.num_sea_routes);
@@ -804,6 +805,9 @@ static void load_main_data(buffer *main, int version)
     }
     city_data.building.months_since_last_destroyed_iron_mine = buffer_read_u16(main);
     city_data.building.months_since_last_flooded_clay_pit = buffer_read_u16(main);
+    if (version > SAVE_GAME_LAST_NO_QUARRY_COLLAPSE) {
+        city_data.building.months_since_last_destroyed_quarry = buffer_read_u16(main);
+    }
     city_data.sentiment.blessing_festival_boost = buffer_read_i16(main);
     city_data.figure.animals = buffer_read_i16(main);
     city_data.trade.num_sea_routes = buffer_read_i16(main);
