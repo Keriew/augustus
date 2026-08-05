@@ -823,7 +823,7 @@ static translation_string all_strings[] = {
     { TR_ACTION_TYPE_TAX_RATE_SET, "Ustaw poziom podatków" },
     { TR_ACTION_TYPE_TRADE_ADJUST_PRICE, "Zmień ceny handlowe" },
     { TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT, "Zmień kwotę handlową szlaku handlowego" },
-    { TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Zmień koszt otwarcia szlaku handlowego" },
+    { TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Zmień koszt otwarcia szlaku handlowego (Dn)" },
     { TR_ACTION_TYPE_TRADE_PROBLEM_LAND, "Rozpocznij problem lądowego szlaku handlowego" },
     { TR_ACTION_TYPE_TRADE_PROBLEM_SEA, "Rozpocznij problem morskiego szlaku handlowego" },
     { TR_ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE, "Szlak handlowy i nowy surowiec" },

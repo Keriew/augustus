@@ -1149,7 +1149,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_SHOW_CUSTOM_MESSAGE, "Mostrar mensaje personalizado"},
     {TR_ACTION_TYPE_TAX_RATE_SET, "Fijar el tipo impositivo"},
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE, "Cambiar el valor de la variable personalizada"},
-    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Cambiar el costo de apertura de la ruta comercial"},
+    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Cambiar el costo de apertura de la ruta comercial (Dn)"},
     {TR_ACTION_TYPE_A_MESSAGE, "Un mensaje"},
     {TR_ACTION_TYPE_CHANGE_CITY_RATING, "Cambiar la puntuación de la ciudad"},
     {TR_ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES, "Modificar las existencias de recursos"},

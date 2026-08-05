@@ -428,6 +428,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_attr = {.name = "rename_city",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_RENAME_CITY},
                                         .xml_parm1 = {.name = "city",          .type = PARAMETER_TYPE_CITY,    .key = TR_PARAMETER_TYPE_CITY },
                                         .xml_parm2 = {.name = "name",          .type = PARAMETER_TYPE_CUSTOM_TEXT,      .key = TR_PARAMETER_NAME}, },
+    [ACTION_TYPE_CHANGE_ROUTE_RESOURCE_COST] = {.type = ACTION_TYPE_CHANGE_ROUTE_RESOURCE_COST,
+                                        .xml_attr = {.name = "change_resource_cost",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_ROUTE_RESOURCE_COST},
+                                        .xml_parm1 = {.name = "target_city",    .type = PARAMETER_TYPE_ROUTE,       .key = TR_PARAMETER_TYPE_ROUTE },
+                                        .xml_parm2 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,    .key = TR_PARAMETER_TYPE_RESOURCE },
+                                        .xml_parm3 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,     .min_limit = 0,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)

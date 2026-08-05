@@ -1034,3 +1034,19 @@ int scenario_action_type_rename_city_execute(scenario_action_t *action)
 
     return 1;
 }
+
+int scenario_action_type_change_route_resources_execute(scenario_action_t *action)
+{
+    int route_id = action->parameter1;
+    int resource = action->parameter2;
+    int amount = scenario_formula_evaluate_formula(action->parameter3);
+
+    if (!trade_route_is_valid(route_id)) {
+        return 0;
+    }
+
+    full_empire_object *full = empire_object_get_full(empire_object_get_trade_city(route_id)->id);
+    full->route_resource_cost[resource] = amount;
+
+    return 1;
+}

@@ -1286,7 +1286,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_TAX_RATE_SET, "Steuersatz festlegen"},
     {TR_ACTION_TYPE_TRADE_ADJUST_PRICE, "Handelspreis anpassen"},
     {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT, "Anzahl gehandelter Güter auf Route anpassen"},
-    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "ändere Handelsrouten Kosten"},
+    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Ändere Handelsrouten Kosten (Dn)"},
     {TR_ACTION_TYPE_TRADE_PROBLEM_LAND, "Starte Problem beim Landhandel"},
     {TR_ACTION_TYPE_TRADE_PROBLEM_SEA, "Starte Probleme beim Seehandel"},
     {TR_ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE, "Handelsroute: neue Ressource hinzufügen"},

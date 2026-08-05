@@ -1229,7 +1229,6 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_SHOW_CUSTOM_MESSAGE, "Показать пользовательское сообщение:"},
     {TR_ACTION_TYPE_TAX_RATE_SET, "Изменить ставку налога:"},
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE, "Изменить значение переменной:"},
-    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Торговый путь: Цена открытия"},
     {TR_ACTION_TYPE_A_MESSAGE, "Сообщение"},
     {TR_ACTION_TYPE_CHANGE_CITY_RATING, "Изменить рейтинг города"},
     {TR_ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES, "Изменить запасы ресурсов"},

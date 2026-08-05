@@ -928,7 +928,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_TAX_RATE_SET, "Definir imposto" },
     {TR_ACTION_TYPE_TRADE_ADJUST_PRICE, "Ajustar preço" },
     {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_AMOUNT, "Ajustar quantidade comercializada na rota" },
-    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Mudar preço de abertura de rota" },
+    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Mudar preço de abertura de rota (Dn)" },
     {TR_ACTION_TYPE_TRADE_PROBLEM_LAND, "Iniciar interrupção de rota terrestre" },
     {TR_ACTION_TYPE_TRADE_PROBLEM_SEA, "Iniciar interrupção de rota marítima" },
     {TR_ACTION_TYPE_TRADE_ROUTE_ADD_NEW_RESOURCE, "Adicionar recurso em rota comercial" },

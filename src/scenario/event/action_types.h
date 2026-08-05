@@ -106,4 +106,6 @@ int scenario_action_type_change_monument_resources_execute(scenario_action_t *ac
 
 int scenario_action_type_rename_city_execute(scenario_action_t *action);
 
+int scenario_action_type_change_route_resources_execute(scenario_action_t *action);
+
 #endif // ACTION_TYPES_H

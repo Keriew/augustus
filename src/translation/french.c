@@ -1229,7 +1229,7 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_SHOW_CUSTOM_MESSAGE, "Afficher un message personnalisé"},
     {TR_ACTION_TYPE_TAX_RATE_SET, "Définir le taux d'imposition"},
     {TR_ACTION_TYPE_CHANGE_CUSTOM_VARIABLE, "Modifier valeur variable perso."},
-    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Modifier prix ouvrir rte commerc."},
+    {TR_ACTION_TYPE_TRADE_ADJUST_ROUTE_OPEN_PRICE, "Modifier prix ouvrir rte commerc (Dn)"},
     {TR_ACTION_TYPE_A_MESSAGE, "Un message"},
     {TR_ACTION_TYPE_CHANGE_CITY_RATING, "Modifier éval. cité"},
     {TR_ACTION_TYPE_CHANGE_RESOURCE_STOCKPILES, "Modifier réserves de ress."},
