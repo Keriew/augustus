@@ -235,6 +235,19 @@ static void button_add_resource(int param1, int param2)
     window_select_list_show_text(0, 0, &converted_button, resource_texts, total_resources, add_resource);
 }
 
+static void get_tooltip(tooltip_context *c)
+{
+    image_button *btn = &add_resource_button[0];
+    const mouse *m = mouse_in_dialog(mouse_get());
+    if (m->x >= btn->x_offset && m->x < btn->x_offset + btn->width &&
+        m->y >= btn->y_offset && m->y < btn->y_offset + btn->height && btn->enabled) {
+        c->text_group = CUSTOM_TRANSLATION;
+        c->text_id = TR_EMPIRE_TOOLTIP_ADD_RESOURCE;
+        c->type = TOOLTIP_BUTTON;
+        return;
+    }
+}
+
 void window_editor_edit_route_cost_show(unsigned int object_id)
 {
     init(object_id);
@@ -243,6 +256,7 @@ void window_editor_edit_route_cost_show(unsigned int object_id)
         draw_background,
         draw_foreground,
         handle_input,
+        get_tooltip
     };
     window_show(&window);
 }
