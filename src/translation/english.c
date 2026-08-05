@@ -2288,7 +2288,8 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_ONLY_CURRENT_YEAR , "You only started your governorship this year!"},
     {TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP, "Right Click: Advanced cost options"},
     {TR_EMPIRE_ROUTE_COST, "Route Cost:"},
-    {TR_EMPIRE_RESOURCE_COST, "Resources needed to open"}
+    {TR_EMPIRE_RESOURCE_COST, "Resources needed to open"},
+    {TR_EMPIRE_COSTS, "Costs"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
