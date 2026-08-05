@@ -44,6 +44,7 @@
 #include "window/city.h"
 #include "window/empire_sidebar_sort.h"
 #include "window/message_dialog.h"
+#include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
 #include "window/resource_settings.h"
 #include "window/trade_ledger.h"
@@ -3175,7 +3176,22 @@ static void confirmed_open_trade_by_route(int accepted, int checked)
 static void button_open_trade_by_route(int route_id)
 {
     data.selected_trade_route = route_id;
-    window_popup_dialog_show(POPUP_DIALOG_OPEN_TRADE, confirmed_open_trade_by_route, 2);
+    full_empire_object *city = empire_object_get_full(empire_object_get_trade_city(route_id)->id);
+    int resource_cost_fulfilled = 1;
+    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        int amount_stored = city_resource_count_warehouses_amount(r);
+        if (resource_is_food(r)) {
+            amount_stored += city_resource_count_food_on_granaries(r) / RESOURCE_ONE_LOAD;
+        }
+        if (amount_stored < city->route_resource_cost[r]) {
+            resource_cost_fulfilled = 0;
+        }
+    }
+    if (resource_cost_fulfilled) {
+        window_popup_dialog_show(POPUP_DIALOG_OPEN_TRADE, confirmed_open_trade_by_route, 2);
+    } else {
+        window_plain_message_dialog_show(TR_EMPIRE_NO_RESOURCES_TITLE, TR_EMPIRE_NO_RESOURCES_TEXT, 1);
+    }
 }
 
 void register_resource_button(int x, int y, int width, int height, resource_type r, int highlight)

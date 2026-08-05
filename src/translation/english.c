@@ -2289,7 +2289,9 @@ static translation_string all_strings[] = {
     {TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP, "Right Click: Advanced cost options"},
     {TR_EMPIRE_ROUTE_COST, "Route Cost:"},
     {TR_EMPIRE_RESOURCE_COST, "Resources needed to open"},
-    {TR_EMPIRE_COSTS, "Costs"}
+    {TR_EMPIRE_COSTS, "Costs"},
+    {TR_EMPIRE_NO_RESOURCES_TITLE, "Missing resources"},
+    {TR_EMPIRE_NO_RESOURCES_TEXT, "You don't have enough resources to open the route.\n Make sure your industries have enough employees and consider building more to get the necessary amount of resources."}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
