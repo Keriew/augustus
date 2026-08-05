@@ -133,6 +133,7 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
     [CONFIG_UI_SHOW_SHORELINE_DESIRABILITY] = "ui_show_shoreline_desirability",
     [CONFIG_UI_SHOW_ELEVATION_DESIRABILITY] = "ui_show_elevation_desirability",
+    [CONFIG_GP_CH_ENEMIES_RETREAT_FAST] = "gameplay_change_enemies_retreat_fast",
     [CONFIG_UI_EMPIRE_SIDEBAR_SORT_METHOD] = "ui_empire_sidebar_sort_method",
     [CONFIG_UI_EMPIRE_SIDEBAR_SORT_REVERSED] = "ui_empire_sidebar_sort_reversed",
     [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_ROUTE_TYPE] = "ui_empire_sidebar_filter_route_type",
@@ -142,7 +143,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_AUTO_CYCLE_TEMPLES] = "ui_auto_cycle_temples",
     [CONFIG_UI_AUTO_CYCLE_GARDENS] = "ui_auto_cycle_gardens",
     [CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES] = "ui_auto_delete_old_common_messages",
-    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = "ui_scroll_camera_unlocked",
+    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = "ui_scroll_camera_unlocked"
 };
 
 static const char *ini_string_keys[] = {
@@ -218,7 +219,7 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = 2,
     [CONFIG_UI_WT_WEATHER_DURATION] = 1,
     [CONFIG_UI_CLIMATE_GRID_COLORS] = 1,
-    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = 1,
+    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = 1
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

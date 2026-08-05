@@ -4,6 +4,7 @@
 #include "city/figures.h"
 #include "city/sound.h"
 #include "core/calc.h"
+#include "core/config.h"
 #include "core/image.h"
 #include "figure/combat.h"
 #include "figure/formation.h"
@@ -16,6 +17,7 @@
 #include "figuretype/missile.h"
 #include "map/figure.h"
 #include "scenario/gladiator_revolt.h"
+#include "scenario/map.h"
 #include "sound/effect.h"
 #include "sound/speech.h"
 
@@ -184,7 +186,7 @@ static void enemy_action(figure *f, formation *m)
         case FIGURE_ACTION_148_FLEEING:
             f->destination_x = f->source_x;
             f->destination_y = f->source_y;
-            figure_movement_move_ticks(f, f->speed_multiplier);
+            figure_movement_move_ticks(f, f->speed_multiplier * (config_get(CONFIG_GP_CH_ENEMIES_RETREAT_FAST) ? 2 : 1));
             if (f->direction == DIR_FIGURE_AT_DESTINATION ||
                 f->direction == DIR_FIGURE_REROUTE ||
                 f->direction == DIR_FIGURE_LOST) {
