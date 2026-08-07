@@ -16,6 +16,7 @@
 #include "graphics/panel.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
+#include "input/mouse.h"
 #include "input/scroll.h"
 #include "input/zoom.h"
 #include "map/figure.h"
@@ -36,6 +37,7 @@
 #include "widget/map_editor_tool.h"
 #include "window/editor/empire.h"
 #include "window/editor/pause_menu.h"
+#include "window/editor/scenario_event_details.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -488,7 +490,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
             }
         }
     }
-    
+
     if (h->show_empire_map) {
         if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
             resource_set_mapping(RESOURCE_CURRENT_VERSION);
@@ -521,6 +523,14 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
             editor_tool_update_use(tile);
         } else if (m->left.is_down || editor_tool_is_in_use()) {
             editor_tool_update_use(tile);
+        } else if (m->right.went_up && !editor_tool_is_in_use()) {
+            int offset = tile->grid_offset;
+            int event_id = event_tiles[offset][0];
+            if (event_id == -1) {
+                return; // No events
+            }
+            window_editor_scenario_event_details_show(event_id);
+            return;
         }
     }
     if (m->left.went_up && editor_tool_is_in_use()) {
