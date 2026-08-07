@@ -325,7 +325,7 @@ int building_monument_access_point(building *b, map_point *dst)
     int dx = b->x - b->road_access_x;
     int dy = b->y - b->road_access_y;
     int half_size = b->size / 2;
-    int even_size = b->size % 2;
+    int even_size = b->size % 2 == 0;
 
     if (dx == -half_size && dy == -b->size) {
         dst->x = b->x + half_size;

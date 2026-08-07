@@ -16,19 +16,6 @@ int grid_picker_index_to_row_column(grid_picker *picker, int index, int *row, in
 
 static int debug_shader = 2;
 
-static void grid_picker_cell_click(const complex_button *button)
-{
-    grid_picker *picker = (grid_picker *) button->user_data;
-    if (!picker) {
-        return;
-    }
-
-    picker->selected_index = button->parameters[0];
-    if (picker->selected_callback) {
-        picker->selected_callback(picker);
-    }
-}
-
 void grid_picker_cells_init(int count, grid_picker_cell *cells, int *images, lang_fragment *sequence, int sequence_size,
     tooltip_context *tooltip_c)
 {
@@ -135,7 +122,7 @@ void grid_picker_init(complex_button *anchor, grid_picker *picker, const grid_pi
     memset(picker, 0, sizeof(*picker));
 
     memcpy(&picker->anchor, anchor, sizeof(picker->anchor));
-    // pointer assignment wont work because tooltip_c contains const's - memcpy 
+    // pointer assignment wont work because tooltip_c contains const's - memcpy
 
     picker->cell_count = cell_count;
     picker->columns = columns;
@@ -344,7 +331,7 @@ int grid_picker_handle_mouse(grid_picker *picker, const mouse *m)
     }
 
     if (picker->is_expanded) {
-        handled = 1; // if picker is expanded, swallow all mouse input. 
+        handled = 1; // if picker is expanded, swallow all mouse input.
         if (m->right.went_up) {
             picker->is_expanded = 0;
             window_request_refresh();

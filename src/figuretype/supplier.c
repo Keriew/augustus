@@ -83,7 +83,6 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
         return 0;
     }
     int amount_taken = building_granary_try_remove_resource(granary, resource, granary_loads_take);
-    int amount_taken_units = amount_taken * RESOURCE_ONE_LOAD;
     city_finance_trade_ledger_add_consumed(resource, amount_taken);
 
     // create delivery boys

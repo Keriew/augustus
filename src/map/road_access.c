@@ -215,7 +215,7 @@ int map_has_road_access_monument_construction(int x, int y, int size)
     int min_value = 12;
     int min_grid_offset = map_grid_offset(x, y);
     int half_size = size / 2;
-    int even_size = size % 2;
+    int even_size = size % 2 == 0;
     find_minimum_road_tile(x + half_size, y + size - 1, 1, &min_value, &min_grid_offset);
     find_minimum_road_tile(x + size - 1, y + half_size, 1, &min_value, &min_grid_offset);
     find_minimum_road_tile(x + half_size, y, 1, &min_value, &min_grid_offset);
@@ -473,7 +473,7 @@ int map_road_to_largest_network_monument_construction(int x, int y, int size, in
     int min_index = 12;
     int min_grid_offset = -1;
     int half_size = size / 2;
-    int even_size = size % 2;
+    int even_size = size % 2 == 0;
 
     check_road_to_largest_network_monument(x + half_size, y + size - 1, &min_index, &min_grid_offset);
     check_road_to_largest_network_monument(x + size - 1, y + half_size, &min_index, &min_grid_offset);
