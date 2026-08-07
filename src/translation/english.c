@@ -2324,7 +2324,8 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_INDUSTRY, "Industrial walkers\n A lot of people fall in here."},
     {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_ENTERTAINMENT, "Entertainment walkers"},
     {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_EDUCATION, "Education walkers"},
-    {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_HEALTH, "Health walkers"}
+    {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_HEALTH, "Health walkers"},
+    {TR_CONDITION_TYPE_FIGURES_IN_AREA, "Figure count in area"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

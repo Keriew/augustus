@@ -21,6 +21,7 @@
 #include "game/time.h"
 #include "map/building.h"
 #include "map/desirability.h"
+#include "map/figure.h"
 #include "map/grid.h"
 #include "map/property.h"
 #include "map/terrain.h"
@@ -712,4 +713,19 @@ int scenario_condition_type_population_in_area_met(const scenario_condition_t *c
     }
 
     return comparison_helper_compare_values(comparison, total_population, value);
+}
+
+int scenario_condition_type_figures_in_area_met(const scenario_condition_t *condition)
+{
+    int grid_offset1 = condition->parameter1;
+    int grid_offset2 = condition->parameter2;
+    int category = condition->parameter3;
+    int comparison = condition->parameter4;
+    int value = scenario_formula_evaluate_formula(condition->parameter5);
+
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+
+    int total_figures = map_count_figures_category_in_area(slice, category);
+
+    return comparison_helper_compare_values(comparison, total_figures, value);
 }

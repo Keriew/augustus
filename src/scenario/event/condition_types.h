@@ -66,4 +66,6 @@ int scenario_condition_type_desirability_in_area_met(const scenario_condition_t 
 
 int scenario_condition_type_population_in_area_met(const scenario_condition_t *condition);
 
+int scenario_condition_type_figures_in_area_met(const scenario_condition_t *condition);
+
 #endif // CONDITION_TYPES_H
