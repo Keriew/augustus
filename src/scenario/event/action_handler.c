@@ -115,6 +115,8 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_rename_city_execute(action);
         case ACTION_TYPE_CHANGE_ROUTE_RESOURCE_COST:
             return scenario_action_type_change_route_resources_execute(action);
+        case ACTION_TYPE_KILL_WALKERS_IN_AREA:
+            return scenario_action_type_kill_walkers_in_area_execute(action);
         default:
             return 0;
     }

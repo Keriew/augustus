@@ -12,6 +12,7 @@
 #include "core/xml_parser.h"
 #include "empire/city.h"
 #include "figure/formation.h"
+#include "figure/properties.h"
 #include "game/resource.h"
 #include "game/state.h"
 #include "map/terrain.h"
@@ -433,6 +434,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "target_city",    .type = PARAMETER_TYPE_ROUTE,       .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,    .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm3 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,     .min_limit = 0,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
+    [ACTION_TYPE_KILL_WALKERS_IN_AREA]  = {.type = ACTION_TYPE_KILL_WALKERS_IN_AREA,
+                                        .xml_attr = {.name = "kill_walkers_in_area",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_KILL_WALKERS_IN_AREA},
+                                        .xml_parm1 = {.name = "grid_offset1",       .type = PARAMETER_TYPE_GRID_SLICE,    .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
+                                        .xml_parm2 = {.name = "grid_offset2",       .type = PARAMETER_TYPE_GRID_SLICE,    .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
+                                        .xml_parm3 = {.name = "category",      .type = PARAMETER_TYPE_FIGURE_CATEGORY,    .min_limit = 0,    .max_limit = (1 << FIGURE_MAX_CATEGORIES) - 1, .key = TR_PARAMETER_TYPE_FIGURE_CATEGORY }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
@@ -1418,6 +1424,8 @@ int scenario_events_parameter_data_get_default_value_for_parameter(xml_data_attr
             return BUILDING_GRAND_TEMPLE_CERES;
         case PARAMETER_TYPE_RESOURCE_MONUMENT:
             return ARCHITECTS;
+        case PARAMETER_TYPE_FIGURE_CATEGORY:
+            return FIGURE_CATEGORY_ALL;
         default:
             return 0;
     }
@@ -1665,6 +1673,23 @@ void scenario_events_parameter_data_get_display_string_for_value(parameter_type 
             if (text_string) {
                 result_text = string_copy(text_string, result_text, maxlength);
             }
+            return;
+        }
+        case PARAMETER_TYPE_FIGURE_CATEGORY:
+        {
+            const uint8_t *text = translation_for(TR_PARAMETER_FIGURE_CATEGORY_MULTIPLE);
+            if (!value) {
+                text = translation_for(TR_PARAMETER_FIGURE_CATEGORY_NONE);
+            } else {
+                for (int i = 0; i < FIGURE_MAX_CATEGORIES; i++) {
+                    int category_value = 1 << i;
+                    if (value == category_value) {
+                        text = translation_for(TR_PARAMETER_FIGURE_CATEGORY_INACTIVE + i);
+                        break;
+                    }
+                }
+            }
+            result_text = string_copy(text, result_text, maxlength);
             return;
         }
         default:

@@ -673,6 +673,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/allowed_buildings.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/attributes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/build_menu.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/compose_figure_category.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/custom_messages.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/custom_variables.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/demand_changes.c

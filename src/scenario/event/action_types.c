@@ -30,7 +30,9 @@
 #include "game/time.h"
 #include "game/resource.h"
 #include "graphics/weather.h"
+#include "figure/properties.h"
 #include "map/building.h"
+#include "map/figure.h"
 #include "map/grid.h"
 #include "map/property.h"
 #include "map/routing_terrain.h"
@@ -1047,6 +1049,18 @@ int scenario_action_type_change_route_resources_execute(scenario_action_t *actio
 
     full_empire_object *full = empire_object_get_full(empire_object_get_trade_city(route_id)->id);
     full->route_resource_cost[resource] = amount;
+
+    return 1;
+}
+
+int scenario_action_type_kill_walkers_in_area_execute(scenario_action_t *action)
+{
+    int grid_offset1 = action->parameter1;
+    int grid_offset2 = action->parameter2;
+    int category = action->parameter3;
+    grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
+
+    map_kill_figures_category_in_area(slice, category);
 
     return 1;
 }

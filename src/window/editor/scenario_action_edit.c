@@ -23,6 +23,7 @@
 #include "widget/input_box.h"
 #include "widget/map_editor.h"
 #include "window/editor/allowed_buildings.h"
+#include "window/editor/compose_figure_category.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
@@ -772,6 +773,9 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             return;
         case PARAMETER_TYPE_CUSTOM_TEXT:
             create_scenario_text(parameter);
+            return;
+        case PARAMETER_TYPE_FIGURE_CATEGORY:
+            window_editor_compose_figure_category_show(set_param_value, data.action->parameter3);
             return;
         default:
             return;

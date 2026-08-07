@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 92
+#define XML_TOTAL_ELEMENTS 93
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -158,7 +158,8 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "change_immigration_percentage", xml_import_create_action, 0, "actions"},
     { "change_monument_resources", xml_import_create_action, 0, "actions"},
     { "rename_city", xml_import_create_action, 0, "actions"}, // 90
-    { "change_resource_cost", xml_import_create_action, 0, "actions"}
+    { "change_resource_cost", xml_import_create_action, 0, "actions"},
+    { "kill_walkers_in_area", xml_import_create_action, 0, "actions"}
 };
 
 static int xml_import_start_scenario_events(void)
@@ -547,6 +548,7 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_NUMBER:
         case PARAMETER_TYPE_GRID_SLICE:
         case PARAMETER_TYPE_GRID_OFFSET:
+        case PARAMETER_TYPE_FIGURE_CATEGORY:
             return xml_import_special_parse_limited_number(attr, target);
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
             return xml_import_special_parse_min_max_number(attr, target);
