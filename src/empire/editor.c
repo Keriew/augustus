@@ -18,7 +18,6 @@
 #include "window/empire.h"
 #include "window/popup_dialog.h"
 
-#define BASE_BORDER_FLAG_IMAGE_ID 3323
 #define BORDER_EDGE_DEFAULT_SPACING 50
 
 static struct {

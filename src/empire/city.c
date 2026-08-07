@@ -1,7 +1,9 @@
 #include "city.h"
 
 #include "assets/assets.h"
+#include "building/granary.h"
 #include "building/monument.h"
+#include "building/warehouse.h"
 #include "core/array.h"
 #include "core/calc.h"
 #include "core/lang.h"
@@ -472,8 +474,19 @@ static int generate_trader(int city_id, empire_city *city)
 void empire_city_open_trade(int city_id, int apply_cost)
 {
     empire_city *city = array_item(cities, city_id);
+    full_empire_object *full = empire_object_get_full(city->empire_object_id);
     if (apply_cost) {
         city_finance_process_sundry(city->cost_to_open);
+        // resource cost
+        for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+            int amount = full->route_resource_cost[r];
+            int amount_left = building_warehouses_send_resources_to_trade_route(r, amount);
+            if (amount_left > 0 && resource_is_food(r)) {
+                building_granaries_send_resources_to_trade_route(r, amount_left);
+            }
+            int amount_units = amount * RESOURCE_ONE_LOAD;
+            city_finance_trade_ledger_add_consumed(r, amount_units);
+        }
     }
     trade_route_set_open(city->route_id);
     city->is_open = 1;
@@ -805,6 +818,8 @@ int empire_city_get_icon_image_id(empire_city_icon_type type)
             return image_group(GROUP_EMPIRE_FOREIGN_CITY);
         case EMPIRE_CITY_ICON_TOWER:
             return assets_lookup_image_id(ASSET_UI_EMP_ICON_OLD_WATCHTOWER); // old_watchtower
+        case EMPIRE_CITY_ICON_BUTTON:
+            return image_group(GROUP_SELECT_MISSION_BUTTON); // button
         default:
             return -1;
     }
@@ -825,6 +840,6 @@ int empire_city_get_at(int x, int y, const uint8_t *name)
             }
         }
     }
-    
+
     return 0;
 }

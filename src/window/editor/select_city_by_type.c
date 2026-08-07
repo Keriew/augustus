@@ -61,7 +61,6 @@ typedef struct {
 
 static struct {
     unsigned int focus_button_id;
-    empire_city_type filter_type;
     unsigned int list_size;
     void (*callback)(int);
 
@@ -110,10 +109,9 @@ static void id_list_mem_handling(int city_array_size)
     memset(data.valid_city_ids, 0, data.valid_city_ids_size * sizeof(int));
 }
 
-static void init(void (*callback)(int), empire_city_type type)
+static void init(void (*callback)(int), empire_city_type type, int all_types)
 {
     data.callback = callback;
-    data.filter_type = type;
     data.list_size = 0;
     memset(data.list, 0, sizeof(data.list));
 
@@ -123,7 +121,7 @@ static void init(void (*callback)(int), empire_city_type type)
 
     for (int i = 1; i < city_array_size; i++) {
         empire_city *city = empire_city_get(i);
-        if (city->type == data.filter_type) {
+        if ((city->type == type || all_types) && city->in_use) {
             data.valid_city_ids[data.list_size] = i;
             data.list_size++;
         }
@@ -194,7 +192,7 @@ static void button_click(const generic_button *button)
     close();
 }
 
-void window_editor_select_city_by_type_show(void (*callback)(int), empire_city_type type)
+void window_editor_select_city_by_type_show(void (*callback)(int), empire_city_type type, int all_city_types)
 {
     window_type window = {
         WINDOW_EDITOR_SELECT_CITY_BY_TYPE,
@@ -202,6 +200,6 @@ void window_editor_select_city_by_type_show(void (*callback)(int), empire_city_t
         draw_foreground,
         handle_input
     };
-    init(callback, type);
+    init(callback, type, all_city_types);
     window_show(&window);
 }

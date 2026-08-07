@@ -159,7 +159,7 @@ static void set_amount(int value)
 
 static void button_amount(const generic_button *button)
 {
-    window_numeric_input_show(0, 0, button, 2, 99, set_amount);
+    window_numeric_input_show(0, 0, button, 4, 9999, set_amount);
 }
 
 static void button_delete(const generic_button *button)

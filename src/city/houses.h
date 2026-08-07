@@ -12,6 +12,8 @@ typedef struct {
         int religion;
         int second_religion;
         int third_religion;
+        int fourth_religion;
+        int fifth_religion;
         int barber;
         int bathhouse;
         int clinic;

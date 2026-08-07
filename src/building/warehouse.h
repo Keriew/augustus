@@ -272,12 +272,20 @@ void building_warehouse_recount_resources(building *main);
 
  /**
   * @brief Create a cart pusher to Rome with the requested resources.
-  * TODO: create building_storage helper for this and granary equivalent
+  * TODO: create building_storage helper for this
   * @param resource The resource type
   * @param amount The amount of resource to send
   * @return amount that couldnt be sent, or 0 if all sent
   */
 int building_warehouses_send_resources_to_rome(int resource, int amount);
+
+ /**
+  * @brief Create a cart pusher with the resources needed for a trade route
+  * @param resource The resource type
+  * @param amount The amount of resource to send
+  * @return amount that couldnt be sent, or 0 if all sent
+  */
+int building_warehouses_send_resources_to_trade_route(int resource, int amount);
 
 
 #endif // BUILDING_WAREHOUSE_H

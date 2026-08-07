@@ -241,11 +241,9 @@ void window_building_draw_house(building_info_context *c)
         text_draw((uint8_t *) ")", c->x_offset + 32 + width, c->y_offset + 56, FONT_NORMAL_BLACK, 0);
         lang_text_draw_multiline(127, 41 + b->data.house.evolve_text_id,
             c->x_offset + 32, c->y_offset + 72, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
-    } else if (b->data.house.evolve_text_id == 67) { // latrine devolve
-        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_MISSING_DEVOLVE,
-            c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
-    } else if (b->data.house.evolve_text_id == 68) { // latrine evolve
-        lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_BUILDING_LATRINES_MISSING_EVOLVE,
+    } else if (b->data.house.evolve_text_id > 106) { // no original translation b->data.house.evolve_text_id is the custom translation key
+        // custom translation keys with an enum value under 106 won't work and should therefore not be used
+        lang_text_draw_multiline(CUSTOM_TRANSLATION, b->data.house.evolve_text_id,
             c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 3), FONT_NORMAL_BLACK);
     } else {
         lang_text_draw_multiline(127, 40 + b->data.house.evolve_text_id,

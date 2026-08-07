@@ -30,9 +30,35 @@
 #define INFINITE 10000
 
 typedef struct {
-    const int phases;
-    const int resources[MAX_PHASES][RESOURCE_MAX];
+    int phases;
+    int resources[MAX_PHASES][RESOURCE_MAX];
 } monument_type;
+
+typedef enum {
+    MONUMENT_GRAND_TEMPLE_CERES = 0,
+    MONUMENT_GRAND_TEMPLE_NEPTUNE,
+    MONUMENT_GRAND_TEMPLE_MERCURY,
+    MONUMENT_GRAND_TEMPLE_MARS,
+    MONUMENT_GRAND_TEMPLE_VENUS,
+    MONUMENT_PANTHEON,
+    MONUMENT_ORACLE,
+    MONUMENT_LARGE_TEMPLE_CERES,
+    MONUMENT_LARGE_TEMPLE_NEPTUNE,
+    MONUMENT_LARGE_TEMPLE_MERCURY,
+    MONUMENT_LARGE_TEMPLE_MARS,
+    MONUMENT_LARGE_TEMPLE_VENUS,
+    MONUMENT_LIGHTHOUSE,
+    MONUMENT_COLOSSEUM,
+    MONUMENT_HIPPODROME,
+    MONUMENT_NYMPHAEUM,
+    MONUMENT_LARGE_MAUSOLEUM,
+    MONUMENT_SMALL_MAUSOLEUM,
+    MONUMENT_CARAVANSERAI,
+    MONUMENT_CITY_MINT,
+    MONUMENT_TRIUMPHAL_ARCH,
+    TOTAL_MONUMENTS,
+    NOT_A_MONUMENT = -1
+} monument_building_type;
 
 static const monument_type grand_temple = {
     .phases    = 6,
@@ -163,29 +189,7 @@ static const monument_type triumphal_arch = {
     }
 };
 
-static const monument_type *MONUMENT_TYPES[BUILDING_TYPE_MAX] = {
-    [BUILDING_GRAND_TEMPLE_CERES]   = &grand_temple,
-    [BUILDING_GRAND_TEMPLE_NEPTUNE] = &grand_temple,
-    [BUILDING_GRAND_TEMPLE_MERCURY] = &grand_temple,
-    [BUILDING_GRAND_TEMPLE_MARS]    = &grand_temple,
-    [BUILDING_GRAND_TEMPLE_VENUS]   = &grand_temple,
-    [BUILDING_PANTHEON]             = &pantheon,
-    [BUILDING_ORACLE]               = &oracle,
-    [BUILDING_LARGE_TEMPLE_CERES]   = &large_temple,
-    [BUILDING_LARGE_TEMPLE_NEPTUNE] = &large_temple,
-    [BUILDING_LARGE_TEMPLE_MERCURY] = &large_temple,
-    [BUILDING_LARGE_TEMPLE_MARS]    = &large_temple,
-    [BUILDING_LARGE_TEMPLE_VENUS]   = &large_temple,
-    [BUILDING_LIGHTHOUSE]           = &lighthouse,
-    [BUILDING_COLOSSEUM]            = &colosseum,
-    [BUILDING_HIPPODROME]           = &hippodrome,
-    [BUILDING_NYMPHAEUM]            = &nymphaeum,
-    [BUILDING_LARGE_MAUSOLEUM]      = &large_mausoleum,
-    [BUILDING_SMALL_MAUSOLEUM]      = &small_mausoleum,
-    [BUILDING_CARAVANSERAI]         = &caravanserai,
-    [BUILDING_CITY_MINT]            = &city_mint,
-    [BUILDING_TRIUMPHAL_ARCH]       = &triumphal_arch
-};
+static monument_type MONUMENT_TYPES[TOTAL_MONUMENTS];
 
 typedef struct {
     int walker_id;
@@ -195,6 +199,96 @@ typedef struct {
 } monument_delivery;
 
 array(monument_delivery) monument_deliveries;
+
+static monument_building_type get_monument_building_type(building_type type)
+{
+    if (type >= BUILDING_GRAND_TEMPLE_CERES && type <= BUILDING_GRAND_TEMPLE_VENUS) {
+        return MONUMENT_GRAND_TEMPLE_CERES + (type - BUILDING_GRAND_TEMPLE_CERES);
+    } else if (type == BUILDING_PANTHEON) {
+        return MONUMENT_PANTHEON;
+    } else if (type == BUILDING_ORACLE) {
+        return MONUMENT_ORACLE;
+    } else if (type >= BUILDING_LARGE_TEMPLE_CERES && type <= BUILDING_LARGE_TEMPLE_VENUS) {
+        return MONUMENT_LARGE_TEMPLE_CERES + (type - BUILDING_LARGE_TEMPLE_CERES);
+    } else if (type == BUILDING_LIGHTHOUSE) {
+        return MONUMENT_LIGHTHOUSE;
+    } else if (type == BUILDING_COLOSSEUM) {
+        return MONUMENT_COLOSSEUM;
+    } else if (type == BUILDING_HIPPODROME) {
+        return MONUMENT_HIPPODROME;
+    } else if (type == BUILDING_NYMPHAEUM) {
+        return MONUMENT_NYMPHAEUM;
+    } else if (type == BUILDING_LARGE_MAUSOLEUM) {
+        return MONUMENT_LARGE_MAUSOLEUM;
+    } else if (type == BUILDING_SMALL_MAUSOLEUM) {
+        return MONUMENT_SMALL_MAUSOLEUM;
+    } else if (type == BUILDING_CARAVANSERAI) {
+        return MONUMENT_CARAVANSERAI;
+    } else if (type == BUILDING_CITY_MINT) {
+        return MONUMENT_CITY_MINT;
+    } else if (type == BUILDING_TRIUMPHAL_ARCH) {
+        return MONUMENT_TRIUMPHAL_ARCH;
+    }
+    return NOT_A_MONUMENT;
+}
+
+void building_monument_reset_stages(void)
+{
+    MONUMENT_TYPES[MONUMENT_GRAND_TEMPLE_CERES] = grand_temple;
+    MONUMENT_TYPES[MONUMENT_GRAND_TEMPLE_NEPTUNE] = grand_temple;
+    MONUMENT_TYPES[MONUMENT_GRAND_TEMPLE_MERCURY] = grand_temple;
+    MONUMENT_TYPES[MONUMENT_GRAND_TEMPLE_MARS] = grand_temple;
+    MONUMENT_TYPES[MONUMENT_GRAND_TEMPLE_VENUS] = grand_temple;
+    MONUMENT_TYPES[MONUMENT_PANTHEON] = pantheon;
+    MONUMENT_TYPES[MONUMENT_ORACLE] = oracle;
+    MONUMENT_TYPES[MONUMENT_LARGE_TEMPLE_CERES] = large_temple;
+    MONUMENT_TYPES[MONUMENT_LARGE_TEMPLE_NEPTUNE] = large_temple;
+    MONUMENT_TYPES[MONUMENT_LARGE_TEMPLE_MERCURY] = large_temple;
+    MONUMENT_TYPES[MONUMENT_LARGE_TEMPLE_MARS] = large_temple;
+    MONUMENT_TYPES[MONUMENT_LARGE_TEMPLE_VENUS] = large_temple;
+    MONUMENT_TYPES[MONUMENT_LIGHTHOUSE] = lighthouse;
+    MONUMENT_TYPES[MONUMENT_COLOSSEUM] = colosseum;
+    MONUMENT_TYPES[MONUMENT_HIPPODROME] = hippodrome;
+    MONUMENT_TYPES[MONUMENT_NYMPHAEUM] = nymphaeum;
+    MONUMENT_TYPES[MONUMENT_LARGE_MAUSOLEUM] = large_mausoleum;
+    MONUMENT_TYPES[MONUMENT_SMALL_MAUSOLEUM] = small_mausoleum;
+    MONUMENT_TYPES[MONUMENT_CARAVANSERAI] = caravanserai;
+    MONUMENT_TYPES[MONUMENT_CITY_MINT] = city_mint;
+    MONUMENT_TYPES[MONUMENT_TRIUMPHAL_ARCH] = triumphal_arch;
+}
+
+void building_monument_save_stages(buffer *buf)
+{
+    int buf_size = sizeof(monument_type) * TOTAL_MONUMENTS;
+    uint8_t *buf_data = malloc(buf_size);
+    buffer_init(buf, buf_data, buf_size);
+    buffer_write_raw(buf, MONUMENT_TYPES, buf_size);
+}
+
+void building_monument_load_stages(buffer *buf)
+{
+    int buf_size = sizeof(monument_type) * TOTAL_MONUMENTS;
+    buffer_read_raw(buf, MONUMENT_TYPES, buf_size);
+}
+
+void building_monument_stage_resource_set(building_type b_type, int stage, resource_type r, int amount)
+{
+    monument_building_type m_type = get_monument_building_type(b_type);
+    if (m_type < 0) {
+        return;
+    }
+    monument_type *monument = &MONUMENT_TYPES[m_type];
+    if (stage > monument->phases - 2) {
+        return;
+    }
+    monument->resources[stage][r] = amount;
+    for (building *b = building_first_of_type(b_type); b; b = b->next_of_type) {
+        if (b->monument.phase != stage + 1) {
+            continue;
+        }
+        b->resources[r] = amount;
+    }
+}
 
 int building_monument_deliver_resource(building *b, int resource)
 {
@@ -318,7 +412,7 @@ int building_monument_get_monument(int x, int y, int resource, int road_network_
     int min_dist = INFINITE;
     building *min_building = 0;
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
-        if (!MONUMENT_TYPES[type] || type == BUILDING_TRIUMPHAL_ARCH) { // triumphal arch should not be a destiantion for work camps
+        if (get_monument_building_type(type) < 0 || type == BUILDING_TRIUMPHAL_ARCH) { // triumphal arch should not be a destination for work camps
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -355,7 +449,7 @@ int building_monument_get_monument(int x, int y, int resource, int road_network_
 int building_monument_has_unfinished_monuments(void)
 {
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
-        if (!MONUMENT_TYPES[type]) {
+        if (get_monument_building_type(type) < 0) {
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -369,13 +463,18 @@ int building_monument_has_unfinished_monuments(void)
 
 int building_monument_resources_needed_for_monument_type(building_type type, int resource, int phase)
 {
-    return MONUMENT_TYPES[type] ? MONUMENT_TYPES[type]->resources[phase - 1][resource] : 0;
+    monument_building_type m_type = get_monument_building_type(type);
+    return m_type >= 0 ? MONUMENT_TYPES[m_type].resources[phase - 1][resource] : 0;
 }
 
 void building_monument_set_phase(building *b, int phase)
 {
     if (phase == building_monument_phases(b->type)) {
         phase = MONUMENT_FINISHED;
+        // reset buildings resources since some monuments use these in there finished form (e.g. city mint)
+        for (int resource = 0; resource < RESOURCE_MAX; resource++) {
+            b->resources[resource] = 0;
+        }
     }
     if (phase == b->monument.phase) {
         return;
@@ -400,7 +499,7 @@ int building_monument_is_monument(const building *b)
 
 int building_monument_type_is_monument(building_type type)
 {
-    return type > BUILDING_NONE && type < BUILDING_TYPE_MAX && MONUMENT_TYPES[type] != 0;
+    return get_monument_building_type(type) >= 0;
 }
 
 int building_monument_type_is_mini_monument(building_type type)
@@ -433,7 +532,7 @@ int building_monument_needs_resource(building *b, int resource)
 void building_monuments_set_construction_phase(int phase)
 {
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
-        if (!MONUMENT_TYPES[type]) {
+        if (get_monument_building_type(type) < 0) {
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
@@ -456,13 +555,14 @@ int building_monument_get_neptune_gt(void)
 
 int building_monument_phases(building_type type)
 {
-    return MONUMENT_TYPES[type] ? MONUMENT_TYPES[type]->phases : 0;
+    monument_building_type m_type = get_monument_building_type(type);
+    return m_type >= 0 ? MONUMENT_TYPES[m_type].phases : 0;
 }
 
 void building_monument_finish_monuments(void)
 {
     for (building_type type = BUILDING_MONUMENT_FIRST_ID; type < BUILDING_TYPE_MAX; type++) {
-        if (!MONUMENT_TYPES[type]) {
+        if (get_monument_building_type(type) < 0) {
             continue;
         }
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {

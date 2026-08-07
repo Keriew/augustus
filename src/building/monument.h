@@ -23,6 +23,11 @@ typedef enum {
     PANTHEON_MODULE_2_HOUSING_EVOLUTION
 } module_type;
 
+void building_monument_reset_stages(void);
+void building_monument_save_stages(buffer *buf);
+void building_monument_load_stages(buffer *buf);
+void building_monument_stage_resource_set(building_type b_type, int stage, resource_type r, int amount);
+
 int building_monument_access_point(building *b, map_point *dst);
 int building_monument_add_module(building *b, int module_type);
 int building_monument_deliver_resource(building *b, int resource);
