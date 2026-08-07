@@ -2325,7 +2325,10 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_ENTERTAINMENT, "Entertainment walkers"},
     {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_EDUCATION, "Education walkers"},
     {TR_PARAMETER_TOOLTIP_FIGURE_CATEGORY_HEALTH, "Health walkers"},
-    {TR_CONDITION_TYPE_FIGURES_IN_AREA, "Figure count in area"}
+    {TR_CONDITION_TYPE_FIGURES_IN_AREA, "Figure count in area"},
+    {TR_ACTION_TYPE_SEND_CITY_WARNING, "Send city warning"},
+    {TR_PARAMETER_MESSAGE, "Message"},
+    {TR_PARAMETER_PLAY_FANFARE, "Play fanfare"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

@@ -51,6 +51,7 @@
 #include "scenario/property.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
+#include "sound/effect.h"
 
 #include <stdlib.h>
 
@@ -1061,6 +1062,19 @@ int scenario_action_type_kill_walkers_in_area_execute(scenario_action_t *action)
     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
 
     map_kill_figures_category_in_area(slice, category);
+
+    return 1;
+}
+
+int scenario_action_type_send_city_warning_execute(scenario_action_t *action)
+{
+    const uint8_t *text = scenario_text_get_text(action->parameter1);
+    int play_fanfare = action->parameter2;
+
+    city_warning_show_custom(text, NEW_WARNING_SLOT);
+    if (play_fanfare) {
+        sound_effect_play(SOUND_EFFECT_FANFARE_URGENT);
+    }
 
     return 1;
 }

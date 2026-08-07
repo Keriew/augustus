@@ -110,4 +110,6 @@ int scenario_action_type_change_route_resources_execute(scenario_action_t *actio
 
 int scenario_action_type_kill_walkers_in_area_execute(scenario_action_t *action);
 
+int scenario_action_type_send_city_warning_execute(scenario_action_t *action);
+
 #endif // ACTION_TYPES_H

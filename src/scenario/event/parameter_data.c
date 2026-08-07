@@ -32,7 +32,7 @@
 
 static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
     [CONDITION_TYPE_TIME_PASSED] = {.type = CONDITION_TYPE_TIME_PASSED,
-                                        .xml_attr = {.name = "time",           .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_TIME_PASSED },
+                                        .xml_attr = {.name = "time",            .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_TIME_PASSED },
                                         .xml_parm1 = {.name = "check",          .type = PARAMETER_TYPE_CHECK,            .min_limit = 1,         .max_limit = 6,                     .key = TR_PARAMETER_TYPE_CHECK },
                                         .xml_parm2 = {.name = "value",          .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,         .max_limit = UNLIMITED,   .key = TR_PARAMETER_TYPE_FORMULA }, },
     [CONDITION_TYPE_DIFFICULTY] = {.type = CONDITION_TYPE_DIFFICULTY,
@@ -446,6 +446,11 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "grid_offset1",       .type = PARAMETER_TYPE_GRID_SLICE,    .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
                                         .xml_parm2 = {.name = "grid_offset2",       .type = PARAMETER_TYPE_GRID_SLICE,    .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
                                         .xml_parm3 = {.name = "category",      .type = PARAMETER_TYPE_FIGURE_CATEGORY,    .min_limit = 0,    .max_limit = (1 << FIGURE_MAX_CATEGORIES) - 1, .key = TR_PARAMETER_TYPE_FIGURE_CATEGORY }, },
+    [ACTION_TYPE_SEND_CITY_WARNING]     = {.type = ACTION_TYPE_SEND_CITY_WARNING,
+                                        .xml_attr = {.name = "send_city_warning",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_SEND_CITY_WARNING},
+                                        .xml_parm1 = {.name = "message",             .type = PARAMETER_TYPE_CUSTOM_TEXT,      .key = TR_PARAMETER_MESSAGE},
+                                        .xml_parm2 = {.name = "play_fanfare",        .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
+                                            .max_limit = 1,         .key = TR_PARAMETER_PLAY_FANFARE }, },
 };
 
 scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type)
