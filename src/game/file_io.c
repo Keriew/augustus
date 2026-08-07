@@ -420,7 +420,7 @@ static void init_scenario_data(scenario_version_t version)
         state->scenario_formulas = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
         state->production_rates = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
     }
-    if (version > SCENARIO_TESTING_VERSION_BUMP_3) {
+    if (version > SCENARIO_LAST_NO_HOUSE_MODELS) {
         state->scenario_texts = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
     }
     state->end_marker = create_scenario_piece(4, 0);
@@ -523,7 +523,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         } else {
             version_data->features.scenario_formulas = 0;
         }
-        if (version > SAVE_GAME_TESTING_VERSION_BUMP_4) {
+        if (version > SAVE_GAME_LAST_NO_HOUSE_MODELS) {
             version_data->features.scenario_texts = 1;
         } else {
             version_data->features.scenario_texts = 0;
@@ -553,7 +553,7 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
     version_data->features.custom_model_data = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
     version_data->features.rubble_grid = version > SAVE_GAME_LAST_U16_GRIDS;
     version_data->features.custom_production_rates = version > SAVE_GAME_LAST_NO_FORMULAS_AND_MODEL_DATA;
-    version_data->features.monument_stages = version > SAVE_GAME_TESTING_VERSION_BUMP_3;
+    version_data->features.monument_stages = version > SAVE_GAME_LAST_NO_HOUSE_MODELS;
 }
 
 static void init_savegame_data(savegame_version_t version)
@@ -825,7 +825,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     if (version <= SCENARIO_LAST_NO_EMPIRE_EDITOR) {
         scenario_events_migrate_to_buys_sells();
     }
-    if (version <= SCENARIO_TESTING_VERSION_BUMP_1) {
+    if (version <= SCENARIO_LAST_NO_HOUSE_MODELS) {
         scenario_events_population_migrate_counting();
     }
     building_monument_reset_stages();
@@ -913,7 +913,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     scenario_map_init();
     // do this before loading buildings
     building_monument_reset_stages();
-    if (version > SAVE_GAME_TESTING_VERSION_BUMP_3) {
+    if (version > SAVE_GAME_LAST_NO_HOUSE_MODELS) {
         building_monument_load_stages(state->monument_stages);
     }
 
@@ -1052,7 +1052,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     if (version > SAVE_GAME_LAST_NO_LEDGER) {
         city_finance_ledger_load_state(state->finance_ledger, version);
     }
-    if (version <= SAVE_GAME_TESTING_VERSION_BUMP_1) {
+    if (version <= SAVE_GAME_LAST_NO_HOUSE_MODELS) {
         scenario_events_population_migrate_counting();
     }
 }

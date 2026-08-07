@@ -552,7 +552,7 @@ static void load_main_data(buffer *main, int version)
     city_data.migration.emigrated_today = buffer_read_i32(main);
     city_data.migration.refused_immigrants_today = buffer_read_i32(main);
     city_data.migration.percentage = buffer_read_i32(main);
-    if (version > SAVE_GAME_TESTING_VERSION_BUMP_2) {
+    if (version > SAVE_GAME_LAST_NO_HOUSE_MODELS) {
         city_data.migration.adjust_percentage_immigration = buffer_read_i32(main);
         city_data.migration.adjust_percentage_emigration = buffer_read_i32(main);
     } else {

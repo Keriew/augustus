@@ -199,14 +199,14 @@ void empire_object_load(buffer *buf, int version)
             }
         } else if (obj->type == EMPIRE_OBJECT_CITY) {
             for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
-                full->city_sells_resource[resource_remap(r)] = (version > SCENARIO_TESTING_VERSION_BUMP_5) ?
+                full->city_sells_resource[resource_remap(r)] = (version > SCENARIO_LAST_NO_HOUSE_MODELS) ?
                     buffer_read_u32(buf) : buffer_read_i16(buf);
             }
             for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
-                full->city_buys_resource[resource_remap(r)] = (version > SCENARIO_TESTING_VERSION_BUMP_5) ?
+                full->city_buys_resource[resource_remap(r)] = (version > SCENARIO_LAST_NO_HOUSE_MODELS) ?
                     buffer_read_u32(buf) : buffer_read_i16(buf);
             }
-            if (version > SCENARIO_TESTING_VERSION_BUMP_5) {
+            if (version > SCENARIO_LAST_NO_HOUSE_MODELS) {
                 for (int r = RESOURCE_MIN; r < resource_total_mapped(); r++) {
                     full->route_resource_cost[resource_remap(r)] = buffer_read_u32(buf);
                 }
@@ -274,7 +274,7 @@ void empire_object_load(buffer *buf, int version)
             obj->future_trade_after_icon = EMPIRE_CITY_ICON_DEFAULT;
             migrate_orders(obj);
         }
-        if (version > SCENARIO_TESTING_VERSION_BUMP_1) {
+        if (version > SCENARIO_LAST_NO_HOUSE_MODELS) {
             full->route_hidden = buffer_read_u8(buf);
         }
     }

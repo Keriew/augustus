@@ -525,7 +525,7 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
     if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         formulas_load_state(buf_formulas);
     }
-    if (scenario_version > SCENARIO_TESTING_VERSION_BUMP_3) {
+    if (scenario_version > SCENARIO_LAST_NO_HOUSE_MODELS) {
         texts_load_state(buf_texts);
     }
 
@@ -637,7 +637,7 @@ void scenario_events_min_max_migrate_to_formulas(int version)
     scenario_event_t *current;
     array_foreach(scenario_events, current) //go through all events
     {
-        if (version > SCENARIO_TESTING_VERSION_BUMP_2) {
+        if (version > SCENARIO_LAST_NO_HOUSE_MODELS) {
             continue;
         }
         scenario_condition_group_t *group;
