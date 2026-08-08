@@ -27,6 +27,7 @@ int text_draw_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t
 int text_draw_centered_ellipsized(const uint8_t *str, int x, int y, int box_width, font_t font, color_t color);
 
 int text_draw_number(int value, char prefix, const char *postfix, int x, int y, font_t font, color_t color);
+int text_draw_number_right_aligned( int value, char prefix, const char *postfix, int right_x, int y, font_t font, color_t color);
 void text_draw_number_finances(int value, int x, int y, font_t font, color_t color);
 int text_draw_number_scaled(int value, char prefix, const uint8_t *postfix,
         int x, int y, font_t font, color_t color, float scale);

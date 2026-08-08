@@ -489,6 +489,12 @@ int text_draw_number(int value, char prefix, const char *postfix, int x, int y, 
     return text_draw_number_scaled(value, prefix, ascii_postfix, x, y, font, color, SCALE_NONE);
 }
 
+int text_draw_number_right_aligned( int value, char prefix, const char *postfix, int right_x, int y, font_t font, color_t color)
+{
+    int width = text_get_number_width(value, prefix, postfix, font);
+    return text_draw_number(value, prefix, postfix, right_x - width, y, font, color);
+}
+
 int text_draw_number_float_scaled(float value, int decimal_places, char prefix, const uint8_t *postfix,
     int x, int y, font_t font, color_t color, float scale)
 {
