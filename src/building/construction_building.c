@@ -633,6 +633,10 @@ int building_construction_place_building(building_type type, int x, int y, int e
         }
     }
     if (type == BUILDING_TOWER) {
+        if (map_terrain_exists_tile_in_area_with_type(x, y, 2, TERRAIN_BUILDING)) {
+            city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        }
         if (!building_orientation) {
             building_orientation = building_rotation_get_rotation() + 1;
             if (building_orientation > 4) {
