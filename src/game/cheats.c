@@ -87,7 +87,7 @@ static const char *commands[] = {
     "startinvasion",            // syntax: startinvasion <invasion_type> <size> <invasion_point>
     "nextyear",
     "blessing",                 // syntax: blessing <god_id>
-    "showtooltip",              // syntax: showtooltip <type/dsiabled>
+    "showtooltip",              // syntax: showtooltip <type/disabled>
     "killall",
     "finishmonuments",
     "monumentphase",            // syntax: monumentphase <phase>
