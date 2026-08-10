@@ -103,7 +103,7 @@ static const char *commands[] = {
     "leavemealone",
     "weather",                  // syntax: weather <weather_type> <intensity>
     "destroy",                  // syntax: destroy <building_id> <destruction_type>
-    "monumentcost"              // syntax: monumentcost <building_type> <stage> <resource> <amount>
+    "arbeitszeitbetrug"         // syntax: arbeitszeitbetrug <building_type> <stage> <resource> <amount>
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
