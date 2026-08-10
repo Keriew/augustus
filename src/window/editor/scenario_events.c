@@ -41,6 +41,7 @@
 #define BUTTON_WIDTH 320
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
+#define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
 typedef struct {
     scenario_event_t *event;
@@ -85,7 +86,7 @@ static generic_button buttons[] = {
     {68 + BUTTON_WIDTH / 2, EVENTS_Y_OFFSET + (13 * EVENTS_ROW_HEIGHT), BUTTON_WIDTH / 2, EVENTS_ROW_HEIGHT, button_click, 0, 17}, // paste
     {44, EVENTS_Y_OFFSET - 24, 20, 20, button_click, 0, 18} // select all/none
 };
-#define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
+
 
 static struct {
     unsigned int focus_button_id;
