@@ -16,8 +16,8 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "translation/translation.h"
-#include "window/editor/map.h"
 #include "window/editor/attributes.h"
+#include "window/editor/map.h"
 #include "window/file_dialog.h"
 #include "window/numeric_input.h"
 #include "window/popup_dialog.h"
@@ -161,7 +161,7 @@ static void draw_model_item(const grid_box_item *item)
             data_buttons[i].width, data_buttons[i].height, item->is_focused && data.data_buttons_focus_id == i + 1);
 
         model_house *model = model_get_house(h_level);
-        model_house *default_model = (model_house *)&building_properties_for_type(h_level + 10)->house_model_data;
+        model_house *default_model = (model_house *) &building_properties_for_type(h_level + 10)->house_model_data;
         int value = *model_get_ptr_for_house_data_type(model, i);
         int default_value = *model_get_ptr_for_house_data_type(default_model, i);
         color_t color = 0;

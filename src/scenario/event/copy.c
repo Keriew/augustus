@@ -1,7 +1,7 @@
 #include "copy.h"
 
-#include "scenario/event/parameter_data.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/parameter_data.h"
 
 void copy_formulas_action(scenario_action_t *action, int **params, int index)
 {

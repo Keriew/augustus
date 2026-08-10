@@ -25,8 +25,8 @@
 #include "game/tutorial.h"
 #include "map/road_access.h"
 #include "scenario/allowed_building.h"
-#include "scenario/event/data.h"
 #include "scenario/event/controller.h"
+#include "scenario/event/data.h"
 #include "scenario/property.h"
 
 #include <math.h>

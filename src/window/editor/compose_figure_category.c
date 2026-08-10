@@ -2,13 +2,13 @@
 
 #include "core/string.h"
 #include "figure/properties.h"
-#include "input/input.h"
 #include "graphics/graphics.h"
 #include "graphics/grid_box.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "input/input.h"
 #include "translation/translation.h"
 #include "window/editor/map.h"
 

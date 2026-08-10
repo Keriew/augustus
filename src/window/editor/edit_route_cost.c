@@ -2,7 +2,6 @@
 
 #include "empire/city.h"
 #include "empire/object.h"
-#include "input/input.h"
 #include "game/resource.h"
 #include "graphics/font.h"
 #include "graphics/generic_button.h"
@@ -13,6 +12,7 @@
 #include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "input/input.h"
 #include "translation/translation.h"
 #include "window/editor/empire.h"
 #include "window/numeric_input.h"
@@ -100,7 +100,7 @@ static void draw_foreground(void)
     text_draw_centered(translation_for(TR_EMPIRE_ROUTE_COST), cost_button[0].x, cost_button[0].y + 8,
             cost_button[0].width / 2, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
     const uint8_t cost_text[32] = "";
-    snprintf((char *)cost_text, 32, "%i %s", full->trade_route_cost, lang_get_string(6, 0));
+    snprintf((char *) cost_text, 32, "%i %s", full->trade_route_cost, lang_get_string(6, 0));
     text_draw_centered(cost_text, cost_button[0].x + cost_button[0].width / 2, cost_button[0].y + 8,
         cost_button[0].width / 2, FONT_NORMAL_GREEN, COLOR_MASK_NONE);
 
@@ -121,10 +121,10 @@ static void draw_foreground(void)
                 resource_x_offset = 24;
             }
             int real_width = draw_resource(r, resource_amount, resource_x_offset, y_offset - 9, resource_buttons[r].highlighted);
-            resource_buttons[r] = (resource_button){resource_x_offset, y_offset - 9, 1, 0};
+            resource_buttons[r] = (resource_button) { resource_x_offset, y_offset - 9, 1, 0 };
             resource_x_offset += 32 + real_width;
         } else {
-            resource_buttons[r] = (resource_button){0, 0, 0, 0};
+            resource_buttons[r] = (resource_button) { 0, 0, 0, 0 };
         }
     }
 
@@ -157,7 +157,7 @@ static int resource_buttons_handle_input(const mouse *m)
             btn->highlighted = 1;
             if (m->left.went_up) {
                 data.selected_resource = r;
-                generic_button converted_button = (generic_button){btn->x, btn->y, RESOURCE_ICON_SIDE, RESOURCE_ICON_SIDE};
+                generic_button converted_button = (generic_button) { btn->x, btn->y, RESOURCE_ICON_SIDE, RESOURCE_ICON_SIDE };
                 window_numeric_input_bound_show(0, 0, &converted_button, 5, 0, 99999, set_resource_cost);
                 window_request_refresh();
                 return 1;
@@ -230,8 +230,8 @@ static void button_add_resource(int param1, int param2)
         total_resources++;
     }
 
-    generic_button converted_button = (generic_button){add_resource_button[0].x_offset, add_resource_button[0].y_offset,
-        add_resource_button[0].width, add_resource_button[0].height};
+    generic_button converted_button = (generic_button) { add_resource_button[0].x_offset, add_resource_button[0].y_offset,
+        add_resource_button[0].width, add_resource_button[0].height };
     window_select_list_show_text(0, 0, &converted_button, resource_texts, total_resources, add_resource);
 }
 

@@ -16,11 +16,11 @@
 #include "game/resource.h"
 #include "game/state.h"
 #include "map/terrain.h"
-#include "scenario/event/controller.h"
-#include "scenario/event/parameter_city.h"
 #include "scenario/criteria.h"
 #include "scenario/custom_messages.h"
 #include "scenario/custom_variable.h"
+#include "scenario/event/controller.h"
+#include "scenario/event/parameter_city.h"
 #include "scenario/invasion.h"
 #include "scenario/request.h"
 #include "window/editor/select_city_trade_route.h"
@@ -423,27 +423,27 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm4 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
-    [ACTION_TYPE_LOCK_TRADE_ROUTE]     = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
+    [ACTION_TYPE_LOCK_TRADE_ROUTE] = {.type = ACTION_TYPE_LOCK_TRADE_ROUTE,
                                         .xml_attr = {.name = "lock_trade_route",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_LOCK_TRADE_ROUTE},
                                         .xml_parm1 = {.name = "target_city",       .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "lock",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_LOCK },
                                         .xml_parm3 = {.name = "show_message",      .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,     .max_limit = 1,         .key = TR_PARAMETER_SHOW_MESSAGE }, },
-    [ACTION_TYPE_CHANGE_GOAL]          = {.type = ACTION_TYPE_CHANGE_GOAL,
+    [ACTION_TYPE_CHANGE_GOAL] = {.type = ACTION_TYPE_CHANGE_GOAL,
                                         .xml_attr = {.name = "change_goal",   .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_GOAL},
                                         .xml_parm1 = {.name = "win_condition",   .type = PARAMETER_TYPE_WIN_CONDITION,    .key = TR_PARAMETER_TYPE_WIN_CONDITION},
                                         .xml_parm2 = {.name = "value",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA },
                                         .xml_parm3 = {.name = "set_to_value",      .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
                                             .max_limit = 1,         .key = TR_PARAMETER_SET_TO_VALUE }, },
-    [ACTION_TYPE_MOVE_CAMERA]          = {.type = ACTION_TYPE_MOVE_CAMERA,
+    [ACTION_TYPE_MOVE_CAMERA] = {.type = ACTION_TYPE_MOVE_CAMERA,
                                         .xml_attr = {.name = "move_camera",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_MOVE_CAMERA},
                                         .xml_parm1 = {.name = "grid_offset",   .type = PARAMETER_TYPE_GRID_OFFSET,    .min_limit = 0,    .max_limit = UNLIMITED,    .key = TR_PARAMETER_GRID_OFFSET}, },
-    [ACTION_TYPE_CHANGE_WEATHER]       = {.type = ACTION_TYPE_CHANGE_WEATHER,
+    [ACTION_TYPE_CHANGE_WEATHER] = {.type = ACTION_TYPE_CHANGE_WEATHER,
                                         .xml_attr = {.name = "change_weather", .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_CHANGE_WEATHER},
                                         .xml_parm1 = {.name = "weather_type",    .type = PARAMETER_TYPE_WEATHER, .key = TR_PARAMETER_TYPE_WEATHER},
                                         .xml_parm2 = {.name = "intensity",         .type = PARAMETER_TYPE_FORMULA,            .min_limit = 0,
                                             .max_limit = UNLIMITED,     .key = TR_PARAMETER_INTENSITY}, },
-    [ACTION_TYPE_HIDE_TRADE_ROUTE]     = {.type = ACTION_TYPE_HIDE_TRADE_ROUTE,
+    [ACTION_TYPE_HIDE_TRADE_ROUTE] = {.type = ACTION_TYPE_HIDE_TRADE_ROUTE,
                                         .xml_attr = {.name = "hide_trade_route",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_HIDE_TRADE_ROUTE},
                                         .xml_parm1 = {.name = "target_city",        .type = PARAMETER_TYPE_ROUTE,   .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "hide",   .type = PARAMETER_TYPE_BOOLEAN,     .min_limit = 0,    .max_limit = 1,         .key = TR_PARAMETER_HIDE}, },
@@ -462,7 +462,7 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm2 = {.name = "stage",   .type = PARAMETER_TYPE_NUMBER,     .min_limit = 1,    .max_limit = 5,         .key = TR_PARAMETER_MONUMENT_STAGE},
                                         .xml_parm3 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE_MONUMENT,         .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm4 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,          .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
-    [ACTION_TYPE_RENAME_CITY]           = {.type = ACTION_TYPE_RENAME_CITY,
+    [ACTION_TYPE_RENAME_CITY] = {.type = ACTION_TYPE_RENAME_CITY,
                                         .xml_attr = {.name = "rename_city",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_RENAME_CITY},
                                         .xml_parm1 = {.name = "city",          .type = PARAMETER_TYPE_CITY,    .key = TR_PARAMETER_TYPE_CITY },
                                         .xml_parm2 = {.name = "name",          .type = PARAMETER_TYPE_CUSTOM_TEXT,      .key = TR_PARAMETER_NAME}, },
@@ -471,12 +471,12 @@ static scenario_action_data_t scenario_action_data[ACTION_TYPE_MAX] = {
                                         .xml_parm1 = {.name = "target_city",    .type = PARAMETER_TYPE_ROUTE,       .key = TR_PARAMETER_TYPE_ROUTE },
                                         .xml_parm2 = {.name = "resource",       .type = PARAMETER_TYPE_RESOURCE,    .key = TR_PARAMETER_TYPE_RESOURCE },
                                         .xml_parm3 = {.name = "amount",         .type = PARAMETER_TYPE_FORMULA,     .min_limit = 0,      .max_limit = UNLIMITED,     .key = TR_PARAMETER_TYPE_FORMULA }, },
-    [ACTION_TYPE_KILL_WALKERS_IN_AREA]  = {.type = ACTION_TYPE_KILL_WALKERS_IN_AREA,
+    [ACTION_TYPE_KILL_WALKERS_IN_AREA] = {.type = ACTION_TYPE_KILL_WALKERS_IN_AREA,
                                         .xml_attr = {.name = "kill_walkers_in_area",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_KILL_WALKERS_IN_AREA},
                                         .xml_parm1 = {.name = "grid_offset1",       .type = PARAMETER_TYPE_GRID_SLICE,    .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER1 },
                                         .xml_parm2 = {.name = "grid_offset2",       .type = PARAMETER_TYPE_GRID_SLICE,    .min_limit = 0,    .max_limit = UNLIMITED,     .key = TR_PARAMETER_GRID_OFFSET_CORNER2 },
                                         .xml_parm3 = {.name = "category",      .type = PARAMETER_TYPE_FIGURE_CATEGORY,    .min_limit = 0,    .max_limit = (1 << FIGURE_MAX_CATEGORIES) - 1, .key = TR_PARAMETER_TYPE_FIGURE_CATEGORY }, },
-    [ACTION_TYPE_SEND_CITY_WARNING]     = {.type = ACTION_TYPE_SEND_CITY_WARNING,
+    [ACTION_TYPE_SEND_CITY_WARNING] = {.type = ACTION_TYPE_SEND_CITY_WARNING,
                                         .xml_attr = {.name = "send_city_warning",    .type = PARAMETER_TYPE_TEXT,    .key = TR_ACTION_TYPE_SEND_CITY_WARNING},
                                         .xml_parm1 = {.name = "message",             .type = PARAMETER_TYPE_CUSTOM_TEXT,      .key = TR_PARAMETER_MESSAGE},
                                         .xml_parm2 = {.name = "play_fanfare",        .type = PARAMETER_TYPE_BOOLEAN,      .min_limit = 0,
@@ -500,39 +500,39 @@ parameter_type scenario_events_parameter_data_get_action_parameter_type(
     switch (parameter_index) {
         case 1:
             if (min_limit)
-            *min_limit = action->xml_parm1.min_limit;
+                *min_limit = action->xml_parm1.min_limit;
             if (max_limit)
-            *max_limit = action->xml_parm1.max_limit;
+                *max_limit = action->xml_parm1.max_limit;
             return action->xml_parm1.type;
         case 2:
             if (min_limit)
-            *min_limit = action->xml_parm2.min_limit;
+                *min_limit = action->xml_parm2.min_limit;
             if (max_limit)
-            *max_limit = action->xml_parm2.max_limit;
+                *max_limit = action->xml_parm2.max_limit;
             return action->xml_parm2.type;
         case 3:
             if (min_limit)
-            *min_limit = action->xml_parm3.min_limit;
+                *min_limit = action->xml_parm3.min_limit;
             if (max_limit)
-            *max_limit = action->xml_parm3.max_limit;
+                *max_limit = action->xml_parm3.max_limit;
             return action->xml_parm3.type;
         case 4:
             if (min_limit)
-            *min_limit = action->xml_parm4.min_limit;
+                *min_limit = action->xml_parm4.min_limit;
             if (max_limit)
-            *max_limit = action->xml_parm4.max_limit;
+                *max_limit = action->xml_parm4.max_limit;
             return action->xml_parm4.type;
         case 5:
             if (min_limit)
-            *min_limit = action->xml_parm5.min_limit;
+                *min_limit = action->xml_parm5.min_limit;
             if (max_limit)
-            *max_limit = action->xml_parm5.max_limit;
+                *max_limit = action->xml_parm5.max_limit;
             return action->xml_parm5.type;
         default:
             if (min_limit)
-            *min_limit = 0;
+                *min_limit = 0;
             if (max_limit)
-            *max_limit = 0;
+                *max_limit = 0;
             return PARAMETER_TYPE_UNDEFINED;
     }
 }
@@ -549,39 +549,39 @@ parameter_type scenario_events_parameter_data_get_condition_parameter_type(
     switch (parameter_index) {
         case 1:
             if (min_limit)
-            *min_limit = condition->xml_parm1.min_limit;
+                *min_limit = condition->xml_parm1.min_limit;
             if (max_limit)
-            *max_limit = condition->xml_parm1.max_limit;
+                *max_limit = condition->xml_parm1.max_limit;
             return condition->xml_parm1.type;
         case 2:
             if (min_limit)
-            *min_limit = condition->xml_parm2.min_limit;
+                *min_limit = condition->xml_parm2.min_limit;
             if (max_limit)
-            *max_limit = condition->xml_parm2.max_limit;
+                *max_limit = condition->xml_parm2.max_limit;
             return condition->xml_parm2.type;
         case 3:
             if (min_limit)
-            *min_limit = condition->xml_parm3.min_limit;
+                *min_limit = condition->xml_parm3.min_limit;
             if (max_limit)
-            *max_limit = condition->xml_parm3.max_limit;
+                *max_limit = condition->xml_parm3.max_limit;
             return condition->xml_parm3.type;
         case 4:
             if (min_limit)
-            *min_limit = condition->xml_parm4.min_limit;
+                *min_limit = condition->xml_parm4.min_limit;
             if (max_limit)
-            *max_limit = condition->xml_parm4.max_limit;
+                *max_limit = condition->xml_parm4.max_limit;
             return condition->xml_parm4.type;
         case 5:
             if (min_limit)
-            *min_limit = condition->xml_parm5.min_limit;
+                *min_limit = condition->xml_parm5.min_limit;
             if (max_limit)
-            *max_limit = condition->xml_parm5.max_limit;
+                *max_limit = condition->xml_parm5.max_limit;
             return condition->xml_parm5.type;
         default:
             if (min_limit)
-            *min_limit = 0;
+                *min_limit = 0;
             if (max_limit)
-            *max_limit = 0;
+                *max_limit = 0;
             return PARAMETER_TYPE_UNDEFINED;
     }
 }
@@ -1073,7 +1073,7 @@ static void generate_building_type_mappings(void)
         special_attribute_mappings_building_type_size++;
     }
     special_attribute_mappings_buildings[special_attribute_mappings_building_type_size++] =
-        (special_attribute_mapping_t){PARAMETER_TYPE_BUILDING, "rubble", -1, TR_PARAMETER_TERRAIN_RUBBLE};
+        (special_attribute_mapping_t) { PARAMETER_TYPE_BUILDING, "rubble", -1, TR_PARAMETER_TERRAIN_RUBBLE };
 }
 
 static void generate_model_mappings(void)
@@ -1723,8 +1723,8 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
 {
     scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
     result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
-    int values[5] = {action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5};
-    xml_data_attribute_t attributes[5] = {xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5};
+    int values[5] = { action->parameter1, action->parameter2, action->parameter3, action->parameter4, action->parameter5 };
+    xml_data_attribute_t attributes[5] = { xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5 };
     for (int i = 0; i < 5; i++) {
         parameter_type p_type = attributes[i].type;
         translation_key key = attributes[i].key;
@@ -1739,7 +1739,7 @@ void scenario_events_parameter_data_get_display_string_for_action(const scenario
         result_text = append_text(string_from_ascii("\n"), result_text, &maxlength);
         result_text = append_text(translation_for(key), result_text, &maxlength);
         result_text = append_text(string_from_ascii(":"), result_text, &maxlength);
-        result_text = translation_for_type_lookup_by_value(p_type , values[i], result_text, &maxlength);
+        result_text = translation_for_type_lookup_by_value(p_type, values[i], result_text, &maxlength);
     }
 }
 
@@ -1747,8 +1747,8 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
 {
     scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
     result_text = append_text(translation_for(xml_info->xml_attr.key), result_text, &maxlength);
-    int values[5] = {condition->parameter1, condition->parameter2, condition->parameter3, condition->parameter4, condition->parameter5};
-    xml_data_attribute_t attributes[5] = {xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5};
+    int values[5] = { condition->parameter1, condition->parameter2, condition->parameter3, condition->parameter4, condition->parameter5 };
+    xml_data_attribute_t attributes[5] = { xml_info->xml_parm1, xml_info->xml_parm2, xml_info->xml_parm3, xml_info->xml_parm4, xml_info->xml_parm5 };
     for (int i = 0; i < 5; i++) {
         if (!attributes[i].type) {
             return;
@@ -1756,6 +1756,6 @@ void scenario_events_parameter_data_get_display_string_for_condition(const scena
         result_text = append_text(string_from_ascii("\n"), result_text, &maxlength);
         result_text = append_text(translation_for(attributes[i].key), result_text, &maxlength);
         result_text = append_text(string_from_ascii(":"), result_text, &maxlength);
-        result_text = translation_for_type_lookup_by_value(attributes[i].type , values[i], result_text, &maxlength);
+        result_text = translation_for_type_lookup_by_value(attributes[i].type, values[i], result_text, &maxlength);
     }
 }
