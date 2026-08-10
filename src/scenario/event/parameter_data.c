@@ -30,6 +30,36 @@
 
 #define ARCHITECTS RESOURCE_NONE
 
+#define SPECIAL_ATTRIBUTE_MAPPINGS_CHECK_SIZE (sizeof(special_attribute_mappings_check) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_CHECK_DIFFICULTY (sizeof(special_attribute_mappings_difficulty) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_BOOLEAN_SIZE (sizeof(special_attribute_mappings_boolean) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_POP_CLASS_SIZE (sizeof(special_attribute_mappings_pop_class) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_STANDARD_MESSAGE_SIZE (sizeof(special_attribute_mappings_standard_message) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_MEDIA_TYPE_SIZE (sizeof(special_attribute_mappings_media_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_RATING_TYPE_SIZE (sizeof(special_attribute_mappings_rating_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_STORAGE_TYPE_SIZE (sizeof(special_attribute_mappings_storage_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_INVASION_TYPE_SIZE (sizeof(special_attribute_mappings_attack_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_TARGET_TYPE_SIZE (sizeof(special_attribute_mappings_target_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_ENEMY_TYPE_SIZE (sizeof(special_attribute_mappings_enemy_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_GOD_SIZE (sizeof(special_attribute_mappings_god) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE (sizeof(special_attribute_mappings_climate) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_data_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSE_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_house_data_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE (sizeof(special_attribute_mappings_percentage) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_WITH_GROUPS_SIZE (sizeof(special_attribute_mappings_housing_with_groups) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE (sizeof(special_attribute_mappings_housing) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE (sizeof(special_attribute_mappings_age) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE (sizeof(special_attribute_mappings_troops_class) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE (sizeof(special_attribute_mappings_player_troops) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE (sizeof(special_attribute_mappings_coverage_buildings) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE (sizeof(special_attribute_mappings_rank) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE (sizeof(special_attribute_mappings_win_condition) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_WEATHER_TYPE_SIZE (sizeof(special_attribute_mappings_weather_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_ROUTE_TYPE_SIZE (sizeof(special_attribute_mappings_route_type) / sizeof(special_attribute_mapping_t))
+#define SPECIAL_ATTRIBUTE_MAPPINGS_VARIABLE_COLOR_SIZE (sizeof(special_attribute_mappings_variable_color) / sizeof(special_attribute_mapping_t))
+
 static scenario_condition_data_t scenario_condition_data[CONDITION_TYPE_MAX] = {
     [CONDITION_TYPE_TIME_PASSED] = {.type = CONDITION_TYPE_TIME_PASSED,
                                         .xml_attr = {.name = "time",            .type = PARAMETER_TYPE_TEXT,             .key = TR_CONDITION_TYPE_TIME_PASSED },
@@ -617,8 +647,6 @@ static special_attribute_mapping_t special_attribute_mappings_check[] = {
     {.type = PARAMETER_TYPE_CHECK,                .text = "gt",                            .value = COMPARISON_TYPE_GREATER_THAN,        .key = TR_PARAMETER_VALUE_COMPARISON_TYPE_GREATER_THAN },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_CHECK_SIZE (sizeof(special_attribute_mappings_check) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_difficulty[] = {
     {.type = PARAMETER_TYPE_DIFFICULTY,           .text = "very_easy",                     .value = DIFFICULTY_VERY_EASY,               .key = TR_PARAMETER_VALUE_DIFFICULTY_VERY_EASY },
     {.type = PARAMETER_TYPE_DIFFICULTY,           .text = "easy",                          .value = DIFFICULTY_EASY,                    .key = TR_PARAMETER_VALUE_DIFFICULTY_EASY },
@@ -627,14 +655,10 @@ static special_attribute_mapping_t special_attribute_mappings_difficulty[] = {
     {.type = PARAMETER_TYPE_DIFFICULTY,           .text = "very_hard",                     .value = DIFFICULTY_VERY_HARD,               .key = TR_PARAMETER_VALUE_DIFFICULTY_VERY_HARD },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_CHECK_DIFFICULTY (sizeof(special_attribute_mappings_difficulty) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_boolean[] = {
     {.type = PARAMETER_TYPE_BOOLEAN,              .text = "false",                         .value = 0,                                  .key = TR_PARAMETER_VALUE_BOOLEAN_FALSE },
     {.type = PARAMETER_TYPE_BOOLEAN,              .text = "true",                          .value = 1,                                  .key = TR_PARAMETER_VALUE_BOOLEAN_TRUE },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_BOOLEAN_SIZE (sizeof(special_attribute_mappings_boolean) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_pop_class[] = {
     {.type = PARAMETER_TYPE_POP_CLASS,            .text = "all",                           .value = POP_CLASS_ALL,                      .key = TR_PARAMETER_VALUE_POP_CLASS_ALL },
@@ -642,8 +666,6 @@ static special_attribute_mapping_t special_attribute_mappings_pop_class[] = {
     {.type = PARAMETER_TYPE_POP_CLASS,            .text = "plebeian",                      .value = POP_CLASS_PLEBEIAN,                 .key = TR_PARAMETER_VALUE_POP_CLASS_PLEBEIAN },
     {.type = PARAMETER_TYPE_POP_CLASS,            .text = "slums",                         .value = POP_CLASS_SLUMS,                    .key = TR_PARAMETER_VALUE_POP_CLASS_SLUMS },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_POP_CLASS_SIZE (sizeof(special_attribute_mappings_pop_class) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_buildings[BUILDING_TYPE_MAX];
 static unsigned int special_attribute_mappings_building_type_size;
@@ -722,8 +744,6 @@ static special_attribute_mapping_t special_attribute_mappings_standard_message[]
     {.type = PARAMETER_TYPE_STANDARD_MESSAGE,            .text = "enemies_leaving",           .value = MESSAGE_ENEMIES_LEAVING,                    .key = TR_PARAMETER_VALUE_MESSAGE_ENEMIES_LEAVING },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_STANDARD_MESSAGE_SIZE (sizeof(special_attribute_mappings_standard_message) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_media_type[] = {
     {.type = PARAMETER_TYPE_MEDIA_TYPE,                  .text = "sound",                     .value = 1,          .key = TR_PARAMETER_VALUE_MEDIA_TYPE_SOUND },
     {.type = PARAMETER_TYPE_MEDIA_TYPE,                  .text = "video",                     .value = 2,          .key = TR_PARAMETER_VALUE_MEDIA_TYPE_VIDEO },
@@ -731,22 +751,16 @@ static special_attribute_mapping_t special_attribute_mappings_media_type[] = {
     {.type = PARAMETER_TYPE_MEDIA_TYPE,                  .text = "background_image",          .value = 4,          .key = TR_PARAMETER_VALUE_MEDIA_TYPE_BACKGROUND_IMAGE },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_MEDIA_TYPE_SIZE (sizeof(special_attribute_mappings_media_type) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_rating_type[] = {
     {.type = PARAMETER_TYPE_RATING_TYPE,                .text = "peace",                      .value = SELECTED_RATING_PEACE,          .key = TR_PARAMETER_VALUE_RATING_TYPE_PEACE },
     {.type = PARAMETER_TYPE_RATING_TYPE,                .text = "prosperity",                 .value = SELECTED_RATING_PROSPERITY,     .key = TR_PARAMETER_VALUE_RATING_TYPE_PROSPERITY },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_RATING_TYPE_SIZE (sizeof(special_attribute_mappings_rating_type) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_storage_type[] = {
     {.type = PARAMETER_TYPE_STORAGE_TYPE,                .text = "all",                    .value = STORAGE_TYPE_ALL,               .key = TR_PARAMETER_VALUE_STORAGE_TYPE_ALL },
     {.type = PARAMETER_TYPE_STORAGE_TYPE,                .text = "granaries",              .value = STORAGE_TYPE_GRANARIES,         .key = TR_PARAMETER_VALUE_STORAGE_TYPE_GRANARIES },
     {.type = PARAMETER_TYPE_STORAGE_TYPE,                .text = "warehouses",             .value = STORAGE_TYPE_WAREHOUSES,        .key = TR_PARAMETER_VALUE_STORAGE_TYPE_WAREHOUSES },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_STORAGE_TYPE_SIZE (sizeof(special_attribute_mappings_storage_type) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_attack_type[] = {
     {.type = PARAMETER_TYPE_INVASION_TYPE,                .text = "enemy_army",          .value = INVASION_TYPE_ENEMY_ARMY,          .key = TR_PARAMETER_VALUE_INVASION_TYPE_ENEMY_ARMY },
@@ -755,8 +769,6 @@ static special_attribute_mapping_t special_attribute_mappings_attack_type[] = {
     {.type = PARAMETER_TYPE_INVASION_TYPE,                .text = "mars",                .value = INVASION_TYPE_MARS_NATIVES,        .key = TR_PARAMETER_VALUE_INVASION_TYPE_MARS_NATIVES },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_INVASION_TYPE_SIZE (sizeof(special_attribute_mappings_attack_type) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_target_type[] = {
     {.type = PARAMETER_TYPE_TARGET_TYPE,                .text = "food_chain",          .value = FORMATION_ATTACK_FOOD_CHAIN,      .key = TR_PARAMETER_VALUE_FORMATION_ATTACK_FOOD_CHAIN },
     {.type = PARAMETER_TYPE_TARGET_TYPE,                .text = "gold_stores",         .value = FORMATION_ATTACK_GOLD_STORES,     .key = TR_PARAMETER_VALUE_FORMATION_ATTACK_GOLD_STORES },
@@ -764,8 +776,6 @@ static special_attribute_mapping_t special_attribute_mappings_target_type[] = {
     {.type = PARAMETER_TYPE_TARGET_TYPE,                .text = "troops",              .value = FORMATION_ATTACK_TROOPS,          .key = TR_PARAMETER_VALUE_FORMATION_ATTACK_TROOPS },
     {.type = PARAMETER_TYPE_TARGET_TYPE,                .text = "random",              .value = FORMATION_ATTACK_RANDOM,          .key = TR_PARAMETER_VALUE_FORMATION_ATTACK_RANDOM },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_TARGET_TYPE_SIZE (sizeof(special_attribute_mappings_target_type) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_enemy_type[] = {
     {.type = PARAMETER_TYPE_ENEMY_TYPE,                .text = "undefined",       .value = ENEMY_UNDEFINED,         .key = TR_PARAMETER_VALUE_ENEMY_UNDEFINED },
@@ -785,8 +795,6 @@ static special_attribute_mapping_t special_attribute_mappings_enemy_type[] = {
     */
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_ENEMY_TYPE_SIZE (sizeof(special_attribute_mappings_enemy_type) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_god[] =
 {
     {.type = PARAMETER_TYPE_GOD,                .text = "Ceres",          .value = GOD_CERES,         .key = TR_PARAMETER_VALUE_GOD_CERES },
@@ -798,16 +806,12 @@ static special_attribute_mapping_t special_attribute_mappings_god[] =
 
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_GOD_SIZE (sizeof(special_attribute_mappings_god) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_climate[] =
 {
     {.type = PARAMETER_TYPE_CLIMATE,            .text = "Central",        .value = CLIMATE_CENTRAL,   .key = TR_PARAMETER_VALUE_CLIMATE_CENTRAL },
     {.type = PARAMETER_TYPE_CLIMATE,            .text = "Northern",       .value = CLIMATE_NORTHERN,  .key = TR_PARAMETER_VALUE_CLIMATE_NORTHERN },
     {.type = PARAMETER_TYPE_CLIMATE,            .text = "Desert",         .value = CLIMATE_DESERT,    .key = TR_PARAMETER_VALUE_CLIMATE_DESERT },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_CLIMATE_SIZE (sizeof(special_attribute_mappings_climate) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 {
@@ -819,8 +823,6 @@ static special_attribute_mapping_t special_attribute_mappings_terrain[] =
     {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rubble",           .value = TERRAIN_RUBBLE,   .key = TR_PARAMETER_TERRAIN_RUBBLE },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_TERRAIN_SIZE (sizeof(special_attribute_mappings_terrain) / sizeof(special_attribute_mapping_t))
-
 special_attribute_mapping_t special_attribute_mappings_data_type[] =
 {
     {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "cost",                     .value = MODEL_COST,                    .key = TR_PARAMETER_COST },
@@ -830,8 +832,6 @@ special_attribute_mapping_t special_attribute_mappings_data_type[] =
     {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "desirability_range",       .value = MODEL_DESIRABILITY_RANGE,      .key = TR_PARAMETER_DESIRABILITY_RANGE },
     {.type = PARAMETER_TYPE_DATA_TYPE,          .text = "laborers",                 .value = MODEL_LABORERS,                .key = TR_PARAMETER_LABORERS },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_data_type) / sizeof(special_attribute_mapping_t))
 
 special_attribute_mapping_t special_attribute_mappings_house_data_type[] =
 {
@@ -854,14 +854,10 @@ special_attribute_mapping_t special_attribute_mappings_house_data_type[] =
     {.type = PARAMETER_TYPE_HOUSE_DATA_TYPE,          .text = "tax_multiplier",         .value = MODEL_TAX_MULTIPLIER,          .key = TR_PARAMETER_TAX_MULTIPLIER },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSE_DATA_TYPE_SIZE (sizeof(special_attribute_mappings_house_data_type) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_percentage[] = {
     {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Percentage", .value = 0, .key = TR_PARAMETER_PERCENTAGE },
     {.type = PARAMETER_TYPE_PERCENTAGE, .text = "Absolute",   .value = 1, .key = TR_PARAMETER_ABSOLUTE },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_PERCENTAGE_SIZE (sizeof(special_attribute_mappings_percentage) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_housing_with_groups[] = {
     // Individual housing types
@@ -902,8 +898,6 @@ static special_attribute_mapping_t special_attribute_mappings_housing_with_group
     {.type = PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS,            .text = "slums",                         .value = POP_CLASS_SLUMS,                    .key = TR_PARAMETER_VALUE_POP_CLASS_SLUMS },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_WITH_GROUPS_SIZE (sizeof(special_attribute_mappings_housing_with_groups) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_housing[] = {
     // Individual housing types
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "small_tent",       .value = BUILDING_HOUSE_SMALL_TENT,     .key = TR_BUILDING_HOUSE_SMALL_TENT },
@@ -928,8 +922,6 @@ static special_attribute_mapping_t special_attribute_mappings_housing[] = {
     {.type = PARAMETER_TYPE_HOUSING_TYPE, .text = "luxury_palace",    .value = BUILDING_HOUSE_LUXURY_PALACE,  .key = TR_BUILDING_HOUSE_LUXURY_PALACE },
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_HOUSING_SIZE (sizeof(special_attribute_mappings_housing) / sizeof(special_attribute_mapping_t))
-
 static special_attribute_mapping_t special_attribute_mappings_age[] = {
     // Decenniums (10-year age groups)
     {.type = PARAMETER_TYPE_AGE_GROUP, .text = "decennium_0",  .value = 0,  .key = TR_DECENNIUM_0 }, // Ages 0-9
@@ -949,8 +941,6 @@ static special_attribute_mapping_t special_attribute_mappings_age[] = {
     {.type = PARAMETER_TYPE_AGE_GROUP, .text = "working_age",  .value = 12, .key = TR_PARAMETER_AGE_WORKING }, // Ages 20-49/59 (depends on config)
     {.type = PARAMETER_TYPE_AGE_GROUP, .text = "retired",      .value = 13, .key = TR_PARAMETER_AGE_RETIRED }, // Ages 50+/60+ (depends on config)
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_AGE_SIZE (sizeof(special_attribute_mappings_age) / sizeof(special_attribute_mapping_t))
 
 // like condition, but not condition
 static special_attribute_mapping_t special_attribute_mappings_city_property[] = {
@@ -980,16 +970,12 @@ static special_attribute_mapping_t special_attribute_mappings_city_property[] = 
 
 };
 
-#define SPECIAL_ATTRIBUTE_MAPPINGS_CITY_PROPERTY_SIZE (sizeof(special_attribute_mappings_city_property) / sizeof(special_attribute_mapping_t))
-
-
 static special_attribute_mapping_t special_attribute_mappings_troops_class[] = {
     {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "all",            .value = ENEMY_CLASS_ALL,            .key = TR_CITY_PROPERTY_ALL },
     {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "melee",          .value = ENEMY_CLASS_MELEE,          .key = TR_CITY_PROPERTY_TROOPS_MELEE },
     {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "ranged",         .value = ENEMY_CLASS_RANGED,         .key = TR_CITY_PROPERTY_TROOPS_RANGED },
     {.type = PARAMETER_TYPE_ENEMY_CLASS, .text = "cavalry",        .value = ENEMY_CLASS_MOUNTED,        .key = TR_CITY_PROPERTY_TROOPS_MOUNTED },
 };
-#define SPECIAL_ATTRIBUTE_MAPPINGS_TROOPS_CLASS_SIZE (sizeof(special_attribute_mappings_troops_class) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_player_troops[] = {
     {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "all",            .value = FIGURE_FORT_STANDARD,                          .key = TR_CITY_PROPERTY_ALL},
@@ -999,8 +985,6 @@ static special_attribute_mapping_t special_attribute_mappings_player_troops[] = 
     {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "legionary",      .value = FIGURE_FORT_LEGIONARY,       .key = TR_BUILDING_FORT_LEGIONARIES },
     {.type = PARAMETER_TYPE_PLAYER_TROOPS, .text = "javelin",        .value = FIGURE_FORT_JAVELIN,         .key = TR_BUILDING_FORT_JAVELIN },
 };
-
-#define SPECIAL_ATTRIBUTE_MAPPINGS_PLAYER_TROOPS_SIZE (sizeof(special_attribute_mappings_player_troops) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_coverage_buildings[] = {
     {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "theatres",      .value = BUILDING_THEATER,              .key = TR_CITY_PROPERTY_COVERAGE_THEATRE },
@@ -1017,7 +1001,6 @@ static special_attribute_mapping_t special_attribute_mappings_coverage_buildings
     {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "libraries",     .value = BUILDING_LIBRARY,              .key = TR_CITY_PROPERTY_COVERAGE_LIBRARY },
     {.type = PARAMETER_TYPE_COVERAGE_BUILDINGS,     .text = "academies",     .value = BUILDING_ACADEMY,              .key = TR_CITY_PROPERTY_COVERAGE_ACADEMY },
 };
-#define SPECIAL_ATTRIBUTE_MAPPINGS_COVERAGE_BUILDINGS_SIZE (sizeof(special_attribute_mappings_coverage_buildings) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_rank[] = {
     {.type = PARAMETER_TYPE_RANK, .text = "citizen",        .value = 0,  .key = TR_RANK_CITIZEN },
@@ -1034,7 +1017,6 @@ static special_attribute_mapping_t special_attribute_mappings_rank[] = {
     {.type = PARAMETER_TYPE_RANK, .text = "promotion",      .value = 11, .key = TR_RANK_PROMOTE },
     {.type = PARAMETER_TYPE_RANK, .text = "demotion",       .value = 12, .key = TR_RANK_DEMOTE}
 };
-#define SPECIAL_ATTRIBUTE_MAPPINGS_RANK_SIZE (sizeof(special_attribute_mappings_rank) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_win_condition[] = {
     {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "culture",         .value = SCENARIO_WIN_CONDITION_CULTURE,        .key = TR_SCENARIO_WIN_CONDITION_CULTURE },
@@ -1045,7 +1027,6 @@ static special_attribute_mapping_t special_attribute_mappings_win_condition[] = 
     {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "winning time",    .value = SCENARIO_WIN_CONDITION_WINNING_TIME,   .key = TR_SCENARIO_WIN_CONDITION_WINNING_TIME },
     {.type = PARAMETER_TYPE_WIN_CONDITION, .text = "population",      .value = SCENARIO_WIN_CONDITION_POPULATION,     .key = TR_SCENARIO_WIN_CONDITION_POPULATION },
 };
-#define SPECIAL_ATTRIBUTE_MAPPINGS_WIN_CONDITION_SIZE (sizeof(special_attribute_mappings_win_condition) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_weather_type[] = {
     {.type = PARAMETER_TYPE_WEATHER, .text = "clear",          .value = 0,        .key = TR_PARAMETER_CLEAN_WEATHER },
@@ -1053,14 +1034,12 @@ static special_attribute_mapping_t special_attribute_mappings_weather_type[] = {
     {.type = PARAMETER_TYPE_WEATHER, .text = "snow",           .value = 2,        .key = TR_CONFIG_HEADER_SNOW },
     {.type = PARAMETER_TYPE_WEATHER, .text = "sand",           .value = 3,        .key = TR_CONFIG_HEADER_SAND },
 };
-#define SPECIAL_ATTRIBUTE_MAPPINGS_WEATHER_TYPE_SIZE (sizeof(special_attribute_mappings_weather_type) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_route_type[] = {
     {.type = PARAMETER_TYPE_ROUTE_TYPE, .text = "all",          .value = 0,        .key = TR_PARAMETER_ROUTE_TYPE_ALL },
     {.type = PARAMETER_TYPE_ROUTE_TYPE, .text = "land",         .value = 1,        .key = TR_PARAMETER_ROUTE_TYPE_LAND },
     {.type = PARAMETER_TYPE_ROUTE_TYPE, .text = "sea",          .value = 2,        .key = TR_PARAMETER_ROUTE_TYPE_SEA },
 };
-#define SPECIAL_ATTRIBUTE_MAPPINGS_ROUTE_TYPE_SIZE (sizeof(special_attribute_mappings_route_type) / sizeof(special_attribute_mapping_t))
 
 static special_attribute_mapping_t special_attribute_mappings_variable_color[] = {
     {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "none",           .value = 0,        .key = TR_EDITOR_COLOR_NONE },
@@ -1075,7 +1054,6 @@ static special_attribute_mapping_t special_attribute_mappings_variable_color[] =
     {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "black",          .value = 9,        .key = TR_EDITOR_COLOR_BLACK },
     {.type = PARAMETER_TYPE_VARIABLE_COLOR, .text = "dark_blue",      .value = 10,       .key = TR_EDITOR_COLOR_DARK_BLUE },
 };
-#define SPECIAL_ATTRIBUTE_MAPPINGS_VARIABLE_COLOR_SIZE (sizeof(special_attribute_mappings_variable_color) / sizeof(special_attribute_mapping_t))
 
 static void generate_building_type_mappings(void)
 {

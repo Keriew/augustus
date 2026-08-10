@@ -15,6 +15,7 @@
 #include "graphics/text.h"
 #include "input/mouse.h"
 #include "translation/translation.h"
+#include "window/empire.h"
 
 #include <string.h>
 
@@ -159,9 +160,9 @@ int window_empire_sidebar_sort_count_trade_resources(const empire_city *city, in
     int count = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         if (resource_is_storable(r)) {
-            if ((row_type == 1 && city->sells_resource[r]) ||
-                (!row_type && city->buys_resource[r]) ||
-                (row_type == 2 && full->route_resource_cost[r])) {
+            if ((row_type == ROW_TYPE_SELLS && city->sells_resource[r]) ||
+                (row_type == ROW_TYPE_BUYS && city->buys_resource[r]) ||
+                (row_type == ROW_TYPE_COSTS && full->route_resource_cost[r])) {
                 count++;
             }
         }

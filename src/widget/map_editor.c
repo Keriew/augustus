@@ -473,6 +473,8 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
 {
     scroll_map(m);
 
+    int has_scrolled = 0;
+
     if (m->is_touch) {
         handle_touch();
     } else {
@@ -481,7 +483,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
         }
         if (m->right.went_up) {
             if (!editor_tool_is_active()) {
-                int has_scrolled = scroll_drag_end();
+                has_scrolled = scroll_drag_end();
                 if (!has_scrolled) {
                     editor_tool_deactivate();
                 }
@@ -515,7 +517,6 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
     zoom_map(m, h, city_view_get_scale());
 
     if (tile->grid_offset) {
-
         if (m->left.went_down) {
             if (!editor_tool_is_in_use()) {
                 editor_tool_start_use(tile);
@@ -523,7 +524,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
             editor_tool_update_use(tile);
         } else if (m->left.is_down || editor_tool_is_in_use()) {
             editor_tool_update_use(tile);
-        } else if (m->right.went_up && !editor_tool_is_in_use()) {
+        } else if (m->right.went_up && !editor_tool_is_in_use() && !has_scrolled) {
             int offset = tile->grid_offset;
             int event_id = event_tiles[offset][0];
             if (event_id == -1) {

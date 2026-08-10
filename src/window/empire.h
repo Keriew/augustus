@@ -3,6 +3,12 @@
 
 #include "empire/object.h"
 
+enum {
+    ROW_TYPE_BUYS,
+    ROW_TYPE_SELLS,
+    ROW_TYPE_COSTS
+};
+
 void window_empire_draw_border(const empire_object *border, int x_offset, int y_offset);
 
 void window_empire_collect_trade_edges(void);

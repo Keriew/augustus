@@ -298,12 +298,6 @@ enum {
     DD_COUNT
 };
 
-enum {
-    ROW_TYPE_BUYS,
-    ROW_TYPE_SELLS,
-    ROW_TYPE_COSTS
-};
-
 static cycling_button cycling_buttons[BTN_COUNT];
 static dropdown_button dropdown_buttons[DD_COUNT];
 static complex_button complex_buttons[CMPLX_BTN_COUNT];
