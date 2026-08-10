@@ -2163,6 +2163,9 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_DISABLED_2, "Your scribes are working hard to build this feature, but they need more time."},
     {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds" },
     {TR_UI_LEDGER_ONLY_CURRENT_YEAR , "You only started your governorship this year!"},
+    {TR_EDITOR_TOOL_OUTSKIRTS, "Outskirts"},
+    {TR_EDITOR_TOOL_OUTSKIRTS_REMOVE, "Remove outskits"},
+    {TR_EDITOR_SELECT_LAND, "Select land"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

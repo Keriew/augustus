@@ -48,7 +48,7 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     {0, 1, 2, 3, 4, -1},
     {5, 6, -1},
     {7, 8, 9, -1},
-    {10, 11, 12, 13, 14, 15, 16, 17, -1},
+    {10, 11, 12, 13, 14, 15, 16, 17, TR_EDITOR_TOOL_OUTSKIRTS, TR_EDITOR_TOOL_OUTSKIRTS_REMOVE, -1},
     {18, 19, -1},
     {20, TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, 21, 22,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT,
@@ -180,7 +180,14 @@ static void button_menu_item(const generic_button *button)
             }
             break;
         case MENU_INVASION_POINTS:
-            editor_tool_set_with_id(TOOL_INVASION_POINT, index);
+            switch (index) {
+                case 8:
+                    editor_tool_set_type(TOOL_OUTSKIRTS); break;
+                case 9:
+                    editor_tool_set_type(TOOL_OUTSKIRTS_REMOVE); break;
+                default:
+                    editor_tool_set_with_id(TOOL_INVASION_POINT, index);
+            }
             break;
         case MENU_ANIMAL_POINTS:
             if (index < 8) {

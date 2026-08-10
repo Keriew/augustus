@@ -6,6 +6,7 @@
 #include "core/io.h"
 #include "core/log.h"
 #include "core/string.h"
+#include "editor/tool.h"
 #include "translation/translation.h"
 
 #include <stdlib.h>
@@ -647,6 +648,39 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_REMOVE);
             case TR_EDITOR_RUBBLE:
                 return translation_for(TR_EDITOR_RUBBLE);
+            case TR_EDITOR_TOOL_OUTSKIRTS:
+                return translation_for(TR_EDITOR_TOOL_OUTSKIRTS);
+            case TR_EDITOR_TOOL_OUTSKIRTS_REMOVE:
+                return translation_for(TR_EDITOR_TOOL_OUTSKIRTS_REMOVE);
+            default:
+                break;
+        }
+    }
+
+    if (group == 49) {
+        switch (index) {
+            case TOOL_NATIVE_HUT_ALT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT);
+            case TOOL_NATIVE_DECORATION:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION);
+            case TOOL_NATIVE_MONUMENT:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT);
+            case TOOL_NATIVE_WATCHTOWER:
+                return translation_for(TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER);
+            case TOOL_EARTHQUAKE_CUSTOM:
+                return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM);
+            case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
+                return translation_for(TR_EDITOR_TOOL_EARTHQUAKE_REMOVE);
+            case TOOL_NATIVE_RUINS:
+                return translation_for(TR_EDITOR_RUBBLE);
+            case TOOL_OUTSKIRTS:
+                return translation_for(TR_EDITOR_TOOL_OUTSKIRTS);
+            case TOOL_OUTSKIRTS_REMOVE:
+                return translation_for(TR_EDITOR_TOOL_OUTSKIRTS_REMOVE);
+            case TOOL_SELECT_LAND:
+                return translation_for(TR_EDITOR_SELECT_LAND);
+            case TOOL_NATIVE_FIELD: // fix og spelling mistake "native feild"
+                return lang_get_string(41, BUILDING_NATIVE_CROPS);
             default:
                 break;
         }
