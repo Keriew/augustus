@@ -2197,7 +2197,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS, "Show warnings when deleting events, conditions or actions"},
     {TR_CATEGORY_UI_EDITOR, "Editor"},
     {TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENTS_CONFIRM_TITLE, "Delete events?"},
-    {TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENTS_CONFIRM_TEXT, "Are you sure you want to delete these events?\n\nThe action is irreversible." },
+    {TR_EDITOR_SCENARIO_EVENTS_DELETE_EVENTS_CONFIRM_TEXT, "Are you sure you want to delete these events?\n\nThis action is irreversible." },
     {TR_CONDITION_TYPE_DESIRABILITY_IN_AREA, "Desirability in area"},
     {TR_CONDITION_TYPE_POPULATION_IN_AREA, "Population in area"},
     {TR_PARAMETER_AGE_SCHOOL, "School age (0-14)"},
