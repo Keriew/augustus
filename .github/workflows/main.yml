@@ -56,7 +56,7 @@ jobs:
             os: macos-latest
             cache-key: macos
             SDL_VERSION: 2.32.10
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_MIXER_VERSION: 2.8.2
             BUILD_TARGET: mac
             DEPLOY: mac
           - name: iOS
@@ -180,8 +180,8 @@ jobs:
           - name: Windows MSVC ARM64
             cache-key: msvc-arm64
             COMPILER: msvc-arm64
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
     name: ${{ matrix.name }}
     runs-on: windows-latest
     env:
