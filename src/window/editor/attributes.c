@@ -32,6 +32,7 @@
 #include "window/editor/invasions.h"
 #include "window/editor/map.h"
 #include "window/editor/model_data.h"
+#include "window/editor/house_model_data.h"
 #include "window/editor/price_changes.h"
 #include "window/editor/requests.h"
 #include "window/editor/scenario_events.h"
@@ -59,6 +60,7 @@ static void button_delete_intro(const generic_button *button);
 static void button_change_victory(const generic_button *button);
 static void button_delete_victory(const generic_button *button);
 static void button_change_model_data(const generic_button *button);
+static void button_change_house_model_data(const generic_button *button);
 static void button_return_to_city(const generic_button *button);
 static void button_change_climate(const generic_button *button);
 static void button_change_image(int forward, int param2);
@@ -79,6 +81,7 @@ static generic_button buttons[] = {
     {470, 156, 250, 30, button_change_intro, button_delete_intro, 13},
     {470, 196, 250, 30, button_change_victory, button_delete_victory, 14},
     {470, 236, 250, 30, button_change_model_data, 0, 15},
+    {470, 276, 250, 30, button_change_house_model_data, 0, 16},
     {470, 436, 250, 30, button_return_to_city},
 };
 #define NUMBER_OF_BUTTONS (sizeof(buttons) / sizeof(generic_button))
@@ -217,8 +220,11 @@ static void draw_foreground(void)
     button_border_draw(470, 236, 250, 30, data.focus_button_id == 15);
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CHANGE_MODEL_DATA, 470, 245, 250, FONT_NORMAL_BLACK);
 
+    button_border_draw(470, 276, 250, 30, data.focus_button_id == 16);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_CHANGE_HOUSE_MODEL_DATA, 470, 285, 250, FONT_NORMAL_BLACK);
+
     if (!editor_is_active()) {
-        button_border_draw(470, 436, 250, 30, data.focus_button_id == 16);
+        button_border_draw(470, 436, 250, 30, data.focus_button_id == 17);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_RETURN_TO_CITY, 470, 445, 250, FONT_NORMAL_BLACK);
     }
 
@@ -356,6 +362,12 @@ static void button_change_model_data(const generic_button *button)
 {
     stop();
     window_model_data_show();
+}
+
+static void button_change_house_model_data(const generic_button *button)
+{
+    stop();
+    window_house_model_data_show();
 }
 
 static void button_return_to_city(const generic_button *button)

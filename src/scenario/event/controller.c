@@ -2,7 +2,7 @@
 
 #include "core/array.h"
 #include "core/log.h"
-#include "core/string.h"   
+#include "core/string.h"
 #include "empire/city.h"
 #include "game/save_version.h"
 #include "map/grid.h"
@@ -19,13 +19,17 @@
 #include <string.h>
 
 #define SCENARIO_EVENTS_SIZE_STEP 50
-#define SCENARIO_FORMULAS_SIZE_STEP 500
+#define SCENARIO_FORMULAS_SIZE_STEP 100
+#define SCENARIO_TEXTS_SIZE_STEP 25
 
 static array(scenario_event_t) scenario_events;
 static array(scenario_formula_t) scenario_formulas;
+static array(scenario_text_t) scenario_texts;
 
 static void formulas_save_state(buffer *buf);
 static void formulas_load_state(buffer *buf);
+static void texts_save_state(buffer *buf);
+static void texts_load_state(buffer *buf);
 
 void scenario_events_init(void)
 {
@@ -38,6 +42,54 @@ void scenario_events_init(void)
 static void new_formula(scenario_formula_t *formula, unsigned int id)
 {
     formula->id = id;
+}
+
+static void new_text(scenario_text_t *text, unsigned int id)
+{
+    text->id = id;
+}
+
+unsigned int scenario_text_get_new(const uint8_t *initial_text)
+{
+    scenario_text_t *text = array_advance(scenario_texts);
+
+    if (!text) {
+        log_error("Unable to allocate memory for a new scenario text. The game will now crash.", 0, 0);
+        return 0;
+    }
+    string_copy(initial_text, text->text, MAX_SCENARIO_TEXT_LENGTH - 1);
+
+    return text->id;
+}
+
+scenario_text_t *scenario_text_get(unsigned int id)
+{
+    if (id == 0 || id >= scenario_texts.size) {
+        log_error("Invalid scenario text index.", 0, 0);
+        return NULL;
+    }
+    return array_item(scenario_texts, id);
+}
+
+const uint8_t *scenario_text_get_text(unsigned int id)
+{
+    if (id == 0 || id >= scenario_texts.size) {
+        log_error("Invalid scenario text index.", 0, 0);
+        return NULL;
+    }
+    scenario_text_t *text = array_item(scenario_texts, id);
+
+    return text->text;
+}
+
+void scenario_text_change(unsigned int id, const uint8_t *new_text)
+{
+    if (id == 0 || id >= scenario_texts.size) {
+        log_error("Invalid scenario text ID.", 0, 0);
+        return;
+    }
+    scenario_text_t *text = array_item(scenario_texts, id);
+    string_copy(new_text, text->text, MAX_SCENARIO_TEXT_LENGTH - 1);
 }
 
 unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_limit, int max_limit)
@@ -53,7 +105,7 @@ unsigned int scenario_formula_add(const uint8_t *formatted_calculation, int min_
     calculation->evaluation = 0;
     strncpy((char *) calculation->formatted_calculation, (const char *) formatted_calculation, MAX_FORMULA_LENGTH - 1);
     scenario_event_formula_check(calculation);
-    // null termination on last char-  treating as string 
+    // null termination on last char-  treating as string
     return calculation->id;
 }
 
@@ -121,12 +173,16 @@ void scenario_events_clear(void)
         log_error("Unable to allocate enough memory for the scenario events array. The game will now crash.", 0, 0);
     }
 
-    // Clear formulas
+    // Clear formulas and texts
     if (!array_init(scenario_formulas, SCENARIO_FORMULAS_SIZE_STEP, new_formula, 0)) {
         log_error("Unable to allocate enough memory for the scenario formulas array. The game will now crash.", 0, 0);
     }
+    if (!array_init(scenario_texts, SCENARIO_TEXTS_SIZE_STEP, new_text, 0)) {
+        log_error("Unable to allocate enough memory for the scenario texts array. The game will now crash.", 0, 0);
+    }
 
     array_advance(scenario_formulas); // Reserve ID 0 as invalid
+    array_advance(scenario_texts); // Reserve ID 0 as invalid
 }
 
 scenario_event_t *scenario_event_get(int event_id)
@@ -253,12 +309,13 @@ static void actions_save_state(buffer *buf)
 
 }
 
-void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas)
+void scenario_events_save_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas, buffer *buf_texts)
 {
     info_save_state(buf_events);
     conditions_save_state(buf_conditions);
     actions_save_state(buf_actions);
     formulas_save_state(buf_formulas);
+    texts_save_state(buf_texts);
 }
 
 static void info_load_state(buffer *buf, int scenario_version)
@@ -393,7 +450,7 @@ static void formulas_load_state(buffer *buf)
     for (size_t i = 0; i < array_size; ++i) {
 
         scenario_formula_t *formula = array_advance(scenario_formulas);
-        
+
         unsigned int id = buffer_read_u32(buf);
         if (id != formula->id) {
             log_error("Formula ID mismatch during loading. Something has gone wrong.", 0, 0);
@@ -410,8 +467,52 @@ static void formulas_load_state(buffer *buf)
     }
 }
 
+static void texts_save_state(buffer *buf)
+{
+    int struct_size =
+        sizeof(uint32_t)                              // id
+        + sizeof(uint8_t) * MAX_SCENARIO_TEXT_LENGTH; // text
+    buffer_init_dynamic_array(buf, scenario_texts.size, struct_size);
+
+    scenario_text_t *text;
+
+    array_foreach(scenario_texts, text) {
+        if (array_index == 0) {
+            continue; // Skip index 0 as it's reserved for invalid texts
+        }
+        buffer_write_u32(buf, text->id);
+        buffer_write_raw(buf, text->text, MAX_SCENARIO_TEXT_LENGTH);
+    }
+}
+
+static void texts_load_state(buffer *buf)
+{
+    size_t array_size = buffer_load_dynamic_array(buf);
+
+    if (!array_init(scenario_texts, SCENARIO_TEXTS_SIZE_STEP, new_text, 0) ||
+        !array_expand(scenario_texts, array_size)) {
+        log_error("Unable to allocate enough memory for the scenario texts array. The game will now crash.", 0, 0);
+    }
+
+    array_advance(scenario_texts); // Advance once to skip index 0, which is reserved for invalid texts
+
+    for (size_t i = 0; i < array_size; ++i) {
+
+        scenario_text_t *text = array_advance(scenario_texts);
+
+        unsigned int id = buffer_read_u32(buf);
+        if (id != text->id) {
+            log_error("Text ID mismatch during loading. Something has gone wrong.", 0, 0);
+            return;
+        }
+
+        buffer_read_raw(buf, text->text, MAX_SCENARIO_TEXT_LENGTH);
+        text->text[MAX_SCENARIO_TEXT_LENGTH - 1] = '\0'; // ensure safety
+    }
+}
+
 void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buffer *buf_actions, buffer *buf_formulas,
-     int scenario_version)
+     buffer *buf_texts, int scenario_version)
 {
     scenario_events_clear();
     info_load_state(buf_events, scenario_version);
@@ -423,6 +524,9 @@ void scenario_events_load_state(buffer *buf_events, buffer *buf_conditions, buff
     actions_load_state(buf_actions, scenario_version > SCENARIO_LAST_STATIC_ORIGINAL_DATA);
     if (scenario_version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         formulas_load_state(buf_formulas);
+    }
+    if (scenario_version > SCENARIO_LAST_NO_HOUSE_MODELS) {
+        texts_load_state(buf_texts);
     }
 
     scenario_event_t *current;
@@ -461,75 +565,33 @@ void scenario_events_progress_paused(int days_passed)
     }
 }
 
-static void migrate_parameters_action(scenario_action_t *action)
+static void migrate_parameters_action(scenario_action_t *action, int **params, int index)
 {
-    // migration for older actions (pre-formulas)
     int min_limit = 0, max_limit = 0;
-    parameter_type p_type;
-    action_types action_type = action->type;
-    if (action_type == ACTION_TYPE_ADJUST_CITY_HEALTH || action_type == ACTION_TYPE_ADJUST_ROME_WAGES ||
-        action_type == ACTION_TYPE_ADJUST_MONEY || action_type == ACTION_TYPE_ADJUST_SAVINGS) {
-        return;
-    }
-    int *params[] = {    // Collect addresses of the fields
-        &action->parameter1,
-        &action->parameter2,
-        &action->parameter3,
-        &action->parameter4,
-        &action->parameter5
-    };
-    for (int i = 1; i <= 5; ++i) {
-        int *param_value = params[i - 1];
-        p_type = scenario_events_parameter_data_get_action_parameter_type(
-            action_type, i, &min_limit, &max_limit);
-        if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
-            char buffer[16];  // Make sure buffer is large enough
-            memset(buffer, 0, sizeof(buffer));
-            string_from_int((uint8_t *) buffer, *param_value, 0);
-            unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
-            switch (i) {
-                case 1: action->parameter1 = id; break;
-                case 2: action->parameter2 = id; break;
-                case 3: action->parameter3 = id; break;
-                case 4: action->parameter4 = id; break;
-                case 5: action->parameter5 = id; break;
-            }
-        }
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
+        action->type, index, &min_limit, &max_limit);
+    if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
+        char buffer[16];  // Make sure buffer is large enough
+        memset(buffer, 0, sizeof(buffer));
+        string_from_int((uint8_t *) buffer, *param_value, 0);
+        unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
+        *param_value = id;
     }
 }
 
-static void migrate_parameters_condition(scenario_condition_t *condition)
+static void migrate_parameters_condition(scenario_condition_t *condition, int **params, int index)
 {
-    // migration for older conditions (pre-formulas)
     int min_limit = 0, max_limit = 0;
-    parameter_type p_type;
-    condition_types condition_type = condition->type;
-
-    int *params[] = {    // Collect addresses of the fields
-        &condition->parameter1,
-        &condition->parameter2,
-        &condition->parameter3,
-        &condition->parameter4,
-        &condition->parameter5
-    };
-
-    for (int i = 1; i <= 5; ++i) {
-        int *param_value = params[i - 1];
-        p_type = scenario_events_parameter_data_get_condition_parameter_type(
-            condition_type, i, &min_limit, &max_limit);
-        if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
-            uint8_t buffer[16];  // Make sure buffer is large enough
-            memset(buffer, 0, sizeof(buffer));
-            string_from_int(buffer, *param_value, 0);
-            unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
-            switch (i) {
-                case 1: condition->parameter1 = id; break;
-                case 2: condition->parameter2 = id; break;
-                case 3: condition->parameter3 = id; break;
-                case 4: condition->parameter4 = id; break;
-                case 5: condition->parameter5 = id; break;
-            }
-        }
+    int *param_value = params[index - 1];
+    parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
+        condition->type, index, &min_limit, &max_limit);
+    if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
+        uint8_t buffer[16];  // Make sure buffer is large enough
+        memset(buffer, 0, sizeof(buffer));
+        string_from_int(buffer, *param_value, 0);
+        unsigned int id = scenario_formula_add((const uint8_t *) buffer, min_limit, max_limit);
+        *param_value = id;
     }
 }
 
@@ -552,7 +614,11 @@ void scenario_events_migrate_to_formulas(void)
         scenario_action_t *action;
         for (unsigned int j = 0; j < current->actions.size; j++) {
             action = array_item(current->actions, j);
-            migrate_parameters_action(action); //migrate parameters if needed
+            if (action->type == ACTION_TYPE_ADJUST_CITY_HEALTH || action->type == ACTION_TYPE_ADJUST_ROME_WAGES ||
+                action->type == ACTION_TYPE_ADJUST_MONEY || action->type == ACTION_TYPE_ADJUST_SAVINGS) {
+                return;
+            }
+            scenario_parameters_foreach_in_action(action, migrate_parameters_action); //migrate parameters if needed
         }
         scenario_condition_group_t *group;
         scenario_condition_t *condition;
@@ -560,17 +626,40 @@ void scenario_events_migrate_to_formulas(void)
             group = array_item(current->condition_groups, j);
             for (unsigned int k = 0; k < group->conditions.size; k++) {
                 condition = array_item(group->conditions, k);
-                migrate_parameters_condition(condition); //migrate parameters if needed
+                scenario_parameters_foreach_in_condition(condition, migrate_parameters_condition); //migrate parameters if needed
             }
         }
     }
 }
 
-void scenario_events_min_max_migrate_to_formulas(void)
+void scenario_events_min_max_migrate_to_formulas(int version)
 {
     scenario_event_t *current;
     array_foreach(scenario_events, current) //go through all events
     {
+        if (version > SCENARIO_LAST_NO_HOUSE_MODELS) {
+            continue;
+        }
+        scenario_condition_group_t *group;
+        scenario_condition_t *condition;
+        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
+            group = array_item(current->condition_groups, j);
+            for (unsigned int k = 0; k < group->conditions.size; k++) {
+                condition = array_item(group->conditions, k);
+                if (condition->type != CONDITION_TYPE_TIME_PASSED) {
+                    continue;
+                }
+                uint8_t buffer[32];
+                memset(buffer, 0, sizeof(buffer));
+                sprintf((char *)buffer, "{%i,%i}", condition->parameter3, condition->parameter4);
+                unsigned int id = scenario_formula_add((const uint8_t *) buffer, 0, 1000000000);
+                condition->parameter2 = id;
+            }
+        }
+
+        if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
+            continue;
+        }
         scenario_action_t *action;
         for (unsigned int j = 0; j < current->actions.size; j++) { // go through all actions in event
             action = array_item(current->actions, j);
@@ -602,6 +691,55 @@ void scenario_events_min_max_migrate_to_formulas(void)
     }
 }
 
+void scenario_events_population_migrate_counting(void)
+{
+    scenario_event_t *current;
+    array_foreach(scenario_events, current) //go through all events
+    {
+        scenario_action_t *action;
+        for (unsigned int j = 0; j < current->actions.size; j++) {
+            action = array_item(current->actions, j);
+            if (action->type != ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA) {
+                return; // only migrate change house model data for actions
+            }
+            if (action->parameter1 == HOUSE_GROUP_TENT) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_TENT;
+            } else if (action->parameter1 == HOUSE_GROUP_SHACK) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_SHACK;
+            } else if (action->parameter1 == HOUSE_GROUP_HOVEL) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_HOVEL;
+            } else if (action->parameter1 == HOUSE_GROUP_CASA) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_CASA;
+            } else if (action->parameter1 == HOUSE_GROUP_INSULA) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_INSULA;
+            } else if (action->parameter1 == HOUSE_GROUP_VILLA) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_VILLA;
+            } else if (action->parameter1 == HOUSE_GROUP_PALACE) {
+                action->parameter1 = BUILDING_HOUSE_SMALL_PALACE;
+            }
+        }
+    }
+}
+
+void scenario_events_assign_parent_single_event_ids(scenario_event_t *event)
+{
+    int event_id = event->id;
+    scenario_action_t *action;
+    for (unsigned int i = 0; i < event->actions.size; i++) {
+        action = array_item(event->actions, i);
+        action->parent_event_id = event_id;
+    }
+    scenario_condition_group_t *group;
+    scenario_condition_t *condition;
+    for (unsigned int j = 0; j < event->condition_groups.size; j++) {
+        group = array_item(event->condition_groups, j);
+        for (unsigned int k = 0; k < group->conditions.size; k++) {
+            condition = array_item(group->conditions, k);
+            condition->parent_event_id = event_id;
+        }
+    }
+}
+
 void scenario_events_migrate_to_buys_sells(void)
 {
     scenario_event_t *current;
@@ -629,21 +767,7 @@ void scenario_events_assign_parent_event_ids(void)
     scenario_event_t *current;
     array_foreach(scenario_events, current) //go through all events
     {
-        int event_id = current->id;
-        scenario_action_t *action;
-        for (unsigned int j = 0; j < current->actions.size; j++) {
-            action = array_item(current->actions, j);
-            action->parent_event_id = event_id;
-        }
-        scenario_condition_group_t *group;
-        scenario_condition_t *condition;
-        for (unsigned int j = 0; j < current->condition_groups.size; j++) {
-            group = array_item(current->condition_groups, j);
-            for (unsigned int k = 0; k < group->conditions.size; k++) {
-                condition = array_item(group->conditions, k);
-                condition->parent_event_id = event_id;
-            }
-        }
+        scenario_events_assign_parent_single_event_ids(current);
     }
 }
 
@@ -657,8 +781,10 @@ void scenario_events_fetch_event_tiles_to_editor(void)
         scenario_action_t *action;
         for (unsigned int j = 0; j < current->actions.size; j++) {
             action = array_item(current->actions, j);
-            if (action->type == ACTION_TYPE_BUILDING_FORCE_COLLAPSE ||
-                action->type == ACTION_TYPE_CHANGE_TERRAIN) {
+            if (scenario_events_parameter_data_get_action_parameter_type(
+                action->type, 1, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE &&
+                scenario_events_parameter_data_get_action_parameter_type(
+                action->type, 2, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE) {
                 int grid_offset1 = action->parameter1;
                 int grid_offset2 = action->parameter2;
                 grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
@@ -674,20 +800,22 @@ void scenario_events_fetch_event_tiles_to_editor(void)
             group = array_item(current->condition_groups, j);
             for (unsigned int k = 0; k < group->conditions.size; k++) {
                 condition = array_item(group->conditions, k);
-                if (condition->type == CONDITION_TYPE_BUILDING_COUNT_AREA ||
-                    condition->type == CONDITION_TYPE_TERRAIN_IN_AREA) {
+                if (scenario_events_parameter_data_get_condition_parameter_type(
+                condition->type, 1, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE &&
+                scenario_events_parameter_data_get_condition_parameter_type(
+                condition->type, 2, NULL, NULL) == PARAMETER_TYPE_GRID_SLICE) {
                     int grid_offset1 = condition->parameter1;
                     int grid_offset2 = condition->parameter2;
                     grid_slice *slice = map_grid_get_grid_slice_from_corner_offsets(grid_offset1, grid_offset2);
                     for (int i = 0; i < slice->size; i++) {
                         widget_map_editor_add_draw_context_event_tile(slice->grid_offsets[i], event_id);
                     }
-
                 }
             }
         }
     }
 }
+
 void scenario_events_migrate_to_grid_slices(void)
 {
     scenario_event_t *current;
