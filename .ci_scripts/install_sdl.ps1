@@ -49,18 +49,18 @@ if ("${env:COMPILER}" -eq "msvc") {
 
         cmake -G "Visual Studio 18 2026" -A ARM64 -DSDL_LIBC=ON -DCMAKE_BUILD_TYPE=Release ..
         cmake --build . -j 4 --config Release
-        cmake --install build --config Release --prefix $SDL_DIR
+        cmake --install . --config Release --prefix $SDL_DIR
 
-        CheckSuccess("Build SDL")
+CheckSuccess("Build SDL")
 
         cd ..\..
         cd "SDL${SDL_MAJOR_VERSION}_mixer-${env:SDL_MIXER_VERSION}"
         mkdir build
         cd build
-          
+
         cmake -G "Visual Studio 18 2026" -A ARM64 -DCMAKE_PREFIX_PATH=$SDL_DIR -DCMAKE_BUILD_TYPE=Release -DSDL${SDL_MAJOR_VERSION}MIXER_MP3=ON -DSDL${SDL_MAJOR_VERSION}MIXER_MP3_MINIMP3=ON -DSDL${SDL_MAJOR_VERSION}MIXER_VENDORED=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_SAMPLES=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_FLAC=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_CMD=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_MOD=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_MIDI=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_MIDI_TIMIDITY=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_OPUS=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_VORBIS=STB -DSDL${SDL_MAJOR_VERSION}MIXER_WAVPACK=OFF ..
         cmake --build . -j 4 --config Release
-        cmake --install build --config Release --prefix $SDL_MIXER_DIR
+        cmake --install . --config Release --prefix $SDL_MIXER_DIR
 
         CheckSuccess("Build SDL mixer")
 
