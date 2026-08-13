@@ -12,8 +12,8 @@ if ("${env:COMPILER}" -eq "msvc") {
     cmake -G "Visual Studio 18 2026" -A x64 -DAV1_VIDEO_SUPPORT=ON $CMAKE_SDL_VERSION "$CMAKE_SDL_PREFIX" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     cmake --build . -j 4 --config RelWithDebInfo
 } elseif ("${env:COMPILER}" -eq "msvc-arm64") {
-    cmake -G "Ninja" -DAV1_VIDEO_SUPPORT=ON $CMAKE_SDL_VERSION "$CMAKE_SDL_PREFIX" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-    ninja
+    cmake -G "Visual Studio 18 2026" -A ARM64 -DAV1_VIDEO_SUPPORT=ON $CMAKE_SDL_VERSION "$CMAKE_SDL_PREFIX" -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    cmake --build . -j 4 --config RelWithDebInfo
 } elseif ("${env:COMPILER}" -eq "mingw-32") {
     $env:path = "D:\msys64\mingw32\bin;${env:path}"
     cmake -G "MinGW Makefiles" -DAV1_VIDEO_SUPPORT=ON $CMAKE_SDL_VERSION "$CMAKE_SDL_PREFIX" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc.exe -DCMAKE_MAKE_PROGRAM=mingw32-make.exe ..
