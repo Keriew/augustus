@@ -1,5 +1,5 @@
 name: Build Augustus
-on: 
+on:
   push:
     paths-ignore:
       - '**.md'
@@ -56,7 +56,7 @@ jobs:
             os: macos-latest
             cache-key: macos
             SDL_VERSION: 2.32.10
-            SDL_MIXER_VERSION: 2.8.2
+            SDL_MIXER_VERSION: 2.8.1
             BUILD_TARGET: mac
             DEPLOY: mac
           - name: iOS
