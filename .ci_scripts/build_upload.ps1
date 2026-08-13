@@ -36,7 +36,7 @@ if ("${env:COMPILER}" -eq "msvc") {
     CopyFile build/augustus.exe .
     CopyFile build/augustus.pdb .
     CopyFile SDL${SDL_MAJOR_VERSION}-${env:SDL_VERSION}\build\Release\SDL${SDL_MAJOR_VERSION}.dll .
-    CopyFile ext\SDL$SDL_MAJOR_VERSION\SDL${SDL_MAJOR_VERSION}_mixer\SDL${SDL_MAJOR_VERSION}_mixer.dll .
+    CopyFile SDL${SDL_MAJOR_VERSION}_mixer-${env:SDL_VERSION}\build\Release\SDL${SDL_MAJOR_VERSION}_mixer.dll .
 } elseif ("${env:COMPILER}" -eq "mingw-32") {
     $suffix = "windows"
     build/cv2pdb.exe build/augustus.exe
