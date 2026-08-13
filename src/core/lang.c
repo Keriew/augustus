@@ -679,6 +679,8 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_EDITOR_TOOL_OUTSKIRTS_REMOVE);
             case TOOL_SELECT_LAND:
                 return translation_for(TR_EDITOR_SELECT_LAND);
+            case TOOL_SELECT_OFFSET:
+                return translation_for(TR_EDITOR_SELECT_OFFSET);
             case TOOL_NATIVE_FIELD: // fix og spelling mistake "native feild"
                 return lang_get_string(41, BUILDING_NATIVE_CROPS);
             default:
