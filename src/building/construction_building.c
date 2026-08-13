@@ -136,7 +136,7 @@ int building_construction_prepare_terrain(grid_slice *grid_slice, clear_mode cle
                 break;
         }
         if (map_terrain_is(g_offset, terrain_mask_to_remove)) {
-            total_cost += (cost == COST_FREE) ? 0 : 3; // base cost per tile is 50% more than regular clear
+            total_cost += (cost == COST_FREE) ? 0 : model_get_building(BUILDING_REPAIR_LAND)->cost; // base cost per tile is the cost of repair land
             if (cost != COST_MEASURE) {
                 // Auto-clear of vegetation persists through undo (preview restore + user undo).
                 // Other clear modes (clear-land tool, rubble, force) keep normal restore-on-undo.
@@ -633,12 +633,8 @@ int building_construction_place_building(building_type type, int x, int y, int e
         }
     }
     if (type == BUILDING_TOWER) {
-        if (!map_terrain_all_tiles_in_radius_are(x, y, size, 0, TERRAIN_WALL)) {
+        if (!check_gatehouse_tiles(grid_offset)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
-            return 0;
-        }
-        if (!map_terrain_all_tiles_in_radius_are(x, y, 2, 0, TERRAIN_BUILDING)) {
-            city_warning_show(WARNING_WALL_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
         if (!building_orientation) {

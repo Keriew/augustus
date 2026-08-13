@@ -129,6 +129,12 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.font_lookup[ASSET_FONT_SQ_BRACKET_RIGHT] = assets_get_image_id("UI", "rightbracket_white_l");
     data.font_lookup[ASSET_FONT_CRLY_BRACKET_LEFT] = assets_get_image_id("UI", "curlybracket_white_left");
     data.font_lookup[ASSET_FONT_CRLY_BRACKET_RIGHT] = assets_get_image_id("UI", "curlybracket_white_right");
+    data.font_lookup[ASSET_FONT_ABSTRACT_CARET_SYMBOL] = assets_get_image_id("UI", "abstract_caret_symbol");
+
+    // Tile data assets
+    data.asset_lookup[ASSET_UI_FOUNTAIN_RANGE] = assets_get_image_id("UI", "Water_Range");
+    data.asset_lookup[ASSET_UI_RESERVOIR_RANGE] = assets_get_image_id("UI", "Reservoir_Range_Overlay_Icon");
+    data.asset_lookup[ASSET_UI_GRID] = assets_get_image_id("UI", "Grid_Full");
 }
 
 int assets_load_single_group(const char *file_name, color_t **main_images, int *main_image_widths)

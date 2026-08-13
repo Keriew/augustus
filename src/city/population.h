@@ -86,4 +86,6 @@ int city_population_percentage_in_tents_shacks(void);
 
 int city_population_percentage_in_villas_palaces(void);
 
+int city_population_count_at_level(int level);
+
 #endif // CITY_POPULATION_H

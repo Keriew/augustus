@@ -56,6 +56,7 @@ static void game_cheat_disable_legions_consumption(uint8_t *);
 static void game_cheat_disable_invasions(uint8_t *);
 static void game_cheat_change_weather(uint8_t *);
 static void game_cheat_destroy_building(uint8_t *);
+static void game_cheat_change_monument_resources(uint8_t *args);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -77,7 +78,8 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_disable_legions_consumption,
     game_cheat_disable_invasions,
     game_cheat_change_weather,
-    game_cheat_destroy_building
+    game_cheat_destroy_building,
+    game_cheat_change_monument_resources
 };
 
 static const char *commands[] = {
@@ -85,7 +87,7 @@ static const char *commands[] = {
     "startinvasion",            // syntax: startinvasion <invasion_type> <size> <invasion_point>
     "nextyear",
     "blessing",                 // syntax: blessing <god_id>
-    "showtooltip",              // syntax: showtooltip <type/dsiabled>
+    "showtooltip",              // syntax: showtooltip <type/disabled>
     "killall",
     "finishmonuments",
     "monumentphase",            // syntax: monumentphase <phase>
@@ -99,8 +101,9 @@ static const char *commands[] = {
     "ihaveanarmy",
     "breadandfish",
     "leavemealone",
-    "weather",                   // syntax: weather <weather_type> <intensity>
-    "destroy"                   // syntax: destroy <building_id> <destruction_type>
+    "weather",                  // syntax: weather <weather_type> <intensity>
+    "destroy",                  // syntax: destroy <building_id> <destruction_type>
+    "arbeitszeitbetrug"         // syntax: arbeitszeitbetrug <building_type> <stage> <resource> <amount>
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -369,7 +372,7 @@ static void game_cheat_change_weather(uint8_t *args)
 
 static void game_cheat_destroy_building(uint8_t *args)
 {
-    //COLLAPSE = 0, FIRE = 1, NO_RUBBLE = 2, EARTHQUAKE = 3
+    // COLLAPSE = 0, FIRE = 1, NO_RUBBLE = 2, EARTHQUAKE = 3
     int destroy_type = 0;
     int building_id = 0;
     int index = parse_integer(args, &building_id);
@@ -391,6 +394,22 @@ static void game_cheat_destroy_building(uint8_t *args)
             break;
     }
     show_warning(TR_CHEAT_DESTROYED_BUILDING);
+}
+
+static void game_cheat_change_monument_resources(uint8_t *args)
+{
+    int monument = 0;
+    int stage = 0;
+    int resource = 0;
+    int amount = 0;
+    int index = parse_integer(args, &monument);
+    index += parse_integer(args + index, &stage);
+    index += parse_integer(args + index, &resource);
+    parse_integer(args + index, &amount);
+    stage--;
+
+    building_monument_stage_resource_set(monument, stage, resource, amount);
+    show_warning(TR_CHEAT_CHANGED_MONUMENT_RESOURCES);
 }
 
 void game_cheat_parse_command(uint8_t *command)

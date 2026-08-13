@@ -51,7 +51,7 @@ resource_type window_empire_sidebar_sort_get_selected_filter_resource(void);
 int window_empire_sidebar_sort_get_hovered_sorting_button(void);
 int window_empire_sidebar_sort_get_sorting_reversed(void);
 int window_empire_sidebar_sort_get_expanded_main(void);
-int window_empire_sidebar_sort_count_trade_resources(const empire_city *city, int is_sell);
+int window_empire_sidebar_sort_count_trade_resources(const empire_city *city, int row_type);
 void window_empire_sidebar_sort_set_current_sorting(int sorting);
 void window_empire_sidebar_sort_set_current_filtering(int filtering);
 void window_empire_sidebar_sort_set_selected_filter_resource(resource_type resource);

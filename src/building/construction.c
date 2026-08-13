@@ -76,7 +76,6 @@ static struct {
         int rock;
         int tree;
         int water;
-        int wall;
         int distant_water;
         int open_water;
     } required_terrain;
@@ -661,7 +660,6 @@ void building_construction_set_type(building_type type, int setup_rotation)
     data.cost_preview = 0;
 
     if (type != BUILDING_NONE) {
-        data.required_terrain.wall = 0;
         data.required_terrain.water = 0;
         data.required_terrain.tree = 0;
         data.required_terrain.rock = 0;
@@ -690,9 +688,6 @@ void building_construction_set_type(building_type type, int setup_rotation)
                 break;
             case BUILDING_CLAY_PIT:
                 data.required_terrain.water = 1;
-                break;
-            case BUILDING_TOWER:
-                data.required_terrain.wall = 1;
                 break;
             case BUILDING_LIGHTHOUSE:
                 data.required_terrain.open_water = 1;
@@ -1087,7 +1082,7 @@ void building_construction_update(int x, int y, int grid_offset)
             data.draw_as_constructing = 1;
         }
     } if (data.required_terrain.meadow || data.required_terrain.rock || data.required_terrain.tree ||
-        data.required_terrain.water || data.required_terrain.wall || data.required_terrain.distant_water
+        data.required_terrain.water || data.required_terrain.distant_water
         || data.required_terrain.open_water) {
         // never mark as constructing
     } else {
@@ -1221,6 +1216,17 @@ void building_construction_place(void)
 
     int placement_cost = model_get_building(type)->cost;
     int repaired_buildings = 0;
+
+    if (type == BUILDING_TOWER) {
+        for (int x = x_end; x <= x_end + 1; x++) {
+            for (int y = y_end; y <= y_end + 1; y++) {
+                if (!map_terrain_is(map_grid_offset(x, y), TERRAIN_WALL)) {
+                    placement_cost += model_get_building(BUILDING_WALL)->cost;
+                }
+            }
+        }
+    }
+
     if (type == BUILDING_CLEAR_LAND) {
         // BUG in original (keep this behaviour): if confirmation has to be asked (bridge/fort),
         // the previous cost is deducted from treasury and if user chooses 'no', they still pay for removal.
@@ -1395,11 +1401,6 @@ int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
     } else if (data.required_terrain.water) {
         if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 3, TERRAIN_WATER)) {
             set_warning(warning_id, WARNING_WATER_NEEDED);
-            return 0;
-        }
-    } else if (data.required_terrain.wall) {
-        if (!map_terrain_all_tiles_in_radius_are(x, y, 2, 0, TERRAIN_WALL)) {
-            set_warning(warning_id, WARNING_WALL_NEEDED);
             return 0;
         }
     } else if (data.required_terrain.distant_water) {

@@ -221,10 +221,14 @@ int map_has_road_access_monument_construction(int x, int y, int size)
     find_minimum_road_tile(x + half_size, y, 1, &min_value, &min_grid_offset);
     find_minimum_road_tile(x, y + half_size, 1, &min_value, &min_grid_offset);
     if (even_size) {
-        find_minimum_road_tile(x + 1, y + size - 1, 1, &min_value, &min_grid_offset);
-        find_minimum_road_tile(x + size - 1, y + 1, 1, &min_value, &min_grid_offset);
-        find_minimum_road_tile(x + 1, y, 1, &min_value, &min_grid_offset);
-        find_minimum_road_tile(x, y + 1, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x + half_size - 1, y, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x + half_size, y, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x + half_size - 1, y + size - 1, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x + half_size, y + size - 1, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x, y + half_size - 1, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x, y + half_size, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x + size - 1, y + half_size - 1, 1, &min_value, &min_grid_offset);
+        find_minimum_road_tile(x + size - 1, y + half_size, 1, &min_value, &min_grid_offset);
     }
     return min_value < 12;
 }
@@ -481,10 +485,14 @@ int map_road_to_largest_network_monument_construction(int x, int y, int size, in
     check_road_to_largest_network_monument(x, y + half_size, &min_index, &min_grid_offset);
 
     if (even_size) {
-        check_road_to_largest_network_monument(x + 1, y + size - 1, &min_index, &min_grid_offset);
-        check_road_to_largest_network_monument(x + size - 1, y + 1, &min_index, &min_grid_offset);
-        check_road_to_largest_network_monument(x + 1, y, &min_index, &min_grid_offset);
-        check_road_to_largest_network_monument(x, y + 1, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x + half_size - 1, y, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x + half_size, y, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x + half_size - 1, y + size - 1, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x + half_size, y + size - 1, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x, y + half_size - 1, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x, y + half_size, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x + size - 1, y + half_size - 1, &min_index, &min_grid_offset);
+        check_road_to_largest_network_monument(x + size - 1, y + half_size, &min_index, &min_grid_offset);
     }
 
     if (min_index < 12) {
