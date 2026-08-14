@@ -616,6 +616,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
     }
     if (!exact_coordinates) {
         building_construction_offset_start_from_orientation(&x, &y, size);
+        grid_offset = map_grid_offset(x, y);
     }
     // Hide vegetation from the placement-validation checks below; if all checks
     // succeed we'll auto-clear the actual footprint just before creating the
@@ -633,8 +634,7 @@ int building_construction_place_building(building_type type, int x, int y, int e
         }
     }
     if (type == BUILDING_TOWER) {
-        int tower_grid_offset = map_grid_offset(x, y);
-        if (!check_gatehouse_tiles(tower_grid_offset)) {
+        if (!check_gatehouse_tiles(grid_offset)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
