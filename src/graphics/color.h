@@ -72,6 +72,7 @@ typedef uint32_t color_t;
 #define COLOR_MASK_FOOTPRINT_GHOST 0x22ffffff
 #define COLOR_MASK_BUILDING_GHOST 0xa7ffffff
 #define COLOR_MASK_BUILDING_GHOST_RED 0xa7ff8878
+#define COLOR_MASK_OUTSKIRTS 0xff668866
 
 #define COLOR_MASK_ORANGE_GOLD 0x66ffcc33
 #define COLOR_MASK_AMBER 0x66ffb300
@@ -169,5 +170,11 @@ typedef uint32_t color_t;
         COLOR_BLEND_CHANNEL(src, dst, alpha_src, alpha_dst, alpha_mix, COLOR_CHANNEL_RED) | \
         COLOR_BLEND_CHANNEL(src, dst, alpha_src, alpha_dst, alpha_mix, COLOR_CHANNEL_GREEN) | \
         COLOR_BLEND_CHANNEL(src, dst, alpha_src, alpha_dst, alpha_mix, COLOR_CHANNEL_BLUE))
+
+#define COLOR_MIX_COLORS(color_a, color_b) \
+        (((COLOR_COMPONENT(color_a, COLOR_BITSHIFT_ALPHA) + COLOR_COMPONENT(color_b, COLOR_BITSHIFT_ALPHA)) / 2 << COLOR_BITSHIFT_ALPHA) | \
+        ((COLOR_COMPONENT(color_a, COLOR_BITSHIFT_RED) + COLOR_COMPONENT(color_b, COLOR_BITSHIFT_RED)) / 2 << COLOR_BITSHIFT_RED) | \
+        ((COLOR_COMPONENT(color_a, COLOR_BITSHIFT_GREEN) + COLOR_COMPONENT(color_b, COLOR_BITSHIFT_GREEN)) / 2 << COLOR_BITSHIFT_GREEN) | \
+        ((COLOR_COMPONENT(color_a, COLOR_BITSHIFT_BLUE) + COLOR_COMPONENT(color_b, COLOR_BITSHIFT_BLUE)) / 2 << COLOR_BITSHIFT_BLUE))
 
 #endif // GRAPHICS_COLOR_H

@@ -137,6 +137,9 @@ static void draw_footprint(int x, int y, int grid_offset)
     if (event_tiles[grid_offset][0] != -1) {
         color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
     }
+    if (map_property_is_outskirts(grid_offset)) {
+        color_mask = color_mask ? COLOR_MIX_COLORS(COLOR_MASK_OUTSKIRTS, color_mask) : COLOR_MASK_OUTSKIRTS;
+    }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
@@ -175,6 +178,9 @@ static void draw_top(int x, int y, int grid_offset)
     color_t color_mask = 0;
     if (event_tiles[grid_offset][0] != -1) {
         color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
+    }
+    if (map_property_is_outskirts(grid_offset)) {
+        color_mask = color_mask ? COLOR_MIX_COLORS(COLOR_MASK_OUTSKIRTS, color_mask) : COLOR_MASK_OUTSKIRTS;
     }
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 }
