@@ -82,8 +82,8 @@ static void limit_and_sort_list(void)
 
 static void update_invasion_list(void)
 {
-    int current_invasions = scenario_invasion_count_total();
-    if ((unsigned int) current_invasions != data.total_invasions) {
+    unsigned int current_invasions = scenario_invasion_count_total();
+    if (current_invasions != data.total_invasions) {
         free(data.invasions);
         data.invasions = 0;
         if (current_invasions) {
@@ -98,7 +98,9 @@ static void update_invasion_list(void)
         data.total_invasions = current_invasions;
     }
     limit_and_sort_list();
-    grid_box_update_total_items(&invasion_buttons, data.invasions_in_use);
+    if (grid_box_get_total_items(&invasion_buttons) != data.invasions_in_use) {
+        grid_box_update_total_items(&invasion_buttons, data.invasions_in_use);
+    }
 }
 
 static void draw_background(void)
