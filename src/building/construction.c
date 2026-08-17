@@ -918,6 +918,17 @@ void building_construction_update(int x, int y, int grid_offset)
     map_property_clear_constructing_and_deleted();
     building_construction_dry_run_vegetation_reset();
     int current_cost = model_get_building(type)->cost;
+
+    if (type == BUILDING_TOWER) {
+        for (int xx = x; xx <= x + 1; xx++) {
+            for (int yy = y; yy <= y + 1; yy++) {
+                if (!map_terrain_is(map_grid_offset(xx, yy), TERRAIN_WALL)) {
+                    current_cost += model_get_building(BUILDING_WALL)->cost;
+                }
+            }
+        }
+    }
+
     int repaired_buildings = 0;
     if (type == BUILDING_CLEAR_LAND) {
         int items_placed = last_items_cleared = building_construction_clear_select(data.start.x, data.start.y, x, y);
