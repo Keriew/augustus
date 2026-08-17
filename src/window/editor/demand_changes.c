@@ -189,7 +189,7 @@ static void draw_demand_change_button(const grid_box_item *item)
     int COL_YEAR = 5;
     int COL_SCENARIO = 45;
     int COL_RESOURCE = 140;
-    int COL_AMOUNT = 170;
+    int COL_AMOUNT = 165;
     int COL_BUY_SELL = 280;
     int COL_CITY = 380;
 
