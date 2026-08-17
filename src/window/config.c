@@ -1211,6 +1211,9 @@ static void set_player_name_width(void)
 
 static void fetch_original_config_values(void)
 {
+    data.config_values[CONFIG_ORIGINAL_FULLSCREEN].original_value = setting_fullscreen();
+    data.config_values[CONFIG_ORIGINAL_FULLSCREEN].new_value = setting_fullscreen();
+
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].original_value = game_speed_get_index(setting_game_speed());
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value = game_speed_get_index(setting_game_speed());
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].original_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
