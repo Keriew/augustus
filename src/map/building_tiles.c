@@ -252,7 +252,7 @@ static void adjust_to_absolute_xy(int *x, int *y, int size)
     }
 }
 
-int map_building_tiles_mark_construction(int x, int y, int size, int terrain, int absolute_xy)
+int map_building_tiles_mark_construction(int x, int y, int size, int terrain, int absolute_xy, int is_military)
 {
     if (!absolute_xy) {
         adjust_to_absolute_xy(&x, &y, size);
@@ -263,7 +263,8 @@ int map_building_tiles_mark_construction(int x, int y, int size, int terrain, in
     for (int dy = 0; dy < size; dy++) {
         for (int dx = 0; dx < size; dx++) {
             int grid_offset = map_grid_offset(x + dx, y + dy);
-            if (map_terrain_is(grid_offset, terrain & TERRAIN_NOT_CLEAR) || map_has_figure_at(grid_offset)) {
+            if (map_terrain_is(grid_offset, terrain & TERRAIN_NOT_CLEAR) || map_has_figure_at(grid_offset) ||
+                (is_military && map_property_is_outskirts(grid_offset))) {
                 return 0;
             }
         }

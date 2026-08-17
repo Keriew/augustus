@@ -275,7 +275,8 @@ void building_construction_toggle_auto_cycle(auto_cycle_group group)
 
 static void mark_construction(int x, int y, int size, int terrain, int absolute_xy)
 {
-    if (map_building_tiles_mark_construction(x, y, size, terrain, absolute_xy)) {
+    int is_military = building_is_military(data.type);
+    if (map_building_tiles_mark_construction(x, y, size, terrain, absolute_xy, is_military)) {
         data.draw_as_constructing = 1;
     }
 }
@@ -402,7 +403,7 @@ static int place_wall(int x_start, int y_start, int x_end, int y_end, int measur
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (!map_terrain_is(grid_offset, blocking_mask)) {
+            if (!map_terrain_is(grid_offset, blocking_mask) && !map_property_is_outskirts(grid_offset)) {
                 items_placed++;
                 building_construction_auto_clear_vegetation_at(grid_offset, measure_only);
                 map_tiles_set_wall(x, y);
@@ -453,7 +454,7 @@ static int plot_draggable_building(int x_start, int y_start, int x_end, int y_en
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (!map_terrain_is(grid_offset, terrain)) {
+            if (!map_terrain_is(grid_offset, terrain) && !(map_property_is_outskirts(grid_offset) && building_is_military(data.type))) {
                 building_construction_auto_clear_vegetation_at(grid_offset, 1);
                 map_property_mark_constructing(grid_offset);
                 items_placed++;
@@ -485,7 +486,8 @@ static int place_draggable_building(int x_start, int y_start, int x_end, int y_e
     for (int y = y_min; y <= y_max; y++) {
         for (int x = x_min; x <= x_max; x++) {
             int grid_offset = map_grid_offset(x, y);
-            if (!map_terrain_is(grid_offset, blocking_mask)) {
+            if (!map_terrain_is(grid_offset, blocking_mask) &&
+                !(map_property_is_outskirts(grid_offset) && building_is_military(data.type))) {
                 building_construction_auto_clear_vegetation_at(grid_offset, 0);
                 items_placed++;
                 building *b = building_create(type, x, y);
@@ -496,7 +498,8 @@ static int place_draggable_building(int x_start, int y_start, int x_end, int y_e
                 }
                 game_undo_add_building(b);
                 map_building_tiles_add(b->id, b->x, b->y, b->size, building_image_get(b), TERRAIN_BUILDING);
-            } else if (!map_terrain_is(grid_offset, blocking_mask_except_road)) {
+            } else if (!map_terrain_is(grid_offset, blocking_mask_except_road) &&
+                !(map_property_is_outskirts(grid_offset) && building_is_military(data.type))) {
                 if (gate_type) {
                     building_construction_auto_clear_vegetation_at(grid_offset, 0);
                     items_placed++;

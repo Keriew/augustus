@@ -313,6 +313,11 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
         }
     }
 
+    if (map_property_is_outskirts(grid_offset)) {
+        color_mask = color_mask != COLOR_MASK_NONE ? COLOR_MIX_COLORS(COLOR_MASK_OUTSKIRTS, color_mask) :
+        COLOR_MASK_OUTSKIRTS;
+    }
+
     return color_mask;
 }
 

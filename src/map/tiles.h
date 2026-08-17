@@ -72,6 +72,8 @@ int map_tiles_are_clear_with_terrain_exception(int x, int y, int size, int disal
 
 int map_tiles_are_clear(int x, int y, int size, int disallowed_terrain, int check_figure);
 
+int map_tiles_exists_outskirts(int x, int y, int size);
+
 void map_tiles_add_entry_exit_flags(void);
 void map_tiles_remove_entry_exit_flags(void);
 
