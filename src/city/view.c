@@ -66,9 +66,7 @@ static void check_camera_boundaries(void)
     } else {
         if (data.camera.tile.x < x_min - allowance - 1) {
             data.camera.tile.x = x_min - allowance - 1;
-            int zoom_adjust = calc_adjust_with_percentage(data.viewport.width_pixels + 2, data.scale) / 2 % TILE_WIDTH_PIXELS;
-            zoom_adjust = allowance ? zoom_adjust : 0;
-            data.camera.pixel.x = 0 - zoom_adjust;
+            data.camera.pixel.x = 0;
         }
         int max_x_tile = VIEW_X_MAX - x_min - data.viewport.width_tiles + allowance;
         int max_x_pixel = TILE_WIDTH_PIXELS -
@@ -88,9 +86,7 @@ static void check_camera_boundaries(void)
 
         if (data.camera.tile.y < min_y_tile) {
             data.camera.tile.y = min_y_tile;
-            int percent_adjust = calc_adjust_with_percentage(data.viewport.height_pixels, data.scale);
-            int y_zoom_adjust = ((percent_adjust + TILE_HEIGHT_PIXELS) / 2) % TILE_HEIGHT_PIXELS;
-            data.camera.pixel.y = -(allowance ? y_zoom_adjust : 0);
+            data.camera.pixel.y = 0;
         }
         int max_y_tile = (VIEW_Y_MAX - y_min - data.viewport.height_tiles + allowance * 2) & ~1;
         int max_y_pixel = TILE_HEIGHT_PIXELS -
