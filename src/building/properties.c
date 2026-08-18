@@ -3,6 +3,7 @@
 #include "assets/assets.h"
 #include "building/building.h"
 #include "core/image_group.h"
+#include "game/save_version.h"
 #include "sound/city.h"
 #include "translation/translation.h"
 #include "type.h"
@@ -12,10 +13,13 @@
 
 #define NUM_HOUSES 20
 
-#define SIZE_BUILDINGS sizeof(model_building) * BUILDING_TYPE_MAX
-#define SIZE_HOUSES sizeof(model_house) * NUM_HOUSES
+#define SIZE_BUILDINGS (sizeof(model_building) * BUILDING_TYPE_MAX)
+#define SIZE_HOUSES (sizeof(model_house) * NUM_HOUSES)
 
-#define BUFFER_SIZE SIZE_BUILDINGS + SIZE_HOUSES
+#define BUFFER_SIZE (SIZE_BUILDINGS + SIZE_HOUSES)
+
+#define BUILDINGS_SIZE_LEGACY (212 * 6 * 4)
+#define HOUSES_SIZE_LEGACY (20 * 17 * 4)
 
 #define UNLIMITED 1000000000
 #define NEGATIVE_UNLIMITED -1000000000
@@ -2324,18 +2328,28 @@ void model_reset(void)
 
 void model_save_model_data(buffer *buf)
 {
-    uint8_t *buf_data = malloc(BUFFER_SIZE);
+    int buf_size = BUFFER_SIZE + 8;
+    uint8_t *buf_data = malloc(buf_size);
 
-    buffer_init(buf, buf_data, BUFFER_SIZE);
+    buffer_init(buf, buf_data, buf_size);
+    buffer_write_i32(buf, SIZE_BUILDINGS);
+    buffer_write_i32(buf, SIZE_HOUSES);
 
     buffer_write_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
     buffer_write_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
 }
 
-void model_load_model_data(buffer *buf)
+void model_load_model_data(buffer *buf, int scenario_version)
 {
-    buffer_read_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
-    buffer_read_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
+    int buildings_size = BUILDINGS_SIZE_LEGACY;
+    int houses_size = HOUSES_SIZE_LEGACY;
+    int contains_buffer_size = scenario_version > SCENARIO_LAST_NO_BUFFER_SIZE_IN_MODEL_DATA;
+    if (contains_buffer_size) {
+        buildings_size = buffer_read_i32(buf);
+        houses_size = buffer_read_i32(buf);
+    }
+    buffer_read_raw(buf, buildings, buildings_size);
+    buffer_read_raw(buf, houses, houses_size);
 }
 
 model_house *model_get_house(house_level level)
