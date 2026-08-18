@@ -1548,6 +1548,8 @@
 	<image id="Scrollbar_Up_02" src="Scrollbar_Up_02"/>
 	<image id="Scrollbar_Up_03" src="Scrollbar_Up_03"/>
 	<image id="Scrollbar_Up_04" src="Scrollbar_Up_04"/>
+	<image id="Scrollbar_Lines_D_01" src="Scrollbar_Lines_D_01"/>
+	<image id="Scrollbar_Lines_L_01" src="Scrollbar_Lines_L_01"/>
 	<image id="Scrollbar_Middle_01" src="Scrollbar_Middle_01"/>
 	<image id="Scrollbar_Middle_02" src="Scrollbar_Middle_02"/>
 	<image id="Scrollbar_Middle_03" src="Scrollbar_Middle_03"/>
@@ -1574,6 +1576,9 @@
 	<image id="Scrollbar_Plus_04" src="Scrollbar_Plus_04"/>
 	<image id="Scrollbar_Dark_End" src="Scrollbar_Dark_End"/>
 	<image id="Scrollbar_Dark_Mid" src="Scrollbar_Dark_Mid"/>
+	<image id="Scrollbar_Dark_Start">
+		<layer src="Scrollbar_Dark_End" invert="vertical"/>
+	</image>
 	<!-- Note: Assetss for drawing custom-dimension main-menu-style buttons -->
 	<image id="Button_Menu_Left_Panel" width="13" height="19">
 		<layer group="15" image="0" x ="-3" y="-3"/>

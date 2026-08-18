@@ -268,6 +268,7 @@ static config_widget ui_widgets_by_category[CATEGORY_UI_COUNT][MAX_WIDGETS] = {
         {TYPE_CHECKBOX, CONFIG_UI_DISABLE_RIGHT_CLICK_MAP_DRAG, TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_INVERSE_MAP_DRAG, TR_CONFIG_UI_INVERSE_MAP_DRAG, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_CHECKBOX, CONFIG_UI_SCROLL_CAMERA_UNLOCKED, TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
+        {TYPE_CHECKBOX, CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, NULL, 0, 1, ITEM_BASE_H, CHECKBOX_MARGIN},
         {TYPE_NONE}
     },
     // Building
@@ -469,8 +470,17 @@ typedef struct {
     int text_w;
 } content_span;
 
-static scrollbar_type scrollbar = { 580,ITEM_Y_OFFSET,ITEM_BASE_H * NUM_VISIBLE_FALLBACK,
-    560,NUM_VISIBLE_FALLBACK,on_scroll, 0, 4
+static scrollbar_type scrollbar =
+{
+    .x = 580,
+    .y = ITEM_Y_OFFSET,
+    .height = ITEM_BASE_H * NUM_VISIBLE_FALLBACK,
+    .scrollable_width = 560,
+    .elements_in_view = NUM_VISIBLE_FALLBACK,
+    .on_scroll_callback = on_scroll,
+    .has_y_margin = 0,
+    .dot_padding = 4,
+    .decorate_scrollbar = 1
 };
 
 static const resolution resolutions[] = {
@@ -1202,6 +1212,9 @@ static void set_player_name_width(void)
 
 static void fetch_original_config_values(void)
 {
+    data.config_values[CONFIG_ORIGINAL_FULLSCREEN].original_value = setting_fullscreen();
+    data.config_values[CONFIG_ORIGINAL_FULLSCREEN].new_value = setting_fullscreen();
+
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].original_value = game_speed_get_index(setting_game_speed());
     data.config_values[CONFIG_ORIGINAL_GAME_SPEED].new_value = game_speed_get_index(setting_game_speed());
     data.config_values[CONFIG_ORIGINAL_ENABLE_MUSIC].original_value = setting_sound(SOUND_TYPE_MUSIC)->enabled;
@@ -1995,7 +2008,6 @@ static void draw_foreground(void)
 
     //  scrollbar (if needed)
     if (data.layout.has_scrollbar) {
-        inner_panel_draw(scrollbar.x + 4, scrollbar.y + 28, 2, scrollbar.height / BLOCK_SIZE - 3);
         scrollbar_draw(&scrollbar);
     }
     //  category list box

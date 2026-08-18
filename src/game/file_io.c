@@ -471,6 +471,9 @@ static void get_version_data(savegame_version_data *version_data, savegame_versi
         version_data->piece_sizes.city_data -= sizeof(int32_t) * 6 * 2;
         version_data->piece_sizes.city_data += total_new_resources * 18;
         version_data->piece_sizes.city_data += total_new_food * 4;
+        if (version > SAVE_GAME_LAST_NO_FIXED_CITY_DATA_SIZE) {
+            version_data->piece_sizes.city_data += 16 + 12 + 8 + 8;
+        }
     }
     if (version <= SAVE_GAME_LAST_STATIC_SCENARIO_OBJECTS) {
         // Bug - this should have acconted the new resource types, but since it hasn't before,

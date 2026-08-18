@@ -1487,9 +1487,17 @@ static void draw_trade_resource(resource_type r, int trade_max, int x, int y)
 
 void window_empire_draw_resource_shields(int trade_max, int x_offset, int y_offset)
 {
-    int num_bronze_shields = (trade_max % 100) / 20 + 1;
-    if (trade_max >= 600) {
+    int num_gold_shields = trade_max / 100;
+    int remainder = (trade_max % 100);
+    int num_bronze_shields = (remainder + 10) / 20;
+
+    if (num_bronze_shields > 5) {
         num_bronze_shields = 5;
+    }
+
+    if (num_gold_shields > 7) {
+        num_gold_shields = 7;
+        num_bronze_shields = 0;
     }
 
     int top_left_x;
@@ -1507,10 +1515,6 @@ void window_empire_draw_resource_shields(int trade_max, int x_offset, int y_offs
         image_draw(bronze_shield, top_left_x + pt.x, top_left_y + pt.y, COLOR_MASK_NONE, SCALE_NONE);
     }
 
-    int num_gold_shields = trade_max / 100;
-    if (num_gold_shields > 5) {
-        num_gold_shields = 5;
-    }
     top_left_x = x_offset - 1;
     top_left_y = y_offset + 22;
     int gold_shield = assets_lookup_image_id(ASSET_GOLD_SHIELD);

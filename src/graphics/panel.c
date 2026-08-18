@@ -6,6 +6,7 @@
 #include "graphics/image.h"
 
 #define INNER_PANEL_MIN_SIZE (2 * BLOCK_SIZE)
+#define SCROLL_PANEL_WIDTH 24
 
 void outer_panel_draw(int x, int y, int width_blocks, int height_blocks)
 {
@@ -153,6 +154,27 @@ void bordered_panel_draw_colored(int x, int y, int width_px, int height_px, int 
     unbordered_panel_draw_colored(x, y, width_blocks, height_blocks, color_bg);
     graphics_reset_clip_rectangle();
     button_border_draw_colored(x, y, width_px, height_px, has_focus, color_border);
+}
+
+void scrollbar_panel_draw(int x, int y, int height_px)
+{
+    if (height_px <= BLOCK_SIZE * 2) { // minimum height to draw the panel is 2 blocks - start and end.
+        return;
+    }
+    graphics_set_clip_rectangle(x, y, SCROLL_PANEL_WIDTH, height_px);
+    int main_blocks = (height_px - (2 * BLOCK_SIZE) + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    int start_id = assets_lookup_image_id(ASSET_UI_SCROLL_BG_01);
+    int mid_id = assets_lookup_image_id(ASSET_UI_SCROLL_BG_02);
+    int end_id = assets_lookup_image_id(ASSET_UI_SCROLL_BG_03);
+    int drawing_y = y;
+    image_draw(start_id, x, y, COLOR_MASK_NONE, SCALE_NONE);
+    for (int yy = 1; yy < main_blocks; yy++) {
+        image_draw(mid_id, x, drawing_y, COLOR_MASK_NONE, SCALE_NONE);
+        drawing_y += BLOCK_SIZE;
+    }
+    image_draw(end_id, x, drawing_y, COLOR_MASK_NONE, SCALE_NONE);
+    graphics_reset_clip_rectangle();
 }
 
 void inner_panel_draw(int x, int y, int width_blocks, int height_blocks)

@@ -6,6 +6,15 @@
 #include "graphics/image_button.h"
 #include "input/mouse.h"
 
+#define LEGACY_SCROLL_BUTTON_HEIGHT 26
+#define LEGACY_SCROLL_BUTTON_WIDTH 39
+#define LEGACY_SCROLL_DOT_SIZE 25
+#define SCROLL_BUTTON_SIDE 24 // square
+#define SCROLL_BOX_HEIGHT 48
+#define SCROLL_BOX_WIDTH 24
+#define LEGACY_TOTAL_SCROLL_BUTTON_HEIGHT (2 * LEGACY_SCROLL_BUTTON_HEIGHT + LEGACY_SCROLL_DOT_SIZE)
+#define TOTAL_SCROLL_BUTTON_HEIGHT (2 * SCROLL_BUTTON_SIDE + SCROLL_BOX_HEIGHT)
+
 typedef struct {
     int x;
     int y;
@@ -19,12 +28,19 @@ typedef struct {
     unsigned int max_scroll_position;
     unsigned int scroll_position;
     int is_dragging_scrollbar_dot;
-    int scrollbar_dot_drag_offset;
+    int scrollbar_dot_drag_offset; // Exact position of the top of the thumb within its allowed travel
+    int scrollbar_dot_mouse_offset; // Exact position of the mouse within the scrollbar thumb while dragging
+    int scrollbar_dot_offset_from_mouse; // Keep a mouse-placed thumb pixel-stable after release
+    unsigned int scrollbar_dot_offset_scroll_position;
+    unsigned int scrollbar_dot_offset_max_scroll_position;
     int touch_drag_state;
     int position_on_touch;
-    
+    int legacy; // use legacy scrollbar graphics - config-managed
+    int decorate_scrollbar; // draw the bg panel behind the scrollbar
+
     image_button image_button_scroll_up;
     image_button image_button_scroll_down;
+    image_button image_button_scroll_dot;
 } scrollbar_type;
 
 /**

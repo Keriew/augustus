@@ -124,6 +124,13 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_TRADE_LEDGER_EXPORT] = assets_get_image_id("UI", "Trade_Ledger_Export");
     data.asset_lookup[ASSET_UI_TRADE_LEDGER_IMPORT] = assets_get_image_id("UI", "Trade_Ledger_Import");
     data.asset_lookup[ASSET_UI_RESOURCE_PICKER] = assets_get_image_id("UI", "resource_picker");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_UP] = assets_get_image_id("UI", "Scrollbar_Up_01");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_DOWN] = assets_get_image_id("UI", "Scrollbar_Down_01");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_MIDDLE] = assets_get_image_id("UI", "Scrollbar_Middle_01");
+    data.asset_lookup[ASSET_UI_SCROLL_BG_01] = assets_get_image_id("UI", "Scrollbar_Dark_Start");
+    data.asset_lookup[ASSET_UI_SCROLL_BG_02] = assets_get_image_id("UI", "Scrollbar_Dark_Mid");
+    data.asset_lookup[ASSET_UI_SCROLL_BG_03] = assets_get_image_id("UI", "Scrollbar_Dark_End");
+
     // font assets - keep last
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");
     data.font_lookup[ASSET_FONT_SQ_BRACKET_RIGHT] = assets_get_image_id("UI", "rightbracket_white_l");
