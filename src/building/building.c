@@ -802,6 +802,10 @@ void building_update_desirability(void)
 
         desirability += building_get_elevation_desirability_bonus(b->grid_offset);
 
+        if (map_tiles_exists_outskirts(b->x, b->y, b->size)) {
+            desirability += BUILDING_OUTSKIRTS_DESIRABILITY_MALUS;
+        }
+
         // Clamp before assigning to 8-bit signed int
         desirability = calc_bound(desirability, -100, 100);
 
