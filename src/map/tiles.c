@@ -758,6 +758,24 @@ int map_tiles_exists_outskirts(int x, int y, int size)
     return 0;
 }
 
+int map_tiles_find_nearest_non_outskirts(int x, int y)
+{
+    for (int radius = 0; radius <= 6; radius++) {
+        int x_min, y_min, x_max, y_max;
+        map_grid_get_area(x, y, 1, radius, &x_min, &y_min, &x_max, &y_max);
+
+        for (int yy = y_min; yy <= y_max; yy++) {
+            for (int xx = x_min; xx <= x_max; xx++) {
+                int grid_offset = map_grid_offset(xx, yy);
+                if (!map_property_is_outskirts(grid_offset)) {
+                    return radius;
+                }
+            }
+        }
+    }
+    return 6;
+}
+
 int map_tiles_highway_get_aqueduct_image(int grid_offset)
 {
     int aqueduct_image_id = assets_lookup_image_id(ASSET_AQUEDUCT_WITH_WATER);

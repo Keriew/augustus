@@ -26,6 +26,7 @@
 #include "map/point.h"
 #include "map/property.h"
 #include "map/terrain.h"
+#include "map/tiles.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/controller.h"
 #include "scenario/empire.h"
@@ -123,6 +124,8 @@ static void draw_footprint(int x, int y, int grid_offset)
         return;
     }
     // Valid grid_offset and leftmost tile -> draw
+    int map_x = map_grid_offset_to_x(grid_offset);
+    int map_y = map_grid_offset_to_y(grid_offset);
     color_t color_mask = 0;
     int image_id = map_image_at(grid_offset);
     if (draw_context.advance_water_animation &&
@@ -138,7 +141,9 @@ static void draw_footprint(int x, int y, int grid_offset)
         color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
     }
     if (map_property_is_outskirts(grid_offset)) {
-        color_mask = color_mask ? COLOR_MIX_COLORS(COLOR_MASK_OUTSKIRTS, color_mask) : COLOR_MASK_OUTSKIRTS;
+        int distance_to_non_outskirts = map_tiles_find_nearest_non_outskirts(map_x, map_y);
+        color_t faded_outskirts = COLOR_MASK_OUTSKIRTS_FADE(distance_to_non_outskirts);
+        color_mask = color_mask ? COLOR_MIX_COLORS(faded_outskirts, color_mask) : faded_outskirts;
     }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 
@@ -174,13 +179,17 @@ static void draw_top(int x, int y, int grid_offset)
     if (!map_property_is_draw_tile(grid_offset)) {
         return;
     }
+    int map_x = map_grid_offset_to_x(grid_offset);
+    int map_y = map_grid_offset_to_y(grid_offset);
     int image_id = map_image_at(grid_offset);
     color_t color_mask = 0;
     if (event_tiles[grid_offset][0] != -1) {
         color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
     }
     if (map_property_is_outskirts(grid_offset)) {
-        color_mask = color_mask ? COLOR_MIX_COLORS(COLOR_MASK_OUTSKIRTS, color_mask) : COLOR_MASK_OUTSKIRTS;
+        int distance_to_non_outskirts = map_tiles_find_nearest_non_outskirts(map_x, map_y);
+        color_t faded_outskirts = COLOR_MASK_OUTSKIRTS_FADE(distance_to_non_outskirts);
+        color_mask = color_mask ? COLOR_MIX_COLORS(faded_outskirts, color_mask) : faded_outskirts;
     }
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 }
