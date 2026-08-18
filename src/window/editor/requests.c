@@ -91,9 +91,6 @@ static void update_request_list(void)
             }
         }
         data.total_requests = current_requests;
-        limit_and_sort_list();
-        grid_box_update_total_items(&request_buttons, data.requests_in_use);
-        return;
     }
     limit_and_sort_list();
     if (grid_box_get_total_items(&request_buttons) != data.requests_in_use) {

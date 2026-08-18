@@ -98,9 +98,6 @@ static void update_demand_changes_list(void)
             }
         }
         data.total_demand_changes = current_demand_changes;
-        limit_and_sort_list();
-        grid_box_update_total_items(&demand_change_buttons, data.demand_changes_in_use);
-        return;
     }
     limit_and_sort_list();
     if (grid_box_get_total_items(&demand_change_buttons) != data.demand_changes_in_use) {
@@ -193,21 +190,21 @@ static void draw_demand_change_button(const grid_box_item *item)
     int COL_BUY_SELL = 280;
     int COL_CITY = 380;
 
-    // 1
+    // 1 year
     text_draw_number(demand_change->year, '+', " ", item->x + COL_YEAR, item->y + 7, FONT_NORMAL_BLACK, 0);
 
-    // 2
+    // 2 scenario start year
     lang_text_draw_year(scenario_property_start_year() + demand_change->year, item->x + COL_SCENARIO, item->y + 7,
         FONT_NORMAL_BLACK);
 
-    // 3
+    // 3 resource icon
     int image_id = resource_get_data(demand_change->resource)->image.editor.icon;
     const image *img = image_get(image_id);
     int base_width = (24 - img->original.width) / 2;
     int base_height = (item->height - img->original.height) / 2;
     image_draw(image_id, item->x + COL_RESOURCE + base_width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
 
-    // 4
+    // 4 amount
     demand_change_amount_t amount;
     get_change_amount(item->index, &amount);
     int width = 0;
