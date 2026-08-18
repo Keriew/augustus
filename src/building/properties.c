@@ -63,6 +63,13 @@ static struct min_max min_max_for_house_data_types[MODEL_HOUSE_MAX] = {
 
 // PROPERTIES
 
+/*
+    When adding a new building add a new entry to this array like this:
+    [NEW_BUILDING_ENUM_NAME] = {all the data, also present in other building entries in this array}
+    Descriptions of what most of the fields you fill in mean can be found in the header file but there are also
+    plenty of examples here.
+*/
+
 static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_ANY] = {
         .event_data.attr = "any",
@@ -2332,6 +2339,7 @@ void model_save_model_data(buffer *buf)
     uint8_t *buf_data = malloc(buf_size);
 
     buffer_init(buf, buf_data, buf_size);
+    // Save the buffer sizes of houses and buildings so on load we load the right amount of data.
     buffer_write_i32(buf, SIZE_BUILDINGS);
     buffer_write_i32(buf, SIZE_HOUSES);
 
@@ -2341,6 +2349,10 @@ void model_save_model_data(buffer *buf)
 
 void model_load_model_data(buffer *buf, int scenario_version)
 {
+    /* For versions in which buffer sizes aren't save set them to completely static constants.
+    If it is a savegame where these are saved load them instead.
+    This ensures that we always load the right amount of bytes and
+    never break model data when adding a new building or evven a house */
     int buildings_size = BUILDINGS_SIZE_LEGACY;
     int houses_size = HOUSES_SIZE_LEGACY;
     int contains_buffer_size = scenario_version > SCENARIO_LAST_NO_BUFFER_SIZE_IN_MODEL_DATA;

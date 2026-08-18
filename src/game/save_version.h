@@ -38,6 +38,9 @@
     not used for certain types of structure. e.g. non-combat figures don't use 'wait_ticks_next_target', so to avoid
     adding a new property, this property was used to store number of ticks to wait before changing destination for cartpushers.
     If are using a property in non-original way, please make sure to leave a comment explaining the change.
+9.  When adding something like a new building or a new figure ALWAYS increase the save game version. Even if you don't add any new data in structs
+    you add a new possible value in an enum at least and if an older version of augustus loads the map because it's the same save version
+    but then encounters the new value it won't know what to do with it.
 
 If you are unsure about anything regarding the savegame versioning, please ask on github or discord.
 **********************************************************************************************************************/
