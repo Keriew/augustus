@@ -1,6 +1,7 @@
 #include "building.h"
 
 #include "building/clone.h"
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/construction_building.h"
 #include "building/construction_clear.h"
@@ -457,7 +458,7 @@ int building_repair_cost_at(int grid_offset)
 
     if (building_is_house(og_type)) {
         grid_slice *house_slice = map_grid_get_grid_slice_house(b->id, 1);
-        int clear_cost = house_slice->size * (11 + 3); // 10.5 per new house tile + 3 per rubble tile to clear
+        int clear_cost = house_slice->size * (11 + model_get_building(BUILDING_REPAIR_LAND)->cost); // 10.5 per new house tile + cost of repair land per rubble tile to clear
         return clear_cost;
     }
     if (b->type == BUILDING_WAREHOUSE_SPACE) {
@@ -651,6 +652,13 @@ int building_repair_at(int grid_offset)
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
+
+    // Repair palisade gates together with roads
+    if (type_to_place == BUILDING_PALISADE_GATE) {
+        map_terrain_add(new_building->grid_offset, TERRAIN_ROAD);
+        map_tiles_update_all_roads();
+    }
+
     if (building_is_storage(type_to_place) && b->storage_id) {
         if (new_building->storage_id != og_storage_id) {
             building_storage_delete(new_building->storage_id);
@@ -683,6 +691,7 @@ int building_repair_at(int grid_offset)
         map_tiles_update_all_walls(); // towers affect wall connections
     }
     game_undo_disable(); // not accounting for undoing repairs
+    building_connectable_update_connections(); // Fix incorrect palisade wall rotation when repairs
     return full_cost;
 }
 

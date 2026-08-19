@@ -23,15 +23,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#define XML_TOTAL_ELEMENTS 19
-#define BASE_BORDER_FLAG_IMAGE_ID 3323
+#define XML_TOTAL_ELEMENTS 20
 #define BORDER_EDGE_DEFAULT_SPACING 50
 
 typedef enum {
     LIST_NONE = -1,
     LIST_BUYS = 1,
     LIST_SELLS = 2,
-    LIST_TRADE_WAYPOINTS = 3
+    LIST_TRADE_WAYPOINTS = 3,
+    LIST_RESOURCE_COST = 4
 } city_list;
 
 typedef enum {
@@ -57,7 +57,7 @@ static struct {
     int version;
     int info_only;
     int current_city_id;
-    int current_trade_route_id; // This is not an actual route id but an empire object id 
+    int current_trade_route_id; // This is not an actual route id but an empire object id
     city_list current_city_list;
     int has_vulnerable_city;
     int current_invasion_path_id;
@@ -76,6 +76,7 @@ static int xml_start_ornament(void);
 static int xml_start_border(void);
 static int xml_start_border_edge(void);
 static int xml_start_city(void);
+static int xml_start_resource_cost(void);
 static int xml_start_buys(void);
 static int xml_start_sells(void);
 static int xml_start_waypoints(void);
@@ -103,9 +104,10 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "edge", xml_start_border_edge, 0, "border" },
     { "cities", 0, 0, "empire" },
     { "city", xml_start_city, xml_end_city, "cities" },
+    { "resource_cost", xml_start_resource_cost, xml_end_sells_buys_or_waypoints, "city"},
     { "buys", xml_start_buys, xml_end_sells_buys_or_waypoints, "city" },
     { "sells", xml_start_sells, xml_end_sells_buys_or_waypoints, "city" },
-    { "resource", xml_start_resource, 0, "buys|sells" },
+    { "resource", xml_start_resource, 0, "buys|sells|resource_cost" },
     { "trade_points", xml_start_waypoints, xml_end_sells_buys_or_waypoints, "city" },
     { "point", xml_start_trade_point, 0, "trade_points" },
     { "invasion_paths", 0, 0, "empire" },
@@ -125,9 +127,10 @@ static const xml_parser_element xml_info_elements[XML_TOTAL_ELEMENTS] = {
     { "edge", 0, 0, "border" },
     { "cities", 0, 0, "empire" },
     { "city", 0, 0, "cities" },
+    { "resource_cost", 0, 0, "city"},
     { "buys", 0, 0, "city" },
     { "sells", 0, 0, "city" },
-    { "resource", 0, 0, "buys|sells" },
+    { "resource", 0, 0, "buys|sells|resource_cost" },
     { "trade_points", 0, 0, "city" },
     { "point", 0, 0, "trade_points" },
     { "invasion_paths", 0, 0, "empire" },
@@ -433,9 +436,17 @@ static int xml_start_sells(void)
     return 1;
 }
 
+static int xml_start_resource_cost(void)
+{
+    data.current_city_list = LIST_RESOURCE_COST;
+    return 1;
+}
+
 static int xml_start_waypoints(void)
 {
     data.current_city_list = LIST_TRADE_WAYPOINTS;
+    int route_hidden = xml_parser_get_attribute_bool("hidden");
+    empire_object_get_full(data.current_trade_route_id)->route_hidden = route_hidden;
     return 1;
 }
 
@@ -445,7 +456,7 @@ static int xml_start_resource(void)
         data.success = 0;
         log_error("No active city when parsing resource", 0, 0);
         return 0;
-    } else if (data.current_city_list != LIST_BUYS && data.current_city_list != LIST_SELLS) {
+    } else if (data.current_city_list != LIST_BUYS && data.current_city_list != LIST_SELLS && data.current_city_list != LIST_RESOURCE_COST) {
         data.success = 0;
         log_error("Resource not in buy or sell tag", 0, 0);
         return 0;
@@ -472,6 +483,8 @@ static int xml_start_resource(void)
         city_obj->city_buys_resource[resource] = amount;
     } else if (data.current_city_list == LIST_SELLS) {
         city_obj->city_sells_resource[resource] = amount;
+    } else if (data.current_city_list == LIST_RESOURCE_COST) {
+        city_obj->route_resource_cost[resource] = amount;
     }
 
     return 1;

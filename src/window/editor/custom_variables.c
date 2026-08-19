@@ -112,7 +112,7 @@ static grid_box_type variable_buttons = {
     .x = 26,
     .y = 79,
     .width = 38 * BLOCK_SIZE,
-    .height = GRID_BOX_HEIGHT, //if changing this 
+    .height = GRID_BOX_HEIGHT, //if changing this
     .num_columns = 1,
     .item_height = GRID_BOX_ITEM_HEIGHT, //or this, update the MAX_VISIBLE_GRID_ITEMS macro accordingly
     .item_margin.horizontal = 10,
@@ -142,13 +142,15 @@ static void init_color_dropdown(void)
             color_dropdown_options[dd_anchors][j].left_click_handler = dropdown_button_default_option_click;
             color_dropdown_options[dd_anchors][j].user_data = &color_dropdowns[dd_anchors]; //backref to parent dropdown
             color_dropdown_options[dd_anchors][j].parameters[0] = dd_anchors;
+            color_dropdown_options[dd_anchors][j].style = COMPLEX_BUTTON_STYLE_CUSTOM;
             // draw_variable_item will reestablish the correct variable id with scroll offset
             color_dropdown_options[dd_anchors][j].color_mask = complex_button_basic_colors(j - 1);
+            color_dropdown_options[dd_anchors][j].font = FONT_NORMAL_BLACK;
             if (j > 8) {
-                color_dropdown_options[dd_anchors][j].font = FONT_SMALL_PLAIN; //white font for dark colors
+                color_dropdown_options[dd_anchors][j].font = FONT_NORMAL_WHITE; //white font for dark colors
             }
         }
-        dropdown_button_init(&color_dropdowns[dd_anchors], color_dropdown_options[dd_anchors], COLOR_BUTTONS_COUNT, COLOR_DROPDOWN_WIDTH, 2, 4);
+        dropdown_button_init(&color_dropdowns[dd_anchors], color_dropdown_options[dd_anchors], COLOR_BUTTONS_COUNT, COLOR_DROPDOWN_WIDTH, 0, 2, 4);
         color_dropdowns[dd_anchors].selected_callback = button_edit_color;
     }
 }
@@ -229,11 +231,15 @@ static void update_item_buttons_positions(void)
     if (grid_box_has_scrollbar(&variable_buttons)) {
         item_buttons[4].x -= 2 * BLOCK_SIZE;
         for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; i++) {
-            color_dropdown_options[i][0].x = 568 - 2 * BLOCK_SIZE;
+            for (int j = 0; j < COLOR_BUTTONS_COUNT; j++) {
+                color_dropdowns[i].buttons[j].x = 568 - 2 * BLOCK_SIZE;
+            }
         }
     } else {
         for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; i++) {
-            color_dropdown_options[i][0].x = 568;
+            for (int j = 0; j < COLOR_BUTTONS_COUNT; j++) {
+                color_dropdowns[i].buttons[j].x = 568;
+            }
         }
     }
 
@@ -310,11 +316,11 @@ static void update_dd_anchor(int variable_id, int grid_box_position)
     int pos = grid_box_position;
     int color_group = scenario_custom_variable_get_color_group(id);
     color_dropdowns[pos].selected_index = scenario_custom_variable_get_color_group(id); // selcted index color
-    color_dropdown_options[pos][0].parameters[0] = id; //set the variable id as parameter for the color dropdown
-    color_dropdown_options[pos][0].color_mask = scenario_custom_variable_get_color(id); //set the selected colour option
-    color_dropdown_options[pos][0].is_hidden = 0; //unhide the associated color dropdown
-    color_dropdown_options[pos][0].sequence = &color_fragments[color_group]; //select text
-    color_dropdown_options[pos][0].font = (color_group > 8) ? FONT_SMALL_PLAIN : FONT_NORMAL_BLACK; //match font
+    color_dropdowns[pos].buttons[0].parameters[0] = id; //set the variable id as parameter for the color dropdown
+    color_dropdowns[pos].buttons[0].color_mask = scenario_custom_variable_get_color(id); //set the selected colour option
+    color_dropdowns[pos].buttons[0].is_hidden = 0; //unhide the associated color dropdown
+    color_dropdowns[pos].buttons[0].sequence = &color_fragments[color_group]; //select text
+    color_dropdowns[pos].buttons[0].font = (color_group > 8) ? FONT_SMALL_PLAIN : FONT_NORMAL_BLACK; //match font
 }
 
 static void draw_variable_item(const grid_box_item *item)
@@ -730,14 +736,14 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
     if (data.expanded_dropdown != -1 && data.custom_variables_in_use) { // handle dropdowns, starting with expanded
-        if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[data.expanded_dropdown])) {
+        if (dropdown_button_handle_mouse(&color_dropdowns[data.expanded_dropdown], m_dialog)) {
             window_invalidate();
             return;
         }
 
     } else {
         for (int i = 0; i < MAX_VISIBLE_GRID_ITEMS; ++i) {
-            if (dropdown_button_handle_mouse(m_dialog, &color_dropdowns[i])) {
+            if (dropdown_button_handle_mouse(&color_dropdowns[i], m_dialog)) {
                 window_invalidate();
                 return;
             }

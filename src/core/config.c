@@ -129,10 +129,22 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_GRANARY_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_granary_do_not_allow_walkers",
     [CONFIG_GP_CH_WAREHOUSE_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_warehouse_do_not_allow_walkers",
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_PLEBIANS] = "gameplay_change_houses_do_not_spawn_plebeians",
+    [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = "ui_editor_show_deletion_warnings",
     [CONFIG_GP_CH_AUTO_CLEAR_TREES] = "gameplay_change_auto_clear_trees",
     [CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS] = "gameplay_change_houses_do_not_spawn_dogs",
     [CONFIG_UI_SHOW_SHORELINE_DESIRABILITY] = "ui_show_shoreline_desirability",
     [CONFIG_UI_SHOW_ELEVATION_DESIRABILITY] = "ui_show_elevation_desirability",
+    [CONFIG_UI_EMPIRE_SIDEBAR_SORT_METHOD] = "ui_empire_sidebar_sort_method",
+    [CONFIG_UI_EMPIRE_SIDEBAR_SORT_REVERSED] = "ui_empire_sidebar_sort_reversed",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_ROUTE_TYPE] = "ui_empire_sidebar_filter_route_type",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_ROUTE_OPEN] = "ui_empire_sidebar_filter_route_open",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_RESOURCE_TYPE] = "ui_empire_sidebar_filter_resource_type",
+    [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_RESOURCE] = "ui_empire_sidebar_filter_resource",
+    [CONFIG_UI_AUTO_CYCLE_TEMPLES] = "ui_auto_cycle_temples",
+    [CONFIG_UI_AUTO_CYCLE_GARDENS] = "ui_auto_cycle_gardens",
+    [CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES] = "ui_auto_delete_old_common_messages",
+    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = "ui_scroll_camera_unlocked",
+    [CONFIG_UI_SCROLL_LEGACY_SCROLLBAR] = "ui_scroll_old_scroll", // keep comma after last entry please
 };
 
 static const char *ini_string_keys[] = {
@@ -207,7 +219,10 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_WT_SANDSTORM_SIZE] = 0,
     [CONFIG_UI_WT_SNOWFLAKE_SIZE] = 2,
     [CONFIG_UI_WT_WEATHER_DURATION] = 1,
-    [CONFIG_UI_CLIMATE_GRID_COLORS] = 1
+    [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = 1,
+    [CONFIG_UI_CLIMATE_GRID_COLORS] = 1,
+    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = 1,
+    [CONFIG_UI_SCROLL_LEGACY_SCROLLBAR] = 0, //keep the comma after last entry please
 };
 
 static const char default_string_values[CONFIG_STRING_MAX_ENTRIES][CONFIG_STRING_VALUE_MAX] = { 0 };

@@ -2,6 +2,7 @@
 
 #include "core/image_group_editor.h"
 #include "core/string.h"
+#include "empire/city.h"
 #include "empire/trade_route.h"
 #include "game/resource.h"
 #include "graphics/button.h"
@@ -48,10 +49,10 @@ static grid_box_type demand_change_buttons = {
     .y = 40,
     .width = 38 * BLOCK_SIZE,
     .height = 19 * BLOCK_SIZE,
-    .num_columns = 2,
-    .item_height = 30,
+    .num_columns = 1,
+    .item_height = 28,
     .item_margin.horizontal = 10,
-    .item_margin.vertical = 5,
+    .item_margin.vertical = 4,
     .extend_to_hidden_scrollbar = 1,
     .on_click = button_demand_change,
     .draw_item = draw_demand_change_button
@@ -99,7 +100,9 @@ static void update_demand_changes_list(void)
         data.total_demand_changes = current_demand_changes;
     }
     limit_and_sort_list();
-    grid_box_update_total_items(&demand_change_buttons, data.demand_changes_in_use);
+    if (grid_box_get_total_items(&demand_change_buttons) != data.demand_changes_in_use) {
+        grid_box_update_total_items(&demand_change_buttons, data.demand_changes_in_use);
+    }
 }
 
 static void draw_background(void)
@@ -111,7 +114,7 @@ static void draw_background(void)
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 25);
-    lang_text_draw(44, 94, 20, 14, FONT_LARGE_BLACK);
+    lang_text_draw(44, 94, 20, 12, FONT_LARGE_BLACK);
 
     if (!data.demand_changes_in_use) {
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_NO_DEMAND_CHANGES, 0, 165, 640, FONT_LARGE_BLACK);
@@ -162,33 +165,71 @@ static void get_change_amount(unsigned int index, demand_change_amount_t *amount
     amount->difference = amount->value - previous_value;
 }
 
+static const uint8_t *get_route_name(int route_id)
+{
+    int city_id = empire_city_get_for_trade_route(route_id);
+    if (city_id < 0) {
+        return lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE);
+    }
+    empire_city *city = empire_city_get(city_id);
+    if (city->type == EMPIRE_CITY_TRADE || city->type == EMPIRE_CITY_FUTURE_TRADE) {
+        return empire_city_get_name(city);
+    }
+    return lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE);
+}
+
 static void draw_demand_change_button(const grid_box_item *item)
 {
     button_border_draw(item->x, item->y, item->width, item->height, item->is_focused);
     const demand_change_t *demand_change = data.demand_changes[item->index];
-    text_draw_number(demand_change->year, '+', " ", item->x + 5, item->y + 7, FONT_NORMAL_BLACK, 0);
-    int width = lang_text_draw_year(scenario_property_start_year() + demand_change->year, item->x + 40, item->y + 7,
+
+    int COL_YEAR = 5;
+    int COL_SCENARIO = 45;
+    int COL_RESOURCE = 140;
+    int COL_AMOUNT = 165;
+    int COL_BUY_SELL = 280;
+    int COL_CITY = 380;
+
+    // 1 year
+    text_draw_number(demand_change->year, '+', " ", item->x + COL_YEAR, item->y + 7, FONT_NORMAL_BLACK, 0);
+
+    // 2 scenario start year
+    lang_text_draw_year(scenario_property_start_year() + demand_change->year, item->x + COL_SCENARIO, item->y + 7,
         FONT_NORMAL_BLACK);
+
+    // 3 resource icon
     int image_id = resource_get_data(demand_change->resource)->image.editor.icon;
     const image *img = image_get(image_id);
+    int base_width = (24 - img->original.width) / 2;
     int base_height = (item->height - img->original.height) / 2;
-    image_draw(image_id, item->x + 45 + width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
-    width += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SHORT_ROUTE_TEXT, item->x + 75 + width, item->y + 7,
-        FONT_NORMAL_BLACK);
-    width += text_draw_number(demand_change->route_id, '@', " ", item->x + 75 + width, item->y + 7,
-        FONT_NORMAL_BLACK, 0);
+    image_draw(image_id, item->x + COL_RESOURCE + base_width, item->y + base_height, COLOR_MASK_NONE, SCALE_NONE);
+
+    // 4 amount
     demand_change_amount_t amount;
     get_change_amount(item->index, &amount);
-    width += text_draw_number(amount.value, '@', " ", item->x + 75 + width, item->y + 7, FONT_NORMAL_BLACK, 0);
+    int width = 0;
+    int x_amount = item->x + COL_AMOUNT;
+    width += text_draw_number(amount.value, '@', " ", x_amount + width, item->y + 7,
+        FONT_NORMAL_BLACK, 0);
     if (amount.difference > 0) {
-        width += text_draw(string_from_ascii("("), item->x + 70 + width, item->y + 7,
-            FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
-        width += text_draw_number(amount.difference, '+', ")", item->x + 70 + width - 5, item->y + 7,
-            FONT_NORMAL_PLAIN, COLOR_MASK_DARK_GREEN);
+        width += text_draw(string_from_ascii("("), x_amount + width - 8, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_FONT_DARK_GREEN);
+        width += text_draw_number(amount.difference, '+', ")", x_amount + width - 13, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_FONT_DARK_GREEN);
     } else {
-        width += text_draw_number(amount.difference, '(', ")", item->x + 70 + width, item->y + 7,
-            FONT_NORMAL_PLAIN, COLOR_MASK_PURPLE);
+        width += text_draw_number(amount.difference, '(', ")", x_amount + width - 8, item->y + 7,
+            FONT_NORMAL_PLAIN, COLOR_FONT_RED);
     }
+
+    // 5 buys-sells
+    translation_key key = demand_change->buys ? TR_EDITOR_DEMAND_CHANGE_BUYS : TR_EDITOR_DEMAND_CHANGE_SELLS;
+    int color = demand_change->buys ? COLOR_MASK_DARK_GREEN : COLOR_MASK_PURPLE;
+    lang_text_draw_colored(CUSTOM_TRANSLATION, key, item->x + COL_BUY_SELL, item->y + 7,
+        FONT_NORMAL_PLAIN, color);
+
+    // 6 city name
+    text_draw(get_route_name(demand_change->route_id), item->x + COL_CITY, item->y + 7,
+        FONT_NORMAL_BLACK, COLOR_MASK_NONE);
 }
 
 static void draw_foreground(void)

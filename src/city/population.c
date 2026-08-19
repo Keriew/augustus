@@ -294,6 +294,21 @@ int city_population_at_level(int level)
     return city_data.population.at_level[level];
 }
 
+int city_population_count_at_level(int level)
+{
+    int total_population = 0;
+    building_type type = level + 10; // convert from house level to building type
+    for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE || !b->house_size) {
+            continue;
+        }
+
+        int population = b->house_population;
+        total_population += population;
+    }
+    return total_population;
+}
+
 static void yearly_advance_ages_and_calculate_deaths(void)
 {
     int aged100 = city_data.population.at_age[99];

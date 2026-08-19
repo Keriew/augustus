@@ -859,6 +859,7 @@ void figure_warehouseman_action(figure *f)
                         if (delivered) {
                             city_health_dispatch_sickness(f);
                             f->loads_sold_or_carrying -= delivered;
+                            // produced
                         }
                         break;
                     case BUILDING_BARRACKS:

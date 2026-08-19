@@ -390,6 +390,9 @@ static void show_roamers_for_overlay(int overlay)
             figure_roamer_preview_create_all_for_building_type(BUILDING_DOCTOR);
             figure_roamer_preview_create_all_for_building_type(BUILDING_HOSPITAL);
             break;
+        case OVERLAY_ENEMY:
+            figure_roamer_preview_create_all_for_building_type(BUILDING_PREFECTURE);
+            figure_roamer_preview_create_all_for_building_type(BUILDING_WATCHTOWER);
         case OVERLAY_NONE:
         default:
             break;
@@ -621,6 +624,9 @@ static void show_overlay_from_grid_offset(int grid_offset)
         case BUILDING_NATIVE_HUT:
         case BUILDING_NATIVE_HUT_ALT:
         case BUILDING_NATIVE_MEETING:
+        case BUILDING_NATIVE_WATCHTOWER:
+        case BUILDING_NATIVE_MONUMENT:
+        case BUILDING_NATIVE_DECORATION:
             overlay = OVERLAY_NATIVE;
             break;
         case BUILDING_WAREHOUSE:
@@ -633,6 +639,18 @@ static void show_overlay_from_grid_offset(int grid_offset)
             break;
         case BUILDING_LATRINES:
             overlay = OVERLAY_HEALTH;
+            break;
+        case BUILDING_TOWER:
+        case BUILDING_WALL:
+        case BUILDING_GATEHOUSE:
+        case BUILDING_WATCHTOWER:
+        case BUILDING_FORT_LEGIONARIES:
+        case BUILDING_FORT_JAVELIN:
+        case BUILDING_FORT_MOUNTED:
+        case BUILDING_FORT_GROUND:
+        case BUILDING_FORT_AUXILIA_INFANTRY:
+        case BUILDING_FORT_ARCHERS:
+            overlay = OVERLAY_ENEMY;
             break;
         case BUILDING_NONE:
             if (map_terrain_get(grid_offset) & TERRAIN_RUBBLE) {
