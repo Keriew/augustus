@@ -1,5 +1,6 @@
 #include "list_box.h"
 
+#include "core/config.h"
 #include "core/direction.h"
 #include "graphics/button.h"
 #include "graphics/font.h"
@@ -88,12 +89,12 @@ static int get_actual_width_blocks(const list_box_type *list_box)
 static void draw_scrollbar(list_box_type *list_box)
 {
     scrollbar_type *scrollbar = &list_box->scrollbar;
-
+    int legacy = config_get(CONFIG_UI_SCROLL_LEGACY_SCROLLBAR);
     scrollbar->x = list_box->x + (list_box->width_blocks - 2) * BLOCK_SIZE + 4;
     scrollbar->y = list_box->y;
     scrollbar->on_scroll_callback = window_request_refresh;
     scrollbar->has_y_margin = 1;
-    scrollbar->dot_padding = list_box->decorate_scrollbar ? 8 : 0;
+    scrollbar->dot_padding = legacy ? (list_box->decorate_scrollbar ? 8 : 0) : 0;
 
     scrollbar->height = list_box->height_blocks * BLOCK_SIZE;
     int scrollable_height_pixels = scrollbar->height;
@@ -106,7 +107,7 @@ static void draw_scrollbar(list_box_type *list_box)
     scrollbar_update_total_elements(scrollbar, list_box->total_items);
 
     if (list_box->decorate_scrollbar && list_box->total_items > scrollbar->elements_in_view) {
-        inner_panel_draw(scrollbar->x + 4, scrollbar->y + 32, 2, scrollbar->height / BLOCK_SIZE - 4);
+        scrollbar->decorate_scrollbar = 1; // panel drawing moved to the scrollbar directly
     }
     scrollbar_draw(&list_box->scrollbar);
 }
@@ -115,7 +116,7 @@ void list_box_draw(list_box_type *list_box)
 {
     draw_scrollbar(list_box);
 
-    if(!list_box->refresh_requested) {
+    if (!list_box->refresh_requested) {
         return;
     }
     list_box->refresh_requested = 0;

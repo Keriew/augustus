@@ -510,11 +510,12 @@ void figure_trade_caravan_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 int move_on = 0;
+                int storage_id = building_get(f->destination_building_id)->storage_id;
                 if (figure_trade_caravan_can_buy(f, f->destination_building_id, f->empire_city_id)) {
                     int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 1);
-                        trader_record_bought_resource(f->trader_id, resource);
+                        trader_record_bought_resource(f->id, f->trader_id, resource, storage_id);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->trader_amount_bought++;
                     } else {
@@ -527,7 +528,7 @@ void figure_trade_caravan_action(figure *f)
                     int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 0);
-                        trader_record_sold_resource(f->trader_id, resource);
+                        trader_record_sold_resource(f->id, f->trader_id, resource, storage_id);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->loads_sold_or_carrying++;
                     } else {
@@ -664,6 +665,7 @@ void figure_native_trader_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 building *b = building_get(f->destination_building_id);
+                int storage_id = b->storage_id;
                 int resource = get_native_trader_buy_resource(b); // preemptive check of resource to avoid standing idle
                 if (building_storage_get_permission(BUILDING_STORAGE_PERMISSION_NATIVES, b) &&
                     f->trader_amount_bought < figure_trade_land_trade_units() && resource != RESOURCE_NONE) {
@@ -674,7 +676,7 @@ void figure_native_trader_action(figure *f)
                         removed = building_warehouse_try_remove_resource(b, resource, 1);
                     }
                     if (removed) {
-                        trader_record_bought_resource(f->trader_id, resource);
+                        trader_record_bought_resource(f->id, f->trader_id, resource, storage_id);
                         int price = trade_price_sell(resource, 1);
                         city_finance_process_export(price * removed);
                         city_health_update_sickness_level_in_building(f->destination_building_id);

@@ -17,6 +17,7 @@
 #include "scenario/event/parameter_data.h"
 #include "widget/input_box.h"
 #include "widget/map_editor.h"
+#include "window/editor/compose_figure_category.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
@@ -47,8 +48,6 @@ static void resource_selection(const generic_button *button);
 static void custom_message_selection(void);
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button);
 static int get_param_value(void);
-static void on_grid_slice_selected(grid_slice *selection);
-static void start_grid_slice_selection(void);
 
 static generic_button buttons[] = {
     {BUTTON_LEFT_PADDING, DETAILS_Y_OFFSET + (0 * DETAILS_ROW_HEIGHT), BUTTON_WIDTH, DETAILS_ROW_HEIGHT - 2, button_amount, 0, 1},
@@ -73,6 +72,7 @@ static struct {
     unsigned int formula_index;
     scenario_condition_t *condition;
     scenario_condition_data_t *xml_info;
+    resource_type available_resources[RESOURCE_MAX];
 } data;
 
 static uint8_t *translation_for_param_value(parameter_type type, int value)
@@ -178,7 +178,6 @@ static void draw_foreground(void)
 
 static void close_window(void)
 {
-    scenario_condition_type_init(data.condition);
     window_go_back();
 }
 
@@ -330,21 +329,22 @@ static void set_parameter_being_edited(int value)
 
 static void set_resource_value(int value)
 {
+    resource_type resource = data.available_resources[value];
     switch (data.parameter_being_edited) {
         case 1:
-            data.condition->parameter1 = value + 1;
+            data.condition->parameter1 = resource;
             return;
         case 2:
-            data.condition->parameter2 = value + 1;
+            data.condition->parameter2 = resource;
             return;
         case 3:
-            data.condition->parameter3 = value + 1;
+            data.condition->parameter3 = resource;
             return;
         case 4:
-            data.condition->parameter4 = value + 1;
+            data.condition->parameter4 = resource;
             return;
         case 5:
-            data.condition->parameter5 = value + 1;
+            data.condition->parameter5 = resource;
             return;
         default:
             return;
@@ -354,11 +354,17 @@ static void set_resource_value(int value)
 static void resource_selection(const generic_button *button)
 {
     static const uint8_t *resource_texts[RESOURCE_MAX];
-    for (resource_type resource = RESOURCE_MIN_FOOD; resource < RESOURCE_MAX; resource++) {
-        resource_texts[resource - 1] = resource_get_data(resource)->text;
+    int total_resources = 0;
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+        if (!resource_is_storable(resource)) {
+            continue;
+        }
+        resource_texts[total_resources] = resource_get_data(resource)->text;
+        data.available_resources[total_resources] = resource;
+        total_resources++;
     }
     window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
-        resource_texts, RESOURCE_MAX - 1, set_resource_value);
+        resource_texts, total_resources, set_resource_value);
 }
 
 static void custom_message_selection(void)
@@ -429,6 +435,22 @@ static void start_grid_slice_selection(void)
     window_editor_map_show();
 }
 
+static void on_grid_offset_selected(int grid_offset)
+{
+    data.condition->parameter1 = grid_offset;
+    widget_map_editor_add_draw_context_event_tile(grid_offset, data.condition->parent_event_id);
+    scenario_events_fetch_event_tiles_to_editor();
+    editor_tool_clear_selection_callback();
+    window_go_back();
+}
+
+static void start_grid_offset_selection(void)
+{
+    editor_tool_set_single_selection_callback(on_grid_offset_selected);
+    editor_tool_set_type(TOOL_SELECT_OFFSET);
+    window_editor_map_show();
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -451,6 +473,8 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_STANDARD_MESSAGE:
         case PARAMETER_TYPE_STORAGE_TYPE:
         case PARAMETER_TYPE_TARGET_TYPE:
+        case PARAMETER_TYPE_GOD:
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_REQUEST:
@@ -460,7 +484,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             window_editor_select_city_trade_route_show(set_param_value);
             return;
         case PARAMETER_TYPE_FUTURE_CITY:
-            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE);
+            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE, 0);
             return;
         case PARAMETER_TYPE_RESOURCE:
             resource_selection(button);
@@ -472,12 +496,17 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             custom_variable_selection();
             return;
         case PARAMETER_TYPE_GRID_SLICE:
-        {
             start_grid_slice_selection();
             return;
-        }
         case PARAMETER_TYPE_FORMULA:
             create_evaluation_formula(parameter);
+            return;
+        case PARAMETER_TYPE_GRID_OFFSET:
+            // unused yet
+            start_grid_offset_selection();
+            return;
+        case PARAMETER_TYPE_FIGURE_CATEGORY:
+            window_editor_compose_figure_category_show(set_param_value, data.condition->parameter3);
             return;
         default:
             return;

@@ -65,18 +65,12 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
     // water
     int water = model->water;
     if (!house->has_water_access) {
-        if (water >= 2) {
-            if (level > HOUSE_SMALL_CASA) {
-                ++demands->missing.fountain;
-                return  0;
-            } else if (!house->has_well_access) {
-                ++demands->missing.well;
-                return 0;
-            } else if (level > HOUSE_LARGE_SHACK && !house->has_latrines_access) {
-                return 0;
-            }
-        }
-        if (water == 1 && !house->has_well_access) {
+        if (water > 2) {
+            ++demands->missing.fountain;
+            return 0;
+        } else if (water > 1 && !house->has_latrines_access) {
+            return 0;
+        } if (water == 1 && !house->has_well_access) {
             ++demands->missing.well;
             return 0;
         }
@@ -110,8 +104,8 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
     }
     // religion
     int religion = model->religion;
-    if (religion > 3) {
-        religion = 3;
+    if (religion > 5) {
+        religion = 5;
     }
     if (house->data.house.num_gods < religion) {
         if (religion == 1) {
@@ -120,8 +114,14 @@ static int has_required_goods_and_services(building *house, int for_upgrade, int
         } else if (religion == 2) {
             ++demands->missing.second_religion;
             return 0;
-        } else if (religion >= 3) {
+        } else if (religion == 3) {
             ++demands->missing.third_religion;
+            return 0;
+        } else if (religion == 4) {
+            ++demands->missing.fourth_religion;
+            return 0;
+        } else if (religion >= 5) {
+            ++demands->missing.fifth_religion;
             return 0;
         }
     } else if (religion > 0) {
@@ -542,7 +542,7 @@ static void consume_resources(building *b)
         consumption_reduction[RESOURCE_WINE] += 20;
         consumption_reduction[RESOURCE_OIL] += 20;
     }
-    // mars module 2 - all goods reduced by 10% 
+    // mars module 2 - all goods reduced by 10%
     if (b->data.house.temple_mars && building_monument_gt_module_is_active(MARS_MODULE_2_ALL_GOODS)) {
         consumption_reduction[RESOURCE_WINE] += 10;
         consumption_reduction[RESOURCE_OIL] += 10;
@@ -628,20 +628,18 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
         if (!house->has_well_access) {
             house->data.house.evolve_text_id = 1;
             return;
-        } else if (!house->has_latrines_access) {
-            house->data.house.evolve_text_id = 68;
-            return;
         }
     }
 
     if (water == 2 && !house->has_water_access) {
         if (!house->has_latrines_access) {
-            house->data.house.evolve_text_id = 67;
-            return;
-        } else if (level >= HOUSE_LARGE_CASA) {
-            house->data.house.evolve_text_id = 2;
+            house->data.house.evolve_text_id = TR_BUILDING_LATRINES_MISSING_DEVOLVE;
             return;
         }
+    }
+
+    if (water == 3 && !house->has_water_access) {
+        house->data.house.evolve_text_id = 2;
     }
 
     // entertainment
@@ -680,6 +678,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
         } else if (foodtypes_required == 3) {
             house->data.house.evolve_text_id = 11;
             return;
+        } else if (foodtypes_required == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_FOODTYPE_MISSING_DEVOLVE;
+            return;
+        } else if (foodtypes_required == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_FOODTYPE_MISSING_DEVOLVE;
+            return;
         }
     }
     // education
@@ -713,8 +717,8 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     }
     // religion
     int religion = model->religion;
-    if (religion > 3) {
-        religion = 3;
+    if (religion > 5) {
+        religion = 5;
     }
     if (house->data.house.num_gods < religion) {
         if (religion == 1) {
@@ -725,6 +729,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             return;
         } else if (religion == 3) {
             house->data.house.evolve_text_id = 22;
+            return;
+        } else if (religion == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_GOOD_MISSING_DEVOLVE;
+            return;
+        } else if (religion == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_GOOD_MISSING_DEVOLVE;
             return;
         }
     }
@@ -788,14 +798,18 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
         if (!house->has_well_access) {
             house->data.house.evolve_text_id = 31;
             return;
-        } else if (!house->has_latrines_access) {
-            house->data.house.evolve_text_id = 68;
-            return;
         }
     }
 
     if (water == 2 && !house->has_water_access) {
-        if (level >= HOUSE_LARGE_CASA && house->has_well_access && house->has_latrines_access) {
+        if (!house->has_latrines_access || !house->has_well_access) {
+            house->data.house.evolve_text_id = TR_BUILDING_LATRINES_MISSING_EVOLVE;
+            return;
+        }
+    }
+
+    if (water == 3 && !house->has_water_access) {
+        if (house->has_well_access && house->has_latrines_access) {
             house->data.house.evolve_text_id = 32;
             return;
         }
@@ -832,6 +846,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
         } else if (foodtypes_required == 3) {
             house->data.house.evolve_text_id = 41;
             return;
+        } else if (foodtypes_required == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_FOODTYPE_MISSING_EVOLVE;
+            return;
+        } else if (foodtypes_required == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_FOODTYPE_MISSING_EVOLVE;
+            return;
         }
     }
     // education
@@ -865,8 +885,8 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
     }
     // religion
     religion = model->religion;
-    if (religion > 3) {
-        religion = 3;
+    if (religion > 5) {
+        religion = 5;
     }
     if (house->data.house.num_gods < religion) {
         if (religion == 1) {
@@ -877,6 +897,12 @@ void building_house_determine_evolve_text(building *house, int worst_desirabilit
             return;
         } else if (religion == 3) {
             house->data.house.evolve_text_id = 52;
+            return;
+        } else if (religion == 4) {
+            house->data.house.evolve_text_id = TR_BUILDING_FOURTH_GOOD_MISSING_EVOLVE;
+            return;
+        } else if (religion == 5) {
+            house->data.house.evolve_text_id = TR_BUILDING_FIFTH_GOOD_MISSING_EVOLVE;
             return;
         }
     }

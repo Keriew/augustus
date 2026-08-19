@@ -45,7 +45,7 @@ static void button_close(int param1, int param2);
 static void button_help(int param1, int param2);
 static void button_advisor(int advisor, int param2);
 static void button_go_to_problem(int param1, int param2);
-static void button_dispatch_request(const complex_button *button);
+static void button_dispatch_request(complex_button *button);
 
 static image_button image_button_back = {
     0, 0, 31, 20, IB_NORMAL, GROUP_MESSAGE_ICON, 8, button_back, button_none, 0, 0, 1
@@ -137,7 +137,7 @@ static struct {
     int use_popup;
 } player_message;
 
-static void button_dispatch_request(const complex_button *button)
+static void button_dispatch_request(complex_button *button)
 {
     int request_id = button->parameters[0];
     scenario_request_dispatch(request_id);
@@ -794,7 +794,7 @@ static int handle_input_video(const mouse *m_dialog, const lang_message *msg, co
     if (image_buttons_handle_mouse(m_dialog, data.x + 372, data.y + 410, &image_button_close, 1, 0)) {
         return 1;
     }
-    if (complex_button_handle_mouse(m_dialog, &complex_button_dispatch_request)) {
+    if (complex_button_handle_mouse(&complex_button_dispatch_request, m_dialog)) {
         return 1;
     }
     if (is_event_message(msg)) {
@@ -821,7 +821,7 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
         return 1;
     }
     if (msg->type == TYPE_MESSAGE) {
-        if (complex_button_handle_mouse(m_dialog, &complex_button_dispatch_request)) {
+        if (complex_button_handle_mouse(&complex_button_dispatch_request, m_dialog)) {
             return 1;
         }
         if (image_buttons_handle_mouse(

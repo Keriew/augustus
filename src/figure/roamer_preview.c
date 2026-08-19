@@ -79,6 +79,8 @@ static figure_type building_type_to_figure_type(building_type type)
             return FIGURE_PRIEST;
         case BUILDING_MISSION_POST:
             return FIGURE_MISSIONARY;
+        case BUILDING_WATCHTOWER:
+            return FIGURE_WATCHMAN;
         case BUILDING_BARRACKS:
         case BUILDING_MILITARY_ACADEMY:
         case BUILDING_MESS_HALL:
@@ -117,7 +119,6 @@ static figure_type building_type_to_figure_type(building_type type)
         case BUILDING_SHIPYARD:
         case BUILDING_CARAVANSERAI:
         case BUILDING_LIGHTHOUSE:
-        case BUILDING_WATCHTOWER:
             return FIGURE_LABOR_SEEKER;
         default:
             return FIGURE_NONE;
@@ -138,6 +139,7 @@ static int roam_length_for_figure_type(figure_type type)
             return 192;
         case FIGURE_ENGINEER:
         case FIGURE_PREFECT:
+        case FIGURE_WATCHMAN:
             return 640;
         default:
             return 384;

@@ -29,6 +29,8 @@ void city_data_init(void)
     city_data.emperor.gifts[GIFT_MODEST].cost = 0;
     city_data.emperor.gifts[GIFT_GENEROUS].cost = 0;
     city_data.emperor.gifts[GIFT_LAVISH].cost = 0;
+    city_data.migration.adjust_percentage_immigration = 100;
+    city_data.migration.adjust_percentage_emigration = 100;
 
     city_gods_reset();
 }
@@ -92,6 +94,8 @@ static void save_main_data(buffer *main)
     buffer_write_i32(main, city_data.migration.emigrated_today);
     buffer_write_i32(main, city_data.migration.refused_immigrants_today);
     buffer_write_i32(main, city_data.migration.percentage);
+    buffer_write_i32(main, city_data.migration.adjust_percentage_immigration);
+    buffer_write_i32(main, city_data.migration.adjust_percentage_emigration);
     buffer_write_i32(main, city_data.culture.population_with_venus_access);
     buffer_write_i32(main, city_data.migration.immigration_duration);
     buffer_write_i32(main, city_data.migration.emigration_duration);
@@ -254,6 +258,8 @@ static void save_main_data(buffer *main)
     buffer_write_i32(main, city_data.houses.missing.religion);
     buffer_write_i32(main, city_data.houses.missing.second_religion);
     buffer_write_i32(main, city_data.houses.missing.third_religion);
+    buffer_write_i32(main, city_data.houses.missing.fourth_religion);
+    buffer_write_i32(main, city_data.houses.missing.fifth_religion);
     buffer_write_i32(main, city_data.houses.requiring.religion);
     buffer_write_i32(main, city_data.entertainment.theater_shows);
     buffer_write_i32(main, city_data.entertainment.theater_no_shows_weighted);
@@ -548,6 +554,13 @@ static void load_main_data(buffer *main, int version)
     city_data.migration.emigrated_today = buffer_read_i32(main);
     city_data.migration.refused_immigrants_today = buffer_read_i32(main);
     city_data.migration.percentage = buffer_read_i32(main);
+    if (version > SAVE_GAME_LAST_NO_HOUSE_MODELS) {
+        city_data.migration.adjust_percentage_immigration = buffer_read_i32(main);
+        city_data.migration.adjust_percentage_emigration = buffer_read_i32(main);
+    } else {
+        city_data.migration.adjust_percentage_immigration = 100;
+        city_data.migration.adjust_percentage_emigration = 100;
+    }
     city_data.culture.population_with_venus_access = buffer_read_i32(main);
     city_data.migration.immigration_duration = buffer_read_i32(main);
     city_data.migration.emigration_duration = buffer_read_i32(main);
@@ -733,6 +746,10 @@ static void load_main_data(buffer *main, int version)
     city_data.houses.missing.religion = buffer_read_i32(main);
     city_data.houses.missing.second_religion = buffer_read_i32(main);
     city_data.houses.missing.third_religion = buffer_read_i32(main);
+    if (version > SAVE_GAME_LAST_NO_FIXED_FOURTH_RELIGIONS) {
+        city_data.houses.missing.fourth_religion = buffer_read_i32(main);
+        city_data.houses.missing.fifth_religion = buffer_read_i32(main);
+    }
     city_data.houses.requiring.religion = buffer_read_i32(main);
     city_data.entertainment.theater_shows = buffer_read_i32(main);
     city_data.entertainment.theater_no_shows_weighted = buffer_read_i32(main);

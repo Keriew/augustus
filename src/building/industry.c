@@ -7,6 +7,7 @@
 #include "building/properties.h"
 #include "city/buildings.h"
 #include "city/data_private.h"
+#include "city/finance.h"
 #include "city/warning.h"
 #include "core/calc.h"
 #include "core/image.h"
@@ -62,6 +63,9 @@ int building_get_efficiency(const building *b)
     int production_for_resource = resource_production_per_month(resource);
 
     int percentage = calc_percentage(b->data.industry.average_production_per_month, production_for_resource);
+    if (b->type == BUILDING_WHARF) {
+        return percentage;
+    }
     return calc_bound(percentage, 0, 100);
 }
 
@@ -136,7 +140,7 @@ static void update_venus_gt_production(void)
     if (!venus_gt || !building_monument_gt_module_is_active(VENUS_MODULE_1_DISTRIBUTE_WINE)) {
         return;
     }
-    
+
     venus_gt->monument.progress += (10 + (city_data.culture.population_with_venus_access /
         MAX_PROGRESS_VENUS_GT / 2));
     if (venus_gt->monument.progress > MAX_PROGRESS_VENUS_GT) {
@@ -210,7 +214,7 @@ static void update_city_mint_production(int new_day)
         city_finance_treasury_add_miscellaneous(DENARII_MINTED_PER_PRODUCTION - minted_personal_funds);
         if (b->resources[RESOURCE_GOLD] >= BUILDING_INDUSTRY_CITY_MINT_GOLD_PER_COIN) {
             b->resources[RESOURCE_GOLD] -= BUILDING_INDUSTRY_CITY_MINT_GOLD_PER_COIN;
-                b->data.industry.has_raw_materials = 1;
+            b->data.industry.has_raw_materials = 1;
         }
     }
 }
@@ -341,6 +345,8 @@ void building_industry_start_new_production(building *b)
     }
     if (b->data.industry.progress >= building_industry_get_max_progress(b)) {
         b->data.industry.production_current_month += 100;
+        // log produced resource here:
+        city_finance_trade_ledger_add_produced((resource_type) b->output_resource_id);
         b->data.industry.progress = 0;
     }
     resource_supply_chain chain[RESOURCE_SUPPLY_CHAIN_MAX_SIZE];
@@ -348,7 +354,10 @@ void building_industry_start_new_production(building *b)
     int has_raw_materials = building_industry_has_raw_materials_for_production(b);
     if (has_raw_materials) {
         for (int i = 0; i < num_raw_materials; i++) {
-            b->resources[chain[i].raw_material] -= chain[i].raw_amount;
+            resource_type raw_material = chain[i].raw_material;
+            int raw_units = chain[i].raw_amount; // units, not cartloads
+            b->resources[raw_material] -= chain[i].raw_amount;
+            city_finance_trade_ledger_add_consumed(raw_material, raw_units);
         }
     }
     b->data.industry.has_raw_materials = has_raw_materials;

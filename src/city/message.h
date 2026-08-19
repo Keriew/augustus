@@ -260,4 +260,6 @@ void city_message_save_state(buffer *messages, buffer *extra, buffer *counts, bu
 
 void city_message_load_state(buffer *messages, buffer *extra, buffer *counts, buffer *delays, buffer *population);
 
+void city_message_clear_old_messages(void);
+
 #endif // CITY_MESSAGE_H

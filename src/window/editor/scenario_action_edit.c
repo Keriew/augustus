@@ -1,5 +1,6 @@
 #include "scenario_action_edit.h"
 
+#include "building/properties.h"
 #include "core/string.h"
 #include "editor/tool.h"
 #include "game/resource.h"
@@ -13,6 +14,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "map/grid.h"
+#include "scenario/criteria.h"
 #include "scenario/event/action_handler.h"
 #include "scenario/event/controller.h"
 #include "scenario/event/formula.h"
@@ -21,6 +23,7 @@
 #include "widget/input_box.h"
 #include "widget/map_editor.h"
 #include "window/editor/allowed_buildings.h"
+#include "window/editor/compose_figure_category.h"
 #include "window/editor/custom_variables.h"
 #include "window/editor/map.h"
 #include "window/editor/requests.h"
@@ -73,8 +76,11 @@ static struct {
     int formula_min_limit;
     int formula_max_limit;
     unsigned int formula_index;
+    unsigned int text_index;
+    uint8_t text[MAX_SCENARIO_TEXT_LENGTH];
     scenario_action_t *action;
     scenario_action_data_t *xml_info;
+    resource_type available_resources[RESOURCE_MAX];
 } data;
 
 static uint8_t *translation_for_param_value(parameter_type type, int value)
@@ -87,8 +93,10 @@ static uint8_t *translation_for_param_value(parameter_type type, int value)
 static void init(scenario_action_t *action)
 {
     data.action = action;
-    memset(data.formula, 0, MAX_TEXT_LENGTH);
+    memset(data.formula, 0, MAX_FORMULA_LENGTH);
     data.formula_index = 0;  // Reset formula index when switching actions
+    memset(data.text, 0, MAX_SCENARIO_TEXT_LENGTH);
+    data.text_index = 0;  // Reset text index when switching actions
     data.parameter_being_edited = 0;
     data.parameter_being_edited_current_value = 0;
 }
@@ -304,6 +312,20 @@ static void set_param_value(int value)
                 resolved_param.type = scenario_events_parameter_data_resolve_flexible_type(data.action, 5);
                 data.action->parameter5 = scenario_events_parameter_data_get_default_value_for_parameter(&resolved_param);
             }
+            if (data.formula_index) {
+                if (data.action->type == ACTION_TYPE_CHANGE_MODEL_DATA) {
+                    data.formula_min_limit = model_get_min_for_data_type(data.action->parameter2);
+                    data.formula_max_limit = model_get_max_for_data_type(data.action->parameter2);
+                }
+                if (data.action->type == ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA) {
+                    data.formula_min_limit = model_get_min_for_house_data_type(data.action->parameter2);
+                    data.formula_max_limit = model_get_max_for_house_data_type(data.action->parameter2);
+                }
+                if (data.action->type == ACTION_TYPE_CHANGE_GOAL) {
+                    data.formula_max_limit = scenario_criteria_get_max_value(data.action->parameter1);
+                }
+                scenario_formula_change(data.formula_index, data.formula, data.formula_min_limit, data.formula_max_limit);
+            }
             return;
         case 3:
             data.action->parameter3 = value;
@@ -345,6 +367,30 @@ static void set_parameter_being_edited(int value)
 
 static void set_resource_value(int value)
 {
+    resource_type resource = data.available_resources[value];
+    switch (data.parameter_being_edited) {
+        case 1:
+            data.action->parameter1 = resource;
+            return;
+        case 2:
+            data.action->parameter2 = resource;
+            return;
+        case 3:
+            data.action->parameter3 = resource;
+            return;
+        case 4:
+            data.action->parameter4 = resource;
+            return;
+        case 5:
+            data.action->parameter5 = resource;
+            return;
+        default:
+            return;
+    }
+}
+
+static void set_all_resource_value(int value)
+{
     switch (data.parameter_being_edited) {
         case 1:
             data.action->parameter1 = value + 1;
@@ -366,14 +412,63 @@ static void set_resource_value(int value)
     }
 }
 
+static void set_monument_resource_value(int value)
+{
+    switch (data.parameter_being_edited) {
+        case 1:
+            data.action->parameter1 = value;
+            return;
+        case 2:
+            data.action->parameter2 = value;
+            return;
+        case 3:
+            data.action->parameter3 = value;
+            return;
+        case 4:
+            data.action->parameter4 = value;
+            return;
+        case 5:
+            data.action->parameter5 = value;
+            return;
+        default:
+            return;
+    }
+}
+
 static void resource_selection(const generic_button *button)
 {
     static const uint8_t *resource_texts[RESOURCE_MAX];
-    for (resource_type resource = RESOURCE_MIN_FOOD; resource < RESOURCE_MAX; resource++) {
+    int total_resources = 0;
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+        if (!resource_is_storable(resource)) {
+            continue;
+        }
+        resource_texts[total_resources] = resource_get_data(resource)->text;
+        data.available_resources[total_resources] = resource;
+        total_resources++;
+    }
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
+        resource_texts, total_resources, set_resource_value);
+}
+
+static void all_resource_selection(const generic_button *button)
+{
+    static const uint8_t *resource_texts[RESOURCE_ALL];
+    for (resource_type resource = RESOURCE_MIN; resource < RESOURCE_ALL; resource++) {
         resource_texts[resource - 1] = resource_get_data(resource)->text;
     }
     window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
-        resource_texts, RESOURCE_MAX - 1, set_resource_value);
+        resource_texts, RESOURCE_ALL - 1, set_all_resource_value);
+}
+
+static void monument_resource_selection(const generic_button *button)
+{
+    static const uint8_t *resource_texts[RESOURCE_MAX];
+    for (resource_type resource = RESOURCE_NONE; resource < RESOURCE_MAX; resource++) {
+        resource_texts[resource] = resource ? resource_get_data(resource)->text : translation_for(TR_RESOURCE_ARCHITECTS);
+    }
+    window_select_list_show_text(screen_dialog_offset_x(), screen_dialog_offset_y(), button,
+        resource_texts, RESOURCE_MAX, set_monument_resource_value);
 }
 
 static void custom_message_selection(void)
@@ -438,11 +533,38 @@ static void set_formula_value(const uint8_t *formula)
     window_invalidate();
 }
 
+static void set_text_value(const uint8_t *text)
+{
+    string_copy(text, data.text, MAX_SCENARIO_TEXT_LENGTH - 1);
+    data.text[MAX_SCENARIO_TEXT_LENGTH - 1] = 0;
+    // Add text to list and get its index
+    if (!data.text_index) {
+        data.text_index = scenario_text_get_new(data.text);
+        set_param_value(data.text_index);
+    } else {
+        // Update existing text
+        scenario_text_change(data.text_index, data.text);
+        set_param_value(data.text_index);
+    }
+    window_invalidate();
+}
+
 static void create_evaluation_formula(xml_data_attribute_t *parameter)
 {
     int current_index = get_param_value();
     data.formula_min_limit = parameter->min_limit;
     data.formula_max_limit = parameter->max_limit;
+    if (data.action->type == ACTION_TYPE_CHANGE_MODEL_DATA) {
+        data.formula_min_limit = model_get_min_for_data_type(data.action->parameter2);
+        data.formula_max_limit = model_get_max_for_data_type(data.action->parameter2);
+    }
+    if (data.action->type == ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA) {
+        data.formula_min_limit = model_get_min_for_house_data_type(data.action->parameter2);
+        data.formula_max_limit = model_get_max_for_house_data_type(data.action->parameter2);
+    }
+    if (data.action->type == ACTION_TYPE_CHANGE_GOAL) {
+        data.formula_max_limit = scenario_criteria_get_max_value(data.action->parameter1);
+    }
     if (current_index > 0) { // a formula already exists
         const uint8_t *src = scenario_formula_get_string((unsigned int) current_index);
         if (src) {
@@ -459,8 +581,29 @@ static void create_evaluation_formula(xml_data_attribute_t *parameter)
         memset(data.formula, 0, MAX_FORMULA_LENGTH); //clear if not assigned to prevent last formula from peeking through
         data.formula_index = 0;  // Reset formula index for new formulas
     }
-    window_text_input_expanded_show(string_from_ascii("FORMULA"), string_from_ascii("..."), data.formula, MAX_FORMULA_LENGTH,
-         set_formula_value, INPUT_BOX_CHARS_FORMULAS);
+    window_text_input_expanded_show(translation_for(TR_PARAMETER_TYPE_FORMULA), string_from_ascii("..."), data.formula,
+        MAX_FORMULA_LENGTH, set_formula_value, INPUT_BOX_CHARS_FORMULAS);
+}
+
+static void create_scenario_text(xml_data_attribute_t *parameter)
+{
+    unsigned int current_index = get_param_value();
+    if (current_index > 0) { // a custom text already exists
+        const uint8_t *src = scenario_text_get_text(current_index);
+        if (src) {
+            string_copy(src, data.text, MAX_SCENARIO_TEXT_LENGTH - 1);
+            data.text[MAX_SCENARIO_TEXT_LENGTH - 1] = '\0';
+            data.text_index = current_index;
+        } else {
+            memset(data.text, 0, MAX_SCENARIO_TEXT_LENGTH);
+            data.text_index = 0;  // Reset if text not found
+        }
+    } else {
+        memset(data.text, 0, MAX_SCENARIO_TEXT_LENGTH); //clear if not assigned to prevent last text from peeking through
+        data.text_index = 0;  // Reset text index for new texts
+    }
+    window_text_input_expanded_show(translation_for(parameter->key), string_from_ascii("..."), data.text,
+        MAX_SCENARIO_TEXT_LENGTH, set_text_value, INPUT_BOX_CHARS_ALL_SUPPORTED);
 }
 
 static void custom_variable_selection(void)
@@ -526,6 +669,22 @@ static void start_grid_slice_selection(void)
     window_editor_map_show();
 }
 
+static void on_grid_offset_selected(int grid_offset)
+{
+    data.action->parameter1 = grid_offset;
+    widget_map_editor_add_draw_context_event_tile(grid_offset, data.action->parent_event_id);
+    scenario_events_fetch_event_tiles_to_editor();
+    editor_tool_clear_selection_callback();
+    window_go_back();
+}
+
+static void start_grid_offset_selection(void)
+{
+    editor_tool_set_single_selection_callback(on_grid_offset_selected);
+    editor_tool_set_type(TOOL_SELECT_OFFSET);
+    window_editor_map_show();
+}
+
 static void change_parameter(xml_data_attribute_t *parameter, const generic_button *button)
 {
     set_parameter_being_edited(button->parameter1);
@@ -551,15 +710,22 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
         case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
         case PARAMETER_TYPE_MODEL:
         case PARAMETER_TYPE_CITY_PROPERTY:
         case PARAMETER_TYPE_PERCENTAGE:
-        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
         case PARAMETER_TYPE_AGE_GROUP:
         case PARAMETER_TYPE_PLAYER_TROOPS:
         case PARAMETER_TYPE_ENEMY_CLASS:
         case PARAMETER_TYPE_COVERAGE_BUILDINGS:
         case PARAMETER_TYPE_RANK:
+        case PARAMETER_TYPE_WIN_CONDITION:
+        case PARAMETER_TYPE_WEATHER:
+        case PARAMETER_TYPE_ROUTE_TYPE:
+        case PARAMETER_TYPE_VARIABLE_COLOR:
+        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_MONUMENT:
             window_editor_select_special_attribute_mapping_show(parameter->type, set_param_value, data.parameter_being_edited_current_value);
             return;
         case PARAMETER_TYPE_ALLOWED_BUILDING:
@@ -572,7 +738,7 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             window_editor_select_city_trade_route_show(set_param_value);
             return;
         case PARAMETER_TYPE_FUTURE_CITY:
-            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE);
+            window_editor_select_city_by_type_show(set_param_value, EMPIRE_CITY_FUTURE_TRADE, 0);
             return;
         case PARAMETER_TYPE_RESOURCE:
             resource_selection(button);
@@ -591,10 +757,26 @@ static void change_parameter(xml_data_attribute_t *parameter, const generic_butt
             window_editor_select_city_resources_for_route_show(set_param_value, data.action->parameter3);
             return;
         case PARAMETER_TYPE_GRID_SLICE:
-        {
             start_grid_slice_selection();
             return;
-        }
+        case PARAMETER_TYPE_RESOURCE_ALL:
+            all_resource_selection(button);
+            return;
+        case PARAMETER_TYPE_GRID_OFFSET:
+            start_grid_offset_selection();
+            return;
+        case PARAMETER_TYPE_RESOURCE_MONUMENT:
+            monument_resource_selection(button);
+            return;
+        case PARAMETER_TYPE_CITY:
+            window_editor_select_city_by_type_show(set_param_value, 0, 1);
+            return;
+        case PARAMETER_TYPE_CUSTOM_TEXT:
+            create_scenario_text(parameter);
+            return;
+        case PARAMETER_TYPE_FIGURE_CATEGORY:
+            window_editor_compose_figure_category_show(set_param_value, data.action->parameter3);
+            return;
         default:
             return;
     }
