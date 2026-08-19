@@ -10,7 +10,7 @@
 #define FIGURE_FACTION_ROAMER_PREVIEW 2
 
 typedef struct {
-    unsigned int id;
+    unsigned int id; // universal figure id for all figures - !!! Do not confuse with trader_id !!!
 
     unsigned int image_id;
     unsigned int cart_image_id;
@@ -103,7 +103,7 @@ typedef struct {
     unsigned char phrase_sequence_exact;
     signed char phrase_id;
     unsigned char phrase_sequence_city;
-    unsigned char trader_id;
+    unsigned short trader_id; // ID In the trader array, not the figure ID!
     unsigned char wait_ticks_next_target; //used for retargetting for fighting figures, and destination for pushers
     unsigned char dont_draw_elevated;
     unsigned short target_figure_id;

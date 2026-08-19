@@ -38,9 +38,9 @@ static grid_box_type price_change_buttons = {
     .width = 38 * BLOCK_SIZE,
     .height = 19 * BLOCK_SIZE,
     .num_columns = 2,
-    .item_height = 30,
+    .item_height = 28,
     .item_margin.horizontal = 10,
-    .item_margin.vertical = 5,
+    .item_margin.vertical = 4,
     .extend_to_hidden_scrollbar = 1,
     .on_click = button_price_change,
     .draw_item = draw_price_change_button
@@ -92,7 +92,9 @@ static void update_price_changes_list(void)
         data.total_price_changes = current_price_changes;
     }
     limit_and_sort_list();
-    grid_box_update_total_items(&price_change_buttons, data.price_changes_in_use);
+    if (grid_box_get_total_items(&price_change_buttons) != data.price_changes_in_use) {
+        grid_box_update_total_items(&price_change_buttons, data.price_changes_in_use);
+    }
 }
 
 static void draw_background(void)
