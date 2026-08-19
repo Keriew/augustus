@@ -6,10 +6,14 @@
 #include <stdint.h>
 
 #define EVENT_NAME_LENGTH 32
+#define SCENARIO_ACTIONS_ARRAY_SIZE_STEP 20
+#define SCENARIO_CONDITIONS_ARRAY_SIZE_STEP 20
+#define SCENARIO_CONDITION_GROUPS_ARRAY_SIZE_STEP 2
 #define CONDITION_GROUP_ITEMS_ARRAY_SIZE_STEP 2
 #define CONDITION_GROUP_STRUCT_SIZE (2 * sizeof(uint32_t) + 1 * sizeof(uint16_t) + 1 * sizeof(uint8_t))
 #define CONDITION_STRUCT_SIZE (5 * sizeof(int32_t) + 1 * sizeof(int16_t))
 #define MAX_FORMULA_LENGTH 100
+#define MAX_SCENARIO_TEXT_LENGTH 128
 
 typedef enum {
     EVENT_STATE_UNDEFINED = 0,
@@ -52,6 +56,13 @@ typedef enum {
     CONDITION_TYPE_BUILDING_COUNT_AREA = 24,
     CONDITION_TYPE_CHECK_FORMULA = 25,
     CONDITION_TYPE_TERRAIN_IN_AREA = 26,
+    CONDITION_TYPE_ENEMIES_IN_CITY = 27,
+    CONDITION_TYPE_LAND_TRADE_PROBLEMS = 28,
+    CONDITION_TYPE_SEA_TRADE_PROBLEMS = 29,
+    CONDITION_TYPE_MONTHS_SINCE_FESTIVAL = 30,
+    CONDITION_TYPE_DESIRABILITY_IN_AREA = 31,
+    CONDITION_TYPE_POPULATION_IN_AREA = 32,
+    CONDITION_TYPE_FIGURES_IN_AREA = 33,
     CONDITION_TYPE_MAX,
     // helper constants
     CONDITION_TYPE_MIN = CONDITION_TYPE_TIME_PASSED,
@@ -102,7 +113,19 @@ typedef enum {
     ACTION_TYPE_CHANGE_RANK = 41,
     ACTION_TYPE_CHANGE_MODEL_DATA = 42,
     ACTION_TYPE_CHANGE_PRODUCTION_RATE = 43,
-    ACTION_TYPE_LOCK_TRADE_ROUTE = 44,
+    ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA = 44,
+    ACTION_TYPE_LOCK_TRADE_ROUTE = 45,
+    ACTION_TYPE_CHANGE_GOAL = 46,
+    ACTION_TYPE_MOVE_CAMERA = 47,
+    ACTION_TYPE_CHANGE_WEATHER = 48,
+    ACTION_TYPE_HIDE_TRADE_ROUTE = 49,
+    ACTION_TYPE_CHANGE_VARIABLE_COLOR = 50,
+    ACTION_TYPE_IMMIGRATION_PERCENTAGE = 51,
+    ACTION_TYPE_CHANGE_MONUMENT_RESOURCES = 52,
+    ACTION_TYPE_RENAME_CITY = 53,
+    ACTION_TYPE_CHANGE_ROUTE_RESOURCE_COST = 54,
+    ACTION_TYPE_KILL_WALKERS_IN_AREA = 55,
+    ACTION_TYPE_SEND_CITY_WARNING = 56,
     ACTION_TYPE_MAX,
     // helper constants
     ACTION_TYPE_MIN = ACTION_TYPE_ADJUST_FAVOR,
@@ -172,13 +195,18 @@ typedef struct {
 } scenario_event_t;
 
 typedef struct {
-    unsigned int id; //this number should correspond to the index in array
-    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; //use [custom_variable_id] to get custom variables in the formula
+    unsigned int id; // this number should correspond to the index in array
+    uint8_t formatted_calculation[MAX_FORMULA_LENGTH]; // use [custom_variable_id] to get custom variables in the formula
     int evaluation; // the last evaluated result of the formula, or in case of static - the only evaluation
     unsigned char is_static; // flag to indicate if formula needs to be re-evaluated every time or whether its static
     unsigned char is_error; // flag to indicate an error in formula that will prevent it from evaluation
-    int min_evaluation; //limits are inherited from xml parameters on adding to the array
-    int max_evaluation; //they cannot be set afterwards, because they are dictated by the kind of number expected to be returned
+    int min_evaluation; // limits are inherited from xml parameters on adding to the array
+    int max_evaluation; // they cannot be set afterwards, because they are dictated by the kind of number expected to be returned
 } scenario_formula_t;
+
+typedef struct {
+    unsigned int id; // this number should correspond to the index in array
+    uint8_t text[MAX_SCENARIO_TEXT_LENGTH]; // the actual text which is used in the action/condition
+} scenario_text_t;
 
 #endif // SCENARIO_EVENT_DATA_H

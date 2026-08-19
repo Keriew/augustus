@@ -5,6 +5,12 @@
 #include "figure/type.h"
 #include "map/grid.h"
 
+typedef enum {
+    AUTO_CYCLE_GROUP_TEMPLES,
+    AUTO_CYCLE_GROUP_GARDENS,
+    AUTO_CYCLE_GROUP_MAX
+} auto_cycle_group;
+
 void building_construction_reset_cycle_steps(void);
 
 int building_construction_cycle_forward(void);
@@ -25,9 +31,9 @@ void building_construction_set_type(building_type type, int setup_rotation);
 
 void building_construction_clear_type(void);
 
-int building_construction_is_auto_cycling(void);
+int building_construction_is_auto_cycling(auto_cycle_group group);
 
-void building_construction_toggle_auto_cycle(void);
+void building_construction_toggle_auto_cycle(auto_cycle_group group);
 
 int building_construction_can_rotate(void);
 

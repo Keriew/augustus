@@ -199,6 +199,7 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         return;
     }
     int target_grid_offset = f->grid_offset + map_grid_direction_delta(f->direction);
+    building *b = building_get(map_building_at(target_grid_offset));
     if (f->is_boat) {
         if (!map_terrain_is(target_grid_offset, TERRAIN_WATER)) {
             f->direction = DIR_FIGURE_REROUTE;
@@ -212,7 +213,6 @@ static void advance_route_tile(figure *f, int roaming_enabled)
             switch (map_routing_get_destroyable(target_grid_offset)) {
                 case DESTROYABLE_BUILDING:
                 {
-                    building *b = building_get(map_building_at(target_grid_offset));
                     switch (b->type) {
                         case BUILDING_PALISADE:
                         case BUILDING_PALISADE_GATE:
@@ -251,11 +251,11 @@ static void advance_route_tile(figure *f, int roaming_enabled)
         if (!map_routing_is_wall_passable(target_grid_offset)) {
             f->direction = DIR_FIGURE_REROUTE;
         }
-    } else if (f->type == FIGURE_WOLF && map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE ^ TERRAIN_ELEVATION)) {
+    } else if (f->type == FIGURE_WOLF && map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE ^ TERRAIN_ELEVATION) &&
+        !building_type_is_roadblock(b->type)){
         f->direction = DIR_FIGURE_REROUTE; // don't let wolves walk through gatehouses build after they chose their destination
     } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP)) {
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
-            building *b = building_get(map_building_at(target_grid_offset));
             if (b->type == BUILDING_GRANARY) {
                 if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
                     f->direction = DIR_FIGURE_REROUTE; // do not roam into dead-end granaries
@@ -274,7 +274,6 @@ static void advance_route_tile(figure *f, int roaming_enabled)
             (map_routing_citizen_is_road(target_grid_offset) && !roaming_enabled))) {
             return; // passable terrain - no reroute
         }
-        building *b = building_get(map_building_at(target_grid_offset));
         if (building_type_is_roadblock(b->type) && roaming_enabled) { //only block roaming
             int permission = get_permission_for_figure_type(f);
             if (!building_roadblock_get_permission(permission, b)) {

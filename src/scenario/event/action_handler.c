@@ -93,8 +93,32 @@ int scenario_action_type_execute(scenario_action_t *action)
             return scenario_action_type_change_rank_execute(action);
         case ACTION_TYPE_CHANGE_PRODUCTION_RATE:
             return scenario_action_type_change_production_rate_execute(action);
+        case ACTION_TYPE_CHANGE_HOUSE_MODEL_DATA:
+            return scenario_action_type_change_house_model_data_execute(action);
         case ACTION_TYPE_LOCK_TRADE_ROUTE:
             return scenario_action_type_lock_trade_route_execute(action);
+        case ACTION_TYPE_CHANGE_GOAL:
+            return scenario_action_type_change_goal_execute(action);
+        case ACTION_TYPE_MOVE_CAMERA:
+            return scenario_action_type_move_camera_execute(action);
+        case ACTION_TYPE_CHANGE_WEATHER:
+            return scenario_action_type_change_weather_execute(action);
+        case ACTION_TYPE_HIDE_TRADE_ROUTE:
+            return scenario_action_type_hide_trade_route_execute(action);
+        case ACTION_TYPE_CHANGE_VARIABLE_COLOR:
+            return scenario_action_type_change_custom_variable_color_execute(action);
+        case ACTION_TYPE_IMMIGRATION_PERCENTAGE:
+            return scenario_action_type_change_immigration_percentage_execute(action);
+        case ACTION_TYPE_CHANGE_MONUMENT_RESOURCES:
+            return scenario_action_type_change_monument_resources_execute(action);
+        case ACTION_TYPE_RENAME_CITY:
+            return scenario_action_type_rename_city_execute(action);
+        case ACTION_TYPE_CHANGE_ROUTE_RESOURCE_COST:
+            return scenario_action_type_change_route_resources_execute(action);
+        case ACTION_TYPE_KILL_WALKERS_IN_AREA:
+            return scenario_action_type_kill_walkers_in_area_execute(action);
+        case ACTION_TYPE_SEND_CITY_WARNING:
+            return scenario_action_type_send_city_warning_execute(action);
         default:
             return 0;
     }

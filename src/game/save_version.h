@@ -38,13 +38,16 @@
     not used for certain types of structure. e.g. non-combat figures don't use 'wait_ticks_next_target', so to avoid
     adding a new property, this property was used to store number of ticks to wait before changing destination for cartpushers.
     If are using a property in non-original way, please make sure to leave a comment explaining the change.
+9.  When adding something like a new building or a new figure ALWAYS increase the save game version. Even if you don't add any new data in structs
+    you add a new possible value in an enum at least and if an older version of augustus loads the map because it's the same save version
+    but then encounters the new value it won't know what to do with it.
 
 If you are unsure about anything regarding the savegame versioning, please ask on github or discord.
 **********************************************************************************************************************/
 
 typedef enum {
 
-    SAVE_GAME_CURRENT_VERSION = 0xb5,
+    SAVE_GAME_CURRENT_VERSION = 0xbb,
 
     SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66,
     SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76,
@@ -106,10 +109,16 @@ typedef enum {
     SAVE_GAME_LAST_NO_HIGHWAY_STATION = 0xb2,
     SAVE_GAME_LAST_NO_TRIUMPHAL_ARCH_MONUMENT = 0xb3,
     SAVE_GAME_LAST_NO_FORT_ORIENTATION = 0xb4,
+    SAVE_GAME_LAST_NO_LEDGER = 0xb5, // only existed in test versions, never on master.
+    SAVE_GAME_LAST_NO_FINANCE_OVERVIEW_HISTORY = 0xb6,
+    SAVE_GAME_LAST_NO_HOUSE_MODELS = 0xb7,
+    SAVE_GAME_LAST_NO_FIXED_FOURTH_RELIGIONS = 0xb8,
+    SAVE_GAME_LAST_NO_FIXED_CITY_DATA_SIZE = 0xb9,
+    SAVE_GAME_LAST_NO_BUFFER_SIZE_IN_MODEL_DATA = 0xba
 } savegame_version_t;
 
 typedef enum {
-    SCENARIO_CURRENT_VERSION = 22,
+    SCENARIO_CURRENT_VERSION = 24,
 
     SCENARIO_VERSION_NONE = 0,
     SCENARIO_LAST_UNVERSIONED = 1,
@@ -132,7 +141,9 @@ typedef enum {
     SCENARIO_LAST_NO_VISIBLE_CUSTOM_VARIABLES = 18,
     SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA = 19,
     SCENARIO_LAST_NO_EMPIRE_EDITOR = 20,
-    SCENARIO_LAST_LIMITED_ROUTE_COST = 21
+    SCENARIO_LAST_LIMITED_ROUTE_COST = 21,
+    SCENARIO_LAST_NO_HOUSE_MODELS = 22,
+    SCENARIO_LAST_NO_BUFFER_SIZE_IN_MODEL_DATA = 23
 } scenario_version_t;
 
 typedef enum {

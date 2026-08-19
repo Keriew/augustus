@@ -1,13 +1,16 @@
 #include "grid_box.h"
 
+#include "core/config.h"
 #include "graphics/button.h"
 #include "graphics/font.h"
 #include "graphics/panel.h"
+#include "graphics/scrollbar.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/scroll.h"
 
 #define NO_POSITION ((unsigned int) -1)
+
 
 static unsigned int calculate_scrollable_items(const grid_box_type *grid_box)
 {
@@ -75,37 +78,42 @@ void grid_box_request_refresh(grid_box_type *grid_box)
 int grid_box_has_scrollbar(const grid_box_type *grid_box)
 {
     return grid_box->width > 2 * BLOCK_SIZE && (!grid_box->extend_to_hidden_scrollbar ||
-        calculate_scrollable_items(grid_box) > grid_box->scrollbar.elements_in_view);
+    calculate_scrollable_items(grid_box) > grid_box->scrollbar.elements_in_view);
 }
 
 static void draw_scrollbar(grid_box_type *grid_box)
 {
+    int legacy = config_get(CONFIG_UI_SCROLL_LEGACY_SCROLLBAR);
+    int arrow_height = legacy ? LEGACY_SCROLL_BUTTON_HEIGHT : SCROLL_BUTTON_SIDE;
+    int arrow_width = legacy ? LEGACY_SCROLL_BUTTON_WIDTH : SCROLL_BUTTON_SIDE;
     scrollbar_type *scrollbar = &grid_box->scrollbar;
-    scrollbar->x = grid_box->x + grid_box->width + 4 - 2 * BLOCK_SIZE + grid_box->offset_scrollbar_x;
+    scrollbar->x = grid_box->x + grid_box->width - arrow_height + grid_box->offset_scrollbar_x;
     scrollbar->y = grid_box->y + grid_box->offset_scrollbar_y;
     scrollbar->on_scroll_callback = window_request_refresh;
     scrollbar->has_y_margin = 1;
-    scrollbar->dot_padding = grid_box->decorate_scrollbar ? 8 : 0;
+    scrollbar->dot_padding = legacy ? (grid_box->decorate_scrollbar ? 8 : 0) : 0;
 
     scrollbar->height = grid_box->height;
     int scrollable_height_pixels = scrollbar->height;
     if (grid_box->draw_inner_panel) {
         scrollable_height_pixels -= BLOCK_SIZE;
     }
-    scrollbar->scrollable_width = grid_box->width - 2 * BLOCK_SIZE;
+    scrollbar->scrollable_width = grid_box->width - arrow_width;
     scrollbar->elements_in_view = scrollable_height_pixels / grid_box->item_height;
 
     scrollbar_update_total_elements(scrollbar, calculate_scrollable_items(grid_box));
 
     if (grid_box->decorate_scrollbar && grid_box->total_items > scrollbar->elements_in_view) {
-        inner_panel_draw(scrollbar->x + 4, scrollbar->y + 32, 2, scrollbar->height / BLOCK_SIZE - 4);
+        scrollbar->decorate_scrollbar = 1; // panel drawing moved to the scrollbar directly
     }
     scrollbar_draw(&grid_box->scrollbar);
 }
 
-unsigned int get_usable_width(const grid_box_type *grid_box)
+unsigned int grid_box_get_usable_width(const grid_box_type *grid_box)
 {
-    return grid_box_has_scrollbar(grid_box) ? grid_box->width - 2 * BLOCK_SIZE : grid_box->width;
+    int legacy = config_get(CONFIG_UI_SCROLL_LEGACY_SCROLLBAR);
+    int arrow_width = legacy ? LEGACY_SCROLL_BUTTON_WIDTH : SCROLL_BUTTON_SIDE;
+    return grid_box_has_scrollbar(grid_box) ? grid_box->width - arrow_width : grid_box->width;
 }
 
 void grid_box_draw(grid_box_type *grid_box)
@@ -117,7 +125,7 @@ void grid_box_draw(grid_box_type *grid_box)
     }
     grid_box->refresh_requested = 0;
 
-    unsigned int width = get_usable_width(grid_box);
+    unsigned int width = grid_box_get_usable_width(grid_box);
     unsigned int inner_padding = 0;
 
     if (grid_box->draw_inner_panel) {
@@ -164,20 +172,13 @@ void grid_box_draw(grid_box_type *grid_box)
 void grid_box_set_bounds(grid_box_type *grid_box, int new_x, int new_y, unsigned int new_width, unsigned int new_height)
 {
     //Compare against the existing values, if no change, do nothing
-    if (new_x != grid_box->x
-        || new_y != grid_box->y
-        || new_width != grid_box->width
-        || new_height != grid_box->height) {
+    if (new_x != grid_box->x || new_y != grid_box->y || new_width != grid_box->width || new_height != grid_box->height) {
         // Overwrite with the new dims
         grid_box->x = new_x;
         grid_box->y = new_y;
         grid_box->width = new_width;
         grid_box->height = new_height;
-        scrollbar_update_total_elements(
-            &grid_box->scrollbar,
-            calculate_scrollable_items(grid_box)
-        );
-
+        scrollbar_update_total_elements(&grid_box->scrollbar, calculate_scrollable_items(grid_box));
         // Tell the grid‐box to redraw itself with the new bounds.
         grid_box_request_refresh(grid_box);
     }
@@ -195,7 +196,7 @@ static int set_focused_item(grid_box_type *grid_box, unsigned int position, unsi
 
     if (grid_box->focused_item.index != old_index) {
         unsigned int inner_padding = grid_box->draw_inner_panel ? BLOCK_SIZE : 0;
-        unsigned int width = (get_usable_width(grid_box) - inner_padding) / grid_box->num_columns;
+        unsigned int width = (grid_box_get_usable_width(grid_box) - inner_padding) / grid_box->num_columns;
         grid_box->focused_item.width = width - grid_box->item_margin.horizontal;
         grid_box->focused_item.height = grid_box->item_height - grid_box->item_margin.vertical;
         grid_box->focused_item.position = position;
@@ -215,7 +216,7 @@ static int set_focused_item(grid_box_type *grid_box, unsigned int position, unsi
 static int determine_focus(grid_box_type *grid_box, int x, int y)
 {
     unsigned int inner_padding = grid_box->draw_inner_panel ? BLOCK_SIZE / 2 : 0;
-    unsigned int width = get_usable_width(grid_box);
+    unsigned int width = grid_box_get_usable_width(grid_box);
     unsigned int old_index = grid_box->focused_item.index;
     if (x < (int) (grid_box->x + inner_padding) || x >= (int) (grid_box->x + width - inner_padding) ||
         y < (int) (grid_box->y + inner_padding) || y >= (int) (grid_box->y + grid_box->height - inner_padding)) {
@@ -270,7 +271,6 @@ int grid_box_handle_input(grid_box_type *grid_box, const mouse *m, int in_dialog
         return 1;
     }
     if (determine_focus(grid_box, m->x, m->y)) {
-
         grid_box_request_refresh(grid_box);
     }
 

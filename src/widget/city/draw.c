@@ -302,7 +302,7 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
     if (is_top && map_property_is_deleted(grid_offset) && !is_multi_tile_terrain(grid_offset)) {
         color_mask = building_construction_clear_color();
     }
-    
+
     if (!building_id && !is_top) {
         int is_cursor_tile = (draw_context.cursor_tile && grid_offset == draw_context.cursor_tile->grid_offset);
 
@@ -314,6 +314,29 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
     }
 
     return color_mask;
+}
+
+static int overlay_should_show_roadblock(const building *b)
+{
+    if (b->type == BUILDING_ROADBLOCK) {
+        return 1;
+    }
+    return !draw_context.overlay->show_building || draw_context.overlay->show_building(b);
+}
+
+static color_t full_grid_color(void)
+{
+    if (!config_get(CONFIG_UI_CLIMATE_GRID_COLORS)) {
+        return COLOR_GRID;
+    }
+    switch (scenario_property_climate()) {
+        case CLIMATE_DESERT:
+            return COLOR_GRID_DESERT;
+        case CLIMATE_NORTHERN:
+            return COLOR_GRID_NORTHERN;
+        default:
+            return COLOR_GRID_CENTRAL;
+    }
 }
 
 static void draw_footprint(int x, int y, int grid_offset)
@@ -378,7 +401,7 @@ static void draw_footprint(int x, int y, int grid_offset)
     } else if (building_id && !map_is_bridge(grid_offset)) {
         building *b = building_get(building_id);
 
-        if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
+        if (overlay_should_show_roadblock(b)) {
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
         } else {
             if (!building_is_farm(b->type) || is_drawable_farm_corner(grid_offset)) {
@@ -391,7 +414,7 @@ static void draw_footprint(int x, int y, int grid_offset)
 
     // Grid is drawn by the renderer directly at zoom > 200%
     if (!building_id && config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
-        image_draw(assets_lookup_image_id(ASSET_UI_GRID), x, y, COLOR_GRID, draw_context.scale);
+        image_draw(assets_lookup_image_id(ASSET_UI_GRID), x, y, full_grid_color(), draw_context.scale);
     }
 
     draw_roamer_frequency(x, y, grid_offset);
@@ -686,9 +709,9 @@ static void draw_building_top(int x, int y, int grid_offset, color_t color_mask)
 {
     building *b = building_get(map_building_at(grid_offset));
 
-    if (!draw_context.overlay->show_building || draw_context.overlay->show_building(b)) {
+    if (overlay_should_show_roadblock(b)) {
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
-        
+
         // Specific buildings
         draw_senate_rating_flags(b, x, y, color_mask);
         draw_mothball_icon(b, x, y, grid_offset, color_mask);
@@ -702,7 +725,7 @@ static void draw_building_top(int x, int y, int grid_offset, color_t color_mask)
     if (!draw_context.overlay->get_column_height) {
         return;
     }
-    
+
     int column_height = draw_context.overlay->get_column_height(b);
     if (column_height == NO_COLUMN) {
         return;
@@ -1138,7 +1161,8 @@ static void draw_elevated_figures(int x, int y, int grid_offset)
         figure *f = figure_get(figure_id);
 
         if ((!draw_context.overlay->show_figure || draw_context.overlay->show_figure(f)) &&
-            ((f->use_cross_country && !f->is_ghost && !f->dont_draw_elevated) || f->height_adjusted_ticks)) {
+            ((f->use_cross_country && !f->is_ghost && !f->dont_draw_elevated)
+            || (f->height_adjusted_ticks && f->building_id != draw_context.selected_building_id))) {
             int highlight = f->formation_id > 0 && f->formation_id == draw_context.highlighted_formation;
             city_draw_figure(f, x, y, draw_context.scale, highlight);
         } else if (f->building_id == draw_context.selected_building_id) { // Figure originates from selected building
