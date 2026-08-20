@@ -5,9 +5,9 @@
 
 void copy_formulas_action(scenario_action_t *action, int **params, int index)
 {
-    int *param_value = params[index - 1];
+    int *param_value = params[index];
     parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
-        action->type, index, NULL, NULL);
+        action->type, index + 1, NULL, NULL);
     if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
         scenario_formula_t *formula = scenario_formula_get(*param_value);
         if (!formula) {
@@ -21,9 +21,9 @@ void copy_formulas_action(scenario_action_t *action, int **params, int index)
 
 void copy_formulas_condition(scenario_condition_t *condition, int **params, int index)
 {
-    int *param_value = params[index - 1];
+    int *param_value = params[index];
     parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
-        condition->type, index, NULL, NULL);
+        condition->type, index + 1, NULL, NULL);
     if (p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) {
         scenario_formula_t *formula = scenario_formula_get(*param_value);
         if (!formula) {
@@ -37,9 +37,9 @@ void copy_formulas_condition(scenario_condition_t *condition, int **params, int 
 
 void copy_texts_action(scenario_action_t *action, int **params, int index)
 {
-    int *param_value = params[index - 1];
+    int *param_value = params[index];
     parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
-        action->type, index, NULL, NULL);
+        action->type, index + 1, NULL, NULL);
     if (p_type == PARAMETER_TYPE_CUSTOM_TEXT) {
         scenario_text_t *text = scenario_text_get(*param_value);
         if (!text) {
@@ -52,9 +52,9 @@ void copy_texts_action(scenario_action_t *action, int **params, int index)
 
 void copy_texts_condition(scenario_condition_t *condition, int **params, int index)
 {
-    int *param_value = params[index - 1];
+    int *param_value = params[index];
     parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
-        condition->type, index, NULL, NULL);
+        condition->type, index + 1, NULL, NULL);
     if (p_type == PARAMETER_TYPE_CUSTOM_TEXT) {
         scenario_text_t *text = scenario_text_get(*param_value);
         if (!text) {

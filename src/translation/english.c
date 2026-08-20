@@ -2334,7 +2334,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SELECT_OFFSET, "Select offset"},
     {TR_WARNING_NO_MILITARY_ON_OUTSKIRTS, "You can't build military structures in the outskirts"},
     {TR_CONFIG_SHOW_OUTSKIRTS_DESIRABILITY, "Show outskirts desirability malus in overlay"},
-    {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Enable classic scrollbars"}
+    {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Enable classic scrollbars"},
+    {TR_BUILDING_WILLOW_TREE, "Willow tree"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

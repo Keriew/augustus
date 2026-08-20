@@ -35,6 +35,10 @@
 		<layer group="59" image="2" x="0" y="22"/>
 		<layer src="Ornamental_Tree_05_Top_Layer" x="0" y="0"/>
 	</image>
+	<image id="ornamental willow" width="58" height="55" isometric="true">
+		<layer group="59" image="2" x="0" y="23"/>
+		<layer src="Ornamental_Tree_09_Top_Layer" x="0" y="0"/>
+	</image>
 	<!-- Note: Assets for 'Garden path'  -->
 	<image id="garden path r" width="58" height="32" isometric="true">
 		<layer group="59" image="3" x="0" y="0" invert="horizontal"/>

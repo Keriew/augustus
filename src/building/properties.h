@@ -50,7 +50,7 @@ typedef enum {
     MODEL_DESIRABILITY_STEP_SIZE,
     MODEL_DESIRABILITY_RANGE,
     MODEL_LABORERS,
-    
+
     MODEL_BUILDING_MAX
 } building_model_data_type;
 
@@ -72,7 +72,7 @@ typedef enum {
     MODEL_PROSPERITY,
     MODEL_MAX_PEOPLE,
     MODEL_TAX_MULTIPLIER,
-    
+
     MODEL_HOUSE_MAX
 } house_model_data_type;
 
@@ -90,7 +90,7 @@ void model_reset_buildings(void);
 void model_reset(void);
 
 void model_save_model_data(buffer *buf);
-void model_load_model_data(buffer *buf);
+void model_load_model_data(buffer *buf, int scenario_version);
 
 /**
  * Gets the model for a building

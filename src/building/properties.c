@@ -3,6 +3,7 @@
 #include "assets/assets.h"
 #include "building/building.h"
 #include "core/image_group.h"
+#include "game/save_version.h"
 #include "sound/city.h"
 #include "translation/translation.h"
 #include "type.h"
@@ -12,10 +13,13 @@
 
 #define NUM_HOUSES 20
 
-#define SIZE_BUILDINGS sizeof(model_building) * BUILDING_TYPE_MAX
-#define SIZE_HOUSES sizeof(model_house) * NUM_HOUSES
+#define SIZE_BUILDINGS (sizeof(model_building) * BUILDING_TYPE_MAX)
+#define SIZE_HOUSES (sizeof(model_house) * NUM_HOUSES)
 
-#define BUFFER_SIZE SIZE_BUILDINGS + SIZE_HOUSES
+#define BUFFER_SIZE (SIZE_BUILDINGS + SIZE_HOUSES)
+
+#define BUILDINGS_SIZE_LEGACY (212 * 6 * 4)
+#define HOUSES_SIZE_LEGACY (20 * 17 * 4)
 
 #define UNLIMITED 1000000000
 #define NEGATIVE_UNLIMITED -1000000000
@@ -58,6 +62,13 @@ static struct min_max min_max_for_house_data_types[MODEL_HOUSE_MAX] = {
 };
 
 // PROPERTIES
+
+/*
+    When adding a new building add a new entry to this array like this:
+    [NEW_BUILDING_ENUM_NAME] = {all the data, also present in other building entries in this array}
+    Descriptions of what most of the fields you fill in mean can be found in the header file but there are also
+    plenty of examples here.
+*/
 
 static building_properties properties[BUILDING_TYPE_MAX] = {
     [BUILDING_ANY] = {
@@ -2263,7 +2274,17 @@ static building_properties properties[BUILDING_TYPE_MAX] = {
         .event_data.attr = "highway_station",
         .building_model_data = {.cost = 200, .desirability_value = -2, .desirability_step = 1,
             .desirability_step_size = 1, .desirability_range = 3, .laborers = 12}
-     },
+    },
+    [BUILDING_WILLOW_TREE] = {
+    .venus_gt_bonus = 1,
+    .size = 1,
+    .fire_proof = 1,
+    .custom_asset.group = "Aesthetics",
+    .custom_asset.id = "ornamental willow",
+    .event_data.attr = "willow_tree",
+    .building_model_data = {.cost = 12, .desirability_value = 3, .desirability_step = 1,
+        .desirability_step_size = -1, .desirability_range = 3, .laborers = 0}
+    }
 };
 
 void building_properties_init(void)
@@ -2324,18 +2345,33 @@ void model_reset(void)
 
 void model_save_model_data(buffer *buf)
 {
-    uint8_t *buf_data = malloc(BUFFER_SIZE);
+    int buf_size = BUFFER_SIZE + 8;
+    uint8_t *buf_data = malloc(buf_size);
 
-    buffer_init(buf, buf_data, BUFFER_SIZE);
+    buffer_init(buf, buf_data, buf_size);
+    // Save the buffer sizes of houses and buildings so on load we load the right amount of data.
+    buffer_write_i32(buf, SIZE_BUILDINGS);
+    buffer_write_i32(buf, SIZE_HOUSES);
 
     buffer_write_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
     buffer_write_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
 }
 
-void model_load_model_data(buffer *buf)
+void model_load_model_data(buffer *buf, int scenario_version)
 {
-    buffer_read_raw(buf, buildings, BUFFER_SIZE - SIZE_HOUSES);
-    buffer_read_raw(buf, houses, BUFFER_SIZE - SIZE_BUILDINGS);
+    /* For versions in which buffer sizes aren't save set them to completely static constants.
+    If it is a savegame where these are saved load them instead.
+    This ensures that we always load the right amount of bytes and
+    never break model data when adding a new building or evven a house */
+    int buildings_size = BUILDINGS_SIZE_LEGACY;
+    int houses_size = HOUSES_SIZE_LEGACY;
+    int contains_buffer_size = scenario_version > SCENARIO_LAST_NO_BUFFER_SIZE_IN_MODEL_DATA;
+    if (contains_buffer_size) {
+        buildings_size = buffer_read_i32(buf);
+        houses_size = buffer_read_i32(buf);
+    }
+    buffer_read_raw(buf, buildings, buildings_size);
+    buffer_read_raw(buf, houses, houses_size);
 }
 
 model_house *model_get_house(house_level level)
