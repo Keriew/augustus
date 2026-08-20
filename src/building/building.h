@@ -10,6 +10,8 @@
 #define BUILDING_WATER_DESIRABILITY_RANGE 3
 #define BUILDING_WATER_DESIRABILITY_BONUS 15
 
+#define BUILDING_OUTSKIRTS_DESIRABILITY_MALUS -15
+
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
     ORDER_CONDITION_ALWAYS,
@@ -290,6 +292,8 @@ int building_is_house_group(house_groups group, building_type type);
 int building_is_statue_garden_temple(building_type type);
 
 int building_is_fort(building_type type);
+
+int building_is_military(building_type type); // not prefectures nor armory
 
 int building_is_active(const building *b);
 

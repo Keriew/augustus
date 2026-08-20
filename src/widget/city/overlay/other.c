@@ -456,6 +456,9 @@ static int get_environmental_desirability(const int grid_offset, int ignore_conf
     if (ignore_config || config_get(CONFIG_UI_SHOW_ELEVATION_DESIRABILITY)) {
         additional_desirability += building_get_elevation_desirability_bonus(grid_offset);
     }
+    if ((ignore_config || config_get(CONFIG_UI_SHOW_OUTSKIRTS_DESIRABILITY)) && map_property_is_outskirts(grid_offset)) {
+        additional_desirability += BUILDING_OUTSKIRTS_DESIRABILITY_MALUS;
+    }
     return additional_desirability;
 }
 
@@ -517,7 +520,7 @@ static int get_tooltip_depot_orders(tooltip_context *c, int grid_offset)
 
         snprintf((char *) result, sizeof(result),
             "%s %s\n"
-            "%s%s\n" //double \n doesnt get rendered, and neither does \n after a space. 
+            "%s%s\n" //double \n doesnt get rendered, and neither does \n after a space.
             "%s %s %s",
             (const char *) moving_resource, (const char *) resource_name,
             (const char *) order_string, threshold_str,
@@ -811,7 +814,7 @@ static void draw_water_graph(int x, int y, float scale, int grid_offset)
             return;
         }
         color_t water_color = COLOR_MASK_GRAY;
-        
+
         switch (model_get_house(b->subtype.house_level)->water) {
             default:
             case 1:

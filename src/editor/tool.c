@@ -158,6 +158,8 @@ int editor_tool_is_brush(void)
         case TOOL_LOWER_LAND:
         case TOOL_EARTHQUAKE_CUSTOM:
         case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
+        case TOOL_OUTSKIRTS:
+        case TOOL_OUTSKIRTS_REMOVE:
             return 1;
         default:
             return 0;
@@ -205,7 +207,8 @@ static void add_terrain(const void *tile_data, int dx, int dy)
     }
     int grid_offset = tile->grid_offset + map_grid_delta(dx, dy);
     int terrain = map_terrain_get(grid_offset);
-    if (data.type != TOOL_EARTHQUAKE_CUSTOM && data.type != TOOL_EARTHQUAKE_CUSTOM_REMOVE) {
+    if (data.type != TOOL_EARTHQUAKE_CUSTOM && data.type != TOOL_EARTHQUAKE_CUSTOM_REMOVE &&
+        data.type != TOOL_OUTSKIRTS && data.type != TOOL_OUTSKIRTS_REMOVE) {
         if (terrain & TERRAIN_BUILDING) {
             map_building_tiles_remove(0, x, y);
             terrain = map_terrain_get(grid_offset);
@@ -278,6 +281,12 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             break;
         case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
             map_property_clear_future_earthquake(grid_offset);
+            break;
+        case TOOL_OUTSKIRTS:
+            map_property_mark_outskirts(grid_offset);
+            break;
+        case TOOL_OUTSKIRTS_REMOVE:
+            map_property_clear_outskirts(grid_offset);
         default:
             break;
     }

@@ -44,7 +44,7 @@ static int aqueduct_include_construction = 0;
 static int highway_top_tile_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
 static int elevation_recalculate_trees = 0;
 
-static int is_clear(int x, int y, int size, int disallowed_terrain, int terrain_exception, 
+static int is_clear(int x, int y, int size, int disallowed_terrain, int terrain_exception,
     int check_figure, int check_image)
 {
     if (!map_grid_is_inside(x, y, size)) {
@@ -706,7 +706,7 @@ int map_tiles_is_adjacent_to_building_type(int grid_offset, int building_type, i
     tiles[1] = grid_offset + map_grid_delta(1, 0);
     tiles[2] = grid_offset + map_grid_delta(0, 1);
     tiles[3] = grid_offset + map_grid_delta(-1, 0);
-    tiles[4] = grid_offset + map_grid_delta(1, -1);// diagonal tiles 
+    tiles[4] = grid_offset + map_grid_delta(1, -1);// diagonal tiles
     tiles[5] = grid_offset + map_grid_delta(1, 1);
     tiles[6] = grid_offset + map_grid_delta(-1, 1);
     tiles[7] = grid_offset + map_grid_delta(-1, -1);
@@ -740,6 +740,40 @@ int map_tiles_is_paved_road(int grid_offset)
         return 1;
     }
     return 0;
+}
+
+int map_tiles_exists_outskirts(int x, int y, int size)
+{
+    if (!map_grid_is_inside(x, y, size)) {
+        return 0;
+    }
+    for (int dy = 0; dy < size; dy++) {
+        for (int dx = 0; dx < size; dx++) {
+            int grid_offset = map_grid_offset(x + dx, y + dy);
+            if (map_property_is_outskirts(grid_offset)) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int map_tiles_find_nearest_non_outskirts(int x, int y)
+{
+    for (int radius = 0; radius <= 6; radius++) {
+        int x_min, y_min, x_max, y_max;
+        map_grid_get_area(x, y, 1, radius, &x_min, &y_min, &x_max, &y_max);
+
+        for (int yy = y_min; yy <= y_max; yy++) {
+            for (int xx = x_min; xx <= x_max; xx++) {
+                int grid_offset = map_grid_offset(xx, yy);
+                if (!map_property_is_outskirts(grid_offset)) {
+                    return radius;
+                }
+            }
+        }
+    }
+    return 6;
 }
 
 int map_tiles_highway_get_aqueduct_image(int grid_offset)

@@ -2281,6 +2281,11 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_TT_BALANCE, "Sort by Denarii Balance"},
     {TR_UI_LEDGER_DISABLED_1, "This feature is not yet available."},
     {TR_UI_LEDGER_DISABLED_2, "Your scribes are working hard to build this feature, but they need more time."},
+    {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds" },
+    {TR_UI_LEDGER_ONLY_CURRENT_YEAR , "You only started your governorship this year!"},
+    {TR_EDITOR_TOOL_OUTSKIRTS, "Outskirts"},
+    {TR_EDITOR_TOOL_OUTSKIRTS_REMOVE, "Remove outskits"},
+    {TR_EDITOR_SELECT_LAND, "Select land"},
     {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds"},
     {TR_UI_LEDGER_ONLY_CURRENT_YEAR, "You only started your governorship this year!"},
     {TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP, "Right Click: Advanced cost options"},
@@ -2326,6 +2331,9 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_SEND_CITY_WARNING, "Send city warning"},
     {TR_PARAMETER_MESSAGE, "Message"},
     {TR_PARAMETER_PLAY_FANFARE, "Play fanfare"},
+    {TR_EDITOR_SELECT_OFFSET, "Select offset"},
+    {TR_WARNING_NO_MILITARY_ON_OUTSKIRTS, "You can't build military structures in the outskirts"},
+    {TR_CONFIG_SHOW_OUTSKIRTS_DESIRABILITY, "Show outskirts desirability malus in overlay"},
     {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Enable classic scrollbars"},
     {TR_BUILDING_WILLOW_TREE, "Willow tree"}
 };
