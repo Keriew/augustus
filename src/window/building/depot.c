@@ -179,6 +179,7 @@ static void setup_buttons_for_selected_depot(void)
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
         if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
+             store_building->state == BUILDING_STATE_RUBBLE ||
              (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
