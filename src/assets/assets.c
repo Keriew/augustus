@@ -131,6 +131,7 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_SCROLL_BG_02] = assets_get_image_id("UI", "Scrollbar_Dark_Mid");
     data.asset_lookup[ASSET_UI_SCROLL_BG_03] = assets_get_image_id("UI", "Scrollbar_Dark_End");
 
+    data.asset_lookup[ASSET_AESTHETIC_BUILDING_WILLOW_TREE] = assets_get_image_id("Aesthetics", "ornamental willow");
     // font assets - keep last
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");
     data.font_lookup[ASSET_FONT_SQ_BRACKET_RIGHT] = assets_get_image_id("UI", "rightbracket_white_l");

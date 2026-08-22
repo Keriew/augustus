@@ -568,9 +568,9 @@ void scenario_events_progress_paused(int days_passed)
 static void migrate_parameters_action(scenario_action_t *action, int **params, int index)
 {
     int min_limit = 0, max_limit = 0;
-    int *param_value = params[index - 1];
+    int *param_value = params[index];
     parameter_type p_type = scenario_events_parameter_data_get_action_parameter_type(
-        action->type, index, &min_limit, &max_limit);
+        action->type, index + 1, &min_limit, &max_limit);
     if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
         char buffer[16];  // Make sure buffer is large enough
         memset(buffer, 0, sizeof(buffer));
@@ -583,9 +583,9 @@ static void migrate_parameters_action(scenario_action_t *action, int **params, i
 static void migrate_parameters_condition(scenario_condition_t *condition, int **params, int index)
 {
     int min_limit = 0, max_limit = 0;
-    int *param_value = params[index - 1];
+    int *param_value = params[index];
     parameter_type p_type = scenario_events_parameter_data_get_condition_parameter_type(
-        condition->type, index, &min_limit, &max_limit);
+        condition->type, index + 1, &min_limit, &max_limit);
     if ((p_type == PARAMETER_TYPE_FORMULA || p_type == PARAMETER_TYPE_GRID_SLICE) && param_value != NULL) {
         uint8_t buffer[16];  // Make sure buffer is large enough
         memset(buffer, 0, sizeof(buffer));
@@ -627,7 +627,7 @@ void scenario_events_migrate_to_formulas(void)
             for (unsigned int k = 0; k < group->conditions.size; k++) {
                 condition = array_item(group->conditions, k);
                 if (condition->type == CONDITION_TYPE_TIME_PASSED) {
-                    continue;
+                    continue; // skip this since it is already handled in min max migration
                 }
                 scenario_parameters_foreach_in_condition(condition, migrate_parameters_condition); //migrate parameters if needed
             }
@@ -650,7 +650,7 @@ void scenario_events_min_max_migrate_to_formulas(int version)
             for (unsigned int k = 0; k < group->conditions.size; k++) {
                 condition = array_item(group->conditions, k);
                 if (condition->type != CONDITION_TYPE_TIME_PASSED) {
-                    continue; // skip this since it is already handled in min max migration
+                    continue;
                 }
                 uint8_t buffer[32];
                 memset(buffer, 0, sizeof(buffer));

@@ -151,7 +151,7 @@ static int get_height_id(void)
         }
 
         switch (b->type) {
-                //256px
+            //256px
             case BUILDING_SMALL_STATUE:
             case BUILDING_MEDIUM_STATUE:
             case BUILDING_LARGE_STATUE:
@@ -187,6 +187,7 @@ static int get_height_id(void)
             case BUILDING_PANELLED_GARDEN_WALL:
             case BUILDING_PALISADE:
             case BUILDING_GLADIATOR_STATUE:
+            case BUILDING_WILLOW_TREE:
                 return HEIGHT_1_16_BLOCKS;
 
                 //288px
@@ -409,7 +410,7 @@ static void init(int grid_offset)
             case BUILDING_FORT_ARCHERS:
                 context.formation_id = b->formation_id;
                 break;
-                case BUILDING_WAREHOUSE_SPACE:
+            case BUILDING_WAREHOUSE_SPACE:
             case BUILDING_HIPPODROME:
                 b = building_main(b);
                 context.building_id = b->id;
@@ -772,7 +773,8 @@ static void draw_background(void)
         } else if ((btype >= BUILDING_PINE_TREE && btype <= BUILDING_PAVILION_GREEN) ||
             (btype >= BUILDING_HEDGE_DARK && btype <= BUILDING_HEDGE_LIGHT) ||
             btype == BUILDING_COLONNADE || btype == BUILDING_GARDEN_PATH || btype == BUILDING_LOOPED_GARDEN_WALL ||
-            btype == BUILDING_ROOFED_GARDEN_WALL || btype == BUILDING_PANELLED_GARDEN_WALL) {
+            btype == BUILDING_ROOFED_GARDEN_WALL || btype == BUILDING_PANELLED_GARDEN_WALL ||
+            btype == BUILDING_WILLOW_TREE) {
             window_building_draw_garden(&context);
         } else if (btype == BUILDING_PREFECTURE) {
             window_building_draw_prefect(&context);
