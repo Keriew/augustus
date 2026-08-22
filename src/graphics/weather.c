@@ -532,7 +532,8 @@ void update_weather(void)
     }
 
     if ((data.weather_config.type == WEATHER_NONE ||
-        data.weather_config.active == 0) && data.current_particle_count == 0) {
+        data.weather_config.active == 0) && data.current_particle_count == 0
+        && !window_is(WINDOW_CONFIG) && !window_is(WINDOW_MAIN_MENU)) {
         if (data.is_sound_playing) {
             sound_device_stop_type(SOUND_TYPE_EFFECTS);
             data.is_sound_playing = 0;

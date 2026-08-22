@@ -1,5 +1,5 @@
 name: Build Augustus
-on: 
+on:
   push:
     paths-ignore:
       - '**.md'
@@ -106,19 +106,19 @@ jobs:
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         if: ${{ matrix.cache-key }}
         with:
           path: deps
           key: ${{ matrix.cache-key }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}
       - name: Setup JDK 17
         if: matrix.BUILD_TARGET == 'android'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -180,8 +180,8 @@ jobs:
           - name: Windows MSVC ARM64
             cache-key: msvc-arm64
             COMPILER: msvc-arm64
-            SDL_VERSION: 2.32.8
-            SDL_MIXER_VERSION: 2.8.1
+            SDL_VERSION: 2.32.10
+            SDL_MIXER_VERSION: 2.8.2
     name: ${{ matrix.name }}
     runs-on: windows-latest
     env:
@@ -191,12 +191,12 @@ jobs:
       SKIP_UPLOAD: ${{ matrix.SKIP_UPLOAD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: deps
           key: windows-${{ matrix.cache-key }}-${{ env.SDL_VERSION }}-${{ env.SDL_MIXER_VERSION }}

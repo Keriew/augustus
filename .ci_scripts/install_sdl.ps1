@@ -47,9 +47,22 @@ if ("${env:COMPILER}" -eq "msvc") {
         mkdir build
         cd build
 
-        cmake -G "Visual Studio 17 2022" -A ARM64 -DSDL_LIBC=ON -DCMAKE_BUILD_TYPE=Release ..
+        # Use an argument array and the call operator to avoid PowerShell parsing the command
+        Write-Host "cmake: $(Get-Command cmake | Select-Object -ExpandProperty Source)"
+        & cmake --version
+
+        $cmakeArgs = @(
+            '-G', 'Visual Studio 18 2026'
+            '-A', 'ARM64'
+            '-DSDL_LIBC=ON'
+            "-DCMAKE_BUILD_TYPE=Release"
+            '..'
+        )
+        Write-Host "Running: cmake $($cmakeArgs -join ' ')"
+        & cmake @cmakeArgs
+
         cmake --build . -j 4 --config Release
-        cmake --install build --config Release --prefix $SDL_DIR
+        cmake --install . --config Release --prefix $SDL_DIR
 
         CheckSuccess("Build SDL")
 
@@ -57,10 +70,32 @@ if ("${env:COMPILER}" -eq "msvc") {
         cd "SDL${SDL_MAJOR_VERSION}_mixer-${env:SDL_MIXER_VERSION}"
         mkdir build
         cd build
-          
-        cmake -G "Visual Studio 17 2022" -A ARM64 -DCMAKE_PREFIX_PATH=$SDL_DIR -DCMAKE_BUILD_TYPE=Release -DSDL${SDL_MAJOR_VERSION}MIXER_MP3=ON -DSDL${SDL_MAJOR_VERSION}MIXER_MP3_MINIMP3=ON -DSDL${SDL_MAJOR_VERSION}MIXER_VENDORED=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_SAMPLES=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_FLAC=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_CMD=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_MOD=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_MIDI=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_MIDI_TIMIDITY=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_OPUS=OFF -DSDL${SDL_MAJOR_VERSION}MIXER_VORBIS=STB -DSDL${SDL_MAJOR_VERSION}MIXER_WAVPACK=OFF ..
+
+        # Build SDL_mixer with an explicit array of -D flags to avoid PowerShell parameter parsing issues
+        $cmakeArgs = @(
+            '-G', 'Visual Studio 18 2026'
+            '-A', 'ARM64'
+            ("-DCMAKE_PREFIX_PATH=" + $SDL_DIR)
+            '-DCMAKE_BUILD_TYPE=Release'
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_MP3=ON")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_MP3_MINIMP3=ON")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_VENDORED=OFF")
+            ('-DSDL' + $SDL_MAJOR_VERSION + 'MIXER_SAMPLES=OFF')
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_FLAC=OFF")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_CMD=OFF")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_MOD=OFF")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_MIDI=OFF")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_MIDI_TIMIDITY=OFF")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_OPUS=OFF")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_VORBIS=STB")
+            ("-DSDL${SDL_MAJOR_VERSION}MIXER_WAVPACK=OFF")
+            '..'
+        )
+        Write-Host "Running: cmake $($cmakeArgs -join ' ')"
+        & cmake @cmakeArgs
+
         cmake --build . -j 4 --config Release
-        cmake --install build --config Release --prefix $SDL_MIXER_DIR
+        cmake --install . --config Release --prefix $SDL_MIXER_DIR
 
         CheckSuccess("Build SDL mixer")
 

@@ -1085,6 +1085,23 @@ static void set_water_image(int x, int y, int grid_offset)
     if (((map_terrain_get(grid_offset) & (TERRAIN_WATER | TERRAIN_BUILDING)) == TERRAIN_WATER) || map_is_bridge(grid_offset)) {
         const terrain_image *img = map_image_context_get_shore(grid_offset);
         int image_id = image_group(GROUP_TERRAIN_WATER) + img->group_offset + img->item_offset;
+        if (map_terrain_is(grid_offset, TERRAIN_SHALLOW_WATER)) {
+            // GROUP_TERRAIN_WATER_SHORE 0-3 are open-water shallow variants,
+            // 4-7 are shore-shallow keyed by the screen-direction of adjacent land.
+            // Only the "clean straight shore" patterns from the water context table
+            // (group_offset 8/12/16/20 = exactly one cardinal-land neighbour with the
+            // adjacent diagonals also water) use a shallow shore sprite. Diagonal
+            // corners, peninsulas, and other multi-direction configurations fall
+            // through and keep the regular water shore image.
+            int base = image_group(GROUP_TERRAIN_WATER_SHORE);
+            switch (img->group_offset) {
+                case 0:  image_id = base + (map_random_get(grid_offset) & 3); break;
+                case 8:  image_id = base + 4; break;
+                case 12: image_id = base + 5; break;
+                case 16: image_id = base + 6; break;
+                case 20: image_id = base + 7; break;
+            }
+        }
         if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_BUILDING)) {
             // fortified shore
             if (!map_is_bridge(grid_offset)) { //no fortification right under the bridge

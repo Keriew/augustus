@@ -597,6 +597,7 @@ static void show_overlay_from_grid_offset(int grid_offset)
         case BUILDING_PLUM_TREE:
         case BUILDING_PALM_TREE:
         case BUILDING_DATE_TREE:
+        case BUILDING_WILLOW_TREE:
         case BUILDING_PINE_PATH:
         case BUILDING_FIR_PATH:
         case BUILDING_OAK_PATH:
