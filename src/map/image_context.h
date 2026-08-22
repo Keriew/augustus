@@ -6,6 +6,7 @@ typedef struct {
     int group_offset;
     int item_offset;
     int aqueduct_offset;
+    int max_item_offset;
 } terrain_image;
 
 void map_image_context_init(void);
