@@ -110,6 +110,7 @@ static int xml_start_layer_element(void)
     const char *path = xml_parser_get_attribute_string("src");
     const char *group = xml_parser_get_attribute_string("group");
     const char *image_id = xml_parser_get_attribute_string("image");
+    const char *source = xml_parser_get_attribute_string("source");
     int src_x = xml_parser_get_attribute_int("src_x");
     int src_y = xml_parser_get_attribute_int("src_y");
     int offset_x = xml_parser_get_attribute_int("x");
@@ -120,6 +121,15 @@ static int xml_start_layer_element(void)
     layer_rotate_type rotate = xml_parser_get_attribute_enum("rotate", ROTATE_VALUES, 3, ROTATE_90_DEGREES);
     layer_isometric_part part = xml_parser_get_attribute_enum("part", part_values, 2, PART_FOOTPRINT);
     layer_mask mask = xml_parser_get_attribute_enum("mask", mask_values, 2, LAYER_MASK_GRAYSCALE);
+
+    // source="aux" picks the auxiliary main file (c3.555 in editor mode). We
+    // encode it as a prefix on the group string so the existing layer pipeline
+    // stays unchanged.
+    char prefixed_group[32];
+    if (source && group && strcmp(source, "aux") == 0) {
+        snprintf(prefixed_group, sizeof(prefixed_group), "aux:%s", group);
+        group = prefixed_group;
+    }
 
     if (!asset_image_add_layer(img, path, group, image_id, src_x, src_y,
         offset_x, offset_y, width, height, invert, rotate, part == PART_NONE ? PART_BOTH : part, mask)) {
