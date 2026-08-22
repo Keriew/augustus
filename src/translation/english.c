@@ -1898,6 +1898,8 @@ static translation_string all_strings[] = {
     {TR_EDITOR_COLOR_BLACK, "Black"},
     {TR_EDITOR_COLOR_DARK_BLUE, "Dark Blue"},
     {TR_EDITOR_RUBBLE, "Rubble"},
+    {TR_EDITOR_TOOL_WATER, "Water"},
+    {TR_EDITOR_TOOL_SHALLOW, "Shallows"},
     {TR_PARAMETER_GRID_OFFSET_CORNER1, "Corner 1"},
     {TR_PARAMETER_GRID_OFFSET_CORNER2, "Corner 2"},
     {TR_CONDITION_TYPE_TERRAIN_IN_AREA, "Terrain in area"},
@@ -2244,6 +2246,9 @@ static translation_string all_strings[] = {
     {TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE, "Triumphal arch completed"},
     {TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, "The triumphal arch now stands complete, its towering stonework and finely carved facade honoring the courage of our soldiers and the victories they have secured for the city. May it stand for generations as a symbol of strength, sacrifice and civic pride."},
     {TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME, "(Supplied by Rome)"},
+    {TR_WARNING_ENEMIES_PREVENT_BRIDGE_DESTRUCTION, "You can not destroy bridges while an invasion is ongoing!"},
+    {TR_CONFIG_GP_CH_ENEMIES_RETREAT_FAST, "Enemies retreat twice as fast"},
+    {TR_CONFIG_CATEGORY_MANAGEMENT_MILITARY, "Military"},
     {TR_CHEAT_CHANGED_MONUMENT_RESOURCES, "Changed needed resources for monument type"},
     {TR_ACTION_TYPE_CHANGE_MONUMENT_RESOURCES, "Change monument resources needed"},
     {TR_PARAMETER_TYPE_MONUMENT, "Monument type"},
@@ -2340,7 +2345,8 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_SEND_CITY_WARNING, "Send city warning"},
     {TR_PARAMETER_MESSAGE, "Message"},
     {TR_PARAMETER_PLAY_FANFARE, "Play fanfare"},
-    {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Enable classic scrollbars" }
+    {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Enable classic scrollbars"},
+    {TR_BUILDING_WILLOW_TREE, "Willow tree"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
