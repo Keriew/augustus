@@ -283,6 +283,7 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_MEADOW:
         case TOOL_MARSHLAND:
         case TOOL_ROCKS:
+        case TOOL_SHALLOW:
         case TOOL_SHRUB:
         case TOOL_TREES:
         case TOOL_WATER:

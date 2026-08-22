@@ -375,7 +375,7 @@ static void init_scenario_data(scenario_version_t version)
     }
     state->graphic_ids = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
     state->edge = create_scenario_piece(GRID_SIZE_BUF_U8, 0);
-    if (version > SCENARIO_LAST_U16_TERRAIN) {
+    if (version > SCENARIO_LAST_LEGACY_TERRAIN) {
         state->terrain = create_scenario_piece(GRID_SIZE_BUF_U32, 0);
     } else {
         state->terrain = create_scenario_piece(GRID_SIZE_BUF_U16, 0);
@@ -761,7 +761,7 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     resource_set_mapping(resource_version);
 
     map_image_load_state_legacy(file->graphic_ids);
-    map_terrain_load_state(file->terrain, version > SCENARIO_LAST_U16_TERRAIN, file->graphic_ids, 1);
+    map_terrain_load_state(file->terrain, version > SCENARIO_LAST_LEGACY_TERRAIN, file->graphic_ids, 1);
     if (version > SCENARIO_LAST_NO_FORMULAS_AND_MODEL_DATA) {
         map_property_load_state(file->bitfields, file->edge);
     } else {
@@ -1409,11 +1409,10 @@ int game_file_io_read_scenario(const char *filename)
 
 static int scenario_terrain_at(int grid_offset)
 {
-    if (scenario_data.version <= SCENARIO_LAST_U16_TERRAIN) {
+    if (scenario_data.version <= SCENARIO_LAST_LEGACY_TERRAIN) {
         return map_terrain_get_from_buffer_16(scenario_data.state.terrain, grid_offset);
-    } else {
-        return map_terrain_get_from_buffer_32(scenario_data.state.terrain, grid_offset);
     }
+    return map_terrain_get_from_buffer_32(scenario_data.state.terrain, grid_offset);
 }
 
 static int scenario_tile_size_at(int grid_offset)

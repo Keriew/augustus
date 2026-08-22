@@ -187,7 +187,7 @@ int formation_get_max_legions(void);
 int formation_for_legion(int legion_index);
 
 void formation_change_morale(formation *m, int amount);
-int formation_has_low_morale(formation *m);
+int formation_has_low_morale(const formation *m);
 void formation_update_morale_after_death(formation *m);
 
 void formation_change_all_legions_morale(int amount);
