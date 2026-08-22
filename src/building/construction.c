@@ -76,7 +76,6 @@ static struct {
         int rock;
         int tree;
         int water;
-        int wall;
         int distant_water;
         int open_water;
     } required_terrain;
@@ -100,8 +99,8 @@ static const struct cycle building_cycles[] = {
       BUILDING_SHRINE_MARS,  BUILDING_SHRINE_VENUS }, AUTO_CYCLE_GROUP_TEMPLES },
     { 9, 2, {BUILDING_GARDEN_PATH, BUILDING_DATE_PATH, BUILDING_ELM_PATH,  BUILDING_FIG_PATH,  BUILDING_FIR_PATH,
       BUILDING_OAK_PATH,  BUILDING_PALM_PATH, BUILDING_PINE_PATH, BUILDING_PLUM_PATH}, AUTO_CYCLE_GROUP_GARDENS },
-    { 8, 1, {BUILDING_DATE_TREE, BUILDING_ELM_TREE,  BUILDING_FIG_TREE,  BUILDING_FIR_TREE,
-      BUILDING_OAK_TREE,  BUILDING_PALM_TREE, BUILDING_PINE_TREE, BUILDING_PLUM_TREE }, AUTO_CYCLE_GROUP_GARDENS },
+    { 9, 1, {BUILDING_DATE_TREE, BUILDING_ELM_TREE,  BUILDING_FIG_TREE,  BUILDING_FIR_TREE,
+      BUILDING_OAK_TREE,  BUILDING_PALM_TREE, BUILDING_PINE_TREE, BUILDING_PLUM_TREE, BUILDING_WILLOW_TREE }, AUTO_CYCLE_GROUP_GARDENS },
     { 2, 1, {BUILDING_GARDENS, BUILDING_OVERGROWN_GARDENS }, AUTO_CYCLE_GROUP_GARDENS },
 };
 
@@ -661,7 +660,6 @@ void building_construction_set_type(building_type type, int setup_rotation)
     data.cost_preview = 0;
 
     if (type != BUILDING_NONE) {
-        data.required_terrain.wall = 0;
         data.required_terrain.water = 0;
         data.required_terrain.tree = 0;
         data.required_terrain.rock = 0;
@@ -690,9 +688,6 @@ void building_construction_set_type(building_type type, int setup_rotation)
                 break;
             case BUILDING_CLAY_PIT:
                 data.required_terrain.water = 1;
-                break;
-            case BUILDING_TOWER:
-                data.required_terrain.wall = 1;
                 break;
             case BUILDING_LIGHTHOUSE:
                 data.required_terrain.open_water = 1;
@@ -812,6 +807,7 @@ int building_construction_is_updatable(void)
         case BUILDING_PLUM_TREE:
         case BUILDING_PALM_TREE:
         case BUILDING_DATE_TREE:
+        case BUILDING_WILLOW_TREE:
         case BUILDING_PINE_PATH:
         case BUILDING_FIR_PATH:
         case BUILDING_OAK_PATH:
@@ -884,16 +880,16 @@ static int should_mark_for_construction(building_type type)
 // "updatable": bridges and statues.
 static int auto_clear_handled_by_explicit_branch(building_type type)
 {
-  if (building_construction_is_updatable()) {
-      return 1;
-  }
-  if (type == BUILDING_LOW_BRIDGE || type == BUILDING_SHIP_BRIDGE) {
-      return 1;
-  }
-  if (type >= BUILDING_GODDESS_STATUE && type <= BUILDING_SENATOR_STATUE) {
-      return 1;
-  }
-  return 0;
+    if (building_construction_is_updatable()) {
+        return 1;
+    }
+    if (type == BUILDING_LOW_BRIDGE || type == BUILDING_SHIP_BRIDGE) {
+        return 1;
+    }
+    if (type >= BUILDING_GODDESS_STATUE && type <= BUILDING_SENATOR_STATUE) {
+        return 1;
+    }
+    return 0;
 }
 
 void building_construction_update(int x, int y, int grid_offset)
@@ -962,7 +958,7 @@ void building_construction_update(int x, int y, int grid_offset)
         if (items_placed >= 0) {
             current_cost *= items_placed;
         }
-    } else if (type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) {
+    } else if ((type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) || type == BUILDING_WILLOW_TREE) {
         int items_placed = plot_draggable_building(data.start.x, data.start.y, x, y, 0);
         if (items_placed >= 0) {
             current_cost *= items_placed;
@@ -1087,7 +1083,7 @@ void building_construction_update(int x, int y, int grid_offset)
             data.draw_as_constructing = 1;
         }
     } if (data.required_terrain.meadow || data.required_terrain.rock || data.required_terrain.tree ||
-        data.required_terrain.water || data.required_terrain.wall || data.required_terrain.distant_water
+        data.required_terrain.water || data.required_terrain.distant_water
         || data.required_terrain.open_water) {
         // never mark as constructing
     } else {
@@ -1221,6 +1217,17 @@ void building_construction_place(void)
 
     int placement_cost = model_get_building(type)->cost;
     int repaired_buildings = 0;
+
+    if (type == BUILDING_TOWER) {
+        for (int x = x_end; x <= x_end + 1; x++) {
+            for (int y = y_end; y <= y_end + 1; y++) {
+                if (!map_terrain_is(map_grid_offset(x, y), TERRAIN_WALL)) {
+                    placement_cost += model_get_building(BUILDING_WALL)->cost;
+                }
+            }
+        }
+    }
+
     if (type == BUILDING_CLEAR_LAND) {
         // BUG in original (keep this behaviour): if confirmation has to be asked (bridge/fort),
         // the previous cost is deducted from treasury and if user chooses 'no', they still pay for removal.
@@ -1316,7 +1323,7 @@ void building_construction_place(void)
         placement_cost = info.cost;
         map_tiles_update_all_aqueducts(0);
         map_routing_update_land();
-    } else if (type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) {
+    } else if ((type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) || type == BUILDING_WILLOW_TREE) {
         placement_cost *= place_draggable_building(x_start, y_start, x_end, y_end, type, 0);
     } else if (type >= BUILDING_PINE_PATH && type <= BUILDING_DATE_PATH) {
         int rotation = building_rotation_get_rotation_with_limit(BUILDING_CONNECTABLE_ROTATION_LIMIT_PATHS);
@@ -1395,11 +1402,6 @@ int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
     } else if (data.required_terrain.water) {
         if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 3, TERRAIN_WATER)) {
             set_warning(warning_id, WARNING_WATER_NEEDED);
-            return 0;
-        }
-    } else if (data.required_terrain.wall) {
-        if (!map_terrain_all_tiles_in_radius_are(x, y, 2, 0, TERRAIN_WALL)) {
-            set_warning(warning_id, WARNING_WALL_NEEDED);
             return 0;
         }
     } else if (data.required_terrain.distant_water) {

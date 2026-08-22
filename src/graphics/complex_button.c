@@ -15,7 +15,6 @@
 static void complex_button_ellipsized(complex_button *button, int was_ellipsized);
 static int debug_shade = 0;
 static int debug_sunken = 0;
-static font_t debug_font = FONT_NORMAL_BLACK;
 static color_t debug_color_primary = COLOR_FONT_GRAY_50;
 static color_t debug_color_secondary = COLOR_FONT_GRAY_GREEN;
 
@@ -131,6 +130,7 @@ static void font_and_colours(complex_button_style style, int is_disabled, int is
             *font = is_large ? FONT_LARGE_PLAIN : FONT_NORMAL_PLAIN;
             *font_primary = COLOR_FONT_GRAY;
             *font_secondary = COLOR_MASK_NONE;
+            break;
         case COMPLEX_BUTTON_STYLE_CUSTOM:
         default:
             *font = FONT_NORMAL_BLACK;
@@ -139,7 +139,7 @@ static void font_and_colours(complex_button_style style, int is_disabled, int is
             break;
     }
 
-};
+}
 
 static int sequence_position_is_centered(sequence_positioning position)
 {
@@ -377,7 +377,7 @@ void complex_button_draw(const complex_button *button)
         case COMPLEX_BUTTON_STYLE_GRAY_NO_FILL:
             draw_main_menu_style(button, base_font, font_primary, font_secondary);
             break;
-        default: // all other variants housed in the default style draw function 
+        default: // all other variants housed in the default style draw function
             draw_default_style(button, base_font, font_primary, font_secondary, button->color_mask);
     }
 }
@@ -468,7 +468,7 @@ int complex_button_handle_mouse_array(complex_button *buttons, const mouse *m, u
     return handled;
 }
 
-//TO SOLVE: manually set tooltips will be overwritten if the button is ellipsized. 
+//TO SOLVE: manually set tooltips will be overwritten if the button is ellipsized.
 int complex_button_handle_tooltip(const complex_button *button, tooltip_context *c)
 {
     if (button->is_focused) {

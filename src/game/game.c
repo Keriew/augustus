@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include "assets/assets.h"
+#include "building/monument.h"
 #include "building/properties.h"
 #include "city/view.h"
 #include "core/config.h"
@@ -129,6 +130,7 @@ int game_init(void)
     }
 
     model_reset();
+    building_monument_reset_stages();
 
     building_properties_init();
     load_augustus_messages();

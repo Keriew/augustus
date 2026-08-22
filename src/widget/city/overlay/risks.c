@@ -314,6 +314,8 @@ static void get_building_health(int x, int y, float scale, int grid_offset)
         case BUILDING_PALISADE:
             y_offset = 40;
             break;
+        default:
+            break;
     }
     int draw_x = center_x - bar_width / 2;
     int draw_y = center_y + y_offset / scale;

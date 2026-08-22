@@ -459,6 +459,8 @@ const uint8_t *lang_get_string(int group, int index)
                 return translation_for(TR_BUILDING_PALM_TREE);
             case BUILDING_DATE_TREE:
                 return translation_for(TR_BUILDING_DATE_TREE);
+            case BUILDING_WILLOW_TREE:
+                return translation_for(TR_BUILDING_WILLOW_TREE);
             case BUILDING_PINE_PATH:
                 return translation_for(TR_BUILDING_PINE_PATH);
             case BUILDING_FIR_PATH:

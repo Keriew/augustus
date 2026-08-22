@@ -386,9 +386,9 @@ static int trade_ship_phrase(figure *f)
     } else if (f->action_state == FIGURE_ACTION_112_TRADE_SHIP_MOORED) {
         int state = figure_trade_ship_is_trading(f);
         if (state == TRADE_SHIP_BUYING) {
-            return EXACT_STATE_OFFSET + 1; // buying goods
+            return EXACT_STATE_OFFSET; // buying goods
         } else if (state == TRADE_SHIP_SELLING) {
-            return EXACT_STATE_OFFSET; // selling goods
+            return EXACT_STATE_OFFSET + 1; // selling goods
         } else {
             if (!trader_has_traded(f->trader_id)) {
                 return EXACT_STATE_OFFSET + 2; // no trade

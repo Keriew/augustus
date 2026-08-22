@@ -196,32 +196,40 @@ static void window_building_draw_monument_resources_needed(building_info_context
 {
     building *b = building_get(c->building_id);
     int y_offset = 95;
+    int x_offset = 0;
     inner_panel_draw(c->x_offset + 16, c->y_offset + y_offset, c->width_blocks - 2, 5);
     if (building_monument_needs_resources(b)) {
+        int current_resource = 0;
         for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
             int resource_needed_amount = building_monument_resources_needed_for_monument_type(b->type, r,
                 b->monument.phase);
             if (!resource_needed_amount) {
                 continue;
             }
+            current_resource++;
             int resource_delivered_amount = resource_needed_amount - b->resources[r];
             const image *img = image_get(resource_get_data(r)->image.icon);
             int icon_x = (24 - img->original.width + 1) / 2;  //max icon width  24
             int icon_y = (22 - img->original.height + 1) / 2; //max icon height 22
 
-            image_draw(resource_get_data(r)->image.icon, c->x_offset + 32 + icon_x, c->y_offset + y_offset + 10 + icon_y,
+            image_draw(resource_get_data(r)->image.icon, c->x_offset + 32 + icon_x + x_offset, c->y_offset + y_offset + 10 + icon_y,
                 COLOR_MASK_NONE, SCALE_NONE);
-            int width = text_draw(resource_get_data(r)->text, c->x_offset + 65, c->y_offset + y_offset + 15,
+            int width = text_draw(resource_get_data(r)->text, c->x_offset + 65 + x_offset, c->y_offset + y_offset + 15,
                 FONT_NORMAL_WHITE, 0);
             width += text_draw_number(resource_delivered_amount, '@', "/",
-                c->x_offset + 65 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
+                c->x_offset + 65 + width + x_offset, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
             width += text_draw_number(resource_needed_amount, '@', " ",
-                c->x_offset + 65 + width - 10, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
+                c->x_offset + 65 + width - 10 + x_offset, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE, 0);
             if (b->type == BUILDING_TRIUMPHAL_ARCH) {
                 lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_TRIUMPHAL_ARCH_SUPPLIED_BY_ROME,
                     c->x_offset + 54 + width, c->y_offset + y_offset + 15, FONT_NORMAL_WHITE);
             }
-            y_offset += 20;
+            if (current_resource == 3 && b->type != BUILDING_TRIUMPHAL_ARCH) {
+                y_offset = 95;
+                x_offset = ((c->width_blocks - 2) * BLOCK_SIZE - 16) / 2;
+            } else {
+                y_offset += 20;
+            }
         }
     } else {
         text_draw_multiline(translation_for(TR_BUILDING_MONUMENT_CONSTRUCTION_ARCHITECT_NEEDED),

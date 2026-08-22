@@ -121,10 +121,6 @@ static const lang_fragment tab_text_production[] = {
     {.type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Production"},
 };
 
-static const lang_fragment tab_text_summary[] = {
-    {.type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Summary"},
-};
-
 static image_button image_buttons[] = {
     {744, 554, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1},
 };
@@ -548,7 +544,7 @@ static void draw_foreground(void)
         ledger_tabs.tabs[1].button.font = FONT_NORMAL_PLAIN;
         ledger_tabs.tabs[1].button.font_color = COLOR_FONT_GRAY;
 
-        tabs_initialized = tab_view_layout(&ledger_tabs) == TAB_LAYOUT_OK; // layout tabs and set initialized flag based on success  
+        tabs_initialized = tab_view_layout(&ledger_tabs) == TAB_LAYOUT_OK; // layout tabs and set initialized flag based on success
     }
 
     graphics_in_dialog_with_size(PANEL_W, PANEL_H);

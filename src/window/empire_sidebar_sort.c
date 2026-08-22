@@ -3,6 +3,7 @@
 #include "core/config.h"
 #include "core/string.h"
 #include "empire/city.h"
+#include "empire/object.h"
 #include "empire/trade_prices.h"
 #include "empire/trade_route.h"
 #include "game/resource.h"
@@ -14,6 +15,7 @@
 #include "graphics/text.h"
 #include "input/mouse.h"
 #include "translation/translation.h"
+#include "window/empire.h"
 
 #include <string.h>
 
@@ -152,13 +154,15 @@ static resource_type filter_resource_from_config(void)
 }
 
 
-int window_empire_sidebar_sort_count_trade_resources(const empire_city *city, int is_sell)
+int window_empire_sidebar_sort_count_trade_resources(const empire_city *city, int row_type)
 {
+    full_empire_object *full = empire_object_get_full(city->empire_object_id);
     int count = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         if (resource_is_storable(r)) {
-            if ((is_sell && city->sells_resource[r]) ||
-                (!is_sell && city->buys_resource[r])) {
+            if ((row_type == ROW_TYPE_SELLS && city->sells_resource[r]) ||
+                (row_type == ROW_TYPE_BUYS && city->buys_resource[r]) ||
+                (row_type == ROW_TYPE_COSTS && full->route_resource_cost[r])) {
                 count++;
             }
         }
