@@ -280,7 +280,6 @@ static void figure_cart_unload_or_return(figure *f, building *b)
 
 void figure_depot_cartpusher_action(figure *f)
 {
-    figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
     int speed_factor = DEPOT_CART_PUSHER_SPEED;
     int percentage_speed = 0;
@@ -335,6 +334,7 @@ void figure_depot_cartpusher_action(figure *f)
         case FIGURE_ACTION_241_DEPOT_CART_PUSHER_HEADING_TO_DESTINATION:
         case FIGURE_ACTION_250_DEPOT_CART_PUSHER_RETURN_TO_SOURCE:
         {
+            figure_image_increase_offset(f, 12);
             set_cart_graphic(f);
             if (f->wait_ticks > DEPOT_CART_REROUTE_DELAY) {
                 figure_movement_move_ticks_with_percentage(f, speed_factor, percentage_speed);
@@ -421,6 +421,7 @@ void figure_depot_cartpusher_action(figure *f)
             break;
 
         case FIGURE_ACTION_243_DEPOT_CART_PUSHER_RETURNING:
+            figure_image_increase_offset(f, 12);
             set_cart_graphic(f);
             figure_movement_move_ticks_with_percentage(f, speed_factor, percentage_speed);
             if (f->direction == DIR_FIGURE_AT_DESTINATION) {
