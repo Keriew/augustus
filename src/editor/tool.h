@@ -35,10 +35,16 @@ typedef enum {
     TOOL_NATIVE_RUINS = 32,
     TOOL_SELECT_LAND = 33,
     TOOL_SELECT_OFFSET = 34,
-    TOOL_SHALLOW = 35
+    TOOL_SHALLOW = 35,
+    TOOL_NATIVE_WELL = 36,
+    TOOL_NATIVE_LARGE_HUT_ALT = 37,
+    TOOL_NATIVE_HUT_ALT_2 = 38,
+    TOOL_NATIVE_LARGE_HUT_ALT_2 = 39,
+    TOOL_NATIVE_PALISADE = 40
 } tool_type;
 
 tool_type editor_tool_type(void);
+int editor_tool_id(void);
 int editor_tool_is_active(void);
 void editor_tool_deactivate(void);
 void editor_tool_set_type(tool_type tool);
