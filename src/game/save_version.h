@@ -120,7 +120,7 @@ typedef enum {
 } savegame_version_t;
 
 typedef enum {
-    SCENARIO_CURRENT_VERSION = 25,
+    SCENARIO_CURRENT_VERSION = 26,
 
     SCENARIO_VERSION_NONE = 0,
     SCENARIO_LAST_UNVERSIONED = 1,
