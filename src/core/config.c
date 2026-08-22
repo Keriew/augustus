@@ -142,6 +142,7 @@ static const char *ini_keys[] = {
     [CONFIG_UI_EMPIRE_SIDEBAR_FILTER_RESOURCE] = "ui_empire_sidebar_filter_resource",
     [CONFIG_UI_AUTO_CYCLE_TEMPLES] = "ui_auto_cycle_temples",
     [CONFIG_UI_AUTO_CYCLE_GARDENS] = "ui_auto_cycle_gardens",
+    [CONFIG_UI_EXTRA_INFORMATION_IN_CART_DEPOT] = "ui_extra_information_in_cart_depot",
     [CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES] = "ui_auto_delete_old_common_messages",
     [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = "ui_scroll_camera_unlocked",
     [CONFIG_UI_SCROLL_LEGACY_SCROLLBAR] = "ui_scroll_old_scroll", // keep comma after last entry please

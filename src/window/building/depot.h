@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "input/mouse.h"
+#include "game/resource.h"
 
 void window_building_depot_init_main(int building_id);
 void window_building_depot_init_resource_selection(void);
@@ -21,5 +22,7 @@ int window_building_handle_mouse_depot_select_destination(const mouse *m, buildi
 int window_building_handle_mouse_depot_select_resource(const mouse *m, building_info_context *c);
 
 void window_building_depot_get_tooltip_main(int *translation);
+
+void window_building_get_depot_resource_orders_count(int building_id, resource_type resource, int *source_count, int *destination_count);
 
 #endif // WINDOW_BUILDING_DEPOT_H
