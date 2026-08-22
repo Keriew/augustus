@@ -105,6 +105,7 @@ extern struct scenario_t {
         int contaminated_water;
         int iron_mine_collapse;
         int clay_pit_flooded;
+        int quarry_collapse;
     } random_events;
 
     struct {

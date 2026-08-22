@@ -323,6 +323,22 @@ void load_augustus_messages(void)
     set_message_parameters(m, TR_CITY_MESSAGE_TITLE_TRIUMPHAL_ARCH_COMPLETE,
         TR_CITY_MESSAGE_TEXT_TRIUMPHAL_ARCH_COMPLETE, 0, MESSAGE_TYPE_BUILDING_COMPLETION);
     i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_MINE_COLLAPSED,
+        TR_CITY_MESSAGE_TEXT_MINE_COLLAPSED, 0, MESSAGE_TYPE_DISASTER);
+    i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_PIT_COLLAPSED,
+        TR_CITY_MESSAGE_TEXT_PIT_COLLAPSED, 0, MESSAGE_TYPE_DISASTER);
+    i += 1;
+
+    m = &data.message_entries[i];
+    set_message_parameters(m, TR_CITY_MESSAGE_TITLE_QUARRY_COLLAPSED,
+        TR_CITY_MESSAGE_TEXT_QUARRY_COLLAPSED, 0, MESSAGE_TYPE_DISASTER);
+    i += 1;
+
 }
 
 
