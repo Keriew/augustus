@@ -19,6 +19,7 @@
 #define PROCEED_GROUP 43
 #define PROCEED_TEXT 5
 #define CHECKBOX_CHECK_SIZE 20
+#define CONFIRMATION_WITH_EXTRA_MAX_LENGTH 512
 
 static void button_checkbox(const generic_button *button);
 static void button_ok(int param1, int param2);
@@ -31,6 +32,8 @@ static image_button buttons[] = {
 };
 
 static generic_button checkbox = { 160, 180, 360, 20, button_checkbox };
+
+static uint8_t confirmation_with_extra_text[CONFIRMATION_WITH_EXTRA_MAX_LENGTH];
 
 static struct {
     int ok_clicked;
@@ -171,4 +174,51 @@ void window_popup_dialog_show_confirmation(const uint8_t *custom_title, const ui
         };
         window_show(&window);
     }
+}
+
+void window_popup_dialog_show_confirmation_with_extra(translation_key title, translation_key message,
+    const uint8_t *extra, const uint8_t *extra2, void (*close_func)(int accepted, int checked))
+{
+    const uint8_t *title_text = translation_for(title);
+    const uint8_t *message_text = translation_for(message);
+
+    if (!extra && !extra2) {
+        window_popup_dialog_show_confirmation(title_text, message_text, 0, close_func);
+        return;
+    }
+
+    uint8_t *cursor = confirmation_with_extra_text;
+    int remaining = CONFIRMATION_WITH_EXTRA_MAX_LENGTH;
+
+    cursor = string_copy(message_text, cursor, remaining);
+    remaining = CONFIRMATION_WITH_EXTRA_MAX_LENGTH - (cursor - confirmation_with_extra_text);
+
+    if (extra) {
+        if (remaining > 1) {
+            *cursor = '\n';
+            cursor++;
+            *cursor = 0;
+            remaining--;
+        }
+        cursor = string_copy(extra, cursor, remaining);
+        remaining = CONFIRMATION_WITH_EXTRA_MAX_LENGTH - (cursor - confirmation_with_extra_text);
+    }
+
+    if (extra2) {
+        if (!extra && remaining > 1) {
+            *cursor = '\n';
+            cursor++;
+            *cursor = 0;
+            remaining--;
+        }
+        if (remaining > 1) {
+            *cursor = '\n';
+            cursor++;
+            *cursor = 0;
+            remaining--;
+        }
+        string_copy(extra2, cursor, remaining);
+    }
+
+    window_popup_dialog_show_confirmation(title_text, confirmation_with_extra_text, 0, close_func);
 }
