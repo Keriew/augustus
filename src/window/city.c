@@ -822,8 +822,9 @@ static void handle_hotkeys(const hotkeys *h)
         int building_id = map_building_at(grid_offset);
         if (building_id) {
             building *b = building_main(building_get(building_id));
+            window_building_info_show(grid_offset);
             if (has_storage_orders(b->type)) {
-                window_building_info_show(grid_offset);
+                // only navigate to special orders if the screen supports it
                 window_building_info_show_storage_orders();
             }
         }
