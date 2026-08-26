@@ -2177,7 +2177,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     handled |= generic_buttons_handle_mouse(md, 0, 0, bottom_buttons, data.has_changes ? NUM_BOTTOM_BUTTONS : NUM_BOTTOM_BUTTONS - 1, &data.bottom_focus_button);
     handled |= generic_buttons_handle_mouse(md, 0, 0, page_buttons, CONFIG_PAGES, &data.page_focus_button);
 
-    if (!handled && (m->right.went_up || h->escape_pressed)) {
+    if (!handled && (m->right.went_up || h->close_pressed)) {
         window_go_back();
     }
     if (prev_focus != data.focus_button) {

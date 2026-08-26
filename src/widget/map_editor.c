@@ -503,7 +503,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
         return;
     }
 
-    if (h->escape_pressed) {
+    if (h->close_pressed) {
         if (editor_tool_is_active()) {
             editor_tool_deactivate();
         } else {

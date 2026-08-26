@@ -2954,7 +2954,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
                 window_city_show();
             }
         }
-        if (h->escape_pressed) { // handle escape
+        if (h->close_pressed) {
             window_city_show();
         }
     }

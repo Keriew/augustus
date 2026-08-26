@@ -513,6 +513,9 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
         case HOTKEY_EDITOR_EMPIRE_PICK_TOOL:
             def->action = &data.hotkey_state.pick_empire_tool;
             break;
+        case HOTKEY_CLOSE:
+            def->action = &data.hotkey_state.close_pressed;
+            break;
         default:
             def->action = 0;
     }
@@ -595,7 +598,8 @@ void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings)
     data.definitions[0].repeatable = 0;
     data.definitions[0].value = 1;
 
-    data.definitions[1].action = &data.hotkey_state.escape_pressed;
+    // ESC always closes; HOTKEY_CLOSE adds user-configurable keys on top of it
+    data.definitions[1].action = &data.hotkey_state.close_pressed;
     data.definitions[1].key = KEY_TYPE_ESCAPE;
     data.definitions[1].modifiers = 0;
     data.definitions[1].repeatable = 0;
