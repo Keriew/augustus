@@ -542,6 +542,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_media.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_localization.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_variable.c
     ${PROJECT_SOURCE_DIR}/src/scenario/demand_change.c
