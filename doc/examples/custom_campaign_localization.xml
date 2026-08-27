@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<localization version="1" language="pt-BR">
+    <message uid="Drought">
+        <title>Rei solicita trigo</title>
+        <subtitle>Seca no Vale do Tibre</subtitle>
+        <text>Governador, as colheitas fracassaram...</text>
+    </message>
+</localization>
