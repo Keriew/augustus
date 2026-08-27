@@ -237,8 +237,9 @@ static void draw_messages(unsigned int total_messages)
                 data.x_text + 180, data.y_text + 8 + 20 * i, font, 0);
         } else {
             custom_message_t *custom_msg = custom_messages_get(msg->param1);
-            if (custom_msg->title) {
-                text_draw_ellipsized(custom_msg->title->text, data.x_text + 180, data.y_text + 8 + 20 * i,
+            uint8_t *title = custom_messages_get_title(custom_msg);
+            if (title) {
+                text_draw_ellipsized(title, data.x_text + 180, data.y_text + 8 + 20 * i,
                     data.text_width_blocks * BLOCK_SIZE - 180, font, 0);
             } else {
                 text_draw(translation_for(TR_ACTION_TYPE_A_MESSAGE), data.x_text + 180, data.y_text + 8 + 20 * i, font, 0);

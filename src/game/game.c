@@ -30,6 +30,7 @@
 #include "platform/file_manager.h"
 #include "platform/prefs.h"
 #include "platform/user_path.h"
+#include "scenario/custom_messages_localization.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
 #include "sound/city.h"
@@ -221,7 +222,16 @@ void game_exit_editor(void)
 
 int game_reload_language(void)
 {
-    return reload_language(editor_is_active(), 1);
+    int is_editor = editor_is_active();
+    int result = reload_language(is_editor, 1);
+    if (result) {
+        if (is_editor) {
+            custom_messages_localization_clear();
+        } else {
+            custom_messages_localization_load();
+        }
+    }
+    return result;
 }
 
 void game_run(void)
