@@ -67,6 +67,7 @@
 #include "platform/file_manager.h"
 #include "scenario/criteria.h"
 #include "scenario/custom_messages.h"
+#include "scenario/custom_messages_localization.h"
 #include "scenario/demand_change.h"
 #include "scenario/distant_battle.h"
 #include "scenario/earthquake.h"
@@ -350,6 +351,7 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
 
     scenario_set_campaign_mission(mission);
     scenario_set_campaign_rank(rank);
+    custom_messages_localization_load();
 
     scenario_settings_init_mission();
     city_emperor_init_scenario(rank);
@@ -415,6 +417,7 @@ int game_file_start_scenario_from_buffer(uint8_t *data, int length, int is_save_
     scenario_set_custom(game_campaign_is_original() ? 0 : 2);
     scenario_set_campaign_mission(mission);
     scenario_set_campaign_rank(rank);
+    custom_messages_localization_load();
     scenario_restore_campaign_player_name();
 
     if (game_campaign_is_original()) {
@@ -465,6 +468,7 @@ int game_file_load_saved_game(const char *filename)
     check_backward_compatibility();
     initialize_saved_game();
     building_storage_reset_building_ids();
+    custom_messages_localization_load();
 
     sound_music_update(1);
     return 1;
