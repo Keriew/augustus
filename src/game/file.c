@@ -333,6 +333,7 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
         uint8_t scenario_mapx_name[FILE_NAME_MAX];
         string_copy(scenario_name, scenario_mapx_name, FILE_NAME_MAX);
         if (game_file_load_saved_game(full_scenario_file) == FILE_LOAD_SUCCESS) {
+            game_campaign_restore();
             is_save_game = 1;
             scenario_set_name(scenario_mapx_name);
         } else {
