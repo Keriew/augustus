@@ -18,6 +18,17 @@ localization/pt-BR/messages/RC01 Ostia.xml
 
 This works for both unpacked campaign directories and `.campaign` packages.
 
+The selected directory is tried first, followed by its normalized locale form. A campaign may also provide `localization/locales.xml` to map distribution-specific language directory names and to select a regional locale when the base game language is installed as the default and no language directory is selected:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<locales version="1">
+    <locale id="pt-BR" aliases="pt-br|pt_BR|portuguese" default-for="pt"/>
+</locales>
+```
+
+`default-for` uses the detected base-game language tag. This explicit mapping is necessary because the original game identifies Portuguese but does not distinguish Brazilian from European Portuguese. If the manifest is absent, Augustus tries a language-neutral directory such as `localization/pt/` for a default Portuguese installation. An explicit selection such as `pt-PT` is never redirected through `default-for`.
+
 ## File format
 
 ```xml
