@@ -17,6 +17,7 @@ localization/pt-BR/messages/RC01 Ostia.xml
 ```
 
 This works for both unpacked campaign directories and `.campaign` packages.
+Campaign scenarios stored as either editable `.mapx` files or packaged `.svx` files are supported.
 
 The selected directory is tried first, followed by its normalized locale form. A campaign may also provide `localization/locales.xml` to map distribution-specific language directory names and to select a regional locale when the base game language is installed as the default and no language directory is selected:
 
