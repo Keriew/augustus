@@ -22,6 +22,12 @@ typedef struct {
     uint8_t *text;
 } localized_custom_message;
 
+typedef enum {
+    LOCALIZED_FIELD_TITLE,
+    LOCALIZED_FIELD_SUBTITLE,
+    LOCALIZED_FIELD_TEXT,
+} localized_custom_message_field;
+
 static struct {
     localized_custom_message *messages;
     uint8_t *seen_messages;
@@ -95,6 +101,11 @@ static int xml_start_message(void)
     }
 
     const char *uid = xml_parser_get_attribute_string("uid");
+    if (!uid || strlen(uid) >= FILE_NAME_MAX) {
+        log_error("Custom message localization uid is too long", 0, 0);
+        data.success = 0;
+        return 0;
+    }
     uint8_t encoded_uid[FILE_NAME_MAX];
     encoding_from_utf8(uid, encoded_uid, FILE_NAME_MAX);
     int message_id = custom_messages_get_id_by_uid(encoded_uid);
@@ -211,6 +222,9 @@ int custom_messages_localization_load(void)
     if (!game_campaign_is_active() || !game_campaign_is_custom()) {
         return 0;
     }
+    if (custom_messages_count() <= 0) {
+        return 0;
+    }
 
     const char *language = config_get_string(CONFIG_STRING_UI_LANGUAGE_DIR);
     if (!language || !*language) {
@@ -223,7 +237,11 @@ int custom_messages_localization_load(void)
     }
 
     char scenario_name[FILE_NAME_MAX];
-    snprintf(scenario_name, FILE_NAME_MAX, "%s", file_remove_path(scenario->path));
+    int scenario_name_size = snprintf(scenario_name, FILE_NAME_MAX, "%s", file_remove_path(scenario->path));
+    if (scenario_name_size < 0 || scenario_name_size >= FILE_NAME_MAX) {
+        log_error("Custom campaign scenario name is too long for localization", scenario->path, 0);
+        return 0;
+    }
     file_remove_extension(scenario_name);
 
     char path[FILE_NAME_MAX];
@@ -250,17 +268,17 @@ int custom_messages_localization_load(void)
     return result;
 }
 
-static uint8_t *get_localized_field(int message_id, int field)
+static uint8_t *get_localized_field(int message_id, localized_custom_message_field field)
 {
     if (!data.messages || message_id <= 0 || message_id > data.message_count) {
         return 0;
     }
     switch (field) {
-        case 0:
+        case LOCALIZED_FIELD_TITLE:
             return data.messages[message_id].title;
-        case 1:
+        case LOCALIZED_FIELD_SUBTITLE:
             return data.messages[message_id].subtitle;
-        case 2:
+        case LOCALIZED_FIELD_TEXT:
             return data.messages[message_id].text;
         default:
             return 0;
@@ -269,15 +287,15 @@ static uint8_t *get_localized_field(int message_id, int field)
 
 uint8_t *custom_messages_localization_get_title(int message_id)
 {
-    return get_localized_field(message_id, 0);
+    return get_localized_field(message_id, LOCALIZED_FIELD_TITLE);
 }
 
 uint8_t *custom_messages_localization_get_subtitle(int message_id)
 {
-    return get_localized_field(message_id, 1);
+    return get_localized_field(message_id, LOCALIZED_FIELD_SUBTITLE);
 }
 
 uint8_t *custom_messages_localization_get_text(int message_id)
 {
-    return get_localized_field(message_id, 2);
+    return get_localized_field(message_id, LOCALIZED_FIELD_TEXT);
 }
