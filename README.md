@@ -74,6 +74,12 @@ Augustus changes are explained in detail in the comprehensive manual. Below you 
 |Polish   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_polish_3.0.pdf)|
 |Russian   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_russian_3.0.pdf)|
 
+## Custom campaign localization
+
+Custom campaigns can provide translated scenario messages without modifying their canonical scenario XML files. Locale IDs, aliases, and detected-language defaults are declared by each campaign; they are not hardcoded for a specific language.
+
+See the [custom campaign localization guide](doc/custom_campaign_localization.md) for the directory structure, XML format, fallback behavior, and a [complete locale manifest example](doc/examples/custom_campaign_locales.xml).
+
 ## Bugs
 
 See the list of [Bugs & idiosyncrasies](https://github.com/bvschaik/julius/wiki/Caesar-3-bugs) to find out more about some known bugs.
