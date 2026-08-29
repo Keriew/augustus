@@ -249,7 +249,8 @@ void map_routing_update_water(void)
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
-            if (map_terrain_is(grid_offset, TERRAIN_WATER) && is_surrounded_by_water(grid_offset)) {
+            if (map_terrain_is(grid_offset, TERRAIN_WATER) && !map_terrain_is(grid_offset, TERRAIN_MARSHLAND) &&
+                is_surrounded_by_water(grid_offset)) {
                 if (x > 0 && x < map_data.width - 1 &&
                     y > 0 && y < map_data.height - 1) {
                     switch (map_sprite_bridge_at(grid_offset)) {
