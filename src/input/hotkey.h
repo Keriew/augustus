@@ -7,7 +7,7 @@
 typedef struct {
     // fixed keys with multiple functions
     int enter_pressed;
-    int escape_pressed;
+    int close_pressed;
     int f5_pressed;
     int delete_pressed;
     int backspace_pressed;

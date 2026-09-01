@@ -49,6 +49,7 @@ static hotkey_widget hotkey_widgets[] = {
     {HOTKEY_ARROW_LEFT, TR_HOTKEY_ARROW_LEFT},
     {HOTKEY_ARROW_RIGHT, TR_HOTKEY_ARROW_RIGHT},
     {HOTKEY_HEADER, TR_HOTKEY_HEADER_GLOBAL},
+    {HOTKEY_CLOSE, TR_HOTKEY_CLOSE},
     {HOTKEY_TOGGLE_FULLSCREEN, TR_HOTKEY_TOGGLE_FULLSCREEN},
     {HOTKEY_CENTER_WINDOW, TR_HOTKEY_CENTER_WINDOW},
     {HOTKEY_RESIZE_TO_640, TR_HOTKEY_RESIZE_TO_640},
@@ -358,7 +359,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         hotkey_buttons, NUM_VISIBLE_OPTIONS * 2, &data.focus_button);
     handled |= generic_buttons_handle_mouse(m_dialog, 0, 0,
         bottom_buttons, NUM_BOTTOM_BUTTONS, &data.bottom_focus_button);
-    if (!handled && (m->right.went_up || h->escape_pressed)) {
+    if (!handled && (m->right.went_up || h->close_pressed)) {
         window_go_back();
     }
 }

@@ -2328,6 +2328,7 @@ typedef enum {
     TR_EDITOR_TOOL_WATER,
     TR_EDITOR_TOOL_SHALLOW,
     TR_BUILDING_WILLOW_TREE,
+    TR_HOTKEY_CLOSE,
     TRANSLATION_MAX_KEY
 } translation_key;
 
