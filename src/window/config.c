@@ -66,6 +66,14 @@
 #define NUMERICAL_DOT_SIZE       20
 // bottom buttons
 #define NUM_BOTTOM_BUTTONS 5
+#define BOTTOM_BUTTONS_LEFT 20
+#define BOTTOM_BUTTONS_RIGHT 620
+#define BOTTOM_BUTTON_MIN_WIDTH 50
+#define BOTTOM_BUTTON_MIN_GAP 8
+#define BOTTOM_BUTTON_TEXT_PADDING 16
+#define SELECT_BUTTON_MIN_WIDTH 200
+#define SELECT_BUTTON_RIGHT 620
+#define SELECT_BUTTON_TEXT_PADDING 16
 
 enum {
     TYPE_NONE,
@@ -558,6 +566,51 @@ static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
     { 430, 436,  90, 30, button_close, 0, 1, TR_BUTTON_OK },
     { 530, 436,  90, 30, button_close, 0, 2, TR_OPTION_MENU_APPLY }
 };
+
+static void layout_bottom_buttons(void)
+{
+    int total_width = 0;
+    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+        int width = text_get_width(translation_for(bottom_buttons[i].parameter2), FONT_NORMAL_BLACK) +
+            BOTTOM_BUTTON_TEXT_PADDING;
+        bottom_buttons[i].width = width > BOTTOM_BUTTON_MIN_WIDTH ? width : BOTTOM_BUTTON_MIN_WIDTH;
+        total_width += bottom_buttons[i].width;
+    }
+
+    int available_width = BOTTOM_BUTTONS_RIGHT - BOTTOM_BUTTONS_LEFT -
+        (NUM_BOTTOM_BUTTONS - 1) * BOTTOM_BUTTON_MIN_GAP;
+    while (total_width > available_width) {
+        int resizable_buttons = 0;
+        for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+            if (bottom_buttons[i].width > BOTTOM_BUTTON_MIN_WIDTH) {
+                resizable_buttons++;
+            }
+        }
+        if (!resizable_buttons) {
+            break;
+        }
+        int reduction = (total_width - available_width + resizable_buttons - 1) / resizable_buttons;
+        for (int i = 0; i < NUM_BOTTOM_BUTTONS && total_width > available_width; i++) {
+            int available_reduction = bottom_buttons[i].width - BOTTOM_BUTTON_MIN_WIDTH;
+            int applied_reduction = reduction < available_reduction ? reduction : available_reduction;
+            if (applied_reduction > total_width - available_width) {
+                applied_reduction = total_width - available_width;
+            }
+            bottom_buttons[i].width -= applied_reduction;
+            total_width -= applied_reduction;
+        }
+    }
+
+    int gap = (BOTTOM_BUTTONS_RIGHT - BOTTOM_BUTTONS_LEFT - total_width) / (NUM_BOTTOM_BUTTONS - 1);
+    if (gap < BOTTOM_BUTTON_MIN_GAP) {
+        gap = BOTTOM_BUTTON_MIN_GAP;
+    }
+    int x = BOTTOM_BUTTONS_LEFT;
+    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+        bottom_buttons[i].x = x;
+        x += bottom_buttons[i].width + gap;
+    }
+}
 
 static generic_button page_buttons[] = {
     { 0, 48, 0, 30, button_page, 0, 0 },
@@ -1212,6 +1265,16 @@ static void set_player_name_width(void)
         text_ellipsize(data.player_name, FONT_NORMAL_BLACK, width - 16);
     }
     select_buttons[SELECT_PLAYER_NAME].width = width;
+}
+
+static void set_select_button_width(int index, const uint8_t *text)
+{
+    int width = text_get_width(text, FONT_NORMAL_BLACK) + SELECT_BUTTON_TEXT_PADDING;
+    if (width < SELECT_BUTTON_MIN_WIDTH) {
+        width = SELECT_BUTTON_MIN_WIDTH;
+    }
+    int maximum_width = SELECT_BUTTON_RIGHT - select_buttons[index].x;
+    select_buttons[index].width = width < maximum_width ? width : maximum_width;
 }
 
 static void fetch_original_config_values(void)
@@ -1928,6 +1991,10 @@ static void draw_background(void)
     update_weather();
     graphics_in_dialog();
 
+    layout_bottom_buttons();
+    set_select_button_width(SELECT_LANGUAGE, display_text_language());
+    set_select_button_width(SELECT_USER_DIRECTORY, display_text_user_directory());
+
     outer_panel_draw(0, 0, 40, 30);
     text_draw_centered(translation_for(TR_CONFIG_TITLE), 16, 16, 608, FONT_LARGE_BLACK, 0);
 
@@ -1968,7 +2035,7 @@ static void draw_background(void)
     //  bottom buttons text
     for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
         int disabled = i == NUM_BOTTOM_BUTTONS - 1 && !data.has_changes;
-        text_draw_centered(translation_for(bottom_buttons[i].parameter2),
+        text_draw_centered_ellipsized(translation_for(bottom_buttons[i].parameter2),
             bottom_buttons[i].x, bottom_buttons[i].y + 9, bottom_buttons[i].width,
             disabled ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK,
             disabled ? COLOR_FONT_LIGHT_GRAY : 0);
