@@ -19,6 +19,12 @@ typedef enum {
     FONT_TYPES_MAX
 } font_t;
 
+typedef enum {
+    FONT_ASSET_LAYOUT_DEFAULT,
+    FONT_ASSET_LAYOUT_BRAZILIAN_PORTUGUESE,
+    FONT_ASSET_LAYOUT_MAX
+} font_asset_layout;
+
 typedef struct {
     font_t font;
     int image_offset;
@@ -42,6 +48,12 @@ typedef struct {
  * @param encoding Encoding to use
  */
 void font_set_encoding(encoding_type encoding);
+
+/**
+ * Selects character mapping overrides for the loaded graphics layout.
+ * @param layout Graphics layout to use
+ */
+void font_set_asset_layout(font_asset_layout layout);
 
 /**
  * Gets the font definition for the specified font
