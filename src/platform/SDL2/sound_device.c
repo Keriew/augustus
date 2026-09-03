@@ -188,8 +188,10 @@ static Mix_Chunk *load_chunk(const char *filename)
     size_t size;
     uint8_t *audio_data = game_campaign_load_file(filename, &size);
     if (audio_data) {
-        SDL_RWops *sdl_memory = SDL_RWFromMem(audio_data, (int) size);
-        return Mix_LoadWAV_RW(sdl_memory, SDL_TRUE);
+        SDL_RWops *sdl_memory = SDL_RWFromConstMem(audio_data, (int) size);
+        Mix_Chunk *chunk = sdl_memory ? Mix_LoadWAV_RW(sdl_memory, SDL_TRUE) : 0;
+        free(audio_data);
+        return chunk;
     }
     filename = dir_get_file(filename, MAY_BE_LOCALIZED);
     if (!filename) {

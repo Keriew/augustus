@@ -38,6 +38,7 @@ static struct {
 typedef struct {
     char filename[FILE_NAME_MAX];
     MIX_Track *track;
+    uint8_t *audio_buffer;
     time_millis last_played;
     sound_type type;
 } sound_channel;
@@ -149,6 +150,8 @@ static void stop_channel(int channel)
         MIX_DestroyTrack(ch->track);
         ch->track = 0;
     }
+    free(ch->audio_buffer);
+    ch->audio_buffer = 0;
     ch->filename[0] = 0;
     ch->last_played = 0;
 }
@@ -184,16 +187,13 @@ static uint8_t *load_file(const char *filename, size_t *size)
     return audio_data;
 }
 
-static MIX_Track *create_track_from_memory(uint8_t *buffer, size_t size, const char *filename, bool free_when_done)
+static MIX_Track *create_track_from_memory(uint8_t *buffer, size_t size, const char *filename)
 {
     if (!buffer || !size) {
-        if (free_when_done) {
-            free(buffer);
-        }
         return 0;
     }
 
-    MIX_Audio *audio = MIX_LoadAudioNoCopy(data.mixer, buffer, size, free_when_done);
+    MIX_Audio *audio = MIX_LoadAudioNoCopy(data.mixer, buffer, size, false);
     if (!audio) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
             "Failed to load audio from SDL_IOStream for file '%s'. Reason: %s", filename, SDL_GetError());
@@ -208,28 +208,40 @@ static MIX_Track *create_track_from_memory(uint8_t *buffer, size_t size, const c
         return 0;
     }
 
-    MIX_SetTrackAudio(track, audio);
+    if (!MIX_SetTrackAudio(track, audio)) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+            "Failed to set audio on track for file '%s'. Reason: %s", filename, SDL_GetError());
+        MIX_DestroyTrack(track);
+        MIX_DestroyAudio(audio);
+        return 0;
+    }
+    MIX_DestroyAudio(audio);
 
     return track;
 }
 
-static MIX_Track *load_track(const char *filename)
+static MIX_Track *load_track(const char *filename, uint8_t **audio_buffer)
 {
+    *audio_buffer = 0;
     if (!filename || !*filename) {
         return 0;
     }
     size_t size;
     uint8_t *audio_data = game_campaign_load_file(filename, &size);
-    if (audio_data) {
-        return create_track_from_memory(audio_data, size, filename, false);
+    if (!audio_data) {
+        audio_data = load_file(filename, &size);
+        if (!audio_data) {
+            return 0;
+        }
     }
 
-    audio_data = load_file(filename, &size);
-    if (!audio_data) {
+    MIX_Track *track = create_track_from_memory(audio_data, size, filename);
+    if (!track) {
+        free(audio_data);
         return 0;
     }
-
-    return create_track_from_memory(audio_data, size, filename, true);
+    *audio_buffer = audio_data;
+    return track;
 }
 
 static void callback_for_sound_finished(void *userdata, MIX_Track *track)
@@ -391,7 +403,7 @@ int sound_device_play_file_on_channel_panned(const char *filename, sound_type ty
             return 0;
         }
         stop_channel(channel);
-        data.channels[channel].track = load_track(filename);
+        data.channels[channel].track = load_track(filename, &data.channels[channel].audio_buffer);
         if (!data.channels[channel].track) {
             return 0;
         }
@@ -570,6 +582,9 @@ void sound_device_close(void)
 {
     if (!data.initialized) {
         return;
+    }
+    for (unsigned int i = 0; i < data.total_channels; i++) {
+        stop_channel(i);
     }
     free_custom_audio_stream();
     MIX_DestroyMixer(data.mixer);
