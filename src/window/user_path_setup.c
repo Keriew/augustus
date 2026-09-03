@@ -22,6 +22,12 @@
 
 #include <string.h>
 
+#define DIALOG_WIDTH 640
+#define PATH_BUTTON_MIN_X 150
+#define PATH_BUTTON_MAX_X 408
+#define PATH_BUTTON_RIGHT_MARGIN 32
+#define LABEL_FIELD_GAP 16
+
 static struct {
     int show_window;
     int window_status;
@@ -41,6 +47,19 @@ static image_button ok_cancel_buttons[] = {
     {270, 100, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 0, button_ok_cancel, button_none, 1, 0, 1},
     {330, 100, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_ok_cancel, button_none, 0, 0, 1},
 };
+
+static void layout_path_button(void)
+{
+    int label_width = lang_text_get_width(CUSTOM_TRANSLATION,
+        TR_USER_DIRECTORIES_WINDOW_USER_PATH, FONT_NORMAL_BLACK);
+    path_button.x = 16 + label_width + LABEL_FIELD_GAP;
+    if (path_button.x < PATH_BUTTON_MIN_X) {
+        path_button.x = PATH_BUTTON_MIN_X;
+    } else if (path_button.x > PATH_BUTTON_MAX_X) {
+        path_button.x = PATH_BUTTON_MAX_X;
+    }
+    path_button.width = DIALOG_WIDTH - path_button.x - PATH_BUTTON_RIGHT_MARGIN;
+}
 
 static void init(int first_time)
 {
@@ -115,12 +134,16 @@ static void draw_background(void)
     if (!data.show_window) {
         return;
     }
-    graphics_in_dialog_with_size(640, 144);
+    graphics_in_dialog_with_size(DIALOG_WIDTH, 144);
+
+    layout_path_button();
 
     outer_panel_draw(0, 0, 40, 9);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_USER_DIRECTORIES_WINDOW_TITLE, 0, 20, 640, FONT_LARGE_BLACK);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_USER_DIRECTORIES_WINDOW_TITLE,
+        0, 20, DIALOG_WIDTH, FONT_LARGE_BLACK);
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_USER_DIRECTORIES_WINDOW_USER_PATH, 16, 64, FONT_NORMAL_BLACK);
+    text_draw_ellipsized(translation_for(TR_USER_DIRECTORIES_WINDOW_USER_PATH), 16, 64,
+        path_button.x - LABEL_FIELD_GAP - 16, FONT_NORMAL_BLACK, 0);
 
     text_draw_ellipsized(get_path_text(), path_button.x + 10, path_button.y + 9, path_button.width - 20,
         FONT_NORMAL_BLACK, 0);
@@ -134,7 +157,7 @@ static void draw_foreground(void)
         return;
     }
 
-    graphics_in_dialog_with_size(640, 144);
+    graphics_in_dialog_with_size(DIALOG_WIDTH, 144);
 
     button_border_draw(path_button.x, path_button.y, path_button.width, path_button.height, data.button_in_focus);
     image_buttons_draw(0, 0, ok_cancel_buttons, 2);
@@ -144,7 +167,7 @@ static void draw_foreground(void)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    const mouse *m_dialog = mouse_in_dialog_with_size(m, 640, 144);
+    const mouse *m_dialog = mouse_in_dialog_with_size(m, DIALOG_WIDTH, 144);
     if (m->right.went_up) {
         window_go_back();
         return;
