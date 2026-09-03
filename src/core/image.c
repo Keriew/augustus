@@ -248,6 +248,7 @@ static struct {
     image_packer packer;
     int max_image_width;
     int max_image_height;
+    int uses_brazilian_portuguese_font_layout;
 } data;
 
 static void read_header(buffer *buf)
@@ -333,6 +334,35 @@ static int prepare_images(buffer *buf, image *images, image_draw_data *draw_data
             return 0;
         }
         memset(data.external_draw_data, 0, data.total_external_images * sizeof(image_draw_data));
+    }
+    return 1;
+}
+
+static int detect_brazilian_portuguese_font_layout(const image_draw_data *draw_data)
+{
+    static const struct {
+        int image_offset;
+        int data_length;
+        int width;
+        int height;
+    } signature[] = {
+        // Offsets are zero-based positions; font mapping IDs are one-based.
+        {80, 134, 8, 12},   // a with tilde
+        {92, 128, 8, 12},   // o with tilde
+        {104, 196, 11, 16}, // capital A with tilde
+        {107, 141, 12, 16}, // capital C with connected cedilla
+        {122, 166, 10, 15}, // capital O with tilde
+    };
+    int font_base = data.group_image_ids[GROUP_FONT];
+
+    for (unsigned int i = 0; i < sizeof(signature) / sizeof(signature[0]); i++) {
+        int image_id = font_base + signature[i].image_offset;
+        if (image_id < 0 || image_id >= IMAGE_MAIN_ENTRIES ||
+            draw_data[image_id].data_length != signature[i].data_length ||
+            data.main[image_id].original.width != signature[i].width ||
+            data.main[image_id].original.height != signature[i].height) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -718,6 +748,7 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
         free(draw_data);
         return 0;
     }
+    data.uses_brazilian_portuguese_font_layout = detect_brazilian_portuguese_font_layout(draw_data);
 
     int data_size = io_read_file_into_buffer(filename_bmp, MAY_BE_LOCALIZED, tmp_data, MAIN_DATA_SIZE);
     if (!data_size) {
@@ -774,6 +805,11 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     }
 
     return 1;
+}
+
+int image_uses_brazilian_portuguese_font_layout(void)
+{
+    return data.uses_brazilian_portuguese_font_layout;
 }
 
 static void free_font_memory(void)
