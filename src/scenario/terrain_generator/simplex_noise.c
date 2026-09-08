@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdint.h>
 #include "simplex_noise.h"
 #define STRETCH_CONSTANT_2D (-0.211324865405187) // (1/sqrt(2+1)-1)/2
@@ -7,14 +6,14 @@
 #define NORM_CONSTANT_2D (47.0)
 
 static const int gradients2D[] = {
-     5,  2,   2,  5,
-    -5,  2,  -2,  5,
-     5, -2,   2, -5,
-    -5, -2,  -2, -5,
+    5, 2, 2, 5,
+    -5, 2, -2, 5,
+    5, -2, 2, -5,
+    -5, -2, -2, -5,
 };
 
 static int fastFloor(double x) {
-    int xi = (int)x;
+    int xi = (int) x;
     return x < xi ? xi - 1 : xi;
 }
 
@@ -30,11 +29,11 @@ void initSimplex(SimplexNoise *ctx, int64_t seed) {
 
     for (int i = 255; i >= 0; i--) {
         seed = seed * 6364136223846793005LL + 1442695040888963407LL;
-        int r = (int)((seed + 31) % (i + 1));
+        int r = (int) ((seed + 31) % (i + 1));
         if (r < 0) r += (i + 1);
 
         ctx->perm[i] = source[r];
-        ctx->permGradIndex2D[i] = (ctx->perm[i] % (sizeof(gradients2D)/sizeof(int)/2)) * 2;
+        ctx->permGradIndex2D[i] = (ctx->perm[i] % (sizeof(gradients2D) / sizeof(int) / 2)) * 2;
         source[r] = source[i];
     }
 }
@@ -50,10 +49,6 @@ double simplex2D(SimplexNoise *ctx, double x, double y) {
     double squishOffset = (xsb + ysb) * SQUISH_CONSTANT_2D;
     double dx0 = x - (xsb + squishOffset);
     double dy0 = y - (ysb + squishOffset);
-
-    int xins = xs - xsb;
-    int yins = ys - ysb;
-    double inSum = xins + yins;
 
     double value = 0;
 
@@ -86,10 +81,10 @@ double simplex2D(SimplexNoise *ctx, double x, double y) {
 }
 
 double simplex2D_octaves(SimplexNoise *ctx,
-                             double x, double y,
-                             int octaves,
-                             double persistence,
-                             double lacunarity) {
+                         double x, double y,
+                         int octaves,
+                         double persistence,
+                         double lacunarity) {
     double amplitude = 1.0;
     double frequency = 1.0;
     double value = 0.0;

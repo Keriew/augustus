@@ -12,21 +12,18 @@ enum {
     DIR_COUNT = 8,
 };
 
-static const int DIR_X[DIR_COUNT] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-static const int DIR_Y[DIR_COUNT] = { -1, -1, 0, 1, 1, 1, 0, -1 };
+static const int DIR_X[DIR_COUNT] = {0, 1, 1, 1, 0, -1, -1, -1};
+static const int DIR_Y[DIR_COUNT] = {-1, -1, 0, 1, 1, 1, 0, -1};
 
-static int abs_int(int value)
-{
+static int abs_int(int value) {
     return (value < 0) ? -value : value;
 }
 
-static int sign_int(int value)
-{
+static int sign_int(int value) {
     return (value > 0) - (value < 0);
 }
 
-static int tile_is_on_side(int x, int y, int width, int height, int side)
-{
+static int tile_is_on_side(int x, int y, int width, int height, int side) {
     switch (side) {
         case SIDE_NORTH:
             return y == 0;
@@ -39,8 +36,7 @@ static int tile_is_on_side(int x, int y, int width, int height, int side)
     }
 }
 
-static void choose_edge_point(int side, int width, int height, int *x, int *y)
-{
+static void choose_edge_point(int side, int width, int height, int *x, int *y) {
     switch (side) {
         case SIDE_NORTH:
             *x = terrain_generator_random_between(0, width);
@@ -61,8 +57,7 @@ static void choose_edge_point(int side, int width, int height, int *x, int *y)
     }
 }
 
-static int direction_moves_away_from_side(int dir, int side)
-{
+static int direction_moves_away_from_side(int dir, int side) {
     switch (side) {
         case SIDE_NORTH:
             return DIR_Y[dir] > 0;
@@ -75,8 +70,7 @@ static int direction_moves_away_from_side(int dir, int side)
     }
 }
 
-static int direction_moves_toward_side(int dir, int side)
-{
+static int direction_moves_toward_side(int dir, int side) {
     switch (side) {
         case SIDE_NORTH:
             return DIR_Y[dir] < 0;
@@ -89,15 +83,13 @@ static int direction_moves_toward_side(int dir, int side)
     }
 }
 
-static void carve_river_tile(int x, int y)
-{
+static void carve_river_tile(int x, int y) {
     int grid_offset = map_grid_offset(x, y);
     map_terrain_set_with_tile_update(grid_offset, TERRAIN_WATER);
     map_elevation_set(grid_offset, 0);
 }
 
-static void carve_river_tile_brush(int x, int y, int r)
-{
+static void carve_river_tile_brush(int x, int y, int r) {
     if (r <= 0) {
         carve_river_tile(x, y);
         return;
@@ -128,8 +120,7 @@ typedef struct {
 static river_tile generated_river_tiles[GRID_SIZE * GRID_SIZE];
 static int generated_river_tile_count = 0;
 
-static void record_river_tile(int x, int y)
-{
+static void record_river_tile(int x, int y) {
     if (generated_river_tile_count <= 0) {
         generated_river_tiles[generated_river_tile_count].x = x;
         generated_river_tiles[generated_river_tile_count].y = y;
@@ -145,16 +136,12 @@ static void record_river_tile(int x, int y)
     if (generated_river_tile_count >= GRID_SIZE * GRID_SIZE) {
         return;
     }
-
     generated_river_tiles[generated_river_tile_count].x = x;
     generated_river_tiles[generated_river_tile_count].y = y;
     generated_river_tile_count++;
 }
 
-
-
-static void replay_river_tiles(void)
-{
+static void replay_river_tiles(void) {
     const int river_min_radius = 1;
     const int river_max_radius = 10;
     int current_river_radius = river_min_radius;
@@ -184,10 +171,9 @@ static int choose_next_direction(
     int width,
     int height,
     int step,
-    int min_exit_steps)
-{
+    int min_exit_steps) {
     int total_weight = 0;
-    int weights[DIR_COUNT] = { 0 };
+    int weights[DIR_COUNT] = {0};
 
     int target_step_x = sign_int(target_x - x);
     int target_step_y = sign_int(target_y - y);
@@ -234,17 +220,13 @@ static int choose_next_direction(
         if (phase == 1 && direction_moves_toward_side(dir, end_side)) {
             weight += 2;
         }
-
         if (step < min_exit_steps && tile_is_on_side(nx, ny, width, height, start_side)) {
             weight -= 4;
         }
-
         weight += terrain_generator_random_between(0, 3);
-
         if (weight <= 0) {
             continue;
         }
-
         weights[dir] = weight;
         total_weight += weight;
     }
@@ -263,14 +245,10 @@ static int choose_next_direction(
         }
         pick -= weights[dir];
     }
-
     return -1;
 }
 
-
-
-void terrain_generator_straight_river(void)
-{
+void terrain_generator_straight_river(void) {
     int width = map_grid_width();
     int height = map_grid_height();
     if (width <= 1 || height <= 1) {
@@ -316,8 +294,7 @@ void terrain_generator_straight_river(void)
     replay_river_tiles();
 }
 
-void terrain_generator_generate_river(void)
-{
+void terrain_generator_generate_river(void) {
     int width = map_grid_width();
     int height = map_grid_height();
     if (width <= 1 || height <= 1) {
@@ -341,8 +318,8 @@ void terrain_generator_generate_river(void)
 
     int center_x = width / 2;
     int center_y = height / 2;
-    int center_radius = terrain_generator_clamp_int((width + height) / 16, 4, 12);
-    int min_exit_steps = terrain_generator_clamp_int((width + height) / 6, 8, 80);
+    int center_radius = calc_bound((width + height) / 16, 4, 12);
+    int min_exit_steps = calc_bound((width + height) / 6, 8, 80);
 
     int previous_dir = -1;
     int phase = 0;
@@ -400,11 +377,10 @@ void terrain_generator_generate_river(void)
         } else {
             y += step_y;
         }
-        x = terrain_generator_clamp_int(x, 0, width - 1);
-        y = terrain_generator_clamp_int(y, 0, height - 1);
+        x = calc_bound(x, 0, width - 1);
+        y = calc_bound(y, 0, height - 1);
     }
 
     record_river_tile(x, y);
-
     replay_river_tiles();
 }

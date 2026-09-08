@@ -6,30 +6,26 @@
 
 static uint16_t segments[GRID_SIZE * GRID_SIZE];
 
-static int terrain_tile_is_segment_passable(int grid_offset)
-{
+static int terrain_tile_is_segment_passable(int grid_offset) {
     return !map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_WATER);
 }
 
-const uint16_t *terrain_generator_segments(void)
-{
+const uint16_t *terrain_generator_segments(void) {
     return segments;
 }
 
-uint16_t terrain_generator_segment_id_at(int x, int y)
-{
+uint16_t terrain_generator_segment_id_at(int x, int y) {
     if (!map_grid_is_inside(x, y, 1)) {
         return 0;
     }
     return segments[map_grid_offset(x, y)];
 }
 
-void segment_map(void)
-{
+void segment_map(void) {
     const int width = map_grid_width();
     const int height = map_grid_height();
-    static const int dx[4] = { 1, -1, 0, 0 };
-    static const int dy[4] = { 0, 0, 1, -1 };
+    static const int dx[4] = {1, -1, 0, 0};
+    static const int dy[4] = {0, 0, 1, -1};
     int queue[GRID_SIZE * GRID_SIZE];
     uint16_t component_id = 1;
 

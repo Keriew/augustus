@@ -1,5 +1,4 @@
 #include "terrain_generator.h"
-
 #include "assets/assets.h"
 #include "city/view.h"
 #include "core/config.h"
@@ -49,18 +48,18 @@
 #include "window/video.h"
 #include "window/city.h"
 #include "window/editor/map.h"
-
 #include <stdio.h>
 #include <string.h>
 
+#include "core/calc.h"
 #include "graphics/screen.h"
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
 #define CONTROL_LABEL_X 32
-#define CONTROL_VALUE_X 160
-#define CONTROL_BUTTON_WIDTH 120
+#define CONTROL_VALUE_X 144
+#define CONTROL_BUTTON_WIDTH 160
 #define CONTROL_BUTTON_HEIGHT 20
 
 #define SIZE_BUTTON_Y 60
@@ -68,7 +67,6 @@
 #define SEED_INPUT_Y 108
 #define RANDOMIZE_BUTTON_Y 144
 #define CLIMATE_BUTTON_Y 168
-
 
 #define SETTINGS_LABEL_Y 135
 #define SETTINGS_ROW_Y 155
@@ -92,11 +90,9 @@
 #define START_GAME_BUTTON_Y 412
 #define BACK_BUTTON_Y 440
 
-
 #define PREVIEW_X 320
 #define PREVIEW_Y 60
 #define PREVIEW_WIDTH 288
-// #define PREVIEW_HEIGHT 240
 #define PREVIEW_HEIGHT 288
 
 #define SEED_TEXT_LENGTH 16
@@ -104,7 +100,7 @@
 
 #define CLIMATE_COUNT 3
 
-#define SETTINGS_INPUT_WIDTH_BLOCKS 8
+#define SETTINGS_INPUT_WIDTH_BLOCKS 10
 #define SETTINGS_INPUT_HEIGHT_BLOCKS 2
 #define SETTINGS_INPUT_X CONTROL_VALUE_X
 #define SETTINGS_START_Y 196
@@ -154,11 +150,12 @@ static const uint8_t label_start_game[] = "Start game";
 static const uint8_t label_back[] = "Back";
 static const uint8_t label_seed_placeholder[] = "Random";
 static const uint8_t label_initial_funds[] = "Initial funds";
-static const uint8_t label_culture_goal[] = "Culture goal";
-static const uint8_t label_prosperity_goal[] = "Prosperity goal";
-static const uint8_t label_peace_goal[] = "Peace goal";
-static const uint8_t label_favor_goal[] = "Favor goal";
-static const uint8_t label_population_goal[] = "Population goal";
+static const uint8_t labal_goals[] = "Goals:";
+static const uint8_t label_culture_goal[] = "Culture";
+static const uint8_t label_prosperity_goal[] = "Prosperity";
+static const uint8_t label_peace_goal[] = "Peace";
+static const uint8_t label_favor_goal[] = "Favor";
+static const uint8_t label_population_goal[] = "Population";
 
 static const uint8_t size_label_40[] = "40 x 40";
 static const uint8_t size_label_60[] = "60 x 60";
@@ -189,7 +186,6 @@ static const uint8_t *terrain_generator_size_labels[TERRAIN_GENERATOR_SIZE_COUNT
 
 static const uint8_t *terrain_generator_algorithm_labels[TERRAIN_GENERATOR_COUNT];
 
-
 static generic_button buttons[] = {
     {CONTROL_VALUE_X, SIZE_BUTTON_Y, CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT, button_select_size, 0, 0},
     {CONTROL_VALUE_X, ALGORITHM_BUTTON_Y, CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT, button_select_algorithm, 0, 0},
@@ -204,8 +200,8 @@ static generic_button buttons[] = {
 static input_box seed_input = {
     CONTROL_VALUE_X,
     SEED_INPUT_Y,
-    11,
-    2,
+    SETTINGS_INPUT_WIDTH_BLOCKS,
+    SETTINGS_INPUT_HEIGHT_BLOCKS,
     FONT_NORMAL_WHITE,
     0,
     NULL,
@@ -242,7 +238,7 @@ static input_box initial_funds_input = {
 
 static input_box culture_goal_input = {
     SETTINGS_INPUT_X,
-    SETTINGS_START_Y + SETTINGS_ROW_SPACING,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 3,
     SETTINGS_INPUT_WIDTH_BLOCKS,
     SETTINGS_INPUT_HEIGHT_BLOCKS,
     FONT_NORMAL_WHITE,
@@ -258,7 +254,7 @@ static input_box culture_goal_input = {
 
 static input_box prosperity_goal_input = {
     SETTINGS_INPUT_X,
-    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 2,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 4,
     SETTINGS_INPUT_WIDTH_BLOCKS,
     SETTINGS_INPUT_HEIGHT_BLOCKS,
     FONT_NORMAL_WHITE,
@@ -274,7 +270,7 @@ static input_box prosperity_goal_input = {
 
 static input_box peace_goal_input = {
     SETTINGS_INPUT_X,
-    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 3,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 5,
     SETTINGS_INPUT_WIDTH_BLOCKS,
     SETTINGS_INPUT_HEIGHT_BLOCKS,
     FONT_NORMAL_WHITE,
@@ -290,7 +286,7 @@ static input_box peace_goal_input = {
 
 static input_box favor_goal_input = {
     SETTINGS_INPUT_X,
-    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 4,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 6,
     SETTINGS_INPUT_WIDTH_BLOCKS,
     SETTINGS_INPUT_HEIGHT_BLOCKS,
     FONT_NORMAL_WHITE,
@@ -306,7 +302,7 @@ static input_box favor_goal_input = {
 
 static input_box population_goal_input = {
     SETTINGS_INPUT_X,
-    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 5,
+    SETTINGS_START_Y + SETTINGS_ROW_SPACING * 7,
     SETTINGS_INPUT_WIDTH_BLOCKS,
     SETTINGS_INPUT_HEIGHT_BLOCKS,
     FONT_NORMAL_WHITE,
@@ -388,17 +384,6 @@ static int get_seed_value(unsigned int *seed_out)
     return 1;
 }
 
-static int clamp_int(int value, int min_value, int max_value)
-{
-    if (value < min_value) {
-        return min_value;
-    }
-    if (value > max_value) {
-        return max_value;
-    }
-    return value;
-}
-
 static int parse_input_box_value(const input_box *box)
 {
     if (!string_length(box->text)) {
@@ -409,7 +394,7 @@ static int parse_input_box_value(const input_box *box)
 
 static int sanitize_input_box_value(input_box *box, int min_value, int max_value)
 {
-    int value = clamp_int(parse_input_box_value(box), min_value, max_value);
+    int value = calc_bound(parse_input_box_value(box), min_value, max_value);
     set_input_box_value(box, value);
     return value;
 }
@@ -590,11 +575,12 @@ static void draw_background(void)
     text_draw(label_climate, CONTROL_LABEL_X, CLIMATE_BUTTON_Y + 6, FONT_NORMAL_BLACK, 0);
 
     text_draw(label_initial_funds, CONTROL_LABEL_X, SETTINGS_START_Y + 6, FONT_NORMAL_BLACK, 0);
-    text_draw(label_culture_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING + 6, FONT_NORMAL_BLACK, 0);
-    text_draw(label_prosperity_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 2 + 6, FONT_NORMAL_BLACK, 0);
-    text_draw(label_peace_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 3 + 6, FONT_NORMAL_BLACK, 0);
-    text_draw(label_favor_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 4 + 6, FONT_NORMAL_BLACK, 0);
-    text_draw(label_population_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 5 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(labal_goals, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 2 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_culture_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 3 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_prosperity_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 4 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_peace_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 5 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_favor_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 6 + 6, FONT_NORMAL_BLACK, 0);
+    text_draw(label_population_goal, CONTROL_LABEL_X, SETTINGS_START_Y + SETTINGS_ROW_SPACING * 7 + 6, FONT_NORMAL_BLACK, 0);
 
     inner_panel_draw(PREVIEW_X - 8, PREVIEW_Y - 8, (PREVIEW_WIDTH + 16) / BLOCK_SIZE,
         (PREVIEW_HEIGHT + 16) / BLOCK_SIZE);

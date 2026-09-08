@@ -6,6 +6,7 @@ typedef enum {
     TERRAIN_GENERATOR_RIVER = 0,
     TERRAIN_GENERATOR_COUNT = 2
 } terrain_generator_algorithm;
+
 void set_entry_exit_points(void);
 void terrain_generator_generate(terrain_generator_algorithm algorithm);
 void terrain_generator_set_seed(int enabled, unsigned int seed);

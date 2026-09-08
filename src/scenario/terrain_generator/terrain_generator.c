@@ -15,33 +15,18 @@
 #include <math.h>
 #include <stdint.h>
 
-
 static int use_fixed_seed = 0;
 static unsigned int fixed_seed = 0;
 
-static int terrain_tile_is_passable(int grid_offset)
-{
+static int terrain_tile_is_passable(int grid_offset) {
     return !map_terrain_is(grid_offset, TERRAIN_WATER | TERRAIN_ROCK);
 }
 
-int terrain_generator_clamp_int(int value, int min_value, int max_value)
-{
-    if (value < min_value) {
-        return min_value;
-    }
-    if (value > max_value) {
-        return max_value;
-    }
-    return value;
-}
-
-int terrain_generator_random_between(int min_value, int max_value)
-{
+int terrain_generator_random_between(int min_value, int max_value) {
     return random_between_from_stdlib(min_value, max_value);
 }
 
-static void clear_base_terrain(void)
-{
+static void clear_base_terrain(void) {
     int width = map_grid_width();
     int height = map_grid_height();
     for (int y = 0; y < height; y++) {
@@ -53,8 +38,7 @@ static void clear_base_terrain(void)
     }
 }
 
-static void choose_edge_point(int side, int width, int height, int *x, int *y)
-{
+static void choose_edge_point(int side, int width, int height, int *x, int *y) {
     switch (side) {
         case 0: // north
             *y = 0;
@@ -75,15 +59,14 @@ static void choose_edge_point(int side, int width, int height, int *x, int *y)
     }
 
     if (width > 2) {
-        *x = terrain_generator_clamp_int(*x, 0, width - 1);
+        *x = calc_bound(*x, 0, width - 1);
     }
     if (height > 2) {
-        *y = terrain_generator_clamp_int(*y, 0, height - 1);
+        *y = calc_bound(*y, 0, height - 1);
     }
 }
 
-static double point_distance_euclidean(int x1, int y1, int x2, int y2)
-{
+static double point_distance_euclidean(int x1, int y1, int x2, int y2) {
     int dx = x2 - x1;
     int dy = y2 - y1;
     return sqrt((double) (dx * dx + dy * dy));
@@ -94,14 +77,12 @@ typedef struct {
     int y;
 } point2i;
 
-static int is_edge_tile(int x, int y, int width, int height)
-{
+static int is_edge_tile(int x, int y, int width, int height) {
     return x == 0 || x == width - 1 || y == 0 || y == height - 1;
 }
 
 static int choose_two_random_interior_points(const uint16_t *segments, int width, int height, uint16_t segment_id,
-    point2i *point1, point2i *point2)
-{
+                                             point2i *point1, point2i *point2) {
     int interior_count = 0;
 
     for (int y = 1; y < height - 1; y++) {
@@ -135,8 +116,7 @@ static int choose_two_random_interior_points(const uint16_t *segments, int width
 }
 
 static int choose_random_edge_exit(const uint16_t *segments, int width, int height, uint16_t segment_id,
-    point2i entry, double minimum_distance, point2i *exit_point)
-{
+                                   point2i entry, double minimum_distance, point2i *exit_point) {
     int found_exit = 0;
     int exit_candidate_count = 0;
 
@@ -166,8 +146,7 @@ static int choose_random_edge_exit(const uint16_t *segments, int width, int heig
     return found_exit;
 }
 
-int terrain_generator_flood_fill_reachable_land(int start_x, int start_y, uint8_t *reachable_land)
-{
+int terrain_generator_flood_fill_reachable_land(int start_x, int start_y, uint8_t *reachable_land) {
     if (!reachable_land) {
         return 0;
     }
@@ -185,8 +164,8 @@ int terrain_generator_flood_fill_reachable_land(int start_x, int start_y, uint8_
 
     const int width = map_grid_width();
     const int height = map_grid_height();
-    static const int dx[4] = { 1, -1, 0, 0 };
-    static const int dy[4] = { 0, 0, 1, -1 };
+    static const int dx[4] = {1, -1, 0, 0};
+    static const int dy[4] = {0, 0, 1, -1};
 
     int queue[GRID_SIZE * GRID_SIZE];
     int queue_start = 0;
@@ -227,11 +206,11 @@ int terrain_generator_flood_fill_reachable_land(int start_x, int start_y, uint8_
     return reachable_count;
 }
 
-static void set_road_tile(int x, int y)
-{
+static void set_road_tile(int x, int y) {
     int grid_offset = map_grid_offset(x, y);
     map_terrain_remove(grid_offset,
-        TERRAIN_WATER | TERRAIN_TREE | TERRAIN_SHRUB | TERRAIN_ROCK | TERRAIN_MEADOW | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP);
+                       TERRAIN_WATER | TERRAIN_TREE | TERRAIN_SHRUB | TERRAIN_ROCK | TERRAIN_MEADOW | TERRAIN_ELEVATION
+                       | TERRAIN_ACCESS_RAMP);
     map_terrain_add(grid_offset, TERRAIN_ROAD);
     map_property_clear_constructing(grid_offset);
     map_property_set_multi_tile_size(grid_offset, 1);
@@ -240,8 +219,7 @@ static void set_road_tile(int x, int y)
     map_tiles_update_region_empty_land(x - 1, y - 1, x + 1, y + 1);
 }
 
-static void add_road_between_points(int start_x, int start_y, int end_x, int end_y)
-{
+static void add_road_between_points(int start_x, int start_y, int end_x, int end_y) {
     const uint16_t *segments = terrain_generator_segments();
     int start_offset = map_grid_offset(start_x, start_y);
     int end_offset = map_grid_offset(end_x, end_y);
@@ -250,8 +228,8 @@ static void add_road_between_points(int start_x, int start_y, int end_x, int end
     int path_length = 0;
     int current_offset = end_offset;
     int guard = 0;
-    static const int dir_x[4] = { 1, -1, 0, 0 };
-    static const int dir_y[4] = { 0, 0, 1, -1 };
+    static const int dir_x[4] = {1, -1, 0, 0};
+    static const int dir_y[4] = {0, 0, 1, -1};
 
     if (!terrain_tile_is_passable(start_offset) || !terrain_tile_is_passable(end_offset)) {
         return;
@@ -321,20 +299,19 @@ static void add_road_between_points(int start_x, int start_y, int end_x, int end
     }
 }
 
-void set_entry_exit_points(void)
-{
+void set_entry_exit_points(void) {
     const int width = map_grid_width();
     const int height = map_grid_height();
     const uint16_t *segments = terrain_generator_segments();
 
 
-    point2i entry = { 0, 0 };
-    point2i point1 = { 0, 0 };
-    point2i point2 = { 0, 0 };
-    point2i exit_point = { 0, 0 };
+    point2i entry = {0, 0};
+    point2i point1 = {0, 0};
+    point2i point2 = {0, 0};
+    point2i exit_point = {0, 0};
 
     int has_fallback_entry = 0;
-    point2i fallback_entry = { 0, 0 };
+    point2i fallback_entry = {0, 0};
 
     int found_full_route = 0;
     const int max_attempts = width * height;
@@ -380,14 +357,14 @@ void set_entry_exit_points(void)
     scenario_editor_set_exit_point(exit_point.x, exit_point.y);
 
     double route_entry_p1_p2_exit =
-        point_distance_euclidean(entry.x, entry.y, point1.x, point1.y) +
-        point_distance_euclidean(point1.x, point1.y, point2.x, point2.y) +
-        point_distance_euclidean(point2.x, point2.y, exit_point.x, exit_point.y);
+            point_distance_euclidean(entry.x, entry.y, point1.x, point1.y) +
+            point_distance_euclidean(point1.x, point1.y, point2.x, point2.y) +
+            point_distance_euclidean(point2.x, point2.y, exit_point.x, exit_point.y);
 
     double route_entry_p2_p1_exit =
-        point_distance_euclidean(entry.x, entry.y, point2.x, point2.y) +
-        point_distance_euclidean(point2.x, point2.y, point1.x, point1.y) +
-        point_distance_euclidean(point1.x, point1.y, exit_point.x, exit_point.y);
+            point_distance_euclidean(entry.x, entry.y, point2.x, point2.y) +
+            point_distance_euclidean(point2.x, point2.y, point1.x, point1.y) +
+            point_distance_euclidean(point1.x, point1.y, exit_point.x, exit_point.y);
 
     if (route_entry_p2_p1_exit < route_entry_p1_p2_exit) {
         point2i tmp = point1;
@@ -398,8 +375,8 @@ void set_entry_exit_points(void)
     }
 
     double route_entry_p1_exit =
-        point_distance_euclidean(entry.x, entry.y, point1.x, point1.y) +
-        point_distance_euclidean(point1.x, point1.y, exit_point.x, exit_point.y);
+            point_distance_euclidean(entry.x, entry.y, point1.x, point1.y) +
+            point_distance_euclidean(point1.x, point1.y, exit_point.x, exit_point.y);
 
     if (route_entry_p1_p2_exit < route_entry_p1_exit) {
         add_road_between_points(entry.x, entry.y, point1.x, point1.y);
@@ -414,8 +391,7 @@ void set_entry_exit_points(void)
     // map_terrain_set(map_grid_offset(point2.x, point2.y), TERRAIN_GARDEN);
 }
 
-void terrain_generator_generate(terrain_generator_algorithm algorithm)
-{
+void terrain_generator_generate(terrain_generator_algorithm algorithm) {
     if (use_fixed_seed) {
         random_set_stdlib_seed(fixed_seed);
     } else {
@@ -444,9 +420,7 @@ void terrain_generator_generate(terrain_generator_algorithm algorithm)
     random_clear_stdlib_seed();
 }
 
-void terrain_generator_set_seed(int enabled, unsigned int seed)
-{
+void terrain_generator_set_seed(int enabled, unsigned int seed) {
     use_fixed_seed = enabled != 0;
     fixed_seed = seed;
 }
-

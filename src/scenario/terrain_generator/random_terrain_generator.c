@@ -3,8 +3,7 @@
 #include "map/grid.h"
 #include "map/terrain.h"
 
-void terrain_generator_random_terrain(void)
-{
+void terrain_generator_random_terrain(void) {
     const int width = map_grid_width();
     const int height = map_grid_height();
 
