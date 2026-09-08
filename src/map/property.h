@@ -43,6 +43,9 @@ int map_property_is_plaza_earthquake_or_overgrown_garden(int grid_offset);
 void map_property_mark_plaza_earthquake_or_overgrown_garden(int grid_offset);
 void map_property_clear_plaza_earthquake_or_overgrown_garden(int grid_offset);
 
+int map_property_is_outskirts(int grid_offset);
+void map_property_mark_outskirts(int grid_offset);
+void map_property_clear_outskirts(int grid_offset);
 
 int map_property_is_constructing(int grid_offset);
 void map_property_mark_constructing(int grid_offset);

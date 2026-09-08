@@ -29,6 +29,7 @@
 #include "map/grid.h"
 #include "map/image.h"
 #include "map/orientation.h"
+#include "map/property.h"
 #include "map/random.h"
 #include "map/routing.h"
 #include "map/routing_terrain.h"
@@ -250,8 +251,12 @@ static int check_gatehouse_tiles(int grid_offset)
 {
     grid_slice *slice = map_grid_get_grid_slice_square(grid_offset, 2);
     for (int i = 0; i < slice->size; i++) {
-        if (map_terrain_is(slice->grid_offsets[i], TERRAIN_BUILDING)) {
-            if (map_terrain_is(slice->grid_offsets[i], TERRAIN_WALL)) {
+        int grid_offset = slice->grid_offsets[i];
+        if (map_property_is_outskirts(grid_offset)) {
+            return -1;
+        }
+        if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+            if (map_terrain_is(grid_offset, TERRAIN_WALL)) {
                 continue;
             } else {
                 return 0;
@@ -634,8 +639,12 @@ int building_construction_place_building(building_type type, int x, int y, int e
         }
     }
     if (type == BUILDING_TOWER) {
-        if (!check_gatehouse_tiles(grid_offset)) {
+        int tiles_check = check_gatehouse_tiles(grid_offset);
+        if (!tiles_check) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        } else if (tiles_check == -1) {
+            city_warning_show(WARNING_NO_MILITARY_ON_OUTSKIRTS, NEW_WARNING_SLOT);
             return 0;
         }
         if (!building_orientation) {
@@ -650,8 +659,12 @@ int building_construction_place_building(building_type type, int x, int y, int e
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
         }
-        if (!check_gatehouse_tiles(grid_offset)) { //helper to make sure all building tiles are on walls
+        int tiles_check = check_gatehouse_tiles(grid_offset); // helper to make sure all building tiles are on walls
+        if (!tiles_check) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
+            return 0;
+        } else if (tiles_check == -1) {
+            city_warning_show(WARNING_NO_MILITARY_ON_OUTSKIRTS, NEW_WARNING_SLOT);
             return 0;
         }
         if (!building_orientation) {
@@ -681,7 +694,6 @@ int building_construction_place_building(building_type type, int x, int y, int e
         }
     }
     int waterside_orientation_abs = 0, waterside_orientation_rel = 0;
-
     if (type == BUILDING_SHIPYARD || type == BUILDING_WHARF || type == BUILDING_DOCK) {
         if (map_water_determine_orientation(x, y, building_properties_for_type(type)->size, 0,
             &waterside_orientation_abs, &waterside_orientation_rel, 1, 0)) {
@@ -693,6 +705,10 @@ int building_construction_place_building(building_type type, int x, int y, int e
             return 0;
         }
     } else {
+        if (building_is_military(type) && map_tiles_exists_outskirts(x, y, size)) {
+            city_warning_show(WARNING_NO_MILITARY_ON_OUTSKIRTS, NEW_WARNING_SLOT);
+            return 0;
+        }
         if (!map_tiles_are_clear(x, y, size, terrain_mask, check_figure)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;
@@ -709,6 +725,10 @@ int building_construction_place_building(building_type type, int x, int y, int e
         int orient_index = building_rotation_get_rotation();
         int x_offset = offsets_x[orient_index];
         int y_offset = offsets_y[orient_index];
+        if (map_tiles_exists_outskirts(x + x_offset, y + y_offset, 4)) {
+            city_warning_show(WARNING_NO_MILITARY_ON_OUTSKIRTS, NEW_WARNING_SLOT);
+            return 0;
+        }
         if (!map_tiles_are_clear(x + x_offset, y + y_offset, 4, terrain_mask, 0)) { // ignore figures on fort grounds
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             return 0;

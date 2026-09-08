@@ -172,6 +172,9 @@ static int is_blocked_for_building(int grid_offset, int building_size, int *bloc
             tile_blocked = check_figures;
             figure_animal_try_nudge_at(grid_offset, tile_offset, building_size);
         }
+        if (map_property_is_outskirts(tile_offset) && building_is_military(data.ghost_building.type)) {
+            tile_blocked = 1;
+        }
         blocked_tiles[i] = tile_blocked;
         blocked += tile_blocked;
     }
@@ -500,7 +503,7 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
 {
     const building_properties *props = building_properties_for_type(type);
     int building_size = type == BUILDING_WAREHOUSE ? 3 : props->size;
-    //BUILDING_WAREHOUSE is size 1, since it's only the corner tile. 
+    //BUILDING_WAREHOUSE is size 1, since it's only the corner tile.
     //It's manually adjusted for sizing purposes that should affect entire 3x3 building.
     int image_id = 0;
 
@@ -562,7 +565,8 @@ static void draw_default(const map_tile *tile, int x_view, int y_view, building_
             }
         }
 
-        if (fully_blocked || forbidden_terrain) {
+        if (fully_blocked || forbidden_terrain ||
+            (map_property_is_outskirts(tile_offset) && building_is_military(type))) {
             blocked_tiles[i] = TILE_FORBIDDEN;
         } else if (check_figure && map_has_figure_at(tile_offset)) {
             blocked_tiles[i] = TILE_FORBIDDEN;
