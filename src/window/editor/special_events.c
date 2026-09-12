@@ -33,6 +33,7 @@ static void button_min_wages(const generic_button *button);
 static void button_contamination_toggle(const generic_button *button);
 static void button_iron_mine_toggle(const generic_button *button);
 static void button_clay_pit_toggle(const generic_button *button);
+static void button_quarry_toggle(const generic_button *button);
 static void dd_earthquake_pattern(dropdown_button *dd);
 
 static generic_button buttons[] = {
@@ -51,6 +52,7 @@ static generic_button buttons[] = {
     {216, 316, 100, 24, button_contamination_toggle},
     {216, 346, 100, 24, button_iron_mine_toggle},
     {216, 376, 100, 24, button_clay_pit_toggle},
+    {216, 406, 100, 24, button_quarry_toggle},
 };
 
 static dropdown_button earthquake_pattern_dropdown;
@@ -83,10 +85,10 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(16, 32, 35, 26);
+    outer_panel_draw(16, 32, 35, 28);
 
     lang_text_draw(38, 0, 32, 48, FONT_LARGE_BLACK);
-    lang_text_draw_centered(13, 3, 16, 424, 480, FONT_NORMAL_BLACK);
+    lang_text_draw_centered(13, 3, 16, 454, 480, FONT_NORMAL_BLACK); //Right-click to Continue
 
     // table header
     lang_text_draw_centered(38, 11, 216, 92, 100, FONT_SMALL_PLAIN);
@@ -164,15 +166,38 @@ static void draw_foreground(void)
     lang_text_draw_centered(18, scenario_editor_contaminated_water_enabled(), 216, 322, 100, FONT_NORMAL_BLACK);
     lang_text_draw(38, 13, 330, 324, FONT_SMALL_PLAIN);
 
-    lang_text_draw(38, 9, 36, 352, FONT_NORMAL_BLACK);
+    // Iron mine collapse
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_MINE_COLLAPSED, 36, 352, FONT_NORMAL_BLACK);
     button_border_draw(216, 346, 100, 24, focus_button_id == 14);
     lang_text_draw_centered(18, scenario_editor_iron_mine_collapse_enabled(), 216, 352, 100, FONT_NORMAL_BLACK);
-    lang_text_draw(38, 13, 330, 354, FONT_SMALL_PLAIN);
+    int x = 330;
+    x += lang_text_draw(38, 13, x, 354, FONT_SMALL_PLAIN);  // Random
+    x += 10;
+    x += lang_text_draw(23, 9, x, 354, FONT_SMALL_PLAIN);   // Iron
+    x += text_draw((const uint8_t *) ",", x - 4, 354, FONT_SMALL_PLAIN, COLOR_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_RESOURCE_GOLD, x, 354, FONT_SMALL_PLAIN); // Gold
 
-    lang_text_draw(38, 10, 36, 382, FONT_NORMAL_BLACK);
+    // Clay pits flooded
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_PIT_COLLAPSED, 36, 382, FONT_NORMAL_BLACK);
     button_border_draw(216, 376, 100, 24, focus_button_id == 15);
     lang_text_draw_centered(18, scenario_editor_clay_pit_flooded_enabled(), 216, 382, 100, FONT_NORMAL_BLACK);
-    lang_text_draw(38, 13, 330, 384, FONT_SMALL_PLAIN);
+    x = 330;
+    x += lang_text_draw(38, 13, x, 384, FONT_SMALL_PLAIN);  // Random
+    x += 10;
+    x += lang_text_draw(23, 11, x, 384, FONT_SMALL_PLAIN);  // Clay
+    x += text_draw((const uint8_t *) ",", x - 4, 384, FONT_SMALL_PLAIN, COLOR_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_RESOURCE_SAND, x, 384, FONT_SMALL_PLAIN); // Sand
+
+    // Quarry collapsed
+    lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_EVENTS_QUARRY_COLLAPSED, 36, 412, FONT_NORMAL_BLACK);
+    button_border_draw(216, 406, 100, 24, focus_button_id == 16);
+    lang_text_draw_centered(18, scenario_editor_quarry_collapse_enabled(), 216, 412, 100, FONT_NORMAL_BLACK);
+    x = 330;
+    x += lang_text_draw(38, 13, x, 414, FONT_SMALL_PLAIN);  // Random
+    x += 10;
+    x += lang_text_draw(23, 12, x, 414, FONT_SMALL_PLAIN);  // Marble
+    x += text_draw((const uint8_t *) ",", x - 4, 414, FONT_SMALL_PLAIN, COLOR_BLACK);
+    lang_text_draw(CUSTOM_TRANSLATION, TR_RESOURCE_STONE, x, 414, FONT_SMALL_PLAIN);    // Stone
 
     graphics_reset_dialog();
 }
@@ -180,7 +205,7 @@ static void draw_foreground(void)
 static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
-    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, 15, &focus_button_id)) {
+    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, 16, &focus_button_id)) {
         return;
     }
     if (scenario.earthquake.severity == EARTHQUAKE_CUSTOM) {
@@ -285,6 +310,12 @@ static void button_iron_mine_toggle(const generic_button *button)
 static void button_clay_pit_toggle(const generic_button *button)
 {
     scenario_editor_clay_pit_flooded_toggle_enabled();
+    window_request_refresh();
+}
+
+static void button_quarry_toggle(const generic_button *button)
+{
+    scenario_editor_quarry_collapse_toggle_enabled();
     window_request_refresh();
 }
 
