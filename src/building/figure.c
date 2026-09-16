@@ -1675,8 +1675,12 @@ static void spawn_figure_barracks(building *b)
             spawn_delay += city_data.mess_hall.food_stress_cumulative - 20;
         }
 
-        spawn_delay = spawn_delay * resource_get_defaults(RESOURCE_TROOPS)->production_per_month /
-            resource_get_data(RESOURCE_TROOPS)->production_per_month;
+        int troops_production = resource_get_data(RESOURCE_TROOPS)->production_per_month;
+        // Compatibility with old maps where TROOPS production was not defined
+        if (troops_production == 0) {
+            troops_production = resource_get_defaults(RESOURCE_TROOPS)->production_per_month;
+        }
+        spawn_delay = spawn_delay * resource_get_defaults(RESOURCE_TROOPS)->production_per_month / troops_production;
 
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {
