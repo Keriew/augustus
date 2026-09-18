@@ -710,6 +710,14 @@ void building_update_state(void)
         if (b->state == BUILDING_STATE_IN_USE && b->house_size) {
             continue;
         }
+
+        // patch the phantom bridge entry in the buildings array after a bridge deletion
+        if ((b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_SHIP_BRIDGE) 
+            && (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED)
+            && (map_building_at(b->grid_offset) != b->id)) {
+                b->state = BUILDING_STATE_UNUSED;
+        }
+
         if (b->state == BUILDING_STATE_UNDO || b->state == BUILDING_STATE_DELETED_BY_PLAYER) {
             if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE) {
                 wall_recalc = 1;
