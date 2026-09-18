@@ -9,6 +9,7 @@
 #include "building/type.h"
 #include "core/calc.h"
 #include "core/image.h"
+#include "figure/image.h"
 #include "game/animation.h"
 #include "map/image.h"
 #include "map/sprite.h"
@@ -22,6 +23,30 @@ static void advance_monument_secondary_animation(building *b)
         }
     }
 }
+
+
+int building_dock_has_active_dockers(const building *dock)
+{
+    for (int i = 0; i < 3; i++) {
+        if (!dock->data.distribution.cartpusher_ids[i]) {
+            continue;
+        }
+        figure *f = figure_get(dock->data.distribution.cartpusher_ids[i]);
+        switch (f->action_state) {
+            case FIGURE_ACTION_133_DOCKER_IMPORT_QUEUE:
+            case FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE:
+            case FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE:
+            case FIGURE_ACTION_136_DOCKER_EXPORT_GOING_TO_STORAGE:
+            case FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING:
+            case FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING:
+            case FIGURE_ACTION_139_DOCKER_IMPORT_AT_STORAGE:
+            case FIGURE_ACTION_140_DOCKER_EXPORT_AT_STORAGE:
+                return 1;
+        }
+    }
+    return 0;
+}
+
 
 int building_animation_offset(building *b, int image_id, int grid_offset)
 {
@@ -51,10 +76,12 @@ int building_animation_offset(building *b, int image_id, int grid_offset)
     if (b->type == BUILDING_WAREHOUSE && b->num_workers < model_get_building(b->type)->laborers) {
         return 0;
     }
-    if (b->type == BUILDING_DOCK && b->data.dock.num_ships <= 0) {
+
+    if (b->type == BUILDING_DOCK && !building_dock_has_active_dockers(b)) {
         map_sprite_animation_set(grid_offset, 1);
         return 1;
     }
+
     if (b->type == BUILDING_MARBLE_QUARRY && (b->num_workers <= 0 || b->strike_duration_days > 0)) {
         map_sprite_animation_set(grid_offset, 1);
         return 1;
