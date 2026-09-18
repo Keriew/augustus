@@ -51,8 +51,11 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
     asset_image *asset_img = 0;
 
     atlas_type type = img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET;
-    if (type == ATLAS_EXTRA_ASSET || type == ATLAS_UNPACKED_EXTRA_ASSET ||
-        l->calculated_image_id >= IMAGE_MAIN_ENTRIES) {
+    // Aux ids carry IMAGE_AUX_FLAG; they live on ATLAS_MAIN_AUX, not the asset
+    // table, so skip the asset-lookup branch.
+    int is_aux = (l->calculated_image_id & IMAGE_AUX_FLAG) != 0;
+    if (!is_aux && (type == ATLAS_EXTRA_ASSET || type == ATLAS_UNPACKED_EXTRA_ASSET ||
+        l->calculated_image_id >= IMAGE_MAIN_ENTRIES)) {
         asset_img = asset_image_get_from_id(l->calculated_image_id - IMAGE_MAIN_ENTRIES);
         if (!asset_img) {
             log_error("Problem loading layer from image id", 0, l->calculated_image_id);
@@ -87,7 +90,11 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
     int width;
     int height;
     if (type == ATLAS_EXTERNAL && !asset_img) {
-        image_get_external_dimensions(img, &width, &height);
+        if (is_aux) {
+            image_get_external_dimensions_aux(img, &width, &height);
+        } else {
+            image_get_external_dimensions(img, &width, &height);
+        }
     } else {
         width = l->width;
         height = l->height;
@@ -136,7 +143,10 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
             }
         }
     } else if (type == ATLAS_EXTERNAL) {
-        if (!image_load_external_pixels(data, img, width)) {
+        int ok = is_aux
+            ? image_load_external_pixels_aux(data, img, width)
+            : image_load_external_pixels(data, img, width);
+        if (!ok) {
             free(data);
             log_error("Problem loading layer from image id", 0, l->calculated_image_id);
             load_dummy_layer(l);
@@ -164,9 +174,24 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
             free(data);
             data = new_data;
         }****/
-    } else if (type == ATLAS_MAIN) {
-        int atlas_width = main_image_widths[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
-        const color_t *atlas_pixels = main_data[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
+    } else if (type == ATLAS_MAIN || type == ATLAS_MAIN_AUX) {
+        // ATLAS_MAIN_AUX is the editor-mode aux atlas (c3.555). Its pixel buffers
+        // live separately from the editor's main atlas and are only valid between
+        // image_load_main_aux_prepare and finalize.
+        color_t **src_buffers = main_data;
+        int *src_widths = main_image_widths;
+        if (type == ATLAS_MAIN_AUX) {
+            src_buffers = image_aux_atlas_buffers();
+            src_widths = image_aux_atlas_widths();
+            if (!src_buffers || !src_widths) {
+                free(data);
+                log_error("Aux atlas not available for layer composition", 0, l->calculated_image_id);
+                load_dummy_layer(l);
+                return;
+            }
+        }
+        int atlas_width = src_widths[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
+        const color_t *atlas_pixels = src_buffers[img->atlas.id & IMAGE_ATLAS_BIT_MASK];
         if (!atlas_width || !atlas_pixels) {
             free(data);
             log_error("Problem loading layer from image id", 0, l->calculated_image_id);
@@ -184,8 +209,8 @@ static void load_layer_from_another_image(layer *l, color_t **main_data, int *ma
         } else {
             int tiles = (img->width + 2) / (FOOTPRINT_WIDTH + 2);
             if ((l->part & PART_TOP) && img->top) {
-                int top_width = main_image_widths[img->top->atlas.id & IMAGE_ATLAS_BIT_MASK];
-                const color_t *top_pixels = main_data[img->top->atlas.id & IMAGE_ATLAS_BIT_MASK];
+                int top_width = src_widths[img->top->atlas.id & IMAGE_ATLAS_BIT_MASK];
+                const color_t *top_pixels = src_buffers[img->top->atlas.id & IMAGE_ATLAS_BIT_MASK];
                 image_copy_info copy = {
                     .src = { img->top->atlas.x_offset, img->top->atlas.y_offset, top_width, top_width, top_pixels },
                     .dst = { 0, 0, l->width, l->height, data },
@@ -400,14 +425,35 @@ int layer_add_from_image_id(layer *l, const char *group_id, const char *image_id
             return 0;
         }
     } else {
-        int group = atoi(group_id);
+        // Handle "aux:N" prefix which marks an image group in the auxiliary main
+        // file (c3.555 loaded alongside c3map.555 in editor mode). When the aux
+        // atlas isn't loaded (e.g. in-game where c3.555 IS the main file), fall
+        // back to the regular main group lookup so the same XML works in both
+        // editor and game.
+        int prefer_aux = 0;
+        const char *group_str = group_id;
+        if (strncmp(group_str, "aux:", 4) == 0) {
+            prefer_aux = 1;
+            group_str += 4;
+        }
+        int group = atoi(group_str);
         if (group >= 0 && group < IMAGE_MAX_GROUPS) {
             int id = image_id ? atoi(image_id) : 0;
-            l->calculated_image_id = image_group(group) + id;
+            if (prefer_aux && image_aux_is_loaded()) {
+                l->calculated_image_id = image_group_aux(group) + id;
+            } else {
+                l->calculated_image_id = image_group(group) + id;
+            }
         } else {
             log_info("Image group is out of range", group_id, 0);
         }
-        if (l->calculated_image_id >= 0 && l->calculated_image_id < IMAGE_MAIN_ENTRIES) {
+        if (l->calculated_image_id & IMAGE_AUX_FLAG) {
+            original_image = image_get(l->calculated_image_id);
+            if (!original_image || original_image->width == 0) {
+                l->calculated_image_id = 0;
+                original_image = 0;
+            }
+        } else if (l->calculated_image_id >= 0 && l->calculated_image_id < IMAGE_MAIN_ENTRIES) {
             original_image = image_get(l->calculated_image_id);
         } else {
             log_info("Image id is out of range", 0, l->calculated_image_id);
