@@ -51,6 +51,15 @@
 #include "window/trade_opened.h"
 #include "window/trade_prices.h"
 
+// refactor, v2 notes:
+// FPS counter shouldn't be enabled by default outside of city view. Add config for 2 types of fps counter -
+// 0 - no fps counter, 1 - for city view only, 2 - for all views.
+// check language_text_get_width and variants for interactions with non-latin script. Test on Russian
+// Dropdown buttons should auto check if they will fit on the screen. If not, [dd.dropup = 1] to change directiom
+// Fix the tooltips for the cities on the sidebar. Current ones are hardcoded and seem to have misaligned. 
+// Fix the city badge drawing - we have assets for custom width badges, we can expand the badge if the city name is long
+
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
