@@ -2338,7 +2338,8 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Population goal not met"},
     {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Room for all needed employees"},
     {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Not enough room for needed employees"},
-    {TR_MAP_EDITOR_PACKAGE_MAP, "Package map"}
+    {TR_MAP_EDITOR_PACKAGE_MAP, "Package map"},
+    {TR_EDITOR_PACKAGE_MAP, "Packaging map"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
