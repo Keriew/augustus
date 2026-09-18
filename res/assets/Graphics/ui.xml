@@ -1544,13 +1544,40 @@
 	<image id="Scrollbar_Down_02" src="Scrollbar_Down_02"/>
 	<image id="Scrollbar_Down_03" src="Scrollbar_Down_03"/>
 	<image id="Scrollbar_Down_04" src="Scrollbar_Down_04"/>
+	<image id="Scrollbar_Left_01">
+		<layer group="this" image="Scrollbar_Down_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_02">
+		<layer group="this" image="Scrollbar_Down_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_03">
+		<layer group="this" image="Scrollbar_Down_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_04">
+		<layer group="this" image="Scrollbar_Down_04" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Up_01" src="Scrollbar_Up_01"/>
 	<image id="Scrollbar_Up_02" src="Scrollbar_Up_02"/>
 	<image id="Scrollbar_Up_03" src="Scrollbar_Up_03"/>
 	<image id="Scrollbar_Up_04" src="Scrollbar_Up_04"/>
+	<image id="Scrollbar_Right_01">
+		<layer group="this" image="Scrollbar_Up_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_02">
+		<layer group="this" image="Scrollbar_Up_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_03">
+		<layer group="this" image="Scrollbar_Up_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_04">
+		<layer group="this" image="Scrollbar_Up_04" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Lines_D_01" src="Scrollbar_Lines_D_01"/>
 	<image id="Scrollbar_Lines_L_01" src="Scrollbar_Lines_L_01"/>
 	<image id="Scrollbar_Lines_Alpha" src="Scrollbar_Lines_Alpha"/>
+	<image id="Scrollbar_Lines_Alpha_B" width="19" height="24">
+		<layer group="this" image="Scrollbar_Lines_Alpha" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Middle_01" src="Scrollbar_Middle_01"/>
 	<image id="Scrollbar_Middle_02" src="Scrollbar_Middle_02"/>
 	<image id="Scrollbar_Middle_03" src="Scrollbar_Middle_03"/>
@@ -1712,6 +1739,22 @@
 	<image id="Scrollbar_Middle_04b_Trimmed_MirrorH" width="32" height="24">
 		<layer group="this" image="Scrollbar_Middle_04b_Trimmed" invert="horizontal"/>
 	</image>
+	<image id="Scrollbar_mini_thumb_01" src="Scrollbar_mini_thumb_01"/>
+	<image id="Scrollbar_mini_thumb_02" src="Scrollbar_mini_thumb_02"/>
+	<image id="Scrollbar_mini_thumb_03" src="Scrollbar_mini_thumb_03"/>
+	<image id="Scrollbar_mini_thumb_lines" src="Scrollbar_mini_thumb_lines"/>
+	<image id="Scrollbar_mini_thumb_vert_01">
+		<layer group="this" image="Scrollbar_mini_thumb_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_02">
+		<layer group="this" image="Scrollbar_mini_thumb_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_03">
+		<layer group="this" image="Scrollbar_mini_thumb_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_lines">
+		<layer group="this" image="Scrollbar_mini_thumb_lines" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Minus_01" src="Scrollbar_Minus_01"/>
 	<image id="Scrollbar_Minus_02" src="Scrollbar_Minus_02"/>
 	<image id="Scrollbar_Minus_03" src="Scrollbar_Minus_03"/>
@@ -1724,6 +1767,15 @@
 	<image id="Scrollbar_Dark_Mid" src="Scrollbar_Dark_Mid"/>
 	<image id="Scrollbar_Dark_Start">
 		<layer src="Scrollbar_Dark_End" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Dark_End_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_End" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Dark_Mid_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_Mid" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Dark_Start_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_Start" rotate="90" x="0" y="0"/>
 	</image>
 	<!-- Note: Assetss for drawing custom-dimension main-menu-style buttons -->
 	<image id="Button_Menu_Left_Panel" width="13" height="19">
@@ -1799,4 +1851,5 @@
 	<image id="Trade_Ledger_Export" src = "Trade_Ledger_Export"/>
 	<image id="Trade_Ledger_Import" src = "Trade_Ledger_Import"/>
 	<image id="resource_picker" src = "resource_picker"/>
+	<image id="hourglass_icon" src = "hourglass_v1"/>
 </assetlist>

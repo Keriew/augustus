@@ -18,6 +18,7 @@
 #include "empire/trade_prices.h"
 #include "empire/type.h"
 #include "game/system.h"
+#include "game/time.h"
 #include "game/tutorial.h"
 #include "graphics/arrow_button.h"
 #include "graphics/button.h"
@@ -30,6 +31,7 @@
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/screen.h"
+#include "graphics/slider.h"
 #include "graphics/scrollbar.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
@@ -213,7 +215,7 @@ static void image_draw_silh_scaled_centered(int image_id, int x, int y, color_t 
 static void animation_draw_scaled(const image *img, int image_id, int new_animation, int x, int y, color_t color, int draw_scale_percent);
 static int open_trade_button_icon_fits(const empire_city *city, const open_trade_button_style *style, trade_icon_type icon_type);
 static void draw_sidebar_city_item(const grid_box_item *item);
-static void draw_funds_panel(void);
+static void draw_funds_and_date_panels(void);
 static int draw_images_at_interval(int image_id, int x_draw_offset, int y_draw_offset,
     int start_x, int start_y, int end_x, int end_y, int interval, int remaining, color_t color_mask);
 void window_empire_collect_trade_edges(void);
@@ -262,6 +264,7 @@ static void process_selection(void);
 static int is_sidebar(const mouse *m);
 static int is_sidebar_border(const mouse *m);
 static int is_funds_panel(int x, int y);
+static int is_trade_year_text(int x, int y);
 static int is_map(const mouse *m);
 static void handle_sidebar_border(const mouse *m);
 static void on_sidebar_city_click(const grid_box_item *item);
@@ -294,12 +297,12 @@ enum {
 enum {
     DD_TRADE_BUY_SELL,
     DD_TRADE_SORT,
-    DD_SET_DATE,
     DD_COUNT
 };
 
 static cycling_button cycling_buttons[BTN_COUNT];
 static dropdown_button dropdown_buttons[DD_COUNT];
+static slider_t date_slider;
 static complex_button complex_buttons[CMPLX_BTN_COUNT];
 static grid_picker resource_picker;
 static complex_button resource_picker_anchor;
@@ -573,7 +576,7 @@ static void setup_header_footer_buttons(void)
     complex_buttons[BTN_TRADE_HISTORY].sequence = &trade_history;
     complex_buttons[BTN_TRADE_HISTORY].sequence_size = 1;
     complex_buttons[BTN_TRADE_HISTORY].tooltip_c.translation_key = TR_UI_LEDGER_DISABLED_1;
-    // TR_UI_SIDEBAR_TRADE_HISTORY_TOOLTIP
+
     static lang_fragment set_date_dd_frag[9] = { 0 };
 
     for (int i = 0; i < 3; i++) {
@@ -590,17 +593,11 @@ static void setup_header_footer_buttons(void)
         set_date_dd_frag[i].text_id = TR_UI_YEAR_AGO;
         set_date_dd_frag[i].number = i - 1;
     }
-    int year_dd_width = data.sidebar.filter_section.x_max - data.sidebar.filter_section.x_min;
-    dropdown_button_init_simple(0, 0, year_dd_width, SIDEBAR_HEADER_BUTTON_HEIGHT,
-        set_date_dd_frag, 9, &dropdown_buttons[DD_SET_DATE], DD_BUTTON_STYLE_GRAY, NULL); //0,0 for x,y because update runs every frame
-    dropdown_buttons[DD_SET_DATE].width = year_dd_width;
-    dropdown_buttons[DD_SET_DATE].height = SIDEBAR_HEADER_BUTTON_HEIGHT;
-    dropdown_buttons[DD_SET_DATE].selected_index = 1; // default to "Current Year"
-    dropdown_buttons[DD_SET_DATE].drop_up = 1; // defy gravity and drop up instead of down
-    for (int i = 2; i < 9; i++) {
-        dropdown_buttons[DD_SET_DATE].buttons[i].is_disabled = 1;
-        dropdown_buttons[DD_SET_DATE].buttons[i].is_hidden = 1; // disable buttons except current year and anchor
-    }
+    int date_slider_width = SIDEBAR_HEADER_BUTTON_EXTRA_WIDE_WIDTH; // default that will be overwritten 
+    trade_history_years_stored = trade_route_get_history_years_stored(); // refresh
+    slider_init(&date_slider, 0, 0, date_slider_width, 0, trade_history_years_stored, 1, 0, 0, SLIDER_DISPLAY_TEXT_BELOW);
+    slider_text_block_init(&date_slider.block, 0, 0, date_slider_width, SIDEBAR_HEADER_BUTTON_HEIGHT, set_date_dd_frag, 9, 5);
+
     // footer setup finished
     data.sidebar.buttons_initialised = 1;
 }
@@ -670,7 +667,8 @@ static void setup_sidebar(void)
 
 static void refresh_header_and_footer_buttons(void)
 {
-    data.sidebar.trade_year = dropdown_buttons[DD_SET_DATE].selected_index - 1; // 0 index is anchor, so -1
+
+    data.sidebar.trade_year = date_slider.value; // convert to year index
     window_empire_sidebar_sort_set_trade_year(data.sidebar.trade_year); // update the year in the sorting module
     int sorting = window_empire_sidebar_sort_get_current_sorting();
     if (sorting >= SORT_BY_NAME && sorting < MAX_SORTING_KEY) {
@@ -739,19 +737,21 @@ static void refresh_header_and_footer_buttons(void)
     int date_dd_x = filter_x - SIDEBAR_HEADER_BUTTON_SPACING;
     int date_dd_y = y_footer + SIDEBAR_MARGIN_VERTICAL;
     int date_dd_width = data.sidebar.filter_section.x_max - data.sidebar.filter_section.x_min;
-    int date_dd_height = SIDEBAR_HEADER_BUTTON_HEIGHT;
-    dropdown_button_update_dimensions(date_dd_x, date_dd_y, date_dd_width, date_dd_height, &dropdown_buttons[DD_SET_DATE]);
+
+    date_slider.x = date_dd_x - 6;
+    date_slider.y = date_dd_y - 6;
+    date_slider.length = date_dd_width;
+    date_slider.value_step = 1;
+    date_slider.max_value = trade_history_years_stored;
+
+
     if (!trade_history_years_stored) {
-        dropdown_buttons[DD_SET_DATE].buttons[0].is_disabled = 1; // disable anchor button if no history
-        dropdown_buttons[DD_SET_DATE].buttons[0].tooltip_c.translation_key = TR_UI_LEDGER_ONLY_CURRENT_YEAR;
-        dropdown_buttons[DD_SET_DATE].buttons[0].tooltip_c.type = TOOLTIP_BUTTON;
+        date_slider.is_disabled = 1; // disable anchor button if no history
+        date_slider.tooltip_c.translation_key = TR_UI_LEDGER_ONLY_CURRENT_YEAR;
+        date_slider.tooltip_c.type = TOOLTIP_BUTTON;
     } else {
-        dropdown_buttons[DD_SET_DATE].buttons[0].tooltip_c.type = TOOLTIP_NONE;
-        dropdown_buttons[DD_SET_DATE].buttons[0].tooltip_c.translation_key = 0;
-        for (int i = 0; i < trade_history_years_stored; i++) {
-            dropdown_buttons[DD_SET_DATE].buttons[i + 2].is_hidden = 0;
-            dropdown_buttons[DD_SET_DATE].buttons[i + 2].is_disabled = 0; // enable all years that have data
-        }
+        date_slider.tooltip_c.type = TOOLTIP_NONE;
+        date_slider.tooltip_c.translation_key = 0;
     }
     filter_x += SIDEBAR_HEADER_BUTTON_HEIGHT + SIDEBAR_HEADER_BUTTON_SPACING;
 
@@ -2085,7 +2085,7 @@ static void draw_empire_object(const empire_object *obj)
             return; // dont draw the icon if route is closed or hidden
         }
         if (empire_object_get_full(empire_city_get(empire_city_get_for_trade_route
-            (obj->trade_route_id))->empire_object_id + 1)->route_hidden) {
+        (obj->trade_route_id))->empire_object_id + 1)->route_hidden) {
             // perform more complex check in case it's a vanilla empire since there the icon trade route isn't always the first
             return;
         }
@@ -2357,7 +2357,7 @@ static void draw_sidebar_grid_box(void)
         cycling_button_draw_array(cycling_buttons, BTN_COUNT);
         complex_button_draw_array(complex_buttons, CMPLX_BTN_COUNT);
         dropdown_button_draw_array(dropdown_buttons, DD_COUNT);
-
+        slider_draw(&date_slider);
     }
 
     graphics_reset_clip_rectangle();
@@ -2394,7 +2394,34 @@ static int funds_panel_width(void)
     return (blocks + 2) * BLACK_PANEL_BLOCK_WIDTH;
 }
 
-static void draw_funds_panel(void)
+static int selected_trade_year(void)
+{
+    return game_time_year() - date_slider.value;
+}
+
+static int trade_year_text_width(void)
+{
+    int year = selected_trade_year();
+    int absolute_year = year < 0 ? -year : year;
+    return text_get_number_width(absolute_year, ' ', "", FONT_LARGE_PLAIN) +
+        lang_text_get_width(20, year >= 0 ? 1 : 0, FONT_LARGE_PLAIN);
+}
+
+static void draw_trade_year_text(void)
+{
+    int width = trade_year_text_width();
+    int x = data.sidebar.x_min - WIDTH_BORDER - width - 1;
+    int y = data.y_min + WIDTH_BORDER + 4;
+    int funds_right = data.x_min + WIDTH_BORDER + funds_panel_width() + BLACK_PANEL_BLOCK_WIDTH;
+
+    if (x <= funds_right) {
+        return;
+    }
+
+    lang_text_draw_year_colored(selected_trade_year(), x, y, FONT_LARGE_PLAIN, COLOR_WHITE);
+}
+
+static void draw_funds_and_date_panels(void)
 {
     int x = data.x_min + WIDTH_BORDER;
     int y = data.y_min + WIDTH_BORDER;
@@ -2412,6 +2439,7 @@ static void draw_funds_panel(void)
     text_draw_number(treasury, '@', "\0", draw_x + label_width, y + 5, FONT_NORMAL_PLAIN, treasury_color);
     button_border_draw(x - 3, y - 3, width + 4, FUNDS_PANEL_HEIGHT + 8, 0); // minor adjustments to fit border
     graphics_reset_clip_rectangle();
+    draw_trade_year_text();
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -2438,7 +2466,7 @@ static void draw_foreground(void)
         data.selected_city = 0;
     }
     draw_paneling();
-    draw_funds_panel();
+    draw_funds_and_date_panels();
     if (!data.sidebar.border_btn.is_collapsed) {
         draw_sidebar_grid_box();  // grid_box uses usable_sidebar dimensions
         grid_box_request_refresh(&sidebar_grid_box);
@@ -2516,6 +2544,21 @@ static int is_funds_panel(int x, int y)
     return x >= panel_x && x < panel_x + funds_panel_width() &&
         y >= panel_y && y < panel_y + FUNDS_PANEL_HEIGHT;
 }
+
+// static int is_trade_year_text(int x, int y)
+// {
+//     int width = trade_year_text_width();
+//     int text_x = data.sidebar.x_min - WIDTH_BORDER - width - 1;
+//     int text_y = data.y_min + WIDTH_BORDER;
+//     int funds_right = data.x_min + WIDTH_BORDER + funds_panel_width() + BLACK_PANEL_BLOCK_WIDTH;
+
+//     if (text_x <= funds_right) {
+//         return 0;
+//     }
+
+//     return x >= text_x && x < text_x + width &&
+//         y >= text_y && y < text_y + font_definition_for(FONT_LARGE_PLAIN)->line_height;
+// }
 
 static int is_map(const mouse *m)
 {
@@ -2823,6 +2866,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
             return;
         }
         if (complex_button_handle_mouse_array(complex_buttons, m, CMPLX_BTN_COUNT)) {
+            return;
+        }
+        if (slider_handle_mouse(&date_slider, m)) {
             return;
         }
 
