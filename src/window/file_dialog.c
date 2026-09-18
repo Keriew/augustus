@@ -141,7 +141,7 @@ static file_type_data empire_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EMPIRES
 static file_type_data scenario_event_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_EVENTS };
 static file_type_data custom_messages_data = { "xml", PATH_LOCATION_EDITOR_CUSTOM_MESSAGES };
 static file_type_data model_data = { "xml", PATH_LOCATION_EDITOR_MODEL_DATA };
-static file_type_data image_data = { "png", PATH_LOCATION_COMMUNITY_IMAGE };
+static file_type_data image_data = { "png", PATH_LOCATION_CONTENT_IMAGE };
 
 static int compare_name(const void *va, const void *vb)
 {
@@ -242,14 +242,16 @@ static void init(file_type type, file_dialog_type dialog_type)
             file_remove_extension(data.selected_file);
         }
         encoding_from_utf8(data.selected_file, data.typed_name, FILE_NAME_MAX);
-        if (data.dialog_type == FILE_DIALOG_SAVE) {
+        if (data.dialog_type == FILE_DIALOG_SAVE && data.type != FILE_TYPE_SCENARIO) {
             file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
         }
     } else if (dialog_type == FILE_DIALOG_SAVE) {
         // Suggest default filename
         string_copy(lang_get_string(9, type == FILE_TYPE_SCENARIO ? 7 : 6), data.typed_name, FILE_NAME_MAX);
         encoding_to_utf8(data.typed_name, data.selected_file, FILE_NAME_MAX, encoding_system_uses_decomposed());
-        file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
+        if (data.type != FILE_TYPE_SCENARIO) {
+            file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
+        }
     } else {
         // Use empty string
         data.typed_name[0] = 0;
@@ -258,8 +260,7 @@ static void init(file_type type, file_dialog_type dialog_type)
 
     if (data.dialog_type != FILE_DIALOG_SAVE) {
         if (type == FILE_TYPE_SCENARIO) {
-            data.file_list = dir_find_files_with_extension_at_location(scenario_data.location, scenario_data.extension);
-            data.file_list = dir_append_files_with_extension(scenario_data_expanded.extension);
+            data.file_list = dir_find_all_subdirectories_at_location(scenario_data.location);
         } else if (type == FILE_TYPE_EMPIRE) {
             data.file_list = dir_find_files_with_extension_at_location(empire_data.location, empire_data.extension);
         } else if (type == FILE_TYPE_SCENARIO_EVENTS) {
@@ -275,7 +276,11 @@ static void init(file_type type, file_dialog_type dialog_type)
             data.file_list = dir_append_files_with_extension(saved_game_data_expanded.extension);
         }
     } else {
-        data.file_list = dir_find_files_with_extension_at_location(data.file_data->location, data.file_data->extension);
+        if (type == FILE_TYPE_SCENARIO) {
+            data.file_list = dir_find_all_subdirectories_at_location(scenario_data.location);
+        } else {
+            data.file_list = dir_find_files_with_extension_at_location(data.file_data->location, data.file_data->extension);
+        }
     }
     init_filtered_file_list();
     list_box_init(&list_box, data.filtered_file_list.num_files);
@@ -339,11 +344,29 @@ static void draw_mission_info(int x_offset, int y_offset, int box_size)
     text_draw_ellipsized(text, x_offset, y_offset, box_size, FONT_NORMAL_BLACK, 0);
 }
 
+static const char *find_map_file(char *foldername)
+{
+    const char *filename;
+    char map_foldername[FILE_NAME_MAX];
+    snprintf(map_foldername, FILE_NAME_MAX, "%s/%s",
+        platform_file_manager_get_directory_for_location(scenario_data.location, 0), foldername);
+    filename = dir_get_first_file_with_extension(map_foldername, scenario_data.extension);
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(map_foldername, scenario_data_expanded.extension);
+    }
+    return filename;
+}
+
 static void draw_background(void)
 {
     window_draw_underlying_window();
     if (*data.selected_file) {
-        const char *filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
+        const char *filename;
+        if (data.type == FILE_TYPE_SCENARIO) {
+            filename = find_map_file(data.selected_file);
+        } else {
+            filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
+        }
         if (filename && data.type != FILE_TYPE_EMPIRE_IMAGE) {
             if (data.type == FILE_TYPE_SAVED_GAME) {
                 data.savegame_info_status = game_file_io_read_saved_game_info(filename, 0, &data.info);
@@ -467,12 +490,12 @@ static void draw_foreground(void)
             }
         } else if (*data.selected_file && (data.type == FILE_TYPE_EMPIRE_IMAGE || data.type == FILE_TYPE_EMPIRE)) {
             const image *img = image_get(data.preview_image_id);
-            
+
             // Calculate scale to fit image within 266x352 box
             float x_scale = img->width / 266.0f;
             float y_scale = img->height / 352.0f;
             float scale = x_scale > y_scale ? x_scale : y_scale;  // Use SMALLER ratio to fit
-            
+
             if (scale <= 1.0f) {
                 // Image is smaller than box, just center it without scaling
                 int centered_x = 352 + (266 - img->width) / 2;
@@ -581,7 +604,9 @@ static void input_box_changed(int is_addition_at_end)
         if (data.file_list->num_files > NUM_FILES_IN_VIEW) {
             scroll_index = find_first_file_with_prefix(data.selected_file);
         }
-        file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
+        if (data.type != FILE_TYPE_SCENARIO) {
+            file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
+        }
         if (scroll_index >= 0 && data.filtered_file_list.num_files > scroll_index &&
             platform_file_manager_compare_filename(data.selected_file,
                 data.filtered_file_list.files[scroll_index].name) == 0) {
@@ -609,7 +634,18 @@ static void confirm_save_file(int accepted, int checked)
     if (!accepted) {
         return;
     }
-    const char *filename = dir_append_location(data.selected_file, data.file_data->location);
+    const char *filename;
+    if (data.type != FILE_TYPE_SCENARIO) {
+        filename = dir_append_location(data.selected_file, data.file_data->location);
+    } else {
+        char map_name[FILE_NAME_MAX];
+        string_copy((const uint8_t *)data.selected_file, (uint8_t *)map_name, FILE_NAME_MAX);
+        file_append_extension(map_name, scenario_data_expanded.extension, FILE_NAME_MAX);
+        filename = dir_append_location(data.selected_file, data.file_data->location);
+        platform_file_manager_create_directory(filename, 0, 0); // not overwriting allows for only maps being edited but assets staying intact
+        // append the actual filename
+        snprintf((char *)filename, FILE_NAME_MAX, "%s/%s", filename, map_name);
+    }
     input_box_stop(&main_input);
     if (checked) {
         config_set(CONFIG_UI_ASK_CONFIRMATION_ON_FILE_OVERWRITE, 0);
@@ -672,9 +708,24 @@ static void button_ok_cancel(int is_ok, int param2)
     const char *filename;
 
     if (data.dialog_type == FILE_DIALOG_SAVE) {
-        filename = dir_append_location(data.selected_file, data.file_data->location);
+        if (data.type == FILE_TYPE_SCENARIO) {
+            char map_name[FILE_NAME_MAX];
+            string_copy((const uint8_t *)data.selected_file, (uint8_t *)map_name, FILE_NAME_MAX);
+            scenario_set_name((uint8_t *)data.selected_file); // set the scenario name so the game can find scenario specific assets in editor too
+            file_append_extension(map_name, scenario_data_expanded.extension, FILE_NAME_MAX);
+            filename = dir_append_location(data.selected_file, data.file_data->location);
+            // append the actual filename
+            snprintf((char *)filename, FILE_NAME_MAX, "%s/%s", filename, map_name);
+        } else {
+            filename = dir_append_location(data.selected_file, data.file_data->location);
+        }
     } else {
-        filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
+        if (data.type == FILE_TYPE_SCENARIO) {
+            scenario_set_name((uint8_t *)data.selected_file); // set the scenario name so the game can find scenario specific assets in editor too
+            filename = find_map_file(data.selected_file);
+        } else {
+            filename = dir_get_file_at_location(data.selected_file, data.file_data->location);
+        }
         if (!filename) {
             window_plain_message_dialog_show(TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE,
                 TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, 1);
@@ -805,7 +856,7 @@ static void update_preview_image(void)
         empire_xml_parse_file(filename, 1);
         const char *custom_filename = empire_xml_read_info();
         if (custom_filename && *custom_filename) {
-            const char *got_filename = dir_get_file_at_location(custom_filename, PATH_LOCATION_COMMUNITY_IMAGE);
+            const char *got_filename = dir_get_file_at_location(custom_filename, PATH_LOCATION_CONTENT_IMAGE);
             if (got_filename && *got_filename) {
                 string_copy(string_from_ascii(got_filename), (uint8_t *)filename, 128);
             } else {
@@ -835,7 +886,9 @@ static void select_file(unsigned int index, int is_double_click)
         encoding_from_utf8(data.selected_file, data.typed_name, FILE_NAME_MAX);
         if (data.dialog_type == FILE_DIALOG_SAVE) {
             input_box_refresh_text(&main_input);
-            file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
+            if (data.type != FILE_TYPE_SCENARIO) {
+                file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
+            }
         }
         window_request_refresh();
     }

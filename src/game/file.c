@@ -324,16 +324,14 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
     int rank = scenario_campaign_rank();
     map_bookmarks_clear();
     int is_save_game = 0;
-    const char *full_scenario_file = dir_get_file_at_location(scenario_file, PATH_LOCATION_SCENARIO);
-    if (!full_scenario_file) {
-        return 0;
-    }
-    if (!load_custom_scenario(scenario_name, full_scenario_file)) {
-        uint8_t scenario_mapx_name[FILE_NAME_MAX];
-        string_copy(scenario_name, scenario_mapx_name, FILE_NAME_MAX);
-        if (game_file_load_saved_game(full_scenario_file) == FILE_LOAD_SUCCESS) {
+    if (!load_custom_scenario(scenario_name, scenario_file)) {
+        uint8_t scenario_folder_name[FILE_NAME_MAX];
+        string_copy(scenario_name, scenario_folder_name, FILE_NAME_MAX);
+        if (game_file_load_saved_game(scenario_file) == FILE_LOAD_SUCCESS) {
             is_save_game = 1;
-            scenario_set_name(scenario_mapx_name);
+            scenario_set_name(scenario_folder_name);
+            mission = scenario_campaign_mission();
+            rank = scenario_campaign_rank();
         } else {
             return 0;
         }
@@ -357,12 +355,22 @@ static int start_scenario(const uint8_t *scenario_name, const char *scenario_fil
     return 1;
 }
 
-static const char *get_scenario_filename(const uint8_t *scenario_name, const char *extension, int decomposed)
+static const char *find_scenario_file(const uint8_t *foldername, int decomposed)
 {
-    static char filename[FILE_NAME_MAX];
-    encoding_to_utf8(scenario_name, filename, FILE_NAME_MAX, decomposed);
-    if (!file_has_extension(filename, extension)) {
-        file_append_extension(filename, extension, FILE_NAME_MAX);
+    const char *filename;
+    char map_foldername[FILE_NAME_MAX];
+    encoding_to_utf8(foldername, map_foldername, FILE_NAME_MAX, decomposed);
+    string_copy((const uint8_t *)dir_append_location(map_foldername, PATH_LOCATION_SCENARIO),
+        (uint8_t *)map_foldername, FILE_NAME_MAX);
+    filename = dir_get_first_file_with_extension(map_foldername, "map");
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(map_foldername, "mapx");
+    }
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(map_foldername, "sav");
+    }
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(map_foldername, "svx");
     }
     return filename;
 }
@@ -431,16 +439,10 @@ int game_file_start_scenario_from_buffer(uint8_t *data, int length, int is_save_
 
 int game_file_start_scenario_by_name(const uint8_t *scenario_name)
 {
-    if (start_scenario(scenario_name, get_scenario_filename(scenario_name, "map", 0))) {
+    if (start_scenario(scenario_name, find_scenario_file(scenario_name, 0))) {
         return 1;
     }
-    if (start_scenario(scenario_name, get_scenario_filename(scenario_name, "mapx", 0))) {
-        return 1;
-    }
-    if (start_scenario(scenario_name, get_scenario_filename(scenario_name, "map", 1))) {
-        return 1;
-    }
-    return start_scenario(scenario_name, get_scenario_filename(scenario_name, "mapx", 1));
+    return start_scenario(scenario_name, find_scenario_file(scenario_name, 1));
 }
 
 int game_file_load_saved_game(const char *filename)
