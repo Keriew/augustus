@@ -727,6 +727,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/logo.c
     ${PROJECT_SOURCE_DIR}/src/window/main_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/message_dialog.c
+    ${PROJECT_SOURCE_DIR}/src/window/message_dialog_layout.c
     ${PROJECT_SOURCE_DIR}/src/window/message_list.c
     ${PROJECT_SOURCE_DIR}/src/window/military_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/mission_briefing.c
