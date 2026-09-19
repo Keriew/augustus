@@ -6,6 +6,7 @@
 #include "core/log.h"
 #include "core/string.h"
 #include "game/campaign.h"
+#include "scenario/custom_messages_localization.h"
 
 #define CUSTOM_MESSAGES_ARRAY_SIZE_STEP 100
 
@@ -57,6 +58,7 @@ void custom_messages_clear(void)
 
 void custom_messages_clear_all(void)
 {
+    custom_messages_localization_clear();
     custom_messages_clear();
     custom_media_clear();
     message_media_text_blob_remove_unused();
@@ -197,6 +199,12 @@ void custom_messages_load_state(buffer *messages_buffer, buffer *media_buffer)
 
 uint8_t *custom_messages_get_title(custom_message_t *message)
 {
+    uint8_t *localized = custom_messages_localization_get_title(message->id);
+    return localized ? localized : custom_messages_get_source_title(message);
+}
+
+uint8_t *custom_messages_get_source_title(custom_message_t *message)
+{
     if (message->title && message->title->in_use) {
         return message->title->text;
     } else {
@@ -206,6 +214,12 @@ uint8_t *custom_messages_get_title(custom_message_t *message)
 
 uint8_t *custom_messages_get_subtitle(custom_message_t *message)
 {
+    uint8_t *localized = custom_messages_localization_get_subtitle(message->id);
+    return localized ? localized : custom_messages_get_source_subtitle(message);
+}
+
+uint8_t *custom_messages_get_source_subtitle(custom_message_t *message)
+{
     if (message->subtitle && message->subtitle->in_use) {
         return message->subtitle->text;
     } else {
@@ -214,6 +228,12 @@ uint8_t *custom_messages_get_subtitle(custom_message_t *message)
 }
 
 uint8_t *custom_messages_get_text(custom_message_t *message)
+{
+    uint8_t *localized = custom_messages_localization_get_text(message->id);
+    return localized ? localized : custom_messages_get_source_text(message);
+}
+
+uint8_t *custom_messages_get_source_text(custom_message_t *message)
 {
     if (message->display_text && message->display_text->in_use) {
         return message->display_text->text;
