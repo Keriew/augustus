@@ -105,8 +105,6 @@ Metadata is reloaded after successful language changes and campaign restoration,
 hidden while the campaign is suspended, and freed on campaign clear. UI code must
 not retain translated pointers across reloads. The editor keeps canonical data.
 
-Developer regression tests: [campaign localization tests](../tests/campaign_localization/README.md).
-
 ## Scope
 
 This feature translates text only. Localized audio, images, video, custom empire
