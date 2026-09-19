@@ -225,6 +225,7 @@ int game_reload_language(void)
     int is_editor = editor_is_active();
     int result = reload_language(is_editor, 1);
     if (result) {
+        game_campaign_reload_localization();
         if (is_editor) {
             custom_messages_localization_clear();
         } else {
