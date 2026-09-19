@@ -76,7 +76,7 @@ Augustus changes are explained in detail in the comprehensive manual. Below you 
 
 ## Custom campaign localization
 
-Custom campaigns can provide translated scenario messages without modifying their canonical scenario XML files. Locale IDs, aliases, and detected-language defaults are declared by each campaign; they are not hardcoded for a specific language.
+Custom campaigns can provide translated scenario messages, campaign names and descriptions, mission titles, and scenario names/descriptions without modifying their canonical files. Locale IDs, aliases, and detected-language defaults are declared by each campaign; they are not hardcoded for a specific language. Translations affect presentation only, not campaign identity or saved progress.
 
 See the [custom campaign localization guide](doc/custom_campaign_localization.md) for the directory structure, XML format, fallback behavior, and a [complete locale manifest example](doc/examples/custom_campaign_locales.xml).
 

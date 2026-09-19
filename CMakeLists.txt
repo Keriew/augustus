@@ -463,6 +463,8 @@ set(FIGURETYPE_FILES
 set(GAME_FILES
     ${PROJECT_SOURCE_DIR}/src/game/campaign/campaign.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/file.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/localization.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/localization_file.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/mission.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/original.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/player_data.c
