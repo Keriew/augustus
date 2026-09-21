@@ -512,9 +512,6 @@ int scenario_action_type_trade_add_new_resource_execute(scenario_action_t *actio
 
     int city_id = empire_city_get_for_trade_route(route_id);
     if (show_message && empire_city_is_trade_route_open(route_id)) {
-        if (city_id < 0) {
-            city_id = 0;
-        }
         city_message_post(1, MESSAGE_INCREASED_TRADING, city_id, resource);
     }
 
@@ -603,9 +600,6 @@ int scenario_action_type_trade_route_adjust_open_price_execute(scenario_action_t
 
     if (show_message && !empire_city_is_trade_route_open(route_id)) {
         int city_id = empire_city_get_for_trade_route(route_id);
-        if (city_id < 0) {
-            city_id = 0;
-        }
         city_message_post(1, MESSAGE_ROUTE_PRICE_CHANGE, city_id, amount - old_cost);
     }
     return 1;
@@ -643,9 +637,6 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
     }
 
     int city_id = empire_city_get_for_trade_route(route_id);
-    if (city_id < 0) {
-        city_id = 0;
-    }
     if (show_message && empire_city_is_trade_route_open(route_id)) {
         int last_amount = trade_route_limit(route_id, resource, buys);
 

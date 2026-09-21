@@ -39,7 +39,7 @@
 #include "scenario/map.h"
 #include "scenario/property.h"
 
-#include <math.h> 
+#include <math.h>
 #include <stdio.h>
 
 #define INFINITE 10000
@@ -95,10 +95,10 @@ static void resource_multiplier_init(void)
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         // player buys, traders sell
         int price_sell_multiplier = calculate_log_score(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
-        LOGARITHMIC_SCALER_SELL, trade_price_buy(r, 1)); //trader sells, player buys 
+        LOGARITHMIC_SCALER_SELL, trade_price_buy(r, 1)); //trader sells, player buys
         data.sell_multiplier.value_multiplier[r] = price_sell_multiplier;
         int price_buy_multiplier = calculate_log_score(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
-        LOGARITHMIC_SCALER_BUY, trade_price_sell(r, 1)); //trader buys, player sells 
+        LOGARITHMIC_SCALER_BUY, trade_price_sell(r, 1)); //trader buys, player sells
         data.buy_multiplier.value_multiplier[r] = price_buy_multiplier;
         // add any other rules that increase priority of a resource here, e.g.: resource_is_food(r) ? 150 : 100;
     }
@@ -404,7 +404,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             int distance_score = calculate_log_score(raw_distance, MULTIPLIER_DISTANCE_MIN, MULTIPLIER_DISTANCE_MAX,
                 LOGARITHIMIC_SCALER_DISTANCE, DISTANCE_BASELINE);
             //swapping the input and baseline gives inverted score: higher score for shorter distances
-            int total_score = (sell_score + buy_score) * distance_score / 100; // Normalize by 100 
+            int total_score = (sell_score + buy_score) * distance_score / 100; // Normalize by 100
             // If this building is the best candidate so far, store it
             if (total_score > best_score && total_score > 0) {
                 best_score = total_score;
@@ -412,7 +412,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             }
         }
     }
-    // 5. Return result 
+    // 5. Return result
     if (best_building_id) {
         const building *best_building = building_get(best_building_id);
         if (best_building->type == BUILDING_GRANARY && best_building->has_road_access >= 1) {
@@ -1111,7 +1111,7 @@ int figure_trader_ship_other_ship_closer_to_dock(unsigned int dock_id, int dista
     for (int route_id = 0; route_id < 20; route_id++) {
         if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             int city_id = empire_city_get_for_trade_route(route_id);
-            if (city_id != -1) {
+            if (city_id) {
                 empire_city *city = empire_city_get(city_id);
                 for (int i = 0; i < 3; i++) {
                     figure *other_ship = figure_get(city->trader_figure_ids[i]);

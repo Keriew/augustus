@@ -2,6 +2,7 @@
 
 #include "building/image.h"
 #include "building/industry.h"
+#include "building/properties.h"
 #include "core/calc.h"
 #include "core/image.h"
 #include "core/image_group.h"
@@ -77,8 +78,8 @@ void map_image_update_all(void)
                 calc_percentage(b->data.industry.progress, building_industry_get_max_progress(b)));
             continue;
         }
-        if (b->type == BUILDING_SHIP_BRIDGE || b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_WALL) {
-            continue; //bridges are drawn as a part of terrain drawing, and their image shouldnt be fetched.
+        if (b->type == BUILDING_SHIP_BRIDGE || b->type == BUILDING_LOW_BRIDGE || building_properties_for_type(b->type)->shared) {
+            continue; //bridges are drawn as a part of terrain drawing, and their image shouldnt be fetched. Fetching shared building image will cause a black tile(0,0) to appear on the map.
         }
         int image_id = building_image_get(b);
 

@@ -168,7 +168,7 @@ static void get_change_amount(unsigned int index, demand_change_amount_t *amount
 static const uint8_t *get_route_name(int route_id)
 {
     int city_id = empire_city_get_for_trade_route(route_id);
-    if (city_id < 0) {
+    if (!city_id) {
         return lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE);
     }
     empire_city *city = empire_city_get(city_id);
