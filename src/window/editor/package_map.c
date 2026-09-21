@@ -3,6 +3,8 @@
 #include "core/array.h"
 #include "core/file.h"
 #include "core/zlib_helper.h"
+#include "empire/empire.h"
+#include "game/campaign.h"
 #include "graphics/font.h"
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
@@ -21,6 +23,24 @@ static struct {
     int capacity;
 } data;
 
+const char *image_paths[] = {
+    CAMPAIGNS_DIRECTORY "/image",
+    "image",
+    0
+};
+
+const char *all_assets_paths[] = {
+    CAMPAIGNS_DIRECTORY "/image",
+    "image",
+    CAMPAIGNS_DIRECTORY "/audio",
+    "audio",
+    CAMPAIGNS_DIRECTORY "/video",
+    "video",
+    0
+};
+
+#define NUM_ASSET_PATHS 7
+
 int add_file(const char *name)
 {
     if (data.file_count == data.capacity) {
@@ -37,16 +57,68 @@ int add_file(const char *name)
     return 0;
 }
 
+static const char *find_asset(const char *path, const char **paths)
+{
+    if (!path || !*path) {
+        return 0;
+    }
+    for (int i = 0; paths[i]; i++) {
+        char full_path[FILE_NAME_MAX];
+        const char *found_path = 0;
+        snprintf(full_path, FILE_NAME_MAX, "%s/%s", paths[i], path);
+        if (game_campaign_has_file(full_path)) {
+            found_path = full_path; // first look in campaigns directory
+        } else {
+            char scenario_dir_path[FILE_NAME_MAX];
+            snprintf(scenario_dir_path, FILE_NAME_MAX, "%s/%s", dir_get_scenario_dir(), full_path);
+            if (!(found_path = dir_get_file(scenario_dir_path, 0))) { // then in the scenarios own asset directories
+                if (!(found_path = dir_get_file_at_location(full_path, PATH_LOCATION_EDITOR_CONTENT))) { // then in editor/content
+                    found_path = dir_get_file_at_location(full_path, PATH_LOCATION_COMMUNITY); // at last in community
+                }
+            }
+        }
+        if (found_path) {
+            return found_path;
+        }
+    }
+    return 0;
+}
+
 static void find_files(void)
 {
+    // Add the empire background image if existant
+    if (empire_get_image_path()) {
+        add_file(find_asset(empire_get_image_path(), image_paths));
+    }
 
+    // Add all assets used in custom messages
+}
+
+static const char *find_scenario_file(void)
+{
+    const char *filename;
+    const char *foldername = dir_get_scenario_dir();
+    filename = dir_get_first_file_with_extension(foldername, "map");
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(foldername, "mapx");
+    }
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(foldername, "sav");
+    }
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(foldername, "svx");
+    }
+    return filename;
 }
 
 static void init(void)
 {
     find_files();
     data.exporting = 1;
-    zip_package_map("", data.files, data.file_count, "", MZ_DEFAULT_LEVEL);
+    char zip_path[FILE_NAME_MAX];
+    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
+    zip_package_map(zip_path, data.files, data.file_count, find_scenario_file(), MZ_DEFAULT_LEVEL);
+    data.exporting = 0;
 }
 
 static void draw_foreground(void)

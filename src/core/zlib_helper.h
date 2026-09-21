@@ -16,7 +16,7 @@ int zlib_helper_compress(void *input_buffer, const int input_length, void *outpu
  *   audio/   all files from `files` with an audio extension
  *   savegame or map file stored at the archive root
  *
- * @param zip_path The path to the dir the zip gets created in
+ * @param zip_path The path to the zip which gets create
  * @param files The file list checked to package only necessary assets
  * @param count The length of the file list
  * @param map_file The main map or savegame file
