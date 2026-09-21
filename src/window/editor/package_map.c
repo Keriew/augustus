@@ -2,7 +2,11 @@
 
 #include "core/array.h"
 #include "core/file.h"
+#include "core/image.h"
+#include "core/image_group.h"
+#include "core/image_group_editor.h"
 #include "core/zlib_helper.h"
+#include "editor/editor.h"
 #include "empire/empire.h"
 #include "game/campaign.h"
 #include "graphics/font.h"
@@ -11,6 +15,7 @@
 #include "graphics/panel.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "scenario/custom_messages.h"
 #include "translation/translation.h"
 
 #define WINDOW_WIDTH 30
@@ -29,32 +34,34 @@ const char *image_paths[] = {
     0
 };
 
-const char *all_assets_paths[] = {
-    CAMPAIGNS_DIRECTORY "/image",
-    "image",
-    CAMPAIGNS_DIRECTORY "/audio",
-    "audio",
+const char *video_paths[] = {
     CAMPAIGNS_DIRECTORY "/video",
     "video",
     0
 };
 
-#define NUM_ASSET_PATHS 7
+const char *audio_paths[] = {
+    CAMPAIGNS_DIRECTORY "/audio",
+    "audio",
+    0
+};
 
-int add_file(const char *name)
+static void add_file(const char *name)
 {
+    if (!name || !*name) {
+        return;
+    }
     if (data.file_count == data.capacity) {
         size_t new_cap = data.capacity ? data.capacity * 2 : 8;
         char (*tmp)[FILE_NAME_MAX] = realloc(data.files, new_cap * sizeof *tmp);
         if (!tmp) {
-            return -1;
+            return;
         }
         data.files = tmp;
         data.capacity = new_cap;
     }
     snprintf(data.files[data.file_count], FILE_NAME_MAX, "%s", name);  // safe, always terminated
     data.file_count++;
-    return 0;
 }
 
 static const char *find_asset(const char *path, const char **paths)
@@ -87,11 +94,31 @@ static const char *find_asset(const char *path, const char **paths)
 static void find_files(void)
 {
     // Add the empire background image if existant
-    if (empire_get_image_path()) {
+    if (empire_get_image_id() != image_group(editor_is_active() ? GROUP_EDITOR_EMPIRE_MAP : GROUP_EMPIRE_MAP)) {
         add_file(find_asset(empire_get_image_path(), image_paths));
     }
 
     // Add all assets used in custom messages
+    for (int i = 0; i < custom_messages_count(); i++) {
+        custom_message_t *message = custom_messages_get(i);
+        // storing all files (needed to not crash since allocated)
+        char video_name[FILE_NAME_MAX];
+        char audio_name[FILE_NAME_MAX];
+        char speech_name[FILE_NAME_MAX];
+        char music_name[FILE_NAME_MAX];
+        char image_name[FILE_NAME_MAX];
+        snprintf(video_name, FILE_NAME_MAX, "%s", (const char *)custom_messages_get_video(message));
+        snprintf(audio_name, FILE_NAME_MAX, "%s", custom_messages_get_audio(message));
+        snprintf(speech_name, FILE_NAME_MAX, "%s", custom_messages_get_speech(message));
+        snprintf(music_name, FILE_NAME_MAX, "%s", custom_messages_get_background_music(message));
+        snprintf(image_name, FILE_NAME_MAX, "%s", (const char *)custom_messages_get_background_image(message));
+        // removing all paths and finding the files again ensures no vanilla files are copied
+        add_file(find_asset(file_remove_path(video_name), video_paths));
+        add_file(find_asset(file_remove_path(audio_name), audio_paths));
+        add_file(find_asset(file_remove_path(speech_name), audio_paths));
+        add_file(find_asset(file_remove_path(music_name), audio_paths));
+        add_file(find_asset(file_remove_path(image_name), image_paths));
+    }
 }
 
 static const char *find_scenario_file(void)
@@ -118,6 +145,10 @@ static void init(void)
     char zip_path[FILE_NAME_MAX];
     snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
     zip_package_map(zip_path, data.files, data.file_count, find_scenario_file(), MZ_DEFAULT_LEVEL);
+    free(data.files);
+    data.files = NULL;
+    data.file_count = 0;
+    data.capacity = 0;
     data.exporting = 0;
 }
 

@@ -13,7 +13,7 @@
 #define DIR_AUDIO "audio/"
 
 static const char *VIDEO_EXT[] = { "mp4", "mkv", "avi", "mov", "wmv", "flv",
-                                   "webm", "m4v", "mpg", "mpeg", NULL };
+                                   "webm", "m4v", "mpg", "mpeg", "smk", NULL };
 static const char *IMAGE_EXT[] = { "jpg", "jpeg", "png", "gif", "bmp", "webp",
                                    "tif", "tiff", "svg", NULL };
 static const char *AUDIO_EXT[] = { "mp3", "wav", "flac", "aac", "ogg", "m4a",
@@ -102,12 +102,12 @@ static int add_entry(mz_zip_archive *zip, const char *folder,
     char name[FILE_NAME_MAX];
     int n = snprintf(name, sizeof(name), "%s%s", folder, path_basename(src_path));
     if (n < 0 || n >= sizeof(name)) {
-        log_error("Archive name too long for ", src_path, 0);
+        log_error("Archive name too long for", src_path, 0);
         return 0;
     }
     if (!mz_zip_writer_add_file(zip, name, src_path, NULL, 0, level, 0)) {
-        log_error("Failed to add ", src_path, 0);
-        log_error("Reason: ", mz_zip_get_error_string(mz_zip_get_last_error(zip)), 0);
+        log_error("Failed to add", src_path, 0);
+        log_error("Reason:", mz_zip_get_error_string(mz_zip_get_last_error(zip)), 0);
         return 0;
     }
     return 1;
@@ -120,26 +120,25 @@ int zip_package_map(const char *zip_path, char (*files)[FILE_NAME_MAX], int coun
     memset(&zip, 0, sizeof(zip));
 
     if (!mz_zip_writer_init_file(&zip, zip_path, 0)) {
-        log_error("Failed to create ", zip_path, 0);
-        log_error("Reason: ", mz_zip_get_error_string(mz_zip_get_last_error(&zip)), 0);
+        log_error("Failed to create", zip_path, 0);
+        log_error("Reason:", mz_zip_get_error_string(mz_zip_get_last_error(&zip)), 0);
         return 0;
     }
 
     for (int i = 0; i < count; i++) {
         const char *folder = folder_for(files[i]);
         if (!folder) {
-            log_error("Unrecognized file type: Skipping ", files[i], 0);
+            log_error("Unrecognized file type: Skipping", files[i], 0);
             continue;
         }
-        if (!add_entry(&zip, folder, files[i], level))
-            goto fail;
+        add_entry(&zip, folder, files[i], level);
     }
 
     if (map_file && !add_entry(&zip, "", map_file, level))
         goto fail;
 
     if (!mz_zip_writer_finalize_archive(&zip)) {
-        log_error("Failed to finalize archive: ",
+        log_error("Failed to finalize archive:",
                 mz_zip_get_error_string(mz_zip_get_last_error(&zip)), 0);
         goto fail;
     }
