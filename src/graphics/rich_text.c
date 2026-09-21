@@ -70,7 +70,7 @@ int rich_text_init(
             BLOCK_SIZE * data.text_width_blocks - BLOCK_SIZE, data.text_height_lines, 1);
         scrollbar.x = data.x_text + BLOCK_SIZE * data.text_width_blocks - 1;
         scrollbar.y = data.y_text;
-        scrollbar.height = BLOCK_SIZE * data.text_height_blocks;
+        scrollbar.length = BLOCK_SIZE * data.text_height_blocks;
         scrollbar.elements_in_view = data.text_height_lines;
         scrollbar_init(&scrollbar, scrollbar.scroll_position, data.num_lines);
         if (data.num_lines <= data.text_height_lines && adjust_width_on_no_scroll) {

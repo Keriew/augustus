@@ -85,9 +85,9 @@ static void export_border(void)
 static void export_city(const empire_object *obj)
 {
     static const char *city_types[6] = { "roman", "ours", "trade", "future_trade", "distant", "vulnerable" };
-    static const char *city_icons[18] = { "construction", "dis_town", "dis_village", "res_food", "res_goods", "res_sea",
+    static const char *city_icons[19] = { "construction", "dis_town", "dis_village", "res_food", "res_goods", "res_sea",
                                           "tr_town", "ro_town", "tr_village", "ro_village", "ro_capital", "tr_sea",
-                                          "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
+                                          "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower", "button" };
 
     full_empire_object *city = empire_object_get_full(obj->id);
     if (city->city_type == EMPIRE_CITY_FUTURE_ROMAN) {

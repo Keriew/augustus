@@ -7,6 +7,7 @@
 #include "graphics/window.h"
 #include "input/mouse.h"
 #include "sound/effect.h"
+#include "widget/text_block.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -17,6 +18,13 @@ static int debug_shade = 0;
 static int debug_sunken = 0;
 static color_t debug_color_primary = COLOR_FONT_GRAY_50;
 static color_t debug_color_secondary = COLOR_FONT_GRAY_GREEN;
+
+// Temporary solution, as checkbox and cycling buttons need to be moved to their own files,
+// and i don't want to deal with it all at once 
+static void init_lang_sequence_const(lang_sequence *seq, const lang_fragment *fragments, int count)
+{
+    lang_seq_init(seq, (lang_fragment *) fragments, count);
+}
 
 static const cycling_button_state *cycling_button_get_state(const cycling_button *button)
 {
@@ -186,7 +194,9 @@ static void draw_button_contents(const complex_button *button, font_t font, colo
         button->sequence_position : SEQUENCE_POSITION_CENTER;
 
     int text_y = sequence_y_offset(button, position, font);
-    int sequence_width = lang_text_get_sequence_width(button->sequence, button->sequence_size, font);
+    lang_sequence sequence;
+    init_lang_sequence_const(&sequence, button->sequence, button->sequence_size);
+    int sequence_width = lang_seq_get_width(&sequence, font);
     sequence_width -= sequence_width % 2;
 
     const image *image_before = NULL;
@@ -260,15 +270,15 @@ static void draw_button_contents(const complex_button *button, font_t font, colo
     int was_ellipsized = 0;
     if (button->sequence && button->sequence_size > 0) {
         if (font == FONT_NORMAL_PLAIN || font == FONT_LARGE_PLAIN || font == FONT_SMALL_PLAIN) {
-            lang_text_draw_sequence_with_shadow(button->sequence, button->sequence_size, button->x, text_y, button->width,
-    font, font_primary, font_secondary, sequence_position_is_centered(position), debug_sunken);
+            lang_seq_draw_with_shadow(&sequence, button->x, text_y, button->width, font, font_primary, font_secondary,
+                sequence_position_is_centered(position), debug_sunken);
         } else {
             if (sequence_position_is_centered(position)) {
-                lang_text_draw_sequence_centered_ellipsized(button->sequence, button->sequence_size,
-                    button->x, text_y, button->width, font, font_primary, &was_ellipsized);
+                lang_seq_draw_centered_ellipsized(&sequence, button->x, text_y, button->width, font, font_primary,
+                    &was_ellipsized);
             } else {
-                cursor_x += lang_text_draw_sequence_ellipsized(button->sequence, button->sequence_size,
-                    cursor_x, text_y, button->width, font, font_primary, &was_ellipsized);
+                cursor_x += lang_seq_draw_ellipsized(&sequence, cursor_x, text_y, button->width, font, font_primary,
+                    &was_ellipsized);
             }
         }
     }
@@ -421,7 +431,9 @@ int complex_button_handle_mouse(complex_button *btn, const mouse *m)
     }
     if (btn->is_ellipsized && btn->is_focused) { //if the button is ellipsized, show tooltip
         static uint8_t tooltip_text[512];
-        lang_text_concatenate_sequence(btn->sequence, btn->sequence_size, tooltip_text, 512);
+        lang_sequence sequence;
+        init_lang_sequence_const(&sequence, btn->sequence, btn->sequence_size);
+        lang_seq_concatenate(&sequence, tooltip_text, 512);
         btn->tooltip_c.type = TOOLTIP_BUTTON;
         btn->tooltip_c.precomposed_text = tooltip_text; // reset precomposed text to force re-generation
     }
@@ -597,9 +609,10 @@ void checkbox_button_draw(const checkbox_button *button)
     }
     int was_ellipsized = 0;
     if (button->sequence && button->sequence_size > 0) {
-        cursor_x += lang_text_draw_sequence_ellipsized(button->sequence, button->sequence_size, cursor_x, text_y,
-            max_text_width,
-            font, text_color, &was_ellipsized);
+        lang_sequence sequence;
+        init_lang_sequence_const(&sequence, button->sequence, button->sequence_size);
+        cursor_x += lang_seq_draw_ellipsized(&sequence, cursor_x, text_y, max_text_width, font, text_color,
+            &was_ellipsized);
     }
     ((checkbox_button *) button)->is_ellipsized = was_ellipsized;
 
@@ -670,7 +683,9 @@ static void draw_cycling_button_contents(const cycling_button *button, const cyc
 
     int seq_width = 0;
     if (state->sequence && state->sequence_size > 0) {
-        seq_width = lang_text_get_sequence_width(state->sequence, state->sequence_size, font);
+        lang_sequence sequence;
+        init_lang_sequence_const(&sequence, state->sequence, state->sequence_size);
+        seq_width = lang_seq_get_width(&sequence, font);
     }
     int visible_seq_width = seq_width < text_max_width ? seq_width : text_max_width;
 
@@ -691,8 +706,9 @@ static void draw_cycling_button_contents(const cycling_button *button, const cyc
     }
 
     if (state->sequence && state->sequence_size > 0) {
-        cursor_x += lang_text_draw_sequence_ellipsized(state->sequence, state->sequence_size, cursor_x,
-            text_y, text_max_width, font, text_color, 0);
+        lang_sequence sequence;
+        init_lang_sequence_const(&sequence, state->sequence, state->sequence_size);
+        cursor_x += lang_seq_draw_ellipsized(&sequence, cursor_x, text_y, text_max_width, font, text_color, 0);
     }
 
     if (img_after) {
@@ -790,7 +806,9 @@ int checkbox_button_handle_mouse(checkbox_button *btn, const mouse *m)
 
     if (btn->is_ellipsized && btn->is_hovered) {
         static uint8_t tooltip_text[512];
-        lang_text_concatenate_sequence(btn->sequence, btn->sequence_size, tooltip_text, 512);
+        lang_sequence sequence;
+        init_lang_sequence_const(&sequence, btn->sequence, btn->sequence_size);
+        lang_seq_concatenate(&sequence, tooltip_text, 512);
         btn->tooltip_c.type = TOOLTIP_BUTTON;
         btn->tooltip_c.precomposed_text = tooltip_text;
     }

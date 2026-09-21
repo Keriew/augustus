@@ -212,7 +212,9 @@ int tab_view_layout(tab_view *view)
         if (!view->tabs[i].initialised) {
             return TAB_ERR_UNINITIALISED_TAB; // indicate layout was not successful due to uninitialised tabs
         }
-        sum_text_w += lang_text_get_sequence_width(view->tabs[i].button.sequence, 1, view->view_properties.tab_font);
+        lang_sequence sequence;
+        lang_seq_init(&sequence, (lang_fragment *) view->tabs[i].button.sequence, 1);
+        sum_text_w += lang_seq_get_width(&sequence, view->view_properties.tab_font);
     }
 
     // === Step 1 - determine tab widths===
@@ -262,7 +264,9 @@ int tab_view_layout(tab_view *view)
 
     // First determine final button widths
     for (int i = 0; i < tab_count; i++) {
-        int text_w = lang_text_get_sequence_width(view->tabs[i].button.sequence, 1, view->view_properties.tab_font);
+        lang_sequence sequence;
+        lang_seq_init(&sequence, (lang_fragment *) view->tabs[i].button.sequence, 1);
+        int text_w = lang_seq_get_width(&sequence, view->view_properties.tab_font);
 
         switch (view->view_properties.width_mode) {
             case TAB_WIDTH_MAX:

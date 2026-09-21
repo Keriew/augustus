@@ -96,8 +96,8 @@ static void draw_scrollbar(list_box_type *list_box)
     scrollbar->has_y_margin = 1;
     scrollbar->dot_padding = legacy ? (list_box->decorate_scrollbar ? 8 : 0) : 0;
 
-    scrollbar->height = list_box->height_blocks * BLOCK_SIZE;
-    int scrollable_height_pixels = scrollbar->height;
+    scrollbar->length = list_box->height_blocks * BLOCK_SIZE;
+    int scrollable_height_pixels = scrollbar->length;
     scrollbar->scrollable_width = (list_box->width_blocks - 2) * BLOCK_SIZE;
     if (list_box->draw_inner_panel) {
         scrollable_height_pixels -= BLOCK_SIZE;

@@ -2333,6 +2333,11 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_PLAY_FANFARE, "Проиграть фанфары"},
     {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Классическая полоса прокрутки"},
     {TR_BUILDING_WILLOW_TREE, "Ива"},
+    {TR_SIDEBAR_EXTRA_HOUSING_AVAILABLE, "Мест для: "},
+    {TR_SIDEBAR_EXTRA_POPULATION_GOAL_MET, "Цель по населению выполнена"},
+    {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Цель по населению не выполнена"},
+    {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Мест достаточно для всех необходимых работников"},
+    {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Недостаточно мест для необходимых работников"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

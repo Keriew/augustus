@@ -330,9 +330,9 @@ static int xml_start_city(void)
 
     static const char *city_types[6] = { "roman", "ours", "trade", "future_trade", "distant", "vulnerable" };
     static const char *trade_route_types[2] = { "land", "sea" };
-    static const char *city_icons[18] = { "construction", "dis_town", "dis_village", "res_food", "res_goods", "res_sea",
+    static const char *city_icons[19] = { "construction", "dis_town", "dis_village", "res_food", "res_goods", "res_sea",
                                           "tr_town", "ro_town", "tr_village", "ro_village", "ro_capital", "tr_sea",
-                                          "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower" };
+                                          "tr_land", "our_city", "tr_city", "ro_city", "dis_city", "tower", "button" };
     const char *name = xml_parser_get_attribute_string("name");
     if (name) {
         string_copy((const uint8_t *) name, city_obj->city_custom_name, sizeof(city_obj->city_custom_name));

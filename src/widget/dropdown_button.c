@@ -13,7 +13,9 @@ static int calculate_text_width(const complex_button *btn, font_t font)
     if (!btn->sequence || btn->sequence_size == 0) {
         return 0;
     }
-    return lang_text_get_sequence_width(btn->sequence, btn->sequence_size, font);
+    lang_sequence sequence;
+    lang_seq_init(&sequence, (lang_fragment *) btn->sequence, btn->sequence_size);
+    return lang_seq_get_width(&sequence, font);
 }
 
 static complex_button_style dropdown_button_style_to_complex_style(dropdown_button_style style)

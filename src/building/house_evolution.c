@@ -555,7 +555,7 @@ static void consume_resources(building *b)
             continue;
         }
         if (!consumption_reduction[r] ||
-            (game_time_total_months() % (100 / consumption_reduction[r]))) {
+            (game_time_total_months() * (100 - consumption_reduction[r])) % 100 < (100 - consumption_reduction[r])) {
             consume_resource(b, r, model_house_uses_inventory(b->subtype.house_level, r));
         }
     }

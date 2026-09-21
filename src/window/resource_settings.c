@@ -131,7 +131,9 @@ static void draw_foreground(void)
                 .text_group = CUSTOM_TRANSLATION, .text_id = TR_RESOURCE_SETTINGS_IN_GRANARIES
             };
         }
-        lang_text_draw_sequence(storage_seq, seq_len, 66, 192, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+        lang_sequence storage_sequence;
+        lang_seq_init(&storage_sequence, storage_seq, seq_len);
+        lang_seq_draw(&storage_sequence, 66, 192, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
         int width = 0;
 
         int can_import_potentially = empire_can_import_resource_potentially(data.resource);

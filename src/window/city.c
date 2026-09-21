@@ -262,7 +262,9 @@ void label_draw_masked(int x, int y, int width_blocks, int type, color_t color)
 static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment *fragments, int fragment_count, font_t font, color_t color)
 {
     // Measure total width using the new sequence width function
-    int label_width = lang_text_get_sequence_width(fragments, fragment_count, font);
+    lang_sequence sequence;
+    lang_seq_init(&sequence, (lang_fragment *) fragments, fragment_count);
+    int label_width = lang_seq_get_width(&sequence, font);
 
     int label_blocks = (label_width + 2 * BLOCK_SIZE) / BLOCK_SIZE;
     if (label_blocks < 1) label_blocks = 1;
@@ -270,7 +272,7 @@ static void draw_topleft_label_with_fragments(int x, int y, const lang_fragment 
     label_draw_masked(x, y, label_blocks, 1, color);
 
     // Draw the sequence using the new lang_fragment system
-    lang_text_draw_sequence(fragments, fragment_count, x + 6, y + 4, font, COLOR_MASK_NONE);
+    lang_seq_draw(&sequence, x + 6, y + 4, font, COLOR_MASK_NONE);
 }
 
 

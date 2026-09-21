@@ -162,18 +162,133 @@ void scrollbar_panel_draw(int x, int y, int height_px)
         return;
     }
     graphics_set_clip_rectangle(x, y, SCROLL_PANEL_WIDTH, height_px);
-    int main_blocks = (height_px - (2 * BLOCK_SIZE) + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    int main_blocks = (height_px - 2 * BLOCK_SIZE + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     int start_id = assets_lookup_image_id(ASSET_UI_SCROLL_BG_01);
     int mid_id = assets_lookup_image_id(ASSET_UI_SCROLL_BG_02);
     int end_id = assets_lookup_image_id(ASSET_UI_SCROLL_BG_03);
-    int drawing_y = y;
+    int drawing_y = y + BLOCK_SIZE;
     image_draw(start_id, x, y, COLOR_MASK_NONE, SCALE_NONE);
-    for (int yy = 1; yy < main_blocks; yy++) {
+    for (int yy = 0; yy < main_blocks; yy++) {
         image_draw(mid_id, x, drawing_y, COLOR_MASK_NONE, SCALE_NONE);
         drawing_y += BLOCK_SIZE;
     }
     image_draw(end_id, x, drawing_y, COLOR_MASK_NONE, SCALE_NONE);
+    graphics_reset_clip_rectangle();
+}
+
+void scrollbar_thumb_draw(int x, int y, int middle_sections, int is_vertical, int frame)
+{
+    if (middle_sections < 0) {
+        middle_sections = 0;
+    }
+
+    if (frame < 1 || frame > 4) {
+        frame = 1;
+    }
+
+    static const asset_id vertical_start_ids[4] = {
+        ASSET_UI_SCROLLBAR_MIDDLE_01_END_TOP,
+        ASSET_UI_SCROLLBAR_MIDDLE_02_END_TOP,
+        ASSET_UI_SCROLLBAR_MIDDLE_03_END_TOP,
+        ASSET_UI_SCROLLBAR_MIDDLE_04_END_TOP,
+    };
+    static const asset_id vertical_end_ids[4] = {
+        ASSET_UI_SCROLLBAR_MIDDLE_01_END_BOTTOM,
+        ASSET_UI_SCROLLBAR_MIDDLE_02_END_BOTTOM,
+        ASSET_UI_SCROLLBAR_MIDDLE_03_END_BOTTOM,
+        ASSET_UI_SCROLLBAR_MIDDLE_04_END_BOTTOM,
+    };
+    static const asset_id vertical_mid_ids[4] = {
+        ASSET_UI_SCROLLBAR_MIDDLE_01_TRIMMED,
+        ASSET_UI_SCROLLBAR_MIDDLE_02_TRIMMED,
+        ASSET_UI_SCROLLBAR_MIDDLE_03_TRIMMED,
+        ASSET_UI_SCROLLBAR_MIDDLE_04_TRIMMED,
+    };
+
+    static const asset_id horizontal_start_ids[4] = {
+        ASSET_UI_SCROLLBAR_MIDDLE_01B_END_LEFT,
+        ASSET_UI_SCROLLBAR_MIDDLE_02B_END_LEFT,
+        ASSET_UI_SCROLLBAR_MIDDLE_03B_END_LEFT,
+        ASSET_UI_SCROLLBAR_MIDDLE_04B_END_LEFT,
+    };
+    static const asset_id horizontal_end_ids[4] = {
+        ASSET_UI_SCROLLBAR_MIDDLE_01B_END_RIGHT,
+        ASSET_UI_SCROLLBAR_MIDDLE_02B_END_RIGHT,
+        ASSET_UI_SCROLLBAR_MIDDLE_03B_END_RIGHT,
+        ASSET_UI_SCROLLBAR_MIDDLE_04B_END_RIGHT,
+    };
+    static const asset_id horizontal_mid_ids[4] = {
+        ASSET_UI_SCROLLBAR_MIDDLE_01B_TRIMMED,
+        ASSET_UI_SCROLLBAR_MIDDLE_02B_TRIMMED,
+        ASSET_UI_SCROLLBAR_MIDDLE_03B_TRIMMED,
+        ASSET_UI_SCROLLBAR_MIDDLE_04B_TRIMMED,
+    };
+
+    int start_id;
+    int end_id;
+    int mid_id;
+    const int frame_index = frame - 1;
+    if (is_vertical) {
+        start_id = assets_lookup_image_id(vertical_start_ids[frame_index]);
+        end_id = assets_lookup_image_id(vertical_end_ids[frame_index]);
+        mid_id = assets_lookup_image_id(vertical_mid_ids[frame_index]);
+    } else {
+        start_id = assets_lookup_image_id(horizontal_start_ids[frame_index]);
+        end_id = assets_lookup_image_id(horizontal_end_ids[frame_index]);
+        mid_id = assets_lookup_image_id(horizontal_mid_ids[frame_index]);
+    }
+
+    const image *start_img = image_get(start_id);
+    const image *end_img = image_get(end_id);
+    const image *mid_img = image_get(mid_id);
+
+    int start_span = is_vertical ? start_img->original.height : start_img->original.width;
+    int end_span = is_vertical ? end_img->original.height : end_img->original.width;
+    int middle_span = is_vertical ? mid_img->original.height : mid_img->original.width;
+    int thumb_width = is_vertical ? mid_img->original.width : start_span + middle_sections * middle_span + end_span;
+    int thumb_height = is_vertical ? start_span + middle_sections * middle_span + end_span : mid_img->original.height;
+
+    if (start_span <= 0 || end_span <= 0 || middle_span <= 0 || thumb_width <= 0 || thumb_height <= 0) {
+        return;
+    }
+
+    graphics_set_clip_rectangle(x, y, thumb_width, thumb_height);
+
+    if (is_vertical) {
+        image_draw(start_id, x, y, COLOR_MASK_NONE, SCALE_NONE);
+
+        int middle_y = y + start_span;
+        for (int i = 0; i < middle_sections; ++i) {
+            image_draw(mid_id, x, middle_y, COLOR_MASK_NONE, SCALE_NONE);
+            middle_y += middle_span;
+        }
+
+        image_draw(end_id, x, middle_y, COLOR_MASK_NONE, SCALE_NONE);
+    } else {
+        image_draw(start_id, x, y, COLOR_MASK_NONE, SCALE_NONE);
+
+        int middle_x = x + start_span;
+        for (int i = 0; i < middle_sections; ++i) {
+            image_draw(mid_id, middle_x, y, COLOR_MASK_NONE, SCALE_NONE);
+            middle_x += middle_span;
+        }
+
+        image_draw(end_id, middle_x, y, COLOR_MASK_NONE, SCALE_NONE);
+    }
+
+    if (middle_sections > 0) {
+        int lines_alpha_id = assets_lookup_image_id(ASSET_UI_SCROLLBAR_LINES_ALPHA);
+        const image *lines_alpha_img = image_get(lines_alpha_id);
+        if (is_vertical) {
+            int lines_y = y + (thumb_height - lines_alpha_img->original.height) / 2;
+            image_draw(lines_alpha_id, x, lines_y, COLOR_MASK_NONE, SCALE_NONE);
+        } else {
+            int lines_x = x + (thumb_width - lines_alpha_img->original.width) / 2;
+            image_draw(lines_alpha_id, lines_x, y, COLOR_MASK_NONE, SCALE_NONE);
+        }
+    }
+
     graphics_reset_clip_rectangle();
 }
 

@@ -478,7 +478,7 @@ static scrollbar_type scrollbar =
 {
     .x = 580,
     .y = ITEM_Y_OFFSET,
-    .height = ITEM_BASE_H * NUM_VISIBLE_FALLBACK,
+    .length = ITEM_BASE_H * NUM_VISIBLE_FALLBACK,
     .scrollable_width = 560,
     .elements_in_view = NUM_VISIBLE_FALLBACK,
     .on_scroll_callback = on_scroll,

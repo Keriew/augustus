@@ -420,7 +420,9 @@ static void draw_city_message_text(const lang_message *msg)
                 rank_frag[0].text_id = TR_MESSAGE_DEMOTE_RANK_PREFIX;
                 rank_frag[2].text_id = TR_MESSAGE_DEMOTE_RANK_SUFFIX;
             }
-            lang_text_draw_sequence_multiline(rank_frag, 3, data.x + 30, data.y_text + 44,
+            lang_sequence rank_sequence;
+            lang_seq_init(&rank_sequence, rank_frag, 3);
+            lang_seq_draw_multiline_aligned_left(&rank_sequence, data.x + 30, data.y_text + 44,
                 BLOCK_SIZE * (data.text_width_blocks) - 20, 0, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
             break;
         }

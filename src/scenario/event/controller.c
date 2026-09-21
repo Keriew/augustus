@@ -756,7 +756,7 @@ void scenario_events_migrate_to_buys_sells(void)
                 continue;
             }
             int city_id = empire_city_get_for_trade_route(action->parameter1);
-            if (city_id < 0) {
+            if (!city_id) {
                 action->parameter5 = 1;
                 continue;
             }

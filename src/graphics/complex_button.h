@@ -6,6 +6,7 @@
 #include "graphics/lang_text.h"
 #include "graphics/text.h"
 #include "input/mouse.h"
+#include "widget/text_block.h"
 
 #define MAX_COMPLEX_BUTTON_PARAMETERS 10 // arbitrary 
 #define MAX_CYCLE_BUTTON_STATES 10 // arbitrary
@@ -29,18 +30,6 @@ typedef enum {
     CYCLING_BUTTON_STYLE_RAW,                // No border, no fill. Content-only.
     CYCLING_BUTTON_STYLE_GRAY_NO_FILL,       // mainmenu border, but no fill background
 } cycling_button_style;
-
-typedef enum {
-    SEQUENCE_POSITION_TOP_LEFT = 1,      /*         ┌───┬───┬───┐         */
-    SEQUENCE_POSITION_TOP_CENTER = 2,    /*         │ 1 │ 2 │ 3 │         */
-    SEQUENCE_POSITION_TOP_RIGHT = 3,     /*         ├───┼───┼───┤         */
-    SEQUENCE_POSITION_CENTER_LEFT = 4,   /*         │ 4 │ 5 │ 6 │         */
-    SEQUENCE_POSITION_CENTER = 5,        /*         ├───┼───┼───┤         */
-    SEQUENCE_POSITION_CENTER_RIGHT = 6,  /*         │ 7 │ 8 │ 9 │         */
-    SEQUENCE_POSITION_BOTTOM_LEFT = 7,   /*         └───┴───┴───┘         */
-    SEQUENCE_POSITION_BOTTOM_CENTER = 8, /*    just like phone keypad     */
-    SEQUENCE_POSITION_BOTTOM_RIGHT = 9,  /*  OOB values will be centered  */
-} sequence_positioning;
 
 typedef struct btn_img {
     int id;

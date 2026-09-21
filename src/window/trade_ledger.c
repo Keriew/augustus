@@ -625,7 +625,9 @@ static void placeholder_content_draw(tab_view *view, tab *active_tab)
     (void) view;
     (void) active_tab;
     int active = view->state.active_tab;
-    lang_text_draw_sequence(view->tabs[active].button.sequence, 1, 20, 20, FONT_LARGE_BROWN, brown_correction);
+    lang_sequence tab_sequence;
+    lang_seq_init(&tab_sequence, (lang_fragment *) view->tabs[active].button.sequence, 1);
+    lang_seq_draw(&tab_sequence, 20, 20, FONT_LARGE_BROWN, brown_correction);
 }
 
 static void draw_resource_row(const grid_box_item *item)

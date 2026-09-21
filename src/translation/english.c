@@ -1766,7 +1766,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_MINIMAL, "Minimal"},
     {TR_TOOLTIP_FULL, "Full"},
     {TR_CONFIG_CLEAR_WARNINGS_RIGHTCLICK, "Right click to clear warnings in city view"},
-    {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesar's requests respect 'Maintaining'"},
+    {TR_CONFIG_GP_CH_STORAGE_REQUESTS_RESPECT_MAINTAIN, "Caesar's requests respect 'Retaining'"},
     {TR_CONFIG_ENABLE_MARKET_RANGE, "Enable market range"},
     {TR_PARAMETER_TYPE_FORMULA, "Formula"},
     {TR_CONDITION_TYPE_CHECK_FORMULA, "Formulas evaluation"},
@@ -2341,6 +2341,11 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_OUTSKIRTS_DESIRABILITY, "Show outskirts desirability malus in overlay"},
     {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Enable classic scrollbars"},
     {TR_BUILDING_WILLOW_TREE, "Willow tree"},
+    {TR_SIDEBAR_EXTRA_HOUSING_AVAILABLE, "Room for "},
+    {TR_SIDEBAR_EXTRA_POPULATION_GOAL_MET, "Population goal met"},
+    {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Population goal not met"},
+    {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Room for all needed employees"},
+    {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Not enough room for needed employees"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

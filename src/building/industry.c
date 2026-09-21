@@ -62,7 +62,7 @@ int building_get_efficiency(const building *b)
     }
     int production_for_resource = resource_production_per_month(resource);
 
-    int percentage = calc_percentage(b->data.industry.average_production_per_month, production_for_resource);
+    int percentage = calc_percentage_efficiency(b->data.industry.average_production_per_month, production_for_resource);
     if (b->type == BUILDING_WHARF) {
         return percentage;
     }
@@ -71,7 +71,8 @@ int building_get_efficiency(const building *b)
 
 int building_industry_get_max_progress(const building *b)
 {
-    int monthly_production = resource_production_per_month(b->output_resource_id);
+    int monthly_production = resource_production_per_month(
+        b->type == BUILDING_CITY_MINT ? RESOURCE_DENARII : b->output_resource_id); // even minting gold is influenced by the denarii production rate
     return calc_percentage(GAME_TIME_DAYS_PER_MONTH * 2 * model_get_building(b->type)->laborers, monthly_production);
 }
 
@@ -589,8 +590,8 @@ static void update_stats_for_type(building_type type)
             0 : calc_percentage(b->data.industry.progress, building_industry_get_max_progress(b));
         pending_production_percentage = calc_bound(pending_production_percentage, 0, 100);
         sum_months += b->data.industry.production_current_month + pending_production_percentage;
-        b->data.industry.average_production_per_month = sum_months / b->data.industry.age_months;
-        int leftover_from_average = sum_months % b->data.industry.age_months;
+        b->data.industry.average_production_per_month = (sum_months + (b->data.industry.age_months / 2)) / b->data.industry.age_months;
+        int leftover_from_average = sum_months - (b->data.industry.average_production_per_month * b->data.industry.age_months);
         b->data.industry.production_current_month = leftover_from_average - pending_production_percentage;
     }
 }

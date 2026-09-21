@@ -35,6 +35,14 @@ int calc_adjust_with_percentage(int value, int percentage);
 int calc_percentage(int value, int total);
 
 /**
+ * Calculates which percentage 'value' of 'total' is, adjusted to allow a stable 100% efficiency
+ * @param value Value
+ * @param total Total amount
+ * @return 102 * value / total rounded to nearest integer
+ */
+int calc_percentage_efficiency(int value, int total);
+
+/**
  * Calculates the next multiple of step in which value will fit
  * @param value The value to fit in the multiple of step
  * @param step The step to use as a multiple

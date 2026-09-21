@@ -224,7 +224,6 @@ static int default_values[CONFIG_MAX_ENTRIES] = {
     [CONFIG_UI_EDITOR_SHOW_DELETION_WARNINGS] = 1,
     [CONFIG_UI_CLIMATE_GRID_COLORS] = 1,
     [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = 1,
-    [CONFIG_UI_SCROLL_CAMERA_UNLOCKED] = 1,
     [CONFIG_UI_SCROLL_LEGACY_SCROLLBAR] = 0, //keep the comma after last entry please
 };
 

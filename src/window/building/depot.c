@@ -179,6 +179,7 @@ static void setup_buttons_for_selected_depot(void)
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
         if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
+             store_building->state == BUILDING_STATE_RUBBLE ||
              (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
@@ -213,14 +214,14 @@ static void setup_buttons_for_selected_depot(void)
     for (int i = 0; i < storage_array_size; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
-        if (!storage->building_id ||
+        if (!storage->in_use || !storage->building_id ||
              (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
-        if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED) &&
-            store_building->storage_id > 0) {
+        if ((max_storable == 0 || store_building->state == BUILDING_STATE_MOTHBALLED) &&
+            store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
             row_count++;
             if (row_count <= scrollbar.scroll_position || drawn_rows >= MAX_VISIBLE_ROWS) {
                 continue;

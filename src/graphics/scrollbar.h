@@ -18,8 +18,8 @@
 typedef struct {
     int x;
     int y;
-    int height;
-    int scrollable_width;
+    int length; // Height or width depending on horizontal/vertical
+    int scrollable_width; // dimension perpendicular to length
     unsigned int elements_in_view;
     void (*on_scroll_callback)(void);
     int has_y_margin;
@@ -27,6 +27,7 @@ typedef struct {
     int always_visible;
     unsigned int max_scroll_position;
     unsigned int scroll_position;
+    unsigned int step_size; // how many elements to scroll per position change - if not set, decided automatically
     int is_dragging_scrollbar_dot;
     int scrollbar_dot_drag_offset; // Exact position of the top of the thumb within its allowed travel
     int scrollbar_dot_mouse_offset; // Exact position of the mouse within the scrollbar thumb while dragging
@@ -37,6 +38,7 @@ typedef struct {
     int position_on_touch;
     int legacy; // use legacy scrollbar graphics - config-managed
     int decorate_scrollbar; // draw the bg panel behind the scrollbar
+    unsigned char is_horizontal;
 
     image_button image_button_scroll_up;
     image_button image_button_scroll_down;

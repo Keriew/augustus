@@ -205,7 +205,9 @@ static void grid_picker_draw_cell_contents(const grid_picker *picker, const grid
     int text_max_width = picker->cell_width - 2 * inner_margin - image_before_width - image_after_width;
 
     if (cell->sequence && cell->sequence_size > 0) {
-        sequence_width = lang_text_get_sequence_width(cell->sequence, cell->sequence_size, font);
+        lang_sequence sequence;
+        lang_seq_init(&sequence, (lang_fragment *) cell->sequence, cell->sequence_size);
+        sequence_width = lang_seq_get_width(&sequence, font);
 
         if (sequence_width > text_max_width) {
             sequence_width = text_max_width;
@@ -222,8 +224,9 @@ static void grid_picker_draw_cell_contents(const grid_picker *picker, const grid
         cursor_x += image_before_width;
     }
     if (cell->sequence && cell->sequence_size > 0) {
-        cursor_x += lang_text_draw_sequence_ellipsized(
-            cell->sequence, cell->sequence_size, cursor_x, text_y, text_max_width, font, color, NULL);
+        lang_sequence sequence;
+        lang_seq_init(&sequence, (lang_fragment *) cell->sequence, cell->sequence_size);
+        cursor_x += lang_seq_draw_ellipsized(&sequence, cursor_x, text_y, text_max_width, font, color, NULL);
     }
 
     if (cell->image_after > 0) {

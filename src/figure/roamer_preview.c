@@ -119,6 +119,7 @@ static figure_type building_type_to_figure_type(building_type type)
         case BUILDING_SHIPYARD:
         case BUILDING_CARAVANSERAI:
         case BUILDING_LIGHTHOUSE:
+        case BUILDING_ARMOURY:
             return FIGURE_LABOR_SEEKER;
         default:
             return FIGURE_NONE;

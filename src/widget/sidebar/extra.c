@@ -582,7 +582,7 @@ static void draw_extra_info_panel(void)
     }
 
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_RATINGS) {
-        y_offset += EXTRA_INFO_LINE_SPACE;
+        y_offset += EXTRA_INFO_VERTICAL_PADDING; // shortened gap to include extra line in population
 
         data.objectives_y_offset = y_offset;
 
@@ -591,6 +591,13 @@ static void draw_extra_info_panel(void)
         y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 3, &data.objectives.peace, 0);
         y_offset += draw_extra_info_objective(data.x_offset, y_offset, 53, 4, &data.objectives.favor, 0);
         y_offset += draw_extra_info_objective(data.x_offset, y_offset, 4, 6, &data.objectives.population, 1);
+
+        int employee_shortfall = abs(data.unemployment.amount);
+        font_t font = ((data.unemployment.amount < 0) && (city_population_open_housing_capacity() < employee_shortfall))
+            ? FONT_NORMAL_RED : FONT_NORMAL_GREEN;
+        int width = lang_text_draw(CUSTOM_TRANSLATION, TR_SIDEBAR_EXTRA_HOUSING_AVAILABLE, data.x_offset + 11 + 6, y_offset, font);
+        text_draw_number(city_population_open_housing_capacity(), 0, "", data.x_offset + 11 + width, y_offset, font, 0);
+        y_offset += EXTRA_INFO_VERTICAL_PADDING;
     }
 
     if (data.info_to_display & SIDEBAR_EXTRA_DISPLAY_REQUESTS) {
@@ -653,6 +660,20 @@ void sidebar_extra_draw_foreground(void)
     draw_extra_info_buttons();
 }
 
+static const uint8_t *get_population_tooltip(void)
+{
+    static uint8_t text[128];
+    translation_key population = data.objectives.population.value >= data.objectives.population.target ?
+        TR_SIDEBAR_EXTRA_POPULATION_GOAL_MET : TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET;
+    translation_key housing = data.unemployment.amount >= 0 ||
+        city_population_open_housing_capacity() >= abs(data.unemployment.amount) ?
+        TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES : TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES;
+    uint8_t *cursor = string_copy(translation_for(population), text, 128);
+    *cursor++ = '\n';
+    string_copy(translation_for(housing), cursor, 128 - (int) (cursor - text));
+    return text;
+}
+
 int sidebar_extra_handle_mouse(const mouse *m)
 {
     if ((data.info_to_display & SIDEBAR_EXTRA_DISPLAY_GAME_SPEED) &&
@@ -675,11 +696,12 @@ int sidebar_extra_get_tooltip(tooltip_context *c)
     }
     const mouse *m = mouse_get();
     if (m->x < data.x_offset + 2 || m->x >= data.x_offset + data.width - 2 || m->y < data.objectives_y_offset ||
-        m->y >= data.objectives_y_offset + EXTRA_INFO_LINE_SPACE * 8) {
+        m->y >= data.objectives_y_offset + EXTRA_INFO_LINE_SPACE * 11) { // 2 lines per rating, 3 for population = 11
         return 0;
     }
     int text_id = 0;
     selected_rating rating = (m->y - data.objectives_y_offset) / (EXTRA_INFO_LINE_SPACE * 2) + 1;
+    rating = rating > SELECTED_RATING_POPULATION ? SELECTED_RATING_POPULATION : rating;
     switch (rating) {
         case SELECTED_RATING_CULTURE:
             if (data.objectives.culture.value <= 90) {
@@ -711,6 +733,10 @@ int sidebar_extra_get_tooltip(tooltip_context *c)
                 text_id = 53;
             }
             break;
+        case SELECTED_RATING_POPULATION:
+            c->text_group = CUSTOM_TRANSLATION;
+            c->precomposed_text = get_population_tooltip();
+            return 1;
         default:
             return 0;
     }

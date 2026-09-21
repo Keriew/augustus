@@ -93,8 +93,8 @@ static void draw_scrollbar(grid_box_type *grid_box)
     scrollbar->has_y_margin = 1;
     scrollbar->dot_padding = legacy ? (grid_box->decorate_scrollbar ? 8 : 0) : 0;
 
-    scrollbar->height = grid_box->height;
-    int scrollable_height_pixels = scrollbar->height;
+    scrollbar->length = grid_box->height;
+    int scrollable_height_pixels = scrollbar->length;
     if (grid_box->draw_inner_panel) {
         scrollable_height_pixels -= BLOCK_SIZE;
     }
