@@ -99,8 +99,10 @@ static void find_files(void)
     }
 
     // Add all assets used in custom messages
-    for (int i = 0; i < custom_messages_count(); i++) {
+    for (int i = 1; i < custom_messages_count(); i++) {
         custom_message_t *message = custom_messages_get(i);
+
+        // linked media
         // storing all files (needed to not crash since allocated)
         char video_name[FILE_NAME_MAX];
         char audio_name[FILE_NAME_MAX];
@@ -118,6 +120,33 @@ static void find_files(void)
         add_file(find_asset(file_remove_path(speech_name), audio_paths));
         add_file(find_asset(file_remove_path(music_name), audio_paths));
         add_file(find_asset(file_remove_path(image_name), image_paths));
+
+        // text images
+        if (!message->display_text) {
+            continue;
+        }
+        const uint8_t *text = message->display_text->text;
+        while (*text) {
+            if (*text++ == '@' && *text++ == 'G' && *text++ == '[') {
+                const char *begin = (const char *) text;
+                const char *end = strchr(begin, ']');
+                if (!end) {
+                    break;
+                }
+                size_t length = end - begin;
+                text += length + 1;
+                char *location = malloc((length + 1) * sizeof(char));
+                if (location) {
+                    snprintf(location, length + 1, "%s", begin);
+                    char *divider = strchr(location, ':');
+                    if (!divider) {
+                        // this means we have the form @G[filename.png]
+                        add_file(find_asset(location, image_paths));
+                    }
+                    free(location);
+                }
+            }
+        }
     }
 }
 
