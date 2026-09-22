@@ -1,6 +1,7 @@
 #include "zlib_helper.h"
 
 #include "core/file.h"
+#include "core/io.h"
 #include "core/log.h"
 #include "miniz/miniz.h"
 
@@ -12,13 +13,17 @@
 #define DIR_IMAGE "image/"
 #define DIR_AUDIO "audio/"
 
-static const char *VIDEO_EXT[] = { "mp4", "mkv", "avi", "mov", "wmv", "flv",
-                                   "webm", "m4v", "mpg", "mpeg", "smk", NULL };
-static const char *IMAGE_EXT[] = { "jpg", "jpeg", "png", "gif", "bmp", "webp",
-                                   "tif", "tiff", "svg", NULL };
-static const char *AUDIO_EXT[] = { "mp3", "wav", "flac", "aac", "ogg", "m4a",
-                                   "wma", "opus", NULL };
+// Fixed overhead miniz/zip format adds per entry, independent of data size
+#define ZIP_LOCAL_HEADER_SIZE   30   // local file header, excludes name/extra
+#define ZIP_CENTRAL_HEADER_SIZE 46   // central directory record, excludes name/extra
+#define ZIP_END_RECORD_SIZE     22   // end of central directory record
 
+static const char *VIDEO_EXT[] = { "webm", "mpg", "mpeg", "smk", NULL };
+static const char *IMAGE_EXT[] = { "png", "bmp", NULL };
+static const char *AUDIO_EXT[] = { "mp3", "wav", NULL };
+
+static const char *incompressible[] = {"webm", "mpg", "mpeg", "smk", "png", "mp3", NULL};
+static const char *compressible[] = {"wav","bmp", "map", "mapx", NULL};
 
 int zlib_helper_decompress(void *input_buffer, const int input_length, void *output_buffer, const int output_buffer_length, int *output_length)
 {
@@ -70,14 +75,6 @@ int zlib_helper_compress(void *input_buffer, const int input_length, void *outpu
     return 1;
 }
 
-static const char *path_basename(const char *path)
-{
-    const char *s1 = strrchr(path, '/');
-    const char *s2 = strrchr(path, '\\');
-    const char *last = (s1 > s2) ? s1 : s2;
-    return last ? last + 1 : path;
-}
-
 static int has_extension(const char *path, const char **list)
 {
     for (int i = 0; list[i]; i++)
@@ -100,7 +97,7 @@ static int add_entry(mz_zip_archive *zip, const char *folder,
                      const char *src_path, mz_uint level)
 {
     char name[FILE_NAME_MAX];
-    int n = snprintf(name, sizeof(name), "%s%s", folder, path_basename(src_path));
+    int n = snprintf(name, sizeof(name), "%s%s", folder, file_remove_path(src_path));
     if (n < 0 || n >= sizeof(name)) {
         log_error("Archive name too long for", src_path, 0);
         return 0;
@@ -150,4 +147,49 @@ fail: // I know gotos aren't very clean but it was the easiest here
     mz_zip_writer_end(&zip);
     remove(zip_path);
     return 0;
+}
+
+/**
+ * Rough compression ratio for a given file, as (output_size / input_size).
+ * Already-compressed formats (video/image/audio/archives) barely shrink,
+ * so they get a ratio near 1.0. Text-like / uncompressed formats compress
+ * much better with deflate, so they get a lower ratio.
+ * These are ballpark figures, not guarantees, actual results vary with content.
+ */
+static double estimated_ratio(const char *path)
+{
+    float ratio = 0.7;
+    if (has_extension(path, incompressible)) {
+        ratio =  1.0;
+    } else if (file_has_extension(path, "wav")) {
+        ratio = 0.9; // while some wavs can be greatly reduced in size (e.g. ones with a lot of empty space) usually reduction is small
+    } else if (has_extension(path, compressible)) {
+        ratio = 0.4;
+    }
+
+    return ratio;
+}
+
+long long estimate_zip_size(char (*files)[FILE_NAME_MAX], size_t count, const char *extra_file)
+{
+    long long total = ZIP_END_RECORD_SIZE;
+
+    for (size_t i = 0; i <= count; i++) {
+        if (i == count && !extra_file) {
+            break; // Ensure extra file can be omitted
+        }
+        const char *file = i == count ? extra_file : files[i];
+
+        const char *folder = folder_for(file);
+        const char *base = file_remove_path(file);
+        size_t name_length = (folder ? strlen(folder) : 0) + strlen(base);
+
+        double ratio = estimated_ratio(file);
+        long long compressed = (long long)((double)io_get_file_size(file, 0) * ratio);
+
+        total += ZIP_LOCAL_HEADER_SIZE + name_length + compressed;
+        total += ZIP_CENTRAL_HEADER_SIZE + name_length;
+    }
+
+    return total;
 }

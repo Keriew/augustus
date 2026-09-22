@@ -13,6 +13,7 @@
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
 #include "scenario/custom_messages.h"
@@ -26,6 +27,7 @@ static struct {
     char (*files)[FILE_NAME_MAX]; // A list of files of length FILE_NAME_MAX
     int file_count;
     int capacity;
+    long long zip_size;
 } data;
 
 const char *image_paths[] = {
@@ -167,18 +169,26 @@ static const char *find_scenario_file(void)
     return filename;
 }
 
-static void init(void)
+static void export_stop(void)
 {
-    find_files();
-    data.exporting = 1;
-    char zip_path[FILE_NAME_MAX];
-    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
-    zip_package_map(zip_path, data.files, data.file_count, find_scenario_file(), MZ_DEFAULT_LEVEL);
     free(data.files);
     data.files = NULL;
     data.file_count = 0;
     data.capacity = 0;
     data.exporting = 0;
+//    data.zip_size = 0;
+}
+
+static void init(void)
+{
+    find_files();
+    const char *scenario_file = find_scenario_file();
+    data.zip_size = estimate_zip_size(data.files, data.file_count, scenario_file);
+    char zip_path[FILE_NAME_MAX];
+    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
+    data.exporting = 1;
+    zip_package_map(zip_path, data.files, data.file_count, scenario_file, MZ_DEFAULT_LEVEL);
+    export_stop();
 }
 
 static void draw_foreground(void)
@@ -188,6 +198,7 @@ static void draw_foreground(void)
     outer_panel_draw(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP, 0, 24, WINDOW_WIDTH * BLOCK_SIZE, FONT_LARGE_BLACK);
+    text_draw_number(data.zip_size, 0, 0, 24, 48, FONT_LARGE_BLACK, COLOR_MASK_NONE);
 
     graphics_reset_dialog();
 }

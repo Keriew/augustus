@@ -26,4 +26,14 @@ int zlib_helper_compress(void *input_buffer, const int input_length, void *outpu
 int zip_package_map(const char *zip_path, char (*files)[FILE_NAME_MAX], int count,
                     const char *map_file, mz_uint level);
 
+/**
+ * Estimates the final zip size in bytes for a list of files plus one
+ * optional extra file. archive_name_extra_len bytes should be the length
+ * of the folder prefix you'll add per file (e.g. strlen("video/")), passed
+ * per category via the folder_for()-style logic if you want it exact;
+ * here we just take the plain file list and reuse folder_for() from the
+ * previous answer to size the name correctly.
+ */
+long long estimate_zip_size(char (*files)[FILE_NAME_MAX], size_t count, const char *extra_file);
+
 #endif // CORE_ZLIB_HELPER_H
