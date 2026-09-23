@@ -28,6 +28,8 @@ static struct {
     int file_count;
     int capacity;
     long long zip_size;
+    const char *scenario_file;
+    int file_idx;
 } data;
 
 const char *image_paths[] = {
@@ -169,6 +171,16 @@ static const char *find_scenario_file(void)
     return filename;
 }
 
+static void export_start(void)
+{
+    data.exporting = 1;
+    data.file_idx = 0;
+    char zip_path[FILE_NAME_MAX];
+    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
+    zip_package_map_start(zip_path);//data.files, data.file_count
+    zip_package_map_add_file(data.scenario_file, MZ_DEFAULT_LEVEL);
+}
+
 static void export_stop(void)
 {
     free(data.files);
@@ -176,18 +188,15 @@ static void export_stop(void)
     data.file_count = 0;
     data.capacity = 0;
     data.exporting = 0;
-//    data.zip_size = 0;
+    data.zip_size = 0;
+    data.file_idx = 0;
 }
 
 static void init(void)
 {
     find_files();
-    const char *scenario_file = find_scenario_file();
-    data.zip_size = estimate_zip_size(data.files, data.file_count, scenario_file);
-    char zip_path[FILE_NAME_MAX];
-    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
-    data.exporting = 1;
-    zip_package_map(zip_path, data.files, data.file_count, scenario_file, MZ_DEFAULT_LEVEL);
+    data.scenario_file = find_scenario_file();
+    data.zip_size = estimate_zip_size(data.files, data.file_count, data.scenario_file);
     export_stop();
 }
 
@@ -198,7 +207,12 @@ static void draw_foreground(void)
     outer_panel_draw(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP, 0, 24, WINDOW_WIDTH * BLOCK_SIZE, FONT_LARGE_BLACK);
-    text_draw_number(data.zip_size, 0, 0, 24, 48, FONT_LARGE_BLACK, COLOR_MASK_NONE);
+    if (data.exporting) {
+        zip_package_map_add_file(data.files[data.file_idx], MZ_DEFAULT_LEVEL);
+        data.file_idx++;
+    } else {
+        text_draw_number(data.zip_size, 0, 0, 24, 48, FONT_LARGE_BLACK, COLOR_MASK_NONE);
+    }
 
     graphics_reset_dialog();
 }
@@ -208,6 +222,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     const mouse *m_dialog = mouse_in_dialog(m);
 
     if (input_go_back_requested(m, h) && !data.exporting) {
+        export_stop();
         window_go_back();
     }
 }

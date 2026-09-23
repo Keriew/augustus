@@ -25,6 +25,11 @@ static const char *AUDIO_EXT[] = { "mp3", "wav", NULL };
 static const char *incompressible[] = {"webm", "mpg", "mpeg", "smk", "png", "mp3", NULL};
 static const char *compressible[] = {"wav","bmp", "map", "mapx", NULL};
 
+static struct {
+    mz_zip_archive map_zip;
+    const char *zip_path;
+} data;
+
 int zlib_helper_decompress(void *input_buffer, const int input_length, void *output_buffer, const int output_buffer_length, int *output_length)
 {
     z_stream strm;
@@ -110,43 +115,47 @@ static int add_entry(mz_zip_archive *zip, const char *folder,
     return 1;
 }
 
-int zip_package_map(const char *zip_path, char (*files)[FILE_NAME_MAX], int count,
-                    const char *map_file, mz_uint level)
+static void packaging_fail(void)
 {
-    mz_zip_archive zip;
-    memset(&zip, 0, sizeof(zip));
+    mz_zip_writer_end(&data.map_zip);
+    remove(data.zip_path);
+}
 
-    if (!mz_zip_writer_init_file(&zip, zip_path, 0)) {
+int zip_package_map_start(const char *zip_path)
+{
+    data.zip_path = zip_path; // this is okay since it's just about having access to the path not to modify it or anything
+    mz_zip_archive *zip = &data.map_zip;
+    memset(zip, 0, sizeof(*zip));
+
+    if (!mz_zip_writer_init_file(zip, zip_path, 0)) {
         log_error("Failed to create", zip_path, 0);
-        log_error("Reason:", mz_zip_get_error_string(mz_zip_get_last_error(&zip)), 0);
+        log_error("Reason:", mz_zip_get_error_string(mz_zip_get_last_error(zip)), 0);
         return 0;
     }
 
-    for (int i = 0; i < count; i++) {
-        const char *folder = folder_for(files[i]);
-        if (!folder) {
-            log_error("Unrecognized file type: Skipping", files[i], 0);
-            continue;
-        }
-        add_entry(&zip, folder, files[i], level);
-    }
-
-    if (map_file && !add_entry(&zip, "", map_file, level))
-        goto fail;
-
-    if (!mz_zip_writer_finalize_archive(&zip)) {
-        log_error("Failed to finalize archive:",
-                mz_zip_get_error_string(mz_zip_get_last_error(&zip)), 0);
-        goto fail;
-    }
-
-    mz_zip_writer_end(&zip);
     return 1;
+}
 
-fail: // I know gotos aren't very clean but it was the easiest here
-    mz_zip_writer_end(&zip);
-    remove(zip_path);
-    return 0;
+void zip_package_map_add_file(const char *file, mz_uint level)
+{
+    const char *folder = folder_for(file);
+    if (!folder) {
+        log_error("Unrecognized file type: Skipping", file, 0);
+        return;
+    }
+    add_entry(&data.map_zip, folder, file, level);
+}
+
+int zip_package_map_finalize(void)
+{
+    if (!mz_zip_writer_finalize_archive(&data.map_zip)) {
+        log_error("Failed to finalize archive:", mz_zip_get_error_string(mz_zip_get_last_error(&data.map_zip)), 0);
+        packaging_fail();
+        return 0;
+    }
+
+    mz_zip_writer_end(&data.map_zip);
+    return 1;
 }
 
 /**
