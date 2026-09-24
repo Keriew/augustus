@@ -218,8 +218,6 @@ static void draw_foreground(void)
         uint8_t size_message[128];
         float magnitude = 1.0;
         char extension[3] = "B";
-
-
         if (data.zip_size > 1073741823) {
             magnitude = 1073741824.0;
             snprintf(extension, 3, "GB");
@@ -232,6 +230,8 @@ static void draw_foreground(void)
         }
         snprintf((char *)size_message, 128, "%s %.2f%s.", translation_for(TR_EDITOR_PACKAGE_MAP_SIZE), data.zip_size / magnitude, extension);
         text_draw(size_message, 24, 64 + height, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP_CONTINUE,
+            24, 80 + height, WINDOW_WIDTH * BLOCK_SIZE - 48, FONT_NORMAL_BLACK);
     }
 
     graphics_reset_dialog();
