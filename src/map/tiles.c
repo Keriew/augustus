@@ -28,7 +28,6 @@
 #include "scenario/map.h"
 
 
-
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 #define FORBIDDEN_TERRAIN_MEADOW (TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP |\
@@ -39,6 +38,8 @@
 
 #define GARDEN_VARIANTS 2
 #define GARDEN_IMAGES_PER_VARIANT 4
+
+#define MAX_OUTSKIRTS_FADE_DISTANCE 6
 
 static int aqueduct_include_construction = 0;
 static int highway_top_tile_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
@@ -760,7 +761,7 @@ int map_tiles_exists_outskirts(int x, int y, int size)
 
 int map_tiles_find_nearest_non_outskirts(int x, int y)
 {
-    for (int radius = 0; radius <= 6; radius++) {
+    for (int radius = 0; radius <= MAX_OUTSKIRTS_FADE_DISTANCE; radius++) {
         int x_min, y_min, x_max, y_max;
         map_grid_get_area(x, y, 1, radius, &x_min, &y_min, &x_max, &y_max);
 
@@ -773,7 +774,7 @@ int map_tiles_find_nearest_non_outskirts(int x, int y)
             }
         }
     }
-    return 6;
+    return MAX_OUTSKIRTS_FADE_DISTANCE;
 }
 
 int map_tiles_highway_get_aqueduct_image(int grid_offset)

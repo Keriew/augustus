@@ -952,7 +952,7 @@ int building_is_military(building_type type)
     return building_is_fort(type) || type == BUILDING_FORT_GROUND ||
         type == BUILDING_BARRACKS || type == BUILDING_MILITARY_ACADEMY || type == BUILDING_MESS_HALL ||
         type == BUILDING_TOWER || type == BUILDING_WATCHTOWER || type == BUILDING_GATEHOUSE ||
-        type == BUILDING_PALISADE_GATE;
+        type == BUILDING_PALISADE_GATE || type == BUILDING_PALISADE || type == BUILDING_WALL;
 }
 
 int building_mothball_toggle(building *b)

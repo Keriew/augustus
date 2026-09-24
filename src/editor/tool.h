@@ -35,9 +35,9 @@ typedef enum {
     TOOL_NATIVE_RUINS = 32,
     TOOL_SELECT_LAND = 33,
     TOOL_SELECT_OFFSET = 34,
-    TOOL_OUTSKIRTS = 35,
-    TOOL_OUTSKIRTS_REMOVE = 36,
-    TOOL_SHALLOW = 37
+    TOOL_SHALLOW = 35,
+    TOOL_OUTSKIRTS = 36,
+    TOOL_OUTSKIRTS_REMOVE = 37
 } tool_type;
 
 tool_type editor_tool_type(void);
