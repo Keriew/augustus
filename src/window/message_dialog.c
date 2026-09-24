@@ -94,8 +94,7 @@ static complex_button complex_button_dispatch_request = {
     .width = 200,
     .height = 28,
     .left_click_handler = button_dispatch_request,
-    .sequence = &seq,
-    .sequence_size = 1,
+    .sequence = {.fragments = &seq, .count = 1 },
     .sequence_position = SEQUENCE_POSITION_CENTER,
 };
 
@@ -289,6 +288,7 @@ static const lang_message *get_custom_or_standard_lang_message(int text_id)
 
 static int setup_request_button(const lang_message *msg)
 {
+    complex_button_init_style(&complex_button_dispatch_request, COMPLEX_BUTTON_STYLE_DEFAULT);
     if (msg->message_type != MESSAGE_TYPE_IMPERIAL) {
         complex_button_dispatch_request.is_hidden = 1;
         return 0;

@@ -1,5 +1,6 @@
 #include "complex_button.h"
 
+#include "core/time.h"
 #include "graphics/button.h"
 #include "graphics/graphics.h"
 #include "graphics/panel.h"
@@ -13,18 +14,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void complex_button_ellipsized(complex_button *button, int was_ellipsized);
-static int debug_shade = 0;
-static int debug_sunken = 0;
-static color_t debug_color_primary = COLOR_FONT_GRAY_50;
-static color_t debug_color_secondary = COLOR_FONT_GRAY_GREEN;
+#define DISABLED_SHADING 3
 
-// Temporary solution, as checkbox and cycling buttons need to be moved to their own files,
-// and i don't want to deal with it all at once 
-static void init_lang_sequence_const(lang_sequence *seq, const lang_fragment *fragments, int count)
-{
-    lang_seq_init(seq, (lang_fragment *) fragments, count);
-}
+static void complex_button_ellipsized(complex_button *button, int was_ellipsized);
+static void draw_button_contents(const complex_button *button, font_t font, color_t font_primary, color_t font_secondary);
+static void end_animation(complex_button_animation *anim);
 
 static const cycling_button_state *cycling_button_get_state(const cycling_button *button)
 {
@@ -64,89 +58,89 @@ font_t complex_button_font_for_style(complex_button_style style)
 {
     switch (style) {
         case COMPLEX_BUTTON_STYLE_DEFAULT:
-        case COMPLEX_BUTTON_STYLE_NO_FILL:
+        case COMPLEX_BUTTON_STYLE_SUNKEN:
             return FONT_NORMAL_BLACK;
-        case COMPLEX_BUTTON_STYLE_DEFAULT_SMALL:
-            return FONT_SMALL_PLAIN;
         case COMPLEX_BUTTON_STYLE_GRAY:
-        case COMPLEX_BUTTON_STYLE_GRAY_NO_FILL:
-        case COMPLEX_BUTTON_STYLE_BROWN:
             return FONT_NORMAL_GREEN;
+        case COMPLEX_BUTTON_STYLE_BROWN:
+            return FONT_NORMAL_BROWN;
         case COMPLEX_BUTTON_STYLE_RAW:
+        case COMPLEX_BUTTON_STYLE_IMAGE:
         case COMPLEX_BUTTON_STYLE_CUSTOM:
         default:
             return FONT_NORMAL_BLACK;
     }
 }
 
-static void font_and_colours(complex_button_style style, int is_disabled, int is_large, font_t *font, color_t *font_primary, color_t *font_secondary)
+static color_t complex_button_bg_primary_for_style(complex_button_style style)
 {
-    int dont_override = 0;
-    if (!is_disabled) {
-        switch (style) {
-            case COMPLEX_BUTTON_STYLE_DEFAULT:
-            case COMPLEX_BUTTON_STYLE_NO_FILL:
-                *font = is_large ? FONT_LARGE_BLACK : FONT_NORMAL_BLACK;
-                break;
-            case COMPLEX_BUTTON_STYLE_DEFAULT_SMALL:
-                *font = FONT_SMALL_PLAIN;
-                break;
-            case COMPLEX_BUTTON_STYLE_GRAY:
-            case COMPLEX_BUTTON_STYLE_GRAY_NO_FILL:
-            case COMPLEX_BUTTON_STYLE_BROWN:
-                *font = FONT_NORMAL_GREEN;
-                if (is_large) {
-                    *font = FONT_LARGE_BROWN;
-                }
-                break;
-            case COMPLEX_BUTTON_STYLE_RAW:
-            case COMPLEX_BUTTON_STYLE_CUSTOM:
-            default:
-                *font = FONT_NORMAL_BLACK;
-                break;
-        }
-        if (!dont_override) {
-            *font_primary = COLOR_MASK_NONE;
-            *font_secondary = COLOR_MASK_NONE;
-        }
-        return;
-    }
-    // if disabled:
     switch (style) {
-        case COMPLEX_BUTTON_STYLE_DEFAULT:
-        case COMPLEX_BUTTON_STYLE_NO_FILL:
-            *font = is_large ? FONT_LARGE_PLAIN : FONT_NORMAL_PLAIN;
-            *font_primary = COLOR_FONT_GRAY;
-            *font_secondary = COLOR_MASK_NONE;
-            break;
-        case COMPLEX_BUTTON_STYLE_DEFAULT_SMALL:
-            *font = FONT_SMALL_PLAIN;
-            *font_primary = COLOR_FONT_GRAY;
-            *font_secondary = COLOR_MASK_NONE;
-            break;
-        case COMPLEX_BUTTON_STYLE_GRAY:
-        case COMPLEX_BUTTON_STYLE_GRAY_NO_FILL:
         case COMPLEX_BUTTON_STYLE_BROWN:
-            *font = FONT_NORMAL_GREEN;
-            if (is_large) {
-                *font = FONT_LARGE_PLAIN;
-            }
-            *font_primary = debug_color_primary; //COLOR_FONT_GRAY_50;
-            *font_secondary = debug_color_secondary; //COLOR_FONT_GRAY_GREEN;
-            break;
+            return COLOR_MASK_PASTEL_BROWN;
+        case COMPLEX_BUTTON_STYLE_DEFAULT:
+        case COMPLEX_BUTTON_STYLE_SUNKEN:
+        case COMPLEX_BUTTON_STYLE_GRAY:
         case COMPLEX_BUTTON_STYLE_RAW:
-            *font = is_large ? FONT_LARGE_PLAIN : FONT_NORMAL_PLAIN;
-            *font_primary = COLOR_FONT_GRAY;
-            *font_secondary = COLOR_MASK_NONE;
-            break;
+        case COMPLEX_BUTTON_STYLE_IMAGE:
         case COMPLEX_BUTTON_STYLE_CUSTOM:
         default:
-            *font = FONT_NORMAL_BLACK;
-            *font_primary = COLOR_MASK_NONE;
-            *font_secondary = COLOR_MASK_NONE;
+            return COLOR_MASK_NONE;
+    }
+}
+
+static color_t complex_button_font_primary_for_style(complex_button_style style)
+{
+    switch (style) {
+        case COMPLEX_BUTTON_STYLE_DEFAULT:
+        case COMPLEX_BUTTON_STYLE_SUNKEN:
+        case COMPLEX_BUTTON_STYLE_GRAY:
+        case COMPLEX_BUTTON_STYLE_BROWN:
+        case COMPLEX_BUTTON_STYLE_RAW:
+        case COMPLEX_BUTTON_STYLE_IMAGE:
+        case COMPLEX_BUTTON_STYLE_CUSTOM:
+        default:
+            return COLOR_MASK_NONE;
+    }
+}
+
+void complex_button_init_style(complex_button *button, complex_button_style style)
+{
+    if (!button) {
+        return;
+    }
+    if (style == COMPLEX_BUTTON_STYLE_CUSTOM) {
+        return; // custom style has no defaults
+    }
+    button->style = style;
+    button->font = complex_button_font_for_style(style);
+    button->font_primary = complex_button_font_primary_for_style(style);
+    button->bg_primary = complex_button_bg_primary_for_style(style);
+    button->draw_hover_state = 1;
+    button->draw_border = 1;
+    button->draw_background = 1;
+    button->border_on_hover = 1;
+
+    switch (style) {
+        case COMPLEX_BUTTON_STYLE_GRAY:
+            button->border_on_hover = 0;
+            button->shade_on_hover = 1;
+            break;
+        case COMPLEX_BUTTON_STYLE_SUNKEN:
+            button->border_on_hover = 0;
+            button->shade_on_hover = 2;
+            break;
+        case COMPLEX_BUTTON_STYLE_IMAGE:
+        case COMPLEX_BUTTON_STYLE_RAW:
+            button->draw_border = 0;
+            button->draw_background = 0;
+            button->border_on_hover = 0;
+            break;
+        case COMPLEX_BUTTON_STYLE_CUSTOM:
+        case COMPLEX_BUTTON_STYLE_DEFAULT:
+        case COMPLEX_BUTTON_STYLE_BROWN:
+        default:
             break;
     }
-
 }
 
 static int sequence_position_is_centered(sequence_positioning position)
@@ -185,6 +179,310 @@ static int sequence_y_offset(const complex_button *button, sequence_positioning 
     }
 }
 
+int complex_button_animation_init(complex_button *button, const btn_img *frames, unsigned short frame_count,
+    animation_trigger trigger, animation_mode mode)
+{
+    if (!button || !frames || frame_count == 0) {
+        return 0;
+    }
+
+    btn_img *new_frames = malloc(sizeof(btn_img) * frame_count);
+    if (!new_frames) {
+        return 0;
+    }
+
+    memcpy(new_frames, frames, sizeof(btn_img) * frame_count);
+
+    if (button->has_animation) {
+        free(button->animation.frames);
+    }
+
+    button->animation = (complex_button_animation) {
+        .frames = new_frames,
+        .frame_count = frame_count,
+        .frame_duration = DEFAULT_ANIMATION_FRAME_DURATION,
+        .trigger = trigger,
+        .loop_mode = mode,
+        .skip_zero_frame = trigger == BUTTON_ANIMATION_TRIGGER_CLICK
+    };
+
+    button->has_animation = 1;
+    return 1;
+}
+
+void complex_button_animation_destroy(complex_button *button)
+{
+    if (!button || !button->has_animation) {
+        return;
+    }
+
+    free(button->animation.frames);
+    button->animation = (complex_button_animation) { 0 };
+    button->has_animation = 0;
+}
+
+void complex_button_animation_start(complex_button *button)
+{
+    if (!button || !button->has_animation || button->animation.trigger != BUTTON_ANIMATION_TRIGGER_CUSTOM) {
+        return;
+    }
+
+    complex_button_animation *anim = &button->animation;
+
+    anim->is_active = 1;
+    anim->is_looping = anim->loop_mode != BUTTON_ANIMATION_ONCE;
+    anim->loops_left = anim->max_loop_count;
+    anim->is_reversed = 0;
+    anim->current_frame = 0;
+    anim->last_change = 0;
+}
+
+void complex_button_animation_stop(complex_button *button)
+{
+    if (!button || !button->has_animation || button->animation.trigger != BUTTON_ANIMATION_TRIGGER_CUSTOM) {
+        return;
+    }
+    end_animation(&button->animation);
+}
+
+static void end_animation(complex_button_animation *anim)
+{
+    anim->is_active = 0;
+    anim->is_looping = 0;
+    anim->loops_left = 0;
+    anim->is_reversed = 0;
+    anim->is_holding = 0;
+    anim->current_frame = 0;
+    anim->last_change = 0;
+}
+
+static void handle_animation(complex_button *button)
+{
+    complex_button_animation *anim = &button->animation;
+    int started_animation = 0;
+    int should_advance = 0;
+    int has_finished = 0;
+    int trigger_active = 1;
+
+    if (anim->frame_count <= 0) {
+        return;
+    }
+
+    // frame 1 is the lower boundary when frame 0 is excluded from repeating cycles
+    unsigned short first_loop_frame = anim->skip_zero_frame ? 1 : 0;
+    unsigned short last_frame = anim->frame_count;
+
+    if (!anim->is_active) {
+        switch (anim->trigger) {
+            case BUTTON_ANIMATION_TRIGGER_CLICK:
+                started_animation = button->is_clicked;
+                break;
+
+            case BUTTON_ANIMATION_TRIGGER_HOVER:
+                started_animation = button->is_hovered;
+                break;
+
+            case BUTTON_ANIMATION_TRIGGER_NONE:
+                started_animation = 1;
+                break;
+
+            case BUTTON_ANIMATION_TRIGGER_CUSTOM:
+            default:
+                break;
+        }
+
+        if (!started_animation) {
+            return;
+        }
+        anim->is_active = 1;
+        anim->loops_left = anim->max_loop_count;
+        // establish whether this animation can repeat after its first run
+
+        anim->is_looping = anim->loop_mode != BUTTON_ANIMATION_ONCE && (!anim->max_loop_count || anim->loops_left > 0);
+    } else {
+        if (anim->trigger == BUTTON_ANIMATION_TRIGGER_CLICK && !button->is_clicked) {
+            trigger_active = 0;
+        } else if (anim->trigger == BUTTON_ANIMATION_TRIGGER_HOVER && !button->is_hovered) {
+            trigger_active = 0;
+        }
+
+        if (!trigger_active) {
+            if (anim->allow_immediate_stop) {
+                end_animation(anim);
+                return;
+            }
+
+            // trigger disappeared; finish the current run but do not begin another
+            anim->loops_left = 0;
+            anim->is_looping = 0;
+            if (anim->skip_zero_frame) {
+                if (anim->loop_mode == BUTTON_ANIMATION_PINGPONG) {
+                    if (!anim->is_reversed && anim->current_frame == first_loop_frame) {
+                        end_animation(anim);
+                        return;
+                    }
+                } else if (anim->current_frame == last_frame) {
+                    end_animation(anim);
+                    return;
+                }
+            }
+        }
+    }
+
+    if (anim->skip_zero_frame && trigger_active && !anim->is_looping) {
+        if (anim->loop_mode == BUTTON_ANIMATION_PINGPONG) {
+            if (!anim->is_reversed && anim->current_frame == first_loop_frame && anim->last_change) {
+                return;
+            }
+        } else if (anim->current_frame == last_frame && anim->last_change) {
+            return;
+        }
+    }
+
+    if (anim->last_change) {
+        time_millis now = time_get_millis();
+
+        if (now - anim->last_change >= anim->frame_duration) {
+            should_advance = 1;
+        } else {
+            return;
+        }
+    } else {
+        should_advance = 1;
+    }
+
+    if (should_advance) {
+        anim->last_change = time_get_millis();
+
+        if (anim->is_reversed) {
+            if (anim->current_frame > first_loop_frame) {
+                anim->current_frame--;
+            } else {
+                has_finished = 1;
+                anim->is_reversed = 0;
+            }
+        } else {
+            if (anim->current_frame < last_frame) {
+                anim->current_frame++;
+            } else {
+                if (anim->loop_mode == BUTTON_ANIMATION_PINGPONG) {
+                    anim->is_reversed = 1;
+                } else {
+                    has_finished = 1;
+                }
+            }
+        }
+    }
+
+    if (!has_finished) {
+        return;
+    }
+
+    if (anim->max_loop_count && anim->loops_left > 0) { // decrement finite loop count 
+        anim->loops_left--;
+    }
+
+    // decide whether another complete cycle should begin
+    if (!anim->loop_mode) {
+        anim->is_looping = 0;
+    } else if (!trigger_active) {
+        anim->is_looping = 0;
+    } else if (!anim->max_loop_count) {
+        anim->is_looping = 1;
+    } else {
+        anim->is_looping = anim->loops_left > 0;
+    }
+
+    if (anim->is_looping) {
+        if (anim->loop_mode == BUTTON_ANIMATION_PINGPONG) {
+            if (first_loop_frame < last_frame) {
+                anim->current_frame = first_loop_frame + 1;
+            }
+        } else {
+            // normal loops restart from 0 or 1 depending on skip_zero_frame
+            anim->current_frame = first_loop_frame;
+        }
+        return;
+    }
+
+    if (anim->skip_zero_frame && trigger_active) {
+        anim->is_looping = 0;
+        return;
+    }
+    end_animation(anim);
+}
+
+static const btn_img *get_current_animation_frame_info(const complex_button *button)
+{
+    if (!button) {
+        return NULL;
+    }
+
+    if (!button->has_animation || button->animation.frame_count <= 0) {
+        return &button->image;
+    }
+
+    const complex_button_animation *anim = &button->animation;
+    const btn_img *frame_img = &button->image;
+    if (anim->current_frame > 0) {
+        unsigned short frame_index = anim->current_frame - 1;
+        if (!anim->frames || frame_index >= anim->frame_count) {
+            return NULL;
+        }
+        frame_img = &anim->frames[frame_index];
+    }
+
+    return frame_img;
+}
+
+const static image *get_current_animation_frame(const complex_button *button)
+{
+    const btn_img *frame_img = get_current_animation_frame_info(button);
+    if (!frame_img || frame_img->id <= 0) {
+        return NULL;
+    }
+    return image_get(frame_img->id);
+}
+
+static void draw_button_style_image(const complex_button *button)
+{
+
+    if (button->has_animation) {
+        // de-const cast to allow animation handling
+        complex_button *mutable_button = (complex_button *) button;
+        handle_animation(mutable_button);
+    }
+
+    const btn_img *frame_img = get_current_animation_frame_info(button);
+    const image *image_main = get_current_animation_frame(button);
+    const color_t image_mask = button->is_disabled ? COLOR_MASK_GRAY : COLOR_MASK_NONE;
+    graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
+
+    if (image_main && frame_img) {
+        int x, y;
+        if (frame_img->auto_center) {
+            int image_width = image_main->width;
+            int image_height = image_main->height;
+            x = button->x + (button->width - image_width) / 2 + frame_img->image_x_offset;
+            y = button->y + (button->height - image_height) / 2 + frame_img->image_y_offset;
+        } else {
+            x = button->x + frame_img->image_x_offset;
+            y = button->y + frame_img->image_y_offset;
+        }
+        image_draw(frame_img->id, x, y, image_mask, SCALE_NONE);
+        graphics_reset_clip_rectangle();
+    }
+
+
+    if (button->draw_hover_state && button->shade_on_hover && button->is_hovered && !button->is_disabled) {
+        graphics_shade_rect(button->x, button->y, button->width, button->height, button->shade_on_hover);
+    }
+    if (button->draw_hover_state && button->light_on_hover && button->is_hovered && !button->is_disabled) {
+        graphics_light_up_rect(button->x, button->y, button->width, button->height, button->light_on_hover);
+    }
+    return;
+}
+
 static void draw_button_contents(const complex_button *button, font_t font, color_t font_primary, color_t font_secondary)
 {
     const int inner_margin = 2;
@@ -194,9 +492,8 @@ static void draw_button_contents(const complex_button *button, font_t font, colo
         button->sequence_position : SEQUENCE_POSITION_CENTER;
 
     int text_y = sequence_y_offset(button, position, font);
-    lang_sequence sequence;
-    init_lang_sequence_const(&sequence, button->sequence, button->sequence_size);
-    int sequence_width = lang_seq_get_width(&sequence, font);
+    const lang_sequence *sequence = &button->sequence;
+    int sequence_width = (sequence->fragments && sequence->count > 0) ? lang_seq_get_width(sequence, font) : 0;
     sequence_width -= sequence_width % 2;
 
     const image *image_before = NULL;
@@ -268,16 +565,16 @@ static void draw_button_contents(const complex_button *button, font_t font, colo
     }
 
     int was_ellipsized = 0;
-    if (button->sequence && button->sequence_size > 0) {
+    if (sequence->fragments && sequence->count > 0) {
         if (font == FONT_NORMAL_PLAIN || font == FONT_LARGE_PLAIN || font == FONT_SMALL_PLAIN) {
-            lang_seq_draw_with_shadow(&sequence, button->x, text_y, button->width, font, font_primary, font_secondary,
-                sequence_position_is_centered(position), debug_sunken);
+            lang_seq_draw_with_shadow(sequence, button->x, text_y, button->width, font, font_primary, font_secondary,
+                sequence_position_is_centered(position), 1);
         } else {
             if (sequence_position_is_centered(position)) {
-                lang_seq_draw_centered_ellipsized(&sequence, button->x, text_y, button->width, font, font_primary,
+                lang_seq_draw_centered_ellipsized(sequence, button->x, text_y, button->width, font, font_primary,
                     &was_ellipsized);
             } else {
-                cursor_x += lang_seq_draw_ellipsized(&sequence, cursor_x, text_y, button->width, font, font_primary,
+                cursor_x += lang_seq_draw_ellipsized(sequence, cursor_x, text_y, button->width, font, font_primary,
                     &was_ellipsized);
             }
         }
@@ -292,40 +589,52 @@ static void draw_button_contents(const complex_button *button, font_t font, colo
 }
 
 static void draw_default_style(const complex_button *button, font_t base_font,
-    color_t font_primary, color_t font_secondary, color_t color_mask)
+    color_t font_primary, color_t font_secondary)
 {
     graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
 
     int height_blocks = button->height / BLOCK_SIZE;
-    switch (button->style) {
-        case COMPLEX_BUTTON_STYLE_CUSTOM:
-            unbordered_panel_draw_colored(button->x, button->y, button->width / BLOCK_SIZE + 1,
-                height_blocks + 1, color_mask);
-            break;
-        case COMPLEX_BUTTON_STYLE_NO_FILL:
-        case COMPLEX_BUTTON_STYLE_RAW:
-            break; // no bg fill
-        case COMPLEX_BUTTON_STYLE_BROWN:
-            inner_panel_draw_colored(button->x, button->y, button->width, button->height, COLOR_MASK_PASTEL_BROWN);
-            break;
-        default:
-            unbordered_panel_draw_colored(button->x, button->y, button->width / BLOCK_SIZE + 1,
-                height_blocks + 1, COLOR_MASK_NONE);
-            break;
+    if (button->draw_background) {
+        switch (button->style) {
+            case COMPLEX_BUTTON_STYLE_CUSTOM:
+                unbordered_panel_draw_colored(button->x, button->y, button->width / BLOCK_SIZE + 1,
+                    height_blocks + 1, button->bg_primary);
+                break;
+            case COMPLEX_BUTTON_STYLE_RAW:
+            case COMPLEX_BUTTON_STYLE_IMAGE:
+                break; // no bg fill
+            case COMPLEX_BUTTON_STYLE_SUNKEN:
+            case COMPLEX_BUTTON_STYLE_BROWN:
+                inner_panel_draw_colored(button->x, button->y, button->width, button->height, button->bg_primary);
+                break;
+            case COMPLEX_BUTTON_STYLE_DEFAULT:
+            case COMPLEX_BUTTON_STYLE_GRAY:
+            default:
+                unbordered_panel_draw_colored(button->x, button->y, button->width / BLOCK_SIZE + 1,
+                    height_blocks + 1, button->bg_primary);
+                break;
+        }
     }
 
-    int draw_red_border = !button->is_disabled && button->is_focused;
-    if (button->flush_with_background) {
-        button_border_draw_colored_flush(button->x, button->y, button->width, button->height,
-            draw_red_border, COLOR_MASK_NONE);
-    } else {
-        if (button->style != COMPLEX_BUTTON_STYLE_RAW) {
-            button_border_draw_colored(button->x, button->y, button->width, button->height,
-                draw_red_border, COLOR_MASK_NONE);
+    int draw_red_border = button->draw_hover_state && button->border_on_hover &&
+        !button->is_disabled && button->is_hovered;
+    if (button->draw_border) {
+        if (button->style == COMPLEX_BUTTON_STYLE_SUNKEN) {
+            if (button->draw_hover_state) {
+                graphics_shade_rect(button->x, button->y, button->width, button->height, 2 * button->is_hovered);
+            }
+        } else {
+            if (button->flush_with_background) {
+                button_border_draw_colored_flush(button->x, button->y, button->width, button->height,
+                    draw_red_border, COLOR_MASK_NONE);
+            } else {
+                button_border_draw_colored(button->x, button->y, button->width, button->height,
+                    draw_red_border, COLOR_MASK_NONE);
+            }
         }
     }
     draw_button_contents(button, base_font, font_primary, font_secondary);
-    if (button->shade_on_hover && button->is_focused) {
+    if (button->draw_hover_state && button->shade_on_hover && button->is_hovered && !button->is_disabled) {
         graphics_shade_rect(button->x, button->y, button->width, button->height, button->shade_on_hover);
     }
     graphics_reset_clip_rectangle();
@@ -334,28 +643,25 @@ static void draw_default_style(const complex_button *button, font_t base_font,
 static void draw_main_menu_style(const complex_button *button, font_t base_font, color_t font_primary, color_t font_secondary)
 {
     graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
-    switch (button->style) {
-        case COMPLEX_BUTTON_STYLE_GRAY_NO_FILL:
-        case COMPLEX_BUTTON_STYLE_RAW:
-            break; // no bg fill
-        default:
-        case COMPLEX_BUTTON_STYLE_GRAY:
-            large_label_draw_bg(button->x, button->y, button->width, button->height);
-            break;
+    if (button->draw_background) {
+        large_label_draw_bg_colored(button->x, button->y, button->width, button->height, button->bg_primary);
     }
 
-    if (!button->is_disabled && button->is_focused) {
-        graphics_shade_rect(button->x, button->y, button->width, button->height, 2);
+    if (button->draw_hover_state && !button->is_disabled && button->is_hovered) {
+        graphics_shade_rect(button->x, button->y, button->width, button->height, button->shade_on_hover);
     }
     if (button->is_disabled) {
-        graphics_shade_rect(button->x, button->y, button->width, button->height, debug_shade);
+        graphics_shade_rect(button->x, button->y, button->width, button->height, DISABLED_SHADING);
     }
     draw_button_contents(button, base_font, font_primary, font_secondary);
-    if (button->style != COMPLEX_BUTTON_STYLE_RAW) {
+    if (button->draw_border) {
         large_label_draw_border(button->x, button->y, button->width, button->height);
     }
-    if (button->shade_on_hover && button->is_focused) {
+    if (button->draw_hover_state && button->shade_on_hover && button->is_hovered && !button->is_disabled) {
         graphics_shade_rect(button->x, button->y, button->width, button->height, button->shade_on_hover);
+    }
+    if (button->draw_hover_state && button->light_on_hover && button->is_hovered && !button->is_disabled) {
+        graphics_light_up_rect(button->x, button->y, button->width, button->height, button->light_on_hover);
     }
     graphics_reset_clip_rectangle();
 }
@@ -368,27 +674,27 @@ static void complex_button_ellipsized(complex_button *button, int was_ellipsized
 // === Draw a single button ===
 void complex_button_draw(const complex_button *button)
 {
-    if (button->is_hidden) {
-        return;
-    }
-    if (button->font || button->color_mask || button->style == COMPLEX_BUTTON_STYLE_CUSTOM) {
-        // bypasses the default selection of colors/fonts
-        draw_default_style(button, button->font, button->font_color, COLOR_MASK_NONE, button->color_mask);
+    if (!button || button->is_hidden) {
         return;
     }
     int is_large = button->height > 32 && !button->dont_enlarge_font;
-    color_t font_primary;
-    color_t font_secondary;
-    font_t base_font;
-    font_and_colours(button->style, button->is_disabled, is_large, &base_font, &font_primary, &font_secondary);
+    font_t base_font = button->font ? button->font : (is_large ? FONT_LARGE_BLACK : FONT_NORMAL_BLACK);
+    color_t font_primary = button->font_primary;
+    color_t font_secondary = COLOR_MASK_NONE;
+    if (button->is_disabled) {
+        base_font = is_large ? FONT_LARGE_PLAIN : FONT_NORMAL_PLAIN;
+        font_primary = COLOR_FONT_GRAY;
+    }
 
     switch (button->style) {
+        case COMPLEX_BUTTON_STYLE_IMAGE:
+            draw_button_style_image(button);
+            break;
         case COMPLEX_BUTTON_STYLE_GRAY:
-        case COMPLEX_BUTTON_STYLE_GRAY_NO_FILL:
             draw_main_menu_style(button, base_font, font_primary, font_secondary);
             break;
-        default: // all other variants housed in the default style draw function
-            draw_default_style(button, base_font, font_primary, font_secondary, button->color_mask);
+        default:
+            draw_default_style(button, base_font, font_primary, font_secondary);
     }
 }
 
@@ -408,7 +714,7 @@ int complex_button_handle_mouse(complex_button *btn, const mouse *m)
         }
     }
     int handled = 0;
-
+    int was_clicked = btn->is_clicked;
     // Expanded hitbox
     int left = btn->x - btn->expanded_hitbox_radius;
     int right = btn->x + btn->width + btn->expanded_hitbox_radius;
@@ -416,52 +722,69 @@ int complex_button_handle_mouse(complex_button *btn, const mouse *m)
     int bottom = btn->y + btn->height + btn->expanded_hitbox_radius;
 
     int inside = (m->x >= left && m->x < right && m->y >= top && m->y < bottom);
-    if (btn->is_focused != inside) {
-        btn->is_focused = inside;
+    if (btn->is_hovered != inside) {
+        btn->is_hovered = inside;
 
         if (btn->hover_handler && !btn->is_disabled) {
             btn->hover_handler(btn); // run the hover handler on hover state change
         }
         window_request_refresh(); // redraw to show focus change
     } else {
-        btn->is_focused = inside;
+        btn->is_hovered = inside;
     }
     if (btn->is_disabled) {
         return 0; // disabled buttons do not handle mouse past establishing focus state for tooltip
     }
-    if (btn->is_ellipsized && btn->is_focused) { //if the button is ellipsized, show tooltip
+    if (btn->is_ellipsized && btn->is_hovered) { //if the button is ellipsized, show tooltip
         static uint8_t tooltip_text[512];
-        lang_sequence sequence;
-        init_lang_sequence_const(&sequence, btn->sequence, btn->sequence_size);
-        lang_seq_concatenate(&sequence, tooltip_text, 512);
+        lang_seq_concatenate(&btn->sequence, tooltip_text, 512);
         btn->tooltip_c.type = TOOLTIP_BUTTON;
         btn->tooltip_c.precomposed_text = tooltip_text; // reset precomposed text to force re-generation
     }
 
     if (inside) {
 
-        // --- Left click ---
-
-        if (m->left.went_up) {
+        // on mouse down, set clicked to true to activate animations,
+        // but don't trigger callback or sound until button goes up
+        if (m->left.went_down) {
             btn->is_clicked = 1;
+            handled = 1;
+        } else if (m->right.went_down) {
+            btn->is_clicked = 1;
+            handled = 1;
+        };
+
+        // --- Left click ---
+        if (m->left.went_up) {
+            btn->is_clicked = 0;
+
             sound_effect_play(SOUND_EFFECT_ICON);
             btn->is_active = !btn->is_active; // persistent toggle
             handled = 1;
+
             if (btn->left_click_handler) {
                 btn->left_click_handler(btn);
             }
 
-        }
-        // --- Right click ---
-        if (m->right.went_up) {
-            btn->is_clicked = 1;
+            // --- Right click ---
+        } else if (m->right.went_up) {
             handled = 1;
+
             if (btn->right_click_handler) {
                 btn->right_click_handler(btn);
             }
         }
+
+        if (was_clicked && !btn->is_clicked && btn->unclick_handler) {
+            btn->unclick_handler(btn);
+        }
+
     } else {
         btn->is_clicked = 0;
+
+        if (was_clicked && btn->unclick_handler) {
+            btn->unclick_handler(btn);
+        }
     }
 
     return handled;
@@ -483,7 +806,7 @@ int complex_button_handle_mouse_array(complex_button *buttons, const mouse *m, u
 //TO SOLVE: manually set tooltips will be overwritten if the button is ellipsized.
 int complex_button_handle_tooltip(const complex_button *button, tooltip_context *c)
 {
-    if (button->is_focused) {
+    if (button->is_hovered) {
         if (!tooltip_context_is_empty(&button->tooltip_c)) {
             tooltip_copy_context(c, &button->tooltip_c);
             c->type = TOOLTIP_BUTTON; // constant - for all buttons.
@@ -608,10 +931,8 @@ void checkbox_button_draw(const checkbox_button *button)
         max_text_width = 0;
     }
     int was_ellipsized = 0;
-    if (button->sequence && button->sequence_size > 0) {
-        lang_sequence sequence;
-        init_lang_sequence_const(&sequence, button->sequence, button->sequence_size);
-        cursor_x += lang_seq_draw_ellipsized(&sequence, cursor_x, text_y, max_text_width, font, text_color,
+    if (button->sequence.fragments && button->sequence.count > 0) {
+        cursor_x += lang_seq_draw_ellipsized(&button->sequence, cursor_x, text_y, max_text_width, font, text_color,
             &was_ellipsized);
     }
     ((checkbox_button *) button)->is_ellipsized = was_ellipsized;
@@ -682,10 +1003,8 @@ static void draw_cycling_button_contents(const cycling_button *button, const cyc
     }
 
     int seq_width = 0;
-    if (state->sequence && state->sequence_size > 0) {
-        lang_sequence sequence;
-        init_lang_sequence_const(&sequence, state->sequence, state->sequence_size);
-        seq_width = lang_seq_get_width(&sequence, font);
+    if (state->sequence.fragments && state->sequence.count > 0) {
+        seq_width = lang_seq_get_width(&state->sequence, font);
     }
     int visible_seq_width = seq_width < text_max_width ? seq_width : text_max_width;
 
@@ -705,10 +1024,8 @@ static void draw_cycling_button_contents(const cycling_button *button, const cyc
         cursor_x += img_before_w;
     }
 
-    if (state->sequence && state->sequence_size > 0) {
-        lang_sequence sequence;
-        init_lang_sequence_const(&sequence, state->sequence, state->sequence_size);
-        cursor_x += lang_seq_draw_ellipsized(&sequence, cursor_x, text_y, text_max_width, font, text_color, 0);
+    if (state->sequence.fragments && state->sequence.count > 0) {
+        cursor_x += lang_seq_draw_ellipsized(&state->sequence, cursor_x, text_y, text_max_width, font, text_color, 0);
     }
 
     if (img_after) {
@@ -757,11 +1074,7 @@ void cycling_button_draw_gray_style(const cycling_button *button)
 
     font_t font = state->font ? state->font : cycling_button_font_for_style(button->style);
     if (button->style != CYCLING_BUTTON_STYLE_RAW) {
-        if (button->style == CYCLING_BUTTON_STYLE_GRAY_NO_FILL) {
-            large_label_draw_border(button->x, button->y, button->width, button->height);
-        } else {
-            large_label_draw_bg(button->x, button->y, button->width, button->height);
-        }
+        large_label_draw_bg(button->x, button->y, button->width, button->height);
     }
     if (button->is_hovered) {
         graphics_shade_rect(button->x, button->y, button->width, button->height, 2);
@@ -776,7 +1089,6 @@ void cycling_button_draw(const cycling_button *button)
 {
     switch (button->style) {
         case CYCLING_BUTTON_STYLE_GRAY:
-        case CYCLING_BUTTON_STYLE_GRAY_NO_FILL:
             cycling_button_draw_gray_style(button);
             break;
         default:
@@ -806,9 +1118,7 @@ int checkbox_button_handle_mouse(checkbox_button *btn, const mouse *m)
 
     if (btn->is_ellipsized && btn->is_hovered) {
         static uint8_t tooltip_text[512];
-        lang_sequence sequence;
-        init_lang_sequence_const(&sequence, btn->sequence, btn->sequence_size);
-        lang_seq_concatenate(&sequence, tooltip_text, 512);
+        lang_seq_concatenate(&btn->sequence, tooltip_text, 512);
         btn->tooltip_c.type = TOOLTIP_BUTTON;
         btn->tooltip_c.precomposed_text = tooltip_text;
     }

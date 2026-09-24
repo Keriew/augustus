@@ -2293,6 +2293,13 @@ static translation_string all_strings[] = {
     {TR_EDITOR_SELECT_LAND, "Select land"},
     {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds"},
     {TR_UI_LEDGER_ONLY_CURRENT_YEAR, "You only started your governorship this year!"},
+    {TR_UI_TRADE_YEAR_PREVIOUS, "Previous year"},
+    {TR_UI_TRADE_YEAR_NEXT, "Next year"},
+    {TR_UI_TRADE_YEAR_NO_EARLIER, "Can't go further back"},
+    {TR_UI_TRADE_YEAR_CURRENT_LIMIT, "Current year!"},
+    {TR_UI_TRADE_YEAR_CURRENT, "Current year"},
+    {TR_UI_TRADE_YEAR_LAST, "Last year"},
+    {TR_UI_TRADE_YEAR_YEARS_AGO, " years ago"},
     {TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP, "Right Click: Advanced cost options"},
     {TR_EMPIRE_ROUTE_COST, "Route Cost:"},
     {TR_EMPIRE_RESOURCE_COST, "Resources needed to open"},
@@ -2346,6 +2353,8 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Population goal not met"},
     {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Room for all needed employees"},
     {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Not enough room for needed employees"},
+    {TR_WIDGET_DN, "Dn"},
+    {TR_SIDEBAR_DATE_JUMP_TO_CURRENT, "Click to skip to current year"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

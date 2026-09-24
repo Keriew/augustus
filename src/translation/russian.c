@@ -2288,6 +2288,13 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_DISABLED_2, "Ваши писцы усердно трудятся над этой функцией, но им нужно еще немного времени."},
     {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Расширить границы прокрутки камеры"},
     {TR_UI_LEDGER_ONLY_CURRENT_YEAR, "Это ваш первый год на посту губернатора!"},
+    {TR_UI_TRADE_YEAR_PREVIOUS, "Предыдущий год"},
+    {TR_UI_TRADE_YEAR_NEXT, "Следующий год"},
+    {TR_UI_TRADE_YEAR_NO_EARLIER, "Более ранние записи не сохранились"},
+    {TR_UI_TRADE_YEAR_CURRENT_LIMIT, "Текущий год!"},
+    {TR_UI_TRADE_YEAR_CURRENT, "Текущий год"},
+    {TR_UI_TRADE_YEAR_LAST, "Прошлый год"},
+    {TR_UI_TRADE_YEAR_YEARS_AGO, " лет назад"},
     {TR_EMPIRE_TOOLTIP_ROUTE_COST_HELP, "Щелчок правой: Дополнительные параметры стоимости"},
     {TR_EMPIRE_ROUTE_COST, "Стоимость торгового пути:"},
     {TR_EMPIRE_RESOURCE_COST, "Требуемые ресурсы для открытия"},
@@ -2333,11 +2340,13 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_PLAY_FANFARE, "Проиграть фанфары"},
     {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Классическая полоса прокрутки"},
     {TR_BUILDING_WILLOW_TREE, "Ива"},
-    {TR_SIDEBAR_EXTRA_HOUSING_AVAILABLE, "Мест для: "},
+    {TR_SIDEBAR_EXTRA_HOUSING_AVAILABLE, "Мест для "},
     {TR_SIDEBAR_EXTRA_POPULATION_GOAL_MET, "Цель по населению выполнена"},
     {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Цель по населению не выполнена"},
     {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Мест достаточно для всех необходимых работников"},
     {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Недостаточно мест для необходимых работников"},
+    {TR_WIDGET_DN, "Ден"},
+    {TR_SIDEBAR_DATE_JUMP_TO_CURRENT, "Щелкните, чтобы вернуться к текущему году"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

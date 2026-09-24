@@ -10,12 +10,32 @@
 
 static int calculate_text_width(const complex_button *btn, font_t font)
 {
-    if (!btn->sequence || btn->sequence_size == 0) {
+    if (!btn->sequence.fragments || btn->sequence.count == 0) {
         return 0;
     }
-    lang_sequence sequence;
-    lang_seq_init(&sequence, (lang_fragment *) btn->sequence, btn->sequence_size);
-    return lang_seq_get_width(&sequence, font);
+    return lang_seq_get_width(&btn->sequence, font);
+}
+
+static void copy_button_animation(complex_button *dst, const complex_button *src)
+{
+    unsigned char has_animation = src->has_animation;
+    complex_button_animation src_animation = { 0 };
+    if (has_animation) {
+        src_animation = src->animation;
+    }
+
+    dst->has_animation = 0;
+    dst->animation = (complex_button_animation) { 0 };
+    if (!has_animation) {
+        return;
+    }
+
+    if (complex_button_animation_init(dst, src_animation.frames, src_animation.frame_count,
+        src_animation.trigger, src_animation.loop_mode)) {
+        btn_img *copied_frames = dst->animation.frames;
+        dst->animation = src_animation;
+        dst->animation.frames = copied_frames;
+    }
 }
 
 static complex_button_style dropdown_button_style_to_complex_style(dropdown_button_style style)
@@ -26,7 +46,7 @@ static complex_button_style dropdown_button_style_to_complex_style(dropdown_butt
         case DD_BUTTON_STYLE_DEFAULT:
             return COMPLEX_BUTTON_STYLE_DEFAULT;
         case DD_BUTTON_STYLE_DEFAULT_SMALL:
-            return COMPLEX_BUTTON_STYLE_DEFAULT_SMALL;
+            return COMPLEX_BUTTON_STYLE_DEFAULT;
         case DD_BUTTON_STYLE_GRAY:
             return COMPLEX_BUTTON_STYLE_GRAY;
         default:
@@ -70,13 +90,17 @@ static void update_anchor(dropdown_button *dd)
 
     // Copy visual parameters from selected option to anchor
     anchor->sequence = selected->sequence;
-    anchor->sequence_size = selected->sequence_size;
     anchor->sequence_position = selected->sequence_position;
     anchor->image_before = selected->image_before;
     anchor->image_after = selected->image_after;
-    anchor->color_mask = selected->color_mask;
+    anchor->font_primary = selected->font_primary;
+    anchor->bg_primary = selected->bg_primary;
     anchor->font = selected->font;
     anchor->style = selected->style;
+    anchor->draw_border = selected->draw_border;
+    anchor->draw_hover_state = selected->draw_hover_state;
+    anchor->draw_background = selected->draw_background;
+    anchor->border_on_hover = selected->border_on_hover;
     if (selected->tooltip_c.type) { // only copy tooltip to anchor if the selected option has a valid tooltip
         tooltip_copy_context(&anchor->tooltip_c, &selected->tooltip_c);
     }
@@ -90,7 +114,9 @@ static void save_anchor(dropdown_button *dd)
     }
     complex_button *anchor_og = &dd->anchor_backup;
     complex_button *anchor = &dd->buttons[0];
+    complex_button_animation_destroy(anchor_og);
     memcpy(anchor_og, anchor, sizeof(complex_button));
+    copy_button_animation(anchor_og, anchor);
     // might have to do the assignment 1 by 1 
 }
 
@@ -104,13 +130,17 @@ static void restore_anchor(dropdown_button *dd)
     complex_button *anchor_og = &dd->anchor_backup;
     complex_button *anchor = &dd->buttons[0];
     anchor->sequence = anchor_og->sequence;
-    anchor->sequence_size = anchor_og->sequence_size;
     anchor->sequence_position = anchor_og->sequence_position;
     anchor->image_before = anchor_og->image_before;
     anchor->image_after = anchor_og->image_after;
-    anchor->color_mask = anchor_og->color_mask;
+    anchor->font_primary = anchor_og->font_primary;
+    anchor->bg_primary = anchor_og->bg_primary;
     anchor->font = anchor_og->font;
     anchor->style = anchor_og->style;
+    anchor->draw_border = anchor_og->draw_border;
+    anchor->draw_hover_state = anchor_og->draw_hover_state;
+    anchor->draw_background = anchor_og->draw_background;
+    anchor->border_on_hover = anchor_og->border_on_hover;
     tooltip_copy_context(&anchor->tooltip_c, &anchor_og->tooltip_c);
 }
 
@@ -157,7 +187,11 @@ static void dropdown_cancel(complex_button *btn)
 void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
     unsigned int num_buttons, int width, int height, int spacing, int padding)
 {
+    memset(&dd->anchor_backup, 0, sizeof(dd->anchor_backup));
     memcpy(dd->buttons, buttons, sizeof(complex_button) * num_buttons);
+    for (unsigned int i = 0; i < num_buttons; i++) {
+        copy_button_animation(&dd->buttons[i], &buttons[i]);
+    }
     //dd->buttons = buttons;
     dd->num_buttons = num_buttons;
     dd->expanded = 0;
@@ -222,34 +256,40 @@ void dropdown_button_init_simple(int x, int y, int width, int height, const lang
     dd->padding = 10; // TODO: Check why the width calculation downstream doesnt change with padding change
     complex_button_style style = dropdown_button_style_to_complex_style(dd_style);
     font_t style_font = complex_button_font_for_style(style); // ensure font is set for style
+    if (dd_style == DD_BUTTON_STYLE_DEFAULT_SMALL) {
+        style_font = FONT_SMALL_PLAIN;
+    }
     // Setup origin (button 0)
     complex_button *origin = &dd->buttons[0];
+    complex_button_init_style(origin, style);
     origin->x = x;
     origin->y = y;
     origin->height = height ? height : font_definition_for(style_font)->line_height + 8;
     origin->width = buttons_width;
-    origin->style = style;
+    origin->font = style_font;
     origin->is_hidden = 0;
     origin->is_disabled = 0;
     int has_selection = dd->selected_index > 0;
-    origin->sequence = &frags[has_selection ? dd->selected_index : 0];
+    origin->sequence.fragments = (lang_fragment *) &frags[has_selection ? dd->selected_index : 0];
     origin->sequence_position = SEQUENCE_POSITION_CENTER;
-    origin->sequence_size = 1;
+    origin->sequence.count = 1;
     origin->left_click_handler = dropdown_button_default_origin_click;
     origin->user_data = dd; // pointer to parent
     if (origin_tooltip) {
         tooltip_copy_context(&origin->tooltip_c, origin_tooltip);
     }
+    memset(&dd->anchor_backup, 0, sizeof(dd->anchor_backup));
     save_anchor(dd); // store original anchor for restoring
 
     // Setup options [1..count-1]
     for (unsigned int i = 1; i < count; i++) {
         complex_button *opt = &dd->buttons[i];
-        opt->style = style;
+        complex_button_init_style(opt, style);
+        opt->font = style_font;
         opt->is_hidden = 0;
         opt->is_disabled = 0;
-        opt->sequence = &frags[i];
-        opt->sequence_size = 1;
+        opt->sequence.fragments = (lang_fragment *) &frags[i];
+        opt->sequence.count = 1;
         opt->sequence_position = SEQUENCE_POSITION_CENTER;
 
         // store backref to dropdown + index + value
@@ -349,7 +389,7 @@ void dropdown_button_draw_array(const dropdown_button *dds, unsigned int num_dro
 static void unfocus_all(dropdown_button *dd)
 {
     for (unsigned int i = 0; i < dd->num_buttons; i++) {
-        dd->buttons[i].is_focused = 0;
+        dd->buttons[i].is_hovered = 0;
     }
 }
 
