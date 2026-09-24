@@ -171,16 +171,6 @@ static const char *find_scenario_file(void)
     return filename;
 }
 
-static void export_start(void)
-{
-    data.exporting = 1;
-    data.file_idx = 0;
-    char zip_path[FILE_NAME_MAX];
-    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
-    zip_package_map_start(zip_path);//data.files, data.file_count
-    zip_package_map_add_file(data.scenario_file, MZ_DEFAULT_LEVEL);
-}
-
 static void export_stop(void)
 {
     free(data.files);
@@ -192,12 +182,24 @@ static void export_stop(void)
     data.file_idx = 0;
 }
 
+static void export_start(void)
+{
+    data.exporting = 1;
+    data.file_idx = 0;
+    char zip_path[FILE_NAME_MAX];
+    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
+    if (!zip_package_map_start(zip_path)) {
+        export_stop();
+        window_go_back();
+    }
+    zip_package_map_add_file(data.scenario_file, MZ_DEFAULT_LEVEL);
+}
+
 static void init(void)
 {
     find_files();
     data.scenario_file = find_scenario_file();
     data.zip_size = estimate_zip_size(data.files, data.file_count, data.scenario_file);
-    export_stop();
 }
 
 static void draw_foreground(void)
@@ -211,7 +213,25 @@ static void draw_foreground(void)
         zip_package_map_add_file(data.files[data.file_idx], MZ_DEFAULT_LEVEL);
         data.file_idx++;
     } else {
-        text_draw_number(data.zip_size, 0, 0, 24, 48, FONT_LARGE_BLACK, COLOR_MASK_NONE);
+        int height = lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP_INFO,
+            24, 64, WINDOW_WIDTH * BLOCK_SIZE - 48, FONT_NORMAL_BLACK);
+        uint8_t size_message[128];
+        float magnitude = 1.0;
+        char extension[3] = "B";
+
+
+        if (data.zip_size > 1073741823) {
+            magnitude = 1073741824.0;
+            snprintf(extension, 3, "GB");
+        } else if (data.zip_size > 1048575) {
+            magnitude = 1048576.0;
+            snprintf(extension, 3, "MB");
+        } else if (data.zip_size > 1023) {
+            magnitude = 1024.0;
+            snprintf(extension, 3, "kB");
+        }
+        snprintf((char *)size_message, 128, "%s %.2f%s.", translation_for(TR_EDITOR_PACKAGE_MAP_SIZE), data.zip_size / magnitude, extension);
+        text_draw(size_message, 24, 64 + height, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
     }
 
     graphics_reset_dialog();
