@@ -250,13 +250,33 @@ static struct {
     int max_image_height;
 } data;
 
-static void read_header(buffer *buf)
+// Auxiliary main file (c3.555) loaded in editor mode so editor scenarios can
+// reference game-only image groups (e.g. group 159 for Native_Meeting_Hut_Central
+// composition). Layouts mirror the primary data above but live on their own atlas.
+static struct {
+    int loaded;
+    int climate;
+    uint16_t group_image_ids[IMAGE_MAX_GROUPS];
+    char bitmaps[100][200];
+    image main[IMAGE_MAIN_ENTRIES];
+    const image_atlas_data *atlas_data;  // valid between prepare and finalize
+    image_draw_data *external_draw_data; // kept alive so external aux images can be loaded
+    int total_external_images;
+    int external_image_id; // cache: last external aux image id loaded
+} aux_data;
+
+static void read_header_into(buffer *buf, uint16_t *group_image_ids, char (*bitmaps)[200])
 {
     buffer_skip(buf, 80); // header integers
     for (int i = 0; i < IMAGE_MAX_GROUPS; i++) {
-        data.group_image_ids[i] = buffer_read_u16(buf);
+        group_image_ids[i] = buffer_read_u16(buf);
     }
-    buffer_read_raw(buf, data.bitmaps, 20000);
+    buffer_read_raw(buf, bitmaps, 20000);
+}
+
+static void read_header(buffer *buf)
+{
+    read_header_into(buf, data.group_image_ids, data.bitmaps);
 }
 
 static void read_index_entry(buffer *buf, image *img, image_draw_data *draw_data)
@@ -663,6 +683,175 @@ static void update_native_images(int old_climate, int new_climate)
     }
 }
 
+// Load the game's main .555 file into a secondary atlas while in editor mode.
+// This lets editor scenarios reference c3.555 image groups that don't exist in
+// c3map.555 (e.g. composing Native_Meeting_Hut_Central_01 from group 159).
+//
+// Loading is split in two phases so assets_init can access the aux atlas
+// pixel buffers BEFORE the atlas is uploaded to GPU and buffers are freed:
+//   1. image_load_main_aux_prepare(): read c3.555, pack, convert pixels into
+//      atlas buffers. Atlas data lives in renderer but is not yet finalized.
+//   2. image_load_main_aux_finalize(): create the GPU texture and (optionally)
+//      free the buffers, just like the primary atlas.
+static int image_load_main_aux_prepare(int climate_id)
+{
+    aux_data.loaded = 0;
+    aux_data.climate = climate_id;
+    aux_data.atlas_data = 0;
+    memset(aux_data.main, 0, sizeof(aux_data.main));
+    memset(aux_data.group_image_ids, 0, sizeof(aux_data.group_image_ids));
+
+    graphics_renderer()->free_image_atlas(ATLAS_MAIN_AUX);
+
+    const char *filename_bmp = MAIN_GRAPHICS_555[climate_id];
+    const char *filename_idx = MAIN_GRAPHICS_SG2[climate_id];
+
+    uint8_t *tmp_data = malloc(MAIN_DATA_SIZE * sizeof(uint8_t));
+    image_draw_data *draw_data = malloc(IMAGE_MAIN_ENTRIES * sizeof(image_draw_data));
+    if (!tmp_data || !draw_data ||
+        MAIN_INDEX_SIZE != io_read_file_into_buffer(filename_idx, MAY_BE_LOCALIZED,
+            tmp_data, MAIN_INDEX_SIZE)) {
+        free(tmp_data);
+        free(draw_data);
+        return 0;
+    }
+    memset(draw_data, 0, IMAGE_MAIN_ENTRIES * sizeof(image_draw_data));
+
+    // Save shared state that prepare_images / crop_and_pack_images mutate so the
+    // primary load's state is not clobbered by the aux pass.
+    int saved_images_with_tops = data.images_with_tops;
+    int saved_total_external = data.total_external_images;
+    image_draw_data *saved_external_draw_data = data.external_draw_data;
+    data.images_with_tops = 0;
+    data.total_external_images = 0;
+    data.external_draw_data = 0;
+
+    buffer buf;
+    buffer_init(&buf, tmp_data, HEADER_SIZE);
+    read_header_into(&buf, aux_data.group_image_ids, aux_data.bitmaps);
+    buffer_init(&buf, &tmp_data[HEADER_SIZE], ENTRY_SIZE * IMAGE_MAIN_ENTRIES);
+    if (!prepare_images(&buf, aux_data.main, draw_data, IMAGE_MAIN_ENTRIES, ATLAS_MAIN_AUX)) {
+        goto fail;
+    }
+
+    // c3.555 may flag some images as external. prepare_images only allocates
+    // external_draw_data for ATLAS_MAIN; allocate here so crop_and_pack_images
+    // doesn't dereference a null buffer.
+    if (data.total_external_images > 0) {
+        data.external_draw_data = malloc(data.total_external_images * sizeof(image_draw_data));
+        if (!data.external_draw_data) {
+            goto fail;
+        }
+        memset(data.external_draw_data, 0, data.total_external_images * sizeof(image_draw_data));
+    }
+
+    int data_size = io_read_file_into_buffer(filename_bmp, MAY_BE_LOCALIZED, tmp_data, MAIN_DATA_SIZE);
+    if (!data_size) {
+        goto fail;
+    }
+
+    buffer_init(&buf, tmp_data, data_size);
+    if (!crop_and_pack_images(&buf, aux_data.main, draw_data, IMAGE_MAIN_ENTRIES, ATLAS_MAIN_AUX)) {
+        goto fail;
+    }
+
+    const image_atlas_data *atlas_data = graphics_renderer()->prepare_image_atlas(ATLAS_MAIN_AUX,
+        data.packer.result.images_needed,
+        data.packer.result.last_image_width,
+        data.packer.result.last_image_height);
+    if (!atlas_data) {
+        image_packer_free(&data.packer);
+        goto fail;
+    }
+
+    convert_images(aux_data.main, draw_data, IMAGE_MAIN_ENTRIES, &buf, atlas_data);
+    image_packer_free(&data.packer);
+
+    free_draw_data(draw_data, IMAGE_MAIN_ENTRIES);
+    free(tmp_data);
+
+    // Keep aux's external_draw_data alive — required to load c3.555 external
+    // images on demand from layer.c. We move it to aux_data and restore the
+    // shared globals so the primary atlas continues to use editor externals.
+    if (aux_data.external_draw_data) {
+        // free previously kept aux externals (e.g. climate switch)
+        for (int i = 0; i < aux_data.total_external_images; i++) {
+            free(aux_data.external_draw_data[i].buffer);
+        }
+        free(aux_data.external_draw_data);
+    }
+    aux_data.external_draw_data = data.external_draw_data;
+    aux_data.total_external_images = data.total_external_images;
+    aux_data.external_image_id = -1;
+
+    data.images_with_tops = saved_images_with_tops;
+    data.total_external_images = saved_total_external;
+    data.external_draw_data = saved_external_draw_data;
+
+    aux_data.atlas_data = atlas_data;  // keep for assets_init layer composition
+    aux_data.loaded = 1;
+    return 1;
+
+fail:
+    free_draw_data(draw_data, IMAGE_MAIN_ENTRIES);
+    free(tmp_data);
+    // free aux's external_draw_data we attempted to allocate (if any)
+    if (data.external_draw_data != saved_external_draw_data) {
+        free(data.external_draw_data);
+    }
+    data.images_with_tops = saved_images_with_tops;
+    data.total_external_images = saved_total_external;
+    data.external_draw_data = saved_external_draw_data;
+    return 0;
+}
+
+static void image_load_main_aux_finalize(void)
+{
+    if (!aux_data.loaded || !aux_data.atlas_data) {
+        return;
+    }
+    graphics_renderer()->create_image_atlas(aux_data.atlas_data, 1);
+    aux_data.atlas_data = 0;
+}
+
+color_t **image_aux_atlas_buffers(void)
+{
+    if (!aux_data.atlas_data) {
+        return 0;
+    }
+    return aux_data.atlas_data->buffers;
+}
+
+int *image_aux_atlas_widths(void)
+{
+    if (!aux_data.atlas_data) {
+        return 0;
+    }
+    return aux_data.atlas_data->image_widths;
+}
+
+int image_group_aux(int group)
+{
+    if (!aux_data.loaded || group < 0 || group >= IMAGE_MAX_GROUPS) {
+        return 0;
+    }
+    return IMAGE_AUX_FLAG | aux_data.group_image_ids[group];
+}
+
+const image *image_get_aux(int id)
+{
+    id &= ~IMAGE_AUX_FLAG;
+    if (!aux_data.loaded || id < 0 || id >= IMAGE_MAIN_ENTRIES) {
+        return &DUMMY_IMAGE;
+    }
+    return &aux_data.main[id];
+}
+
+int image_aux_is_loaded(void)
+{
+    return aux_data.loaded;
+}
+
 static void fix_animation_offsets(void)
 {
     // Fix black stripe in legionaries' dying animation
@@ -755,11 +944,30 @@ int image_load_climate(int climate_id, int is_editor, int force_reload, int keep
     free_draw_data(draw_data, IMAGE_MAIN_ENTRIES);
     free(tmp_data);
     make_plain_fonts_white(data.main, atlas_data, image_group(GROUP_FONT));
+
+    // In editor mode, prepare the aux atlas (c3.555) BEFORE assets_init so
+    // layers that reference game image groups can compose from aux buffers.
+    if (is_editor) {
+        image_load_main_aux_prepare(climate_id);
+    } else {
+        // Drop aux state when leaving editor mode
+        if (aux_data.loaded) {
+            graphics_renderer()->free_image_atlas(ATLAS_MAIN_AUX);
+            aux_data.loaded = 0;
+            aux_data.atlas_data = 0;
+        }
+    }
+
     if (!keep_atlas_buffers) {
         assets_init(data.is_editor != is_editor, atlas_data->buffers, atlas_data->image_widths);
     }
     graphics_renderer()->create_image_atlas(atlas_data, !keep_atlas_buffers);
     image_packer_free(&data.packer);
+
+    // Finalize aux atlas after assets_init has composed any layers from it.
+    if (is_editor) {
+        image_load_main_aux_finalize();
+    }
 
     // Update native huts alternative images after climate change.
     update_native_images(data.current_climate, climate_id);
@@ -1287,6 +1495,77 @@ int image_get_external_dimensions(const image *img, int *width, int *height)
     return 1;
 }
 
+int image_get_external_dimensions_aux(const image *img, int *width, int *height)
+{
+    if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) != ATLAS_EXTERNAL) {
+        return 0;
+    }
+    if (!aux_data.external_draw_data) {
+        return 0;
+    }
+    int idx = img->atlas.id & IMAGE_ATLAS_BIT_MASK;
+    if (idx < 0 || idx >= aux_data.total_external_images) {
+        return 0;
+    }
+    image_draw_data *draw_data = &aux_data.external_draw_data[idx];
+    if (width) {
+        *width = draw_data->width;
+    }
+    if (height) {
+        *height = draw_data->height;
+    }
+    return 1;
+}
+
+int image_load_external_pixels_aux(color_t *dst, const image *img, int row_width)
+{
+    if (!aux_data.external_draw_data) {
+        return 0;
+    }
+    int idx = img->atlas.id & IMAGE_ATLAS_BIT_MASK;
+    if (idx < 0 || idx >= aux_data.total_external_images) {
+        return 0;
+    }
+    image_draw_data *draw_data = &aux_data.external_draw_data[idx];
+    char filename[FILE_NAME_MAX];
+    snprintf(filename, FILE_NAME_MAX, "555/%s", aux_data.bitmaps[draw_data->bitmap_id]);
+    file_change_extension(filename, "555");
+    if (!draw_data->buffer) {
+        draw_data->buffer = malloc(draw_data->data_length * sizeof(uint8_t));
+        if (!draw_data->buffer) {
+            log_error("unable to load aux external image - out of memory",
+                aux_data.bitmaps[draw_data->bitmap_id], 0);
+            return 0;
+        }
+        int size = io_read_file_part_into_buffer(
+            &filename[4], MAY_BE_LOCALIZED, draw_data->buffer,
+            draw_data->data_length, draw_data->offset - 1
+        );
+        if (!size) {
+            // try in 555 dir
+            size = io_read_file_part_into_buffer(
+                filename, MAY_BE_LOCALIZED, draw_data->buffer,
+                draw_data->data_length, draw_data->offset - 1
+            );
+            if (!size) {
+                log_error("unable to load aux external image",
+                    aux_data.bitmaps[draw_data->bitmap_id], 0);
+                free(draw_data->buffer);
+                draw_data->buffer = 0;
+                return 0;
+            }
+        }
+    }
+    buffer buf;
+    buffer_init(&buf, draw_data->buffer, draw_data->data_length);
+    if (draw_data->is_compressed) {
+        convert_compressed(&buf, draw_data->width, draw_data->height, 0, 0, draw_data->data_length, dst, row_width);
+    } else {
+        convert_uncompressed(&buf, draw_data->width, draw_data->height, 0, 0, dst, row_width);
+    }
+    return 1;
+}
+
 void image_crop(image *img, const color_t *pixels)
 {
     if (!img->width || !img->height) {
@@ -1381,6 +1660,9 @@ int image_group(int group)
 
 const image *image_get(int id)
 {
+    if (id & IMAGE_AUX_FLAG) {
+        return image_get_aux(id);
+    }
     if (id >= 0 && id < IMAGE_MAIN_ENTRIES) {
         return &data.main[id];
     } else {
