@@ -98,6 +98,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_IMMEDIATELY_DELETE_BUILDINGS, "Immediately destroy buildings"},
     {TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD, "Cart pushers from getting granaries can go off-road"},
     {TR_CONFIG_GRANARIES_GET_DOUBLE, "Double the capacity of cart pushers from getting granaries"},
+    {TR_CONFIG_DOCKERS_CARRY_MULTIPLE_LOADS, "Dock workers carry up to 8 food loads or 4 other loads"},
     {TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES, "Allow traders to export food from granaries"},
     {TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, "Tower sentries don't need road access from barracks"},
     {TR_CONFIG_FARMS_DELIVER_CLOSE, "Farms and wharves deliver only to nearby granaries"},
