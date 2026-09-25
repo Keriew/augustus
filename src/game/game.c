@@ -48,6 +48,15 @@ static void errlog(const char *msg)
 // if language detection fails (e.g. if c3.eng is temporarily unavailable).
 static language_type saved_game_language = LANGUAGE_UNKNOWN;
 
+static void update_font_asset_layout(void)
+{
+    font_asset_layout layout = FONT_ASSET_LAYOUT_DEFAULT;
+    if (saved_game_language == LANGUAGE_PORTUGUESE && image_uses_brazilian_portuguese_font_layout()) {
+        layout = FONT_ASSET_LAYOUT_BRAZILIAN_PORTUGUESE;
+    }
+    font_set_asset_layout(layout);
+}
+
 static encoding_type update_encoding(int is_editor)
 {
     language_type language;
@@ -115,6 +124,7 @@ int game_init(void)
         errlog("unable to load main graphics");
         return 0;
     }
+    update_font_asset_layout();
     if (!image_load_enemy(ENEMY_0_BARBARIAN)) {
         errlog("unable to load enemy graphics");
         return 0;
@@ -186,6 +196,7 @@ static int reload_language(int is_editor, int reload_images)
         errlog("unable to load main graphics");
         return 0;
     }
+    update_font_asset_layout();
 
     resource_init();
 

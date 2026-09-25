@@ -100,6 +100,12 @@ typedef struct {
 int image_load_climate(int climate_id, int is_editor, int force_reload, int keep_atlas_buffers);
 
 /**
+ * Indicates whether the currently loaded main graphics use the Brazilian Portuguese font layout.
+ * @return 1 for the Brazilian Portuguese layout, 0 otherwise
+ */
+int image_uses_brazilian_portuguese_font_layout(void);
+
+/**
  * Loads external fonts file (Cyrillic and Traditional Chinese)
  * @return boolean true on success, false on failure
  */
