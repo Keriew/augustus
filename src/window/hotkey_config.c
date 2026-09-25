@@ -20,6 +20,7 @@
 #include "window/config.h"
 #include "window/hotkey_editor.h"
 #include "window/plain_message_dialog.h"
+#include "window/popup_dialog.h"
 
 #define TR_NONE -1
 #define GROUP_BUILDINGS 28
@@ -232,6 +233,15 @@ static struct {
     unsigned int focus_button;
     unsigned int bottom_focus_button;
     hotkey_mapping mappings[HOTKEY_MAX_ITEMS][2];
+    struct {
+        int is_pending;
+        hotkey_action from_action;
+        int from_index;
+        hotkey_action to_action;
+        int to_index;
+        key_type key;
+        key_modifier_type modifiers;
+    } pending_remap;
 } data;
 
 int get_position_for_widget(translation_key key)
@@ -247,6 +257,7 @@ int get_position_for_widget(translation_key key)
 static void init(int position)
 {
     scrollbar_init(&scrollbar, position, sizeof(hotkey_widgets) / sizeof(hotkey_widget));
+    data.pending_remap.is_pending = 0;
 
     for (int i = 0; i < HOTKEY_MAX_ITEMS; i++) {
         hotkey_mapping empty = { KEY_TYPE_NONE, KEY_MOD_NONE, i };
@@ -380,6 +391,24 @@ static const uint8_t *hotkey_action_name_for(hotkey_action action)
     return name;
 }
 
+static void hotkey_remap_confirmation(int accepted, int checked)
+{
+    if (!data.pending_remap.is_pending) {
+        return;
+    }
+
+    if (accepted) {
+        data.mappings[data.pending_remap.from_action][data.pending_remap.from_index].key = KEY_TYPE_NONE;
+        data.mappings[data.pending_remap.from_action][data.pending_remap.from_index].modifiers = KEY_MOD_NONE;
+
+        data.mappings[data.pending_remap.to_action][data.pending_remap.to_index].key = data.pending_remap.key;
+        data.mappings[data.pending_remap.to_action][data.pending_remap.to_index].modifiers = data.pending_remap.modifiers;
+    }
+
+    data.pending_remap.is_pending = 0;
+    window_invalidate();
+}
+
 static void set_hotkey(hotkey_action action, int index, key_type key, key_modifier_type modifiers)
 {
     int is_duplicate_hotkey = 0;
@@ -394,9 +423,18 @@ static void set_hotkey(hotkey_action action, int index, key_type key, key_modifi
                     // "Fire overlay" already has hotkey "F" and user tries set same hotkey "F" again to "Fire overlay"
                     // we must skip show warning window for better user experience
                     if (!(test_action == action && test_index == index)) {
-                        window_plain_message_dialog_show_with_extra(
+                        data.pending_remap.is_pending = 1;
+                        data.pending_remap.from_action = test_action;
+                        data.pending_remap.from_index = test_index;
+                        data.pending_remap.to_action = action;
+                        data.pending_remap.to_index = index;
+                        data.pending_remap.key = key;
+                        data.pending_remap.modifiers = modifiers;
+
+                        window_popup_dialog_show_confirmation_with_extra(
                             TR_HOTKEY_DUPLICATE_TITLE, TR_HOTKEY_DUPLICATE_MESSAGE,
-                            hotkey_action_name_for(test_action), 0);
+                            hotkey_action_name_for(test_action), hotkey_action_name_for(action),
+                            hotkey_remap_confirmation);
                     }
                     break;
                 }
