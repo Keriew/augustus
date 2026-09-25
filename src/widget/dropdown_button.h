@@ -1,7 +1,7 @@
 #ifndef GRAPHICS_DROPDOWN_BUTTON_H
 #define GRAPHICS_DROPDOWN_BUTTON_H
 
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 
 /**
  * @brief Maximum allowed dropdown width in pixels when auto-sizing.

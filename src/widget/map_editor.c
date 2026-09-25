@@ -9,7 +9,7 @@
 #include "editor/editor.h"
 #include "editor/tool.h"
 #include "graphics/color.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/menu.h"

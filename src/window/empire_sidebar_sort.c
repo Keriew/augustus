@@ -24,8 +24,6 @@
 
 /* next Refactor notes:
 * move out everything relating to the sidebar to this file, rename it to empire_sidebar.c
-* complex_button.c should be split into separate files for cycling and checkbox buttons
-* then all of them including dropdown_button should be moved to widget folder for clarity and simplicty
 * simplify the sort/filter getting/setting/reading/saving logic - too many functions. should be one for read one for write.
 */
 

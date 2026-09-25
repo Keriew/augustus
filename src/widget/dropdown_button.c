@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#pragma region Helpers
+
 static int calculate_text_width(const complex_button *btn, font_t font)
 {
     if (!btn->sequence.fragments || btn->sequence.count == 0) {
@@ -159,6 +161,9 @@ void dropdown_button_advanced_save_anchor(dropdown_button *dd)
     save_anchor(dd); // expose the internal function for non-simple init
 }
 
+#pragma endregion Helpers
+#pragma region Callbacks
+
 /* --- Default left click handler for dropdown options --- */
 void dropdown_button_default_option_click(complex_button *btn)
 {
@@ -183,6 +188,9 @@ static void dropdown_cancel(complex_button *btn)
     dd->expanded = 0;
     window_request_refresh();
 }
+
+#pragma endregion Callbacks
+#pragma region Initialization
 
 void dropdown_button_init(dropdown_button *dd, complex_button *buttons,
     unsigned int num_buttons, int width, int height, int spacing, int padding)
@@ -333,27 +341,8 @@ void dropdown_button_update_dimensions(int x, int y, int width, int height, drop
     }
 }
 
-int dropdown_button_handle_tooltip(const dropdown_button *dd, tooltip_context *c)
-{
-    if (!dd || dd->num_buttons == 0) {
-        return 0;
-    }
-    return complex_button_handle_tooltip_array(dd->buttons, c, dd->num_buttons);
-}
-
-int dropdown_button_handle_tooltip_array(const dropdown_button *dds, tooltip_context *c, unsigned int num_dropdowns)
-{
-    if (!dds || !c) {
-        return 0;
-    }
-
-    for (unsigned int i = 0; i < num_dropdowns; i++) {
-        if (dropdown_button_handle_tooltip(&dds[i], c)) {
-            return 1;
-        }
-    }
-    return 0;
-}
+#pragma endregion Initialization
+#pragma region Drawing
 
 void dropdown_button_draw(const dropdown_button *dd)
 {
@@ -385,6 +374,9 @@ void dropdown_button_draw_array(const dropdown_button *dds, unsigned int num_dro
         dropdown_button_draw(&dds[i]);
     }
 }
+
+#pragma endregion Drawing
+#pragma region Input Handling
 
 static void unfocus_all(dropdown_button *dd)
 {
@@ -467,6 +459,34 @@ int dropdown_button_handle_mouse_array(dropdown_button *dds, const mouse *m, uns
     return 0;
 }
 
+#pragma endregion Input Handling
+#pragma region Tooltip
+
+int dropdown_button_handle_tooltip(const dropdown_button *dd, tooltip_context *c)
+{
+    if (!dd || dd->num_buttons == 0) {
+        return 0;
+    }
+    return complex_button_handle_tooltip_array(dd->buttons, c, dd->num_buttons);
+}
+
+int dropdown_button_handle_tooltip_array(const dropdown_button *dds, tooltip_context *c, unsigned int num_dropdowns)
+{
+    if (!dds || !c) {
+        return 0;
+    }
+
+    for (unsigned int i = 0; i < num_dropdowns; i++) {
+        if (dropdown_button_handle_tooltip(&dds[i], c)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+#pragma endregion Tooltip
+#pragma region Accessors
+
 int dropdown_button_get_x_min(dropdown_button *dd)
 {
     if (!dd || dd->num_buttons == 0) {
@@ -490,3 +510,5 @@ int dropdown_button_get_width(dropdown_button *dd)
     }
     return dd->calculated_width;
 }
+
+#pragma endregion Accessors

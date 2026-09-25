@@ -47,7 +47,8 @@ void large_label_draw_bg(int x, int y, int width, int height);
 /// @param width 
 /// @param height 
 /// @param opacity 0-100 
-void label_draw_greyout_pattern(int x, int y, int width, int height, int opacity);
+/// @param to_left 1 = slant to left, 0 = slant to right
+void label_draw_greyout_pattern(int x, int y, int width, int height, int opacity, int to_left);
 
 void large_label_draw_border(int x, int y, int width, int height);
 

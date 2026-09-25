@@ -6,7 +6,7 @@
 #include "core/time.h"
 #include "game/resource.h"
 #include "game/time.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/lang_sequence.h"

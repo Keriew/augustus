@@ -491,10 +491,11 @@ static inline uint32_t color_mask_opacity(int opacity)
     return (alpha << 24) | 0x00ffffffu;
 }
 
-void label_draw_greyout_pattern(int x, int y, int width, int height, int opacity)
+void label_draw_greyout_pattern(int x, int y, int width, int height, int opacity, int to_left)
 {
     graphics_set_clip_rectangle(x, y, width, height);
-    int diagonal_lines = assets_lookup_image_id(ASSET_UI_DIAGONAL_LINES_R);
+    int asset_const = to_left ? ASSET_UI_DIAGONAL_LINES_L : ASSET_UI_DIAGONAL_LINES_R;
+    int diagonal_lines = assets_lookup_image_id(asset_const);
     uint32_t color = color_mask_opacity(opacity);
     for (int yy = 0; yy < height; yy += 8) {
         for (int xx = 0; xx < width; xx += 8) {

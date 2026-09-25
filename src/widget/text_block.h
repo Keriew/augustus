@@ -37,20 +37,20 @@ typedef struct text_block {
     int height;
 
     // UI standard properties
-    lang_sequence sequence; // text fragments to display in the box
+    lang_sequence sequence;     // text fragments to display in the box
     sequence_positioning position; // where to position the text inside the block, defaults to center/center
-    text_block_style style; // during init sets properties required for a chosen style. Also guides draw function
-    font_t font;            // font to use for the text, defaults to FONT_NORMAL_BLACK if not set
-    color_t font_primary;   // primary color mask for the text, defaults to COLOR_MASK_NONE if not set
-    color_t bg_primary;     // primary color mask for the background drawing. Defaults to COLOR_MASK_NONE if not set
+    text_block_style style;     // during init sets properties required for a chosen style. Also guides draw function
+    font_t font;                // font to use for the text, defaults to FONT_NORMAL_BLACK if not set
+    color_t font_primary;       // primary color mask for the text, defaults to COLOR_MASK_NONE if not set
+    color_t bg_primary;         // primary color mask for the background drawing. Defaults to COLOR_MASK_NONE if not set
     tooltip_context tooltip_c; // optional tooltip context for the text block
 
     // user flags
-    unsigned short draw_border;  // 1/0 - whether border is to be drawn
+    unsigned short draw_border;      // 1/0 - whether border is to be drawn
     unsigned short draw_hover_state; // 1 - draw appropriate 'focused' state when hovered, 0 = no changes on hover.
-    unsigned short draw_background; // 1/0 - whether background is to be filled or left transparent
-    unsigned short is_disabled; // 1/0 - uninteractable, grayed out
-    unsigned short is_hidden; // 1/0 - disabled and invisible, does not handle mouse events at all
+    unsigned short draw_background;  // 1/0 - whether background is to be filled or left transparent
+    unsigned short is_disabled;      // 1/0 - uninteractable, grayed out
+    unsigned short is_hidden;        // 1/0 - disabled and invisible, does not handle mouse events at all
 
     // function pointers
     void (*update_content)(struct text_block *block); // Runs before every draw. Updates block's content
@@ -58,11 +58,11 @@ typedef struct text_block {
     // other properties
     int inner_padding_x; // defaults to 2px
     int inner_padding_y; // defaults to 2px
-    uint8_t *raw_text; // optional raw text if you dont want to deal with lang_sequence
-    int text_offset_x; // optional text-only horizontal offset
-    int text_offset_y; // optional text-only vertical offset
-    int image_before; // optional image to draw before the text
-    int image_after; // optional image to draw after the text
+    uint8_t *raw_text;   // optional raw text if you dont want to deal with lang_sequence
+    int text_offset_x;   // optional text-only horizontal offset
+    int text_offset_y;   // optional text-only vertical offset
+    int image_before;    // optional image to draw before the text
+    int image_after;     // optional image to draw after the text
 
     // cache and state properties
     unsigned short state_is_hovered; // mouse is in bounds of the text block

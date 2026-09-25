@@ -92,10 +92,9 @@ static void refresh_button_state(date_picker *picker)
     // Keep the public selected offset valid before drawing or handling hover/clicks.
     clamp_selected_year(picker);
 
-    picker->buttons[DATE_PICKER_DECREASE].is_disabled =
-        picker->selected_year_offset >= picker_max_offset(picker);
-    picker->buttons[DATE_PICKER_INCREASE].is_disabled =
-        picker->selected_year_offset <= picker_min_offset(picker);
+    picker->buttons[DATE_PICKER_DECREASE].is_disabled = picker->selected_year_offset >= picker_max_offset(picker);
+    picker->buttons[DATE_PICKER_INCREASE].is_disabled = picker->selected_year_offset <= picker_min_offset(picker);
+    picker->buttons[DATE_PICKER_DATE].is_disabled = picker->selected_year_offset == 0;
     update_tooltips(picker);
 }
 
@@ -197,6 +196,7 @@ void widget_date_picker_init(date_picker *picker, int x, int y, int date_field_h
     date->sequence_position = SEQUENCE_POSITION_CENTER;
     date->left_click_handler = date_click;
     date->user_data = picker;
+    date->is_disabled = 1; // date button starts on the current/middle date, so it should start disabled.
 
     refresh_button_state(picker);
 }

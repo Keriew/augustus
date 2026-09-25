@@ -12,7 +12,7 @@
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/settings.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"

@@ -14,6 +14,10 @@
 
 #define DEFAULT_PADDING 2
 
+static void text_block_draw_content(const text_block *block);
+
+#pragma region Helpers
+
 font_t text_block_font_for_style(text_block_style style)
 {
     switch (style) {
@@ -125,6 +129,46 @@ static color_t text_block_color(const text_block *block)
 {
     return block->is_disabled ? COLOR_FONT_GRAY : block->font_primary;
 }
+
+#pragma endregion Helpers
+#pragma region Initialization
+
+int widget_text_block_init_simple(text_block *block, int x, int y, int width, int height, const lang_sequence *sequence,
+    sequence_positioning position, text_block_style style)
+{
+    if (!block) {
+        return 0;
+    }
+
+    memset(block, 0, sizeof(*block));
+
+    if (sequence) {
+        block->sequence = *sequence;
+    }
+
+    block->position = position ? position : SEQUENCE_POSITION_CENTER;
+    block->style = style;
+    block->font = text_block_font_for_style(block->style);
+    block->font_primary = text_block_font_primary_for_style(block->style);
+    block->bg_primary = text_block_bg_primary_for_style(block->style);
+    block->x = x;
+    block->y = y;
+    block->width = width;
+    block->height = height;
+    block->inner_padding_x = DEFAULT_PADDING;
+    block->inner_padding_y = DEFAULT_PADDING;
+    block->draw_border = 1;
+    block->draw_hover_state = 1;
+    block->draw_background = 1;
+    block->is_disabled = 0;
+    block->is_hidden = 0;
+    block->tooltip_c.type = TOOLTIP_BUTTON;
+    // if tooltip type is not set and forgotten by user, tooltip won't show, so set it preemptively in the simple init
+    return 1;
+}
+
+#pragma endregion Initialization
+#pragma region Drawing
 
 static void text_block_draw_background_and_border(const text_block *block)
 {
@@ -287,53 +331,6 @@ static void text_block_draw_with_images(const text_block *block)
     }
 }
 
-int widget_text_block_init_simple(text_block *block, int x, int y, int width, int height, const lang_sequence *sequence,
-    sequence_positioning position, text_block_style style)
-{
-    if (!block) {
-        return 0;
-    }
-
-    memset(block, 0, sizeof(*block));
-
-    if (sequence) {
-        block->sequence = *sequence;
-    }
-
-    block->position = position ? position : SEQUENCE_POSITION_CENTER;
-    block->style = style;
-    block->font = text_block_font_for_style(block->style);
-    block->font_primary = text_block_font_primary_for_style(block->style);
-    block->bg_primary = text_block_bg_primary_for_style(block->style);
-    block->x = x;
-    block->y = y;
-    block->width = width;
-    block->height = height;
-    block->inner_padding_x = DEFAULT_PADDING;
-    block->inner_padding_y = DEFAULT_PADDING;
-    block->draw_border = 1;
-    block->draw_hover_state = 1;
-    block->draw_background = 1;
-    block->is_disabled = 0;
-    block->is_hidden = 0;
-    block->tooltip_c.type = TOOLTIP_BUTTON;
-    // if tooltip type is not set and forgotten by user, tooltip won't show, so set it preemptively in the simple init 
-    return 1;
-}
-
-static void text_block_draw_content(const text_block *block)
-{
-    text_block_draw_background_and_border(block);
-
-    if (block->image_before > 0 || block->image_after > 0) {
-        text_block_draw_with_images(block);
-    } else if (block->sequence.count > 0) {
-        text_block_draw_sequence(block);
-    } else if (block->raw_text) {
-        text_block_draw_raw(block);
-    }
-}
-
 void widget_text_block_draw(const text_block *block)
 {
     if (!block || block->is_hidden) {
@@ -366,6 +363,22 @@ void widget_text_block_draw_clipped(const text_block *block, int clip_x, int cli
     graphics_reset_clip_rectangle();
 }
 
+static void text_block_draw_content(const text_block *block)
+{
+    text_block_draw_background_and_border(block);
+
+    if (block->image_before > 0 || block->image_after > 0) {
+        text_block_draw_with_images(block);
+    } else if (block->sequence.count > 0) {
+        text_block_draw_sequence(block);
+    } else if (block->raw_text) {
+        text_block_draw_raw(block);
+    }
+}
+
+#pragma endregion Drawing
+#pragma region Input Handling
+
 int widget_text_block_handle_mouse(text_block *block, const mouse *m)
 {
     // currently no mouse functionality, only hover state tracking for tooltip support
@@ -392,6 +405,9 @@ int widget_text_block_handle_mouse(text_block *block, const mouse *m)
     return 0;
 }
 
+#pragma endregion Input Handling
+#pragma region Tooltip
+
 int widget_text_block_handle_tooltip(const text_block *block, tooltip_context *c)
 {
     if (!block || !c || block->is_hidden || !block->state_is_hovered || tooltip_context_is_empty(&block->tooltip_c)) {
@@ -401,3 +417,5 @@ int widget_text_block_handle_tooltip(const text_block *block, tooltip_context *c
     tooltip_copy_context(c, &block->tooltip_c);
     return 1;
 }
+
+#pragma endregion Tooltip

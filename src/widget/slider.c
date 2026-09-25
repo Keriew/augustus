@@ -24,6 +24,14 @@ typedef enum slider_element {
     SLIDER_BG = 4
 } slider_element;
 
+static void draw_slider_horizontal(slider_t *slider);
+static void draw_slider_vertical(slider_t *slider);
+static slider_element slider_get_hovered_element(slider_t *slider, const mouse *m);
+static int slider_get_value_from_thumb_offset(slider_t *slider, int thumb_offset);
+static void slider_zero_cache_and_state(slider_t *slider);
+
+#pragma region Helpers
+
 static int get_slider_image_id(const slider_t *slider, slider_element element)
 {
     int id = 0;
@@ -233,47 +241,68 @@ static int mouse_is_inside_rect(const mouse *m, int x, int y, int width, int hei
     return m->x >= x && m->x < x + width && m->y >= y && m->y < y + height;
 }
 
-static slider_element slider_get_hovered_element(slider_t *slider, const mouse *m)
-{
-    slider_element hovered_element = SLIDER_NONE;
+#pragma endregion Helpers
+#pragma region Initialization
 
-    /*
-     * Disabled sliders have no interactive elements.
-     */
-    if (!slider->is_hidden && !slider->is_disabled && m->is_inside_window) {
-        if (slider->is_vertical) {
-            if (mouse_is_inside_rect(m, slider->x, slider->y, SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
-                hovered_element = SLIDER_DECREASE;
-            } else if (mouse_is_inside_rect(m, slider->x, slider->y + slider->length - SLIDER_BUTTON_SIDE,
-                SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
-                hovered_element = SLIDER_INCREASE;
-            } else if (mouse_is_inside_rect(m, slider->x, slider->y + slider->cached_thumb_offset,
-                SLIDER_BUTTON_SIDE, get_thumb_length(slider))) {
-                hovered_element = SLIDER_THUMB;
-            } else if (mouse_is_inside_rect(m, slider->x, slider->y + SLIDER_BUTTON_SIDE,
-                SLIDER_BUTTON_SIDE, slider->length - 2 * SLIDER_BUTTON_SIDE)) {
-                hovered_element = SLIDER_BG;
-            }
-        } else {
-            if (mouse_is_inside_rect(m, slider->x, slider->y, SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
-                hovered_element = SLIDER_DECREASE;
-            } else if (mouse_is_inside_rect(m, slider->x + slider->length - SLIDER_BUTTON_SIDE, slider->y,
-                SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
-                hovered_element = SLIDER_INCREASE;
-            } else if (mouse_is_inside_rect(m, slider->x + slider->cached_thumb_offset, slider->y,
-                get_thumb_length(slider), SLIDER_BUTTON_SIDE)) {
-                hovered_element = SLIDER_THUMB;
-            } else if (mouse_is_inside_rect(m, slider->x + SLIDER_BUTTON_SIDE, slider->y,
-                slider->length - 2 * SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
-                hovered_element = SLIDER_BG;
-            }
-        }
+int widget_slider_init(slider_t *slider, int x, int y, int length, int min_value, int max_value,
+    int value_step, int initial_value, unsigned char is_vertical, slider_display_text display_text)
+{
+    memset(slider, 0, sizeof(*slider));
+
+    if (max_value <= min_value || value_step <= 0 || length <= 2 * SLIDER_BUTTON_SIDE) {
+        // Leave an invalid slider in a harmless state rather than as
+        // a zeroed object which could accidentally still be drawn.
+        slider->is_hidden = 1;
+        slider->is_disabled = 1;
+        return 0;
     }
 
-    slider->is_hovered = hovered_element != SLIDER_NONE;
-    slider->hovered_element = hovered_element;
+    slider->x = x;
+    slider->y = y;
+    slider->length = length;
 
-    return hovered_element;
+    slider->min_value = min_value;
+    slider->max_value = max_value;
+    slider->value_step = value_step;
+
+    slider->draw_background = 1;
+    slider->is_vertical = is_vertical;
+
+    slider->value = slider_snap_value(slider, initial_value);
+    slider->display_text = display_text;
+    slider_update_cached_thumb_offset(slider);
+    return 1;
+}
+
+int widget_slider_text_block_init(text_block *block, int x, int y, int width, int height, lang_sequence *sequence,
+    sequence_positioning position)
+{
+    lang_sequence seq;
+    lang_seq_init(&seq, (lang_fragment *) sequence->fragments, sequence->count);
+    return widget_text_block_init_simple(block, x, y, width, height, &seq, position, TEXT_BLOCK_STYLE_RAW);
+}
+
+#pragma endregion Initialization
+#pragma region Drawing
+
+void widget_slider_draw(const slider_t *slider)
+{
+    if (slider->is_hidden) {
+        return;
+    }
+
+    if (slider->is_vertical) {
+        draw_slider_vertical((slider_t *) slider);
+    } else {
+        draw_slider_horizontal((slider_t *) slider);
+    }
+}
+
+void widget_slider_draw_array(const slider_t *sliders, unsigned int num_sliders)
+{
+    for (unsigned int i = 0; i < num_sliders; i++) {
+        widget_slider_draw(&sliders[i]);
+    }
 }
 
 static void draw_slider_horizontal(slider_t *slider)
@@ -343,62 +372,50 @@ static void draw_slider_vertical(slider_t *slider)
     scrollbar_thumb_draw(slider->x, slider->y + thumb_offset, get_thumb_midsections_count(slider), 1, thumb);
 }
 
-int widget_slider_init(slider_t *slider, int x, int y, int length, int min_value, int max_value,
-    int value_step, int initial_value, unsigned char is_vertical, slider_display_text display_text)
-{
-    memset(slider, 0, sizeof(*slider));
+#pragma endregion Drawing
+#pragma region Input Handling
 
-    if (max_value <= min_value || value_step <= 0 || length <= 2 * SLIDER_BUTTON_SIDE) {
-        // Leave an invalid slider in a harmless state rather than as
-        // a zeroed object which could accidentally still be drawn.
-        slider->is_hidden = 1;
-        slider->is_disabled = 1;
-        return 0;
+static slider_element slider_get_hovered_element(slider_t *slider, const mouse *m)
+{
+    slider_element hovered_element = SLIDER_NONE;
+
+    /*
+     * Disabled sliders have no interactive elements.
+     */
+    if (!slider->is_hidden && !slider->is_disabled && m->is_inside_window) {
+        if (slider->is_vertical) {
+            if (mouse_is_inside_rect(m, slider->x, slider->y, SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
+                hovered_element = SLIDER_DECREASE;
+            } else if (mouse_is_inside_rect(m, slider->x, slider->y + slider->length - SLIDER_BUTTON_SIDE,
+                SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
+                hovered_element = SLIDER_INCREASE;
+            } else if (mouse_is_inside_rect(m, slider->x, slider->y + slider->cached_thumb_offset,
+                SLIDER_BUTTON_SIDE, get_thumb_length(slider))) {
+                hovered_element = SLIDER_THUMB;
+            } else if (mouse_is_inside_rect(m, slider->x, slider->y + SLIDER_BUTTON_SIDE,
+                SLIDER_BUTTON_SIDE, slider->length - 2 * SLIDER_BUTTON_SIDE)) {
+                hovered_element = SLIDER_BG;
+            }
+        } else {
+            if (mouse_is_inside_rect(m, slider->x, slider->y, SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
+                hovered_element = SLIDER_DECREASE;
+            } else if (mouse_is_inside_rect(m, slider->x + slider->length - SLIDER_BUTTON_SIDE, slider->y,
+                SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
+                hovered_element = SLIDER_INCREASE;
+            } else if (mouse_is_inside_rect(m, slider->x + slider->cached_thumb_offset, slider->y,
+                get_thumb_length(slider), SLIDER_BUTTON_SIDE)) {
+                hovered_element = SLIDER_THUMB;
+            } else if (mouse_is_inside_rect(m, slider->x + SLIDER_BUTTON_SIDE, slider->y,
+                slider->length - 2 * SLIDER_BUTTON_SIDE, SLIDER_BUTTON_SIDE)) {
+                hovered_element = SLIDER_BG;
+            }
+        }
     }
 
-    slider->x = x;
-    slider->y = y;
-    slider->length = length;
+    slider->is_hovered = hovered_element != SLIDER_NONE;
+    slider->hovered_element = hovered_element;
 
-    slider->min_value = min_value;
-    slider->max_value = max_value;
-    slider->value_step = value_step;
-
-    slider->draw_background = 1;
-    slider->is_vertical = is_vertical;
-
-    slider->value = slider_snap_value(slider, initial_value);
-    slider->display_text = display_text;
-    slider_update_cached_thumb_offset(slider);
-    return 1;
-}
-
-int widget_slider_text_block_init(text_block *block, int x, int y, int width, int height, lang_sequence *sequence,
-    sequence_positioning position)
-{
-    lang_sequence seq;
-    lang_seq_init(&seq, (lang_fragment *) sequence->fragments, sequence->count);
-    return widget_text_block_init_simple(block, x, y, width, height, &seq, position, TEXT_BLOCK_STYLE_RAW);
-}
-
-void widget_slider_draw(const slider_t *slider)
-{
-    if (slider->is_hidden) {
-        return;
-    }
-
-    if (slider->is_vertical) {
-        draw_slider_vertical((slider_t *) slider);
-    } else {
-        draw_slider_horizontal((slider_t *) slider);
-    }
-}
-
-void widget_slider_draw_array(const slider_t *sliders, unsigned int num_sliders)
-{
-    for (unsigned int i = 0; i < num_sliders; i++) {
-        widget_slider_draw(&sliders[i]);
-    }
+    return hovered_element;
 }
 
 static int slider_get_value_from_thumb_offset(slider_t *slider, int thumb_offset)
@@ -516,6 +533,9 @@ int widget_slider_handle_mouse_array(slider_t *sliders, const mouse *m, unsigned
     return handled;
 }
 
+#pragma endregion Input Handling
+#pragma region Tooltip
+
 int widget_slider_handle_tooltip(const slider_t *slider, tooltip_context *c)
 {
     if (!slider || !c || slider->is_hidden || !slider->is_hovered || tooltip_context_is_empty(&slider->tooltip_c)) {
@@ -536,3 +556,5 @@ int widget_slider_handle_tooltip_array(const slider_t *sliders, tooltip_context 
     }
     return 0;
 }
+
+#pragma endregion Tooltip

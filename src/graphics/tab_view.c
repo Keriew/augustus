@@ -1,7 +1,7 @@
 #include "tab_view.h"
 
 #include "graphics/button.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/panel.h"
 #include "graphics/window.h"
