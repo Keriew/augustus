@@ -199,8 +199,9 @@ static void enable_normal(int *enabled, building_type type)
         enable_if_allowed(enabled, type, current_type);
     }
 
-    if (type == BUILDING_TRIUMPHAL_ARCH && !city_buildings_triumphal_arch_available()) {
-        *enabled = 0;
+    if (type == BUILDING_TRIUMPHAL_ARCH) {
+        // Earned arches remain available even when the scenario disables them.
+        *enabled = city_buildings_triumphal_arch_available();
     }
 }
 
