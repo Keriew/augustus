@@ -2286,8 +2286,6 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_TT_BALANCE, "Sort by Denarii Balance"},
     {TR_UI_LEDGER_DISABLED_1, "This feature is not yet available."},
     {TR_UI_LEDGER_DISABLED_2, "Your scribes are working hard to build this feature, but they need more time."},
-    {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Expand camera bounds" },
-    {TR_UI_LEDGER_ONLY_CURRENT_YEAR , "You only started your governorship this year!"},
     {TR_EDITOR_TOOL_OUTSKIRTS, "Outskirts"},
     {TR_EDITOR_TOOL_OUTSKIRTS_REMOVE, "Remove outskits"},
     {TR_EDITOR_SELECT_LAND, "Select land"},
