@@ -2356,6 +2356,8 @@ static translation_string all_strings[] = {
     {TR_WIDGET_DN, "Dn"},
     {TR_SIDEBAR_DATE_JUMP_TO_CURRENT, "Click to skip to current year"},
     {TR_CONFIG_FIX_EMPIRE_MAP_DIMENSIONS, "Extend map viewport to fullscreen"},
+    {TR_HOTKEY_SAVE_QUICKSAVE, "Quicksave"},
+    {TR_HOTKEY_SAVE_QUICKLOAD, "Quickload"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
