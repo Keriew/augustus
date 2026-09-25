@@ -5,6 +5,7 @@
 #include "core/log.h"
 #include "city/emperor.h"
 #include "game/campaign/file.h"
+#include "game/campaign/localization.h"
 #include "game/campaign/mission.h"
 #include "game/campaign/original.h"
 #include "game/campaign/player_data.h"
@@ -82,6 +83,7 @@ int game_campaign_load(const char *filename)
 
     if (strcmp(filename, data.file_name) == 0) {
         data.active = 1;
+        game_campaign_reload_localization();
         return 1;
     }
 
@@ -96,6 +98,7 @@ int game_campaign_load(const char *filename)
     }
     if (data.active) {
         snprintf(data.file_name, FILE_NAME_MAX, "%s", filename);
+        game_campaign_reload_localization();
     }
     return data.active;
 }
@@ -124,6 +127,59 @@ const char *game_campaign_get_name(void)
 const campaign_info *game_campaign_get_info(void)
 {
     return data.active ? &data.campaign : 0;
+}
+
+void game_campaign_reload_localization(void)
+{
+    campaign_localization_load();
+}
+
+const uint8_t *game_campaign_display_name(void)
+{
+    if (!data.active) {
+        return 0;
+    }
+    const uint8_t *localized = campaign_localization_name();
+    return localized ? localized : data.campaign.name;
+}
+
+const uint8_t *game_campaign_display_description(void)
+{
+    if (!data.active) {
+        return 0;
+    }
+    const uint8_t *localized = campaign_localization_description();
+    return localized ? localized : data.campaign.description;
+}
+
+const uint8_t *game_campaign_display_mission_title(int scenario_id)
+{
+    const campaign_mission *mission = data.active ? campaign_mission_current(scenario_id) : 0;
+    if (!mission) {
+        return 0;
+    }
+    const uint8_t *localized = campaign_localization_mission_title(scenario_id);
+    return localized ? localized : mission->title;
+}
+
+const uint8_t *game_campaign_display_scenario_name(int scenario_id)
+{
+    const campaign_scenario *camp_scenario = game_campaign_get_scenario(scenario_id);
+    if (!camp_scenario) {
+        return 0;
+    }
+    const uint8_t *localized = campaign_localization_scenario_name(scenario_id);
+    return localized ? localized : camp_scenario->name;
+}
+
+const uint8_t *game_campaign_display_scenario_description(int scenario_id)
+{
+    const campaign_scenario *camp_scenario = game_campaign_get_scenario(scenario_id);
+    if (!camp_scenario) {
+        return 0;
+    }
+    const uint8_t *localized = campaign_localization_scenario_description(scenario_id);
+    return localized ? localized : camp_scenario->description;
 }
 
 int game_campaign_has_file(const char *filename)
@@ -295,6 +351,7 @@ void game_campaign_restore(void)
 
 void game_campaign_clear(void)
 {
+    campaign_localization_clear();
     campaign_file_set_path(0);
     campaign_mission_clear();
     if (data.is_custom) {

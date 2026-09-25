@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<campaign_localization version="1" language="fr">
+    <name>Campagne de démonstration</name>
+    <description>Description de la campagne.</description>
+    <mission first-scenario="Mission01">
+        <title>Première mission</title>
+    </mission>
+    <scenario file="Mission01">
+        <name>Premier scénario</name>
+        <description>Description du scénario.</description>
+    </scenario>
+</campaign_localization>
