@@ -12,6 +12,7 @@
 #define DIR_VIDEO "video/"
 #define DIR_IMAGE "image/"
 #define DIR_AUDIO "audio/"
+#define DIR_ROOT ""
 
 // Fixed overhead miniz/zip format adds per entry, independent of data size
 #define ZIP_LOCAL_HEADER_SIZE   30   // local file header, excludes name/extra
@@ -21,6 +22,7 @@
 static const char *VIDEO_EXT[] = { "webm", "mpg", "mpeg", "smk", NULL };
 static const char *IMAGE_EXT[] = { "png", "bmp", NULL };
 static const char *AUDIO_EXT[] = { "mp3", "wav", NULL };
+static const char *MAP_EXT[] = { "map", "mapx", "sav", "svx", NULL };
 
 static const char *incompressible[] = {"webm", "mpg", "mpeg", "smk", "png", "mp3", NULL};
 static const char *compressible[] = {"wav","bmp", "map", "mapx", NULL};
@@ -92,6 +94,7 @@ static int has_extension(const char *path, const char **list)
 /* Returns the folder prefix for a file, or NULL if it's not a known media type */
 static const char *folder_for(const char *path)
 {
+    if (has_extension(path, MAP_EXT)) return DIR_ROOT;
     if (has_extension(path, VIDEO_EXT)) return DIR_VIDEO;
     if (has_extension(path, IMAGE_EXT)) return DIR_IMAGE;
     if (has_extension(path, AUDIO_EXT)) return DIR_AUDIO;
