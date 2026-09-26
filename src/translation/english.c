@@ -2351,9 +2351,15 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Population goal not met"},
     {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Room for all needed employees"},
     {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Not enough room for needed employees"},
+    {TR_MAP_EDITOR_PACKAGE_MAP, "Package map"},
+    {TR_EDITOR_PACKAGE_MAP, "Packaging map"},
+    {TR_EDITOR_PACKAGE_MAP_INFO, "This action will wrap up all necessary files to play this map into one single .zip file."},
+    {TR_EDITOR_PACKAGE_MAP_SIZE, "The resulting size of the zip will be aprox."},
+    {TR_EDITOR_PACKAGE_MAP_CONTINUE, "Are you sure you wanna continue?"},
     {TR_WIDGET_DN, "Dn"},
     {TR_SIDEBAR_DATE_JUMP_TO_CURRENT, "Click to skip to current year"},
     {TR_CONFIG_FIX_EMPIRE_MAP_DIMENSIONS, "Extend map viewport to fullscreen"},
+    {TR_PAUSE_MENU_PACKAGING_IMPOSSIBLE, "You first have to save the map in order to package it!"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

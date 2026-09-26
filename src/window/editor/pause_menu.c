@@ -24,8 +24,11 @@
 #include "window/city.h"
 #include "window/main_menu.h"
 #include "window/mission_briefing.h"
+#include "window/editor/package_map.h"
 
-#define MAX_BUTTONS 7
+#define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
+
+#define DISABLED_PATTERN_OPACITY 80
 
 static void menu_file_confirm_exit(int accepted, int checked)
 {
@@ -48,16 +51,22 @@ static generic_button buttons[] = {
     {192, 260, 192, 25, button_click, 0, 5},
     {192, 300, 192, 25, button_click, 0, 6},
     {192, 340, 192, 25, button_click, 0, 7},
+    {192, 380, 192, 25, button_click, 0, 8},
 };
 
 static void draw_foreground(void)
 {
     graphics_in_dialog();
 
-    outer_panel_draw(160, 44, 16, 22);
+    outer_panel_draw(160, 44, 16, 24);
 
     for (unsigned int i = 0; i < MAX_BUTTONS; i++) {
-        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 ? 1 : 0);
+        int packaging_enabled = (i == 4 ? (scenario_editor_is_saved() && scenario_editor_has_been_saved_once()) : 1);
+        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 && packaging_enabled ? 1 : 0);
+        if (!packaging_enabled) {
+            label_draw_greyout_pattern(buttons[i].x + 1, buttons[i].y + 1, buttons[i].width - 1, 23, COLOR_DISABLED_PATTERN_OPACITY, 1);
+            graphics_tint_rect(buttons[i].x, buttons[i].y, buttons[i].width, 25, COLOR_BUTTON_DISABLED_TINT, COLOR_TINT_OPACITY);
+        }
     }
 
     text_draw_centered(translation_for(TR_LABEL_PAUSE_MENU), 192, 58, 192, FONT_LARGE_BLACK, 0);
@@ -65,9 +74,10 @@ static void draw_foreground(void)
     lang_text_draw_centered(7, 1, 192, 146, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(7, 2, 192, 186, 192, FONT_NORMAL_GREEN);
     lang_text_draw_centered(7, 3, 192, 226, 192, FONT_NORMAL_GREEN);
-    text_draw_centered(translation_for(TR_MAP_EDITOR_OPTIONS), 192, 266, 192, FONT_NORMAL_GREEN, 0);
-    lang_text_draw_centered(1, 7, 192, 306, 192, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(7, 4, 192, 346, 192, FONT_NORMAL_GREEN);
+    text_draw_centered(translation_for(TR_MAP_EDITOR_PACKAGE_MAP), 192, 266, 192, FONT_NORMAL_GREEN, 0);
+    text_draw_centered(translation_for(TR_MAP_EDITOR_OPTIONS), 192, 306, 192, FONT_NORMAL_GREEN, 0);
+    lang_text_draw_centered(1, 7, 192, 346, 192, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(7, 4, 192, 386, 192, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
 }
@@ -111,12 +121,22 @@ static void button_click(const generic_button *button)
         window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD);
     } else if (type == 4) {
         window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE);
-    } else if (type == 5) {
-        window_editor_attributes_show();
+    } else if (type == 5 && scenario_editor_is_saved() && scenario_editor_has_been_saved_once()) {
+        window_map_editor_package_map_show();
     } else if (type == 6) {
-        window_config_show(CONFIG_FIRST_PAGE, 0, 0);
+        window_editor_attributes_show();
     } else if (type == 7) {
-        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed); 
+        window_config_show(CONFIG_FIRST_PAGE, 0, 0);
+    } else if (type == 8) {
+        window_popup_dialog_show_confirmation(translation_for(TR_BUTTON_BACK_TO_MAIN_MENU), 0, 0, main_menu_confirmed);
+    }
+}
+
+static void get_tooltip(tooltip_context *c)
+{
+    if (focus_button_id == 5 && !(scenario_editor_is_saved() && scenario_editor_has_been_saved_once())) {
+        c->type = TOOLTIP_BUTTON;
+        c->translation_key = TR_PAUSE_MENU_PACKAGING_IMPOSSIBLE;
     }
 }
 
@@ -126,7 +146,8 @@ void window_map_editor_pause_menu_show(void)
             WINDOW_EDITOR_MAP,
             window_draw_underlying_window,
             draw_foreground,
-            handle_input
+            handle_input,
+            get_tooltip
     };
     window_show(&window);
 }

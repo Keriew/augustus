@@ -15,6 +15,12 @@ const char *platform_user_path_recommend(void);
 void platform_user_path_create_subdirectories(void);
 
 /**
+ * Loops through all .map and .mapx files in the scenario folder puts them in folders
+ * and deletes them.
+ */
+void plaform_user_path_wrap_scenarios_in_dirs(void);
+
+/**
  * Copies files from the default user path to the new user path
  *
  * @param original_user_path The user path to copy files from

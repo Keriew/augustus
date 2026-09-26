@@ -752,6 +752,11 @@ void scenario_settings_load_state(
     buffer_skip(player_name, MAX_PLAYER_NAME);
     buffer_read_raw(player_name, scenario.settings.player_name, MAX_PLAYER_NAME);
     buffer_read_raw(scenario_name, scenario.scenario_name, MAX_SCENARIO_NAME);
+    // migrate old scenario names (map names) to new ones (folder names)
+    if (file_has_extension((char *)scenario.scenario_name, "map") ||
+        file_has_extension((char *)scenario.scenario_name, "mapx")) {
+        file_remove_extension((char *)scenario.scenario_name); // foldernames are default the map name but without extension
+    }
 
     if (!game_campaign_is_active()) {
         if (campaign_name) {
