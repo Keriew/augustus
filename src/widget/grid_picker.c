@@ -1,7 +1,7 @@
 #include "grid_picker.h"
 
 #include "graphics/button.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/panel.h"
 #include "graphics/screen.h"
@@ -10,11 +10,10 @@
 #include <string.h>
 
 #define GRID_PICKER_SCREEN_MARGIN 10
+#define GRID_PICKER_SHADING 3
 
 int grid_picker_row_column_to_index(grid_picker *picker, int row, int column);
 int grid_picker_index_to_row_column(grid_picker *picker, int index, int *row, int *column);
-
-static int debug_shader = 2;
 
 void grid_picker_cells_init(int count, grid_picker_cell *cells, int *images, lang_fragment *sequence, int sequence_size,
     tooltip_context *tooltip_c)
@@ -38,14 +37,15 @@ void grid_picker_anchor_init(complex_button *anchor, int x, int y, int width, in
     }
 
     memset(anchor, 0, sizeof(*anchor));
+    complex_button_init_style(anchor, style);
     anchor->x = x;
     anchor->y = y;
     anchor->width = width;
     anchor->height = height;
-    anchor->style = style;
-    anchor->sequence = sequence;
-    anchor->sequence_size = sequence_size;
+    anchor->sequence.fragments = (lang_fragment *) sequence;
+    anchor->sequence.count = sequence_size;
     anchor->sequence_position = SEQUENCE_POSITION_CENTER;
+    anchor->shade_on_hover = GRID_PICKER_SHADING; // darker shading
     if (tooltip_c) {
         tooltip_copy_context(&anchor->tooltip_c, tooltip_c);
     }
@@ -266,7 +266,7 @@ static void grid_picker_draw_gray_style(grid_picker *picker)
         grid_picker_draw_cell_contents(picker, cell);
         large_label_draw_border(cell->x, cell->y, picker->cell_width, picker->cell_height);
         if (has_focus) {
-            graphics_shade_rect(cell->x, cell->y, picker->cell_width, picker->cell_height, debug_shader);
+            graphics_shade_rect(cell->x, cell->y, picker->cell_width, picker->cell_height, GRID_PICKER_SHADING);
         }
     }
 }
@@ -310,12 +310,12 @@ void update_anchor(grid_picker *picker)
     }
     if (cell->image.id > 0) {
         picker->anchor.image = cell->image;
-        picker->anchor.sequence = NULL;
-        picker->anchor.sequence_size = 0;
+        picker->anchor.sequence.fragments = NULL;
+        picker->anchor.sequence.count = 0;
     } else {
         picker->anchor.image_before = cell->image_before;
-        picker->anchor.sequence = cell->sequence;
-        picker->anchor.sequence_size = cell->sequence_size;
+        picker->anchor.sequence.fragments = cell->sequence;
+        picker->anchor.sequence.count = cell->sequence_size;
         picker->anchor.image_after = cell->image_after;
     }
 }
@@ -390,7 +390,7 @@ int grid_picker_handle_tooltip(grid_picker *picker, tooltip_context *c)
         grid_picker_cell *cell = &picker->cells[row][column];
         tooltip_copy_context(c, &cell->tooltip_c);
         return 1;
-    } else if (picker->anchor.is_focused && !tooltip_context_is_empty(&picker->anchor.tooltip_c)) {
+    } else if (picker->anchor.is_hovered && !tooltip_context_is_empty(&picker->anchor.tooltip_c)) {
         tooltip_copy_context(c, &picker->anchor.tooltip_c);
         return 1;
     }

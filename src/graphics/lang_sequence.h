@@ -37,7 +37,37 @@ typedef struct lang_sequence {
     int count;
 } lang_sequence;
 
+typedef struct {
+    lang_sequence sequence;
+    lang_fragment fragments[4];
+    // lang_date_format doesn't need to be embedded - after initialisation it's no longer necessary.
+} lang_date_sequence;
+
+typedef enum {
+    LANG_DATE_FORMAT_FULL, // with cosmetic day, e.g. '1 Jan AD 40'
+    LANG_DATE_FORMAT_MONTH_YEAR, // only month an year, like vanilla e.g. 'Jan AD 40'
+    LANG_DATE_FORMAT_YEAR // year only, e.g. 'AD 40'
+} lang_date_format;
+
 void lang_seq_init(lang_sequence *seq, lang_fragment *fragments, int count);
+/**
+ * @brief Helper - initializes a lang sequence with a current date representation.
+ * @param date The lang date sequence to initialize.
+ * @param full_date_format 1 = '1 Jan AD 40', 0 = 'AD 40'
+ */
+void lang_seq_current_date_init(lang_date_sequence *date, int full_date_format);
+
+/**
+ * @brief Helper - initializes a lang sequence with a date representation.
+ * @param date  The lang date sequence to initialize.
+ * @param year  negative for BC, positive for AD
+ * @param month  month (0-11)
+ * @param cosmetic_day  can be left 0, cosmetic day of the month (1-31)
+ * @param game_day can be left 0, if given, used to override the cosmetic day
+ * @param format date shape to build
+ */
+void lang_sequence_date_init_format(lang_date_sequence *date, int year, int month, int cosmetic_day, int game_day,
+    lang_date_format format);
 
 /**
  * @name Lang Frag Constructors

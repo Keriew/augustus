@@ -24,6 +24,8 @@ enum {
     BIT_NO_CONSTRUCTION_AND_DELETED = 0xffaf,
     BIT_FUTURE_EARTHQUAKE = 0x100,
     BIT_NO_FUTURE_EARTHQUAKE = 0xfeff,
+    BIT_OUTSKIRTS = 0x200,
+    BIT_NO_OUTSKIRTS = 0xfdff,
     EDGE_MASK_X = 0x7,
     EDGE_MASK_Y = 0x38,
     EDGE_MASK_XY = 0x3f,
@@ -198,6 +200,21 @@ void map_property_mark_plaza_earthquake_or_overgrown_garden(int grid_offset)
 void map_property_clear_plaza_earthquake_or_overgrown_garden(int grid_offset)
 {
     bitfields_grid.items[grid_offset] &= BIT_NO_PLAZA;
+}
+
+int map_property_is_outskirts(int grid_offset)
+{
+    return bitfields_grid.items[grid_offset] & BIT_OUTSKIRTS;
+}
+
+void map_property_mark_outskirts(int grid_offset)
+{
+    bitfields_grid.items[grid_offset] |= BIT_OUTSKIRTS;
+}
+
+void map_property_clear_outskirts(int grid_offset)
+{
+    bitfields_grid.items[grid_offset] &= BIT_NO_OUTSKIRTS;
 }
 
 int map_property_is_constructing(int grid_offset)

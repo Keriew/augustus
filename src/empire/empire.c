@@ -178,6 +178,15 @@ static void check_scroll_boundaries(void)
 
     data.scroll_x = calc_bound(data.scroll_x, data.image.offset_x, max_x);
     data.scroll_y = calc_bound(data.scroll_y, data.image.offset_y, max_y);
+    if (config_get(CONFIG_FIX_EMPIRE_MAP_DIMENSIONS)) {
+        // Center axes that fit in the viewport; keep scrolling on larger axes.
+        if (data.viewport_width > data.image.width) {
+            data.scroll_x = data.image.offset_x - (data.viewport_width - data.image.width) / 2;
+        }
+        if (data.viewport_height > data.image.height) {
+            data.scroll_y = data.image.offset_y - (data.viewport_height - data.image.height) / 2;
+        }
+    }
 }
 
 void empire_center_on_our_city(int viewport_width, int viewport_height)

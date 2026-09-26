@@ -23,7 +23,7 @@
 #include "game/state.h"
 #include "game/time.h"
 #include "game/undo.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"

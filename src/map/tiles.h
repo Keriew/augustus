@@ -72,6 +72,23 @@ int map_tiles_are_clear_with_terrain_exception(int x, int y, int size, int disal
 
 int map_tiles_are_clear(int x, int y, int size, int disallowed_terrain, int check_figure);
 
+/**
+ * @brief Checks the area of usually a building for outskirts
+ * @param x The x coordinate (of the building)
+ * @param y The y coordinate (of the building)
+ * @param size The size (of the building)
+ * @return 1 if at least one outskirt tile has been found, 0 otherwise (none found)
+ */
+int map_tiles_exists_outskirts(int x, int y, int size);
+/**
+ * @brief Finds the distance to the nearest tile of non outskirt terrain
+ * @param x The x coordinate of the tile to check from
+ * @param y The y coordinate of the tile to check from
+ * @return 0 - 6; 0 if the tile x, y isn't even outskirts,
+ *     1 if the nearest non outskirt tile is one tile away etc., 6 if it 6 OR MORE tiles away
+ */
+int map_tiles_find_nearest_non_outskirts(int x, int y);
+
 void map_tiles_add_entry_exit_flags(void);
 void map_tiles_remove_entry_exit_flags(void);
 

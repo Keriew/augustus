@@ -1439,7 +1439,10 @@
     <image id="abstract_caret_symbol" src="abstract_caret_symbol"/>
     <image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
     <image group="this" image="Plus_Button_Idle"/>
-    <image src="Plus_Button_Click"/>
+    <image id="Plus_Button_Click" src="Plus_Button_Click"/>
+    <image src="Minus_Button_Idle" id="Minus_Button_Idle"/>
+    <image group="this" image="Minus_Button_Idle"/>
+    <image id="Minus_Button_Click" src="Minus_Button_Click"/>
     <image src="Edit_Button_Idle" id="Edit_Button_Idle"/>
     <image group="this" image="Edit_Button_Idle"/>
     <image src="Edit_Button_Click"/>
@@ -1535,13 +1538,40 @@
 	<image id="Scrollbar_Down_02" src="Scrollbar_Down_02"/>
 	<image id="Scrollbar_Down_03" src="Scrollbar_Down_03"/>
 	<image id="Scrollbar_Down_04" src="Scrollbar_Down_04"/>
+	<image id="Scrollbar_Left_01">
+		<layer group="this" image="Scrollbar_Down_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_02">
+		<layer group="this" image="Scrollbar_Down_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_03">
+		<layer group="this" image="Scrollbar_Down_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_04">
+		<layer group="this" image="Scrollbar_Down_04" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Up_01" src="Scrollbar_Up_01"/>
 	<image id="Scrollbar_Up_02" src="Scrollbar_Up_02"/>
 	<image id="Scrollbar_Up_03" src="Scrollbar_Up_03"/>
 	<image id="Scrollbar_Up_04" src="Scrollbar_Up_04"/>
+	<image id="Scrollbar_Right_01">
+		<layer group="this" image="Scrollbar_Up_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_02">
+		<layer group="this" image="Scrollbar_Up_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_03">
+		<layer group="this" image="Scrollbar_Up_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_04">
+		<layer group="this" image="Scrollbar_Up_04" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Lines_D_01" src="Scrollbar_Lines_D_01"/>
 	<image id="Scrollbar_Lines_L_01" src="Scrollbar_Lines_L_01"/>
 	<image id="Scrollbar_Lines_Alpha" src="Scrollbar_Lines_Alpha"/>
+	<image id="Scrollbar_Lines_Alpha_B" width="19" height="24">
+		<layer group="this" image="Scrollbar_Lines_Alpha" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Middle_01" src="Scrollbar_Middle_01"/>
 	<image id="Scrollbar_Middle_02" src="Scrollbar_Middle_02"/>
 	<image id="Scrollbar_Middle_03" src="Scrollbar_Middle_03"/>
@@ -1703,6 +1733,22 @@
 	<image id="Scrollbar_Middle_04b_Trimmed_MirrorH" width="32" height="24">
 		<layer group="this" image="Scrollbar_Middle_04b_Trimmed" invert="horizontal"/>
 	</image>
+	<image id="Scrollbar_mini_thumb_01" src="Scrollbar_mini_thumb_01"/>
+	<image id="Scrollbar_mini_thumb_02" src="Scrollbar_mini_thumb_02"/>
+	<image id="Scrollbar_mini_thumb_03" src="Scrollbar_mini_thumb_03"/>
+	<image id="Scrollbar_mini_thumb_lines" src="Scrollbar_mini_thumb_lines"/>
+	<image id="Scrollbar_mini_thumb_vert_01">
+		<layer group="this" image="Scrollbar_mini_thumb_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_02">
+		<layer group="this" image="Scrollbar_mini_thumb_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_03">
+		<layer group="this" image="Scrollbar_mini_thumb_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_lines">
+		<layer group="this" image="Scrollbar_mini_thumb_lines" rotate="90" x="0" y="0"/>
+	</image>
 	<image id="Scrollbar_Minus_01" src="Scrollbar_Minus_01"/>
 	<image id="Scrollbar_Minus_02" src="Scrollbar_Minus_02"/>
 	<image id="Scrollbar_Minus_03" src="Scrollbar_Minus_03"/>
@@ -1716,6 +1762,24 @@
 	<image id="Scrollbar_Dark_Start">
 		<layer src="Scrollbar_Dark_End" invert="vertical"/>
 	</image>
+	<image id="Scrollbar_Dark_End_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_End" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Dark_Mid_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_Mid" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Dark_Start_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_Start" rotate="90" x="0" y="0"/>
+	</image>
+	<!-- Note: Assets for drawing segmented borders -->
+	<image id="segmented_border_01" src="segmented_border_01" width="5" height="5"/>
+	<image id="segmented_border_02" src="segmented_border_02" width="66" height="5"/>
+	<image id="segmented_border_03" src="segmented_border_03" width="5" height="5"/>
+	<image id="segmented_border_04" src="segmented_border_04" width="5" height="6"/>
+	<image id="segmented_border_06" src="segmented_border_06" width="5" height="6"/>
+	<image id="segmented_border_07" src="segmented_border_07" width="5" height="5"/>
+	<image id="segmented_border_08" src="segmented_border_08" width="66" height="5"/>
+	<image id="segmented_border_09" src="segmented_border_09" width="5" height="5"/>
 	<!-- Note: Assetss for drawing custom-dimension main-menu-style buttons -->
 	<image id="Button_Menu_Left_Panel" width="13" height="19">
 		<layer group="15" image="0" x ="-3" y="-3"/>
@@ -1790,7 +1854,5 @@
 	<image id="Trade_Ledger_Export" src = "Trade_Ledger_Export"/>
 	<image id="Trade_Ledger_Import" src = "Trade_Ledger_Import"/>
 	<image id="resource_picker" src = "resource_picker"/>
-    <image src="Minus_Button_Idle" id="Minus_Button_Idle"/>
-    <image group="this" image="Minus_Button_Idle"/>
-    <image src="Minus_Button_Click"/>
+	<image id="hourglass_icon" src="hourglass_v1" width="24" height="24"/>
 </assetlist>
