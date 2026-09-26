@@ -167,6 +167,7 @@ int game_file_editor_load_scenario(const char *scenario_file)
     scenario_map_init();
 
     prepare_map_for_editing();
+    scenario_editor_set_as_saved(1); // only necessary for the ever saved flag
     return 1;
 }
 
