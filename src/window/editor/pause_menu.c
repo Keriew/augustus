@@ -28,6 +28,8 @@
 
 #define MAX_BUTTONS (sizeof(buttons) / sizeof(generic_button))
 
+#define DISABLED_PATTERN_OPACITY 80
+
 static void menu_file_confirm_exit(int accepted, int checked)
 {
     if (accepted) {
@@ -59,7 +61,12 @@ static void draw_foreground(void)
     outer_panel_draw(160, 44, 16, 24);
 
     for (unsigned int i = 0; i < MAX_BUTTONS; i++) {
-        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 ? 1 : 0);
+        int packaging_enabled = (i == 4 ? (scenario_editor_is_saved() && scenario_editor_has_been_saved_once()) : 1);
+        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 && packaging_enabled ? 1 : 0);
+        if (!packaging_enabled) {
+            label_draw_greyout_pattern(buttons[i].x + 1, buttons[i].y + 1, buttons[i].width - 1, 23, COLOR_DISABLED_PATTERN_OPACITY, 1);
+            graphics_tint_rect(buttons[i].x, buttons[i].y, buttons[i].width, 25, COLOR_BUTTON_DISABLED_TINT, COLOR_TINT_OPACITY);
+        }
     }
 
     text_draw_centered(translation_for(TR_LABEL_PAUSE_MENU), 192, 58, 192, FONT_LARGE_BLACK, 0);
@@ -114,7 +121,7 @@ static void button_click(const generic_button *button)
         window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_LOAD);
     } else if (type == 4) {
         window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE);
-    } else if (type == 5) {
+    } else if (type == 5 && scenario_editor_is_saved() && scenario_editor_has_been_saved_once()) {
         window_map_editor_package_map_show();
     } else if (type == 6) {
         window_editor_attributes_show();
@@ -125,13 +132,22 @@ static void button_click(const generic_button *button)
     }
 }
 
+static void get_tooltip(tooltip_context *c)
+{
+    if (focus_button_id == 5 && !(scenario_editor_is_saved() && scenario_editor_has_been_saved_once())) {
+        c->type = TOOLTIP_BUTTON;
+        c->translation_key = TR_PAUSE_MENU_PACKAGING_IMPOSSIBLE;
+    }
+}
+
 void window_map_editor_pause_menu_show(void)
 {
     window_type window = {
             WINDOW_EDITOR_MAP,
             window_draw_underlying_window,
             draw_foreground,
-            handle_input
+            handle_input,
+            get_tooltip
     };
     window_show(&window);
 }

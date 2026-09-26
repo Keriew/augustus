@@ -14,11 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DISABLED_SHADING 3
-#define DISABLED_PATTERN_OPACITY 80
-#define TINT_COLOR 0x9299A6
-#define TINT_OPACITY 0x33
-
 static void complex_button_ellipsized(complex_button *button, int was_ellipsized);
 // definitions for drawing styles, so the main drawing function can be first
 static void draw_button_contents(const complex_button *button, font_t font, color_t font_primary, color_t font_secondary);
@@ -378,7 +373,7 @@ static void handle_animation(complex_button *button)
         return;
     }
 
-    if (anim->max_loop_count && anim->loops_left > 0) { // decrement finite loop count 
+    if (anim->max_loop_count && anim->loops_left > 0) { // decrement finite loop count
         anim->loops_left--;
     }
 
@@ -639,12 +634,12 @@ static void draw_main_menu_style(const complex_button *button, font_t base_font,
             }
         }
     }
-    // text and images 
+    // text and images
     draw_button_contents(button, base_font, font_primary, font_secondary);
 
     if (button->is_disabled && !button->disabled_no_effect) {
-        label_draw_greyout_pattern(button->x, button->y, button->width, button->height, DISABLED_PATTERN_OPACITY, 1);
-        graphics_tint_rect(button->x, button->y, button->width, button->height, TINT_COLOR, TINT_OPACITY);
+        label_draw_greyout_pattern(button->x, button->y, button->width, button->height, COLOR_DISABLED_PATTERN_OPACITY, 1);
+        graphics_tint_rect(button->x, button->y, button->width, button->height, COLOR_BUTTON_DISABLED_TINT, COLOR_TINT_OPACITY);
         // disabled effects drawn after content to avoid changing font
         graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
         // re-establish clip, label functions reset the clip rectangle internally

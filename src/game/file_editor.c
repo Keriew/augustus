@@ -143,7 +143,7 @@ static void prepare_map_for_editing(void)
     map_natives_init_editor();
     map_routing_update_all();
 
-    scenario_editor_set_as_saved();
+    scenario_editor_set_as_saved(0);
 
     city_view_init();
     game_state_unpause();
@@ -200,7 +200,7 @@ int game_file_editor_write_scenario(const char *scenario_file)
     scenario_distant_battle_set_enemy_travel_months();
 
     if (game_file_io_write_scenario(scenario_file)) {
-        scenario_editor_set_as_saved();
+        scenario_editor_set_as_saved(1);
         return 1;
     }
     return 0;
