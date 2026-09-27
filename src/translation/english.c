@@ -2359,7 +2359,10 @@ static translation_string all_strings[] = {
     {TR_WIDGET_DN, "Dn"},
     {TR_SIDEBAR_DATE_JUMP_TO_CURRENT, "Click to skip to current year"},
     {TR_CONFIG_FIX_EMPIRE_MAP_DIMENSIONS, "Extend map viewport to fullscreen"},
-    {TR_PAUSE_MENU_PACKAGING_IMPOSSIBLE, "You first have to save the map in order to package it!"}
+    {TR_PAUSE_MENU_PACKAGING_IMPOSSIBLE, "You first have to save the map in order to package it!"},
+    {TR_EDITOR_PACKAGE_MAP_SUCCESS_1, "Successfully packaged"},
+    {TR_EDITOR_PACKAGE_MAP_SUCCESS_2, "files into"},
+    {TR_EDITOR_PACKAGE_MAP_SUCCESS_3, "of size"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

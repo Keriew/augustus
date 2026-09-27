@@ -5,7 +5,9 @@
 #include "core/image.h"
 #include "core/image_group.h"
 #include "core/image_group_editor.h"
+#include "core/io.h"
 #include "core/log.h"
+#include "core/string.h"
 #include "core/zlib_helper.h"
 #include "editor/editor.h"
 #include "empire/empire.h"
@@ -24,14 +26,22 @@
 #define WINDOW_WIDTH 30
 #define WINDOW_HEIGHT 20
 
+typedef enum {
+    EXPORTING_UNCONFIRMED,
+    EXPORTING_IN_PROGRESS,
+    EXPORTING_FINISHED
+} exporting_type;
+
 static struct {
-    int exporting;
+    exporting_type exporting;
     char (*files)[FILE_NAME_MAX]; // A list of files of length FILE_NAME_MAX
     int file_count;
     int capacity;
-    long long zip_size;
+    long long int zip_size;
     char scenario_file[FILE_NAME_MAX];
     int file_idx;
+    char zip_path[FILE_NAME_MAX];
+    long long int final_size;
 } data;
 
 const char *image_paths[] = {
@@ -61,9 +71,22 @@ static image_button continue_buttons[] = {
     {256, 130, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_cancel, button_none, 0, 0, 1}
 };
 
+static int file_already_added(const char *filename)
+{
+    for (int i = 0; i < data.file_count; i++) {
+        if (string_equals(string_from_ascii(data.files[i]), string_from_ascii(filename))) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void add_file(const char *name)
 {
     if (!name || !*name) {
+        return;
+    }
+    if (file_already_added(name)) {
         return;
     }
     if (data.file_count == data.capacity) {
@@ -191,6 +214,7 @@ static void export_stop(void)
     data.exporting = 0;
     data.zip_size = 0;
     data.file_idx = 0;
+    data.final_size = 0;
 }
 
 static void close_window(void)
@@ -201,11 +225,10 @@ static void close_window(void)
 
 static void export_start(void)
 {
-    data.exporting = 1;
+    data.exporting = EXPORTING_IN_PROGRESS;
     data.file_idx = 0;
-    char zip_path[FILE_NAME_MAX];
-    snprintf(zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
-    if (!zip_package_map_start(zip_path)) {
+    snprintf(data.zip_path, FILE_NAME_MAX, "%s%s", dir_get_scenario_dir(), ".zip");
+    if (!zip_package_map_start(data.zip_path)) {
         close_window();
     }
     zip_package_map_add_file(data.scenario_file, MZ_DEFAULT_LEVEL);
@@ -225,6 +248,20 @@ static void init(void)
     data.zip_size = estimate_zip_size(data.files, data.file_count, data.scenario_file);
 }
 
+static void get_magnitude(long long int size, float *magnitude, char *extension)
+{
+    if (data.zip_size > 1073741823) {
+        *magnitude = 1073741824.0;
+        snprintf(extension, 3, "GB");
+    } else if (data.zip_size > 1048575) {
+        *magnitude = 1048576.0;
+        snprintf(extension, 3, "MB");
+    } else if (data.zip_size > 1023) {
+        *magnitude = 1024.0;
+        snprintf(extension, 3, "kB");
+    }
+}
+
 static void draw_foreground(void)
 {
     graphics_in_dialog_with_size(WINDOW_WIDTH * BLOCK_SIZE, WINDOW_HEIGHT * BLOCK_SIZE);
@@ -232,30 +269,21 @@ static void draw_foreground(void)
     outer_panel_draw(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP, 0, 24, WINDOW_WIDTH * BLOCK_SIZE, FONT_LARGE_BLACK);
-    if (data.exporting && data.file_idx < data.file_count) {
+    if (data.exporting == EXPORTING_IN_PROGRESS && data.file_idx < data.file_count) {
         zip_package_map_add_file(data.files[data.file_idx], MZ_DEFAULT_LEVEL);
         data.file_idx++;
-    } else if (data.exporting && data.file_idx >= data.file_count) {
+    } else if (data.exporting == EXPORTING_IN_PROGRESS && data.file_idx >= data.file_count) {
         if (!zip_package_map_finalize()) {
             close_window();
         }
-        export_stop();
-    } else {
+        data.exporting = EXPORTING_FINISHED;
+    } else if (data.exporting == EXPORTING_UNCONFIRMED) {
         int height = lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP_INFO,
             24, 64, WINDOW_WIDTH * BLOCK_SIZE - 48, FONT_NORMAL_BLACK);
         uint8_t size_message[128];
         float magnitude = 1.0;
         char extension[3] = "B";
-        if (data.zip_size > 1073741823) {
-            magnitude = 1073741824.0;
-            snprintf(extension, 3, "GB");
-        } else if (data.zip_size > 1048575) {
-            magnitude = 1048576.0;
-            snprintf(extension, 3, "MB");
-        } else if (data.zip_size > 1023) {
-            magnitude = 1024.0;
-            snprintf(extension, 3, "kB");
-        }
+        get_magnitude(data.zip_size, &magnitude, extension);
         snprintf((char *)size_message, 128, "%s %.2f%s.", translation_for(TR_EDITOR_PACKAGE_MAP_SIZE), data.zip_size / magnitude, extension);
         text_draw(size_message, 24, 64 + height, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
         lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP_CONTINUE,
@@ -263,6 +291,19 @@ static void draw_foreground(void)
         // Set the y offset of the buttons flexibly based on the multiline draw
         continue_buttons[0].y_offset = continue_buttons[1].y_offset = 100 + height;
         image_buttons_draw(0, 0, continue_buttons, 2);
+    } else {
+        uint8_t success_message[512];
+        if (!data.final_size) {
+            // cache final size for performance reasons
+            data.final_size = io_get_file_size(data.zip_path, 0);
+        }
+        float magnitude = 1.0;
+        char extension[3] = "B";
+        get_magnitude(data.final_size, &magnitude, extension);
+        snprintf((char *)success_message, 512, "%s %i %s %s %s %.2f%s.", translation_for(TR_EDITOR_PACKAGE_MAP_SUCCESS_1),
+            data.file_count, translation_for(TR_EDITOR_PACKAGE_MAP_SUCCESS_2), data.zip_path,
+            translation_for(TR_EDITOR_PACKAGE_MAP_SUCCESS_3), data.final_size / magnitude, extension);
+        text_draw_multiline(success_message, 24, 64, WINDOW_WIDTH * BLOCK_SIZE - 48, 1, FONT_NORMAL_BLACK, 0);
     }
 
     graphics_reset_dialog();
@@ -272,11 +313,12 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
 
-    if (!data.exporting && image_buttons_handle_mouse(m_dialog, 0, 0, continue_buttons, 2, 0)) {
+    if (data.exporting == EXPORTING_UNCONFIRMED &&
+        image_buttons_handle_mouse(m_dialog, 0, 0, continue_buttons, 2, 0)) {
         return;
     }
 
-    if (input_go_back_requested(m, h) && !data.exporting) {
+    if (input_go_back_requested(m, h) && data.exporting != EXPORTING_IN_PROGRESS) {
         close_window();
     }
 }
