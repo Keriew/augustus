@@ -137,7 +137,7 @@ static void find_files(void)
     }
 
     // Add all assets used in custom messages
-    for (int i = 1; i < custom_messages_count(); i++) {
+    for (int i = 1; i <= custom_messages_count(); i++) {
         custom_message_t *message = custom_messages_get(i);
 
         // linked media
@@ -301,7 +301,7 @@ static void draw_foreground(void)
         char extension[3] = "B";
         get_magnitude(data.final_size, &magnitude, extension);
         snprintf((char *)success_message, 512, "%s %i %s %s %s %.2f%s.", translation_for(TR_EDITOR_PACKAGE_MAP_SUCCESS_1),
-            data.file_count, translation_for(TR_EDITOR_PACKAGE_MAP_SUCCESS_2), data.zip_path,
+            data.file_count + 1, translation_for(TR_EDITOR_PACKAGE_MAP_SUCCESS_2), data.zip_path,
             translation_for(TR_EDITOR_PACKAGE_MAP_SUCCESS_3), data.final_size / magnitude, extension);
         text_draw_multiline(success_message, 24, 64, WINDOW_WIDTH * BLOCK_SIZE - 48, 1, FONT_NORMAL_BLACK, 0);
     }
