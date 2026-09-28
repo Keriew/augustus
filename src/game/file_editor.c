@@ -50,6 +50,7 @@
 #include "scenario/invasion.h"
 #include "scenario/map.h"
 #include "scenario/property.h"
+#include "scenario/terrain_generator/terrain_generator.h"
 #include "sound/city.h"
 #include "sound/music.h"
 #include "widget/map_editor.h"
@@ -131,6 +132,7 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_water();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
+    map_tiles_update_all_trees_shrubs();
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
     map_tiles_update_all_rubble();
@@ -152,6 +154,15 @@ static void prepare_map_for_editing(void)
 void game_file_editor_create_scenario(int size)
 {
     create_blank_map(size);
+    prepare_map_for_editing();
+    scenario_editor_set_custom_message_introduction(0);
+    scenario_editor_set_custom_victory_message(0);
+}
+
+void game_file_editor_create_scenario_generated(int size, int generator_algorithm)
+{
+    create_blank_map(size);
+    terrain_generator_generate((terrain_generator_algorithm) generator_algorithm);
     prepare_map_for_editing();
     scenario_editor_set_custom_message_introduction(0);
     scenario_editor_set_custom_victory_message(0);

@@ -487,7 +487,7 @@ static int aqueduct_in_reservoir(int center_offset)
 
 int map_routing_calculate_distances_for_building(routed_building_type type, int x, int y)
 {
-    int source_offset = map_grid_offset(x, y);
+        int source_offset = map_grid_offset(x, y);
     if (type == ROUTED_BUILDING_WALL) {
         route_queue_all_from(source_offset, DIRECTIONS_NO_DIAGONALS, callback_calc_distance_build_wall, 0);
         return 1;
