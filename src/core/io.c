@@ -58,3 +58,26 @@ int io_write_buffer_to_file(const char *filepath, const void *buffer, size_t siz
     file_close(fp);
     return bytes_written;
 }
+
+long io_get_file_size(const char *filepath, int localizable)
+{
+    const char *cased_file = dir_get_file(filepath, localizable);
+    if (!cased_file) {
+        return -1;
+    }
+
+    FILE *fp = file_open(cased_file, "rb");
+    if (!fp) {
+        return -1;
+    }
+
+    if (fseek(fp, 0, SEEK_END) != 0) {
+        file_close(fp);
+        return -1;
+    }
+
+    long size = ftell(fp);
+    file_close(fp);
+
+    return size;
+}

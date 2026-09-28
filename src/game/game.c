@@ -154,6 +154,7 @@ int game_init(void)
         actions |= ACTION_SHOW_MESSAGE_USER_DIR_NOT_WRITABLE;
     } else {
         platform_user_path_create_subdirectories();
+        plaform_user_path_wrap_scenarios_in_dirs();
     }
     if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) {
         actions |= ACTION_SHOW_INTRO_VIDEOS;

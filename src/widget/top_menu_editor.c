@@ -29,10 +29,12 @@
 #include "window/select_list.h"
 #include "window/editor/empire.h"
 #include "window/editor/map.h"
+#include "window/editor/package_map.h"
 
 void menu_file_new_map(int param);
 static void menu_file_load_map(int param);
 static void menu_file_save_map(int param);
+static void menu_file_package_map(int param);
 static void menu_file_exit_to_menu(int param);
 static void menu_file_exit_game(int param);
 
@@ -56,6 +58,7 @@ static menu_item menu_file[] = {
     {7, 1, menu_file_new_map, 0},
     {7, 2, menu_file_load_map, 0},
     {7, 3, menu_file_save_map, 0},
+    {CUSTOM_TRANSLATION, TR_MAP_EDITOR_PACKAGE_MAP, menu_file_package_map, 0},
     {CUSTOM_TRANSLATION, TR_BUTTON_BACK_TO_MAIN_MENU, menu_file_exit_to_menu, 0},
     {1, 5, menu_file_exit_game, 0}
 };
@@ -85,7 +88,7 @@ static menu_item menu_empire[] = {
 };
 
 static menu_bar_item menu[] = {
-    {7, menu_file, 5},
+    {7, menu_file, 6},
     {2, menu_options, 3},
     {3, menu_help, 2},
     {10, menu_resets, 3},
@@ -258,6 +261,12 @@ static void menu_file_save_map(int param)
     clear_state();
     window_editor_map_show();
     window_file_dialog_show(FILE_TYPE_SCENARIO, FILE_DIALOG_SAVE);
+}
+
+static void menu_file_package_map(int param)
+{
+    clear_state();
+    window_map_editor_package_map_show();
 }
 
 static void menu_file_confirm_exit_to_menu(int accepted, int checked)
