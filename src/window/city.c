@@ -18,6 +18,7 @@
 #include "figure/formation.h"
 #include "figure/formation_legion.h"
 #include "figure/roamer_preview.h"
+#include "game/file.h"
 #include "game/orientation.h"
 #include "game/settings.h"
 #include "game/state.h"
@@ -51,6 +52,7 @@
 #include "window/file_dialog.h"
 #include "window/message_list.h"
 #include "window/overlay_menu.h"
+#include "window/plain_message_dialog.h"
 
 #define TOPLEFT_MESSAGES_X 5
 #define TOPLEFT_MESSAGES_Y_SPACING 24
@@ -196,7 +198,7 @@ void window_city_draw_custom_variables_text_display(void)
 
         // Draw just the text since numbers are now baked into the text
         lang_fragment frags[1] = {
-            {.type = LANG_FRAG_TEXT, .text = var_text_resolved }
+            { .type = LANG_FRAG_TEXT, .text = var_text_resolved }
         };
         int c_group = scenario_custom_variable_get_color_group(i);
         color_t color_ver = complex_button_basic_colors(c_group - 1); // color groups are 1-based
@@ -233,11 +235,11 @@ static void draw_time_left(void)
         const uint8_t *label_str = lang_get_string(CUSTOM_TRANSLATION, label_id);
 
         lang_fragment frags[5] = {
-            {.type = LANG_FRAG_TEXT, .text = label_str },
-            {.type = LANG_FRAG_NUMBER, .text_group = CUSTOM_TRANSLATION, .number = years_left },
-            {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS},
-            {.type = LANG_FRAG_NUMBER, .text_group = CUSTOM_TRANSLATION, .number = months_left},
-            {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS}
+            { .type = LANG_FRAG_TEXT, .text = label_str },
+            { .type = LANG_FRAG_NUMBER, .text_group = CUSTOM_TRANSLATION, .number = years_left },
+            { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_YEARS },
+            { .type = LANG_FRAG_NUMBER, .text_group = CUSTOM_TRANSLATION, .number = months_left },
+            { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_EDITOR_REPEAT_FREQUENCY_MONTHS }
         };
         draw_topleft_label_with_fragments(fps_offset + TOPLEFT_MESSAGES_X, 25, frags, 5, font, COLOR_MASK_NONE);
     }
@@ -794,6 +796,35 @@ static void handle_hotkeys(const hotkeys *h)
     if (h->save_file) {
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
     }
+    if (h->quicksave) {
+        if (!game_file_quicksave()) {
+            window_plain_message_dialog_show(TR_SAVEGAME_NOT_ABLE_TO_SAVE_TITLE,
+                TR_SAVEGAME_NOT_ABLE_TO_SAVE_MESSAGE, 1);
+        } else {
+            static int warning_id;
+            warning_id = city_warning_show(WARNING_QUICKSAVE_SUCCESS, warning_id);
+        }
+        return;
+    }
+    if (h->quickload) {
+        int result = game_file_quickload();
+        if (result == FILE_LOAD_SUCCESS) {
+            window_city_show();
+            static int warning_id;
+            warning_id = city_warning_show(WARNING_QUICKLOAD_SUCCESS, warning_id);
+        } else if (result == FILE_LOAD_INCOMPATIBLE_VERSION) {
+            window_plain_message_dialog_show(TR_SAVEGAME_LARGER_VERSION_TITLE,
+                TR_SAVEGAME_LARGER_VERSION_MESSAGE, 1);
+        } else if (result == FILE_LOAD_WRONG_FILE_FORMAT) {
+            window_plain_message_dialog_show(TR_SAVE_DIALOG_INVALID_FILE,
+                TR_SAVE_DIALOG_INVALID_FILE_DESC, 1);
+        } else {
+            window_plain_message_dialog_show(TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TITLE,
+                TR_SAVE_DIALOG_FILE_DOES_NOT_EXIST_TEXT, 1);
+        }
+        return;
+    }
+
     if (h->rotate_building) {
         building_rotation_rotate_forward();
     }
