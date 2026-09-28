@@ -357,13 +357,13 @@ int building_warehouse_add_import(building *warehouse, int resource, int amount,
     if (building_storage_get_state(warehouse, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
         return 0; // cannot accept this resource
     }
-    int added_amount = building_warehouse_try_add_resource(warehouse, resource, 1, 1);
+    int added_amount = building_warehouse_try_add_resource(warehouse, resource, amount, 1);
     if (added_amount <= 0) {
         return 0; // no space to add
     }
     int price = trade_price_buy(resource, trader_type);
     city_finance_process_import(price * added_amount);
-    return 1;
+    return added_amount;
 }
 
 int building_warehouse_remove_export(building *warehouse, int resource, int amount, int trader_type)
