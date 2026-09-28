@@ -3,6 +3,7 @@
 #include "core/image_group.h"
 #include "core/lang.h"
 #include "core/string.h"
+#include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image_button.h"
 #include "graphics/lang_text.h"
@@ -12,14 +13,15 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "translation/translation.h"
-#include "widget/checkbox_button.h"
-
-#include <string.h>
 
 #define GROUP 5
 
 #define PROCEED_GROUP 43
 #define PROCEED_TEXT 5
+#define CHECKBOX_CHECK_SIZE 20
+#define CHECKBOX_TEXT_MAX_WIDTH 420
+
+static void button_checkbox(const generic_button *button);
 static void button_ok(int param1, int param2);
 static void button_cancel(int param1, int param2);
 static void confirm(void);
@@ -29,15 +31,17 @@ static image_button buttons[] = {
     {256, 100, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_cancel, button_none, 0, 0, 1},
 };
 
-static checkbox_button checkbox = { .x = 160, .y = 180, .width = 360, .height = 20,
-    .font = FONT_NORMAL_BLACK };
-static lang_fragment checkbox_label;
+static generic_button checkbox = { 160, 180, 360, 20, button_checkbox };
 
 static struct {
     int ok_clicked;
     void (*close_func)(int accepted, int checked);
     int has_buttons;
     int translation_key;
+    int checked;
+    unsigned int has_focus;
+    int checkbox_start_width;
+    int checkbox_ellipsized;
     const uint8_t *custom_title;
     const uint8_t *custom_text;
     const uint8_t *checkbox_text;
@@ -56,14 +60,25 @@ static int init(const uint8_t *custom_title, const uint8_t *custom_text,
     data.custom_title = custom_title;
     data.custom_text = custom_text;
     data.checkbox_text = checkbox_text;
-    checkbox.is_checked = checkbox.is_hovered = checkbox.is_ellipsized = 0;
-    memset(&checkbox.tooltip_c, 0, sizeof(checkbox.tooltip_c));
+    data.checked = 0;
+    data.has_focus = 0;
+    data.checkbox_ellipsized = 0;
+    checkbox.x = 160;
+    checkbox.width = 360;
     if (!data.custom_text) {
         data.custom_text = lang_get_string(PROCEED_GROUP, PROCEED_TEXT);
     }
     if (data.checkbox_text) {
-        lang_seq_frag_text(&checkbox_label, data.checkbox_text);
-        lang_seq_init(&checkbox.sequence, &checkbox_label, 1);
+        int text_width = text_get_width(data.checkbox_text, FONT_NORMAL_BLACK);
+        if (text_width > CHECKBOX_TEXT_MAX_WIDTH) {
+            text_width = CHECKBOX_TEXT_MAX_WIDTH;
+            data.checkbox_ellipsized = 1;
+        }
+        data.checkbox_start_width = 80 + (480 - text_width - 30) / 2;
+        if (data.checkbox_ellipsized) {
+            checkbox.x = data.checkbox_start_width;
+            checkbox.width = text_width + 30;
+        }
     }
     return 1;
 }
@@ -81,6 +96,17 @@ static void draw_background(void)
     } else {
         text_draw_centered(data.custom_text, 80, 140, 480, FONT_NORMAL_BLACK, 0);
     }
+    if (data.checkbox_text) {
+        if (data.checked) {
+            text_draw(string_from_ascii("x"), data.checkbox_start_width + 6, 183, FONT_NORMAL_BLACK, 0);
+        }
+        if (data.checkbox_ellipsized) {
+            text_draw_ellipsized(data.checkbox_text, data.checkbox_start_width + 30, 184,
+                CHECKBOX_TEXT_MAX_WIDTH, FONT_NORMAL_BLACK, 0);
+        } else {
+            text_draw(data.checkbox_text, data.checkbox_start_width + 30, 184, FONT_NORMAL_BLACK, 0);
+        }
+    }
     graphics_reset_dialog();
 }
 
@@ -88,7 +114,7 @@ static void draw_foreground(void)
 {
     graphics_in_dialog();
     if (data.checkbox_text) {
-        checkbox_button_draw(&checkbox);
+        button_border_draw(data.checkbox_start_width, 180, CHECKBOX_CHECK_SIZE, CHECKBOX_CHECK_SIZE, data.has_focus);
     }
     if (data.has_buttons) {
         image_buttons_draw(80, data.checkbox_text ? 110 : 90, buttons, 2);
@@ -100,8 +126,7 @@ static void draw_foreground(void)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (data.checkbox_text && checkbox_button_handle_mouse(&checkbox, mouse_in_dialog(m))) {
-        window_request_refresh();
+    if (data.checkbox_text && generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, &checkbox, 1, &data.has_focus)) {
         return;
     }
     if (data.has_buttons && image_buttons_handle_mouse(mouse_in_dialog(m), 80,
@@ -128,16 +153,23 @@ static void button_cancel(int param1, int param2)
     data.close_func(0, 0);
 }
 
+static void button_checkbox(const generic_button *button)
+{
+    data.checked ^= 1;
+    window_request_refresh();
+}
+
 static void confirm(void)
 {
     window_go_back();
-    data.close_func(1, checkbox.is_checked);
+    data.close_func(1, data.checked);
 }
 
 static void get_tooltip(tooltip_context *c)
 {
-    if (data.checkbox_text) {
-        checkbox_button_handle_tooltip(&checkbox, c);
+    if (data.checkbox_text && data.checkbox_ellipsized && data.has_focus) {
+        c->type = TOOLTIP_BUTTON;
+        c->precomposed_text = data.checkbox_text;
     }
 }
 
