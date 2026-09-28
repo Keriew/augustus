@@ -324,16 +324,16 @@ static int low_res_mode = 0;
 
 //original button properties
 static image_button image_button_help[] = {
-    {0, 0, 27, 27, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1}
+    { 0, 0, 27, 27, IB_NORMAL, GROUP_CONTEXT_ICONS, 0, button_help, button_none, 0, 0, 1 }
 };
 static image_button image_button_return_to_city[] = {
-    {0, 0, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_return_to_city, button_none, 0, 0, 1}
+    { 0, 0, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_return_to_city, button_none, 0, 0, 1 }
 };
 static image_button image_button_advisor[] = {
-    {-4, 0, 24, 24, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 12, button_advisor, button_none, ADVISOR_TRADE, 0, 1}
+    { -4, 0, 24, 24, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 12, button_advisor, button_none, ADVISOR_TRADE, 0, 1 }
 };
 static image_button image_button_show_prices[] = {
-    {-4, 0, 24, 24, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 30, button_show_prices, button_none, 0, 0, 1}
+    { -4, 0, 24, 24, IB_NORMAL, GROUP_MESSAGE_ADVISOR_BUTTONS, 30, button_show_prices, button_none, 0, 0, 1 }
 };
 typedef struct {
     int x, y, width, height;
@@ -819,6 +819,11 @@ static void refresh_screen_geometry(void)
 
     int max_width = map_width + WIDTH_BORDER;
     int max_height = map_height + HEIGHT_BORDER;
+
+    if (config_get(CONFIG_FIX_EMPIRE_MAP_DIMENSIONS)) {
+        max_width = data.screen_width;
+        max_height = data.screen_height;
+    }
 
     data.x_min = data.screen_width <= max_width ? 0 : (data.screen_width - max_width) / 2;
     data.x_max = data.screen_width <= max_width ? data.screen_width : data.x_min + max_width;
@@ -1950,6 +1955,11 @@ static void draw_background(void)
     int max_width = map_width + WIDTH_BORDER;
     int max_height = map_height + HEIGHT_BORDER;
 
+    if (config_get(CONFIG_FIX_EMPIRE_MAP_DIMENSIONS)) {
+        max_width = s_width;
+        max_height = s_height;
+    }
+
     data.x_min = s_width <= max_width ? 0 : (s_width - max_width) / 2;
     data.x_max = s_width <= max_width ? s_width : data.x_min + max_width;
     data.y_min = s_height <= max_height ? 0 : (s_height - max_height) / 2;
@@ -2152,10 +2162,10 @@ static void draw_empire_object(const empire_object *obj)
         // actions for currently hovered or selected city objects
         if ((empire_selected_object() == obj->id + 1) && obj->type == EMPIRE_OBJECT_CITY) {
             const int offsets[16][2] = {
-                {1, 0}, {0, 1}, {-1, 0}, {0, -1},
-                {3, 0}, {0, 3}, {-3, 0}, {0, -3},
-                {1, 1}, {-1, 1}, {-1, -1}, {1, -1},
-                {3, 3}, {-3, 3}, {-3, -3}, {3, -3}
+                { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 },
+                { 3, 0 }, { 0, 3 }, { -3, 0 }, { 0, -3 },
+                { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 },
+                { 3, 3 }, { -3, 3 }, { -3, -3 }, { 3, -3 }
             }; // 3 an 1 offsets worked best in testing, other values can be used for readability if necessary
             if (obj->empire_city_icon == EMPIRE_CITY_ICON_BUTTON) {
                 image_draw(image_id + 2, data.x_draw_offset + x, data.y_draw_offset + y, COLOR_MASK_NONE, SCALE_NONE);
@@ -2264,6 +2274,10 @@ static void draw_map(void)
     int map_clip_y_max = data.y_max - BOTTOM_PANEL_HEIGHT;
 
     graphics_set_clip_rectangle(map_clip_x_min, map_clip_y_min, map_clip_x_max - map_clip_x_min, map_clip_y_max - map_clip_y_min);
+    if (config_get(CONFIG_FIX_EMPIRE_MAP_DIMENSIONS)) {
+        unbordered_panel_draw_px_colored(map_clip_x_min, map_clip_y_min, map_clip_x_max - map_clip_x_min,
+            map_clip_y_max - map_clip_y_min, COLOR_LIGHT_GRAY);
+    }
     // Reset all edge drawn flags for this frame
     empire_reset_route_drawn_flags();
 
@@ -2272,6 +2286,31 @@ static void draw_map(void)
     data.x_draw_offset = map_clip_x_min;
     data.y_draw_offset = map_clip_y_min;
     empire_adjust_scroll(&data.x_draw_offset, &data.y_draw_offset);
+
+    if (config_get(CONFIG_FIX_EMPIRE_MAP_DIMENSIONS)) {
+        int map_width, map_height;
+        empire_get_map_size(&map_width, &map_height);
+        int clip_width = map_clip_x_max - map_clip_x_min;
+        int clip_height = map_clip_y_max - map_clip_y_min;
+        int clip_x = map_clip_x_min;
+        int clip_y = map_clip_y_min;
+        // Keep the image and its objects inside the mapmaker's intended region.
+        if (map_width < clip_width) {
+            clip_x += (clip_width - map_width) / 2;
+            clip_width = map_width;
+        }
+        if (map_height < clip_height) {
+            clip_y += (clip_height - map_height) / 2;
+            clip_height = map_height;
+        }
+        // Leave one full decorative tile around the map, centering any rounding slack.
+        int panel_width_blocks = (clip_width + BLOCK_SIZE - 1) / BLOCK_SIZE + 1;
+        int panel_height_blocks = (clip_height + BLOCK_SIZE - 1) / BLOCK_SIZE + 1;
+        outer_panel_draw(clip_x - (panel_width_blocks * BLOCK_SIZE - clip_width) / 2,
+            clip_y - (panel_height_blocks * BLOCK_SIZE - clip_height) / 2,
+            panel_width_blocks, panel_height_blocks);
+        graphics_set_clip_rectangle(clip_x, clip_y, clip_width, clip_height);
+    }
 
     image_draw(empire_get_image_id(), data.x_draw_offset, data.y_draw_offset, COLOR_MASK_NONE, SCALE_NONE);
     if (data.trade_route_anim_start == 0) {
@@ -2791,6 +2830,13 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
         return;
     }
+    // Allow right-dragging regardless of map size or the selected object.
+    if (m->right.went_down && is_map(m)) {
+        scroll_drag_start(0);
+    }
+    if (m->right.went_up && scroll_drag_end()) {
+        return; // A completed drag must not also deselect or leave the map.
+    }
     // Only let the grid‐box process clicks if the sidebar is actually expanded:
     if (!data.sidebar.border_btn.is_collapsed) {
         trade_year_picker.selected_year_offset = data.sidebar.trade_year;
@@ -2930,19 +2976,14 @@ static void handle_input(const mouse *m, const hotkeys *h)
     } else {
         if (is_sidebar(m)) {
             if (m->right.went_up) {
-                int has_scrolled = scroll_drag_end();
-                if (!has_scrolled && input_go_back_requested(m, h)) {
+                if (input_go_back_requested(m, h)) {
                     window_city_show();
                 }
             }
             return; // sidebar handling went through earlier - prevent clicks falling through to map
         }
-        if (m->right.went_down) {
-            scroll_drag_start(0);
-        }
         if (m->right.went_up) {
-            int has_scrolled = scroll_drag_end();
-            if (!has_scrolled && input_go_back_requested(m, h)) {
+            if (input_go_back_requested(m, h)) {
                 window_city_show();
             }
         }

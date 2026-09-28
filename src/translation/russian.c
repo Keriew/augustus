@@ -1629,8 +1629,8 @@ static translation_string all_strings[] = {
     {TR_BUILDING_LATRINES_UNNECESSARY, "Эта латрина бесполезна, так как поблизости нет домов, которым она была бы нужна."},
     {TR_BUILDING_LATRINES_NO_HOUSES, "Эта латрина сейчас не нужна, так как в пределах зоны обслуживания нет домов."},
     {TR_CONFIG_DRAW_ASCLEPIUS, "Заменить стандартную иконку на жезл Асклепия в меню здоровья"},
-    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев 2"}, // Имя в меню редактора карт
-    {TR_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев alt"}, // Имя в окне Тип здания для подсчета сценария событий
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев 2"}, // Название в боковом меню редактора карт
+    {TR_BUILDING_NATIVE_HUT_ALT, "Хижина туземцев 2"}, // Название в списке "Тип здания" редактора событий
     {TR_CONFIG_WAREHOUSES_GRANARIES_OVER_ROAD_PLACEMENT, "Склады и амбары можно строить поверх дорог"},
     {TR_CONFIG_HIGHLIGHT_SELECTED_BUILDING, "Подсвечивать выбранное здание"},
     {TR_CHEAT_UNLOCK_LEGIONS, "Доступно легионов: 20"},
@@ -1647,12 +1647,12 @@ static translation_string all_strings[] = {
     {TR_WINDOW_BUILDING_DISTRIBUTION_MAINTAINING, "Хранение"},
     {TR_CONFIG_MAX_AUTOSAVE_SLOTS, "Максимальное количество слотов ежегодных автосохранений:"},
     {TR_TOOLTIP_PERSONAL_SAVINGS, "Ваши личные сбережения!"},
-    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Декор туземцев"}, // Имя в меню редактора карт
-    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"}, // Имя в меню редактора карт
-    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня"}, // Имя в меню редактора карт
-    {TR_BUILDING_NATIVE_DECORATION, "Декор туземцев"},
-    {TR_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"},
-    {TR_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня туземцев"},
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_DECORATION, "Декор туземцев"}, // Название в боковом меню редактора карт
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"}, // Название в боковом меню редактора карт
+    {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня"}, // Название в боковом меню редактора карт
+    {TR_BUILDING_NATIVE_DECORATION, "Декор туземцев"}, // Название в списке "Тип здания" редактора событий
+    {TR_BUILDING_NATIVE_MONUMENT, "Монумент туземцев"}, // Название в списке "Тип здания" редактора событий
+    {TR_BUILDING_NATIVE_WATCHTOWER, "Сторожевая башня туземцев"}, // Название в списке "Тип здания" редактора событий
     {TR_BUILDING_NATIVE_DECORATION_DESC, "Плод труда местных мастеров, он ценится как римлянами, так и местными жителями. И пусть в нем нет изысканности, многие находят в нем глубину и повод задуматься."},
     {TR_BUILDING_NATIVE_MONUMENT_DESC, "Это великолепное сооружение доказывает, что изобретательность и трудолюбие туземцев позволяют им достигать великих целей, несмотря на их слабые знания в инженерии. Хотя некоторые скептики полагают, что это, возможно, чудо, ниспосланное богами, или же остаток древней, но крайне развитой цивилизации."},
     {TR_BUILDING_NATIVE_WATCHTOWER_DESC, "Туземцы используют данные конструкции для слежки за нашими действиями и выявления уязвимостей. Пока мы не устраним угрозу, охрана на башнях будет мешать нам расширяться на этой территории."},
@@ -2236,7 +2236,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GP_CH_ENEMIES_RETREAT_FAST, "Враги отступают в два раза быстрее"},
     {TR_CONFIG_CATEGORY_MANAGEMENT_MILITARY, "Военные"},
     {TR_CHEAT_CHANGED_MONUMENT_RESOURCES, "Изменены необходимые ресурсы для типа монумента"},
-    {TR_ACTION_TYPE_CHANGE_MONUMENT_RESOURCES, "Изменить (добавить) необходимые ресурсы для монумента"},
+    {TR_ACTION_TYPE_CHANGE_MONUMENT_RESOURCES, "Изменить необходимые ресурсы для монумента"},
     {TR_PARAMETER_TYPE_MONUMENT, "Тип монумента"},
     {TR_PARAMETER_MONUMENT_STAGE, "Этап"},
     {TR_RESOURCE_ARCHITECTS, "Архитекторы"},
@@ -2286,6 +2286,9 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_TT_BALANCE, "Сортировать по балансу средств"},
     {TR_UI_LEDGER_DISABLED_1, "Эта функция пока недоступна."},
     {TR_UI_LEDGER_DISABLED_2, "Ваши писцы усердно трудятся над этой функцией, но им нужно еще немного времени."},
+    {TR_EDITOR_TOOL_OUTSKIRTS, "Окраины"},
+    {TR_EDITOR_TOOL_OUTSKIRTS_REMOVE, "Удалить окраины"},
+    {TR_EDITOR_SELECT_LAND, "Выбрать землю"},
     {TR_CONFIG_UI_SCROLL_CAMERA_UNLOCKED, "Расширить границы прокрутки камеры"},
     {TR_UI_LEDGER_ONLY_CURRENT_YEAR, "Это ваш первый год на посту губернатора!"},
     {TR_UI_TRADE_YEAR_PREVIOUS, "Предыдущий год"},
@@ -2338,6 +2341,9 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_SEND_CITY_WARNING, "Отправить предупреждение городу"},
     {TR_PARAMETER_MESSAGE, "Сообщение"},
     {TR_PARAMETER_PLAY_FANFARE, "Проиграть фанфары"},
+    {TR_EDITOR_SELECT_OFFSET, "Выбрать область"},
+    {TR_WARNING_NO_MILITARY_ON_OUTSKIRTS, "Нельзя строить военные сооружения на окраинах"},
+    {TR_CONFIG_SHOW_OUTSKIRTS_DESIRABILITY, "Отображать штраф привлекательности окраин в режиме наложения"},
     {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Классическая полоса прокрутки"},
     {TR_BUILDING_WILLOW_TREE, "Ива"},
     {TR_SIDEBAR_EXTRA_HOUSING_AVAILABLE, "Мест для "},
@@ -2347,6 +2353,7 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Недостаточно мест для необходимых работников"},
     {TR_WIDGET_DN, "Ден"},
     {TR_SIDEBAR_DATE_JUMP_TO_CURRENT, "Щелкните, чтобы вернуться к текущему году"},
+    {TR_CONFIG_FIX_EMPIRE_MAP_DIMENSIONS, "Расширить область просмотра карты на весь экран"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

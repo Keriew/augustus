@@ -554,8 +554,6 @@ void segmented_border_draw_colored(int x, int y, int width, int height, color_t 
     int inner_width = width - 2 * SEGMENTED_CORNER_SIZE;
     int inner_height = height - 2 * SEGMENTED_CORNER_SIZE;
 
-    graphics_set_clip_rectangle(x, y, width, height);
-
     for (int xx = x + SEGMENTED_CORNER_SIZE;
          xx < x + SEGMENTED_CORNER_SIZE + inner_width;
          xx += SEGMENTED_HORIZONTAL_WIDTH) {
@@ -573,13 +571,8 @@ void segmented_border_draw_colored(int x, int y, int width, int height, color_t 
     image_draw(image_base, x, y, color, SCALE_NONE);
     image_draw(image_base + 2, x + width - SEGMENTED_CORNER_SIZE, y, color, SCALE_NONE);
     image_draw(image_base + 5, x, y + height - SEGMENTED_CORNER_SIZE, color, SCALE_NONE);
-    image_draw(image_base + 7,
-        x + width - SEGMENTED_CORNER_SIZE,
-        y + height - SEGMENTED_CORNER_SIZE,
-        color,
-        SCALE_NONE);
+    image_draw(image_base + 7, x + width - SEGMENTED_CORNER_SIZE, y + height - SEGMENTED_CORNER_SIZE, color, SCALE_NONE);
 
-    graphics_reset_clip_rectangle();
 }
 
 void segmented_border_draw(int x, int y, int width, int height)

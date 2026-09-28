@@ -1437,12 +1437,31 @@ static void spawn_figure_mission_post(building *b)
     }
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        if (city_population() > 0) {
-            b->figure_spawn_delay++;
-            if (b->figure_spawn_delay > 1) {
-                b->figure_spawn_delay = 0;
-                create_roaming_figure(b, road.x, road.y, FIGURE_MISSIONARY);
-            }
+        // Mission Post always has 100% house coverage
+        if (b->distance_from_entry) {
+            b->houses_covered = 100;
+        } else {
+            b->houses_covered = 0;
+        }
+        int pct_workers = worker_percentage(b);
+        int spawn_delay;
+        if (pct_workers >= 100) {
+            spawn_delay = 0;
+        } else if (pct_workers >= 75) {
+            spawn_delay = 1;
+        } else if (pct_workers >= 50) {
+            spawn_delay = 3;
+        } else if (pct_workers >= 25) {
+            spawn_delay = 7;
+        } else if (pct_workers >= 1) {
+            spawn_delay = 15;
+        } else {
+            return;
+        }
+        b->figure_spawn_delay++;
+        if (b->figure_spawn_delay > spawn_delay) {
+            b->figure_spawn_delay = 0;
+            create_roaming_figure(b, road.x, road.y, FIGURE_MISSIONARY);
         }
     }
 }
