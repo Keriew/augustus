@@ -1,7 +1,7 @@
 #ifndef GRAPHICS_TAB_VIEW_H
 #define GRAPHICS_TAB_VIEW_H
 
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "input/mouse.h"
@@ -43,36 +43,53 @@ typedef enum {
 } tab_position; // indexing starts at 0 on the leftmost tab, regardless of the tab_position
 
 struct content_area {
+    // dimensions
     int x;
     int y;
     int width;
     int height;
+
+    // UI standard properties
     int auto_indent; // default style-coherent indentation for content zone. If 0, no border/indent is applied
+
+    // function pointers
     content_draw_callback draw_callback;
 };
 
 struct tab {
+    // UI standard properties
     complex_button button;
+
+    // user flags
     int visible;
     int enabled; //to do: disabled but visible - greyed out and unclickable
-    content_draw_callback draw_callback;
     int initialised; // flag to indicate whether this tab has been setup with text and draw callback
+
+    // function pointers
+    content_draw_callback draw_callback;
+
+    // other properties
     void *user_data; // optional extensibility
 };
 
-/* Sequence positioning from complex button */
-
 struct tab_view {
+    // dimensions
     int x;
     int y;
     int width;
     int height;
     int tab_height;  // height of tab buttons
 
+    // UI standard properties
+    content_area content;
+    tab *tabs;
+
+    // cache and state properties
     struct {
         int active_tab;
     } state;
 
+    // other properties
     struct {
         tab_view_style style;
         tab_position position;
@@ -81,10 +98,6 @@ struct tab_view {
         int count;
         font_t tab_font; // default font for tab titles
     } view_properties;
-
-    content_area content;
-    tab *tabs;
-
 };
 
 typedef enum

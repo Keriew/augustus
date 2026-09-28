@@ -9,4 +9,6 @@ void widget_top_menu_draw(int force);
 int widget_top_menu_handle_input(const mouse *m, const hotkeys *h);
 int widget_top_menu_get_tooltip_text(tooltip_context *c);
 
+char widget_top_menu_get_cosmetic_day_of_month(void);
+
 #endif // WINDOW_TOP_MENU_H

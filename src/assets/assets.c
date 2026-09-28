@@ -107,6 +107,14 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_BTN_MENU_FRAME_07] = assets_get_image_id("UI", "Button_Menu_Frame_07");
     data.asset_lookup[ASSET_UI_BTN_MENU_FRAME_08] = assets_get_image_id("UI", "Button_Menu_Frame_08");
     data.asset_lookup[ASSET_UI_BTN_MENU_FRAME_09] = assets_get_image_id("UI", "Button_Menu_Frame_09");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_01] = assets_get_image_id("UI", "segmented_border_01");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_02] = assets_get_image_id("UI", "segmented_border_02");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_03] = assets_get_image_id("UI", "segmented_border_03");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_04] = assets_get_image_id("UI", "segmented_border_04");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_06] = assets_get_image_id("UI", "segmented_border_06");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_07] = assets_get_image_id("UI", "segmented_border_07");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_08] = assets_get_image_id("UI", "segmented_border_08");
+    data.asset_lookup[ASSET_UI_SEGMENTED_BORDER_09] = assets_get_image_id("UI", "segmented_border_09");
     data.asset_lookup[ASSET_UI_SORTING_ICON] = assets_get_image_id("UI", "Sorting_Icon");
     data.asset_lookup[ASSET_UI_FILTER_ICON] = assets_get_image_id("UI", "Filter_Icon");
     data.asset_lookup[ASSET_UI_SORTING_ICON_HOVER] = assets_get_image_id("UI", "Sorting_Icon_Hover");
@@ -124,10 +132,15 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_TRADE_LEDGER_EXPORT] = assets_get_image_id("UI", "Trade_Ledger_Export");
     data.asset_lookup[ASSET_UI_TRADE_LEDGER_IMPORT] = assets_get_image_id("UI", "Trade_Ledger_Import");
     data.asset_lookup[ASSET_UI_RESOURCE_PICKER] = assets_get_image_id("UI", "resource_picker");
+    data.asset_lookup[ASSET_UI_PLUS_BUTTON_IDLE] = assets_get_image_id("UI", "Plus_Button_Idle");
+    data.asset_lookup[ASSET_UI_PLUS_BUTTON_CLICK] = assets_get_image_id("UI", "Plus_Button_Click");
+    data.asset_lookup[ASSET_UI_MINUS_BUTTON_IDLE] = assets_get_image_id("UI", "Minus_Button_Idle");
+    data.asset_lookup[ASSET_UI_MINUS_BUTTON_CLICK] = assets_get_image_id("UI", "Minus_Button_Click");
     data.asset_lookup[ASSET_UI_SCROLLBAR_UP] = assets_get_image_id("UI", "Scrollbar_Up_01");
     data.asset_lookup[ASSET_UI_SCROLLBAR_DOWN] = assets_get_image_id("UI", "Scrollbar_Down_01");
     data.asset_lookup[ASSET_UI_SCROLLBAR_MIDDLE] = assets_get_image_id("UI", "Scrollbar_Middle_01");
     data.asset_lookup[ASSET_UI_SCROLLBAR_LINES_ALPHA] = assets_get_image_id("UI", "Scrollbar_Lines_Alpha");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_LINES_ALPHA_B] = assets_get_image_id("UI", "Scrollbar_Lines_Alpha_B");
     data.asset_lookup[ASSET_UI_SCROLLBAR_MIDDLE_01_END_TOP] = assets_get_image_id("UI", "Scrollbar_Middle_01_End_Top");
     data.asset_lookup[ASSET_UI_SCROLLBAR_MIDDLE_01_END_BOTTOM] = assets_get_image_id("UI", "Scrollbar_Middle_01_End_Bottom");
     data.asset_lookup[ASSET_UI_SCROLLBAR_MIDDLE_01_TRIMMED] = assets_get_image_id("UI", "Scrollbar_Middle_01_Trimmed");
@@ -163,7 +176,23 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_SCROLL_BG_01] = assets_get_image_id("UI", "Scrollbar_Dark_Start");
     data.asset_lookup[ASSET_UI_SCROLL_BG_02] = assets_get_image_id("UI", "Scrollbar_Dark_Mid");
     data.asset_lookup[ASSET_UI_SCROLL_BG_03] = assets_get_image_id("UI", "Scrollbar_Dark_End");
-
+    data.asset_lookup[ASSET_UI_SCROLL_BG_01B] = assets_get_image_id("UI", "Scrollbar_Dark_Start_B");
+    data.asset_lookup[ASSET_UI_SCROLL_BG_02B] = assets_get_image_id("UI", "Scrollbar_Dark_Mid_B");
+    data.asset_lookup[ASSET_UI_SCROLL_BG_03B] = assets_get_image_id("UI", "Scrollbar_Dark_End_B");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_LEFT_01] = assets_get_image_id("UI", "Scrollbar_Left_01");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_LEFT_02] = assets_get_image_id("UI", "Scrollbar_Left_02");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_LEFT_03] = assets_get_image_id("UI", "Scrollbar_Left_03");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_LEFT_04] = assets_get_image_id("UI", "Scrollbar_Left_04");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_RIGHT_01] = assets_get_image_id("UI", "Scrollbar_Right_01");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_RIGHT_02] = assets_get_image_id("UI", "Scrollbar_Right_02");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_RIGHT_03] = assets_get_image_id("UI", "Scrollbar_Right_03");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_RIGHT_04] = assets_get_image_id("UI", "Scrollbar_Right_04");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_MINI_THUMB_01] = assets_get_image_id("UI", "Scrollbar_Thumb_01");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_MINI_THUMB_02] = assets_get_image_id("UI", "Scrollbar_Thumb_02");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_MINI_THUMB_03] = assets_get_image_id("UI", "Scrollbar_Thumb_03");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_MINI_THUMB_04] = assets_get_image_id("UI", "Scrollbar_Thumb_04");
+    data.asset_lookup[ASSET_UI_SCROLLBAR_MINI_THUMB_LINES] = assets_get_image_id("UI", "Scrollbar_Thumb_Lines");
+    data.asset_lookup[ASSET_UI_HOURGLASS_ICON] = assets_get_image_id("UI", "hourglass_icon");
     data.asset_lookup[ASSET_AESTHETIC_BUILDING_WILLOW_TREE] = assets_get_image_id("Aesthetics", "ornamental willow");
     // font assets - keep last
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");

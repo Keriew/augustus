@@ -461,7 +461,7 @@ static void init_dock_permission_buttons(void)
         int city_id = -1;
         if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             city_id = empire_city_get_for_trade_route(route_id);
-            if (city_id != -1) {
+            if (city_id) {
                 generic_button button = { 0, 0, 210, 22, dock_toggle_route, 0, route_id, city_id };
                 dock_distribution_permissions_buttons[dock_distribution_permissions_buttons_count] = button;
                 dock_distribution_permissions_buttons_count++;

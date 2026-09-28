@@ -187,12 +187,12 @@ static translation_string all_strings[] = {
     { TR_BUILDING_GRAND_TEMPLE_NEPTUNE_MODULE_1_DESC, "Templos enviam condutores de biga para o hipódromo." },
     { TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_1_DESC, "Sacerdotes reduzem o consumo de cerâmica e de móveis em 20%." },
     { TR_BUILDING_GRAND_TEMPLE_MARS_MODULE_1_DESC, "Os templos produzem comida em quantidade proporcional ao número de moradias que atendem e a entregam ao posto de suprimentos. Os custos de manutenção dos fortes são reduzidos em 25%." },
-    { TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_1_DESC, "O Santuário produz vinho em quantidade proporcional à população com acesso a templos de Vênus. Templos recolhem e distribuem vinho para as moradias." },
-    { TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_2_DESC, "Sacerdotes recolhem e distribuem azeite e uma variedade de comida dos estoques da cidade." },
+    { TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_1_DESC, "O Santuário produz vinho em quantidade proporcional à população da cidade com acesso a templos de Vênus. Os templos recolhem e distribuem o vinho para moradias e tavernas." },
+    { TR_BUILDING_GRAND_TEMPLE_CERES_MODULE_2_DESC, "Sacerdotes recolhem e distribuem azeite e um tipo de comida dos estoques da cidade." },
     { TR_BUILDING_GRAND_TEMPLE_NEPTUNE_MODULE_2_DESC, "Sacerdotes aumentam em 5% a capacidade das moradias. O Santuário provê abastecimento de água como se fosse um reservatório cheio." },
     { TR_BUILDING_GRAND_TEMPLE_MERCURY_MODULE_2_DESC, "Sacerdotes reduzem em 20% o consumo de vinho e de azeite." },
     { TR_BUILDING_GRAND_TEMPLE_MARS_MODULE_2_DESC, "Sacerdotes reduzem em 10% o consumo de todos os bens." },
-    { TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_2_DESC, "Sacerdotes provêm entretenimento e embelezam as moradias." },
+    { TR_BUILDING_GRAND_TEMPLE_VENUS_MODULE_2_DESC, "Sacerdotes provêm entretenimento e embelezam as moradias em si, aumentando a atratividade da vizinhança sem decoração adicional." },
     { TR_BUILDING_PANTHEON_MODULE_1_DESC, "Todos os templos da cidade enviam sacerdotes ao Panteão, aumentando a fé e as bênçãos de seus deuses." },
     { TR_BUILDING_PANTHEON_MODULE_2_DESC, "Moradias com acesso ao Panteão conseguem evoluir um nível a mais." },
     { TR_BUILDING_GRAND_TEMPLE_CERES_DESC_MODULE_1, "Templo de Ceres Fecunda" },
@@ -1769,7 +1769,7 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_TYPE_FORMULA, "Fórmula"},
     {TR_CONDITION_TYPE_CHECK_FORMULA, "Avaliação de fórmulas"},
     {TR_ACTION_TYPE_CUSTOM_VARIABLE_FORMULA, "Alterar valor de variável personalizada (fórmula)"},
-    {TR_EDITOR_REPEAT_INTERVAL_TYPE, "TIME"},
+    {TR_EDITOR_REPEAT_INTERVAL_TYPE, "TEMPO"},
     {TR_PLACEHOLDER, "Espaço reservado"},
     {TR_WARNING_CANT_REPAIR_MONUMENTS, "Monumentos únicos não podem ser reconstruídos"},
     {TR_WARNING_CANT_REPAIR_AQUEDUCTS, "Aquedutos não podem ser reconstruídos"},
@@ -2335,7 +2335,11 @@ static translation_string all_strings[] = {
     {TR_PARAMETER_PLAY_FANFARE, "Tocar fanfarra"},
     {TR_CONFIG_UI_SCROLL_LEGACY_SCROLLBAR, "Ativar barras de rolagem clássicas"},
     {TR_BUILDING_WILLOW_TREE, "Salgueiro"},
-
+    {TR_SIDEBAR_EXTRA_HOUSING_AVAILABLE, "Espaço para "},
+    {TR_SIDEBAR_EXTRA_POPULATION_GOAL_MET, "Meta de população atingida"},
+    {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Meta de população não atingida"},
+    {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Há moradia para todos os trabalhadores necessários"},
+    {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Falta moradia para os trabalhadores necessários"},
 };
 
 void translation_portuguese(const translation_string **strings, int *num_strings)

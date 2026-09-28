@@ -43,6 +43,7 @@
 #include "map/property.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
+#include "map/tiles.h"
 #include "scenario/property.h"
 #include "sound/city.h"
 #include "widget/city/bridge.h"
@@ -287,6 +288,9 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
 
     int building_id = map_building_at(grid_offset);
 
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+
     if (building_id) {
         building *b = building_get(building_id);
         if (draw_building_as_deleted(b, grid_offset)) {
@@ -311,6 +315,12 @@ color_t city_draw_get_color_mask(int grid_offset, int is_top)
             config_get(CONFIG_UI_CV_CURSOR_SHADOW) && !scroll_in_progress()) {
             color_mask = COLOR_MASK_HOVER;
         }
+    }
+
+    if (map_property_is_outskirts(grid_offset)) {
+        int distance_to_non_outskirts = map_tiles_find_nearest_non_outskirts(x, y);
+        color_t faded_outskirts = COLOR_MASK_OUTSKIRTS_FADE(distance_to_non_outskirts);
+        color_mask = color_mask != COLOR_MASK_NONE ? COLOR_MIX_COLORS(faded_outskirts, color_mask) : faded_outskirts;
     }
 
     return color_mask;

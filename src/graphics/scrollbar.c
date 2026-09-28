@@ -253,7 +253,7 @@ void scrollbar_draw(scrollbar_type *scrollbar)
             if (scrollbar->legacy) {
                 inner_panel_draw(scrollbar->x + 4, scrollbar->y + 2 * BLOCK_SIZE, 2, scrollbar->length / BLOCK_SIZE - 4);
             } else { // default
-                scrollbar_panel_draw(scrollbar->x, scrollbar->y, scrollbar->length);
+                scrollbar_panel_draw(scrollbar->x, scrollbar->y, scrollbar->length, 1);
             }
         }
         image_buttons_draw(scrollbar->x, scrollbar->y, &scrollbar->image_button_scroll_up, 1);
@@ -373,7 +373,7 @@ static int handle_scrollbar_dot(scrollbar_type *scrollbar, const mouse *m)
     }
     if (!scrollbar->is_dragging_scrollbar_dot &&
         (m->y < scrollbar->y + scroll_btn_height + scrollbar->dot_padding ||
-        m->y > scrollbar->y + scrollbar->length - scroll_btn_height - scrollbar->dot_padding)) {
+            m->y > scrollbar->y + scrollbar->length - scroll_btn_height - scrollbar->dot_padding)) {
         return 0;
     }
     int dot_offset = m->y - scrollbar->y - scroll_btn_height - scrollbar->dot_padding;

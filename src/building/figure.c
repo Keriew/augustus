@@ -1437,12 +1437,31 @@ static void spawn_figure_mission_post(building *b)
     }
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        if (city_population() > 0) {
-            b->figure_spawn_delay++;
-            if (b->figure_spawn_delay > 1) {
-                b->figure_spawn_delay = 0;
-                create_roaming_figure(b, road.x, road.y, FIGURE_MISSIONARY);
-            }
+        // Mission Post always has 100% house coverage
+        if (b->distance_from_entry) {
+            b->houses_covered = 100;
+        } else {
+            b->houses_covered = 0;
+        }
+        int pct_workers = worker_percentage(b);
+        int spawn_delay;
+        if (pct_workers >= 100) {
+            spawn_delay = 0;
+        } else if (pct_workers >= 75) {
+            spawn_delay = 1;
+        } else if (pct_workers >= 50) {
+            spawn_delay = 3;
+        } else if (pct_workers >= 25) {
+            spawn_delay = 7;
+        } else if (pct_workers >= 1) {
+            spawn_delay = 15;
+        } else {
+            return;
+        }
+        b->figure_spawn_delay++;
+        if (b->figure_spawn_delay > spawn_delay) {
+            b->figure_spawn_delay = 0;
+            create_roaming_figure(b, road.x, road.y, FIGURE_MISSIONARY);
         }
     }
 }
@@ -1674,8 +1693,13 @@ static void spawn_figure_barracks(building *b)
         if (city_data.mess_hall.food_stress_cumulative > 20) {
             spawn_delay += city_data.mess_hall.food_stress_cumulative - 20;
         }
-        
-        spawn_delay = calc_adjust_with_percentage(spawn_delay, resource_get_data(RESOURCE_TROOPS)->production_per_month);
+
+        int troops_production = resource_get_data(RESOURCE_TROOPS)->production_per_month;
+        // Compatibility with old maps where TROOPS production was not defined
+        if (troops_production == 0) {
+            troops_production = resource_get_defaults(RESOURCE_TROOPS)->production_per_month;
+        }
+        spawn_delay = spawn_delay * resource_get_defaults(RESOURCE_TROOPS)->production_per_month / troops_production;
 
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {

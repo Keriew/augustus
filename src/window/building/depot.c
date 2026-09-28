@@ -12,7 +12,7 @@
 #include "figure/figure.h"
 #include "figuretype/depot.h"
 #include "graphics/button.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"

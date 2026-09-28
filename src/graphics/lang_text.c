@@ -108,19 +108,24 @@ int lang_text_draw_amount_colored(int group, int number, int amount, int x_offse
 
 int lang_text_draw_year(int year, int x_offset, int y_offset, font_t font)
 {
+    return lang_text_draw_year_colored(year, x_offset, y_offset, font, 0);
+}
+
+int lang_text_draw_year_colored(int year, int x_offset, int y_offset, font_t font, color_t color)
+{
     int width = 0;
     if (year >= 0) {
         int use_year_ad = locale_year_before_ad();
         if (use_year_ad) {
-            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, 0);
-            width += lang_text_draw(20, 1, x_offset + width, y_offset, font);
+            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, color);
+            width += lang_text_draw_colored(20, 1, x_offset + width, y_offset, font, color);
         } else {
-            width += lang_text_draw(20, 1, x_offset + width, y_offset, font);
-            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, 0);
+            width += lang_text_draw_colored(20, 1, x_offset + width, y_offset, font, color);
+            width += text_draw_number(year, ' ', "", x_offset + width, y_offset, font, color);
         }
     } else {
-        width += text_draw_number(-year, ' ', "", x_offset + width, y_offset, font, 0);
-        width += lang_text_draw(20, 0, x_offset + width, y_offset, font);
+        width += text_draw_number(-year, ' ', "", x_offset + width, y_offset, font, color);
+        width += lang_text_draw_colored(20, 0, x_offset + width, y_offset, font, color);
     }
     return width;
 }

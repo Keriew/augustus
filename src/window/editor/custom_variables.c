@@ -6,7 +6,7 @@
 #include "core/string.h"
 #include "editor/editor.h"
 #include "graphics/button.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/grid_box.h"
@@ -137,14 +137,14 @@ static void init_color_dropdown(void)
         color_dropdown_options[dd_anchors][0].height = CHECKBOX_ROW_WIDTH;
         color_dropdown_options[dd_anchors][0].width = COLOR_DROPDOWN_WIDTH + 20;
         for (int j = 0; j < COLOR_BUTTONS_COUNT; j++) { // dropdown option buttons - COLOR_BUTTONS_COUNT per dropdown
-            color_dropdown_options[dd_anchors][j].sequence = &color_fragments[j];
-            color_dropdown_options[dd_anchors][j].sequence_size = 1;
+            complex_button_init_style(&color_dropdown_options[dd_anchors][j], COMPLEX_BUTTON_STYLE_CUSTOM);
+            color_dropdown_options[dd_anchors][j].sequence.fragments = &color_fragments[j];
+            color_dropdown_options[dd_anchors][j].sequence.count = 1;
             color_dropdown_options[dd_anchors][j].left_click_handler = dropdown_button_default_option_click;
             color_dropdown_options[dd_anchors][j].user_data = &color_dropdowns[dd_anchors]; //backref to parent dropdown
             color_dropdown_options[dd_anchors][j].parameters[0] = dd_anchors;
-            color_dropdown_options[dd_anchors][j].style = COMPLEX_BUTTON_STYLE_CUSTOM;
             // draw_variable_item will reestablish the correct variable id with scroll offset
-            color_dropdown_options[dd_anchors][j].color_mask = complex_button_basic_colors(j - 1);
+            color_dropdown_options[dd_anchors][j].bg_primary = complex_button_basic_colors(j - 1);
             color_dropdown_options[dd_anchors][j].font = FONT_NORMAL_BLACK;
             if (j > 8) {
                 color_dropdown_options[dd_anchors][j].font = FONT_NORMAL_WHITE; //white font for dark colors
@@ -317,9 +317,10 @@ static void update_dd_anchor(int variable_id, int grid_box_position)
     int color_group = scenario_custom_variable_get_color_group(id);
     color_dropdowns[pos].selected_index = scenario_custom_variable_get_color_group(id); // selcted index color
     color_dropdowns[pos].buttons[0].parameters[0] = id; //set the variable id as parameter for the color dropdown
-    color_dropdowns[pos].buttons[0].color_mask = scenario_custom_variable_get_color(id); //set the selected colour option
+    color_dropdowns[pos].buttons[0].bg_primary = scenario_custom_variable_get_color(id); //set the selected colour option
     color_dropdowns[pos].buttons[0].is_hidden = 0; //unhide the associated color dropdown
-    color_dropdowns[pos].buttons[0].sequence = &color_fragments[color_group]; //select text
+    color_dropdowns[pos].buttons[0].sequence.fragments = &color_fragments[color_group]; //select text
+    color_dropdowns[pos].buttons[0].sequence.count = 1;
     color_dropdowns[pos].buttons[0].font = (color_group > 8) ? FONT_SMALL_PLAIN : FONT_NORMAL_BLACK; //match font
 }
 

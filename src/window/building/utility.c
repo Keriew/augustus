@@ -9,7 +9,7 @@
 #include "core/dir.h"
 #include "core/image.h"
 #include "graphics/button.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -37,21 +37,21 @@ static struct {
 } data = { 0, 0, 0, 0, 0 };
 
 static generic_button go_to_orders_button[] = {
-    {0, 0, 304, 20, button_go_to_orders},
+    { 0, 0, 304, 20, button_go_to_orders },
 };
 complex_button repair_building_button[] = { 0 };
 
 static generic_button orders_permission_buttons[] = {
-    {0, 4, 210, 22, button_toggle_figure_state, 0, PERMISSION_MAINTENANCE},
-    {0, 36, 210, 22, button_toggle_figure_state, 0, PERMISSION_PRIEST},
-    {0, 68, 210, 22, button_toggle_figure_state, 0, PERMISSION_MARKET},
-    {0, 100, 210, 22, button_toggle_figure_state, 0, PERMISSION_ENTERTAINER},
-    {0, 132, 210, 22, button_toggle_figure_state, 0, PERMISSION_EDUCATION},
-    {0, 164, 210, 22, button_toggle_figure_state, 0, PERMISSION_MEDICINE},
-    {0, 192, 210, 22, button_toggle_figure_state, 0, PERMISSION_TAX_COLLECTOR},
-    {0, 224, 210, 22, button_toggle_figure_state, 0, PERMISSION_LABOR_SEEKER},
-    {0, 256, 210, 22, button_toggle_figure_state, 0, PERMISSION_MISSIONARY},
-    {0, 288, 210, 22, button_toggle_figure_state, 0, PERMISSION_WATCHMAN},
+    { 0, 4, 210, 22, button_toggle_figure_state, 0, PERMISSION_MAINTENANCE },
+    { 0, 36, 210, 22, button_toggle_figure_state, 0, PERMISSION_PRIEST },
+    { 0, 68, 210, 22, button_toggle_figure_state, 0, PERMISSION_MARKET },
+    { 0, 100, 210, 22, button_toggle_figure_state, 0, PERMISSION_ENTERTAINER },
+    { 0, 132, 210, 22, button_toggle_figure_state, 0, PERMISSION_EDUCATION },
+    { 0, 164, 210, 22, button_toggle_figure_state, 0, PERMISSION_MEDICINE },
+    { 0, 192, 210, 22, button_toggle_figure_state, 0, PERMISSION_TAX_COLLECTOR },
+    { 0, 224, 210, 22, button_toggle_figure_state, 0, PERMISSION_LABOR_SEEKER },
+    { 0, 256, 210, 22, button_toggle_figure_state, 0, PERMISSION_MISSIONARY },
+    { 0, 288, 210, 22, button_toggle_figure_state, 0, PERMISSION_WATCHMAN },
 };
 
 static int permission_tooltip_translations[] = { 0,
@@ -66,7 +66,7 @@ static int permission_orders_tooltip_translations[] = {
     TR_TOOLTIP_BUTTON_ROADBLOCK_ORDER_REJECT_ALL, TR_TOOLTIP_BUTTON_ROADBLOCK_ORDER_ACCEPT_ALL };
 
 static generic_button roadblock_orders_buttons[] = {
-    {309, 0, 20, 20, button_roadblock_orders},
+    { 309, 0, 20, 20, button_roadblock_orders },
 };
 
 static unsigned int size_of_orders_permission_buttons = sizeof(orders_permission_buttons) / sizeof(*orders_permission_buttons);
@@ -283,6 +283,7 @@ static void trigger_building_repair(complex_button *button)
 static void init_repair_building_button(building_info_context *c)
 {
     int context_width = BLOCK_SIZE * c->width_blocks;
+    complex_button_init_style(repair_building_button, COMPLEX_BUTTON_STYLE_DEFAULT);
     int button_width = context_width / 2;  // 50% of context width
     repair_building_button->x = c->x_offset + (context_width - button_width) / 2;  // Center horizontally
     repair_building_button->y = c->y_offset + BLOCK_SIZE * c->height_blocks - 30;
@@ -306,8 +307,9 @@ static void init_repair_building_button(building_info_context *c)
     }
     repair_building_button->user_data = c;
     repair_building_button->left_click_handler = trigger_building_repair;
-    repair_building_button->sequence = &frag;
-    repair_building_button->sequence_size = 1;
+    repair_building_button->sequence.fragments = &frag;
+    repair_building_button->sequence.count = 1;
+
 }
 
 void window_building_draw_rubble(building_info_context *c)

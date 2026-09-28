@@ -103,7 +103,7 @@ static void init(int id)
 
     for (int i = 1; i < trade_route_count(); i++) {
         int city_id = empire_city_get_for_trade_route(i);
-        if (city_id < 0) {
+        if (!city_id) {
             create_route_info(i, lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE));
             continue;
         }

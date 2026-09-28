@@ -14,6 +14,7 @@
 #include "figure/formation.h"
 #include "map/grid.h"
 #include "map/road_access.h"
+#include "map/routing.h"
 
 #define INFINITE 10000
 
@@ -106,7 +107,7 @@ static int get_closest_legion_needing_soldiers(const building *barracks)
     int required_recruitment = recruit_type;
 
     switch (barracks->subtype.barracks_priority) {
-        case PRIORITY_FORT: 
+        case PRIORITY_FORT:
             required_recruitment = LEGION_RECRUIT_LEGIONARY;
             break;
         case PRIORITY_FORT_JAVELIN:
@@ -208,9 +209,14 @@ static building *get_unmanned_tower_of_type(building_type type, building *barrac
 {
     for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
         if (b->state == BUILDING_STATE_IN_USE && b->num_workers > 0 &&
-            !b->figure_id && !b->figure_id4 && (b->road_network_id == barracks->road_network_id || config_get(CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD))) {
+            !b->figure_id && !b->figure_id4 &&
+            (b->road_network_id == barracks->road_network_id || config_get(CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD))) {
             if (map_has_road_access(b->x, b->y, b->size, road)) {
-                return b;
+                map_point barracks_road;
+                map_has_road_access(barracks->x, barracks->y, barracks->size, &barracks_road);
+                if (road && map_routing_citizen_can_travel_over_land(barracks_road.x, barracks_road.y, road->x, road->y, 8, 1)) {
+                    return b;
+                }
             }
         }
     }

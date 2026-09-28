@@ -16,7 +16,8 @@
 #include "game/settings.h"
 #include "game/system.h"
 #include "graphics/button.h"
-#include "graphics/complex_button.h"
+#include "widget/checkbox_button.h"
+#include "widget/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -88,7 +89,7 @@ static generic_button toggle_animation_button = {
 };
 
 static const lang_fragment draw_bounds_sequence[] = {
-    { .type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Draw bounds" },
+    {.type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Draw bounds" },
 };
 
 static checkbox_button draw_bounds_checkbox = {
@@ -96,8 +97,7 @@ static checkbox_button draw_bounds_checkbox = {
     .height = 20,
     .left_click_handler = draw_bounds_checkbox_clicked,
     .font = FONT_NORMAL_BLACK,
-    .sequence = draw_bounds_sequence,
-    .sequence_size = 1,
+    .sequence = {.fragments = (lang_fragment *) draw_bounds_sequence, .count = 1 },
 };
 
 static const int ZOOM_VALUES[] = { 50, 100, 200, 400 };
@@ -725,7 +725,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
     checkbox_button_handle_mouse(&draw_bounds_checkbox, m);
 }
 
-static void draw_bounds_checkbox_clicked( checkbox_button *button)
+static void draw_bounds_checkbox_clicked(checkbox_button *button)
 {
     data.draw_bounds = button->is_checked;
     window_invalidate();

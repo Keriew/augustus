@@ -373,7 +373,7 @@ void trade_routes_migrate_to_buys_sells(buffer *limit, buffer *traded, int versi
         trade_route *route = array_next(routes);
         route->open = empire_city_is_trade_route_open(i);
         int city_id = empire_city_get_for_trade_route(i);
-        if (city_id < 0) {
+        if (!city_id) {
             continue;
         }
         for (int r = 0; r < resource_total_mapped(); r++) {

@@ -74,6 +74,12 @@ void graphics_shade_rect(int x, int y, int width, int height, int darkness)
     graphics_renderer()->fill_rect(x, width, y, height, alpha);
 }
 
+void graphics_light_up_rect(int x, int y, int width, int height, int lightness)
+{
+    color_t color = ((0x11 * lightness) << COLOR_BITSHIFT_ALPHA) | 0xFFFFFF;
+    graphics_renderer()->fill_rect(x, width, y, height, color);
+}
+
 void graphics_tint_rect(int x, int y, int width, int height, color_t rgb, int alpha_level)
 {
     color_t tinted = (alpha_level << COLOR_BITSHIFT_ALPHA) | (rgb & 0xFFFFFF);

@@ -530,7 +530,7 @@ static color_t get_savings_color_mask(void)
     return COLOR_FONT_RED;
 }
 
-static char get_cosmetic_day_of_month(void)
+char widget_top_menu_get_cosmetic_day_of_month(void)
 {
     static const char days_in_month[] = {
         31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
@@ -566,7 +566,7 @@ void widget_top_menu_draw(int force)
     if (!force &&
         drawn.treasury == city_finance_treasury() &&
         drawn.population == city_population() &&
-        drawn.day == get_cosmetic_day_of_month() &&
+        drawn.day == widget_top_menu_get_cosmetic_day_of_month() &&
         drawn.personal == city_emperor_personal_savings() &&
         drawn.culture == city_rating_culture() &&
         drawn.prosperity == city_rating_prosperity() &&
@@ -628,7 +628,7 @@ void widget_top_menu_draw(int force)
         int date_x = data.date.start;
         top_menu_black_panel_draw(date_x, 0, DATE_FIELD_WIDTH + data.extra_space);
         int month_offset = date_x + data.extra_space / 2 + BLACK_PANEL_BLOCK_WIDTH + 14; // 14px is enough for day
-        text_draw_number(get_cosmetic_day_of_month(), 0, "", date_x + PANEL_MARGIN + data.extra_space / 2, 5, font,
+        text_draw_number(widget_top_menu_get_cosmetic_day_of_month(), 0, "", date_x + PANEL_MARGIN + data.extra_space / 2, 5, font,
          date_color);
         lang_text_draw_month_year_max_width(game_time_month(), game_time_year(),
          month_offset, 5, DATE_FIELD_WIDTH - BLACK_PANEL_BLOCK_WIDTH - 14, font, date_color);
@@ -669,7 +669,7 @@ void widget_top_menu_draw(int force)
     // --- Cache current state ---
     drawn.treasury = treasury;
     drawn.population = city_population();
-    drawn.day = get_cosmetic_day_of_month();
+    drawn.day = widget_top_menu_get_cosmetic_day_of_month();
     drawn.personal = city_emperor_personal_savings();
     drawn.culture = city_rating_culture();
     drawn.prosperity = city_rating_prosperity();

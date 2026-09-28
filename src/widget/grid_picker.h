@@ -1,7 +1,7 @@
 #ifndef WIDGET_GRID_PICKER_H
 #define WIDGET_GRID_PICKER_H
 
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 
 #define GRID_PICKER_MAX_ROWS 8
 #define GRID_PICKER_MAX_COLUMNS 8
