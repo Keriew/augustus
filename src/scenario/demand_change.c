@@ -66,9 +66,6 @@ static void process_demand_change(demand_change_t *demand_change)
     int route = demand_change->route_id;
     int resource = demand_change->resource;
     int city_id = empire_city_get_for_trade_route(route);
-    if (city_id < 0) {
-        city_id = 0;
-    }
 
     int last_amount = trade_route_limit(route, resource, buys);
     int amount = demand_change->amount;
@@ -184,7 +181,7 @@ void scenario_demand_change_load_state(buffer *buf, scenario_version_t version)
         } else {
             // Migration not guaranteed to be right (wasn't before as well though)
             int city_id = empire_city_get_for_trade_route(demand_change->route_id);
-            if (city_id < 0) {
+            if (!city_id) {
                 demand_change->buys = 1;
                 continue;
             }
@@ -237,7 +234,7 @@ void scenario_demand_change_migrate_old_version(void)
     demand_change_t *demand_change;
     array_foreach(demand_changes, demand_change) {
         int city_id = empire_city_get_for_trade_route(demand_change->route_id);
-        if (city_id < 0) {
+        if (!city_id) {
             demand_change->buys = 1;
             continue;
         }

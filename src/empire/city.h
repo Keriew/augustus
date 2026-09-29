@@ -20,6 +20,7 @@ typedef struct {
     int empire_object_id;
     int is_sea_trade;
     int trader_figure_ids[EMPIRE_CITY_MAX_TRADERS];
+    // int route_opened_year; // either via this or another way, ledger needs to track when a route opens
 } empire_city;
 
 void empire_city_clear_all(void);

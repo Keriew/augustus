@@ -164,6 +164,23 @@ static void set_destination(figure *f, int action, int building_id, int x_dst, i
     }
 }
 
+static int confirm_food_destination_close(int src_building_id, int dst_building_id)
+{
+    if (config_get(CONFIG_GP_CH_FARMS_DELIVER_CLOSE)) {
+        int dist = 0;
+        building *src_building = building_get(src_building_id);
+        building *dst_building = building_get(dst_building_id);
+        int src_building_type = src_building->type;
+        if ((src_building_type >= BUILDING_WHEAT_FARM && src_building_type <= BUILDING_PIG_FARM) || src_building_type == BUILDING_WHARF) {
+            dist = calc_maximum_distance(src_building->x, src_building->y, dst_building->x, dst_building->y);
+        }
+        if (dist >= 64) {
+            return 0;
+        }
+    }
+    return dst_building_id;
+}
+
 static void determine_cartpusher_destination(figure *f, building *b, int road_network_id)
 {
     map_point dst = { 0, 0 };
@@ -183,18 +200,7 @@ static void determine_cartpusher_destination(figure *f, building *b, int road_ne
     // priority 2: accepting granary for food
     dst_building_id = building_granary_for_storing(f->x, f->y,
         b->output_resource_id, road_network_id, 0, &understaffed_storages, &dst);
-    if (config_get(CONFIG_GP_CH_FARMS_DELIVER_CLOSE)) {
-        int dist = 0;
-        building *src_building = building_get(f->building_id);
-        building *dst_building = building_get(dst_building_id);
-        int src_building_type = src_building->type;
-        if ((src_building_type >= BUILDING_WHEAT_FARM && src_building_type <= BUILDING_PIG_FARM) || src_building_type == BUILDING_WHARF) {
-            dist = calc_maximum_distance(src_building->x, src_building->y, dst_building->x, dst_building->y);
-        }
-        if (dist >= 64) {
-            dst_building_id = 0;
-        }
-    }
+    dst_building_id = confirm_food_destination_close(f->building_id, dst_building_id);
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY, dst_building_id, dst.x, dst.y);
         return;
@@ -221,6 +227,7 @@ static void determine_cartpusher_destination(figure *f, building *b, int road_ne
     // priority 4: warehouse
     dst_building_id = building_warehouse_for_storing(0, f->x, f->y,
         b->output_resource_id, road_network_id, &understaffed_storages, &dst);
+    dst_building_id = confirm_food_destination_close(f->building_id, dst_building_id);
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE, dst_building_id, dst.x, dst.y);
         return;
@@ -228,18 +235,7 @@ static void determine_cartpusher_destination(figure *f, building *b, int road_ne
     // priority 5: granary forced when on stockpile
     dst_building_id = building_granary_for_storing(f->x, f->y,
         b->output_resource_id, road_network_id, 1, &understaffed_storages, &dst);
-    if (config_get(CONFIG_GP_CH_FARMS_DELIVER_CLOSE)) {
-        int dist = 0;
-        building *src_building = building_get(f->building_id);
-        building *dst_building = building_get(dst_building_id);
-        int src_building_type = src_building->type;
-        if ((src_building_type >= BUILDING_WHEAT_FARM && src_building_type <= BUILDING_PIG_FARM) || src_building_type == BUILDING_WHARF) {
-            dist = calc_maximum_distance(src_building->x, src_building->y, dst_building->x, dst_building->y);
-        }
-        if (dist >= 64) {
-            dst_building_id = 0;
-        }
-    }
+    dst_building_id = confirm_food_destination_close(f->building_id, dst_building_id);
     if (dst_building_id) {
         set_destination(f, FIGURE_ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY, dst_building_id, dst.x, dst.y);
         return;
@@ -859,6 +855,7 @@ void figure_warehouseman_action(figure *f)
                         if (delivered) {
                             city_health_dispatch_sickness(f);
                             f->loads_sold_or_carrying -= delivered;
+                            // produced
                         }
                         break;
                     case BUILDING_BARRACKS:

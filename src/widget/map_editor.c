@@ -9,13 +9,14 @@
 #include "editor/editor.h"
 #include "editor/tool.h"
 #include "graphics/color.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/menu.h"
 #include "graphics/panel.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
+#include "input/mouse.h"
 #include "input/scroll.h"
 #include "input/zoom.h"
 #include "map/figure.h"
@@ -25,9 +26,11 @@
 #include "map/point.h"
 #include "map/property.h"
 #include "map/terrain.h"
+#include "map/tiles.h"
 #include "scenario/custom_variable.h"
 #include "scenario/event/controller.h"
-#include "scenario/empire.h" 
+#include "scenario/empire.h"
+#include "scenario/property.h"
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
@@ -35,6 +38,7 @@
 #include "widget/map_editor_tool.h"
 #include "window/editor/empire.h"
 #include "window/editor/pause_menu.h"
+#include "window/editor/scenario_event_details.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -99,12 +103,29 @@ int widget_map_editor_add_draw_context_event_tile(int grid_offset, int event_id)
     return 0;
 }
 
+static color_t full_grid_color(void)
+{
+    if (!config_get(CONFIG_UI_CLIMATE_GRID_COLORS)) {
+        return COLOR_GRID;
+    }
+    switch (scenario_property_climate()) {
+        case CLIMATE_DESERT:
+            return COLOR_GRID_DESERT;
+        case CLIMATE_NORTHERN:
+            return COLOR_GRID_NORTHERN;
+        default:
+            return COLOR_GRID_CENTRAL;
+    }
+}
+
 static void draw_footprint(int x, int y, int grid_offset)
 {
     if (grid_offset < 0 || !map_property_is_draw_tile(grid_offset)) {
         return;
     }
     // Valid grid_offset and leftmost tile -> draw
+    int map_x = map_grid_offset_to_x(grid_offset);
+    int map_y = map_grid_offset_to_y(grid_offset);
     color_t color_mask = 0;
     int image_id = map_image_at(grid_offset);
     if (draw_context.advance_water_animation &&
@@ -119,6 +140,11 @@ static void draw_footprint(int x, int y, int grid_offset)
     if (event_tiles[grid_offset][0] != -1) {
         color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
     }
+    if (map_property_is_outskirts(grid_offset)) {
+        int distance_to_non_outskirts = map_tiles_find_nearest_non_outskirts(map_x, map_y);
+        color_t faded_outskirts = COLOR_MASK_OUTSKIRTS_FADE(distance_to_non_outskirts);
+        color_mask = color_mask ? COLOR_MIX_COLORS(faded_outskirts, color_mask) : faded_outskirts;
+    }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
@@ -127,7 +153,7 @@ static void draw_footprint(int x, int y, int grid_offset)
         if (!grid_id) {
             grid_id = assets_get_image_id("UI", "Grid_Full");
         }
-        image_draw(grid_id, x, y, COLOR_GRID, draw_context.scale);
+        image_draw(grid_id, x, y, full_grid_color(), draw_context.scale);
     }
 }
 
@@ -153,10 +179,17 @@ static void draw_top(int x, int y, int grid_offset)
     if (!map_property_is_draw_tile(grid_offset)) {
         return;
     }
+    int map_x = map_grid_offset_to_x(grid_offset);
+    int map_y = map_grid_offset_to_y(grid_offset);
     int image_id = map_image_at(grid_offset);
     color_t color_mask = 0;
     if (event_tiles[grid_offset][0] != -1) {
         color_mask = complex_button_basic_colors((event_tiles[grid_offset][0] % 10) + 1);
+    }
+    if (map_property_is_outskirts(grid_offset)) {
+        int distance_to_non_outskirts = map_tiles_find_nearest_non_outskirts(map_x, map_y);
+        color_t faded_outskirts = COLOR_MASK_OUTSKIRTS_FADE(distance_to_non_outskirts);
+        color_mask = color_mask ? COLOR_MIX_COLORS(faded_outskirts, color_mask) : faded_outskirts;
     }
     image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 }
@@ -455,6 +488,8 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
 {
     scroll_map(m);
 
+    int has_scrolled = 0;
+
     if (m->is_touch) {
         handle_touch();
     } else {
@@ -463,7 +498,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
         }
         if (m->right.went_up) {
             if (!editor_tool_is_active()) {
-                int has_scrolled = scroll_drag_end();
+                has_scrolled = scroll_drag_end();
                 if (!has_scrolled) {
                     editor_tool_deactivate();
                 }
@@ -472,7 +507,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
             }
         }
     }
-    
+
     if (h->show_empire_map) {
         if (scenario_empire_id() == SCENARIO_CUSTOM_EMPIRE) {
             resource_set_mapping(RESOURCE_CURRENT_VERSION);
@@ -497,7 +532,6 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
     zoom_map(m, h, city_view_get_scale());
 
     if (tile->grid_offset) {
-
         if (m->left.went_down) {
             if (!editor_tool_is_in_use()) {
                 editor_tool_start_use(tile);
@@ -505,6 +539,14 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
             editor_tool_update_use(tile);
         } else if (m->left.is_down || editor_tool_is_in_use()) {
             editor_tool_update_use(tile);
+        } else if (m->right.went_up && !editor_tool_is_in_use() && !has_scrolled) {
+            int offset = tile->grid_offset;
+            int event_id = event_tiles[offset][0];
+            if (event_id == -1) {
+                return; // No events
+            }
+            window_editor_scenario_event_details_show(event_id);
+            return;
         }
     }
     if (m->left.went_up && editor_tool_is_in_use()) {

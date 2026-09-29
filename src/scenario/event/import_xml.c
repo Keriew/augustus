@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define XML_TOTAL_ELEMENTS 77
+#define XML_TOTAL_ELEMENTS 95
 #define ERROR_MESSAGE_LENGTH 200
 
 static struct {
@@ -57,6 +57,8 @@ static int xml_import_special_parse_custom_message(xml_data_attribute_t *attr, i
 static int xml_import_special_parse_custom_variable(xml_data_attribute_t *attr, int *target);
 static int xml_import_special_parse_formula(xml_data_attribute_t *attr, int *target);
 static int xml_import_special_parse_number(xml_data_attribute_t *attr, int *target);
+static int xml_import_special_parse_city(xml_data_attribute_t *attr, int *target);
+static int xml_import_special_parse_text(xml_data_attribute_t *attr, int *target);
 
 static condition_types get_condition_type_from_element_name(const char *name);
 static action_types get_action_type_from_element_name(const char *name);
@@ -142,6 +144,24 @@ static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "change_rank", xml_import_create_action, 0, "actions"},
     { "change_production_rate", xml_import_create_action, 0, "actions"},
     { "lock_trade_route", xml_import_create_action, 0, "actions"},
+    { "change_goal", xml_import_create_action, 0, "actions"},
+    { "enemies_in_city", xml_import_create_condition, 0, "conditions|group"},
+    { "land_trade_problem_duration", xml_import_create_condition, 0, "conditions|group"},
+    { "sea_trade_problem_duration", xml_import_create_condition, 0, "conditions|group"}, // 80
+    { "move_camera", xml_import_create_action, 0, "actions"},
+    { "hide_trade_route", xml_import_create_action, 0, "actions"},
+    { "months_since_last_festival", xml_import_create_condition, 0, "conditions|group"},
+    { "change_variable_color", xml_import_create_action, 0, "actions"},
+    { "change_weather", xml_import_create_action, 0, "actions"},
+    { "desirability_in_area", xml_import_create_condition, 0, "conditions|group"},
+    { "population_in_area", xml_import_create_condition, 0, "conditions|group"},
+    { "change_immigration_percentage", xml_import_create_action, 0, "actions"},
+    { "change_monument_resources", xml_import_create_action, 0, "actions"},
+    { "rename_city", xml_import_create_action, 0, "actions"}, // 90
+    { "change_resource_cost", xml_import_create_action, 0, "actions"},
+    { "kill_walkers_in_area", xml_import_create_action, 0, "actions"},
+    { "figures_in_area", xml_import_create_condition, 0, "conditions|group"},
+    { "send_warning", xml_import_create_action, 0, "actions"}
 };
 
 static int xml_import_start_scenario_events(void)
@@ -502,9 +522,10 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_CLIMATE:
         case PARAMETER_TYPE_TERRAIN:
         case PARAMETER_TYPE_DATA_TYPE:
+        case PARAMETER_TYPE_HOUSE_DATA_TYPE:
         case PARAMETER_TYPE_MODEL:
         case PARAMETER_TYPE_PERCENTAGE:
-        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_HOUSING_TYPE_WITH_GROUPS:
         case PARAMETER_TYPE_AGE_GROUP:
         case PARAMETER_TYPE_ENEMY_CLASS:
         case PARAMETER_TYPE_PLAYER_TROOPS:
@@ -512,6 +533,12 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_RANK:
         case PARAMETER_TYPE_CITY_PROPERTY:
         case PARAMETER_TYPE_MEDIA_TYPE:
+        case PARAMETER_TYPE_WIN_CONDITION:
+        case PARAMETER_TYPE_WEATHER:
+        case PARAMETER_TYPE_ROUTE_TYPE:
+        case PARAMETER_TYPE_VARIABLE_COLOR:
+        case PARAMETER_TYPE_HOUSING_TYPE:
+        case PARAMETER_TYPE_MONUMENT:
             return xml_import_special_parse_type(attr, resolved_type, target);
         case PARAMETER_TYPE_ROUTE_RESOURCE:
             return xml_import_special_parse_number(attr, target);
@@ -522,10 +549,14 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
         case PARAMETER_TYPE_REQUEST:
         case PARAMETER_TYPE_NUMBER:
         case PARAMETER_TYPE_GRID_SLICE:
+        case PARAMETER_TYPE_GRID_OFFSET:
+        case PARAMETER_TYPE_FIGURE_CATEGORY:
             return xml_import_special_parse_limited_number(attr, target);
         case PARAMETER_TYPE_MIN_MAX_NUMBER:
             return xml_import_special_parse_min_max_number(attr, target);
         case PARAMETER_TYPE_RESOURCE:
+        case PARAMETER_TYPE_RESOURCE_ALL:
+        case PARAMETER_TYPE_RESOURCE_MONUMENT:
             return xml_import_special_parse_resource(attr, target);
         case PARAMETER_TYPE_ROUTE:
             return xml_import_special_parse_route(attr, target);
@@ -541,6 +572,10 @@ static int xml_import_special_parse_attribute_with_resolved_type(xml_data_attrib
             // FLEXIBLE should have been resolved before calling this function
             xml_import_log_error("Unresolved FLEXIBLE parameter type encountered during import");
             return 0;
+        case PARAMETER_TYPE_CITY:
+            return xml_import_special_parse_city(attr, target);
+        case PARAMETER_TYPE_CUSTOM_TEXT:
+            return xml_import_special_parse_text(attr, target);
         default:
             xml_import_log_error("Something is very wrong. Failed to find attribute type.");
             return 0;
@@ -616,6 +651,31 @@ static int xml_import_special_parse_future_city(xml_data_attribute_t *attr, int 
     }
 }
 
+static int xml_import_special_parse_city(xml_data_attribute_t *attr, int *target)
+{
+    if (!attr->name) {
+        return 0;
+    }
+
+    int has_attr = xml_parser_has_attribute(attr->name);
+    if (!has_attr) {
+        xml_import_log_error("Missing attribute.");
+        return 0;
+    }
+
+    const char *value = xml_parser_get_attribute_string(attr->name);
+    const uint8_t *converted_name = string_from_ascii(value);
+    int city_id = empire_city_get_id_by_name(converted_name);
+    empire_city *city = empire_city_get(city_id);
+    if (city) {
+        *target = city_id;
+        return 1;
+    } else {
+        xml_import_log_error("Could not find city");
+        return 0;
+    }
+}
+
 static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *target)
 {
     if (!attr->name) {
@@ -629,8 +689,8 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
     }
 
     const char *value = xml_parser_get_attribute_string(attr->name);
-    for (resource_type i = RESOURCE_MIN; i < RESOURCE_MAX; i++) {
-        const char *resource_name = resource_get_data(i)->xml_attr_name;
+    for (resource_type i = RESOURCE_NONE; i < RESOURCE_ALL; i++) { // starting at RESOURCE_NONE to cover Architects
+        const char *resource_name = i ? resource_get_data(i)->xml_attr_name : "architects";
         if (xml_parser_compare_multiple(resource_name, value)) {
             *target = (int) i;
             return 1;
@@ -801,6 +861,31 @@ static int xml_import_special_parse_formula(xml_data_attribute_t *attr, int *tar
         return 1;
     } else {
         xml_import_log_error("Could not create formula from imported string.");
+        return 0;
+    }
+}
+
+static int xml_import_special_parse_text(xml_data_attribute_t *attr, int *target)
+{
+    if (!attr->name) {
+        return 1;
+    }
+
+    int has_attr = xml_parser_has_attribute(attr->name);
+    if (!has_attr) {
+        xml_import_log_error("Missing attribute.");
+        return 0;
+    }
+
+    const char *value = xml_parser_get_attribute_string(attr->name);
+    const uint8_t *converted_text = string_from_ascii(value);
+    unsigned int text_id = scenario_text_get_new(converted_text);
+
+    if (text_id) {
+        *target = text_id;
+        return 1;
+    } else {
+        xml_import_log_error("Could not create scenario text from imported string.");
         return 0;
     }
 }

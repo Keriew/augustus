@@ -28,7 +28,6 @@
 #include "scenario/map.h"
 
 
-
 #define OFFSET(x,y) (x + GRID_SIZE * y)
 
 #define FORBIDDEN_TERRAIN_MEADOW (TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP |\
@@ -40,11 +39,13 @@
 #define GARDEN_VARIANTS 2
 #define GARDEN_IMAGES_PER_VARIANT 4
 
+#define MAX_OUTSKIRTS_FADE_DISTANCE 6
+
 static int aqueduct_include_construction = 0;
 static int highway_top_tile_offsets[4] = { 0, -GRID_SIZE, -1, -GRID_SIZE - 1 };
 static int elevation_recalculate_trees = 0;
 
-static int is_clear(int x, int y, int size, int disallowed_terrain, int terrain_exception, 
+static int is_clear(int x, int y, int size, int disallowed_terrain, int terrain_exception,
     int check_figure, int check_image)
 {
     if (!map_grid_is_inside(x, y, size)) {
@@ -706,7 +707,7 @@ int map_tiles_is_adjacent_to_building_type(int grid_offset, int building_type, i
     tiles[1] = grid_offset + map_grid_delta(1, 0);
     tiles[2] = grid_offset + map_grid_delta(0, 1);
     tiles[3] = grid_offset + map_grid_delta(-1, 0);
-    tiles[4] = grid_offset + map_grid_delta(1, -1);// diagonal tiles 
+    tiles[4] = grid_offset + map_grid_delta(1, -1);// diagonal tiles
     tiles[5] = grid_offset + map_grid_delta(1, 1);
     tiles[6] = grid_offset + map_grid_delta(-1, 1);
     tiles[7] = grid_offset + map_grid_delta(-1, -1);
@@ -740,6 +741,40 @@ int map_tiles_is_paved_road(int grid_offset)
         return 1;
     }
     return 0;
+}
+
+int map_tiles_exists_outskirts(int x, int y, int size)
+{
+    if (!map_grid_is_inside(x, y, size)) {
+        return 0;
+    }
+    for (int dy = 0; dy < size; dy++) {
+        for (int dx = 0; dx < size; dx++) {
+            int grid_offset = map_grid_offset(x + dx, y + dy);
+            if (map_property_is_outskirts(grid_offset)) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int map_tiles_find_nearest_non_outskirts(int x, int y)
+{
+    for (int radius = 0; radius <= MAX_OUTSKIRTS_FADE_DISTANCE; radius++) {
+        int x_min, y_min, x_max, y_max;
+        map_grid_get_area(x, y, 1, radius, &x_min, &y_min, &x_max, &y_max);
+
+        for (int yy = y_min; yy <= y_max; yy++) {
+            for (int xx = x_min; xx <= x_max; xx++) {
+                int grid_offset = map_grid_offset(xx, yy);
+                if (!map_property_is_outskirts(grid_offset)) {
+                    return radius;
+                }
+            }
+        }
+    }
+    return MAX_OUTSKIRTS_FADE_DISTANCE;
 }
 
 int map_tiles_highway_get_aqueduct_image(int grid_offset)
@@ -1085,6 +1120,23 @@ static void set_water_image(int x, int y, int grid_offset)
     if (((map_terrain_get(grid_offset) & (TERRAIN_WATER | TERRAIN_BUILDING)) == TERRAIN_WATER) || map_is_bridge(grid_offset)) {
         const terrain_image *img = map_image_context_get_shore(grid_offset);
         int image_id = image_group(GROUP_TERRAIN_WATER) + img->group_offset + img->item_offset;
+        if (map_terrain_is(grid_offset, TERRAIN_SHALLOW_WATER)) {
+            // GROUP_TERRAIN_WATER_SHORE 0-3 are open-water shallow variants,
+            // 4-7 are shore-shallow keyed by the screen-direction of adjacent land.
+            // Only the "clean straight shore" patterns from the water context table
+            // (group_offset 8/12/16/20 = exactly one cardinal-land neighbour with the
+            // adjacent diagonals also water) use a shallow shore sprite. Diagonal
+            // corners, peninsulas, and other multi-direction configurations fall
+            // through and keep the regular water shore image.
+            int base = image_group(GROUP_TERRAIN_WATER_SHORE);
+            switch (img->group_offset) {
+                case 0:  image_id = base + (map_random_get(grid_offset) & 3); break;
+                case 8:  image_id = base + 4; break;
+                case 12: image_id = base + 5; break;
+                case 16: image_id = base + 6; break;
+                case 20: image_id = base + 7; break;
+            }
+        }
         if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_BUILDING)) {
             // fortified shore
             if (!map_is_bridge(grid_offset)) { //no fortification right under the bridge

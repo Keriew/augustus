@@ -1,6 +1,7 @@
 #include "building.h"
 
 #include "building/clone.h"
+#include "building/connectable.h"
 #include "building/construction.h"
 #include "building/construction_building.h"
 #include "building/construction_clear.h"
@@ -457,7 +458,7 @@ int building_repair_cost_at(int grid_offset)
 
     if (building_is_house(og_type)) {
         grid_slice *house_slice = map_grid_get_grid_slice_house(b->id, 1);
-        int clear_cost = house_slice->size * (11 + 3); // 10.5 per new house tile + 3 per rubble tile to clear
+        int clear_cost = house_slice->size * (11 + model_get_building(BUILDING_REPAIR_LAND)->cost); // 10.5 per new house tile + cost of repair land per rubble tile to clear
         return clear_cost;
     }
     if (b->type == BUILDING_WAREHOUSE_SPACE) {
@@ -651,6 +652,13 @@ int building_repair_at(int grid_offset)
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
+
+    // Repair palisade gates together with roads
+    if (type_to_place == BUILDING_PALISADE_GATE) {
+        map_terrain_add(new_building->grid_offset, TERRAIN_ROAD);
+        map_tiles_update_all_roads();
+    }
+
     if (building_is_storage(type_to_place) && b->storage_id) {
         if (new_building->storage_id != og_storage_id) {
             building_storage_delete(new_building->storage_id);
@@ -683,6 +691,7 @@ int building_repair_at(int grid_offset)
         map_tiles_update_all_walls(); // towers affect wall connections
     }
     game_undo_disable(); // not accounting for undoing repairs
+    building_connectable_update_connections(); // Fix incorrect palisade wall rotation when repairs
     return full_cost;
 }
 
@@ -701,6 +710,14 @@ void building_update_state(void)
         if (b->state == BUILDING_STATE_IN_USE && b->house_size) {
             continue;
         }
+
+        // patch the phantom bridge entry in the buildings array after a bridge deletion
+        if ((b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_SHIP_BRIDGE) 
+            && (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED)
+            && (map_building_at(b->grid_offset) != b->id)) {
+                b->state = BUILDING_STATE_UNUSED;
+        }
+
         if (b->state == BUILDING_STATE_UNDO || b->state == BUILDING_STATE_DELETED_BY_PLAYER) {
             if (b->type == BUILDING_TOWER || b->type == BUILDING_GATEHOUSE) {
                 wall_recalc = 1;
@@ -792,6 +809,10 @@ void building_update_desirability(void)
         }
 
         desirability += building_get_elevation_desirability_bonus(b->grid_offset);
+
+        if (map_tiles_exists_outskirts(b->x, b->y, b->size)) {
+            desirability += BUILDING_OUTSKIRTS_DESIRABILITY_MALUS;
+        }
 
         // Clamp before assigning to 8-bit signed int
         desirability = calc_bound(desirability, -100, 100);
@@ -932,6 +953,14 @@ int building_is_fort(building_type type)
         type == BUILDING_FORT_MOUNTED ||
         type == BUILDING_FORT_AUXILIA_INFANTRY ||
         type == BUILDING_FORT_ARCHERS;
+}
+
+int building_is_military(building_type type)
+{
+    return building_is_fort(type) || type == BUILDING_FORT_GROUND ||
+        type == BUILDING_BARRACKS || type == BUILDING_MILITARY_ACADEMY || type == BUILDING_MESS_HALL ||
+        type == BUILDING_TOWER || type == BUILDING_WATCHTOWER || type == BUILDING_GATEHOUSE ||
+        type == BUILDING_PALISADE_GATE || type == BUILDING_PALISADE || type == BUILDING_WALL;
 }
 
 int building_mothball_toggle(building *b)
@@ -1131,4 +1160,8 @@ void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, 
 
     extra.incorrect_houses = buffer_read_i32(corrupt_houses);
     extra.unfixable_houses = buffer_read_i32(corrupt_houses);
+
+    if (save_version <= SAVE_GAME_LAST_NO_FORT_ORIENTATION) {
+        migrate_fort_rotations();
+    }
 }

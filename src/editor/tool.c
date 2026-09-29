@@ -29,7 +29,8 @@
 #include <string.h>
 
 #define TERRAIN_PAINT_MASK ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING |\
-                            TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW)
+                            TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW |\
+                            TERRAIN_SHALLOW_WATER)
 
 static struct {
     int active;
@@ -41,8 +42,9 @@ static struct {
     map_tile start_tile;
     grid_slice *land_selection; // selection being edited right now
     void (*selection_callback)(grid_slice *selection);
+    void (*single_selection_callback)(int grid_offset);
     int found_custom_earthquake;
-} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, 0, 0 };
+} data = { 0, TOOL_GRASS, 0, 3, 0, 0, {0}, NULL, 0, 0, 0 };
 
 tool_type editor_tool_type(void)
 {
@@ -79,6 +81,7 @@ void editor_tool_set_type(tool_type type)
 void editor_tool_clear_selection_callback(void)
 {
     data.selection_callback = 0;
+    data.single_selection_callback = 0;
 }
 
 void editor_tool_set_with_id(tool_type type, int id)
@@ -148,6 +151,7 @@ int editor_tool_is_brush(void)
         case TOOL_GRASS:
         case TOOL_TREES:
         case TOOL_WATER:
+        case TOOL_SHALLOW:
         case TOOL_SHRUB:
         case TOOL_ROCKS:
         case TOOL_MEADOW:
@@ -156,6 +160,8 @@ int editor_tool_is_brush(void)
         case TOOL_LOWER_LAND:
         case TOOL_EARTHQUAKE_CUSTOM:
         case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
+        case TOOL_OUTSKIRTS:
+        case TOOL_OUTSKIRTS_REMOVE:
             return 1;
         default:
             return 0;
@@ -203,7 +209,8 @@ static void add_terrain(const void *tile_data, int dx, int dy)
     }
     int grid_offset = tile->grid_offset + map_grid_delta(dx, dy);
     int terrain = map_terrain_get(grid_offset);
-    if (data.type != TOOL_EARTHQUAKE_CUSTOM && data.type != TOOL_EARTHQUAKE_CUSTOM_REMOVE) {
+    if (data.type != TOOL_EARTHQUAKE_CUSTOM && data.type != TOOL_EARTHQUAKE_CUSTOM_REMOVE &&
+        data.type != TOOL_OUTSKIRTS && data.type != TOOL_OUTSKIRTS_REMOVE) {
         if (terrain & TERRAIN_BUILDING) {
             map_building_tiles_remove(0, x, y);
             terrain = map_terrain_get(grid_offset);
@@ -239,9 +246,17 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             }
             break;
         case TOOL_WATER:
-            if (!(terrain & TERRAIN_WATER) && !(terrain & TERRAIN_ELEVATION_ROCK)) {
+            if (!(terrain & TERRAIN_ELEVATION_ROCK) &&
+                (!(terrain & TERRAIN_WATER) || (terrain & TERRAIN_SHALLOW_WATER))) {
                 terrain &= TERRAIN_PAINT_MASK;
                 terrain |= TERRAIN_WATER;
+                map_property_clear_future_earthquake(grid_offset);
+            }
+            break;
+        case TOOL_SHALLOW:
+            if (!(terrain & TERRAIN_ELEVATION_ROCK)) {
+                terrain &= TERRAIN_PAINT_MASK;
+                terrain |= TERRAIN_WATER | TERRAIN_SHALLOW_WATER;
                 map_property_clear_future_earthquake(grid_offset);
             }
             break;
@@ -276,6 +291,12 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             break;
         case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
             map_property_clear_future_earthquake(grid_offset);
+            break;
+        case TOOL_OUTSKIRTS:
+            map_property_mark_outskirts(grid_offset);
+            break;
+        case TOOL_OUTSKIRTS_REMOVE:
+            map_property_clear_outskirts(grid_offset);
         default:
             break;
     }
@@ -318,6 +339,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_region_trees(x_min, y_min, x_max, y_max);
             break;
         case TOOL_WATER:
+        case TOOL_SHALLOW:
         case TOOL_ROCKS:
             map_image_context_reset_water();
             map_tiles_update_all_rocks();
@@ -577,6 +599,11 @@ void editor_tool_end_use(const map_tile *tile)
             if (data.selection_callback && data.land_selection) {
                 data.selection_callback(data.land_selection);
             }
+            data.active = 0;
+            break;
+        case TOOL_SELECT_OFFSET:
+            data.single_selection_callback(tile->grid_offset);
+            data.active = 0;
             break;
         default:
             break;
@@ -586,6 +613,11 @@ void editor_tool_end_use(const map_tile *tile)
 void editor_tool_set_selection_callback(void (*callback)(grid_slice *selection))
 {
     data.selection_callback = callback;
+}
+
+void editor_tool_set_single_selection_callback(void (*callback)(int grid_offset))
+{
+    data.single_selection_callback = callback;
 }
 
 grid_slice *editor_tool_get_land_selection(void)

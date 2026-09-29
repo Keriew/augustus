@@ -7,7 +7,6 @@
 void scenario_condition_group_new(scenario_condition_group_t *group, unsigned int id);
 int scenario_condition_group_in_use(const scenario_condition_group_t *group);
 
-void scenario_condition_type_init(scenario_condition_t *condition);
 int scenario_condition_type_is_met(scenario_condition_t *condition);
 
 void scenario_condition_type_delete(scenario_condition_t *condition);

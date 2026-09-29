@@ -166,7 +166,7 @@ static void show_message_popup(int message_id)
         if (msg->message_type == MESSAGE_REQUEST_CAN_COMPLY && msg->param1) {
             // param1 = request id
             const scenario_request *request = scenario_request_get(msg->param1);
-            if (request->can_comply_dialog_shown == 1 || request->state > 2) { // dispatched or ignored
+            if (request->can_comply_dialog_shown == 1 || request->state >= 2) { // dispatched or ignored
                 return;  // nothing to show
             }
         }
@@ -556,6 +556,30 @@ void city_message_delete(int message_id)
 {
     data.messages[message_id].message_type = 0;
     city_message_sort_and_compact();
+}
+
+void city_message_clear_old_messages(void)
+{
+    if (!config_get(CONFIG_UI_AUTO_DELETE_OLD_COMMON_MESSAGES)) {
+        return;
+    }
+    int current_year = game_time_year();
+    int changed = 0;
+    for (int i = 0; i < MAX_MESSAGES; i++) {
+        city_message *msg = &data.messages[i];
+        if (!msg->message_type) {
+            continue;
+        }
+        if (msg->message_type == MESSAGE_CUSTOM_MESSAGE) {
+            continue;
+        }
+        if (current_year - msg->year >= 5) {
+            city_message_delete(i);
+            changed = 1;
+        }
+    }
+    if (changed)
+        city_message_sort_and_compact();
 }
 
 int city_message_count(void)

@@ -39,7 +39,7 @@
 #include "scenario/map.h"
 #include "scenario/property.h"
 
-#include <math.h> 
+#include <math.h>
 #include <stdio.h>
 
 #define INFINITE 10000
@@ -95,10 +95,10 @@ static void resource_multiplier_init(void)
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
         // player buys, traders sell
         int price_sell_multiplier = calculate_log_score(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
-        LOGARITHMIC_SCALER_SELL, trade_price_buy(r, 1)); //trader sells, player buys 
+        LOGARITHMIC_SCALER_SELL, trade_price_buy(r, 1)); //trader sells, player buys
         data.sell_multiplier.value_multiplier[r] = price_sell_multiplier;
         int price_buy_multiplier = calculate_log_score(PRICE_BASELINE, MULTIPLIER_PRICE_MIN, MULTIPLIER_PRICE_MAX,
-        LOGARITHMIC_SCALER_BUY, trade_price_sell(r, 1)); //trader buys, player sells 
+        LOGARITHMIC_SCALER_BUY, trade_price_sell(r, 1)); //trader buys, player sells
         data.buy_multiplier.value_multiplier[r] = price_buy_multiplier;
         // add any other rules that increase priority of a resource here, e.g.: resource_is_food(r) ? 150 : 100;
     }
@@ -404,7 +404,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             int distance_score = calculate_log_score(raw_distance, MULTIPLIER_DISTANCE_MIN, MULTIPLIER_DISTANCE_MAX,
                 LOGARITHIMIC_SCALER_DISTANCE, DISTANCE_BASELINE);
             //swapping the input and baseline gives inverted score: higher score for shorter distances
-            int total_score = (sell_score + buy_score) * distance_score / 100; // Normalize by 100 
+            int total_score = (sell_score + buy_score) * distance_score / 100; // Normalize by 100
             // If this building is the best candidate so far, store it
             if (total_score > best_score && total_score > 0) {
                 best_score = total_score;
@@ -412,7 +412,7 @@ static int get_closest_storage(const figure *f, int x, int y, int city_id, map_p
             }
         }
     }
-    // 5. Return result 
+    // 5. Return result
     if (best_building_id) {
         const building *best_building = building_get(best_building_id);
         if (best_building->type == BUILDING_GRANARY && best_building->has_road_access >= 1) {
@@ -510,11 +510,12 @@ void figure_trade_caravan_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 int move_on = 0;
+                int storage_id = building_get(f->destination_building_id)->storage_id;
                 if (figure_trade_caravan_can_buy(f, f->destination_building_id, f->empire_city_id)) {
                     int resource = trader_get_buy_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 1);
-                        trader_record_bought_resource(f->trader_id, resource);
+                        trader_record_bought_resource(f->id, f->trader_id, resource, storage_id);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->trader_amount_bought++;
                     } else {
@@ -527,7 +528,7 @@ void figure_trade_caravan_action(figure *f)
                     int resource = trader_get_sell_resource(f->destination_building_id, f->empire_city_id);
                     if (resource) {
                         trade_route_increase_traded(empire_city_get_route_id(f->empire_city_id), resource, 0);
-                        trader_record_sold_resource(f->trader_id, resource);
+                        trader_record_sold_resource(f->id, f->trader_id, resource, storage_id);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
                         f->loads_sold_or_carrying++;
                     } else {
@@ -664,6 +665,7 @@ void figure_native_trader_action(figure *f)
             if (f->wait_ticks > 10) {
                 f->wait_ticks = 0;
                 building *b = building_get(f->destination_building_id);
+                int storage_id = b->storage_id;
                 int resource = get_native_trader_buy_resource(b); // preemptive check of resource to avoid standing idle
                 if (building_storage_get_permission(BUILDING_STORAGE_PERMISSION_NATIVES, b) &&
                     f->trader_amount_bought < figure_trade_land_trade_units() && resource != RESOURCE_NONE) {
@@ -674,7 +676,7 @@ void figure_native_trader_action(figure *f)
                         removed = building_warehouse_try_remove_resource(b, resource, 1);
                     }
                     if (removed) {
-                        trader_record_bought_resource(f->trader_id, resource);
+                        trader_record_bought_resource(f->id, f->trader_id, resource, storage_id);
                         int price = trade_price_sell(resource, 1);
                         city_finance_process_export(price * removed);
                         city_health_update_sickness_level_in_building(f->destination_building_id);
@@ -954,6 +956,13 @@ void figure_trade_ship_action(figure *f)
                         int entrance_grid_offset = map_grid_offset(river_entry.x, river_entry.y);
                         int entrance_distance = map_grid_chess_distance(f->grid_offset, entrance_grid_offset);
                         river_spot = exit_distance < entrance_distance ? river_exit : river_entry;
+
+                        // Fix unreachable river exit for trade ships (low bridge)
+                        map_routing_calculate_distances_water_boat(f->x, f->y);
+                        if (map_routing_distance(map_grid_offset(river_spot.x, river_spot.y)) == 0) {
+                            river_spot = (river_spot.x == river_exit.x && river_spot.y == river_exit.y)
+                                ? river_entry : river_exit;
+                        }
                     } else {
                         river_spot = river_entry;
                     }
@@ -1102,7 +1111,7 @@ int figure_trader_ship_other_ship_closer_to_dock(unsigned int dock_id, int dista
     for (int route_id = 0; route_id < 20; route_id++) {
         if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             int city_id = empire_city_get_for_trade_route(route_id);
-            if (city_id != -1) {
+            if (city_id) {
                 empire_city *city = empire_city_get(city_id);
                 for (int i = 0; i < 3; i++) {
                     figure *other_ship = figure_get(city->trader_figure_ids[i]);

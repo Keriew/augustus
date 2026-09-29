@@ -102,7 +102,7 @@ static void populate_list(int offset)
         if (target_id < data.list_size) {
             data.list[i].id = target_id;
             int city_id = empire_city_get_for_trade_route(target_id);
-            if (city_id != -1) {
+            if (city_id) {
                 empire_city *city = empire_city_get(city_id);
                 data.list[i].name = empire_city_get_name(city);
             } else {
@@ -184,7 +184,7 @@ static void create_resource_list_for_route(int route_id)
         int buys = 0;
         int sells = 0;
         int city_id = empire_city_get_for_trade_route(route_id);
-        if (city_id != -1) {
+        if (city_id) {
             buys = empire_city_buys_resource(city_id, r);
             sells = empire_city_sells_resource(city_id, r);
         }
@@ -396,7 +396,7 @@ const uint8_t *window_editor_select_city_trade_route_show_get_selected_name(int 
 
     // Determine if this resource is bought or sold by this trade route
     int city_id = empire_city_get_for_trade_route(trade_route_id);
-    if (city_id == -1) {
+    if (!city_id) {
         return r_data->text;
     }
 

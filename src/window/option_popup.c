@@ -101,8 +101,8 @@ static void calculate_visible_options(void)
 
     buttons[2].width = buttons[3].width = buttons[4].width = data.num_options == data.visible_options ? 430 : 400;
 
-    scrollbar.height = Y_OFFSET_PER_OPTION[data.row_size] * data.visible_options;
-    scrollbar.elements_in_view =  data.visible_options;
+    scrollbar.length = Y_OFFSET_PER_OPTION[data.row_size] * data.visible_options;
+    scrollbar.elements_in_view = data.visible_options;
     scrollbar_init(&scrollbar, 0, data.num_options);
     if (data.selected_option > data.visible_options) {
         scrollbar.scroll_position = data.selected_option - data.visible_options;
@@ -188,7 +188,7 @@ static void draw_foreground(void)
         data.focus_button_id == 2 && data.selected_option != data.original_option);
 
     if (data.num_options > data.visible_options) {
-        inner_panel_draw(scrollbar.x + 4, scrollbar.y + 32, 2, scrollbar.height / 16 - 4);
+        inner_panel_draw(scrollbar.x + 4, scrollbar.y + 32, 2, scrollbar.length / 16 - 4);
         scrollbar_draw(&scrollbar);
     }
 

@@ -282,6 +282,7 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_GRASS:
         case TOOL_MEADOW:
         case TOOL_ROCKS:
+        case TOOL_SHALLOW:
         case TOOL_SHRUB:
         case TOOL_TREES:
         case TOOL_WATER:
@@ -290,6 +291,8 @@ void map_editor_tool_draw(const map_tile *tile)
         case TOOL_LOWER_LAND:
         case TOOL_EARTHQUAKE_CUSTOM:
         case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
+        case TOOL_OUTSKIRTS:
+        case TOOL_OUTSKIRTS_REMOVE:
             draw_brush(tile, x, y);
             break;
 
@@ -308,5 +311,10 @@ void map_editor_tool_draw(const map_tile *tile)
                 draw_flat_tile(x, y, COLOR_MASK_AMBER);
             }
             break;
+
+        case TOOL_SELECT_OFFSET:
+            draw_flat_tile(x, y, COLOR_MASK_AMBER);
+            break;
+
     }
 }

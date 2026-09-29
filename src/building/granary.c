@@ -21,7 +21,7 @@
 #define MAX_GRANARIES 100
 #define CURSE_LOADS BUILDING_STORAGE_QUANTITY_MAX / 2
 #define INFINITE 10000
-#define ONE_CARTLOAD 1 //used to be 100 to equal units; 
+#define ONE_CARTLOAD 1 //used to be 100 to equal units;
 //RESOURCE_ONE_LOAD in resource.h still points to 100, since it's used in distribution
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -268,6 +268,38 @@ int building_granaries_send_resources_to_rome(int resource, int amount)
                 if (taken_loads) {
                     try_create_cart_to_rome(b, resource, taken_loads);
                 }
+            }
+        }
+    }
+    return amount;
+}
+
+int building_granaries_send_resources_to_trade_route(int resource, int amount)
+{
+    // first go for emptying or non-getting, non-maintaining granaries with caesar permission
+    for (building *b = building_first_of_type(BUILDING_GRANARY); b && amount; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_IN_USE) {
+            if ((building_storage_get_empty_all(b->id) ||
+                 building_storage_get_state(b, resource, 1) < BUILDING_STORAGE_STATE_GETTING) &&
+                building_storage_get_permission(BUILDING_STORAGE_PERMISSION_CAESAR, b)) {
+                int taken_loads = building_granary_try_remove_resource(b, resource, amount);
+                amount -= taken_loads;
+                if (taken_loads) {
+                    try_create_cart_to_rome(b, resource, taken_loads);
+                }
+            }
+        }
+    }
+    if (amount <= 0) {
+        return 0;
+    }
+    // if that doesn't work, take it anyway
+    for (building *b = building_first_of_type(BUILDING_GRANARY); b && amount; b = b->next_of_type) {
+        if (b->state == BUILDING_STATE_IN_USE) {
+            int taken_loads = building_granary_try_remove_resource(b, resource, amount);
+            amount -= taken_loads;
+            if (taken_loads) {
+                try_create_cart_to_rome(b, resource, taken_loads);
             }
         }
     }

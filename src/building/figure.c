@@ -975,27 +975,6 @@ static void spawn_lighthouse_supplier(building *b, int x, int y)
     send_supplier_to_destination(f, dst_building_id);
 }
 
-static void spawn_highway_station_supplier(building *b, int x, int y)
-{
-    if (b->figure_id) {
-        figure *f = figure_get(b->figure_id);
-        if (f->state != FIGURE_STATE_ALIVE ||
-            (f->type != FIGURE_HIGHWAY_STATION_SUPPLIER && f->type != FIGURE_LABOR_SEEKER)) {
-            b->figure_id = 0;
-        }
-        return;
-    }
-    int dst_building_id = building_highway_station_get_storage_destination(b);
-    if (dst_building_id == 0) {
-        return;
-    }
-    figure *f = figure_create(FIGURE_HIGHWAY_STATION_SUPPLIER, x, y, DIR_0_TOP);
-    f->building_id = b->id;
-    b->figure_id = f->id;
-    f->collecting_item_id = b->data.market.fetch_inventory_id;
-    send_supplier_to_destination(f, dst_building_id);
-}
-
 static void set_bathhouse_graphic(building *b)
 {
     if (b->state != BUILDING_STATE_IN_USE) {
@@ -1458,12 +1437,31 @@ static void spawn_figure_mission_post(building *b)
     }
     map_point road;
     if (map_has_road_access(b->x, b->y, b->size, &road)) {
-        if (city_population() > 0) {
-            b->figure_spawn_delay++;
-            if (b->figure_spawn_delay > 1) {
-                b->figure_spawn_delay = 0;
-                create_roaming_figure(b, road.x, road.y, FIGURE_MISSIONARY);
-            }
+        // Mission Post always has 100% house coverage
+        if (b->distance_from_entry) {
+            b->houses_covered = 100;
+        } else {
+            b->houses_covered = 0;
+        }
+        int pct_workers = worker_percentage(b);
+        int spawn_delay;
+        if (pct_workers >= 100) {
+            spawn_delay = 0;
+        } else if (pct_workers >= 75) {
+            spawn_delay = 1;
+        } else if (pct_workers >= 50) {
+            spawn_delay = 3;
+        } else if (pct_workers >= 25) {
+            spawn_delay = 7;
+        } else if (pct_workers >= 1) {
+            spawn_delay = 15;
+        } else {
+            return;
+        }
+        b->figure_spawn_delay++;
+        if (b->figure_spawn_delay > spawn_delay) {
+            b->figure_spawn_delay = 0;
+            create_roaming_figure(b, road.x, road.y, FIGURE_MISSIONARY);
         }
     }
 }
@@ -1525,6 +1523,7 @@ static void spawn_figure_wharf(building *b)
             b->figure_id = f->id;
             f->wait_ticks = 30;
             f->loads_sold_or_carrying = 1;
+            city_finance_trade_ledger_add_produced(RESOURCE_FISH);
         }
     }
 }
@@ -1694,6 +1693,13 @@ static void spawn_figure_barracks(building *b)
         if (city_data.mess_hall.food_stress_cumulative > 20) {
             spawn_delay += city_data.mess_hall.food_stress_cumulative - 20;
         }
+
+        int troops_production = resource_get_data(RESOURCE_TROOPS)->production_per_month;
+        // Compatibility with old maps where TROOPS production was not defined
+        if (troops_production == 0) {
+            troops_production = resource_get_defaults(RESOURCE_TROOPS)->production_per_month;
+        }
+        spawn_delay = spawn_delay * resource_get_defaults(RESOURCE_TROOPS)->production_per_month / troops_production;
 
         b->figure_spawn_delay++;
         if (b->figure_spawn_delay > spawn_delay) {

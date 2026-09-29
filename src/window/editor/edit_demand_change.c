@@ -103,7 +103,7 @@ static void init(int id)
 
     for (int i = 1; i < trade_route_count(); i++) {
         int city_id = empire_city_get_for_trade_route(i);
-        if (city_id < 0) {
+        if (!city_id) {
             create_route_info(i, lang_get_string(CUSTOM_TRANSLATION, TR_EDITOR_UNKNOWN_ROUTE));
             continue;
         }
@@ -248,7 +248,7 @@ static void set_change_amount(int value)
 
 static void button_amount(const generic_button *button)
 {
-    window_numeric_input_show(0, 0, button, 3, 999, set_change_amount);
+    window_numeric_input_show(0, 0, button, 4, 9999, set_change_amount);
 }
 
 static void button_buying(const generic_button *button)

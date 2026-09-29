@@ -260,7 +260,6 @@ static int deliver_import_resource(figure *f, building *dock)
         return 0;
     }
     if (!f->destination_building_id) {
-        ship->loads_sold_or_carrying--;
         f->action_state = FIGURE_ACTION_133_DOCKER_IMPORT_QUEUE;
     } else {
         f->action_state = FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE;
@@ -335,9 +334,6 @@ void figure_docker_action(figure *f)
     if (b->type != BUILDING_DOCK) {
         f->state = FIGURE_STATE_DEAD;
     }
-    if (b->data.dock.num_ships) {
-        b->data.dock.num_ships--;
-    }
     if (b->data.dock.trade_ship_id) {
         figure *ship = figure_get(b->data.dock.trade_ship_id);
         if (ship->state != FIGURE_STATE_ALIVE || ship->type != FIGURE_TRADE_SHIP) {
@@ -355,7 +351,7 @@ void figure_docker_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_132_DOCKER_IDLING:
-            f->cart_image_id = 0;
+            f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); //visible idle docker
             if (!deliver_import_resource(f, b)) {
                 fetch_export_resource(f, b, 1);
             }
@@ -369,9 +365,8 @@ void figure_docker_action(figure *f)
                 f->wait_ticks = 0;
             }
             if ((unsigned int) b->data.dock.queued_docker_id == f->id) {
-                b->data.dock.num_ships = 120;
                 f->wait_ticks++;
-                if (f->wait_ticks >= 0) {
+                if (f->wait_ticks > 0) {
                     f->action_state = FIGURE_ACTION_135_DOCKER_IMPORT_GOING_TO_STORAGE;
                     f->wait_ticks = 0;
                     set_cart_graphic(f);
@@ -402,9 +397,8 @@ void figure_docker_action(figure *f)
                 f->wait_ticks = 0;
             }
             if ((unsigned int) b->data.dock.queued_docker_id == f->id) {
-                b->data.dock.num_ships = 120;
                 f->wait_ticks++;
-                if (f->wait_ticks >= 80) {
+                if (f->wait_ticks > 0) {
                     set_docker_as_idle(f);
                     f->image_id = 0;
                     f->cart_image_id = 0;
@@ -412,7 +406,7 @@ void figure_docker_action(figure *f)
                 }
             }
             f->wait_ticks++;
-            if (f->wait_ticks >= 20) {
+            if (f->wait_ticks > 0) {
                 set_docker_as_idle(f);
             }
             f->image_offset = 0;
@@ -483,7 +477,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_139_DOCKER_IMPORT_AT_STORAGE:
             set_cart_graphic(f);
             f->wait_ticks++;
-            if (f->wait_ticks > 10) {
+            if (f->wait_ticks > 0) {
                 int trade_city_id;
                 if (b->data.dock.trade_ship_id) {
                     trade_city_id = figure_get(b->data.dock.trade_ship_id)->empire_city_id;
@@ -492,8 +486,17 @@ void figure_docker_action(figure *f)
                 }
                 if (try_import_resource(f->destination_building_id, f->resource_id,
                     trade_city_id, f->loads_sold_or_carrying)) {
-                    int trader_id = figure_get(b->data.dock.trade_ship_id)->trader_id;
-                    trader_record_sold_resource(trader_id, f->resource_id);
+                    int ship_id = b->data.dock.trade_ship_id;
+                    figure *ship = figure_get(ship_id);
+
+                    // delay import cargo accounting until delivery
+                    if (ship->loads_sold_or_carrying > 0) {
+                        ship->loads_sold_or_carrying--;
+                    }
+
+                    unsigned short trader_id = ship->trader_id;
+                    int storage_id = building_get(f->destination_building_id)->storage_id;
+                    trader_record_sold_resource(ship_id, trader_id, f->resource_id, storage_id);
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
                     f->action_state = FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING;
@@ -514,7 +517,7 @@ void figure_docker_action(figure *f)
         case FIGURE_ACTION_140_DOCKER_EXPORT_AT_STORAGE:
             f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); // empty
             f->wait_ticks++;
-            if (f->wait_ticks > 10) {
+            if (f->wait_ticks > 0) {
                 int trade_city_id;
                 if (b->data.dock.trade_ship_id) {
                     trade_city_id = figure_get(b->data.dock.trade_ship_id)->empire_city_id;
@@ -526,8 +529,11 @@ void figure_docker_action(figure *f)
                 f->destination_y = f->source_y;
                 f->wait_ticks = 0;
                 if (try_export_resource(f->destination_building_id, f->resource_id, trade_city_id)) {
-                    int trader_id = figure_get(b->data.dock.trade_ship_id)->trader_id;
-                    trader_record_bought_resource(trader_id, f->resource_id);
+                    int ship_id = b->data.dock.trade_ship_id;
+                    figure *ship = figure_get(ship_id);
+                    unsigned short trader_id = ship->trader_id;
+                    int storage_id = building_get(f->destination_building_id)->storage_id;
+                    trader_record_bought_resource(ship_id, trader_id, f->resource_id, storage_id);
                     city_health_update_sickness_level_in_building(b->id);
                     city_health_dispatch_sickness(f);
                     f->action_state = FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING;

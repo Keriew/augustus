@@ -270,6 +270,9 @@ void map_routing_update_water(void)
             } else {
                 terrain_water.items[grid_offset] = WATER_N1_BLOCKED;
             }
+            if (map_terrain_is(grid_offset, TERRAIN_SHALLOW_WATER)) {
+                terrain_water.items[grid_offset] = WATER_N1_BLOCKED;
+            }
         }
     }
 }

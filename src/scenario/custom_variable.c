@@ -301,12 +301,21 @@ void scenario_custom_variable_resolve_name(const uint8_t *input, uint8_t *output
             // Try to parse a number inside [ ]
             unsigned int id = 0;
             const uint8_t *start = src;
-            while (*src && isdigit(*src)) {
-                id = id * 10 + (*src - '0');
-                src++;
+            if (isalpha(*src)) {
+                uint8_t name[CUSTOM_VARIABLE_NAME_LENGTH];
+                for (int i = 0; isalpha(*src); i++) {
+                    name[i] = (*src);
+                    src++;
+                }
+                id = scenario_custom_variable_get_id_by_name(name);
+            } else {
+                while (*src && isdigit(*src)) {
+                    id = id * 10 + (*src - '0');
+                    src++;
+                }
             }
 
-            if (*src == ']') {
+            if (*src == ']' && id) {
                 src++; // skip closing bracket
                 // Replace with variable value
                 int value = scenario_custom_variable_get_value(id);

@@ -15,12 +15,14 @@
 #define BUILDING_STATE_WITHOUT_RESOURCES (BUILDING_STATE_SICKNESS - RESOURCE_MAX_LEGACY) // 126 (plus variable resource size)
 #define BUILDING_STATE_DYNAMIC_RESOURCES (BUILDING_STATE_WITHOUT_RESOURCES + BUILDING_STATE_NONSTATIC_RESOURCE_SIZE)
 #define BUILDING_STATE_LATRINES (BUILDING_STATE_DYNAMIC_RESOURCES + 9)
-#define BUILDING_STATE_CURRENT_BUFFER_SIZE  (BUILDING_STATE_LATRINES)
+#define BUILDING_STATE_U16_EVOLVE_TEXTS (BUILDING_STATE_LATRINES + 8)
+#define BUILDING_STATE_CURRENT_BUFFER_SIZE  (BUILDING_STATE_U16_EVOLVE_TEXTS)
 
 void building_state_save_to_buffer(buffer *buf, const building *b);
 
 void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_size, int save_version, int for_preview);
 
 void migrate_altar_rotations(void);
+void migrate_fort_rotations(void);
 
 #endif // BUILDING_BUILDING_STATE_H

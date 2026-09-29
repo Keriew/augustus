@@ -44,6 +44,11 @@ static struct {
     color_t reservoir_range_color;
 } water_building_ghost_settings;
 
+static struct {
+    const building *last_fountain;
+    const building *last_well;
+} cached_water_buildings;
+
 static const uint8_t *prefix_value_to_tooltip_text(int value, const uint8_t *message)
 {
     static uint8_t text[TOOLTIP_WITH_PREFIX_MAX_LENGTH];
@@ -451,6 +456,9 @@ static int get_environmental_desirability(const int grid_offset, int ignore_conf
     if (ignore_config || config_get(CONFIG_UI_SHOW_ELEVATION_DESIRABILITY)) {
         additional_desirability += building_get_elevation_desirability_bonus(grid_offset);
     }
+    if ((ignore_config || config_get(CONFIG_UI_SHOW_OUTSKIRTS_DESIRABILITY)) && map_property_is_outskirts(grid_offset)) {
+        additional_desirability += BUILDING_OUTSKIRTS_DESIRABILITY_MALUS;
+    }
     return additional_desirability;
 }
 
@@ -512,7 +520,7 @@ static int get_tooltip_depot_orders(tooltip_context *c, int grid_offset)
 
         snprintf((char *) result, sizeof(result),
             "%s %s\n"
-            "%s%s\n" //double \n doesnt get rendered, and neither does \n after a space. 
+            "%s%s\n" //double \n doesnt get rendered, and neither does \n after a space.
             "%s %s %s",
             (const char *) moving_resource, (const char *) resource_name,
             (const char *) order_string, threshold_str,
@@ -658,7 +666,7 @@ static int has_well_access(int grid_offset)
     }
 
     // Store the last well found to avoid redundant checks for consecutive tiles with the same well access.
-    static const building *last_well;
+    const building *last_well = cached_water_buildings.last_well;
     int radius = map_water_supply_well_radius();
 
     if (last_well && map_grid_chess_distance(last_well->grid_offset, grid_offset) <= radius) {
@@ -671,7 +679,7 @@ static int has_well_access(int grid_offset)
             continue;
         }
         if (well->state == BUILDING_STATE_IN_USE && map_grid_chess_distance(well->grid_offset, grid_offset) <= radius) {
-            last_well = well;
+            cached_water_buildings.last_well = well;
             return 1;
         }
     }
@@ -682,7 +690,7 @@ static int has_well_access(int grid_offset)
 static int has_inactive_fountain_access(int grid_offset)
 {
     // Store the last fountain found to avoid redundant checks for consecutive tiles with the same fountain access.
-    static const building *last_fountain;
+    const building *last_fountain = cached_water_buildings.last_fountain;
     int radius = map_water_supply_fountain_radius();
 
     if (last_fountain && map_grid_chess_distance(last_fountain->grid_offset, grid_offset) <= radius) {
@@ -696,7 +704,7 @@ static int has_inactive_fountain_access(int grid_offset)
         }
         if ((fountain->state == BUILDING_STATE_CREATED || fountain->state == BUILDING_STATE_IN_USE) &&
             map_grid_chess_distance(fountain->grid_offset, grid_offset) <= radius) {
-            last_fountain = fountain;
+            cached_water_buildings.last_fountain = fountain;
             return 1;
         }
     }
@@ -806,7 +814,7 @@ static void draw_water_graph(int x, int y, float scale, int grid_offset)
             return;
         }
         color_t water_color = COLOR_MASK_GRAY;
-        
+
         switch (model_get_house(b->subtype.house_level)->water) {
             default:
             case 1:
@@ -847,6 +855,9 @@ const city_overlay *city_overlay_for_water(void)
     water_building_ghost_settings.show_fountain_well_range = 1;
     water_building_ghost_settings.reservoir_range_color = COLOR_MASK_NONE;
 
+    cached_water_buildings.last_well = 0;
+    cached_water_buildings.last_fountain = 0;
+
     static city_overlay overlay = {
         .type = OVERLAY_WATER,
         .show_building = show_building_water,
@@ -866,6 +877,9 @@ const city_overlay *city_overlay_for_water_building_ghost(int show_reservoir_ran
     water_building_ghost_settings.show_reservoir_range = show_reservoir_range;
     water_building_ghost_settings.show_fountain_well_range = show_fountain_well_ranges;
     water_building_ghost_settings.reservoir_range_color = ALPHA_FONT_SEMI_TRANSPARENT;
+
+    cached_water_buildings.last_well = 0;
+    cached_water_buildings.last_fountain = 0;
 
     static city_overlay overlay = {
         .draw_layer = draw_water_graph

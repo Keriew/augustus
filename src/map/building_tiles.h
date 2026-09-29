@@ -15,7 +15,7 @@ void map_building_tiles_set_rubble(unsigned int building_id, int x, int y, int s
 
 void map_building_tiles_mark_deleting(int grid_offset);
 
-int map_building_tiles_mark_construction(int x, int y, int size, int terrain, int absolute_xy);
+int map_building_tiles_mark_construction(int x, int y, int size, int terrain, int absolute_xy, int is_military);
 
 int map_building_tiles_are_clear(int x, int y, int size, int terrain);
 

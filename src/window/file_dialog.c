@@ -41,6 +41,7 @@
 #include "scenario/event/export_xml.h"
 #include "scenario/event/import_xml.h"
 #include "scenario/model_xml.h"
+#include "scenario/property.h"
 #include "translation/translation.h"
 #include "widget/input_box.h"
 #include "window/city.h"
@@ -54,6 +55,7 @@
 #include "window/popup_dialog.h"
 
 #include <string.h>
+#include <time.h>
 
 #define NUM_FILES_IN_VIEW 21
 #define MAX_FILE_WINDOW_TEXT_WIDTH (16 * BLOCK_SIZE)
@@ -68,12 +70,12 @@ static void select_file(unsigned int index, int is_double_click);
 static void file_tooltip(const list_box_item *item, tooltip_context *c);
 
 static image_button image_buttons[] = {
-    {536, 440, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 0, button_ok_cancel, button_none, 1, 0, 1},
-    {584, 440, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_ok_cancel, button_none, 0, 0, 1},
+    { 536, 440, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 0, button_ok_cancel, button_none, 1, 0, 1 },
+    { 584, 440, 39, 26, IB_NORMAL, GROUP_OK_CANCEL_SCROLL_BUTTONS, 4, button_ok_cancel, button_none, 0, 0, 1 },
 };
 
 static generic_button sort_by_button[] = {
-    {16, 437, 288, 26, button_toggle_sort_type}
+    { 16, 437, 288, 26, button_toggle_sort_type }
 };
 
 typedef struct {
@@ -236,7 +238,21 @@ static void init(file_type type, file_dialog_type dialog_type)
     }
     data.dialog_type = dialog_type;
 
-    if (strlen(data.file_data->last_loaded_file) > 0) {
+    if (dialog_type == FILE_DIALOG_SAVE && type == FILE_TYPE_SAVED_GAME) {
+        char timestamp[32] = "";
+        time_t now = time(NULL);
+        struct tm *local_time = localtime(&now);
+        if (local_time) {
+            strftime(timestamp, sizeof(timestamp), " %d-%m-%y %H-%M", local_time);
+            const uint8_t *name = scenario_name();
+            uint8_t *end = string_copy(name, data.typed_name, FILE_NAME_MAX - sizeof(timestamp));
+            string_copy(string_from_ascii(timestamp), end, sizeof(timestamp));
+        } else { //fallback if system pull fails
+            snprintf(data.selected_file, FILE_NAME_MAX, "%s", data.file_data->last_loaded_file);
+        }
+        encoding_to_utf8(data.typed_name, data.selected_file, FILE_NAME_MAX, encoding_system_uses_decomposed());
+        file_append_extension(data.selected_file, data.file_data->extension, FILE_NAME_MAX);
+    } else if (strlen(data.file_data->last_loaded_file) > 0) {
         snprintf(data.selected_file, FILE_NAME_MAX, "%s", data.file_data->last_loaded_file);
         if (data.dialog_type == FILE_DIALOG_SAVE) {
             file_remove_extension(data.selected_file);
@@ -467,12 +483,12 @@ static void draw_foreground(void)
             }
         } else if (*data.selected_file && (data.type == FILE_TYPE_EMPIRE_IMAGE || data.type == FILE_TYPE_EMPIRE)) {
             const image *img = image_get(data.preview_image_id);
-            
+
             // Calculate scale to fit image within 266x352 box
             float x_scale = img->width / 266.0f;
             float y_scale = img->height / 352.0f;
             float scale = x_scale > y_scale ? x_scale : y_scale;  // Use SMALLER ratio to fit
-            
+
             if (scale <= 1.0f) {
                 // Image is smaller than box, just center it without scaling
                 int centered_x = 352 + (266 - img->width) / 2;
@@ -632,7 +648,7 @@ static void confirm_save_file(int accepted, int checked)
         window_editor_custom_messages_show();
     } else if (data.type == FILE_TYPE_MODEL_DATA) {
         scenario_model_export_to_xml(filename);
-        window_model_data_show();
+        window_go_back();
     } else if (data.type == FILE_TYPE_EMPIRE) {
         scenario_editor_set_custom_empire(data.selected_file);
         empire_export_xml(filename);
@@ -738,7 +754,7 @@ static void button_ok_cancel(int is_ok, int param2)
         } else if (data.type == FILE_TYPE_MODEL_DATA) {
             int result = scenario_model_xml_parse_file(filename);
             if (result) {
-                window_model_data_show();
+                window_go_back();
             } else {
                 window_plain_message_dialog_show(TR_EDITOR_UNABLE_TO_LOAD_MODEL_DATA_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE, 1);
                 return;
@@ -800,14 +816,14 @@ static void update_preview_image(void)
     if (data.type != FILE_TYPE_EMPIRE && data.type != FILE_TYPE_EMPIRE_IMAGE) {
         return;
     }
-    char *filename = (char *)dir_get_file_at_location(data.selected_file, data.file_data->location);
+    char *filename = (char *) dir_get_file_at_location(data.selected_file, data.file_data->location);
     if (data.type == FILE_TYPE_EMPIRE) {
         empire_xml_parse_file(filename, 1);
         const char *custom_filename = empire_xml_read_info();
         if (custom_filename && *custom_filename) {
             const char *got_filename = dir_get_file_at_location(custom_filename, PATH_LOCATION_COMMUNITY_IMAGE);
             if (got_filename && *got_filename) {
-                string_copy(string_from_ascii(got_filename), (uint8_t *)filename, 128);
+                string_copy(string_from_ascii(got_filename), (uint8_t *) filename, 128);
             } else {
                 *filename = '\0';
             }

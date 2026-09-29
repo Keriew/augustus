@@ -535,7 +535,7 @@ static void draw_tile_tooltip(tooltip_context *c)
 static void draw_tooltip(tooltip_context *c)
 {
     if (config_get(CONFIG_DEBUG_START_WITH_TOOLTIP)) {
-
+        // what did he mean by that
     }
     if (c->type == TOOLTIP_BUTTON) {
         draw_button_tooltip(c);
@@ -563,4 +563,43 @@ void tooltip_handle(const mouse *m, void (*func)(tooltip_context *))
         draw_tooltip(&context);
         reset_tooltip(&context);
     }
+}
+
+void tooltip_copy_context(tooltip_context *dst, const tooltip_context *src)
+{
+    if (!dst || !src) {
+        return;
+    }
+
+    dst->type = src->type;
+    dst->high_priority = src->high_priority;
+    dst->text_group = src->text_group;
+    dst->text_id = src->text_id;
+    dst->has_numeric_prefix = src->has_numeric_prefix;
+    dst->numeric_prefix = src->numeric_prefix;
+
+    dst->num_extra_values = src->num_extra_values;
+    for (int i = 0; i < TOOLTIP_MAX_EXTRA_VALUES; i++) {
+        dst->extra_value_text_groups[i] = src->extra_value_text_groups[i];
+        dst->extra_value_text_ids[i] = src->extra_value_text_ids[i];
+    }
+
+    dst->translation_key = src->translation_key;
+    dst->num_extra_texts = src->num_extra_texts;
+    dst->extra_text_type = src->extra_text_type;
+
+    for (int i = 0; i < TOOLTIP_MAX_EXTRA_VALUES; i++) {
+        dst->extra_text_groups[i] = src->extra_text_groups[i];
+        dst->extra_text_ids[i] = src->extra_text_ids[i];
+    }
+
+    dst->precomposed_text = src->precomposed_text;
+}
+
+int tooltip_context_is_empty(const tooltip_context *c)
+{
+    return c->type == 0
+        && c->text_group == 0
+        && c->translation_key == 0
+        && c->precomposed_text == NULL;
 }

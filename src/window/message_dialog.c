@@ -12,7 +12,7 @@
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "game/settings.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
@@ -45,7 +45,7 @@ static void button_close(int param1, int param2);
 static void button_help(int param1, int param2);
 static void button_advisor(int advisor, int param2);
 static void button_go_to_problem(int param1, int param2);
-static void button_dispatch_request(const complex_button *button);
+static void button_dispatch_request(complex_button *button);
 
 static image_button image_button_back = {
     0, 0, 31, 20, IB_NORMAL, GROUP_MESSAGE_ICON, 8, button_back, button_none, 0, 0, 1
@@ -94,8 +94,7 @@ static complex_button complex_button_dispatch_request = {
     .width = 200,
     .height = 28,
     .left_click_handler = button_dispatch_request,
-    .sequence = &seq,
-    .sequence_size = 1,
+    .sequence = {.fragments = &seq, .count = 1 },
     .sequence_position = SEQUENCE_POSITION_CENTER,
 };
 
@@ -137,7 +136,7 @@ static struct {
     int use_popup;
 } player_message;
 
-static void button_dispatch_request(const complex_button *button)
+static void button_dispatch_request(complex_button *button)
 {
     int request_id = button->parameters[0];
     scenario_request_dispatch(request_id);
@@ -289,6 +288,7 @@ static const lang_message *get_custom_or_standard_lang_message(int text_id)
 
 static int setup_request_button(const lang_message *msg)
 {
+    complex_button_init_style(&complex_button_dispatch_request, COMPLEX_BUTTON_STYLE_DEFAULT);
     if (msg->message_type != MESSAGE_TYPE_IMPERIAL) {
         complex_button_dispatch_request.is_hidden = 1;
         return 0;
@@ -420,7 +420,9 @@ static void draw_city_message_text(const lang_message *msg)
                 rank_frag[0].text_id = TR_MESSAGE_DEMOTE_RANK_PREFIX;
                 rank_frag[2].text_id = TR_MESSAGE_DEMOTE_RANK_SUFFIX;
             }
-            lang_text_draw_sequence_multiline(rank_frag, 3, data.x + 30, data.y_text + 44,
+            lang_sequence rank_sequence;
+            lang_seq_init(&rank_sequence, rank_frag, 3);
+            lang_seq_draw_multiline_aligned_left(&rank_sequence, data.x + 30, data.y_text + 44,
                 BLOCK_SIZE * (data.text_width_blocks) - 20, 0, FONT_NORMAL_WHITE, COLOR_MASK_NONE);
             break;
         }
@@ -794,7 +796,7 @@ static int handle_input_video(const mouse *m_dialog, const lang_message *msg, co
     if (image_buttons_handle_mouse(m_dialog, data.x + 372, data.y + 410, &image_button_close, 1, 0)) {
         return 1;
     }
-    if (complex_button_handle_mouse(m_dialog, &complex_button_dispatch_request)) {
+    if (complex_button_handle_mouse(&complex_button_dispatch_request, m_dialog)) {
         return 1;
     }
     if (is_event_message(msg)) {
@@ -821,7 +823,7 @@ static int handle_input_normal(const mouse *m_dialog, const lang_message *msg)
         return 1;
     }
     if (msg->type == TYPE_MESSAGE) {
-        if (complex_button_handle_mouse(m_dialog, &complex_button_dispatch_request)) {
+        if (complex_button_handle_mouse(&complex_button_dispatch_request, m_dialog)) {
             return 1;
         }
         if (image_buttons_handle_mouse(

@@ -94,6 +94,7 @@ static const uint8_t *get_display_string(special_attribute_mapping_t *entry)
         case PARAMETER_TYPE_BUILDING:
         case PARAMETER_TYPE_BUILDING_COUNTING:
         case PARAMETER_TYPE_MODEL:
+        case PARAMETER_TYPE_MONUMENT:
             if (entry->key == TR_PARAMETER_VALUE_DYNAMIC_RESOLVE) {
                 return lang_get_building_type_string(entry->value);
             } else {

@@ -246,6 +246,14 @@ void building_granary_update_built_granaries_capacity(void);
   */
 int building_granaries_send_resources_to_rome(int resource, int amount);
 
+ /**
+  * @brief Create a cart pusher with the resources needed for a trade route
+  * @param resource The resource type
+  * @param amount The amount of resource to send
+  * @return amount that couldnt be sent, or 0 if all sent
+  */
+int building_granaries_send_resources_to_trade_route(int resource, int amount);
+
 /*----------------------*
  * Blessing / Cursing
  *----------------------*/

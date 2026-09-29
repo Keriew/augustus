@@ -41,5 +41,14 @@ typedef struct {
 } tooltip_context;
 
 void tooltip_handle(const mouse *m, void (*func)(tooltip_context *));
+/**
+ * @brief Safely copy the contents of one tooltip_context to another, skipping mouse-related fields.
+ *
+ * @param dst Pointer to the destination tooltip_context.
+ * @param src Pointer to the source tooltip_context.
+ */
+void tooltip_copy_context(tooltip_context *dst, const tooltip_context *src);
+
+int tooltip_context_is_empty(const tooltip_context *c);
 
 #endif // GRAPHICS_TOOLTIP_H

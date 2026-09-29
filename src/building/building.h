@@ -10,6 +10,8 @@
 #define BUILDING_WATER_DESIRABILITY_RANGE 3
 #define BUILDING_WATER_DESIRABILITY_BONUS 15
 
+#define BUILDING_OUTSKIRTS_DESIRABILITY_MALUS -15
+
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
     ORDER_CONDITION_ALWAYS,
@@ -41,7 +43,7 @@ typedef struct building {
     unsigned char size;
     unsigned char house_is_merged;
     unsigned char house_size;
-    unsigned char x; //these are not grid coordinates but image coordinates
+    unsigned char x; // these are not grid coordinates but image coordinates
     unsigned char y;
     short grid_offset;
     building_type type;
@@ -152,7 +154,7 @@ typedef struct building {
             unsigned char health;
             unsigned char num_gods;
             unsigned char devolve_delay;
-            unsigned char evolve_text_id;
+            unsigned short evolve_text_id;
         } house;
         struct {
             unsigned short og_type;
@@ -169,6 +171,9 @@ typedef struct building {
         struct {
             order current_order;
         } depot;
+        struct {
+            short orientation; // can't be in subtype because there's fort_figure_type already
+        } fort;
     } data;
     struct {
         int upgrades;
@@ -237,13 +242,13 @@ building *building_create(building_type type, int x, int y);
 int building_was_tent(const building *b);
 
 int building_is_storage(building_type b_type);
+
 /**
  * @brief Repairs a building using it's entry in the buildings array. In cases of warehouses and burning ruins,
  * some information is removed or reset, so data from b->data.rubble is used to help restore the building.
  * in the future, we should implement a more general system for saving and restoring building state.
  * Keeping a building in the array is helpful because it holds the building's ID, and allows keeping the storage structure.
  */
-
 int building_repair_at(int grid_offset);
 
 int building_is_still_burning(building *b);
@@ -287,6 +292,8 @@ int building_is_house_group(house_groups group, building_type type);
 int building_is_statue_garden_temple(building_type type);
 
 int building_is_fort(building_type type);
+
+int building_is_military(building_type type); // not prefectures nor armory
 
 int building_is_active(const building *b);
 

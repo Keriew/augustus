@@ -8,7 +8,7 @@ string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
 set(SDL_VERSION "2" CACHE STRING "SDL Version to use. Supported versions: 2, 3")
 set_property(CACHE SDL_VERSION PROPERTY STRINGS 2 3)
-    
+
 option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
 option(DRAW_ROUTING "Draw routing debug information." OFF)
 option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
@@ -36,7 +36,7 @@ if(${TARGET_PLATFORM} STREQUAL "emscripten" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE
         message(FATAL_ERROR "Please define EMSDK to point to your Emscripten SDK path!")
     endif()
 endif()
-    
+
 if(${TARGET_PLATFORM} STREQUAL "ios")
 
     set(CMAKE_SYSTEM_NAME "iOS")
@@ -53,9 +53,9 @@ if(${TARGET_PLATFORM} STREQUAL "ios")
 
     # Disable stuff that breaks the build and we don't need.
     if (SDL_VERSION STREQUAL "2")
-        set(SDL2MIXER_WAVPACK OFF) 
-        set(SDL2MIXER_OPUS OFF) 
-        set(SDL2MIXER_MIDI OFF) 
+        set(SDL2MIXER_WAVPACK OFF)
+        set(SDL2MIXER_OPUS OFF)
+        set(SDL2MIXER_MIDI OFF)
         set(SDL2MIXER_MOD OFF)
     else()
         set(SDLMIXER_WAVPACK OFF)
@@ -566,6 +566,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/event/import_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/event/copy.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/formula.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_data.c
     ${PROJECT_SOURCE_DIR}/src/scenario/event/parameter_city.c
@@ -579,7 +580,6 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/clouds.c
-    ${PROJECT_SOURCE_DIR}/src/graphics/complex_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/weather.c
     ${PROJECT_SOURCE_DIR}/src/graphics/font.c
     ${PROJECT_SOURCE_DIR}/src/graphics/generic_button.c
@@ -587,6 +587,7 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/grid_box.c
     ${PROJECT_SOURCE_DIR}/src/graphics/image.c
     ${PROJECT_SOURCE_DIR}/src/graphics/image_button.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/lang_sequence.c
     ${PROJECT_SOURCE_DIR}/src/graphics/lang_text.c
     ${PROJECT_SOURCE_DIR}/src/graphics/list_box.c
     ${PROJECT_SOURCE_DIR}/src/graphics/menu.c
@@ -596,6 +597,7 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/screen.c
     ${PROJECT_SOURCE_DIR}/src/graphics/screenshot.c
     ${PROJECT_SOURCE_DIR}/src/graphics/scrollbar.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/tab_view.c
     ${PROJECT_SOURCE_DIR}/src/graphics/text.c
     ${PROJECT_SOURCE_DIR}/src/graphics/tooltip.c
     ${PROJECT_SOURCE_DIR}/src/graphics/video.c
@@ -623,7 +625,13 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/other.c
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/overlay.c
     ${PROJECT_SOURCE_DIR}/src/widget/city/overlay/risks.c
+    ${PROJECT_SOURCE_DIR}/src/widget/checkbox_button.c
+    ${PROJECT_SOURCE_DIR}/src/widget/complex_button.c
+    ${PROJECT_SOURCE_DIR}/src/widget/cycling_button.c
+    ${PROJECT_SOURCE_DIR}/src/widget/date_picker.c
     ${PROJECT_SOURCE_DIR}/src/widget/dropdown_button.c
+    ${PROJECT_SOURCE_DIR}/src/widget/empire_funds.c
+    ${PROJECT_SOURCE_DIR}/src/widget/grid_picker.c
     ${PROJECT_SOURCE_DIR}/src/widget/input_box.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_tool.c
@@ -634,6 +642,8 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/extra.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/military.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/slide.c
+    ${PROJECT_SOURCE_DIR}/src/widget/slider.c
+    ${PROJECT_SOURCE_DIR}/src/widget/text_block.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
 )
@@ -670,6 +680,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/allowed_buildings.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/attributes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/build_menu.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/compose_figure_category.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/custom_messages.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/custom_variables.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/demand_changes.c
@@ -677,11 +688,13 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_invasion.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_price_change.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/edit_request.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/edit_route_cost.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/empire_properties.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/empire.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/invasions.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/map.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/model_data.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/house_model_data.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/pause_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/price_changes.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/requests.c
@@ -737,6 +750,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/select_list.c
     ${PROJECT_SOURCE_DIR}/src/window/set_salary.c
     ${PROJECT_SOURCE_DIR}/src/window/text_input.c
+    ${PROJECT_SOURCE_DIR}/src/window/trade_ledger.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_opened.c
     ${PROJECT_SOURCE_DIR}/src/window/trade_prices.c
     ${PROJECT_SOURCE_DIR}/src/window/user_path_setup.c
@@ -797,7 +811,7 @@ endif()
 
 set(IOS_FILES "")
 if(${TARGET_PLATFORM} STREQUAL "ios")
-    set(IOS_FILES 
+    set(IOS_FILES
         ${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets
         ${ASSET_SOURCES}
     )

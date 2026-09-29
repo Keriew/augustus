@@ -8,7 +8,8 @@ typedef enum {
     SELECTED_RATING_CULTURE = 1,
     SELECTED_RATING_PROSPERITY = 2,
     SELECTED_RATING_PEACE = 3,
-    SELECTED_RATING_FAVOR = 4
+    SELECTED_RATING_FAVOR = 4,
+    SELECTED_RATING_POPULATION = 5
 } selected_rating;
 
 int city_rating_culture(void);

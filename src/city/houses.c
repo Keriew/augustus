@@ -13,6 +13,8 @@ void city_houses_reset_demands(void)
     city_data.houses.missing.religion = 0;
     city_data.houses.missing.second_religion = 0;
     city_data.houses.missing.third_religion = 0;
+    city_data.houses.missing.fourth_religion = 0;
+    city_data.houses.missing.fifth_religion = 0;
     city_data.houses.missing.barber = 0;
     city_data.houses.missing.bathhouse = 0;
     city_data.houses.missing.clinic = 0;
@@ -82,5 +84,11 @@ void city_houses_calculate_culture_demands(void)
     }
     if (city_data.houses.missing.third_religion > max) {
         city_data.houses.religion = 3;
+    }
+    if (city_data.houses.missing.fourth_religion > max) {
+        city_data.houses.religion = 4;
+    }
+    if (city_data.houses.missing.fifth_religion > max) {
+        city_data.houses.religion = 5;
     }
 }

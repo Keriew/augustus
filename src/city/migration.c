@@ -45,9 +45,9 @@ static void update_status(void)
         if (city_data.migration.emigration_duration) {
             city_data.migration.emigration_duration--;
         } else {
-            int migration_size = 12;
-            city_data.migration.immigration_amount_per_batch =
-                calc_adjust_with_percentage(migration_size, city_data.migration.percentage);
+            city_data.migration.immigration_amount_per_batch = calc_adjust_with_percentage(12,
+                calc_adjust_with_percentage(city_data.migration.percentage,
+                city_data.migration.adjust_percentage_immigration));
             city_data.migration.immigration_duration = 2;
         }
     } else if (city_data.migration.percentage < 0) {
@@ -55,8 +55,9 @@ static void update_status(void)
         if (city_data.migration.immigration_duration) {
             city_data.migration.immigration_duration--;
         } else if (city_data.population.population > 100) {
-            city_data.migration.emigration_amount_per_batch =
-                calc_adjust_with_percentage(12, -city_data.migration.percentage);
+            city_data.migration.emigration_amount_per_batch = calc_adjust_with_percentage(12,
+                -calc_adjust_with_percentage(city_data.migration.percentage,
+                city_data.migration.adjust_percentage_emigration));
             city_data.migration.emigration_duration = 2;
         }
     }
@@ -162,6 +163,16 @@ int city_migration_no_room_for_immigrants(void)
 int city_migration_percentage(void)
 {
     return city_data.migration.percentage;
+}
+
+void city_migration_set_adjust_percentage_immigration(int percentage)
+{
+    city_data.migration.adjust_percentage_immigration = percentage;
+}
+
+void city_migration_set_adjust_percentage_emigration(int percentage)
+{
+    city_data.migration.adjust_percentage_emigration = percentage;
 }
 
 int city_migration_newcomers(void)

@@ -69,3 +69,56 @@ void button_border_draw_colored(int x, int y, int width_pixels, int height_pixel
         }
     }
 }
+
+void button_border_draw_colored_flush(int x, int y, int width_pixels, int height_pixels, int has_focus, color_t color)
+{
+    //papa crudelios please let me know if it should be a separate function or a fork inside button_border_draw_colored
+    int width_blocks = width_pixels / BLOCK_SIZE;
+    if (width_pixels % BLOCK_SIZE) {
+        width_blocks++;
+    }
+
+    int height_blocks = height_pixels / BLOCK_SIZE;
+    if (height_pixels % BLOCK_SIZE) {
+        height_blocks++;
+    }
+
+    int last_block_offset_x = BLOCK_SIZE * width_blocks - width_pixels;
+
+    int image_base = image_group(GROUP_BORDERED_BUTTON);
+    if (has_focus) {
+        image_base += 8;
+    }
+
+    for (int yy = 0; yy < height_blocks; yy++) {
+        int draw_offset_y = y + BLOCK_SIZE * yy;
+
+        for (int xx = 0; xx < width_blocks; xx++) {
+            int draw_offset_x = x + BLOCK_SIZE * xx;
+
+            if (yy == 0) {
+                if (xx == 0) {
+                    image_draw(image_base, draw_offset_x, draw_offset_y, color, SCALE_NONE);
+                } else if (xx < width_blocks - 1) {
+                    image_draw(image_base + 1, draw_offset_x, draw_offset_y, color, SCALE_NONE);
+                } else {
+                    image_draw(image_base + 2,
+                        draw_offset_x - last_block_offset_x,
+                        draw_offset_y,
+                        color,
+                        SCALE_NONE);
+                }
+            } else {
+                if (xx == 0) {
+                    image_draw(image_base + 7, draw_offset_x, draw_offset_y, color, SCALE_NONE);
+                } else if (xx >= width_blocks - 1) {
+                    image_draw(image_base + 3,
+                        draw_offset_x - last_block_offset_x,
+                        draw_offset_y,
+                        color,
+                        SCALE_NONE);
+                }
+            }
+        }
+    }
+}

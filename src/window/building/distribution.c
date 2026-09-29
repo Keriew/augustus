@@ -461,7 +461,7 @@ static void init_dock_permission_buttons(void)
         int city_id = -1;
         if (empire_object_is_sea_trade_route(route_id) && empire_city_is_trade_route_open(route_id)) {
             city_id = empire_city_get_for_trade_route(route_id);
-            if (city_id != -1) {
+            if (city_id) {
                 generic_button button = { 0, 0, 210, 22, dock_toggle_route, 0, route_id, city_id };
                 dock_distribution_permissions_buttons[dock_distribution_permissions_buttons_count] = button;
                 dock_distribution_permissions_buttons_count++;
@@ -562,7 +562,7 @@ void window_building_draw_dock(building_info_context *c)
     if (data.showing_special_orders || data.building_id != c->building_id) {
         scrollbar.x = c->x_offset + (c->width_blocks - 4) * BLOCK_SIZE;
         scrollbar.y = c->y_offset + 240;
-        scrollbar.height = panel_height * BLOCK_SIZE;
+        scrollbar.length = panel_height * BLOCK_SIZE;
         scrollbar.scrollable_width = (c->width_blocks - 5) * BLOCK_SIZE;
         scrollbar.elements_in_view = data.dock_max_cities_visible;
         scrollbar_init(&scrollbar, 0, dock_distribution_permissions_buttons_count);
@@ -745,7 +745,7 @@ void window_building_draw_distributor_orders(building_info_context *c, const uin
 
         scrollbar.x = c->x_offset + (c->width_blocks - 3) * BLOCK_SIZE;
         scrollbar.y = y_offset + 42;
-        scrollbar.height = 21 * BLOCK_SIZE;
+        scrollbar.length = 21 * BLOCK_SIZE;
         scrollbar.scrollable_width = (c->width_blocks - 2) * BLOCK_SIZE;
         scrollbar.elements_in_view = 21 * BLOCK_SIZE / 22;
         scrollbar_init(&scrollbar, 0, data.stored_resources.size);
@@ -1365,15 +1365,17 @@ void window_building_draw_storage_orders(building_info_context *c)
     int y_offset = window_building_get_vertical_offset(c, 28);
     c->help_id = is_granary(c) ? 3 : 4;
     outer_panel_draw(c->x_offset, y_offset, 29, 28);
-    lang_text_draw_sequence_centered(instructions_header, 3, c->x_offset, y_offset + 10,
-         BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, COLOR_MASK_NONE);
+    lang_sequence instructions_sequence;
+    lang_seq_init(&instructions_sequence, instructions_header, 3);
+    lang_seq_draw_centered(&instructions_sequence, c->x_offset, y_offset + 10, BLOCK_SIZE * c->width_blocks,
+        FONT_LARGE_BLACK, COLOR_MASK_NONE);
     if (!data.showing_special_orders || data.building_id != c->building_id) {
         const resource_list *list = is_granary(c) ? city_resource_get_potential_foods()
             : city_resource_get_potential();
 
         scrollbar.x = c->x_offset + (c->width_blocks - 3) * BLOCK_SIZE;
         scrollbar.y = y_offset + 42;
-        scrollbar.height = 21 * BLOCK_SIZE;
+        scrollbar.length = 21 * BLOCK_SIZE;
         scrollbar.scrollable_width = (c->width_blocks - 2) * BLOCK_SIZE;
         scrollbar.elements_in_view = 21 * BLOCK_SIZE / 22;
         scrollbar_init(&scrollbar, 0, list->size);

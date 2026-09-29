@@ -15,7 +15,7 @@ typedef enum {
     COST_FREE = -1, // perform operation for free
     COST_MEASURE = 0, // measure cost only, do not perform operation
     COST_PROCESS = 1 // perform operation for a cost
-}cost_calculation;
+} cost_calculation;
 /**
  * @brief Places a building of the specified type at the given coordinates
  * CAREFUL: x and y are offset depending on city orientation, can cause problems with exact coordinates given
@@ -91,5 +91,3 @@ void building_construction_dry_run_vegetation_reset(void);
 int building_construction_dry_run_vegetation_cost(void);
 
 #endif // BUILDING_CONSTRUCTION_BUILDING_H
-
-

@@ -49,6 +49,7 @@ static void check_road_access(int type, int x, int y, int size)
         case BUILDING_PLUM_TREE:
         case BUILDING_PALM_TREE:
         case BUILDING_DATE_TREE:
+        case BUILDING_WILLOW_TREE:
         case BUILDING_PAVILION_BLUE:
         case BUILDING_PAVILION_RED:
         case BUILDING_PAVILION_ORANGE:

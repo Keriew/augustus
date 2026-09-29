@@ -880,6 +880,8 @@ int building_image_get(const building *b)
         case BUILDING_PALM_TREE:
         case BUILDING_DATE_TREE:
             return assets_get_group_id("Aesthetics") + (b->type - BUILDING_PINE_TREE);
+        case BUILDING_WILLOW_TREE:
+            return assets_get_image_id("Aesthetics", "ornamental willow");
         case BUILDING_GODDESS_STATUE:
         case BUILDING_SENATOR_STATUE:
         {

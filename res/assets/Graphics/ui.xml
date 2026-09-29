@@ -45,7 +45,6 @@
 	<image id="Panth M2 Icon" src="Pantheon_Temple_Complex_Module2_Banner"/>
 	<image id="Venus M Icon" src="Venus_Temple_Complex_Module_Banner"/>
 	<image id="Venus M2 Icon" src="Venus_Temple_Complex_Module2_Banner"/>
-
 	<!-- Note: Banner images for Construction Sites -->
 	<image id="Construction_Banner_01" src="Construction_Banner_01"/>
 	<image id="Construction_Banner_02" src="Construction_Banner_02"/>
@@ -126,6 +125,20 @@
 	</image>
 	<image id="Land Trade Policy Off Button">
 		<layer group="179" image="1" mask="grayscale"/>
+	</image>
+	<!-- Note: Trade ledger separators and route icon composites (52x32) -->
+	<image id="Trade_Separator_Long" src="trades_separator_long"/>
+	<image id="Trade_Separator_Short" src="trades_separator_short"/>
+	<image id="Sea_Trade_Icon_Centered" width="52" height="32">
+		<layer group="179" image="0" x="0" y="0"/>
+	</image>
+	<image id="Land_Trade_Icon_Centered" width="52" height="32">
+		<layer group="179" image="1" x="1" y="-1"/>
+	</image>
+	<image id="Both_Trade_Icons" width="52" height="32">
+		<layer group="179" image="0" x="0" y="0"/>
+		<layer group="179" image="1" x="24" y="11"/>
+		<layer group="this" image="Trade_Separator_Short" x="0" y="0"/>
 	</image>
 	<!-- Note: Fix for Hagia Sophia sprite (removes historically inaccurate Islamic minarets, which were added to the building in the 1500s) -->
 	<image id="H Sophia Fix" src="Hagia_Sophia_Fix"/>
@@ -1391,10 +1404,6 @@
 	<image id="18Legion_Camels" src="18Legion_Camels"/>
 	<image id="19Legion_Dolphins" src="19Legion_Dolphins"/>
 	<image id="20Legion_Sea_Goats" src="20Legion_Sea_Goats"/>
-	<!-- Note: Empire background texture, vertical version -->
-	<image id="Empire_panel_texture_vertical">
-		<layer group="172" image="3" rotate="90" x="0" y="0" width="70" height="40"/>
-	</image>
 	<image id="Empire_sidebar_city_badge_corner" width="12" height="33">
 		<layer group="172" image="8" invert="horizontal" y="-59"/>
 	</image>
@@ -1427,15 +1436,19 @@
 	<image id="rightbracket_white_l" src="rightbracket_white_l"/>
 	<image id="curlybracket_white_left" src="curlybracket_white_left"/>
 	<image id="curlybracket_white_right" src="curlybracket_white_right"/>
-	<image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
-	<image group="this" image="Plus_Button_Idle"/>
-	<image src="Plus_Button_Click"/>
-	<image src="Edit_Button_Idle" id="Edit_Button_Idle"/>
-	<image group="this" image="Edit_Button_Idle"/>
-	<image src="Edit_Button_Click"/>
-	<image src="LandWaypoint" id="LandWaypoint"/>
-	<image src="SeaWaypoint" id="SeaWaypoint"/>
-	<image src="LandWaypoint" id="BorderWaypoint"/>
+    <image id="abstract_caret_symbol" src="abstract_caret_symbol"/>
+    <image src="Plus_Button_Idle" id="Plus_Button_Idle"/>
+    <image group="this" image="Plus_Button_Idle"/>
+    <image id="Plus_Button_Click" src="Plus_Button_Click"/>
+    <image src="Minus_Button_Idle" id="Minus_Button_Idle"/>
+    <image group="this" image="Minus_Button_Idle"/>
+    <image id="Minus_Button_Click" src="Minus_Button_Click"/>
+    <image src="Edit_Button_Idle" id="Edit_Button_Idle"/>
+    <image group="this" image="Edit_Button_Idle"/>
+    <image src="Edit_Button_Click"/>
+    <image src="LandWaypoint" id="LandWaypoint"/>
+    <image src="SeaWaypoint" id="SeaWaypoint"/>
+    <image src="LandWaypoint" id="BorderWaypoint"/>
 	<image id="Water_Range">
 		<layer group="135" image="4" mask="grayscale"/>
 	</image>
@@ -1465,7 +1478,7 @@
 		<layer group="20" image="11"/>
 		<layer src="reservoir_range_mask" mask="alpha"/>
 	</image>
-	<!-- Editor animal flag and lair buttons -->
+	<!-- Note: Editor animal flag and lair buttons -->
 	<image id="Button_AnimalFlag_Idle" src="Button_AnimalFlag_Idle"/>
 	<image id="Button_AnimalFlag_Hover" src="Button_AnimalFlag_Hover"/>
 	<image id="Button_AnimalFlag_Click" src="Button_AnimalFlag_Click"/>
@@ -1473,7 +1486,13 @@
 	<image id="Button_AnimalLair_Hover" src="Button_AnimalLair_Hover"/>
 	<image id="Button_AnimalLair_Click" src="Button_AnimalLair_Click"/>
 	<!-- Note: UI button for accessing Trade Ledger -->
-	<image id="Trade_Ledger_Button_Idle" width="40" height="40">
+	<image id="Trade_Ledger_Button_Idle" width="32" height="32">
+		<layer src="Trade_Ledger_UH" x="-4" y="-4"/>
+	</image>
+	<image id="Trade_Ledger_Button_Click" width="32" height="32">
+		<layer src="Trade_Ledger_H" x="-4" y="-4"/>
+	</image>
+	<!-- <image id="Trade_Ledger_Button_Idle" width="40" height="40">
 		<layer group="128" image="9" x="0" y="0"/>
 		<layer src="Advisor_Button_UH" x="5" y="4"/>
 		<layer src="Trade_Ledger_UH" x="0" y="0"/>
@@ -1482,5 +1501,358 @@
 		<layer group="128" image="22" x="0" y="0"/>
 		<layer src="Advisor_Button_H" x="5" y="4"/>
 		<layer src="Trade_Ledger_H" x="0" y="0"/>
+	</image>  -->
+	<image id="Arrow_Up_Masked" width="32" height="32">
+		<layer group="system" image="15" x="4" y="3"/>
+		<layer src="arrow_up_mask" mask="alpha" x="4" y="3"/>
 	</image>
+	<image id="Arrow_Down_Masked" width="32" height="32">
+		<layer group="system" image="17" x="4" y="5"/>
+		<layer src="arrow_down_mask" mask="alpha" x="4" y="5"/>
+	</image>
+	<image id="Filter_Icon" width="32" height="32">
+		<layer src="filter_icon2" x="0" y="0"/>
+	</image>
+	<image id="Sorting_Icon" width="32" height="32">
+		<layer src="sorting_icon2" x="0" y="0"/>
+	</image>
+	<image id="Filter_Icon_Hover" width="32" height="32">
+		<layer src="filter_icon2_reset" x="0" y="0"/>
+	</image>
+	<image id="Sorting_Icon_Hover" width="32" height="32">
+		<layer src="sorting_icon2_reset" x="0" y="0"/>
+	</image>
+	<!-- Note: Empire Map panel background -->
+	<image id="Empire_Panel_01" width="70" height="40">
+		<layer group="172" image="3" x="0" y="0"/>
+		<layer src="Empire_Panel_01" x="0" y="0"/>
+	</image>
+	<!-- Note: Empire background texture, vertical version -->
+	<image id="Empire_Panel_01b">
+		<layer group="this" image="Empire_Panel_01" rotate="90" x="0" y="0" width="70" height="40"/>
+	</image>
+	<!-- Note: Empire Map sidebar corner (for drag-able side) -->
+	<image id="Empire_Panel_02" src="Empire_Panel_02"/>
+	<!-- Note: Scrollbar/slider buttons -->
+	<image id="Scrollbar_Down_01" src="Scrollbar_Down_01"/>
+	<image id="Scrollbar_Down_02" src="Scrollbar_Down_02"/>
+	<image id="Scrollbar_Down_03" src="Scrollbar_Down_03"/>
+	<image id="Scrollbar_Down_04" src="Scrollbar_Down_04"/>
+	<image id="Scrollbar_Left_01">
+		<layer group="this" image="Scrollbar_Down_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_02">
+		<layer group="this" image="Scrollbar_Down_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_03">
+		<layer group="this" image="Scrollbar_Down_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Left_04">
+		<layer group="this" image="Scrollbar_Down_04" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Up_01" src="Scrollbar_Up_01"/>
+	<image id="Scrollbar_Up_02" src="Scrollbar_Up_02"/>
+	<image id="Scrollbar_Up_03" src="Scrollbar_Up_03"/>
+	<image id="Scrollbar_Up_04" src="Scrollbar_Up_04"/>
+	<image id="Scrollbar_Right_01">
+		<layer group="this" image="Scrollbar_Up_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_02">
+		<layer group="this" image="Scrollbar_Up_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_03">
+		<layer group="this" image="Scrollbar_Up_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Right_04">
+		<layer group="this" image="Scrollbar_Up_04" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Lines_D_01" src="Scrollbar_Lines_D_01"/>
+	<image id="Scrollbar_Lines_L_01" src="Scrollbar_Lines_L_01"/>
+	<image id="Scrollbar_Lines_Alpha" src="Scrollbar_Lines_Alpha"/>
+	<image id="Scrollbar_Lines_Alpha_B" width="19" height="24">
+		<layer group="this" image="Scrollbar_Lines_Alpha" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Middle_01" src="Scrollbar_Middle_01"/>
+	<image id="Scrollbar_Middle_02" src="Scrollbar_Middle_02"/>
+	<image id="Scrollbar_Middle_03" src="Scrollbar_Middle_03"/>
+	<image id="Scrollbar_Middle_04" src="Scrollbar_Middle_04"/>
+	<image id="Scrollbar_Middle_01b">
+		<layer group="this" image="Scrollbar_Middle_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Middle_02b">
+		<layer group="this" image="Scrollbar_Middle_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Middle_03b">
+		<layer group="this" image="Scrollbar_Middle_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Middle_04b">
+		<layer group="this" image="Scrollbar_Middle_04" rotate="90" x="0" y="0"/>
+	</image>
+	<!-- Note: Scrollbar thumb slices: 8px ends, trimmed middle, and mirrored variants -->
+	<image id="Scrollbar_Middle_01_End_Top" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_01"/>
+	</image>
+	<image id="Scrollbar_Middle_01_End_Bottom" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_01" y="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_01_End_Top_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_01_End_Top" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_01_End_Bottom_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_01_End_Bottom" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_01_Trimmed" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_01" y="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_01_Trimmed_MirrorV" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_01_Trimmed" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_02_End_Top" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_02"/>
+	</image>
+	<image id="Scrollbar_Middle_02_End_Bottom" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_02" y="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_02_End_Top_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_02_End_Top" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_02_End_Bottom_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_02_End_Bottom" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_02_Trimmed" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_02" y="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_02_Trimmed_MirrorV" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_02_Trimmed" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_03_End_Top" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_03"/>
+	</image>
+	<image id="Scrollbar_Middle_03_End_Bottom" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_03" y="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_03_End_Top_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_03_End_Top" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_03_End_Bottom_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_03_End_Bottom" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_03_Trimmed" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_03" y="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_03_Trimmed_MirrorV" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_03_Trimmed" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_04_End_Top" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_04"/>
+	</image>
+	<image id="Scrollbar_Middle_04_End_Bottom" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_04" y="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_04_End_Top_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_04_End_Top" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_04_End_Bottom_MirrorV" width="24" height="8">
+		<layer group="this" image="Scrollbar_Middle_04_End_Bottom" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_04_Trimmed" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_04" y="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_04_Trimmed_MirrorV" width="24" height="32">
+		<layer group="this" image="Scrollbar_Middle_04_Trimmed" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Middle_01b_End_Left" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_01b"/>
+	</image>
+	<image id="Scrollbar_Middle_01b_End_Right" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_01b" x="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_01b_End_Left_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_01b_End_Left" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_01b_End_Right_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_01b_End_Right" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_01b_Trimmed" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_01b" x="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_01b_Trimmed_MirrorH" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_01b_Trimmed" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_02b_End_Left" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_02b"/>
+	</image>
+	<image id="Scrollbar_Middle_02b_End_Right" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_02b" x="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_02b_End_Left_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_02b_End_Left" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_02b_End_Right_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_02b_End_Right" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_02b_Trimmed" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_02b" x="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_02b_Trimmed_MirrorH" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_02b_Trimmed" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_03b_End_Left" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_03b"/>
+	</image>
+	<image id="Scrollbar_Middle_03b_End_Right" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_03b" x="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_03b_End_Left_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_03b_End_Left" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_03b_End_Right_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_03b_End_Right" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_03b_Trimmed" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_03b" x="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_03b_Trimmed_MirrorH" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_03b_Trimmed" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_04b_End_Left" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_04b"/>
+	</image>
+	<image id="Scrollbar_Middle_04b_End_Right" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_04b" x="-40"/>
+	</image>
+	<image id="Scrollbar_Middle_04b_End_Left_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_04b_End_Left" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_04b_End_Right_MirrorH" width="8" height="24">
+		<layer group="this" image="Scrollbar_Middle_04b_End_Right" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_Middle_04b_Trimmed" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_04b" x="-8"/>
+	</image>
+	<image id="Scrollbar_Middle_04b_Trimmed_MirrorH" width="32" height="24">
+		<layer group="this" image="Scrollbar_Middle_04b_Trimmed" invert="horizontal"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_01" src="Scrollbar_mini_thumb_01"/>
+	<image id="Scrollbar_mini_thumb_02" src="Scrollbar_mini_thumb_02"/>
+	<image id="Scrollbar_mini_thumb_03" src="Scrollbar_mini_thumb_03"/>
+	<image id="Scrollbar_mini_thumb_lines" src="Scrollbar_mini_thumb_lines"/>
+	<image id="Scrollbar_mini_thumb_vert_01">
+		<layer group="this" image="Scrollbar_mini_thumb_01" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_02">
+		<layer group="this" image="Scrollbar_mini_thumb_02" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_03">
+		<layer group="this" image="Scrollbar_mini_thumb_03" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_mini_thumb_lines">
+		<layer group="this" image="Scrollbar_mini_thumb_lines" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Minus_01" src="Scrollbar_Minus_01"/>
+	<image id="Scrollbar_Minus_02" src="Scrollbar_Minus_02"/>
+	<image id="Scrollbar_Minus_03" src="Scrollbar_Minus_03"/>
+	<image id="Scrollbar_Minus_04" src="Scrollbar_Minus_04"/>
+	<image id="Scrollbar_Plus_01" src="Scrollbar_Plus_01"/>
+	<image id="Scrollbar_Plus_02" src="Scrollbar_Plus_02"/>
+	<image id="Scrollbar_Plus_03" src="Scrollbar_Plus_03"/>
+	<image id="Scrollbar_Plus_04" src="Scrollbar_Plus_04"/>
+	<image id="Scrollbar_Dark_End" src="Scrollbar_Dark_End"/>
+	<image id="Scrollbar_Dark_Mid" src="Scrollbar_Dark_Mid"/>
+	<image id="Scrollbar_Dark_Start">
+		<layer src="Scrollbar_Dark_End" invert="vertical"/>
+	</image>
+	<image id="Scrollbar_Dark_End_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_End" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Dark_Mid_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_Mid" rotate="90" x="0" y="0"/>
+	</image>
+	<image id="Scrollbar_Dark_Start_B" width="16" height="24">
+		<layer group="this" image="Scrollbar_Dark_Start" rotate="90" x="0" y="0"/>
+	</image>
+	<!-- Note: Assets for drawing segmented borders -->
+	<image id="segmented_border_01" src="segmented_border_01" width="5" height="5"/>
+	<image id="segmented_border_02" src="segmented_border_02" width="66" height="5"/>
+	<image id="segmented_border_03" src="segmented_border_03" width="5" height="5"/>
+	<image id="segmented_border_04" src="segmented_border_04" width="5" height="6"/>
+	<image id="segmented_border_06" src="segmented_border_06" width="5" height="6"/>
+	<image id="segmented_border_07" src="segmented_border_07" width="5" height="5"/>
+	<image id="segmented_border_08" src="segmented_border_08" width="66" height="5"/>
+	<image id="segmented_border_09" src="segmented_border_09" width="5" height="5"/>
+	<!-- Note: Assetss for drawing custom-dimension main-menu-style buttons -->
+	<image id="Button_Menu_Left_Panel" width="13" height="19">
+		<layer group="15" image="0" x ="-3" y="-3"/>
+		<layer src="mm_left_section_panel_mask" mask="alpha" x ="-3" y="-3"/>
+	</image>
+	<image id="Button_Menu_Middle_Panel" width="16" height="19">
+		<layer group="15" image="1" y="-3"/>
+		<layer src="mm_mid_section_panel_mask" mask="alpha" y="-3"/>
+	</image>
+	<image id="Button_Menu_Right_Panel" width="13" height="19">
+		<layer group="15" image="2" y="-3"/>
+		<layer src="mm_right_section_panel_mask" mask="alpha" y="-3"/>
+	</image>
+	<image id="Button_Menu_Left_Panel_Mirror_V">
+		<layer group="this" image="Button_Menu_Left_Panel" invert="vertical"/>
+	</image>
+	<image id="Button_Menu_Middle_Panel_Mirror_V">
+		<layer group="this" image="Button_Menu_Middle_Panel" invert="vertical"/>
+	</image>
+	<image id="Button_Menu_Right_Panel_Mirror_V">
+		<layer group="this" image="Button_Menu_Right_Panel" invert="vertical"/>
+	</image>
+	<image id="Button_Menu_Frame_01" width="16" height="16">
+		<layer group="15" image="0"/>
+		<layer src="mm_left_section_frame_mask" mask="alpha"/>
+	</image>
+	<image id="Button_Menu_Frame_02" width="16" height="16">
+		<layer group="15" image="1"/>
+		<layer src="mm_mid_section_frame_mask" mask="alpha"/>
+	</image>
+	<image id="Button_Menu_Frame_03" width="16" height="16">
+		<layer group="15" image="2"/>
+		<layer src="mm_right_section_frame_mask" mask="alpha"/>
+	</image>
+	<image id="Button_Menu_Frame_04" width="16" height="16">
+		<layer group="15" image="0" y="-3"/>
+		<layer src="mm_left_section_frame_mask" y="-3" mask="alpha"/>
+	</image>
+	<!-- <image id="Button_Menu_Frame_05" width="16" height="16"> -->
+	<!--Missing on purpose - 5th isnt used for frame-only draw-->
+	<!-- </image> -->
+	<image id="Button_Menu_Frame_06" width="16" height="16">
+		<layer group="15" image="2" y="-3"/>
+		<layer src="mm_right_section_frame_mask" y="-3" mask="alpha"/>
+	</image>
+	<image id="Button_Menu_Frame_07" width="16" height="16">
+		<layer group="15" image="0" y="-9"/>
+		<layer src="mm_left_section_frame_mask" y="-9" mask="alpha"/>
+	</image>
+	<image id="Button_Menu_Frame_08" width="16" height="16">
+		<layer group="15" image="1" y="-9"/>
+		<layer src="mm_mid_section_frame_mask" y="-9" mask="alpha"/>
+	</image>
+		<image id="Button_Menu_Frame_09" width="16" height="16">
+		<layer group="15" image="2" y="-9"/>
+		<layer src="mm_right_section_frame_mask" y="-9" mask="alpha"/>
+	</image>
+	<image id="Trade_Ledger_Small" width="24" height="24">
+		<layer src="Trade_Ledger_UH_sml" x="0" y="0" width="24" height="24"/>
+	</image>
+	<image id="Trade_Ledger_Small_Hover" width="24" height="24">
+		<layer src="Trade_Ledger_H_sml" x="0" y="0" width="24" height="24"/>
+	</image>
+	<image id="Diagonal_Lines_L" width="8" height="8">
+		<layer src="Double_slash_l"/>
+	</image>
+	<image id="Diagonal_Lines_R" width="8" height="8">
+		<layer src="Double_slash_r"/>
+	</image>
+	<image id="Font_Brown_Up_Arrow" src = "Font_Brown_Up_Arrow"/>
+	<image id="Font_Brown_Down_Arrow" src = "Font_Brown_Down_Arrow"/>
+	<image id="Trade_Ledger_Export" src = "Trade_Ledger_Export"/>
+	<image id="Trade_Ledger_Import" src = "Trade_Ledger_Import"/>
+	<image id="resource_picker" src = "resource_picker"/>
+	<image id="hourglass_icon" src="hourglass_v1" width="24" height="24"/>
 </assetlist>

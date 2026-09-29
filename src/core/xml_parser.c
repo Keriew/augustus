@@ -545,8 +545,21 @@ const char *xml_parser_get_parent_element_name(void)
     return data.parents[data.depth - 2]->name;
 }
 
+static void clear_texts(void)
+{
+    if (!data.texts) {
+        return;
+    }
+    // total_elements remains zero until initialization has allocated all arrays.
+    for (int i = 0; i < data.total_elements; i++) {
+        free(data.texts[i].text);
+    }
+    memset(data.texts, 0, sizeof(element_text) * data.total_elements);
+}
+
 void xml_parser_reset(void)
 {
+    clear_texts();
     data.error = 0;
     sxml_init(&data.parser.context);
     data.depth = 0;
@@ -569,6 +582,7 @@ void xml_parser_free(void)
 
     free(data.elements);
     free(data.parents);
+    clear_texts();
     free(data.texts);
     data.elements = 0;
     data.parents = 0;

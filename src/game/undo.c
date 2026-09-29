@@ -313,6 +313,7 @@ void game_undo_perform(void)
             building_connectable_update_connections();
         } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_SHIP_BRIDGE) {
             map_terrain_restore();
+            map_building_restore();
             map_sprite_restore();
             restore_map_images();
         } else if (data.type == BUILDING_PLAZA || data.type == BUILDING_GARDENS ||

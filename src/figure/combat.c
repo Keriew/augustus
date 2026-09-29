@@ -95,11 +95,14 @@ static void hit_opponent(figure *f)
     if (m->is_charging && m->figure_type == FIGURE_FORT_INFANTRY) {
         figure_attack += 2; // charging bonus for sword infantry
     }
+    if (figure_is_category(f, FIGURE_CATEGORY_HOSTILE) && formation_has_low_morale(m)) {
+        figure_attack = (int)(figure_attack / 3);
+    }
 
     // defense modifiers
     if (opponent_formation->is_halted &&
-            (opponent_formation->figure_type == FIGURE_FORT_LEGIONARY ||
-                opponent_formation->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY)) {
+        (opponent_formation->figure_type == FIGURE_FORT_LEGIONARY ||
+        opponent_formation->figure_type == FIGURE_ENEMY_CAESAR_LEGIONARY)) {
         if (!attack_is_same_direction(opponent->attack_direction, opponent_formation->direction)) {
             opponent_defense -= 4; // opponent not attacking in coordinated formation
         } else if (opponent_formation->layout == FORMATION_COLUMN) {
@@ -109,10 +112,7 @@ static void hit_opponent(figure *f)
             opponent_defense += 2;
         }
     }
-
-    // defense modifiers
-    if (opponent_formation->is_halted &&
-            (opponent_formation->figure_type == FIGURE_FORT_INFANTRY)) {
+    if (opponent_formation->is_halted && (opponent_formation->figure_type == FIGURE_FORT_INFANTRY)) {
         if (!attack_is_same_direction(opponent->attack_direction, opponent_formation->direction)) {
             opponent_defense -= 2; // opponent not attacking in coordinated formation
         } else if (opponent_formation->layout == FORMATION_COLUMN) {
@@ -122,7 +122,9 @@ static void hit_opponent(figure *f)
             opponent_defense += 1;
         }
     }
-
+    if ((cat & FIGURE_CATEGORY_HOSTILE) && formation_has_low_morale(opponent_formation)) {
+        opponent_defense = (int)(opponent_defense / 3);
+    }
 
     int max_damage = opponent_props->max_damage;
     int net_attack = figure_attack - opponent_defense;

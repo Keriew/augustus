@@ -1,5 +1,7 @@
 #include "map.h"
 
+#include "map/routing.h"
+
 #include "core/calc.h"
 #include "map/grid.h"
 #include "scenario/data.h"
@@ -90,19 +92,24 @@ int scenario_map_closest_fishing_point(int x, int y, map_point *fish)
     if (num_fishing_spots <= 0) {
         return 0;
     }
+    map_routing_calculate_distances_water_boat(x, y);
     int min_dist = 10000;
-    int min_fish_id = 0;
+    int min_fish_id = -1;
     for (int i = 0; i < MAX_FISH_POINTS; i++) {
-        if (scenario.fishing_points[i].x > 0) {
-            int dist = calc_maximum_distance(x, y,
-                scenario.fishing_points[i].x, scenario.fishing_points[i].y);
-            if (dist < min_dist) {
-                min_dist = dist;
-                min_fish_id = i;
-            }
+        if (scenario.fishing_points[i].x <= 0) {
+            continue;
+        }
+        int offset = map_grid_offset(scenario.fishing_points[i].x, scenario.fishing_points[i].y);
+        int dist = map_routing_distance(offset);
+        if (dist <= 0) {
+            continue;
+        }
+        if (dist < min_dist) {
+            min_dist = dist;
+            min_fish_id = i;
         }
     }
-    if (min_dist < 10000) {
+    if (min_fish_id >= 0) {
         map_point_store_result(
             scenario.fishing_points[min_fish_id].x,
             scenario.fishing_points[min_fish_id].y,

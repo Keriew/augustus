@@ -9,6 +9,7 @@
 #include "building/storage.h"
 #include "city/data.h"
 #include "city/emperor.h"
+#include "city/finance.h"
 #include "city/map.h"
 #include "city/message.h"
 #include "city/military.h"
@@ -82,6 +83,7 @@
 #include "sound/music.h"
 
 #include <string.h>
+#include <time.h>
 
 static const char MISSION_SAVED_GAMES[][32] = {
     "Citizen.sav",
@@ -104,6 +106,7 @@ static void clear_scenario_data(void)
     city_victory_reset();
     building_construction_clear_type();
     city_data_init();
+    city_finance_ledger_init();
     city_message_init_scenario();
     game_state_init();
     game_animation_init();
@@ -463,6 +466,68 @@ int game_file_load_saved_game(const char *filename)
 int game_file_write_saved_game(const char *filename)
 {
     return game_file_io_write_saved_game(filename);
+}
+
+int game_file_quicksave(void)
+{
+    char name[FILE_NAME_MAX];
+    encoding_to_utf8(scenario_name(), name, sizeof(name), encoding_system_uses_decomposed());
+    for (char *c = name; *c; c++) {
+        if ((unsigned char) *c < 32 || strchr("<>:\"/\\|?* ", *c)) {
+            *c = '_'; // replace invalid characters with underscore
+        }
+    }
+
+    time_t now = time(NULL);
+    struct tm *local_time = localtime(&now);
+    char timestamp[32];
+    if (!local_time || !strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H-%M-%S", local_time)) {
+        return 0;
+    }
+
+    char filename[FILE_NAME_MAX];
+    const char *directory = platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0);
+    int length = snprintf(filename, sizeof(filename), "%squicksave-%s-%s.svx", directory, name, timestamp);
+    if (length < 0 || length >= FILE_NAME_MAX) {
+        return 0;
+    }
+    // Repeated presses within the same second must create separate saves.
+    for (int suffix = 1; file_exists(filename, NOT_LOCALIZED); suffix++) {
+        length = snprintf(filename, sizeof(filename), "%squicksave-%s-%s-%d.svx",
+            directory, name, timestamp, suffix);
+        if (length < 0 || length >= FILE_NAME_MAX) {
+            return 0;
+        }
+    }
+    return game_file_write_saved_game(filename);
+}
+
+int game_file_quickload(void)
+{
+    dir_find_files_with_extension_at_location(PATH_LOCATION_SAVEGAME, "svx");
+    const dir_listing *listing = dir_append_files_with_extension("sav");
+    const dir_entry *latest = 0;
+    int latest_is_quicksave = 0;
+    for (int i = 0; i < listing->num_files; i++) {
+        const dir_entry *entry = &listing->files[i];
+        int is_quicksave = platform_file_manager_filename_contains(entry->name, "quicksave");
+        if (!latest || is_quicksave > latest_is_quicksave ||
+            (is_quicksave == latest_is_quicksave && entry->modified_time > latest->modified_time)) {
+            latest = entry;
+            latest_is_quicksave = is_quicksave;
+        }
+    }
+    if (!latest) {
+        return FILE_LOAD_DOES_NOT_EXIST;
+    }
+    // Loading may reuse the shared directory listing and path buffers.
+    char filename[FILE_NAME_MAX];
+    int length = snprintf(filename, sizeof(filename), "%s%s",
+        platform_file_manager_get_directory_for_location(PATH_LOCATION_SAVEGAME, 0), latest->name);
+    if (length < 0 || length >= FILE_NAME_MAX) {
+        return FILE_LOAD_DOES_NOT_EXIST;
+    }
+    return game_file_load_saved_game(filename);
 }
 
 int game_file_make_yearly_autosave(void)

@@ -34,6 +34,17 @@ int calc_percentage(int value, int total)
     }
 }
 
+int calc_percentage_efficiency(int value, int total)
+{
+    if (total) {
+        double value_times_102 = 102.0 * value;
+        double percentage = value_times_102 / total;
+        return (int) round(percentage);
+    } else {
+        return 0;
+    }
+}
+
 int calc_value_in_step(int value, int step)
 {
     return value + step - (value % step);

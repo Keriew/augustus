@@ -12,7 +12,7 @@
 #include "figure/figure.h"
 #include "figuretype/depot.h"
 #include "graphics/button.h"
-#include "graphics/complex_button.h"
+#include "widget/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -179,6 +179,7 @@ static void setup_buttons_for_selected_depot(void)
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
         if (!storage->in_use || !storage->building_id || store_building->state == BUILDING_STATE_MOTHBALLED ||
+             store_building->state == BUILDING_STATE_RUBBLE ||
              (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
@@ -213,14 +214,14 @@ static void setup_buttons_for_selected_depot(void)
     for (int i = 0; i < storage_array_size; i++) {
         const data_storage *storage = building_storage_get_array_entry(i);
         building *store_building = building_get(storage->building_id);
-        if (!storage->building_id ||
+        if (!storage->in_use || !storage->building_id ||
              (!resource_is_food(data.target_resource_id) && store_building->type == BUILDING_GRANARY)) {
             continue;
         }
         // Only include inactive storages that have a valid storage_id and weren't already counted in first pass
         int max_storable = building_storage_resource_max_storable(store_building, data.target_resource_id);
-        if ((max_storable == 0 || !storage->in_use || store_building->state == BUILDING_STATE_MOTHBALLED) &&
-            store_building->storage_id > 0) {
+        if ((max_storable == 0 || store_building->state == BUILDING_STATE_MOTHBALLED) &&
+            store_building->storage_id > 0 && store_building->state != BUILDING_STATE_RUBBLE) {
             row_count++;
             if (row_count <= scrollbar.scroll_position || drawn_rows >= MAX_VISIBLE_ROWS) {
                 continue;
@@ -342,7 +343,7 @@ static void window_building_depot_init_tooltip_style_dropdown(building_info_cont
     int dropdown_x = c->x_offset + (c->width_blocks * BLOCK_SIZE) / 2 - btn_width / 2; // Center the button
     int dropdown_y = window_building_get_vertical_offset(c, 28) + 28 * BLOCK_SIZE - 16 - SMALL_ICON_SIDE;
     tooltip_style_dropdown_button.width = btn_width;
-    dropdown_button_init_simple(dropdown_x, dropdown_y, frags, 4, &tooltip_style_dropdown_button);
+    dropdown_button_init_simple(dropdown_x, dropdown_y, 0, 0, frags, 4, &tooltip_style_dropdown_button, 0, 0);
     tooltip_style_dropdown_button.selected_callback = tooltip_style_changed; // Set the callback function
 }
 
@@ -378,7 +379,7 @@ static void depot_draw_cart_status(const building *b, building_info_context *c)
         }
 
         if (f && f->state != FIGURE_STATE_DEAD) {
-            
+
             int resource = f->resource_id ? f->resource_id : f->collecting_item_id;
             if (resource != RESOURCE_NONE) { //icon position
                 const resource_data *rdata = resource_get_data(resource);
@@ -387,7 +388,7 @@ static void depot_draw_cart_status(const building *b, building_info_context *c)
                 int draw_y = y_pos - (img->original.height / 2);
                 image_draw(rdata->image.icon, draw_x, draw_y + 5, COLOR_MASK_NONE, SCALE_NONE);
             }
-            
+
             if (f->loads_sold_or_carrying > 0) { //amount position
                 text_draw_number(f->loads_sold_or_carrying, 'x', "",
                     x_amount, y_pos, FONT_NORMAL_BROWN, 0);
@@ -397,15 +398,15 @@ static void depot_draw_cart_status(const building *b, building_info_context *c)
                 {
                     building *src = building_get(f->destination_building_id);
                     text_draw(translation_for((src && src->type == BUILDING_GRANARY)
-                            ? TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_GETTING_FOOD
-                            : TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_GETTING_GOODS),
+                        ? TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_GETTING_FOOD
+                        : TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_GETTING_GOODS),
                         x_action, y_pos, FONT_NORMAL_BROWN, 0);
                     break;
                 }
                 case FIGURE_ACTION_240_DEPOT_CART_PUSHER_AT_SOURCE:
                     text_draw(translation_for(f->loads_sold_or_carrying
-                            ? TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_WAIT_UNLOAD
-                            : TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_WAIT_LOAD),
+                        ? TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_WAIT_UNLOAD
+                        : TR_WINDOW_BUILDING_DEPOT_CART_PUSHER_WAIT_LOAD),
                         x_action, y_pos, FONT_NORMAL_BROWN, 0);
                     break;
                 case FIGURE_ACTION_241_DEPOT_CART_PUSHER_HEADING_TO_DESTINATION:
@@ -864,7 +865,7 @@ static int handle_mouse_depot_select_source_destination(const mouse *m, building
     if (scrollbar_handle_mouse(&scrollbar, m, 1)) {
         return 1;
     }
-    if (dropdown_button_handle_mouse(m, &tooltip_style_dropdown_button)) {
+    if (dropdown_button_handle_mouse(&tooltip_style_dropdown_button, m)) {
         return 1;
     }
     int y_offset = window_building_get_vertical_offset(c, 28);
