@@ -100,7 +100,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_GRANARIES_GET_DOUBLE, "Если Амбар \"Получает еду\", удвоить вместимость тележек"},
     {TR_CONFIG_ALLOW_EXPORTING_FROM_GRANARIES, "Разрешить торговцам экспорт еды из амбаров"},
     {TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD, "Часовым на башнях не нужна дорога к казарме"},
-    {TR_CONFIG_FARMS_DELIVER_CLOSE, "Фермы и причалы доставляют еду только в ближайшие амбары"},
+    {TR_CONFIG_FARMS_DELIVER_CLOSE, "Фермы и причалы доставляют еду только в ближайшие амбары и склады"},
     {TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES, "Если Амбар \"Получает еду\", не принимать еду от ферм и причалов"},
     {TR_CONFIG_ALL_HOUSES_MERGE, "Разрешить слияние 4 домов одного уровня размером 1х1 в дом 2х2"},
     {TR_CONFIG_WINE_COUNTS_IF_OPEN_TRADE_ROUTE, "Торговые пути увеличивают разнообразие вина"},
@@ -2354,6 +2354,10 @@ static translation_string all_strings[] = {
     {TR_WIDGET_DN, "Ден"},
     {TR_SIDEBAR_DATE_JUMP_TO_CURRENT, "Щелкните, чтобы вернуться к текущему году"},
     {TR_CONFIG_FIX_EMPIRE_MAP_DIMENSIONS, "Расширить область просмотра карты на весь экран"},
+    {TR_HOTKEY_SAVE_QUICKSAVE, "Быстрое сохранение"},
+    {TR_HOTKEY_SAVE_QUICKLOAD, "Быстрая загрузка"},
+    {TR_CITY_WARNING_QUICKSAVE_SUCCESS, "Игра успешно сохранена."},
+    {TR_CITY_WARNING_QUICKLOAD_SUCCESS, "Игра успешно загружена."},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
