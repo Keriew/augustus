@@ -2368,7 +2368,7 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_CELL_CARTS_OF, "телег"},
     {TR_UI_LEDGER_CELL_BALANCE, "имеет торговый баланс\n"},
     {TR_UI_LEDGER_CELL_DENARII_FROM, "Ден от торговли"},
-    {TR_UI_LEDGER_HIDE_TOOLTIPS, "Скрыть подсказки строк списка"},
+    {TR_UI_LEDGER_HIDE_TOOLTIPS, "Скрыть подсказки списка"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
