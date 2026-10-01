@@ -105,7 +105,7 @@ typedef struct complex_button {
     unsigned char draw_background;          // 1 = draw style background, 0 = no fill
     unsigned char is_disabled;              // 1 = disabled, 0 = enabled
     unsigned char is_hidden;                // 1 = hidden, 0 = visible
-    unsigned char flush_with_background;    // 1 = bottom border is not drawn
+    unsigned char flush_with_background;    // 1 = omit bottom border and clip border to button bounds
     unsigned char shade_on_hover;           // 0-7, if set, button is graphics_shade_rect with this value
     unsigned char light_on_hover;           // 0-7, if set, button is graphics_light_up_rect with this value
     unsigned char border_on_hover;          // 1 = border switches to hover state when focused

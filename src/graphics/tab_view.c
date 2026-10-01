@@ -270,7 +270,9 @@ int tab_view_layout(tab_view *view)
 
         switch (view->view_properties.width_mode) {
             case TAB_WIDTH_MAX:
-                view->tabs[i].button.width = available_for_tabs / tab_count;
+                // Keep all available pixels so the first and last borders align with the content panel.
+                view->tabs[i].button.width = available_for_tabs / tab_count +
+                    (i < available_for_tabs % tab_count);
                 break;
             case TAB_WIDTH_TO_CONTENT:
                 view->tabs[i].button.width = text_w + TAB_DEFAULT_MARGIN;
@@ -318,7 +320,7 @@ int tab_view_layout(tab_view *view)
 
         case TAB_POS_LEFT:
         default:
-            tab_x = view->x; //miniature offset to align with border of the content area
+            tab_x = view->x;
             break;
     }
 
@@ -328,7 +330,8 @@ int tab_view_layout(tab_view *view)
 
     // Apply final geometry to buttons
     for (int i = 0; i < tab_count; i++) {
-        view->tabs[i].button.x = tab_x + (i == tab_count - 1) - (i == 0);// first pass -1, last pass +1. see note* below
+        // Both tab and content borders use the same border sprites and coordinate origin.
+        view->tabs[i].button.x = tab_x;
         view->tabs[i].button.y = tab_y;
         view->tabs[i].button.bg_primary = color_for_active_tab_button(
             view->view_properties.style,
@@ -337,8 +340,6 @@ int tab_view_layout(tab_view *view)
 
         tab_x += view->tabs[i].button.width + single_gap;
     }
-    //*note - button borders are drawn 1 pixel to the right to account for red border for 'focused' state. 
-    //in order to not rewrite the 15 lines of code that affect the entire codebase, adjusting the first and last only.
 
     // === Step 3 - content area ===
     view->content.x = view->x;
@@ -403,6 +404,7 @@ void tab_view_draw(tab_view *view)
 
     // Draw all visible tab buttons BEFORE the content section
     for (int i = 0; i < view->view_properties.count; i++) {
+        view->tabs[i].button.flush_with_background = i == view->state.active_tab;
         if (view->tabs[i].visible && i != view->state.active_tab) {
             complex_button_draw(&view->tabs[i].button);
         }
@@ -411,8 +413,6 @@ void tab_view_draw(tab_view *view)
     int red_content = view->tabs[view->state.active_tab].button.is_hovered;
     color_t content_color = color_for_tab_background(view->view_properties.style);
     bordered_panel_draw_colored(view->content.x, view->content.y, view->content.width, view->content.height, red_content, content_color, content_color);
-    // y+1 to ever so slightly lower the border 
-    view->tabs[view->state.active_tab].button.flush_with_background = 1; // active tab flushes with background
     complex_button_draw(&view->tabs[view->state.active_tab].button); // draw active tab last so it looks flushed
     // Draw content for active tab
     int active_tab = view->state.active_tab;

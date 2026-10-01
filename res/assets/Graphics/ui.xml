@@ -1855,4 +1855,14 @@
 	<image id="Trade_Ledger_Import" src = "Trade_Ledger_Import"/>
 	<image id="resource_picker" src = "resource_picker"/>
 	<image id="hourglass_icon" src="hourglass_v1" width="24" height="24"/>
+	<image id="consumed" src="consumed"/>
+	<image id="consumed_alpha" src="consumed_alpha"/>
+	<image id="consumed_broken" src="consumed_broken"/>
+	<image id="consumed_broken_alpha" src="consumed_broken_alpha_aa"/>
+	<image id="export_alpha_right" src="export_alpha_right"/>
+	<image id="export_right" src="export_right"/>
+	<image id="import_red_alpha_left" src="import_red_alpha_left"/>
+	<image id="import_red_left" src="import_red_left"/>
+	<image id="produced" src="produced"/>
+	<image id="stock" src="stock"/>
 </assetlist>

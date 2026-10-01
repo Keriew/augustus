@@ -2282,7 +2282,7 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_TT_EXPORTED, "Sort by Exported"},
     {TR_UI_LEDGER_BTN_STOCK, "Stock"},
     {TR_UI_LEDGER_TT_STOCK, "Sort by Stock"},
-    {TR_UI_LEDGER_BTN_BALANCE, "Dn Balance"},
+    {TR_UI_LEDGER_BTN_BALANCE, "Balance"},
     {TR_UI_LEDGER_TT_BALANCE, "Sort by Denarii Balance"},
     {TR_UI_LEDGER_DISABLED_1, "This feature is not yet available."},
     {TR_UI_LEDGER_DISABLED_2, "Your scribes are working hard to build this feature, but they need more time."},
@@ -2358,6 +2358,17 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SAVE_QUICKLOAD, "Quickload"},
     {TR_CITY_WARNING_QUICKSAVE_SUCCESS, "Game saved successfully."},
     {TR_CITY_WARNING_QUICKLOAD_SUCCESS, "Game loaded successfully."},
+    {TR_UI_LEDGER_CELL_PROVINCE_HAS, "Your province has"},
+    {TR_UI_LEDGER_CELL_IMPORTED, "imported"},
+    {TR_UI_LEDGER_CELL_PRODUCED, "produced"},
+    {TR_UI_LEDGER_CELL_CONSUMED, "consumed"},
+    {TR_UI_LEDGER_CELL_EXPORTED, "exported"},
+    {TR_UI_LEDGER_CELL_STORED, "stored"},
+    {TR_UI_LEDGER_CELL_CART_OF, "cart of"},
+    {TR_UI_LEDGER_CELL_CARTS_OF, "carts of"},
+    {TR_UI_LEDGER_CELL_BALANCE, "a trade balance of"},
+    {TR_UI_LEDGER_CELL_DENARII_FROM, "Denarii from trading"},
+    {TR_UI_LEDGER_HIDE_TOOLTIPS, "Hide list tooltips"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
