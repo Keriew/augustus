@@ -65,6 +65,8 @@ static void draw_status(void)
     int brush_size = editor_tool_brush_size() - 1;
     if (selected_tool == TOOL_SHALLOW) {
         text_draw(translation_for(TR_EDITOR_TOOL_SHALLOW), text_offset, 178, FONT_NORMAL_WHITE, 0);
+    } else if (selected_tool == TOOL_MARSHLAND) {
+        text_draw(translation_for(TR_EDITOR_TOOL_MARSHLAND), text_offset, 178, FONT_NORMAL_WHITE, 0);
     } else {
         lang_text_draw(49, selected_tool, text_offset, 178, FONT_NORMAL_WHITE);
     }
@@ -76,6 +78,7 @@ static void draw_status(void)
         case TOOL_SHRUB:
         case TOOL_ROCKS:
         case TOOL_MEADOW:
+        case TOOL_MARSHLAND:
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
             lang_text_draw(48, brush_size, text_offset, 194, FONT_NORMAL_GREEN);

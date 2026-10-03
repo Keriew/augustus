@@ -56,6 +56,7 @@ void map_orientation_change(int counter_clockwise)
 
     map_tiles_update_all_elevation();
     map_tiles_update_all_water();
+    map_tiles_update_all_marshland();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
     map_tiles_update_all_gardens();

@@ -4,10 +4,13 @@
 #include "military.h"
 #include "utility.h"
 
+#include "core/dir.h"
+#include "core/random.h"
 #include "figure/figure.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "sound/speech.h"
+#include "translation/translation.h"
 #include "window/building/figures.h"
 
 void window_building_draw_no_people(building_info_context *c)
@@ -43,6 +46,10 @@ void window_building_draw_terrain(building_info_context *c)
             c->can_play_sound = 0;
             if (c->figure.count > 0) {
                 window_building_play_figure_phrase(c);
+            } else if (c->terrain_type == TERRAIN_INFO_MARSHLAND) {
+                sound_speech_play_file((random_byte() & 1)
+                    ? ASSETS_DIRECTORY "/Sounds/Marshland01.ogg"
+                    : ASSETS_DIRECTORY "/Sounds/Marshland02.ogg");
             } else {
                 sound_speech_play_file("wavs/empty_land.wav");
             }
@@ -60,10 +67,21 @@ void window_building_draw_terrain(building_info_context *c)
         outer_panel_draw(c->x_offset, c->y_offset,
             c->width_blocks, c->height_blocks);
         if (!c->figure.count) {
-            lang_text_draw_centered(70, c->terrain_type + 10,
-                c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+            // Marshland has no entry in the vanilla terrain text group 70, so use its
+            // custom title/description; otherwise fall back to the generic group-70 texts.
+            if (c->terrain_type == TERRAIN_INFO_MARSHLAND) {
+                lang_text_draw_centered(CUSTOM_TRANSLATION, TR_TERRAIN_MARSHLAND,
+                    c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+            } else {
+                lang_text_draw_centered(70, c->terrain_type + 10,
+                    c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+            }
         }
-        if (c->figure.count == 0 &&
+        if (c->figure.count == 0 && c->terrain_type == TERRAIN_INFO_MARSHLAND) {
+            lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_TERRAIN_MARSHLAND_DESC,
+                c->x_offset + 40, c->y_offset + BLOCK_SIZE * c->height_blocks - 125,
+                BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+        } else if (c->figure.count == 0 &&
             c->terrain_type != TERRAIN_INFO_ROAD &&
             c->terrain_type != TERRAIN_INFO_PLAZA &&
             c->terrain_type != TERRAIN_INFO_HIGHWAY) {

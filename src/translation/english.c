@@ -2369,6 +2369,9 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_CELL_BALANCE, "a trade balance of"},
     {TR_UI_LEDGER_CELL_DENARII_FROM, "Denarii from trading"},
     {TR_UI_LEDGER_HIDE_TOOLTIPS, "Hide list tooltips"},
+    {TR_EDITOR_TOOL_MARSHLAND, "Marshland"},
+    {TR_TERRAIN_MARSHLAND, "Marshland"},
+    {TR_TERRAIN_MARSHLAND_DESC, "A fetid swamp. Marshland is impassable and breeds disease: it lowers the desirability of the surrounding area and spreads sickness to nearby houses. No respectable citizen wants to live near it."}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

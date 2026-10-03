@@ -37,7 +37,8 @@ typedef enum {
     TOOL_SELECT_OFFSET = 34,
     TOOL_SHALLOW = 35,
     TOOL_OUTSKIRTS = 36,
-    TOOL_OUTSKIRTS_REMOVE = 37
+    TOOL_OUTSKIRTS_REMOVE = 37,
+    TOOL_MARSHLAND = 38
 } tool_type;
 
 tool_type editor_tool_type(void);

@@ -2338,6 +2338,9 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Objectif de population non atteint"},
     {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Assez de place pour la main-d'œuvre manquante"},
     {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Pas assez de place pour la main-d'œuvre manquante"},
+    {TR_EDITOR_TOOL_MARSHLAND, "Marais"},
+    {TR_TERRAIN_MARSHLAND, "Marais"},
+    {TR_TERRAIN_MARSHLAND_DESC, "Un marécage fétide. Le marais est infranchissable et c'est un nid à maladies : il réduit l'attrait des environs et propage la maladie aux habitations proches. Aucun citoyen respectable ne veut vivre à proximité."},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

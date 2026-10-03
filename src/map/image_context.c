@@ -342,6 +342,7 @@ static const terrain_image *get_image(int group, int tiles[MAX_TILES])
             result.group_offset = context[i].offset_for_orientation[city_view_orientation() / 2];
             result.item_offset = context[i].current_item_offset;
             result.aqueduct_offset = context[i].aqueduct_offset;
+            result.max_item_offset = context[i].max_item_offset;
             break;
         }
     }

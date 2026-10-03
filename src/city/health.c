@@ -14,9 +14,13 @@
 #include "core/calc.h"
 #include "core/random.h"
 #include "game/tutorial.h"
+#include "map/grid.h"
+#include "map/terrain.h"
 #include "scenario/property.h"
 
 #define SICKNESS_SPREAD_DIVISION_FACTOR 4
+#define MARSHLAND_HEALTH_RANGE 3
+#define MARSHLAND_SICKNESS_MALUS 5
 
 #define NUM_PLAGUE_BUILDINGS (sizeof(PLAGUE_BUILDINGS) / sizeof(building_type))
 static const building_type PLAGUE_BUILDINGS[] = { BUILDING_DOCK, BUILDING_WAREHOUSE, BUILDING_GRANARY };
@@ -363,6 +367,21 @@ int city_health_get_house_health_level(const building *b, int update_city_data)
     return house_health;
 }
 
+static void apply_marshland_sickness_malus(building *b)
+{
+    int x_min, y_min, x_max, y_max;
+    map_grid_get_area(b->x, b->y, b->size, MARSHLAND_HEALTH_RANGE, &x_min, &y_min, &x_max, &y_max);
+    for (int yy = y_min; yy <= y_max; yy++) {
+        for (int xx = x_min; xx <= x_max; xx++) {
+            if (map_terrain_is(map_grid_offset(xx, yy), TERRAIN_MARSHLAND)) {
+                b->sickness_level = calc_bound(
+                    b->sickness_level + MARSHLAND_SICKNESS_MALUS, 0, MAX_SICKNESS_LEVEL);
+                return; // one malus per cycle regardless of how many marsh tiles are near
+            }
+        }
+    }
+}
+
 void city_health_update(void)
 {
     int only_gather_stats = 0;
@@ -397,6 +416,7 @@ void city_health_update(void)
             if (!only_gather_stats) {
                 healthy_population += calc_adjust_with_percentage(b->house_population, house_health);
                 adjust_sickness_level_in_house(b, house_health, population_health_offset, hospital_coverage_bonus);
+                apply_marshland_sickness_malus(b);
             }
         }
     }
