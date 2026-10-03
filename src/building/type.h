@@ -224,8 +224,13 @@ typedef enum {
     BUILDING_REPAIR_LAND = 210, // tool, not an actual building
     BUILDING_HIGHWAY_STATION = 211,
     BUILDING_WILLOW_TREE = 212,
+    BUILDING_NATIVE_WELL = 213,
+    BUILDING_NATIVE_LARGE_HUT_ALT = 214,
+    BUILDING_NATIVE_HUT_ALT_2 = 215,
+    BUILDING_NATIVE_LARGE_HUT_ALT_2 = 216,
+    BUILDING_NATIVE_PALISADE = 217,
     // helper constants
-    BUILDING_TYPE_MAX = 213
+    BUILDING_TYPE_MAX = 218
 } building_type;
 
 /* When adding a new building increment BUILDING_TYPE_MAX

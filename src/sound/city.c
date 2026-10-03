@@ -201,6 +201,10 @@ void sound_city_mark_building_view(building_type type, int num_workers, int dire
             break;
             // Buildings that always produce sound
         case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_HUT_ALT:
+        case BUILDING_NATIVE_HUT_ALT_2:
+        case BUILDING_NATIVE_LARGE_HUT_ALT:
+        case BUILDING_NATIVE_LARGE_HUT_ALT_2:
         case BUILDING_NATIVE_MEETING:
         case BUILDING_NATIVE_CROPS:
         case BUILDING_NATIVE_WATCHTOWER:
