@@ -153,7 +153,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         image_buttons_handle_mouse(m_dialog, 0, 0, ok_cancel_buttons, 2, 0)) {
         return;
     }
-    if (h->escape_pressed) {
+    if (h->close_pressed) {
         hotkey_handle_escape();
     }
 }

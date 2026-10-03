@@ -2338,6 +2338,7 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_POPULATION_GOAL_NOT_MET, "Objectif de population non atteint"},
     {TR_SIDEBAR_EXTRA_ROOM_FOR_NEEDED_EMPLOYEES, "Assez de place pour la main-d'œuvre manquante"},
     {TR_SIDEBAR_EXTRA_NOT_ENOUGH_ROOM_FOR_NEEDED_EMPLOYEES, "Pas assez de place pour la main-d'œuvre manquante"},
+    {TR_HOTKEY_CLOSE, "Fermer les panneaux"},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

@@ -184,7 +184,7 @@ void widget_top_menu_editor_draw_panels(void)
 
 static int handle_input_submenu(const mouse *m, const hotkeys *h)
 {
-    if (m->right.went_up || h->escape_pressed) {
+    if (m->right.went_up || h->close_pressed) {
         clear_state();
         window_go_back();
         return 1;

@@ -679,7 +679,7 @@ void widget_city_handle_input(const mouse *m, const hotkeys *h)
         zoom_map(m, h, city_view_get_scale());
     }
 
-    if (h->escape_pressed) {
+    if (h->close_pressed) {
         if (building_construction_type()) {
             building_construction_cancel();
             window_request_refresh();
@@ -753,7 +753,7 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
     if (m->right.went_down && input_coords_in_city(m->x, m->y)) {
         scroll_drag_start(0);
     }
-    if ((m->right.went_up && !scroll_drag_end()) || h->escape_pressed) {
+    if ((m->right.went_up && !scroll_drag_end()) || h->close_pressed) {
         data.capture_input = 0;
         city_warning_clear_all();
         window_city_show();
