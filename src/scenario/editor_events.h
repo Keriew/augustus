@@ -42,4 +42,7 @@ void scenario_editor_iron_mine_collapse_toggle_enabled(void);
 int scenario_editor_clay_pit_flooded_enabled(void);
 void scenario_editor_clay_pit_flooded_toggle_enabled(void);
 
+int scenario_editor_quarry_collapse_enabled(void);
+void scenario_editor_quarry_collapse_toggle_enabled(void);
+
 #endif // SCENARIO_EDITOR_EVENTS_H
