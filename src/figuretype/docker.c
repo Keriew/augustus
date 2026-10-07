@@ -343,6 +343,7 @@ void figure_docker_action(figure *f)
         }
     }
     f->terrain_usage = TERRAIN_USAGE_ROADS_HIGHWAY;
+    f->is_ghost = 0;
     switch (f->action_state) {
         case FIGURE_ACTION_150_ATTACK:
             figure_combat_handle_attack(f);
@@ -351,7 +352,8 @@ void figure_docker_action(figure *f)
             figure_combat_handle_corpse(f);
             break;
         case FIGURE_ACTION_132_DOCKER_IDLING:
-            f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); //visible idle docker
+            f->is_ghost = 1;
+            f->cart_image_id = image_group(GROUP_FIGURE_CARTPUSHER_CART); //visible idle docker(when dock is selected)
             if (!deliver_import_resource(f, b)) {
                 fetch_export_resource(f, b, 1);
             }

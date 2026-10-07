@@ -477,7 +477,8 @@ static void init(int grid_offset)
         while (figure_id > 0 && context.figure.count < 7) {
             figure *f = figure_get(figure_id);
             if (f->state != FIGURE_STATE_DEAD &&
-                f->action_state != FIGURE_ACTION_149_CORPSE) {
+                f->action_state != FIGURE_ACTION_149_CORPSE &&
+                !f->is_ghost) {
                 switch (f->type) {
                     case FIGURE_NONE:
                     case FIGURE_EXPLOSION:
