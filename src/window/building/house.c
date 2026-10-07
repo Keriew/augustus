@@ -78,42 +78,52 @@ static void draw_tax_info(building_info_context *c, int y_offset)
 
 static void draw_happiness_info(building_info_context *c, int y_offset)
 {
-    int happiness = building_get(c->building_id)->sentiment.house_happiness;
+    building *b = building_get(c->building_id);
+    int happiness = b->sentiment.house_happiness;
+    int width = lang_text_draw(CUSTOM_TRANSLATION, TR_BUILDING_WINDOW_HOUSE_HAPPINESS,
+        c->x_offset + 36, y_offset, FONT_NORMAL_BROWN);
+    width += text_draw_number(happiness, 0, "% (", c->x_offset + 36 + width, y_offset, FONT_NORMAL_BROWN, 0);
+    int sentiment_delta = city_sentiment_house_happiness_delta(b);
+    color_t delta_color = sentiment_delta > 0 ? COLOR_FONT_GREEN :
+        sentiment_delta < 0 ? COLOR_FONT_RED : COLOR_FONT_GRAY;
+    text_draw_number(sentiment_delta, sentiment_delta > 0 ? '+' : 0, "%)",
+        c->x_offset + 36 + width, y_offset, FONT_NORMAL_BROWN, delta_color);
+
     int sentiment_text_id = TR_BUILDING_WINDOW_HOUSE_SENTIMENT_1;
     if (happiness > 0) {
         sentiment_text_id = happiness / 10 + TR_BUILDING_WINDOW_HOUSE_SENTIMENT_2;
     }
-    text_draw(translation_for(sentiment_text_id), c->x_offset + 36, y_offset, FONT_NORMAL_BROWN, 0);
+    text_draw(translation_for(sentiment_text_id), c->x_offset + 36, y_offset + 16, FONT_NORMAL_BROWN, 0);
 
-    int message = building_get(c->building_id)->house_sentiment_message;
+    int message = b->house_sentiment_message;
     switch (message) {
         case LOW_MOOD_CAUSE_NO_JOBS:
             text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_UPSET_UNEMPLOYMENT),
-                c->x_offset + 36, y_offset + 20, FONT_NORMAL_BROWN, 0);
+                c->x_offset + 36, y_offset + 32, FONT_NORMAL_BROWN, 0);
             break;
         case LOW_MOOD_CAUSE_HIGH_TAXES:
             text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_UPSET_HIGH_TAXES),
-                c->x_offset + 36, y_offset + 20, FONT_NORMAL_BROWN, 0);
+                c->x_offset + 36, y_offset + 32, FONT_NORMAL_BROWN, 0);
             break;
         case LOW_MOOD_CAUSE_LOW_WAGES:
             text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_UPSET_LOW_WAGES),
-                c->x_offset + 36, y_offset + 20, FONT_NORMAL_BROWN, 0);
+                c->x_offset + 36, y_offset + 32, FONT_NORMAL_BROWN, 0);
             break;
         case LOW_MOOD_CAUSE_SQUALOR:
             text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_UPSET_SQUALOR),
-                c->x_offset + 36, y_offset + 20, FONT_NORMAL_BROWN, 0);
+                c->x_offset + 36, y_offset + 32, FONT_NORMAL_BROWN, 0);
             break;
         case SUGGEST_MORE_ENT:
             text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_SUGGEST_ENTERTAINMENT),
-                c->x_offset + 36, y_offset + 20, FONT_NORMAL_BROWN, 0);
+                c->x_offset + 36, y_offset + 32, FONT_NORMAL_BROWN, 0);
             break;
         case SUGGEST_MORE_FOOD:
             text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_SUGGEST_FOOD),
-                c->x_offset + 36, y_offset + 20, FONT_NORMAL_BROWN, 0);
+                c->x_offset + 36, y_offset + 32, FONT_NORMAL_BROWN, 0);
             break;
         case SUGGEST_MORE_DESIRABILITY:
             text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_SUGGEST_DESIRABILITY),
-                c->x_offset + 36, y_offset + 20, FONT_NORMAL_BROWN, 0);
+                c->x_offset + 36, y_offset + 32, FONT_NORMAL_BROWN, 0);
             break;
         default:
             break;
@@ -121,10 +131,10 @@ static void draw_happiness_info(building_info_context *c, int y_offset)
 
     if (city_sentiment_get_blessing_festival_boost() > 3) {
         text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_RECENT_EVENT_POSITIVE),
-            c->x_offset + 36, y_offset + 40, FONT_NORMAL_BROWN, 0);
+            c->x_offset + 36, y_offset + 48, FONT_NORMAL_BROWN, 0);
     } else if (city_sentiment_get_blessing_festival_boost() < -3) {
         text_draw(translation_for(TR_BUILDING_WINDOW_HOUSE_RECENT_EVENT_NEGATIVE),
-            c->x_offset + 36, y_offset + 40, FONT_NORMAL_BROWN, 0);
+            c->x_offset + 36, y_offset + 48, FONT_NORMAL_BROWN, 0);
     }
 }
 
