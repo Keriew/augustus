@@ -509,6 +509,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_10, "Residents are extremely pleased with you."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_11, "Residents love you."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_12, "Residents idolize you as a god."},
+    {TR_BUILDING_WINDOW_HOUSE_HAPPINESS, "Happiness:"},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_HIGH_TAXES, "Residents are upset about high taxation."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_LOW_WAGES, "Residents are upset about low wages."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_UNEMPLOYMENT, "Residents are upset about the lack of jobs."},

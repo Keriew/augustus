@@ -1,6 +1,8 @@
 #ifndef CITY_SENTIMENT_H
 #define CITY_SENTIMENT_H
 
+struct building;
+
 int city_sentiment(void);
 
 int city_sentiment_low_mood_cause(void);
@@ -26,6 +28,8 @@ void city_sentiment_set_crime_cooldown(void);
 void city_sentiment_reduce_crime_cooldown(void);
 int city_sentiment_get_blessing_festival_boost(void);
 void city_sentiment_decrement_blessing_boost(void);
+
+int city_sentiment_house_happiness_delta(const struct building *b);
 
 void city_sentiment_update(int sentiment_cooldown_delta);
 
