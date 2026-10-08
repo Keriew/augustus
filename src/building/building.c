@@ -352,6 +352,16 @@ void building_delete(building *b)
 void building_clear_related_data(building *b)
 {
     if (b->storage_id) {
+        // cleanup cart depot src and dst selections
+        for (building* b_depot = building_first_of_type(BUILDING_DEPOT); b_depot; b_depot = b_depot->next_of_type) {
+            if (b_depot->data.depot.current_order.src_storage_id == b->storage_id) {
+                b_depot->data.depot.current_order.src_storage_id = 0;
+            }
+            if (b_depot->data.depot.current_order.dst_storage_id == b->storage_id) {
+                b_depot->data.depot.current_order.dst_storage_id = 0;
+            }
+        }
+
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
@@ -1163,5 +1173,9 @@ void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, 
 
     if (save_version <= SAVE_GAME_LAST_NO_FORT_ORIENTATION) {
         migrate_fort_rotations();
+    }
+
+    if (save_version <= SAVE_GAME_LAST_BUILDING_ID_IN_CART_DEPOT) {
+        migrate_cart_depot_building_id_to_storage_id();
     }
 }
