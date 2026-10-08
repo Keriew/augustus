@@ -1007,10 +1007,10 @@ static void get_depot_resource_orders_count(int building_id, resource_type resou
             b->data.depot.current_order.resource_type != resource) {
             continue;
         }
-        if ((int) b->data.depot.current_order.src_storage_id == building_id) {
+        if ((int) b->data.depot.current_order.src_building_id == building_id) {
             (*source_count)++;
         }
-        if ((int) b->data.depot.current_order.dst_storage_id == building_id) {
+        if ((int) b->data.depot.current_order.dst_building_id == building_id) {
             (*destination_count)++;
         }
     }

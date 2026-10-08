@@ -81,8 +81,8 @@ static void write_type_data(buffer *buf, const building *b)
         buffer_write_u8(buf, b->data.market.is_mess_hall);
     } else if (b->type == BUILDING_DEPOT) {
         buffer_write_i8(buf, b->data.depot.current_order.resource_type);
-        buffer_write_i32(buf, b->data.depot.current_order.src_storage_id);
-        buffer_write_i32(buf, b->data.depot.current_order.dst_storage_id);
+        buffer_write_i32(buf, b->data.depot.current_order.src_building_id);
+        buffer_write_i32(buf, b->data.depot.current_order.dst_building_id);
         buffer_write_i8(buf, b->data.depot.current_order.condition.condition_type);
         buffer_write_i8(buf, b->data.depot.current_order.condition.threshold);
         for (int i = 0; i < 3; i++) {
@@ -395,8 +395,8 @@ static void read_type_data(buffer *buf, building *b, int version)
         b->monument.phase = buffer_read_i16(buf);
     } else if (b->type == BUILDING_DEPOT) {
         b->data.depot.current_order.resource_type = resource_remap(buffer_read_i8(buf));
-        b->data.depot.current_order.src_storage_id = buffer_read_i32(buf);
-        b->data.depot.current_order.dst_storage_id = buffer_read_i32(buf);
+        b->data.depot.current_order.src_building_id = buffer_read_i32(buf);
+        b->data.depot.current_order.dst_building_id = buffer_read_i32(buf);
         b->data.depot.current_order.condition.condition_type = buffer_read_i8(buf);
         b->data.depot.current_order.condition.threshold = buffer_read_i8(buf);
         for (int i = 0; i < 3; i++) {

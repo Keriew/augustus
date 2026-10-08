@@ -507,8 +507,8 @@ static int get_tooltip_depot_orders(tooltip_context *c, int grid_offset)
         if (condition_type > TR_ORDER_CONDITION_ALWAYS) {
             snprintf(threshold_str, sizeof(threshold_str), " %d", depot_order.condition.threshold);
         }
-        building *b_src = building_get(depot_order.src_storage_id);
-        building *b_dst = building_get(depot_order.dst_storage_id);
+        building *b_src = building_get(depot_order.src_building_id);
+        building *b_dst = building_get(depot_order.dst_building_id);
 
         const uint8_t *src_type = lang_get_string(28, b_src->type);
         const uint8_t *dst_type = lang_get_string(28, b_dst->type);

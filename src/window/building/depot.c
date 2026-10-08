@@ -277,22 +277,22 @@ static void calculate_available_storages(int building_id)
                 data.secondary_storages++;  // advanced orders: allow inactive/non-used storages
             }
         }
-        if ((unsigned) b->data.depot.current_order.src_storage_id == store->id) {
+        if ((unsigned) b->data.depot.current_order.src_building_id == store->id) {
             building_storage_state src_state = building_storage_get_state(
-                building_get(b->data.depot.current_order.src_storage_id), b->data.depot.current_order.resource_type, 0);
+                building_get(b->data.depot.current_order.src_building_id), b->data.depot.current_order.resource_type, 0);
             has_valid_src = src_state != BUILDING_STORAGE_STATE_NOT_ACCEPTING ? 1 : 0;
         }
-        if ((unsigned) b->data.depot.current_order.dst_storage_id == store->id) {
+        if ((unsigned) b->data.depot.current_order.dst_building_id == store->id) {
             building_storage_state dst_state = building_storage_get_state(
-                building_get(b->data.depot.current_order.dst_storage_id), b->data.depot.current_order.resource_type, 0);
+                building_get(b->data.depot.current_order.dst_building_id), b->data.depot.current_order.resource_type, 0);
             has_valid_dst = dst_state != BUILDING_STORAGE_STATE_NOT_ACCEPTING ? 1 : 0;
         }
     }
     if (!has_valid_src) {
-        b->data.depot.current_order.src_storage_id = 0;
+        b->data.depot.current_order.src_building_id = 0;
     }
     if (!has_valid_dst) {
-        b->data.depot.current_order.dst_storage_id = 0;
+        b->data.depot.current_order.dst_building_id = 0;
     }
 
 }
@@ -456,8 +456,8 @@ void window_building_draw_depot(building_info_context *c)
 void window_building_draw_depot_foreground(building_info_context *c)
 {
     building *b = building_get(data.depot_building_id);
-    building *src = building_get(b->data.depot.current_order.src_storage_id);
-    building *dst = building_get(b->data.depot.current_order.dst_storage_id);
+    building *src = building_get(b->data.depot.current_order.src_building_id);
+    building *dst = building_get(b->data.depot.current_order.dst_building_id);
     setup_buttons_for_selected_depot();
     calculate_available_storages(data.depot_building_id);
     if (!c->has_road_access) {
@@ -803,9 +803,9 @@ static void set_order_source(const generic_button *button)
         return;
     }
     building *b = building_get(depot_building_id);
-    b->data.depot.current_order.src_storage_id = building_id;
-    if (b->data.depot.current_order.dst_storage_id == building_id) {
-        b->data.depot.current_order.dst_storage_id = 0;
+    b->data.depot.current_order.src_building_id = building_id;
+    if (b->data.depot.current_order.dst_building_id == building_id) {
+        b->data.depot.current_order.dst_building_id = 0;
     }
     window_building_info_depot_return_to_main_window();
 }
@@ -818,9 +818,9 @@ static void set_order_destination(const generic_button *button)
         return;
     }
     building *b = building_get(depot_building_id);
-    b->data.depot.current_order.dst_storage_id = building_id;
-    if (b->data.depot.current_order.src_storage_id == building_id) {
-        b->data.depot.current_order.src_storage_id = 0;
+    b->data.depot.current_order.dst_building_id = building_id;
+    if (b->data.depot.current_order.src_building_id == building_id) {
+        b->data.depot.current_order.src_building_id = 0;
     }
     window_building_info_depot_return_to_main_window();
 }
@@ -966,8 +966,8 @@ void window_building_depot_get_tooltip_main(int *translation)
     if (!depot) {
         return;
     }
-    if ((data.focus_button_id == 6 && depot->data.depot.current_order.src_storage_id) ||
-        (data.focus_button_id == 7 && depot->data.depot.current_order.dst_storage_id)) {
+    if ((data.focus_button_id == 6 && depot->data.depot.current_order.src_building_id) ||
+        (data.focus_button_id == 7 && depot->data.depot.current_order.dst_building_id)) {
         *translation = TR_TOOLTIP_BUTTON_CENTER_CAMERA;
     }
     if (data.focus_button_id == 8) {
@@ -1076,7 +1076,7 @@ static void order_clear_source(const generic_button *button)
     if (!b || b->type != BUILDING_DEPOT) {
         return;
     }
-    b->data.depot.current_order.src_storage_id = 0;
+    b->data.depot.current_order.src_building_id = 0;
     window_request_refresh();
 }
 
@@ -1086,7 +1086,7 @@ static void order_clear_destination(const generic_button *button)
     if (!b || b->type != BUILDING_DEPOT) {
         return;
     }
-    b->data.depot.current_order.dst_storage_id = 0;
+    b->data.depot.current_order.dst_building_id = 0;
     window_request_refresh();
 }
 
