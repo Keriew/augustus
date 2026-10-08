@@ -889,9 +889,9 @@ static void draw_foreground(void)
             }
         } else if (btype == BUILDING_DEPOT) {
             if (context.depot_selection == 2) {
-                window_building_draw_depot_select_source_destination(&context);
+                window_building_draw_depot_select_source_destination_foreground(&context);
             } else if (context.depot_selection == 3) {
-                window_building_draw_depot_select_source_destination(&context);
+                window_building_draw_depot_select_source_destination_foreground(&context);
             } else if (context.depot_selection == 1) {
                 window_building_draw_depot_select_resource_foreground(&context);
             } else {
