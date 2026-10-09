@@ -275,7 +275,6 @@ void scrollbar_draw(scrollbar_type *scrollbar)
                 scrollbar->y + scrollbar->image_button_scroll_dot.y_offset, calculate_thumb_midsections_count(scrollbar),
                 !scrollbar->is_horizontal, frame);
         }
-        window_invalidate();
     }
 }
 
