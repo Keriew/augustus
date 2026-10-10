@@ -815,3 +815,22 @@ void migrate_fort_rotations(void)
         }
     }
 }
+
+void migrate_cart_depot_building_id_to_storage_id(void)
+{
+    // before this version, cart depot used building_ids
+    // after it the field is repurposed for storage ids
+    // which means that building->data.depot.current_order.src_storage_id
+    // holds building_id, but expects that to be a storage_id
+    // to migrate, we would just need to find those buildings
+    // and replace the id with it's storage
+
+    for (building* b = building_first_of_type(BUILDING_DEPOT); b; b = b->next_of_type) {
+        int src_building_id = b->data.depot.current_order.src_storage_id;
+        int dst_building_id = b->data.depot.current_order.dst_storage_id;
+        int src_storage_id = building_get(src_building_id)->storage_id;
+        int dst_storage_id = building_get(dst_building_id)->storage_id;
+        b->data.depot.current_order.src_storage_id = src_storage_id;
+        b->data.depot.current_order.dst_storage_id = dst_storage_id;
+    }
+}
