@@ -120,6 +120,8 @@ void map_routing_update_land_citizen(void)
                 terrain_land_citizen.items[grid_offset] = CITIZEN_1_HIGHWAY;
             } else if (terrain & (TERRAIN_RUBBLE | TERRAIN_ACCESS_RAMP | TERRAIN_GARDEN)) {
                 terrain_land_citizen.items[grid_offset] = CITIZEN_2_PASSABLE_TERRAIN;
+            } else if (terrain & TERRAIN_BEACH) {
+                terrain_land_citizen.items[grid_offset] = CITIZEN_4_CLEAR_TERRAIN; // beach is walkable (even over water: a sandbank)
             } else if (terrain & TERRAIN_AQUEDUCT) {
                 terrain_land_citizen.items[grid_offset] = get_land_type_citizen_aqueduct(grid_offset);
             }  else if (terrain & (TERRAIN_BUILDING | TERRAIN_GATEHOUSE)) {
@@ -229,6 +231,8 @@ static void map_routing_update_land_noncitizen(void)
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_0_PASSABLE;
             } else if (terrain & (TERRAIN_GARDEN | TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE)) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_2_CLEARABLE;
+            } else if (terrain & TERRAIN_BEACH) {
+                terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_0_PASSABLE; // beach is walkable (even over water: a sandbank)
             } else if (terrain & TERRAIN_WALL) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_3_WALL;
             } else if (terrain & TERRAIN_NOT_CLEAR) {
@@ -254,7 +258,8 @@ void map_routing_update_water(void)
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {
         for (int x = 0; x < map_data.width; x++, grid_offset++) {
-            if (map_terrain_is(grid_offset, TERRAIN_WATER) && !map_terrain_is(grid_offset, TERRAIN_MARSHLAND) &&
+            if (map_terrain_is(grid_offset, TERRAIN_WATER) &&
+                !map_terrain_is(grid_offset, TERRAIN_MARSHLAND | TERRAIN_BEACH) &&
                 is_surrounded_by_water(grid_offset)) {
                 if (x > 0 && x < map_data.width - 1 &&
                     y > 0 && y < map_data.height - 1) {

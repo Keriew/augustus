@@ -95,6 +95,8 @@ unsigned int building_construction_clear_select(int x_start, int y_start, int x_
                 continue;
             } else if (map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
                 continue;
+            } else if (map_terrain_is(grid_offset, TERRAIN_BEACH)) {
+                continue;
             } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
                 items_placed++;
             } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
@@ -136,6 +138,9 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
                 continue;
             }
             if (map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
+                continue;
+            }
+            if (map_terrain_is(grid_offset, TERRAIN_BEACH)) {
                 continue;
             }
 

@@ -2360,6 +2360,10 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_MARSHLAND, "Marais"},
     {TR_TERRAIN_MARSHLAND, "Marais"},
     {TR_TERRAIN_MARSHLAND_DESC, "Un marécage fétide. Le marais est infranchissable et c'est un nid à maladies : il réduit l'attrait des environs et propage la maladie aux habitations proches. Aucun citoyen respectable ne veut vivre à proximité."},
+    {TR_EDITOR_TOOL_LAND, "Terre"},
+    {TR_EDITOR_TOOL_BEACH, "Plage"},
+    {TR_TERRAIN_BEACH, "Plage"},
+    {TR_TERRAIN_BEACH_DESC, "Une plage de sable fin. Agréable à l'œil et prisée des promeneurs, qui s'y traînent un peu, elle offre à la cité sable et argile en abondance."},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

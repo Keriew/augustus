@@ -42,6 +42,7 @@ typedef struct {
     tile_color rock[4];
     tile_color meadow[4];
     tile_color marshland[4];
+    tile_color beach[4];
     tile_color grass[8];
     tile_color road;
     tile_color highway;
@@ -76,6 +77,7 @@ static const tile_color_climate_variants CLIMATE_VARIANTS[3] = {
         .rock = {{0xff948484, 0xff635a4a}, {0xffa59c94, 0xffb5ada5}, {0xffb5ada5, 0xff8c8484}, {0xff635a4a, 0xffa59c94}},
         .meadow = {{0xffd6bd63, 0xff9c8c39}, {0xff948c39, 0xffd6bd63}, {0xffd6bd63, 0xff9c9439}, {0xff848431, 0xffada54a}},
         .marshland = {{0xff5a6b39, 0xff52633a}, {0xff63734a, 0xff4a5a31}, {0xff525a33, 0xff63733a}, {0xff4a5a31, 0xff5a6b42}},
+        .beach = {{0xffd6c694, 0xffceba84}, {0xffe6d6a5, 0xffd6c68c}, {0xffcec694, 0xffe6d6a5}, {0xffd6c68c, 0xffe6daa5}},
         .grass = {
             {0xff6b8c31, 0xff6b7b29}, {0xff738431, 0xff6b7b29}, {0xff6b7329, 0xff7b8c39}, {0xff527b29, 0xff6b7321},
             {0xff6b8431, 0xff737b31}, {0xff6b7b31, 0xff737b29}, {0xff636b18, 0xff526b21}, {0xff737b31, 0xff737b29}
@@ -91,6 +93,7 @@ static const tile_color_climate_variants CLIMATE_VARIANTS[3] = {
         .rock = {{0xff8c8484, 0xff5a5252}, {0xff9c9c94, 0xffa5a5a5}, {0xffa5a5a5, 0xff848484}, {0xff5a5252, 0xff9c9c94}},
         .meadow = {{0xff427318, 0xff8c9442}, {0xffb5ad4a, 0xff738c39}, {0xff8c8c39, 0xff6b7b29}, {0xff527331, 0xff5a8442}},
         .marshland = {{0xff42583a, 0xff3a5233}, {0xff4a634a, 0xff344a2a}, {0xff3a4a31, 0xff4a5a3a}, {0xff344a2a, 0xff42583a}},
+        .beach = {{0xffc6bd8c, 0xffbdb07b}, {0xffd6c69c, 0xffc6b884}, {0xffbdb88c, 0xffd6c69c}, {0xffc6b884, 0xffd6c69c}},
         .grass = {
             {0xff4a8431, 0xff4a7329}, {0xff527b29, 0xff4a7329}, {0xff526b29, 0xff5a8439}, {0xff397321, 0xff4a6b21},
             {0xff527b31, 0xff5a7331}, {0xff4a7329, 0xff5a7329}, {0xff4a6b18, 0xff316b21}, {0xff527b29, 0xff527329}
@@ -106,6 +109,7 @@ static const tile_color_climate_variants CLIMATE_VARIANTS[3] = {
         .rock = {{0xffa59494, 0xff736352}, {0xffa59c94, 0xffb5ada5}, {0xffb5ada5, 0xff8c847b}, {0xff736352, 0xffbdada5}},
         .meadow = {{0xff739c31, 0xff9cbd52}, {0xff7bb529, 0xff63ad21}, {0xff9cbd52, 0xff8c944a}, {0xff7ba539, 0xff739c31}},
         .marshland = {{0xff7b846b, 0xff737b63}, {0xff848c73, 0xff6b735a}, {0xff737b5a, 0xff848c6b}, {0xff6b735a, 0xff7b846b}},
+        .beach = {{0xffe6d6ad, 0xffded6a5}, {0xfff6e6bd, 0xffe6d6ad}, {0xffded6a5, 0xfff6e6bd}, {0xffe6d6ad, 0xfff6e6b5}},
         .grass = {
             {0xffbdbd9c, 0xffb5b594}, {0xffc6bda5, 0xffbdbda5}, {0xffbdbd9c, 0xffc6c6ad}, {0xffd6cead, 0xffc6bd9c},
             {0xffa59c7b, 0xffbdb594}, {0xffcecead, 0xffb5ad94}, {0xffc6c6a5, 0xffdedebd}, {0xffcecead, 0xffd6d6b5}
@@ -463,6 +467,8 @@ static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
         colors = &minimap_colors.climate->highway;
     } else if (terrain & TERRAIN_MARSHLAND) {
         colors = &minimap_colors.climate->marshland[rand & 3];
+    } else if (terrain & TERRAIN_BEACH) {
+        colors = &minimap_colors.climate->beach[rand & 3];
     } else if (terrain & TERRAIN_WATER) {
         colors = &minimap_colors.climate->water[rand & 3];
     } else if (terrain & (TERRAIN_SHRUB | TERRAIN_TREE)) {

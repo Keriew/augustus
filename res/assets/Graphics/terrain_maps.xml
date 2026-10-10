@@ -201,4 +201,87 @@
 	<image id="Marshland_C_78" src="Marshland_78" isometric="true"/>
 	<image id="Marshland_C_79" src="Marshland_79" isometric="true"/>
 	<image id="Marshland_C_80" src="Marshland_80" isometric="true"/>
+	<!-- Note: Beach tileset 01-80 (Assets created by Areldir). Drawn as a transparent OVERLAY
+	     on top of the native terrain tile, like Marshland: each tile is just the beach sprite
+	     with no land/water base composited in. Climate-agnostic. -->
+	<image id="Beach_C_01" src="Beach_01" isometric="true"/>
+	<image id="Beach_C_02" src="Beach_02" isometric="true"/>
+	<image id="Beach_C_03" src="Beach_03" isometric="true"/>
+	<image id="Beach_C_04" src="Beach_04" isometric="true"/>
+	<image id="Beach_C_05" src="Beach_05" isometric="true"/>
+	<image id="Beach_C_06" src="Beach_06" isometric="true"/>
+	<image id="Beach_C_07" src="Beach_07" isometric="true"/>
+	<image id="Beach_C_08" src="Beach_08" isometric="true"/>
+	<image id="Beach_C_09" src="Beach_09" isometric="true"/>
+	<image id="Beach_C_10" src="Beach_10" isometric="true"/>
+	<image id="Beach_C_11" src="Beach_11" isometric="true"/>
+	<image id="Beach_C_12" src="Beach_12" isometric="true"/>
+	<image id="Beach_C_13" src="Beach_13" isometric="true"/>
+	<image id="Beach_C_14" src="Beach_14" isometric="true"/>
+	<image id="Beach_C_15" src="Beach_15" isometric="true"/>
+	<image id="Beach_C_16" src="Beach_16" isometric="true"/>
+	<image id="Beach_C_17" src="Beach_17" isometric="true"/>
+	<image id="Beach_C_18" src="Beach_18" isometric="true"/>
+	<image id="Beach_C_19" src="Beach_19" isometric="true"/>
+	<image id="Beach_C_20" src="Beach_20" isometric="true"/>
+	<image id="Beach_C_21" src="Beach_21" isometric="true"/>
+	<image id="Beach_C_22" src="Beach_22" isometric="true"/>
+	<image id="Beach_C_23" src="Beach_23" isometric="true"/>
+	<image id="Beach_C_24" src="Beach_24" isometric="true"/>
+	<image id="Beach_C_25" src="Beach_25" isometric="true"/>
+	<image id="Beach_C_26" src="Beach_26" isometric="true"/>
+	<image id="Beach_C_27" src="Beach_27" isometric="true"/>
+	<image id="Beach_C_28" src="Beach_28" isometric="true"/>
+	<image id="Beach_C_29" src="Beach_29" isometric="true"/>
+	<image id="Beach_C_30" src="Beach_30" isometric="true"/>
+	<image id="Beach_C_31" src="Beach_31" isometric="true"/>
+	<image id="Beach_C_32" src="Beach_32" isometric="true"/>
+	<image id="Beach_C_33" src="Beach_33" isometric="true"/>
+	<image id="Beach_C_34" src="Beach_34" isometric="true"/>
+	<image id="Beach_C_35" src="Beach_35" isometric="true"/>
+	<image id="Beach_C_36" src="Beach_36" isometric="true"/>
+	<image id="Beach_C_37" src="Beach_37" isometric="true"/>
+	<image id="Beach_C_38" src="Beach_38" isometric="true"/>
+	<image id="Beach_C_39" src="Beach_39" isometric="true"/>
+	<image id="Beach_C_40" src="Beach_40" isometric="true"/>
+	<image id="Beach_C_41" src="Beach_41" isometric="true"/>
+	<image id="Beach_C_42" src="Beach_42" isometric="true"/>
+	<image id="Beach_C_43" src="Beach_43" isometric="true"/>
+	<image id="Beach_C_44" src="Beach_44" isometric="true"/>
+	<image id="Beach_C_45" src="Beach_45" isometric="true"/>
+	<image id="Beach_C_46" src="Beach_46" isometric="true"/>
+	<image id="Beach_C_47" src="Beach_47" isometric="true"/>
+	<image id="Beach_C_48" src="Beach_48" isometric="true"/>
+	<image id="Beach_C_49" src="Beach_49" isometric="true"/>
+	<image id="Beach_C_50" src="Beach_50" isometric="true"/>
+	<image id="Beach_C_51" src="Beach_51" isometric="true"/>
+	<image id="Beach_C_52" src="Beach_52" isometric="true"/>
+	<image id="Beach_C_53" src="Beach_53" isometric="true"/>
+	<image id="Beach_C_54" src="Beach_54" isometric="true"/>
+	<image id="Beach_C_55" src="Beach_55" isometric="true"/>
+	<image id="Beach_C_56" src="Beach_56" isometric="true"/>
+	<image id="Beach_C_57" src="Beach_57" isometric="true"/>
+	<image id="Beach_C_58" src="Beach_58" isometric="true"/>
+	<image id="Beach_C_59" src="Beach_59" isometric="true"/>
+	<image id="Beach_C_60" src="Beach_60" isometric="true"/>
+	<image id="Beach_C_61" src="Beach_61" isometric="true"/>
+	<image id="Beach_C_62" src="Beach_62" isometric="true"/>
+	<image id="Beach_C_63" src="Beach_63" isometric="true"/>
+	<image id="Beach_C_64" src="Beach_64" isometric="true"/>
+	<image id="Beach_C_65" src="Beach_65" isometric="true"/>
+	<image id="Beach_C_66" src="Beach_66" isometric="true"/>
+	<image id="Beach_C_67" src="Beach_67" isometric="true"/>
+	<image id="Beach_C_68" src="Beach_68" isometric="true"/>
+	<image id="Beach_C_69" src="Beach_69" isometric="true"/>
+	<image id="Beach_C_70" src="Beach_70" isometric="true"/>
+	<image id="Beach_C_71" src="Beach_71" isometric="true"/>
+	<image id="Beach_C_72" src="Beach_72" isometric="true"/>
+	<image id="Beach_C_73" src="Beach_73" isometric="true"/>
+	<image id="Beach_C_74" src="Beach_74" isometric="true"/>
+	<image id="Beach_C_75" src="Beach_75" isometric="true"/>
+	<image id="Beach_C_76" src="Beach_76" isometric="true"/>
+	<image id="Beach_C_77" src="Beach_77" isometric="true"/>
+	<image id="Beach_C_78" src="Beach_78" isometric="true"/>
+	<image id="Beach_C_79" src="Beach_79" isometric="true"/>
+	<image id="Beach_C_80" src="Beach_80" isometric="true"/>
 </assetlist>

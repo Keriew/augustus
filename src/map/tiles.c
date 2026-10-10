@@ -1139,8 +1139,8 @@ static void set_water_image(int x, int y, int grid_offset)
             }
         }
         if (map_terrain_exists_tile_in_radius_with_type(x, y, 1, 2, TERRAIN_BUILDING)) {
-            // fortified shore -- but not under a marsh overlay (its wall sprite would draw over it)
-            if (!map_is_bridge(grid_offset) && !map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
+            // fortified shore -- but not under a marsh/beach overlay (its wall sprite would draw over it)
+            if (!map_is_bridge(grid_offset) && !map_terrain_is(grid_offset, TERRAIN_MARSHLAND | TERRAIN_BEACH)) {
                 int base = image_group(GROUP_TERRAIN_WATER_SHORE);
                 switch (img->group_offset) {
                     case 8: image_id = base + 10; break;
@@ -1309,6 +1309,42 @@ void map_tiles_update_all_marshland(void)
 void map_tiles_update_region_marshland(int x_min, int y_min, int x_max, int y_max)
 {
     foreach_region_tile(x_min, y_min, x_max, y_max, update_marshland_tile);
+}
+
+static int beach_base_image(void)
+{
+    return assets_get_image_id("Terrain_Maps", "Beach_C_01");
+}
+
+static void set_beach_image(int x, int y, int grid_offset)
+{
+    if (!map_terrain_is(grid_offset, TERRAIN_BEACH)) {
+        map_beach_image_set(grid_offset, 0);
+        return;
+    }
+    set_overlay_native_ground(grid_offset);
+    int base = beach_base_image();
+    int offset = overlay_tile_offset(grid_offset, TERRAIN_BEACH);
+    if (offset < 0) {
+        offset = map_random_get(grid_offset) % 8; // fully-surrounded / no-edge: full-tile variant 1-8
+    }
+    map_beach_image_set(grid_offset, base + offset);
+    map_property_mark_draw_tile(grid_offset);
+}
+
+static void update_beach_tile(int x, int y, int grid_offset)
+{
+    set_beach_image(x, y, grid_offset);
+}
+
+void map_tiles_update_all_beach(void)
+{
+    foreach_map_tile(update_beach_tile);
+}
+
+void map_tiles_update_region_beach(int x_min, int y_min, int x_max, int y_max)
+{
+    foreach_region_tile(x_min, y_min, x_max, y_max, update_beach_tile);
 }
 
 static void set_aqueduct(int grid_offset)
@@ -1637,6 +1673,7 @@ void map_tiles_update_all(void)
     map_tiles_update_all_elevation();
     map_tiles_update_all_water();
     map_tiles_update_all_marshland();
+    map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
     foreach_map_tile(set_tree_image);

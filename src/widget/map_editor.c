@@ -153,6 +153,10 @@ static void draw_footprint(int x, int y, int grid_offset)
     if (marsh_image > 0) {
         image_draw_isometric_footprint_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
     }
+    int beach_image = map_beach_image_at(grid_offset);
+    if (beach_image > 0) {
+        image_draw_isometric_footprint_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
+    }
 
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
         //grid is drawn by the renderer directly at zoom > 200%
@@ -206,6 +210,10 @@ static void draw_top(int x, int y, int grid_offset)
     int marsh_image = map_marsh_image_at(grid_offset);
     if (marsh_image > 0) {
         image_draw_isometric_top_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
+    }
+    int beach_image = map_beach_image_at(grid_offset);
+    if (beach_image > 0) {
+        image_draw_isometric_top_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
     }
 }
 

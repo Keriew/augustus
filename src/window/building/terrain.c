@@ -67,10 +67,13 @@ void window_building_draw_terrain(building_info_context *c)
         outer_panel_draw(c->x_offset, c->y_offset,
             c->width_blocks, c->height_blocks);
         if (!c->figure.count) {
-            // Marshland has no entry in the vanilla terrain text group 70, so use its
+            // Marshland and Beach have no entry in the vanilla terrain text group 70, so use their
             // custom title/description; otherwise fall back to the generic group-70 texts.
             if (c->terrain_type == TERRAIN_INFO_MARSHLAND) {
                 lang_text_draw_centered(CUSTOM_TRANSLATION, TR_TERRAIN_MARSHLAND,
+                    c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+            } else if (c->terrain_type == TERRAIN_INFO_BEACH) {
+                lang_text_draw_centered(CUSTOM_TRANSLATION, TR_TERRAIN_BEACH,
                     c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
             } else {
                 lang_text_draw_centered(70, c->terrain_type + 10,
@@ -79,6 +82,10 @@ void window_building_draw_terrain(building_info_context *c)
         }
         if (c->figure.count == 0 && c->terrain_type == TERRAIN_INFO_MARSHLAND) {
             lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_TERRAIN_MARSHLAND_DESC,
+                c->x_offset + 40, c->y_offset + BLOCK_SIZE * c->height_blocks - 125,
+                BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
+        } else if (c->figure.count == 0 && c->terrain_type == TERRAIN_INFO_BEACH) {
+            lang_text_draw_multiline(CUSTOM_TRANSLATION, TR_TERRAIN_BEACH_DESC,
                 c->x_offset + 40, c->y_offset + BLOCK_SIZE * c->height_blocks - 125,
                 BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_BLACK);
         } else if (c->figure.count == 0 &&

@@ -189,6 +189,8 @@ static void update_terrain(void)
                     model->desirability_range);
             } else if (terrain & TERRAIN_MARSHLAND) {
                 add_to_terrain(x, y, 1, -3, 1, 1, 3);
+            } else if (terrain & TERRAIN_BEACH) {
+                add_to_terrain(x, y, 1, 1, 1, 1, 2); // small +1 desirability boost, range 2
             } else if (terrain & TERRAIN_AQUEDUCT) {
                 add_to_terrain(x, y, 1, -2, 1, 1, 2);
             }

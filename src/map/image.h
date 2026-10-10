@@ -29,6 +29,12 @@ void map_marsh_image_backup(void);
 void map_marsh_image_restore(void);
 void map_marsh_image_clear(void);
 
+unsigned int map_beach_image_at(int grid_offset);
+void map_beach_image_set(int grid_offset, int image_id);
+void map_beach_image_backup(void);
+void map_beach_image_restore(void);
+void map_beach_image_clear(void);
+
 void map_image_save_state_legacy(buffer *buf);
 
 void map_image_load_state_legacy(buffer *buf);

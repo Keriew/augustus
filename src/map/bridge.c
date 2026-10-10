@@ -44,9 +44,10 @@ void map_bridge_reset_building_length(void)
     bridge.length = 0;
 }
 
-#define BRIDGE_BLOCKING_TERRAIN (TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING | TERRAIN_MARSHLAND)
-// marshland can also lie over water, so it blocks the bridge span itself, not only its banks
-#define BRIDGE_BLOCKING_TERRAIN_ON_WATER TERRAIN_MARSHLAND
+#define BRIDGE_BLOCKING_TERRAIN (TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING |\
+    TERRAIN_MARSHLAND | TERRAIN_BEACH)
+// marshland and beaches can also lie over water, so they block the bridge span itself, not only its banks
+#define BRIDGE_BLOCKING_TERRAIN_ON_WATER (TERRAIN_MARSHLAND | TERRAIN_BEACH)
 
 static void add_blocking_tile(grid_slice *blocking_tiles, int grid_offset, int *blocked)
 {
