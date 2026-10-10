@@ -1177,4 +1177,8 @@ void building_load_state(buffer *buf, buffer *sequence, buffer *corrupt_houses, 
     if (save_version <= SAVE_GAME_LAST_NO_FORT_ORIENTATION) {
         migrate_fort_rotations();
     }
+
+    if (save_version <= SAVE_GAME_LAST_BUILDING_ID_IN_CART_DEPOT) {
+        migrate_cart_depot_building_id_to_storage_id();
+    }
 }
