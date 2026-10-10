@@ -496,9 +496,20 @@ void window_building_draw_depot_foreground(building_info_context *c)
     button_border_draw(x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y,
         depot_order_buttons[1].width, depot_order_buttons[1].height, focus_border);
     if (src->storage_id) {
-        text_draw_label_and_number_centered(lang_get_string(28, src->type),
+        const data_storage *src_storage = building_storage_get_array_entry(src->storage_id);
+        int is_src_rubble = src->state == BUILDING_STATE_RUBBLE || src->type == BUILDING_BURNING_RUIN;
+        int is_src_valid =
+            !src_storage->in_use ||
+            !src_storage->building_id ||
+            !src->state == BUILDING_STATE_MOTHBALLED ||
+            !(!resource_is_food(data.target_resource_id) && src->type == BUILDING_GRANARY);
+        const uint8_t *src_text = is_src_rubble ? translation_for(TR_EDITOR_RUBBLE) : lang_get_string(28, src->type);
+        font_t resolved_font = (is_src_rubble || !is_src_valid) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+        color_t resolved_clor = (is_src_rubble || !is_src_valid) ? COLOR_FONT_GRAY : 0;
+
+        text_draw_label_and_number_centered(src_text,
             src->storage_id, "", x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, FONT_NORMAL_BLACK, 0);
+            depot_order_buttons[1].width, resolved_font, resolved_clor);
         button_border_draw(x_offset + depot_order_buttons[5].x, y_offset + depot_order_buttons[5].y,
             depot_order_buttons[5].width, depot_order_buttons[5].height, data.focus_button_id == 6);
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[5].x + 3,
@@ -522,9 +533,20 @@ void window_building_draw_depot_foreground(building_info_context *c)
         depot_order_buttons[2].width, depot_order_buttons[2].height,
         data.focus_button_id == 3 && total_storages() > 1);
     if (dst->storage_id) {
-        text_draw_label_and_number_centered(lang_get_string(28, dst->type),
+        const data_storage *dst_storage = building_storage_get_array_entry(dst->storage_id);
+        int is_dst_rubble = dst->state == BUILDING_STATE_RUBBLE || dst->type == BUILDING_BURNING_RUIN;
+        int is_dst_valid =
+            !dst_storage->in_use ||
+            !dst_storage->building_id ||
+            !dst->state == BUILDING_STATE_MOTHBALLED ||
+            !(!resource_is_food(data.target_resource_id) && dst->type == BUILDING_GRANARY);
+        const uint8_t *dst_text = is_dst_rubble ? translation_for(TR_EDITOR_RUBBLE) : lang_get_string(28, dst->type);
+        font_t resolved_font = (is_dst_rubble || !is_dst_valid) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+        color_t resolved_clor = (is_dst_rubble || !is_dst_valid) ? COLOR_FONT_GRAY : 0;
+
+        text_draw_label_and_number_centered(dst_text,
             dst->storage_id, "", x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
-            depot_order_buttons[2].width, FONT_NORMAL_BLACK, 0);
+            depot_order_buttons[2].width, resolved_font, resolved_clor);
         button_border_draw(x_offset + depot_order_buttons[6].x, y_offset + depot_order_buttons[6].y,
             depot_order_buttons[6].width, depot_order_buttons[6].height, data.focus_button_id == 7);
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[6].x + 3,
