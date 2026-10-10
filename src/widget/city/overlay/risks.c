@@ -5,6 +5,7 @@
 #include "building/image.h"
 #include "building/industry.h"
 #include "building/properties.h"
+#include "building/storage.h"
 #include "core/config.h"
 #include "core/string.h"
 #include "figure/properties.h"
@@ -113,8 +114,8 @@ static int show_building_problems(const building *b)
             return 1;
         }
     } else if (b->type == BUILDING_DEPOT &&
-        (!b->data.depot.current_order.src_building_id ||
-            !b->data.depot.current_order.dst_building_id)) {
+        (!building_storage_get_building_id(b->data.depot.current_order.src_storage_id) ||
+            !building_storage_get_building_id(b->data.depot.current_order.dst_storage_id))) {
         return 1;
     } else if (b->type == BUILDING_MARKET &&
          building_distribution_check_if_accepts_nothing(b)) {
@@ -476,8 +477,8 @@ static int get_tooltip_problems(tooltip_context *c, int grid_offset)
         c->text_group = 73;
         return 5;
     } else if (b->type == BUILDING_DEPOT &&
-        (!b->data.depot.current_order.src_building_id ||
-            !b->data.depot.current_order.dst_building_id)) {
+        (!building_storage_get_building_id(b->data.depot.current_order.src_storage_id) ||
+            !building_storage_get_building_id(b->data.depot.current_order.dst_storage_id))) {
         c->translation_key = TR_TOOLTIP_OVERLAY_PROBLEMS_DEPOT_NO_INSTRUCTIONS;
     } else if (b->type == BUILDING_MARKET &&
          building_distribution_check_if_accepts_nothing(b)) {
