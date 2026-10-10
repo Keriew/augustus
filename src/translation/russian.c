@@ -2222,8 +2222,8 @@ static translation_string all_strings[] = {
     {TR_FIGURE_TYPE_DOG, "Собака"},
     {TR_CONFIG_GP_CH_HOUSING_DO_NOT_SPAWN_DOGS, "Дома не создают бродячих собак"},
     {TR_CONFIG_HEADER_DESIRABILITY, "Привлекательность"},
-    {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Отображать привлекательность побережья в режиме наложения"},
-    {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Отображать привлекательность возвышенности в режиме наложения"},
+    {TR_CONFIG_SHOW_SHORELINE_DESIRABILITY, "Отображать привлекательность побережья"},
+    {TR_CONFIG_SHOW_ELEVATION_DESIRABILITY, "Отображать привлекательность возвышенности"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_WELL, "Колодец туземцев"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_LARGE_HUT_ALT, "Большая хижина"},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_HUT_ALT_2, "Хижина туземцев 3"},
@@ -2390,6 +2390,9 @@ static translation_string all_strings[] = {
     {TR_ADVISOR_RELIGION_PEOPLE, "Людей"},
     {TR_ADVISOR_RELIGION_COVERED, "охвачено"},
     {TR_HOTKEY_CLOSE, "Закрыть окна (альтернатива Esc)"},
+    {TR_EDITOR_TOOL_MARSHLAND, "Болото"},
+    {TR_TERRAIN_MARSHLAND, "Болото"},
+    {TR_TERRAIN_MARSHLAND_DESC, "Зловонное болото непроходимо и служит рассадником болезней. Оно снижает привлекательность окрестностей и распространяет болезни на близлежащие дома. Ни один уважающий себя гражданин не захочет жить по соседству с ним."},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
