@@ -499,9 +499,11 @@ void window_building_draw_depot_foreground(building_info_context *c)
         const data_storage *src_storage = building_storage_get_array_entry(src->storage_id);
         int is_src_rubble = src->state == BUILDING_STATE_RUBBLE || src->type == BUILDING_BURNING_RUIN;
         int is_src_valid =
-            !src_storage->in_use ||
-            !src_storage->building_id ||
-            !src->state == BUILDING_STATE_MOTHBALLED ||
+            src_storage->in_use &&
+            src_storage->building_id &&
+            src->state != BUILDING_STATE_MOTHBALLED &&
+            building_storage_get_state(src, b->data.depot.current_order.resource_type, 0)
+                != BUILDING_STORAGE_STATE_NOT_ACCEPTING &&
             !(!resource_is_food(data.target_resource_id) && src->type == BUILDING_GRANARY);
         const uint8_t *src_text = is_src_rubble ? translation_for(TR_EDITOR_RUBBLE) : lang_get_string(28, src->type);
         font_t resolved_font = (is_src_rubble || !is_src_valid) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
@@ -536,9 +538,11 @@ void window_building_draw_depot_foreground(building_info_context *c)
         const data_storage *dst_storage = building_storage_get_array_entry(dst->storage_id);
         int is_dst_rubble = dst->state == BUILDING_STATE_RUBBLE || dst->type == BUILDING_BURNING_RUIN;
         int is_dst_valid =
-            !dst_storage->in_use ||
-            !dst_storage->building_id ||
-            !dst->state == BUILDING_STATE_MOTHBALLED ||
+            dst_storage->in_use &&
+            dst_storage->building_id &&
+            dst->state != BUILDING_STATE_MOTHBALLED &&
+            building_storage_get_state(dst, b->data.depot.current_order.resource_type, 0)
+                != BUILDING_STORAGE_STATE_NOT_ACCEPTING &&
             !(!resource_is_food(data.target_resource_id) && dst->type == BUILDING_GRANARY);
         const uint8_t *dst_text = is_dst_rubble ? translation_for(TR_EDITOR_RUBBLE) : lang_get_string(28, dst->type);
         font_t resolved_font = (is_dst_rubble || !is_dst_valid) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
