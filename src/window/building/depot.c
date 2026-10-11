@@ -11,6 +11,8 @@
 #include "core/config.h"
 #include "figure/figure.h"
 #include "figuretype/depot.h"
+
+#include "core/string.h"
 #include "graphics/button.h"
 #include "widget/complex_button.h"
 #include "graphics/generic_button.h"
@@ -435,6 +437,51 @@ void window_building_draw_depot(building_info_context *c)
     depot_draw_cart_status(b, c);
 }
 
+int is_storage_building_rubble(unsigned int storage_id) {
+    const data_storage *src_storage = building_storage_get_array_entry((int)storage_id);
+    const building *b_storage = building_get(src_storage->building_id);
+    return b_storage->state == BUILDING_STATE_RUBBLE || b_storage->type == BUILDING_BURNING_RUIN;
+}
+
+int is_storage_valid_for_resource(unsigned int storage_id, resource_type resource_type)
+{
+    const data_storage *src_storage = building_storage_get_array_entry((int)storage_id);
+    const building *b_storage = building_get(src_storage->building_id);
+    const building *b_depot = building_get(data.depot_building_id);
+
+    if (!storage_id) return 0;
+    if (!b_storage) return 0;
+    if (!b_depot) return 0;
+
+    if (b_storage->state == BUILDING_STATE_MOTHBALLED) return 0;
+    if (b_storage->type == BUILDING_GRANARY && !resource_is_food(resource_type)) return 0;
+
+    building_storage_state state_for_resource = building_storage_get_state((building*)b_storage, resource_type, 0);
+    if (state_for_resource == BUILDING_STORAGE_STATE_NOT_ACCEPTING) return 0;
+
+    return 1;
+}
+
+typedef struct storage_button_state {
+    uint8_t label[64];
+    font_t font;
+    color_t color;
+} storage_button_state;
+storage_button_state calculate_storage_button_state(unsigned int storage_id, resource_type target_resource) {
+    storage_button_state result;
+
+    building *storage = building_get(building_storage_get_building_id(storage_id));
+    int is_src_valid = is_storage_valid_for_resource(storage_id, target_resource);
+    int is_src_rubble = is_storage_building_rubble(storage_id);
+    const uint8_t *src_name = is_src_rubble ? translation_for(TR_EDITOR_RUBBLE) : lang_get_string(28, storage->type);
+    int length = string_concat(src_name, (const uint8_t *)" ", result.label, sizeof(result.label));
+    string_from_int(result.label + length, storage->storage_id, 0);
+    result.font = (is_src_rubble || !is_src_valid) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
+    result.color = (is_src_rubble || !is_src_valid) ? COLOR_FONT_GRAY : 0;
+
+    return result;
+}
+
 void window_building_draw_depot_foreground(building_info_context *c)
 {
     building *b = building_get(data.depot_building_id);
@@ -495,32 +542,22 @@ void window_building_draw_depot_foreground(building_info_context *c)
     int focus_border = data.focus_button_id == 2 && total_storages() > 1;
     button_border_draw(x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y,
         depot_order_buttons[1].width, depot_order_buttons[1].height, focus_border);
-    if (src->storage_id) {
-        const data_storage *src_storage = building_storage_get_array_entry(src->storage_id);
-        int is_src_rubble = src->state == BUILDING_STATE_RUBBLE || src->type == BUILDING_BURNING_RUIN;
-        int is_src_valid =
-            src_storage->in_use &&
-            src_storage->building_id &&
-            src->state != BUILDING_STATE_MOTHBALLED &&
-            building_storage_get_state(src, b->data.depot.current_order.resource_type, 0)
-                != BUILDING_STORAGE_STATE_NOT_ACCEPTING &&
-            !(!resource_is_food(data.target_resource_id) && src->type == BUILDING_GRANARY);
-        const uint8_t *src_text = is_src_rubble ? translation_for(TR_EDITOR_RUBBLE) : lang_get_string(28, src->type);
-        font_t resolved_font = (is_src_rubble || !is_src_valid) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
-        color_t resolved_clor = (is_src_rubble || !is_src_valid) ? COLOR_FONT_GRAY : 0;
 
-        text_draw_label_and_number_centered(src_text,
-            src->storage_id, "", x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, resolved_font, resolved_clor);
+    if (src->storage_id) {
+        storage_button_state source_button = calculate_storage_button_state(src->storage_id, data.target_resource_id);
+
+        text_draw_centered(source_button.label,
+            x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
+            depot_order_buttons[1].width, source_button.font, source_button.color);
         button_border_draw(x_offset + depot_order_buttons[5].x, y_offset + depot_order_buttons[5].y,
             depot_order_buttons[5].width, depot_order_buttons[5].height, data.focus_button_id == 6);
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[5].x + 3,
             y_offset + depot_order_buttons[5].y + 3, COLOR_FONT_PLAIN, SCALE_NONE);
         depot_order_buttons[5].parameter1 = src->id;
     } else if (total_storages() > 1) {
-        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_SOURCE,
+        text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_SOURCE),
             x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y + 6,
-            depot_order_buttons[1].width, FONT_NORMAL_BLACK);
+            depot_order_buttons[1].width, FONT_NORMAL_BLACK, 0);
     } else {
         translation_key translation;
         translation = total_storages() == 1 ?
@@ -535,31 +572,20 @@ void window_building_draw_depot_foreground(building_info_context *c)
         depot_order_buttons[2].width, depot_order_buttons[2].height,
         data.focus_button_id == 3 && total_storages() > 1);
     if (dst->storage_id) {
-        const data_storage *dst_storage = building_storage_get_array_entry(dst->storage_id);
-        int is_dst_rubble = dst->state == BUILDING_STATE_RUBBLE || dst->type == BUILDING_BURNING_RUIN;
-        int is_dst_valid =
-            dst_storage->in_use &&
-            dst_storage->building_id &&
-            dst->state != BUILDING_STATE_MOTHBALLED &&
-            building_storage_get_state(dst, b->data.depot.current_order.resource_type, 0)
-                != BUILDING_STORAGE_STATE_NOT_ACCEPTING &&
-            !(!resource_is_food(data.target_resource_id) && dst->type == BUILDING_GRANARY);
-        const uint8_t *dst_text = is_dst_rubble ? translation_for(TR_EDITOR_RUBBLE) : lang_get_string(28, dst->type);
-        font_t resolved_font = (is_dst_rubble || !is_dst_valid) ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK;
-        color_t resolved_clor = (is_dst_rubble || !is_dst_valid) ? COLOR_FONT_GRAY : 0;
+        storage_button_state destination_button = calculate_storage_button_state(dst->storage_id, data.target_resource_id);
 
-        text_draw_label_and_number_centered(dst_text,
-            dst->storage_id, "", x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
-            depot_order_buttons[2].width, resolved_font, resolved_clor);
+        text_draw_centered(destination_button.label,
+            x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
+            depot_order_buttons[2].width, destination_button.font, destination_button.color);
         button_border_draw(x_offset + depot_order_buttons[6].x, y_offset + depot_order_buttons[6].y,
             depot_order_buttons[6].width, depot_order_buttons[6].height, data.focus_button_id == 7);
         image_draw(assets_lookup_image_id(ASSET_CENTER_CAMERA_ON_BUILDING), x_offset + depot_order_buttons[6].x + 3,
             y_offset + depot_order_buttons[6].y + 3, COLOR_FONT_PLAIN, SCALE_NONE);
         depot_order_buttons[6].parameter1 = dst->id;
     } else if (total_storages() > 1) {
-        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION,
+        text_draw_centered(lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION),
             x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y + 6,
-            depot_order_buttons[2].width, FONT_NORMAL_BLACK);
+            depot_order_buttons[2].width, FONT_NORMAL_BLACK, 0);
     } else {
         translation_key translation = total_storages() == 1 ? TR_BUILDING_INFO_DEPOT_ONE_BUILDING_FOR_RESOURCE :
             TR_BUILDING_INFO_DEPOT_NO_DESTINATION_AVAILABLE;
