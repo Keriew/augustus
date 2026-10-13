@@ -492,7 +492,9 @@ static void update_enemy_movement(formation *m, int roman_distance)
         target_formation_id = m->missile_attack_formation_id;
     } else if (m->wait_ticks < 32) {
         regroup = 1;
-        state->duration_advance = 4;
+    } else if (m->wait_ticks == 32) {
+        advance = 1;
+        state->duration_advance = 3;
     } else if (army->ignore_roman_soldiers) {
         halt = 0;
         regroup = 0;
@@ -596,15 +598,7 @@ static void update_enemy_movement(formation *m, int roman_distance)
             formation_set_destination(m, x_tile, y_tile);
         }
     } else if (advance) {
-        int x_offset, y_offset;
-        get_layout_orientation_offset(army, m, &x_offset, &y_offset);
-        x_offset += army->destination_x;
-        y_offset += army->destination_y;
-        map_grid_bound(&x_offset, &y_offset);
-        int x_tile, y_tile;
-        if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
-            formation_set_destination(m, x_tile, y_tile);
-        }
+        formation_set_destination(m, army->destination_x, army->destination_y);
     }
 }
 
