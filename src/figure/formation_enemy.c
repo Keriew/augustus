@@ -188,6 +188,10 @@ static building *get_best_and_closest_building(int x, int y, const int *priority
             if (b->state != BUILDING_STATE_IN_USE) {
                 continue;
             }
+            if (b->distance_from_entry == 0 &&
+                !map_routing_noncitizen_can_travel_through_everything(x, y, b->x, b->y, 8)) {
+                continue;
+            }
             int distance = calc_maximum_distance(x, y, b->x, b->y);
             if (distance < min_distance) {
                 best_building = b;
