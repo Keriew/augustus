@@ -487,11 +487,14 @@ static void update_enemy_movement(formation *m, int roman_distance)
     int target_formation_id = 0;
     if (m->missile_fired) {
         halt = 1;
+        state->duration_advance = 0;
     } else if (m->missile_attack_timeout) {
         pursue_target = 1;
         target_formation_id = m->missile_attack_formation_id;
+        state->duration_advance = 0;
     } else if (m->wait_ticks < 32) {
         regroup = 1;
+        state->duration_advance = 0;
     } else if (m->wait_ticks == 32) {
         advance = 1;
         state->duration_advance = 3;
@@ -499,6 +502,7 @@ static void update_enemy_movement(formation *m, int roman_distance)
         halt = 0;
         regroup = 0;
         advance = 1;
+        state->duration_advance = 1;
     } else {
         int halt_duration, advance_duration, regroup_duration;
         if (army->layout == FORMATION_ENEMY_MOB || army->layout == FORMATION_ENEMY12) {
@@ -566,6 +570,7 @@ static void update_enemy_movement(formation *m, int roman_distance)
             state->duration_advance--;
             if (state->duration_advance <= 0) {
                 state->duration_halt = halt_duration;
+                state->duration_advance = 0;
                 set_figures_to_initial(m);
                 halt = 1;
                 advance = 0;
