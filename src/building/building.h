@@ -191,7 +191,7 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_close_to_water;
-    unsigned char storage_id;
+    unsigned char storage_id;  //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
     union {
         signed char house_happiness;
         signed char native_anger;
