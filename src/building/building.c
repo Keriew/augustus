@@ -352,7 +352,7 @@ void building_delete(building *b)
 
 void building_clear_related_data(building *b)
 {
-    if (building_uses_storage(b->type) && b->storage_id) {
+    if (b->storage_id) {
         building_storage_delete(b->storage_id);
         b->storage_id = 0;
     }
@@ -900,11 +900,6 @@ int building_get_house_group(building_type type)
 int building_is_house_group(house_groups group, building_type type)
 {
     return building_get_house_group(type) == group;
-}
-
-int building_uses_storage(building_type type)
-{
-    return type == BUILDING_WAREHOUSE || type == BUILDING_GRANARY;
 }
 
 // For Venus GT base bonus
