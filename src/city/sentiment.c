@@ -37,12 +37,14 @@
 #define IMPERIAL_GAMES_SENTIMENT_BONUS 15
 #define POP_STEP_FOR_BASE_AVERAGE_HOUSE_LEVEL 625
 
+#ifndef min
 #define min(a,b)             \
 ({                           \
     __typeof__ (a) _a = (a); \
     __typeof__ (b) _b = (b); \
     _a < _b ? _a : _b;       \
 })
+#endif
 
 // New advanced sentiment change calculation applies only after city reaches
 // population of 1000. This is required to prevent very fast sentiment drop 
