@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/properties.h"
+#include "building/warehouse.h"
 #include "city/buildings.h"
 #include "city/figures.h"
 #include "city/gods.h"
@@ -258,7 +259,9 @@ static int set_enemy_target_building(formation *m)
     }
     if (best_building) {
         if (best_building->type == BUILDING_WAREHOUSE) {
-            formation_set_destination_building(m, best_building->x + 1, best_building->y, best_building->id + 1);
+            int main_x = map_grid_offset_to_x(building_warehouse_get_main_grid_offset(best_building));
+            int main_y = map_grid_offset_to_y(building_warehouse_get_main_grid_offset(best_building));
+            formation_set_destination_building(m, main_x + 1, main_y, best_building->id + 1);
         } else {
             formation_set_destination_building(m, best_building->x, best_building->y, best_building->id);
         }
