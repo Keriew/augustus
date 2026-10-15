@@ -97,7 +97,7 @@ static void enemy_initial(figure *f, formation *m)
     }
 }
 
-static void enemy_marching(figure *f, const formation *m)
+static void enemy_marching(figure *f, formation *m)
 {
     f->wait_ticks--;
     if (f->wait_ticks <= 0) {
@@ -112,10 +112,19 @@ static void enemy_marching(figure *f, const formation *m)
         figure_route_remove(f);
     }
     figure_movement_move_ticks(f, f->speed_multiplier);
-    if (f->direction == DIR_FIGURE_AT_DESTINATION ||
-        f->direction == DIR_FIGURE_REROUTE ||
+    if (f->direction == DIR_FIGURE_REROUTE ||
         f->direction == DIR_FIGURE_LOST) {
         f->action_state = FIGURE_ACTION_151_ENEMY_INITIAL;
+    } else if (f->direction == DIR_FIGURE_AT_DESTINATION) {
+        if (m->enemy_state.duration_advance) {
+            // Get in formation while waiting for a new target
+            m->enemy_state.duration_advance = 0;
+            f->wait_ticks = 1;
+        }
+        else {
+            f->action_state = FIGURE_ACTION_151_ENEMY_INITIAL;
+        }
+
     }
 }
 
