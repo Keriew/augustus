@@ -807,6 +807,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_DOCK_PLAGUE_DESC, "The plague was brought here by a trade ship. This dock is in quarantine while a doctor or surgeon decontaminates the area."},
     {TR_BUILDING_GRANARY_PLAGUE_DESC, "The plague was brought here by a contaminated worker. This granary is in quarantine while a doctor or surgeon decontaminates the area."},
     {TR_BUILDING_GRANARY_NO_FOOD, "No food stored at this granary."},
+    {TR_BUILDING_GRANARY_WHEAT_BY_ROME, "Rome provides our city with all the wheat it needs."},
     {TR_BUILDING_WAREHOUSE_PLAGUE_DESC, "The plague was brought here by a contaminated worker. This warehouse is in quarantine while a doctor or surgeon decontaminates the area."},
     {TR_BUILDING_WAREHOUSE_NO_GOODS, "No goods stored at this warehouse."},
     {TR_BUILDING_HOUSE_DISEASE_DESC, "Pestilence has struck! Without adequate healthcare, residents dwelling here have died. This house is in quarantine while a doctor or surgeon decontaminates the area."},

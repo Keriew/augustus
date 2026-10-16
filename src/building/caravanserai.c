@@ -6,11 +6,15 @@
 #include "city/trade.h"
 #include "city/resource.h"
 #include "empire/city.h"
+#include "scenario/property.h"
 
 #define INFINITE 10000
 
 int building_caravanserai_enough_foods(building *caravanserai)
 {
+    if (scenario_property_rome_supplies_wheat()) {
+        return 1; // if Rome supplies wheat caravanserai always has enough food
+    }
     int food_required_monthly = building_caravanserai_food_required_monthly();
     int total_food_in_caravanserai = 0;
 

@@ -603,7 +603,9 @@ static int count_food_types_in_stock(building *b)
 
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
-        if (resource_is_inventory(r) && b->resources[r] > 0) {
+        if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            count++; // count wheat if Rome supplies it, regardless of stock
+        } else if (resource_is_inventory(r) && b->resources[r] > 0) {
             count++;
         }
     }
@@ -623,14 +625,16 @@ static void draw_caravanserai_food_per_month(building_info_context *c, int y_off
     x_offset += lang_text_draw(CUSTOM_TRANSLATION, TR_EDITOR_UNITS, x_offset, y_offset, font);
 }
 
-static void draw_food_stocks(building_info_context *c, building *b, int y_offset)
+static int draw_food_stocks(building_info_context *c, building *b, int offset)
 {
+    int y_offset = offset;
     int x_offset = 32;
     const resource_list *list = city_resource_get_potential_foods();
     int food_type_index = 0;
 
     for (unsigned int i = 0; i < list->size; i++) {
         resource_type r = list->items[i];
+        int wheat_by_rome = r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat();
         if (!resource_is_inventory(r) || b->resources[r] <= 0) {
             continue;
         }
@@ -650,6 +654,8 @@ static void draw_food_stocks(building_info_context *c, building *b, int y_offset
         x_offset += 85;
         food_type_index++;
     }
+
+    return y_offset - offset;
 }
 
 static void draw_good_stocks(building_info_context *c, building *b, int y_offset)
@@ -698,7 +704,7 @@ void window_building_draw_market(building_info_context *c)
         window_building_draw_description(c, 97, 2);
     } else {
         if (food_types > 0) {
-            draw_food_stocks(c, b, 50);
+            y_offset = draw_food_stocks(c, b, 50);
         } else {
             window_building_draw_description_at(c, 50, 97, 4);
         }
@@ -707,7 +713,7 @@ void window_building_draw_market(building_info_context *c)
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136 + y_offset, c->width_blocks - 2, 4);
     window_building_draw_employment(c, 140 + y_offset);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144 + y_offset);
-    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 106, 97, 1);
+    window_building_draw_description_at(c, BLOCK_SIZE * c->height_blocks - 106 + y_offset, 97, 1);
 }
 
 void window_building_distributor_draw_foreground(building_info_context *c)
@@ -1185,8 +1191,6 @@ void window_building_draw_storage(building_info_context *c)
         }
     } else if (!c->has_road_access) {
         y += 4 + window_building_draw_description_at(c, 56, 69, 25);
-    } else if (is_granary(c) && scenario_property_rome_supplies_wheat()) {
-        y += window_building_draw_description_at(c, 56, 98, 4);
     } else {
         int total_stored = 0;
         int x;
@@ -1199,11 +1203,12 @@ void window_building_draw_storage(building_info_context *c)
             y += 32;
         } else {
             for (int r = RESOURCE_NONE + 1; r < RESOURCE_MAX; r++) {
+                int wheat_by_rome = is_granary(c) && r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat();
                 int amount = b->resources[r];
-                if (amount <= 0) {
+                if (amount <= 0 && !wheat_by_rome) {
                     continue;
                 }
-                if (offset & 1) {
+                if (offset & 1 && !wheat_by_rome) {
                     x = c->x_offset + 240;
                 } else {
                     x = c->x_offset + 32;
@@ -1217,8 +1222,13 @@ void window_building_draw_storage(building_info_context *c)
                 int base_height = (25 - img->original.height) / 2;
                 image_draw(resource_get_data(r)->image.icon, x + base_width, y + 5 + base_height, COLOR_MASK_NONE, SCALE_NONE);
 
-                int width = text_draw_number(amount, '@', " ", x + 32, y + 12, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-                text_draw(resource_get_data(r)->text, x + 32 + width, y + 12, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+                if (wheat_by_rome) {
+                    text_draw(translation_for(TR_BUILDING_GRANARY_WHEAT_BY_ROME), x + 32, y + 12, FONT_NORMAL_BLACK, COLOR_MASK_NONE);                    
+                    offset = 0;
+                } else {
+                    int width = text_draw_number(amount, '@', " ", x + 32, y + 12, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+                    text_draw(resource_get_data(r)->text, x + 32 + width, y + 12, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+                }
             }
 
             int width = lang_text_draw(98, 2, c->x_offset + 16, c->y_offset + 40, FONT_NORMAL_BLACK);
@@ -1689,7 +1699,7 @@ void window_building_draw_mess_hall(building_info_context *c)
     } else if (b->num_workers > 0 && food_types <= 0) {
         window_building_draw_description_at(c, 50, CUSTOM_TRANSLATION, TR_BUILDING_MESS_HALL_NO_FOOD);
     } else {
-        draw_food_stocks(c, b, 50);
+        y_offset = draw_food_stocks(c, b, 50);
     }
     if (city_military_total_soldiers_in_city() > 0) {
         int width = text_draw(translation_for(TR_BUILDING_MESS_HALL_FULFILLMENT),
@@ -1802,7 +1812,7 @@ void window_building_draw_caravanserai(building_info_context *c)
         } else if (b->num_workers > 0 && food_types <= 0) {
             window_building_draw_description_at(c, 50, CUSTOM_TRANSLATION, TR_BUILDING_CARAVANSERAI_NO_FOOD);
         } else {
-            draw_food_stocks(c, b, 38);
+            y_offset = draw_food_stocks(c, b, 38);
             draw_caravanserai_food_per_month(c, 70);
         }
 
