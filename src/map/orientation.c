@@ -60,6 +60,7 @@ void map_orientation_change(int counter_clockwise)
     map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
+    map_tiles_update_all_hills();
     map_tiles_update_all_gardens();
 
     map_tiles_add_entry_exit_flags();

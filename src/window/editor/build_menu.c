@@ -73,7 +73,7 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG, -1},
     {TR_EDITOR_SCENARIO_BUILDING_LOW_BRIDGE,
     TR_EDITOR_SCENARIO_BUILDING_SHIP_BRIDGE, -1},
-    {TR_EDITOR_TOOL_LAND, TR_EDITOR_TOOL_BEACH, -1},
+    {TR_EDITOR_TOOL_LAND, TR_EDITOR_TOOL_BEACH, TR_EDITOR_TOOL_HILLS, -1},
 };
 
 static struct {
@@ -253,6 +253,7 @@ static void button_menu_item(const generic_button *button)
             switch (index) {
                 case 0: editor_tool_set_type(TOOL_GRASS); break;
                 case 1: editor_tool_set_type(TOOL_BEACH); break;
+                case 2: editor_tool_set_type(TOOL_HILLS); break;
             }
             break;
     }

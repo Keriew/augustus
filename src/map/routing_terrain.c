@@ -123,6 +123,8 @@ void map_routing_update_land_citizen(void)
             } else if (terrain & TERRAIN_BEACH) {
                 // beach is walkable (even over water: a sandbank), but roads, aqueducts and walls cannot be built on it
                 terrain_land_citizen.items[grid_offset] = CITIZEN_2_PASSABLE_TERRAIN;
+            } else if (terrain & TERRAIN_HILL) {
+                terrain_land_citizen.items[grid_offset] = CITIZEN_2_PASSABLE_TERRAIN; // walkable, but nothing can be built on it
             } else if (terrain & TERRAIN_AQUEDUCT) {
                 terrain_land_citizen.items[grid_offset] = get_land_type_citizen_aqueduct(grid_offset);
             }  else if (terrain & (TERRAIN_BUILDING | TERRAIN_GATEHOUSE)) {
@@ -234,6 +236,8 @@ static void map_routing_update_land_noncitizen(void)
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_2_CLEARABLE;
             } else if (terrain & TERRAIN_BEACH) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_0_PASSABLE; // beach is walkable (even over water: a sandbank)
+            } else if (terrain & TERRAIN_HILL) {
+                terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_0_PASSABLE; // walkable, and enemies cannot destroy it
             } else if (terrain & TERRAIN_WALL) {
                 terrain_land_noncitizen.items[grid_offset] = NONCITIZEN_3_WALL;
             } else if (terrain & TERRAIN_NOT_CLEAR) {

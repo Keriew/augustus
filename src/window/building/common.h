@@ -38,6 +38,7 @@ typedef enum {
     TERRAIN_INFO_HIGHWAY = 16,
     TERRAIN_INFO_MARSHLAND = 17,
     TERRAIN_INFO_BEACH = 18,
+    TERRAIN_INFO_HILL = 19,
 } terrain_info_type;
 
 typedef struct {

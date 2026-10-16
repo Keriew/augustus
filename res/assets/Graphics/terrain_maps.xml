@@ -284,4 +284,42 @@
 	<image id="Beach_C_78" src="Beach_78" isometric="true"/>
 	<image id="Beach_C_79" src="Beach_79" isometric="true"/>
 	<image id="Beach_C_80" src="Beach_80" isometric="true"/>
+	<!-- Note: Hills tileset (Assets created by Areldir). One set per climate (C/N/S):
+	     01-08 are 1x1 hills, 09-12 are 2x2 hills. Full tiles: they replace the ground image. -->
+	<image id="Hills_C_01" src="Hills_C_01" isometric="true"/>
+	<image id="Hills_C_02" src="Hills_C_02" isometric="true"/>
+	<image id="Hills_C_03" src="Hills_C_03" isometric="true"/>
+	<image id="Hills_C_04" src="Hills_C_04" isometric="true"/>
+	<image id="Hills_C_05" src="Hills_C_05" isometric="true"/>
+	<image id="Hills_C_06" src="Hills_C_06" isometric="true"/>
+	<image id="Hills_C_07" src="Hills_C_07" isometric="true"/>
+	<image id="Hills_C_08" src="Hills_C_08" isometric="true"/>
+	<image id="Hills_C_09" src="Hills_C_09" isometric="true"/>
+	<image id="Hills_C_10" src="Hills_C_10" isometric="true"/>
+	<image id="Hills_C_11" src="Hills_C_11" isometric="true"/>
+	<image id="Hills_C_12" src="Hills_C_12" isometric="true"/>
+	<image id="Hills_N_01" src="Hills_N_01" isometric="true"/>
+	<image id="Hills_N_02" src="Hills_N_02" isometric="true"/>
+	<image id="Hills_N_03" src="Hills_N_03" isometric="true"/>
+	<image id="Hills_N_04" src="Hills_N_04" isometric="true"/>
+	<image id="Hills_N_05" src="Hills_N_05" isometric="true"/>
+	<image id="Hills_N_06" src="Hills_N_06" isometric="true"/>
+	<image id="Hills_N_07" src="Hills_N_07" isometric="true"/>
+	<image id="Hills_N_08" src="Hills_N_08" isometric="true"/>
+	<image id="Hills_N_09" src="Hills_N_09" isometric="true"/>
+	<image id="Hills_N_10" src="Hills_N_10" isometric="true"/>
+	<image id="Hills_N_11" src="Hills_N_11" isometric="true"/>
+	<image id="Hills_N_12" src="Hills_N_12" isometric="true"/>
+	<image id="Hills_S_01" src="Hills_S_01" isometric="true"/>
+	<image id="Hills_S_02" src="Hills_S_02" isometric="true"/>
+	<image id="Hills_S_03" src="Hills_S_03" isometric="true"/>
+	<image id="Hills_S_04" src="Hills_S_04" isometric="true"/>
+	<image id="Hills_S_05" src="Hills_S_05" isometric="true"/>
+	<image id="Hills_S_06" src="Hills_S_06" isometric="true"/>
+	<image id="Hills_S_07" src="Hills_S_07" isometric="true"/>
+	<image id="Hills_S_08" src="Hills_S_08" isometric="true"/>
+	<image id="Hills_S_09" src="Hills_S_09" isometric="true"/>
+	<image id="Hills_S_10" src="Hills_S_10" isometric="true"/>
+	<image id="Hills_S_11" src="Hills_S_11" isometric="true"/>
+	<image id="Hills_S_12" src="Hills_S_12" isometric="true"/>
 </assetlist>

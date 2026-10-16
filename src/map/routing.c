@@ -201,6 +201,14 @@ static int receive_highway_bonus(int offset, int direction)
     return 0;
 }
 
+// Walkers are slowed down on beaches and hills (see figure/movement.c). A step costs 2 on plain land
+// and 1 on a highway, so a step onto a slowing tile costs 3, close to the actual 20-30% slowdown.
+static int receive_terrain_slowdown(int offset)
+{
+    return map_terrain_is(offset, TERRAIN_BEACH | TERRAIN_HILL) &&
+        !map_terrain_is(offset, TERRAIN_ROAD | TERRAIN_HIGHWAY);
+}
+
 static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int num_directions, int max_tiles,
     int (*callback)(int offset, int next_offset, int direction))
 {
@@ -224,6 +232,8 @@ static void route_queue_from_to(int src_x, int src_y, int dst_x, int dst_y, int 
             int dist = 2 + distance.determined.items[offset];
             if (receive_highway_bonus(next_offset, i)) {
                 dist--;
+            } else if (receive_terrain_slowdown(next_offset)) {
+                dist++;
             }
             if (valid_offset(next_offset, dist) && callback(offset, next_offset, i)) {
                 ordered_enqueue(next_offset, dist, remaining_dist);

@@ -4,6 +4,7 @@
 #include "core/string.h"
 #include "game/campaign.h"
 #include "graphics/image.h"
+#include "map/tiles.h"
 #include "scenario/data.h"
 
 int scenario_is_custom(void)
@@ -176,4 +177,7 @@ void scenario_change_climate(scenario_climate climate)
     climate = calc_bound(climate, CLIMATE_CENTRAL, CLIMATE_DESERT);
     scenario.climate = climate;
     image_load_climate(scenario_property_climate(), 0, 0, 0);
+    map_tiles_update_all_marshland();
+    map_tiles_update_all_beach();
+    map_tiles_update_all_hills();
 }

@@ -178,6 +178,54 @@ void map_tiles_update_all_rocks(void)
     foreach_map_tile(set_rock_image);
 }
 
+static int hill_base_image(void)
+{
+    switch (scenario_property_climate()) {
+        case CLIMATE_NORTHERN:
+            return assets_get_image_id("Terrain_Maps", "Hills_N_01");
+        case CLIMATE_DESERT:
+            return assets_get_image_id("Terrain_Maps", "Hills_S_01");
+        default:
+            return assets_get_image_id("Terrain_Maps", "Hills_C_01");
+    }
+}
+
+static int is_updatable_hill(int grid_offset)
+{
+    return map_terrain_is(grid_offset, TERRAIN_HILL) &&
+        !map_terrain_is(grid_offset, TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP);
+}
+
+static void clear_hill_image(int x, int y, int grid_offset)
+{
+    if (is_updatable_hill(grid_offset)) {
+        map_image_set(grid_offset, 0);
+        map_property_set_multi_tile_size(grid_offset, 1);
+        map_property_mark_draw_tile(grid_offset);
+    }
+}
+
+// Hills are full tiles like rocks: a 2x2 block of hill tiles gets a large hill (variants 09-12),
+// any other hill tile gets a small one (variants 01-08)
+static void set_hill_image(int x, int y, int grid_offset)
+{
+    if (!is_updatable_hill(grid_offset) || map_image_at(grid_offset)) {
+        return;
+    }
+    int base = hill_base_image();
+    if (is_all_terrain_in_area(x, y, 2, TERRAIN_HILL)) {
+        map_building_tiles_add(0, x, y, 2, base + 8 + (map_random_get(grid_offset) & 3), TERRAIN_HILL);
+    } else {
+        map_building_tiles_add(0, x, y, 1, base + (map_random_get(grid_offset) & 7), TERRAIN_HILL);
+    }
+}
+
+void map_tiles_update_all_hills(void)
+{
+    foreach_map_tile(clear_hill_image);
+    foreach_map_tile(set_hill_image);
+}
+
 static void update_tree_image(int x, int y, int grid_offset)
 {
     if (map_terrain_is(grid_offset, TERRAIN_TREE) &&
@@ -1676,6 +1724,7 @@ void map_tiles_update_all(void)
     map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
+    map_tiles_update_all_hills();
     foreach_map_tile(set_tree_image);
     foreach_map_tile(set_shrub_image);
     map_tiles_update_all_gardens();

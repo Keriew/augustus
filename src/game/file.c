@@ -159,6 +159,7 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
+    map_tiles_update_all_hills();
     map_tiles_add_entry_exit_flags();
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();

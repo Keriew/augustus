@@ -2364,6 +2364,9 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_BEACH, "Plage"},
     {TR_TERRAIN_BEACH, "Plage"},
     {TR_TERRAIN_BEACH_DESC, "Une plage de sable fin. Agréable à l'œil et prisée des promeneurs, qui s'y traînent un peu, elle offre à la cité sable et argile en abondance."},
+    {TR_EDITOR_TOOL_HILLS, "Collines"},
+    {TR_TERRAIN_HILLS, "Collines"},
+    {TR_TERRAIN_HILLS_DESC, "Des collines ondulantes, ou des dunes de sable dans le désert. Les marcheurs peuvent les traverser, même si la montée les ralentit, mais rien ne peut être bâti sur leurs pentes."},
 };
 
 void translation_french(const translation_string **strings, int *num_strings)

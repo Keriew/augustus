@@ -46,7 +46,8 @@ typedef enum {
     TOOL_LOW_BRIDGE = 43,
     TOOL_SHIP_BRIDGE = 44,
     TOOL_MARSHLAND = 45,
-    TOOL_BEACH = 46
+    TOOL_BEACH = 46,
+    TOOL_HILLS = 47
 } tool_type;
 
 tool_type editor_tool_type(void);

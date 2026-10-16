@@ -45,7 +45,7 @@ void map_bridge_reset_building_length(void)
 }
 
 #define BRIDGE_BLOCKING_TERRAIN (TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_BUILDING |\
-    TERRAIN_MARSHLAND | TERRAIN_BEACH)
+    TERRAIN_MARSHLAND | TERRAIN_BEACH | TERRAIN_HILL)
 // marshland and beaches can also lie over water, so they block the bridge span itself, not only its banks
 #define BRIDGE_BLOCKING_TERRAIN_ON_WATER (TERRAIN_MARSHLAND | TERRAIN_BEACH)
 

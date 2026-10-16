@@ -36,7 +36,7 @@
 
 #define TERRAIN_PAINT_MASK ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING |\
                             TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MEADOW |\
-                            TERRAIN_SHALLOW_WATER | TERRAIN_MARSHLAND | TERRAIN_BEACH)
+                            TERRAIN_SHALLOW_WATER | TERRAIN_MARSHLAND | TERRAIN_BEACH | TERRAIN_HILL)
 
 static struct {
     int active;
@@ -170,6 +170,7 @@ int editor_tool_is_brush(void)
         case TOOL_MEADOW:
         case TOOL_MARSHLAND:
         case TOOL_BEACH:
+        case TOOL_HILLS:
         case TOOL_NATIVE_RUINS:
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
@@ -190,7 +191,8 @@ static int raise_land_tile(int x, int y, int grid_offset, int terrain)
         if (!(terrain & (TERRAIN_ACCESS_RAMP | TERRAIN_ELEVATION))) {
             map_property_set_multi_tile_size(grid_offset, 1);
             map_elevation_set(grid_offset, elevation + 1);
-            terrain &= ~(TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MARSHLAND);
+            terrain &= ~(TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_MARSHLAND |
+                TERRAIN_HILL);
         }
     }
     return terrain;
@@ -306,14 +308,21 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             // native terrain tile (land / water / coast), which keeps its own image and autotiling.
             // Marsh and beach are mutually exclusive overlays, so placing marsh removes any beach.
             if (!(terrain & TERRAIN_MARSHLAND) && !(terrain & TERRAIN_ELEVATION_ROCK)) {
-                terrain &= ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_BEACH);
+                terrain &= ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_BEACH | TERRAIN_HILL);
                 terrain |= TERRAIN_MARSHLAND;
             }
             break;
         case TOOL_BEACH:
             if (!(terrain & TERRAIN_BEACH) && !(terrain & TERRAIN_ELEVATION_ROCK)) {
-                terrain &= ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_MARSHLAND);
+                terrain &= ~(TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_MARSHLAND | TERRAIN_HILL);
                 terrain |= TERRAIN_BEACH;
+            }
+            break;
+        case TOOL_HILLS:
+            if (!(terrain & (TERRAIN_HILL | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP))) {
+                terrain &= TERRAIN_PAINT_MASK;
+                terrain |= TERRAIN_HILL;
+                map_property_clear_future_earthquake(grid_offset);
             }
             break;
         case TOOL_NATIVE_RUINS:
@@ -373,6 +382,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
@@ -382,6 +392,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_trees(x_min, y_min, x_max, y_max);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_region_beach(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
@@ -391,6 +402,7 @@ void editor_tool_update_use(const map_tile *tile)
         case TOOL_ROCKS:
             map_image_context_reset_water();
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_region_beach(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
@@ -399,6 +411,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_shrub(x_min, y_min, x_max, y_max);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_region_beach(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
@@ -407,6 +420,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_region_beach(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
@@ -415,6 +429,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_region_beach(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
@@ -423,9 +438,20 @@ void editor_tool_update_use(const map_tile *tile)
             map_image_context_reset_water();
             map_tiles_update_region_water(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_beach(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
+            break;
+        case TOOL_HILLS:
+            map_image_context_reset_water();
+            map_tiles_update_region_water(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
+            map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
+            map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
+            map_tiles_update_region_meadow(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
+            map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
+            map_tiles_update_region_beach(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
             break;
         case TOOL_NATIVE_RUINS:
             // Rubble doesn't need terrain updates, just refresh the rubble graphics
@@ -440,6 +466,7 @@ void editor_tool_update_use(const map_tile *tile)
             map_tiles_update_region_trees(x_min, y_min, x_max, y_max);
             map_tiles_update_region_shrub(x_min, y_min, x_max, y_max);
             map_tiles_update_all_rocks();
+            map_tiles_update_all_hills();
             map_tiles_update_region_empty_land(x_min, y_min, x_max, y_max);
             map_tiles_update_region_meadow(x_min, y_min, x_max, y_max);
             map_tiles_update_region_marshland(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
@@ -608,6 +635,7 @@ static void update_terrain_after_elevation_changes(void)
     map_image_context_reset_elevation();
     map_tiles_update_all_elevation_editor();
     map_tiles_update_all_rocks();
+    map_tiles_update_all_hills();
     map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
     map_tiles_update_all_water();
@@ -621,7 +649,8 @@ static void place_access_ramp(const map_tile *tile)
 {
     int orientation = 0;
     if (editor_tool_can_place_access_ramp(tile, &orientation)) {
-        int terrain_mask = ~(TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_GARDEN | TERRAIN_AQUEDUCT);
+        int terrain_mask = ~(TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_GARDEN | TERRAIN_AQUEDUCT |
+            TERRAIN_HILL);
         for (int dy = 0; dy < 2; dy++) {
             for (int dx = 0; dx < 2; dx++) {
                 int grid_offset = tile->grid_offset + map_grid_delta(dx, dy);

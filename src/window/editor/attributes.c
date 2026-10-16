@@ -383,6 +383,7 @@ static void button_change_climate(const generic_button *button)
     image_load_climate(scenario_property_climate(), editor_is_active(), 0, 0);
     map_tiles_update_all_marshland();
     map_tiles_update_all_beach();
+    map_tiles_update_all_hills();
     widget_minimap_invalidate();
     window_request_refresh();
 }
