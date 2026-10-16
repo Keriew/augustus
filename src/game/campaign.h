@@ -79,6 +79,20 @@ const char *game_campaign_get_name(void);
  */
 const campaign_info *game_campaign_get_info(void);
 
+/** Reloads optional display text after a language change, without changing campaign identity. */
+void game_campaign_reload_localization(void);
+
+/**
+ * Presentation-only fields with per-field fallback to canonical campaign data.
+ * Returned pointers remain valid until campaign clear/load or localization reload.
+ * Do not store these strings in scenarios, saves or persistent UI caches.
+ */
+const uint8_t *game_campaign_display_name(void);
+const uint8_t *game_campaign_display_description(void);
+const uint8_t *game_campaign_display_mission_title(int scenario_id);
+const uint8_t *game_campaign_display_scenario_name(int scenario_id);
+const uint8_t *game_campaign_display_scenario_description(int scenario_id);
+
 /**
  * Checks if a file exists in the current campaign.
  * @param filename The filename to check.
