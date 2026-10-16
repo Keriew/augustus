@@ -112,9 +112,7 @@ static int draw_background(void)
 
     // food stocks
     draw_title(146, 4);
-    if (scenario_property_rome_supplies_wheat()) {
-        lang_text_draw(61, 26, X_OFFSET, 146, FONT_NORMAL_GREEN);
-    } else if (city_resource_food_supply_months() > 0) {
+    if (city_resource_food_supply_months() > 0) {
         width = lang_text_draw(61, 28, X_OFFSET, 146, FONT_NORMAL_GREEN);
         lang_text_draw_amount(8, 4, city_resource_food_supply_months(), X_OFFSET + width, 146, FONT_NORMAL_GREEN);
     } else {

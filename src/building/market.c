@@ -11,6 +11,9 @@ int building_market_get_max_food_stock(building *market)
 {
     int max_stock = 0;
     if (market->id > 0 && market->type == BUILDING_MARKET) {
+        if (scenario_property_rome_supplies_wheat()) {
+            return MAX_FOOD; // If Rome supplies wheat, market always has enough food
+        }
         for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
             if (!resource_is_inventory(r)) {
                 continue;
@@ -50,8 +53,12 @@ int building_market_get_needed_inventory(building *market, resource_storage_info
 {
     int needed = 0;
     for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX_FOOD; r++) {
+        if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            info[r].needed = 0;
+            continue; // skip wheat if Rome supplies it
+        }
         info[r].needed = building_distribution_resource_is_handled(r, BUILDING_MARKET) &&
-            !scenario_property_rome_supplies_wheat() && building_distribution_is_good_accepted(market, r);
+            building_distribution_is_good_accepted(market, r);
         if (!needed && info[r].needed) {
             needed = 1;
         }

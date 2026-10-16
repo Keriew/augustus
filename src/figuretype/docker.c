@@ -21,6 +21,7 @@
 #include "figuretype/trader.h"
 #include "game/resource.h"
 #include "map/road_access.h"
+#include "scenario/property.h"
 
 #define INFINITE 10000
 
@@ -30,6 +31,10 @@ static int try_import_resource(int building_id, int resource, int city_id, int q
     if (b->type != BUILDING_WAREHOUSE &&
         !(resource_is_food(resource) && b->type == BUILDING_GRANARY)) {
         return 0;
+    }
+
+    if (b->type == BUILDING_GRANARY && resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+        return 0; // don't allow importing wheat if rome supplies it
     }
 
     if (building_storage_get_state(b, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
