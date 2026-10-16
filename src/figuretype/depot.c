@@ -19,6 +19,7 @@
 #include "map/road_network.h"
 #include "map/routing.h"
 #include "map/routing_terrain.h"
+#include "scenario/property.h"
 
 #define DEPOT_CART_PUSHER_SPEED 1
 
@@ -179,6 +180,9 @@ static void set_destination(figure *f, unsigned int building_id, int action_stat
 
 static int is_storage_valid(building *b, int resource)
 {
+    if (b && b->type == BUILDING_GRANARY && resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+        return 0; // don't allow to store wheat in granary if Rome supplies it
+    }
     return b && b->state == BUILDING_STATE_IN_USE &&
         building_storage_get_state(b, resource, 0) != BUILDING_STORAGE_STATE_NOT_ACCEPTING;
 }

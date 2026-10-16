@@ -57,9 +57,6 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
 {
     building *granary = building_get(granary_id);
     building *market = building_get(market_id);
-    if (market->type == BUILDING_MARKET && scenario_property_rome_supplies_wheat()) {
-        return 0;
-    }
 
     int total_loads = 0;
     int max_units = 0;
@@ -81,6 +78,9 @@ static int take_food_from_granary(figure *f, int market_id, int granary_id)
     int previous_boy = f->id;
 
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD && total_loads < max_loads; r++) {
+        if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            continue; // skip wheat if Rome supplies it
+        }
         int needed =             
             building_distribution_resource_is_handled(r, market->type) &&
             building_distribution_is_good_accepted(market, r);

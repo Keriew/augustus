@@ -4,6 +4,7 @@
 #include "building/monument.h"
 #include "city/resource.h"
 #include "game/resource.h"
+#include "scenario/property.h"
 
 #define INFINITE 10000
 #define MAX_FOOD 600
@@ -29,12 +30,6 @@ int building_temple_get_storage_destination(building *temple)
         return 0;
     }
 
-    resource_type food = city_resource_ceres_temple_food();
-
-    if (food == RESOURCE_NONE) {
-        return 0;
-    }
-
     resource_storage_info info[RESOURCE_MAX] = { 0 };
     if (!building_distribution_get_handled_resources_for_building(temple, info)) {
         return 0;
@@ -45,10 +40,14 @@ int building_temple_get_storage_destination(building *temple)
         return 0;
     }
 
-    // Get food if below threshold
-    if (info[food].building_id && temple->resources[food] < MAX_FOOD) {
-        temple->data.market.fetch_inventory_id = food;
-        return info[food].building_id;
+    resource_type food = city_resource_ceres_temple_food();
+    if (food != RESOURCE_NONE) {
+        // Get food if below threshold
+        if (info[food].building_id && temple->resources[food] < MAX_FOOD) {
+            temple->data.market.fetch_inventory_id = food;
+            return info[food].building_id;
+        }
+        return 0;
     }
 
     // Otherwise get allowed oil depending on stock
@@ -59,13 +58,18 @@ int building_temple_get_storage_destination(building *temple)
 
 int building_temple_mars_food_to_deliver(building *temple, int mess_hall_id)
 {
-    int most_stocked_food_id = -1;
-    int next;
+    int most_stocked_food_id = RESOURCE_NONE;
+    int most_stocked_food_amount = 0;
     building *mess_hall = building_get(mess_hall_id);
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-        next = temple->resources[r];
-        if (next > most_stocked_food_id && next >= 100 && mess_hall->resources[r] <= MAX_MESS_HALL_FOOD) {
+        if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            continue; // skip wheat if Rome supplies it
+        }
+        if (most_stocked_food_amount < temple->resources[r] &&
+            temple->resources[r] >= 100 &&
+            mess_hall->resources[r] < MAX_MESS_HALL_FOOD) {
             most_stocked_food_id = r;
+            most_stocked_food_amount = temple->resources[r];
         }
     }
     return most_stocked_food_id;

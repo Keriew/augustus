@@ -1337,7 +1337,7 @@ static void spawn_figure_temple(building *b)
                     b->figure_id2 = 0;
                 }
                 int food_to_deliver = building_temple_mars_food_to_deliver(b, mess_hall_id);
-                if (food_to_deliver >= 0) {
+                if (food_to_deliver != RESOURCE_NONE) {
                     figure *priest = figure_create(FIGURE_PRIEST, road.x, road.y, DIR_4_BOTTOM);
 
                     priest->collecting_item_id = food_to_deliver;
