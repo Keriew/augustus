@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/properties.h"
+#include "building/warehouse.h"
 #include "city/buildings.h"
 #include "city/figures.h"
 #include "city/gods.h"
@@ -262,7 +263,9 @@ static int set_enemy_target_building(formation *m)
     }
     if (best_building) {
         if (best_building->type == BUILDING_WAREHOUSE) {
-            formation_set_destination_building(m, best_building->x + 1, best_building->y, best_building->id + 1);
+            int main_x = map_grid_offset_to_x(building_warehouse_get_main_grid_offset(best_building));
+            int main_y = map_grid_offset_to_y(building_warehouse_get_main_grid_offset(best_building));
+            formation_set_destination_building(m, main_x + 1, main_y, best_building->id + 1);
         } else {
             formation_set_destination_building(m, best_building->x, best_building->y, best_building->id);
         }
@@ -491,16 +494,22 @@ static void update_enemy_movement(formation *m, int roman_distance)
     int target_formation_id = 0;
     if (m->missile_fired) {
         halt = 1;
+        state->duration_advance = 0;
     } else if (m->missile_attack_timeout) {
         pursue_target = 1;
         target_formation_id = m->missile_attack_formation_id;
+        state->duration_advance = 0;
     } else if (m->wait_ticks < 32) {
         regroup = 1;
-        state->duration_advance = 4;
+        state->duration_advance = 0;
+    } else if (m->wait_ticks == 32) {
+        advance = 1;
+        state->duration_advance = 3;
     } else if (army->ignore_roman_soldiers) {
         halt = 0;
         regroup = 0;
         advance = 1;
+        state->duration_advance = 1;
     } else {
         int halt_duration, advance_duration, regroup_duration;
         if (army->layout == FORMATION_ENEMY_MOB || army->layout == FORMATION_ENEMY12) {
@@ -568,6 +577,7 @@ static void update_enemy_movement(formation *m, int roman_distance)
             state->duration_advance--;
             if (state->duration_advance <= 0) {
                 state->duration_halt = halt_duration;
+                state->duration_advance = 0;
                 set_figures_to_initial(m);
                 halt = 1;
                 advance = 0;
@@ -600,15 +610,7 @@ static void update_enemy_movement(formation *m, int roman_distance)
             formation_set_destination(m, x_tile, y_tile);
         }
     } else if (advance) {
-        int x_offset, y_offset;
-        get_layout_orientation_offset(army, m, &x_offset, &y_offset);
-        x_offset += army->destination_x;
-        y_offset += army->destination_y;
-        map_grid_bound(&x_offset, &y_offset);
-        int x_tile, y_tile;
-        if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
-            formation_set_destination(m, x_tile, y_tile);
-        }
+        formation_set_destination(m, army->destination_x, army->destination_y);
     }
 }
 
