@@ -638,17 +638,10 @@ static int draw_food_stocks(building_info_context *c, building *b, int offset)
         if (!resource_is_inventory(r) || b->resources[r] <= 0) {
             continue;
         }
-        // if (!resource_is_inventory(r) || (b->resources[r] <= 0 && !wheat_by_rome)) {
-        //     continue;
-        // }
         if (food_type_index > 0 && (food_type_index % 5) == 0) {
             y_offset += BLOCK_SIZE * 2;
             x_offset = 32;
         }
-        // if (food_type_index > 0 && ((food_type_index % 5) == 0 || wheat_by_rome)) {
-        //     y_offset += BLOCK_SIZE * 2;
-        //     x_offset = 32;
-        // }
         font_t font = building_distribution_is_good_accepted(b, r) ? FONT_NORMAL_BLACK : FONT_NORMAL_RED;
         int image_id = resource_get_data(r)->image.icon;
         const image *img = image_get(image_id);
@@ -656,16 +649,6 @@ static int draw_food_stocks(building_info_context *c, building *b, int offset)
         int base_height = (25 - img->original.height) / 2;
         image_draw(resource_get_data(r)->image.icon, c->x_offset + x_offset + base_width, c->y_offset + y_offset + base_height,
             COLOR_MASK_NONE, SCALE_NONE);
-        // if (wheat_by_rome) {
-        //     text_draw(translation_for(TR_BUILDING_GRANARY_WHEAT_BY_ROME), 
-        //         c->x_offset + x_offset + 25, c->y_offset + y_offset + 7, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
-        //     food_type_index += (5 - (food_type_index % 5));
-        // } else {
-        //     text_draw_number(b->resources[r], '@', " ",
-        //         c->x_offset + x_offset + 25, c->y_offset + y_offset + 7, font, 0);
-        //     x_offset += 85;
-        //     food_type_index++;
-        // }
         text_draw_number(b->resources[r], '@', " ",
             c->x_offset + x_offset + 25, c->y_offset + y_offset + 7, font, 0);
         x_offset += 85;
