@@ -576,6 +576,21 @@ int building_repair_at(int grid_offset)
     if (!b) {
         return 0;
     }
+
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    int x_min = b->x;
+    int y_min = b->y;
+    int x_max = x_min + b->size;
+    int y_max = y_min + b->size;
+
+    // If the building is not on this location then this builing is not the destroyed building.
+    // The actual destroyed building data is then already lost.
+    if (!building_properties_for_type(b->type)->shared && (x < x_min || x > x_max || y < y_min || y > y_max))  {
+        city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
+        return 0;
+    }
+
     if (b->type == BUILDING_BURNING_RUIN && building_is_still_burning(b)) {
         city_warning_show(WARNING_REPAIR_BURNING, NEW_WARNING_SLOT);
         return 0;
@@ -602,8 +617,8 @@ int building_repair_at(int grid_offset)
     if (!building_properties_for_type(b->type)->shared) {
         grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
     }
-    int x = map_grid_offset_to_x(grid_offset);
-    int y = map_grid_offset_to_y(grid_offset);
+    x = map_grid_offset_to_x(grid_offset);
+    y = map_grid_offset_to_y(grid_offset);
     int size = og_size ? og_size : b->size;
     int type = og_type ? og_type : b->type;
     building_type type_to_place = og_type ? og_type : b->type;
@@ -750,11 +765,6 @@ void building_update_state(void)
                 map_building_set_rubble_grid_building_id(b->grid_offset, 0, b->size);
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
-
-            // monuments clear
-            if (building_monument_is_limited(b->type) || building_monument_is_unfinished_monument(b)) {
-                building_delete(b);
-            }
 
         } else if (b->state == BUILDING_STATE_DELETED_BY_GAME) {
             building_delete(b);
