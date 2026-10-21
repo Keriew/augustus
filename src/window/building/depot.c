@@ -437,13 +437,13 @@ void window_building_draw_depot(building_info_context *c)
     depot_draw_cart_status(b, c);
 }
 
-int is_storage_building_rubble(unsigned int storage_id) {
+static int is_storage_building_rubble(unsigned int storage_id) {
     const data_storage *d_storage = building_storage_get_array_entry((int)storage_id);
     const building *b_storage = building_get(d_storage->building_id);
     return b_storage->state == BUILDING_STATE_RUBBLE || b_storage->type == BUILDING_BURNING_RUIN;
 }
 
-int is_storage_valid_for_resource(unsigned int storage_id, resource_type resource_type)
+static int is_storage_valid_for_resource(unsigned int storage_id, resource_type resource_type)
 {
     const data_storage *d_storage = building_storage_get_array_entry((int)storage_id);
     const building *b_storage = building_get(d_storage->building_id);
@@ -465,7 +465,7 @@ typedef struct storage_button_state {
     font_t font;
     color_t color;
 } storage_button_state;
-storage_button_state calculate_storage_button_state(unsigned int storage_id, resource_type target_resource, int is_src) {
+static storage_button_state calculate_storage_button_state(unsigned int storage_id, resource_type target_resource, int is_src) {
     storage_button_state result;
 
     if (storage_id) {
