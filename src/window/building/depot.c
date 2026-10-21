@@ -477,7 +477,8 @@ static storage_button_state calculate_storage_button_state(unsigned int storage_
         result.font = FONT_NORMAL_BLACK;
         result.color = 0;
     } else if (total_storages() > 1) {
-        const uint8_t *label = lang_get_string(CUSTOM_TRANSLATION, TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION);
+        translation_key translation = is_src ? TR_BUILDING_INFO_DEPOT_SELECT_SOURCE : TR_BUILDING_INFO_DEPOT_SELECT_DESTINATION;
+        const uint8_t *label = lang_get_string(CUSTOM_TRANSLATION, translation);
         string_copy(label, result.label, sizeof(result.label));
         result.font = FONT_NORMAL_BLACK;
         result.color = 0;
