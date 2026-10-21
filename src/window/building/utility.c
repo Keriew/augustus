@@ -324,16 +324,9 @@ void window_building_draw_rubble(building_info_context *c)
     building_type og_type = b->data.rubble.og_type;
     building_type type = og_type == BUILDING_NONE ? b->type : og_type;
 
-    int x = map_grid_offset_to_x(c->grid_offset);
-    int y = map_grid_offset_to_y(c->grid_offset);
-    int x_min = b->x;
-    int y_min = b->y;
-    int x_max = x_min + b->size;
-    int y_max = y_min + b->size;
-
     // If the building is not on this location then this builing is not the destroyed building.
     // The actual destroyed building data is then already lost.
-    if (!building_properties_for_type(b->type)->shared && (x < x_min || x > x_max || y < y_min || y > y_max)) {
+    if (!building_occupies_grid(b, c->grid_offset)) {
         type = BUILDING_NONE;
     }
 

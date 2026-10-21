@@ -242,14 +242,10 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
                             map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
                             building *rubble_building = building_get(rubble_id);
 
-                            int x_min = rubble_building->x;
-                            int y_min = rubble_building->y;
-                            int x_max = x_min + rubble_building->size;
-                            int y_max = y_min + rubble_building->size;
                             // Make sure that rubble_building is on this location.
                             // Some destroyed buildings used to be deleted right away.
                             // This can give rubble_building a completly different building.
-                            if(x >= x_min && x <= x_max && y >= y_min && y <= y_max) {
+                            if (building_occupies_grid(rubble_building, grid_offset)) {
                                 if (rubble_building->state == BUILDING_STATE_RUBBLE ||
                                     rubble_building->type == BUILDING_BURNING_RUIN) {
                                     int ruins_left = map_building_ruins_left(rubble_id);

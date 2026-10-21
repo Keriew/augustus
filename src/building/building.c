@@ -577,16 +577,9 @@ int building_repair_at(int grid_offset)
         return 0;
     }
 
-    int x = map_grid_offset_to_x(grid_offset);
-    int y = map_grid_offset_to_y(grid_offset);
-    int x_min = b->x;
-    int y_min = b->y;
-    int x_max = x_min + b->size;
-    int y_max = y_min + b->size;
-
     // If the building is not on this location then this builing is not the destroyed building.
     // The actual destroyed building data is then already lost.
-    if (!building_properties_for_type(b->type)->shared && (x < x_min || x > x_max || y < y_min || y > y_max))  {
+    if (!building_occupies_grid(b, grid_offset))  {
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
     }
@@ -617,8 +610,8 @@ int building_repair_at(int grid_offset)
     if (!building_properties_for_type(b->type)->shared) {
         grid_offset = og_grid_offset ? og_grid_offset : b->grid_offset;
     }
-    x = map_grid_offset_to_x(grid_offset);
-    y = map_grid_offset_to_y(grid_offset);
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
     int size = og_size ? og_size : b->size;
     int type = og_type ? og_type : b->type;
     building_type type_to_place = og_type ? og_type : b->type;
@@ -708,6 +701,28 @@ int building_repair_at(int grid_offset)
     game_undo_disable(); // not accounting for undoing repairs
     building_connectable_update_connections(); // Fix incorrect palisade wall rotation when repairs
     return full_cost;
+}
+
+int building_occupies_grid(building *b, int grid_offset)
+{
+    if (!b) {
+        return 0;
+    } else if (building_properties_for_type(b->type)->shared) {
+        return 1;
+    }
+
+    int x = map_grid_offset_to_x(grid_offset);
+    int y = map_grid_offset_to_y(grid_offset);
+    int x_min = b->x;
+    int y_min = b->y;
+    int x_max = x_min + b->size;
+    int y_max = y_min + b->size;
+
+    if (x < x_min || x > x_max || y < y_min || y > y_max) {
+        return 0;
+    }
+
+    return 1;
 }
 
 void building_update_state(void)

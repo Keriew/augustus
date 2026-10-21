@@ -1012,13 +1012,9 @@ static void clear_empty_land_image(int x, int y, int grid_offset)
         map_property_mark_draw_tile(grid_offset);
     } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
         building * b = building_get(map_building_at(grid_offset));
-        int x_min = b->x;
-        int y_min = b->y;
-        int x_max = x_min + b->size;
-        int y_max = y_min + b->size;
+
         // Fix terrain when there isn't actually a building on it
-        if ((b->type != BUILDING_SHIP_BRIDGE && b->type != BUILDING_LOW_BRIDGE && !building_properties_for_type(b->type)->shared) &&
-                (x < x_min || x > x_max || y < y_min || y > y_max)) {
+        if (b->type != BUILDING_SHIP_BRIDGE && b->type != BUILDING_LOW_BRIDGE && !building_occupies_grid(b, grid_offset)) {
             map_terrain_remove(grid_offset,TERRAIN_CLEARABLE);
             map_building_set(grid_offset, 0);
             map_image_set(grid_offset, 0);
