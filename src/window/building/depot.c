@@ -551,7 +551,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
             x_offset + depot_order_buttons[4].x, y_offset + depot_order_buttons[4].y + 6, depot_order_buttons[4].width, FONT_NORMAL_BLACK);
     }
 
-    storage_button_state source_button = calculate_storage_button_state(src->storage_id, 1);
+    storage_button_state source_button = calculate_storage_button_state(b->data.depot.current_order.src_storage_id, 1);
     text_draw(translation_for(TR_BUILDING_INFO_DEPOT_SOURCE), x_offset, y_offset + depot_order_buttons[1].y + 6, FONT_NORMAL_BLACK, 0);
     int focus_border = data.focus_button_id == 2 && total_storages() > 1;
     button_border_draw(x_offset + depot_order_buttons[1].x, y_offset + depot_order_buttons[1].y,
@@ -567,7 +567,7 @@ void window_building_draw_depot_foreground(building_info_context *c)
         depot_order_buttons[5].parameter1 = src->id;
     }
 
-    storage_button_state destination_button = calculate_storage_button_state(dst->storage_id, 0);
+    storage_button_state destination_button = calculate_storage_button_state(b->data.depot.current_order.dst_storage_id, 0);
     text_draw(translation_for(TR_BUILDING_INFO_DEPOT_DESTINATION), x_offset, y_offset + depot_order_buttons[2].y + 6, FONT_NORMAL_BLACK, 0);
     button_border_draw(x_offset + depot_order_buttons[2].x, y_offset + depot_order_buttons[2].y,
         depot_order_buttons[2].width, depot_order_buttons[2].height,
