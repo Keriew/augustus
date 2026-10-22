@@ -196,9 +196,11 @@ int building_construction_place_highway(int measure_only, int x_start, int y_sta
     return items_placed;
 }
 
-int building_construction_place_aqueduct(int measure_only, int x_start, int y_start, int x_end, int y_end, int *cost)
+int building_construction_place_aqueduct(int measure_only, int x_start, int y_start, int x_end, int y_end, int *cost, int construction_mode)
 {
-    game_undo_restore_map(0);
+    if (construction_mode) {
+        game_undo_restore_map(0);
+    }
 
     int item_cost = model_get_building(BUILDING_AQUEDUCT)->cost;
     *cost = 0;

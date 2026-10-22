@@ -1033,7 +1033,7 @@ void building_construction_update(int x, int y, int grid_offset)
             current_cost *= length;
         }
     } else if (type == BUILDING_AQUEDUCT) {
-        building_construction_place_aqueduct(1, data.start.x, data.start.y, x, y, &current_cost);
+        building_construction_place_aqueduct(1, data.start.x, data.start.y, x, y, &current_cost, 1);
         map_tiles_update_all_aqueducts(0);
     } else if (type == BUILDING_DRAGGABLE_RESERVOIR) {
         struct reservoir_info info;
@@ -1291,7 +1291,7 @@ void building_construction_place(void)
         placement_cost *= length;
     } else if (type == BUILDING_AQUEDUCT) {
         int cost;
-        if (!building_construction_place_aqueduct(0, x_start, y_start, x_end, y_end, &cost)) {
+        if (!building_construction_place_aqueduct(0, x_start, y_start, x_end, y_end, &cost, 1)) {
             city_warning_show(WARNING_CLEAR_LAND_NEEDED, NEW_WARNING_SLOT);
             building_construction_auto_clear_finalize();
             return;

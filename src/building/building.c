@@ -5,6 +5,7 @@
 #include "building/construction.h"
 #include "building/construction_building.h"
 #include "building/construction_clear.h"
+#include "building/construction_routed.h"
 #include "building/data_transfer.h"
 #include "building/destruction.h"
 #include "building/distribution.h"
@@ -639,6 +640,12 @@ int building_repair_at(int grid_offset)
             success = building_construction_place_building(type_to_place, x, y, 1);
         }
 
+    } else if(type_to_place == BUILDING_AQUEDUCT) {
+        int cost = 0;
+        map_routing_update_land();
+        success =  building_construction_place_aqueduct(0, x, y, x, y, &cost, 0);
+        map_tiles_update_all_aqueducts(0);
+        map_routing_update_land();
     } else {
         if (type_to_place == BUILDING_GATEHOUSE) {
             wall = 1;
