@@ -593,7 +593,7 @@ int building_repair_at(int grid_offset)
         return warehouse_repair(b);
     }
     // flags and placeholders
-    int og_size = 0, og_grid_offset = 0, og_orientation = 0, og_storage_id = 0, wall = 0, is_house_lot = 0, success = 0;
+    int og_size = 0, og_grid_offset = 0, og_orientation = 0, og_storage_id = 0, wall = 0, aqueduct = 0, is_house_lot = 0, success = 0;
     building_type og_type = BUILDING_NONE;
     get_rubble_data(b, &og_size, &og_grid_offset, &og_orientation, &og_type);
     //  Backup building data
@@ -642,10 +642,15 @@ int building_repair_at(int grid_offset)
 
     } else if(type_to_place == BUILDING_AQUEDUCT) {
         int cost = 0;
-        map_routing_update_land();
+        aqueduct = 1;
+        // aqueduct placement relies on routing
+        map_routing_update_land(); // updating routing after preparing the terrain
         success =  building_construction_place_aqueduct(0, x, y, x, y, &cost, 0);
-        map_tiles_update_all_aqueducts(0);
-        map_routing_update_land();
+        if (success) {
+            map_tiles_update_all_aqueducts(0);
+            // routing is not updated in building_construction_place_aqueduct
+            map_routing_update_land(); // updating routing after successful placement
+        }
     } else {
         if (type_to_place == BUILDING_GATEHOUSE) {
             wall = 1;
@@ -655,6 +660,9 @@ int building_repair_at(int grid_offset)
     building *new_building = building_get(map_building_at(map_grid_offset(x, y)));
     if (!success || !cleared) {
         map_terrain_restore(); // restore terrain on failure
+        if(aqueduct) {
+            map_routing_update_land(); // restore routing on failure
+        }
         city_finance_process_construction(-cleared); // refund clearing cost
         city_warning_show(WARNING_REPAIR_IMPOSSIBLE, NEW_WARNING_SLOT);
         return 0;
@@ -664,6 +672,7 @@ int building_repair_at(int grid_offset)
     if (type_to_place == BUILDING_PALISADE_GATE) {
         map_terrain_add(new_building->grid_offset, TERRAIN_ROAD);
         map_tiles_update_all_roads();
+        map_routing_update_land();
     }
 
     if (building_is_storage(type_to_place) && b->storage_id) {
