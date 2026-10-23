@@ -160,7 +160,6 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
     map_tiles_add_entry_exit_flags();
-    map_tiles_update_all_empty_land();
     map_tiles_update_all_meadow();
     map_tiles_update_all_rubble();
     map_tiles_update_all_roads();
@@ -179,6 +178,10 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     map_bridge_recalculate_buildings_from_sprites();
 
     map_natives_init();
+
+    // Update tiles with empty land last: map_tiles_update_all_empty_land clears all tiles
+    // with TERRAIN_BUILDING which don't have a building on them yet
+    map_tiles_update_all_empty_land();
 
     city_view_init();
 
