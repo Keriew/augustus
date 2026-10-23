@@ -1254,6 +1254,7 @@ void building_construction_place(void)
         placement_cost *= items_placed;
         map_property_clear_constructing_and_deleted();
     } else if (type == BUILDING_REPAIR_LAND) {
+        placement_cost = 0;
         building_construction_repair_land(0, data.start.x, data.start.y, x_end, y_end, &repaired_buildings);
         //cost processed inside the repair land function
         map_property_clear_constructing_and_deleted();
