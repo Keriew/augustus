@@ -12,6 +12,7 @@
 #include "city/sentiment.h"
 #include "core/config.h"
 #include "game/time.h"
+#include "scenario/property.h"
 
 #define POPULATION_SCALING_FACTOR 1200
 #define BASE_RESOURCE_REQUIREMENT 3
@@ -79,6 +80,9 @@ int city_games_resource_cost(int game_type_id, resource_type resource)
         }
         game->resource_cost[dominant_resource] = 2;
     }
+    if (resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+        return 0; // skip wheat if Rome supplies it
+    }
     int cost = game->resource_cost[resource] * (BASE_RESOURCE_REQUIREMENT + city_data.population.population / POPULATION_SCALING_FACTOR);
 
     return cost;
@@ -119,6 +123,9 @@ void city_games_schedule(int game_id)
     city_emperor_decrement_personal_savings(city_games_money_cost(game_id));
 
     for (int resource = RESOURCE_MIN; resource < RESOURCE_MAX; resource++) {
+        if (resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            continue; // skip wheat if Rome supplies it
+        }
         int resource_cost = city_games_resource_cost(game_id, resource);
         if (resource_cost) {
             resource_cost = building_warehouses_remove_resource(resource, resource_cost);

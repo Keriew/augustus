@@ -123,6 +123,9 @@ int building_granary_try_add_resource(building *granary, int resource, int amoun
     || ((building_storage_get_state(granary, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) && respect_settings)) {
         return 0;
     }
+    if (resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+        return 0; // don't allow to store wheat in granary if rome supplies it
+    }
     int amount_added = 0;
     int max_current_capacity = respect_settings ?
         building_granary_maximum_receptible_amount(granary, resource) : building_granary_get_free_space_amount(granary);
@@ -313,6 +316,10 @@ int building_granary_maximum_receptible_amount(building *b, int resource)
         return 0;
     }
 
+    if (resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+        return 0; // don't allow to store wheat in granary if rome supplies it
+    }
+
     const building_storage_state state = building_storage_get_state(b, resource, 1);
     const building_storage *s = building_storage_get(b->storage_id);
     if (state == BUILDING_STORAGE_STATE_NOT_ACCEPTING) {
@@ -462,7 +469,6 @@ int building_granary_accepts_storage(building *b, int resource, int *understaffe
 
 building *building_granary_get_granary_needing_food(building *source, int resource, int getting)
 {
-
     int max_distance = config_get(CONFIG_GP_CH_FARMS_DELIVER_CLOSE) ? 64 : INFINITE;
     for (building *b = building_first_of_type(BUILDING_GRANARY); b; b = b->next_of_type) {
         if (b->road_network_id != source->road_network_id || !building_granary_accepts_storage(b, resource, 0)) {
@@ -485,7 +491,7 @@ building *building_granary_get_granary_needing_food(building *source, int resour
 int building_granary_for_storing(int x, int y, int resource, int road_network_id,
     int force_on_stockpile, int *understaffed, map_point *dst)
 {
-    if (scenario_property_rome_supplies_wheat()) {
+    if (resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
         return 0;
     }
     if (!resource_is_food(resource)) {
@@ -516,7 +522,7 @@ int building_granary_for_storing(int x, int y, int resource, int road_network_id
 
 int building_getting_granary_for_storing(int x, int y, int resource, int road_network_id, map_point *dst)
 {
-    if (scenario_property_rome_supplies_wheat()) {
+    if (resource == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
         return 0;
     }
     if (!resource_is_food(resource)) {
@@ -575,11 +581,11 @@ int building_granary_for_getting(building *src, map_point *dst, int min_amount)
     if (s_src->empty_all) {
         return 0;
     }
-    if (scenario_property_rome_supplies_wheat()) {
-        return 0;
-    }
     int food_to_get = RESOURCE_NONE;
     for (resource_type food = RESOURCE_MIN_FOOD; food < RESOURCE_MAX_FOOD; food++) {
+        if (food == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            continue; // skip wheat if rome supplies it
+        }
         if (building_storage_get_state(src, food, 1) == BUILDING_STORAGE_STATE_GETTING) {
             food_to_get = food;
             break; // only one resource per deliveryman, once found, exit loop

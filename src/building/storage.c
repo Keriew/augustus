@@ -15,6 +15,7 @@
 #include "game/resource.h"
 #include "game/save_version.h"
 #include "graphics/text.h"
+#include "scenario/property.h"
 
 #define STORAGE_ARRAY_SIZE_STEP 200
 
@@ -181,7 +182,8 @@ int building_storage_count_stored_resource_types(int building_id)
     }
     int stored_types_count = 0;
     for (int r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-        if (b->resources[r] > 0) {
+        if ((b->type == BUILDING_GRANARY && r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) ||
+            b->resources[r] > 0) {
             stored_types_count++;
         }
     }

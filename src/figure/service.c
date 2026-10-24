@@ -14,6 +14,7 @@
 #include "game/time.h"
 #include "map/building.h"
 #include "map/grid.h"
+#include "scenario/property.h"
 
 #define MAX_COVERAGE 96
 #define TOURISM_COOLDOWN 96
@@ -351,6 +352,9 @@ static void collect_offerings_from_house(building *house, building *temple)
             if (!resource_is_inventory(r)) {
                 continue;
             }
+            if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+                continue; // skip wheat if Rome supplies it
+            }
             if (house->resources[r]) {
                 if (house->house_size == 1 && house->house_is_merged) {
                     temple->resources[r] += 2;
@@ -386,7 +390,13 @@ static void distribute_market_resources(building *b, building *market)
     if (model->food_types) {
         for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
             if (!resource_is_inventory(r) || b->resources[r] >= max_food_stocks ||
-                !building_distribution_is_good_accepted(market, r)) {
+                !market->resources[r] || !building_distribution_is_good_accepted(market, r)) {
+                continue;
+            }
+            if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+                b->resources[r] = max_food_stocks;
+                // do not remove wheat from market if Rome supplies it
+                // we allow to distribute another type of food at the same time
                 continue;
             }
             if (market->resources[r] >= max_food_stocks) {
@@ -584,7 +594,9 @@ int figure_service_provide_coverage(figure *f)
                 case BUILDING_SMALL_TEMPLE_CERES:
                 case BUILDING_LARGE_TEMPLE_CERES:
                     houses_serviced = provide_culture(x, y, religion_coverage_ceres);
-                    provide_market_goods(f->building_id, x, y);
+                    if (building_monument_gt_module_is_active(CERES_MODULE_2_DISTRIBUTE_FOOD)) {
+                        provide_market_goods(f->building_id, x, y);
+                    }
                     break;
                 case BUILDING_GRAND_TEMPLE_CERES:
                     houses_serviced = provide_culture(x, y, religion_coverage_ceres);

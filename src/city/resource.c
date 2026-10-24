@@ -3,6 +3,7 @@
 #include "building/building.h"
 #include "building/caravanserai.h"
 #include "building/count.h"
+#include "building/distribution.h"
 #include "building/granary.h"
 #include "building/industry.h"
 #include "building/monument.h"
@@ -19,6 +20,7 @@
 #include "empire/city.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
+#include "figuretype/supplier.h"
 #include "game/cheats.h"
 #include "game/difficulty.h"
 #include "game/resource.h"
@@ -378,7 +380,8 @@ void city_resource_determine_available(int storable_only)
         if (!resource_is_storable(r)) {
             continue;
         }
-        if (empire_can_produce_resource(r) || empire_can_import_resource(r) || resource_available_by_events(r)) {
+        int wheat_by_rome = r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat();
+        if (wheat_by_rome || empire_can_produce_resource(r) || empire_can_import_resource(r) || resource_available_by_events(r)) {
             available.resource_list.items[available.resource_list.size++] = r;
             potential.resource_list.items[potential.resource_list.size++] = r;
             if (resource_is_food(r)) {
@@ -420,6 +423,9 @@ resource_type city_resource_ceres_temple_food(void)
 
     // locally produced
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            continue; // skip wheat if Rome supplies it
+        }
         if (empire_can_produce_resource_locally(r)) {
             return r;
         }
@@ -477,6 +483,10 @@ static void calculate_available_food(void)
         }
     }
     for (int i = RESOURCE_MIN_FOOD; i < RESOURCE_MAX_FOOD; i++) {
+        if (i == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            city_data.resource.food_types_available++;
+            continue; // skip wheat if Rome supplies it
+        }
         if (city_data.resource.granary_food_stored[i]) {
             city_data.resource.granary_total_stored += city_data.resource.granary_food_stored[i];
             city_data.resource.food_types_available++;
@@ -484,16 +494,14 @@ static void calculate_available_food(void)
     }
     city_data.resource.food_needed_per_month =
         calc_adjust_with_percentage(city_data.population.population, 50);
-    if (city_data.resource.food_needed_per_month > 0) {
+    if (scenario_property_rome_supplies_wheat()) {
+        city_data.resource.food_supply_months = 12;
+    } else if (city_data.resource.food_needed_per_month > 0) {
         city_data.resource.food_supply_months =
             city_data.resource.granary_total_stored / city_data.resource.food_needed_per_month;
     } else {
         city_data.resource.food_supply_months =
             city_data.resource.granary_total_stored > 0 ? 1 : 0;
-    }
-    if (scenario_property_rome_supplies_wheat()) {
-        city_data.resource.food_types_available = 1;
-        city_data.resource.food_supply_months = 12;
     }
 }
 
@@ -501,12 +509,19 @@ void city_resource_calculate_food_stocks_and_supply_wheat(void)
 {
     calculate_available_food();
     if (scenario_property_rome_supplies_wheat()) {
-        building_type supplied_buildings[] = { BUILDING_MARKET, BUILDING_MESS_HALL };
-        for (int i = 0; i < 2; i++) {
+        building_type supplied_buildings[] = { BUILDING_MARKET, BUILDING_MESS_HALL, BUILDING_CARAVANSERAI };
+        for (int i = 0; i < 3; i++) {
             building_type type = supplied_buildings[i];
             for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
-                if (b->state == BUILDING_STATE_IN_USE) {
-                    b->resources[RESOURCE_WHEAT] = 200;
+                if (b->state != BUILDING_STATE_IN_USE) {
+                    continue;
+                }
+                if (type == BUILDING_MARKET && building_distribution_is_good_accepted(b, RESOURCE_WHEAT)) {
+                    b->resources[RESOURCE_WHEAT] = MAX_FOOD_STOCKED_MARKET;
+                } else if (type == BUILDING_MESS_HALL) {
+                    b->resources[RESOURCE_WHEAT] = MAX_FOOD_STOCKED_MESS_HALL;
+                } else if (type == BUILDING_CARAVANSERAI) {
+                    b->resources[RESOURCE_WHEAT] = MAX_FOOD_STOCKED_CARAVANSERAI;
                 }
             }
         }
@@ -531,7 +546,7 @@ static int house_consume_food(void)
             }
             int foodtypes_available = 0;
             for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
-                if (b->resources[r] && resource_is_inventory(r)) {
+                if (resource_is_inventory(r) && b->resources[r]) {
                     foodtypes_available++;
                 }
             }
@@ -540,16 +555,11 @@ static int house_consume_food(void)
             }
 
             b->data.house.num_foods = 0;
-            if (scenario_property_rome_supplies_wheat()) {
-                city_data.resource.food_types_eaten = 1;
-                city_data.resource.food_types_available = 1;
-                b->resources[RESOURCE_WHEAT] = amount_per_type;
-                b->data.house.num_foods = 1;
-            } else if (num_types > 0) {
+            if (num_types > 0) {
                 for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
                     if (!resource_is_inventory(r)) {
                         continue;
-                    }
+                    }                    
                     if (b->resources[r] >= amount_per_type) {
                         b->resources[r] -= amount_per_type;
                         b->data.house.num_foods++;
@@ -601,6 +611,10 @@ static int mess_hall_consume_food(void)
 
     if (total_food_in_mess_hall > 0) {
         for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+            if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+                ++num_foods;
+                continue; // if Rome supplies wheat, mess hall doesn't consume it
+            }
             proportionate_amount = food_required * b->resources[r] / total_food_in_mess_hall;
             if (proportionate_amount > 0) {
                 amount_for_type = calc_bound((int) ceil(proportionate_amount), 0, b->resources[r]);
@@ -631,6 +645,7 @@ static int caravanserai_consume_food(void)
     if (!building_monument_working(BUILDING_CARAVANSERAI)) {
         return 0;
     }
+
     int food_required = building_caravanserai_food_required_monthly();
 
     trade_policy policy = city_trade_policy_get(LAND_TRADE_POLICY);
@@ -655,12 +670,14 @@ static int caravanserai_consume_food(void)
 
     city_data.caravanserai.total_food = total_food_in_caravanserai;
 
-
     if (!food_required || !total_food_in_caravanserai) {
         return 0;
     }
 
     for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD; r++) {
+        if (r == RESOURCE_WHEAT && scenario_property_rome_supplies_wheat()) {
+            continue; // if Rome supplies wheat, caravanserai doesn't consume it
+        }
         proportionate_amount = food_required * b->resources[r] / total_food_in_caravanserai;
         if (proportionate_amount > 0) {
             amount_for_type = calc_bound(proportionate_amount, 0, b->resources[r]);
