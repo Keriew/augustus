@@ -62,6 +62,45 @@ you are missing it, you can [download the update here](https://github.com/bvscha
 
 See [Running Julius](https://github.com/bvschaik/julius/wiki/Running-Julius) for further instructions and startup options.
 
+### Windows: installing on top of the Steam release
+
+The Steam release bundles the Sierra launcher, so `Caesar 3 → Play` opens a small launcher window
+instead of the game. Augustus works with the Steam files as long as it is placed next to them:
+
+1. Install Caesar 3 from Steam.
+2. In your Steam library, right-click **Caesar 3 → Properties → Installed Files → Browse** to open
+   the installation folder (`...\steamapps\common\Caesar 3\`).
+3. Download the Windows build from the table above and extract **all** of its contents
+   (`augustus.exe`, `SDL2.dll`, `SDL2_mixer.dll`, `assets\`, `maps\`, `manual\`) into the **`C3`**
+   subfolder - the one holding `c3.exe` and the `.555` files, not the parent folder.
+4. Run `augustus.exe` from that folder. If it asks for the Caesar 3 data folder on first start,
+   point it to that same `C3` folder.
+
+To keep launching the game through Steam (so playtime tracking and the overlay keep working), tell
+the bundled launcher to start Augustus instead of `c3.exe`:
+
+5. Open `SierraLauncher.ini` in the parent `Caesar 3` folder and change
+
+    ```ini
+    Game1Exe=c3.exe
+    ```
+
+    to
+
+    ```ini
+    Game1Exe=augustus.exe
+    ```
+
+From then on `Steam → Caesar 3 → Play` opens the Sierra launcher, and its **Launch** button starts
+Augustus. The original `c3.exe` is left untouched, so vanilla Caesar 3 can still be started directly
+from `C3\c3.exe`.
+
+**Do not rename `augustus.exe` to `c3.exe`** to make Steam launch it directly: running Augustus under
+the original executable's name makes the mouse cursor disappear while scrolling the map by holding
+the right mouse button. If you would rather not edit `SierraLauncher.ini`, you can instead disable
+*Disable right click to drag the map* in the options menu.
+
+
 ## Manual
 
 Augustus changes are explained in detail in the comprehensive manual. Below you can find the links to the manual in a few language versions.
