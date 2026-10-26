@@ -71,7 +71,7 @@ instead of the game. Augustus works with the Steam files, it only has to live ne
 2. In your Steam library, right-click **Caesar 3 → Properties → Installed Files → Browse** to open
    the install folder (`...\steamapps\common\Caesar 3\`).
 3. Download the Windows build from the [latest release](https://github.com/Keriew/augustus/releases/latest) -
-   both the 32-bit and the 64-bit build work - and extract the whole archive into the **`C3`**
+   both the 32-bit and the 64-bit build should work - and extract the whole archive into the **`C3`**
    subfolder, next to `c3.exe` and the `.555` files (not the parent folder).
 4. Run `augustus.exe` from there; if it asks for the Caesar 3 folder on first start, pick the same
    `C3` folder.
