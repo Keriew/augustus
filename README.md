@@ -70,11 +70,12 @@ instead of the game. Augustus works with the Steam files as long as it is placed
 1. Install Caesar 3 from Steam.
 2. In your Steam library, right-click **Caesar 3 → Properties → Installed Files → Browse** to open
    the installation folder (`...\steamapps\common\Caesar 3\`).
-3. Download the Windows build from the [latest release](https://github.com/Keriew/augustus/releases/latest) -
-   at the time of writing that is the 32-bit build, the 64-bit Windows build is still a development
-   build - and extract **all** of its contents (`augustus.exe`, `SDL2.dll`, `SDL2_mixer.dll`,
-   `assets\`, `maps\`, `manual\`) into the **`C3`** subfolder - the one holding `c3.exe` and the
-   `.555` files, not the parent folder.
+3. Download the Windows build from the [latest release](https://github.com/Keriew/augustus/releases/latest).
+   On 64-bit Windows either the 32-bit or the 64-bit build will run; the 32-bit one is the current
+   stable release, while the 64-bit one is still a development build and additionally needs the
+   separate *development assets* download. Extract **all** of its contents (`augustus.exe`,
+   `SDL2.dll`, `SDL2_mixer.dll`, `assets\`, `maps\`, `manual\`) into the **`C3`** subfolder - the one
+   holding `c3.exe` and the `.555` files, not the parent folder.
 4. Run `augustus.exe` from that folder. If it asks for the Caesar 3 data folder on first start,
    point it to that same `C3` folder.
 
@@ -96,12 +97,6 @@ the bundled launcher to start Augustus instead of `c3.exe`:
 From then on `Steam → Caesar 3 → Play` opens the Sierra launcher, and its **Launch** button starts
 Augustus. The original `c3.exe` is left untouched, so vanilla Caesar 3 can still be started directly
 from `C3\c3.exe`.
-
-**Do not rename `augustus.exe` to `c3.exe`** to make Steam launch it directly: running Augustus under
-the original executable's name makes the mouse cursor disappear while scrolling the map by holding
-the right mouse button. If you would rather not edit `SierraLauncher.ini`, you can instead disable
-*Disable right click to drag the map* in the options menu.
-
 
 ## Manual
 
