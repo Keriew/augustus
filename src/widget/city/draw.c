@@ -264,7 +264,7 @@ static void draw_flattened_building_footprint(const building *b, int x, int y, i
 
         draw_offset = map_grid_offset(b->x + x_leftmost, b->y + y_leftmost);
 
-        if(draw_offset != grid_offset) {
+        if (draw_offset != grid_offset) {
             return;
         }
     }
