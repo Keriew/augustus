@@ -241,7 +241,7 @@ static void draw_flattened_building_footprint(const building *b, int x, int y, i
     }
 
     // Fix flattened footprint for merged vacant lots
-    if(b->type == BUILDING_HOUSE_VACANT_LOT && !b->house_population) {
+    if (b->type == BUILDING_HOUSE_VACANT_LOT && !b->house_population) {
         int x_leftmost, y_leftmost, draw_offset;
         switch (city_view_orientation()) {
         case DIR_0_TOP:
