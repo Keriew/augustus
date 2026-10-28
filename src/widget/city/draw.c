@@ -244,22 +244,22 @@ static void draw_flattened_building_footprint(const building *b, int x, int y, i
     if (b->type == BUILDING_HOUSE_VACANT_LOT && !b->house_population) {
         int x_leftmost, y_leftmost, draw_offset;
         switch (city_view_orientation()) {
-        case DIR_0_TOP:
-            x_leftmost = 0;
-            y_leftmost = b->size - 1;
-            break;
-        case DIR_2_RIGHT:
-            x_leftmost = y_leftmost = 0;
-            break;
-        case DIR_4_BOTTOM:
-            x_leftmost = b->size - 1;
-            y_leftmost = 0;
-            break;
-        case DIR_6_LEFT:
-            x_leftmost = y_leftmost = b->size - 1;
-            break;
-        default:
-            return;
+            case DIR_0_TOP:
+                x_leftmost = 0;
+                y_leftmost = b->size - 1;
+                break;
+            case DIR_2_RIGHT:
+                x_leftmost = y_leftmost = 0;
+                break;
+            case DIR_4_BOTTOM:
+                x_leftmost = b->size - 1;
+                y_leftmost = 0;
+                break;
+            case DIR_6_LEFT:
+                x_leftmost = y_leftmost = b->size - 1;
+                break;
+            default:
+                return;
         }
 
         draw_offset = map_grid_offset(b->x + x_leftmost, b->y + y_leftmost);
