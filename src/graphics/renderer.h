@@ -11,6 +11,7 @@ typedef enum {
     ATLAS_EXTRA_ASSET,
     ATLAS_UNPACKED_EXTRA_ASSET,
     ATLAS_CUSTOM,
+    ATLAS_MAIN_AUX,
     ATLAS_EXTERNAL,
     ATLAS_MAX
 } atlas_type;

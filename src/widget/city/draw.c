@@ -422,6 +422,15 @@ static void draw_footprint(int x, int y, int grid_offset)
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
     }
 
+    int marsh_image = map_marsh_image_at(grid_offset);
+    if (marsh_image > 0) {
+        image_draw_isometric_footprint_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
+    }
+    int beach_image = map_beach_image_at(grid_offset);
+    if (beach_image > 0) {
+        image_draw_isometric_footprint_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
+    }
+
     // Grid is drawn by the renderer directly at zoom > 200%
     if (!building_id && config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
         image_draw(assets_lookup_image_id(ASSET_UI_GRID), x, y, full_grid_color(), draw_context.scale);
@@ -753,11 +762,20 @@ static void draw_top(int x, int y, int grid_offset)
     }
 
     color_t color_mask = city_draw_get_color_mask(grid_offset, 1);
+    int marsh_image = map_marsh_image_at(grid_offset);
+    int beach_image = map_beach_image_at(grid_offset);
 
     if (map_building_at(grid_offset)) {
         draw_building_top(x, y, grid_offset, color_mask);
-    } else {
+    } else if (!marsh_image && !beach_image) {
+        // a marsh or beach overlay covers the whole tile, so the bushes of the ground top must not show through
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
+    }
+    if (marsh_image > 0) {
+        image_draw_isometric_top_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
+    }
+    if (beach_image > 0) {
+        image_draw_isometric_top_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
     }
 }
 

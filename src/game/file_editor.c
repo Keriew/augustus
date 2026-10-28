@@ -1,6 +1,7 @@
 #include "file_editor.h"
 
 #include "assets/assets.h"
+#include "building/building.h"
 #include "building/construction.h"
 #include "building/image.h"
 #include "building/menu.h"
@@ -10,6 +11,7 @@
 #include "city/victory.h"
 #include "city/view.h"
 #include "core/image.h"
+#include "core/image_group.h"
 #include "core/image_group_editor.h"
 #include "empire/editor.h"
 #include "empire/empire.h"
@@ -27,6 +29,7 @@
 #include "game/state.h"
 #include "game/time.h"
 #include "map/aqueduct.h"
+#include "map/bridge.h"
 #include "map/building.h"
 #include "map/desirability.h"
 #include "map/elevation.h"
@@ -84,7 +87,10 @@ void game_file_editor_clear_data(void)
 static void clear_map_data(void)
 {
     map_image_clear();
+    map_marsh_image_clear();
+    map_beach_image_clear();
     map_building_clear();
+    building_clear_all();
     map_terrain_clear();
     map_aqueduct_clear();
     map_figure_clear();
@@ -129,6 +135,8 @@ static void prepare_map_for_editing(void)
 
     map_tiles_update_all_elevation_editor();
     map_tiles_update_all_water();
+    map_tiles_update_all_marshland();
+    map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
     map_tiles_update_all_empty_land();
@@ -140,6 +148,11 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_walls();
     map_tiles_update_all_aqueducts(0);
     widget_map_editor_custom_earthquake_request_refresh();
+    // Reconstruct bridges first: map_natives_init_editor wipes terrain on
+    // tiles with TERRAIN_BUILDING whose image isn't a native — bridges'
+    // image_grid still shows water, so they'd be wiped. Reconstructing first
+    // sets map_building_at so natives skips those tiles.
+    map_bridge_recalculate_buildings_from_sprites();
     map_natives_init_editor();
     map_routing_update_all();
 
@@ -187,6 +200,21 @@ int game_file_editor_write_scenario(const char *scenario_file)
     int image_native_decoration = building_image_get_for_type(BUILDING_NATIVE_DECORATION);
     int image_native_monument = building_image_get_for_type(BUILDING_NATIVE_MONUMENT);
     int image_native_watchtower = building_image_get_for_type(BUILDING_NATIVE_WATCHTOWER);
+    int image_native_well = building_image_get_for_type(BUILDING_NATIVE_WELL);
+    int image_native_large_hut_alt = building_image_get_for_type(BUILDING_NATIVE_LARGE_HUT_ALT);
+    int image_native_large_hut_alt_2 = building_image_get_for_type(BUILDING_NATIVE_LARGE_HUT_ALT_2);
+    int image_native_hut_alt_2 = building_image_get_native_hut_alt_2_base(scenario_property_climate());
+    int image_native_palisade;
+    switch (scenario_property_climate()) {
+        case CLIMATE_NORTHERN:
+            image_native_palisade = assets_get_image_id("Military", "Pal Wall N 01");
+            break;
+        case CLIMATE_DESERT:
+            image_native_palisade = assets_get_image_id("Military", "Pal Wall S 01");
+            break;
+        default:
+            image_native_palisade = assets_get_image_id("Military", "Pal Wall C 01");
+    }
 
     scenario_editor_set_native_images(
         image_alt_hut,
@@ -195,12 +223,49 @@ int game_file_editor_write_scenario(const char *scenario_file)
         image_native_watchtower,
         image_group(GROUP_EDITOR_BUILDING_NATIVE),
         image_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
-        image_group(GROUP_EDITOR_BUILDING_CROPS)
+        image_group(GROUP_EDITOR_BUILDING_CROPS),
+        image_native_well,
+        image_native_large_hut_alt,
+        image_native_hut_alt_2,
+        image_native_large_hut_alt_2,
+        image_native_palisade
     );
     scenario_distant_battle_set_roman_travel_months();
     scenario_distant_battle_set_enemy_travel_months();
 
-    if (game_file_io_write_scenario(scenario_file)) {
+    // Native crop variants: the editor displays the proper variant via the aux
+    // atlas (c3.555 group 100). For save/in-game compat the on-disk image_id
+    // must be in the editor crops group + variant*5 form (decoded by
+    // map_natives_init). Encode for the duration of the write, then restore the
+    // aux-based image so the editor keeps displaying the right variant.
+    int editor_crops_base = image_group(GROUP_EDITOR_BUILDING_CROPS);
+    int aux_crops_base = image_aux_is_loaded() ? image_group_aux(GROUP_BUILDING_FARM_CROPS) : 0;
+    for (building *b = building_first_of_type(BUILDING_NATIVE_CROPS); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
+            continue;
+        }
+        int variant = b->subtype.orientation;
+        if (variant < 0 || variant > 5) {
+            variant = 0;
+        }
+        map_image_set(b->grid_offset, editor_crops_base + variant * 5);
+    }
+
+    int result = game_file_io_write_scenario(scenario_file);
+
+    for (building *b = building_first_of_type(BUILDING_NATIVE_CROPS); b; b = b->next_of_type) {
+        if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
+            continue;
+        }
+        if (aux_crops_base) {
+            map_image_set(b->grid_offset,
+                aux_crops_base + building_image_get_native_crop_offset(b->subtype.orientation));
+        } else {
+            map_image_set(b->grid_offset, editor_crops_base);
+        }
+    }
+
+    if (result) {
         scenario_editor_set_as_saved(1);
         return 1;
     }

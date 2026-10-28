@@ -33,7 +33,7 @@ static void button_attributes(int show, int param2);
 static image_button buttons_build[] = {
     {7, 123, 71, 23, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 45, button_attributes, button_none, 0, 0, 1},
     {84, 123, 71, 23, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 48, button_attributes, button_none, 1, 0, 1},
-    {13, 267, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 0, button_build_tool, button_none, TOOL_GRASS, 0, 1},
+    {13, 267, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 0, button_build_menu, button_none, MENU_LAND, 0, 1},
     {63, 267, 39, 26, IB_NORMAL, GROUP_EDITOR_SIDEBAR_BUTTONS, 3, button_build_tool, button_none, TOOL_TREES, 0, 1},
     {113, 267, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 6, button_build_menu, button_none, MENU_WATER, 0, 1},
     {13, 303, 39, 26, IB_BUILD, GROUP_EDITOR_SIDEBAR_BUTTONS, 21, button_build_menu, button_none, MENU_ELEVATION, 0, 1},
@@ -63,21 +63,25 @@ static void draw_status(void)
 
     int selected_tool = editor_tool_type();
     int brush_size = editor_tool_brush_size() - 1;
-    if (selected_tool == TOOL_SHALLOW) {
-        text_draw(translation_for(TR_EDITOR_TOOL_SHALLOW), text_offset, 178, FONT_NORMAL_WHITE, 0);
-    } else {
-        lang_text_draw(49, selected_tool, text_offset, 178, FONT_NORMAL_WHITE);
-    }
+
+    lang_text_draw(49, selected_tool, text_offset, 178, FONT_NORMAL_WHITE);
     switch (selected_tool) {
         case TOOL_GRASS:
-        case TOOL_TREES:
-        case TOOL_WATER:
+        case TOOL_MEADOW:
+        case TOOL_ROCKS:
         case TOOL_SHALLOW:
         case TOOL_SHRUB:
-        case TOOL_ROCKS:
-        case TOOL_MEADOW:
+        case TOOL_TREES:
+        case TOOL_WATER:
+        case TOOL_NATIVE_RUINS:
         case TOOL_RAISE_LAND:
         case TOOL_LOWER_LAND:
+        case TOOL_EARTHQUAKE_CUSTOM:
+        case TOOL_EARTHQUAKE_CUSTOM_REMOVE:
+        case TOOL_OUTSKIRTS:
+        case TOOL_OUTSKIRTS_REMOVE:
+        case TOOL_MARSHLAND:
+        case TOOL_BEACH:
             lang_text_draw(48, brush_size, text_offset, 194, FONT_NORMAL_GREEN);
             break;
         default:

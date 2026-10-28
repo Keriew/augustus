@@ -31,6 +31,7 @@ int city_culture_coverage_hippodrome(void);
 int city_culture_coverage_average_entertainment(void);
 
 int city_culture_coverage_religion(god_type god);
+int city_culture_coverage_religion_raw(god_type god);
 
 int city_culture_coverage_school(void);
 int city_culture_coverage_library(void);
@@ -56,6 +57,6 @@ int city_culture_get_arena_person_coverage(void);
 
 void city_culture_save_state(buffer *buf);
 
-void city_culture_load_state(buffer *buf);
+void city_culture_load_state(buffer *buf, int version);
 
 #endif // CITY_CULTURE_H

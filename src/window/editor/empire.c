@@ -1236,7 +1236,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
             window_invalidate();
         }
     } else {
-        if (h->escape_pressed) {
+        if (h->close_pressed) {
             button_ok(NULL);
         }
         if (is_outside_map(m->x, m->y)) {

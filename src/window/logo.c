@@ -78,7 +78,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         window_main_menu_show(0);
         return;
     }
-    if (h->escape_pressed) {
+    if (h->close_pressed) {
         hotkey_handle_escape();
     }
 }

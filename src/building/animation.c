@@ -9,6 +9,7 @@
 #include "building/type.h"
 #include "core/calc.h"
 #include "core/image.h"
+#include "figure/image.h"
 #include "game/animation.h"
 #include "map/image.h"
 #include "map/sprite.h"
@@ -21,6 +22,21 @@ static void advance_monument_secondary_animation(building *b)
             b->monument.secondary_frame = 0;
         }
     }
+}
+
+int building_dock_has_active_dockers(const building *dock)
+{
+    for (int i = 0; i < 3; i++) {
+        if (!dock->data.distribution.cartpusher_ids[i]) {
+            continue;
+        }
+        figure *f = figure_get(dock->data.distribution.cartpusher_ids[i]);
+        if (f->action_state >= FIGURE_ACTION_133_DOCKER_IMPORT_QUEUE &&
+            f->action_state <= FIGURE_ACTION_140_DOCKER_EXPORT_AT_STORAGE) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int building_animation_offset(building *b, int image_id, int grid_offset)
@@ -51,7 +67,7 @@ int building_animation_offset(building *b, int image_id, int grid_offset)
     if (b->type == BUILDING_WAREHOUSE && b->num_workers < model_get_building(b->type)->laborers) {
         return 0;
     }
-    if (b->type == BUILDING_DOCK && b->data.dock.num_ships <= 0) {
+    if (b->type == BUILDING_DOCK && !building_dock_has_active_dockers(b)) {
         map_sprite_animation_set(grid_offset, 1);
         return 1;
     }

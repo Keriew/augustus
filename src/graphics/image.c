@@ -9,7 +9,7 @@ void image_draw(int image_id, int x, int y, color_t color, float scale)
 {
     const image *img = image_get(image_id);
     if (image_is_external(img)) {
-        image_load_external_data(img);
+        image_load_external_data(img, (image_id & IMAGE_AUX_FLAG) != 0);
     } else if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
@@ -20,7 +20,7 @@ void image_draw_silhouette(int image_id, int x, int y, color_t color, float scal
 {
     const image *img = image_get(image_id);
     if (image_is_external(img)) {
-        image_load_external_data(img);
+        image_load_external_data(img, (image_id & IMAGE_AUX_FLAG) != 0);
     } else if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
         assets_load_unpacked_asset(image_id);
     }
@@ -136,7 +136,7 @@ static inline void draw_fullscreen_background(int image_id, int x, int y, color_
             y = (int) ((y + s_height - img->height / scale) / 2 * scale);
         }
         if (image_is_external(img)) {
-            image_load_external_data(img);
+            image_load_external_data(img, (image_id & IMAGE_AUX_FLAG) != 0);
         } else if ((img->atlas.id >> IMAGE_ATLAS_BIT_OFFSET) == ATLAS_UNPACKED_EXTRA_ASSET) {
             assets_load_unpacked_asset(image_id);
         }

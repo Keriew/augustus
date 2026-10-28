@@ -30,6 +30,7 @@ static struct {
     int academy;
     int library;
     int religion[5];
+    int religion_raw[5];
     int oracle;
     int tavern;
     int arena;
@@ -73,6 +74,11 @@ int city_culture_coverage_average_entertainment(void)
 int city_culture_coverage_religion(god_type god)
 {
     return coverage.religion[god];
+}
+
+int city_culture_coverage_religion_raw(god_type god)
+{
+    return coverage.religion_raw[god];
 }
 
 int city_culture_coverage_school(void)
@@ -143,7 +149,7 @@ void city_culture_update_coverage(void)
     int nymphaeums = building_count_active(BUILDING_NYMPHAEUM);
     int small_mausoleums = building_count_active(BUILDING_SMALL_MAUSOLEUM);
     int large_mausoleums = building_count_active(BUILDING_LARGE_MAUSOLEUM);
-    coverage.religion[GOD_CERES] = top(calc_percentage(
+    coverage.religion_raw[GOD_CERES] =
         LARARIUM_COVERAGE * larariums +
         ORACLE_COVERAGE * (oracles + small_mausoleums) +
         LARGE_ORACLE_COVERAGE * (nymphaeums + large_mausoleums) +
@@ -151,9 +157,9 @@ void city_culture_update_coverage(void)
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_CERES) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_CERES) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
-        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_CERES),
-        population));
-    coverage.religion[GOD_NEPTUNE] = top(calc_percentage(
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_CERES);
+    coverage.religion[GOD_CERES] = top(calc_percentage(coverage.religion_raw[GOD_CERES], population));
+    coverage.religion_raw[GOD_NEPTUNE] =
         LARARIUM_COVERAGE * larariums +
         ORACLE_COVERAGE * (oracles + small_mausoleums) +
         LARGE_ORACLE_COVERAGE * (nymphaeums + large_mausoleums) +
@@ -161,9 +167,9 @@ void city_culture_update_coverage(void)
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_NEPTUNE) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_NEPTUNE) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
-        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE),
-        population));
-    coverage.religion[GOD_MERCURY] = top(calc_percentage(
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_NEPTUNE);
+    coverage.religion[GOD_NEPTUNE] = top(calc_percentage(coverage.religion_raw[GOD_NEPTUNE], population));
+    coverage.religion_raw[GOD_MERCURY] =
         LARARIUM_COVERAGE * larariums +
         ORACLE_COVERAGE * (oracles + small_mausoleums) +
         LARGE_ORACLE_COVERAGE * (nymphaeums + large_mausoleums) +
@@ -171,9 +177,9 @@ void city_culture_update_coverage(void)
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_MERCURY) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_MERCURY) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
-        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_MERCURY),
-        population));
-    coverage.religion[GOD_MARS] = top(calc_percentage(
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_MERCURY);
+    coverage.religion[GOD_MERCURY] = top(calc_percentage(coverage.religion_raw[GOD_MERCURY], population));
+    coverage.religion_raw[GOD_MARS] =
         LARARIUM_COVERAGE * larariums +
         ORACLE_COVERAGE * (oracles + small_mausoleums) +
         LARGE_ORACLE_COVERAGE * (nymphaeums + large_mausoleums) +
@@ -181,9 +187,9 @@ void city_culture_update_coverage(void)
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_MARS) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_MARS) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
-        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_MARS),
-        population));
-    coverage.religion[GOD_VENUS] = top(calc_percentage(
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_MARS);
+    coverage.religion[GOD_MARS] = top(calc_percentage(coverage.religion_raw[GOD_MARS], population));
+    coverage.religion_raw[GOD_VENUS] =
         LARARIUM_COVERAGE * larariums +
         ORACLE_COVERAGE * (oracles + small_mausoleums) +
         LARGE_ORACLE_COVERAGE * (nymphaeums + large_mausoleums) +
@@ -191,8 +197,8 @@ void city_culture_update_coverage(void)
         SMALL_TEMPLE_COVERAGE * building_count_active(BUILDING_SMALL_TEMPLE_VENUS) +
         LARGE_TEMPLE_COVERAGE * building_count_active(BUILDING_LARGE_TEMPLE_VENUS) +
         PANTHEON_COVERAGE * building_count_active(BUILDING_PANTHEON) +
-        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_VENUS),
-        population));
+        GRAND_TEMPLE_COVERAGE * building_count_active(BUILDING_GRAND_TEMPLE_VENUS);
+    coverage.religion[GOD_VENUS] = top(calc_percentage(coverage.religion_raw[GOD_VENUS], population));
     coverage.oracle = top(calc_percentage(ORACLE_COVERAGE * oracles, population));
 
     city_data.culture.religion_coverage =
@@ -301,6 +307,7 @@ void city_culture_save_state(buffer *buf)
     buffer_write_i32(buf, coverage.hippodrome);
     for (int i = GOD_CERES; i <= GOD_VENUS; i++) {
         buffer_write_i32(buf, coverage.religion[i]);
+        buffer_write_i32(buf, coverage.religion_raw[i]);
     }
     buffer_write_i32(buf, coverage.oracle);
     buffer_write_i32(buf, coverage.school);
@@ -309,7 +316,7 @@ void city_culture_save_state(buffer *buf)
     buffer_write_i32(buf, coverage.hospital);
 }
 
-void city_culture_load_state(buffer *buf)
+void city_culture_load_state(buffer *buf, int version)
 {
     // Yes, hospital is saved twice
     coverage.theater = buffer_read_i32(buf);
@@ -319,6 +326,9 @@ void city_culture_load_state(buffer *buf)
     coverage.hippodrome = buffer_read_i32(buf);
     for (int i = GOD_CERES; i <= GOD_VENUS; i++) {
         coverage.religion[i] = buffer_read_i32(buf);
+        if (version > SAVE_GAME_LAST_NO_RAW_RELIGION_COVERAGE) {
+            coverage.religion_raw[i] = buffer_read_i32(buf);
+        }
     }
     coverage.oracle = buffer_read_i32(buf);
     coverage.school = buffer_read_i32(buf);

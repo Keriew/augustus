@@ -285,8 +285,24 @@ static void advance_route_tile(figure *f, int roaming_enabled)
             }
 
         }
-    } else if (map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE)) {
+    } else if (map_terrain_is(target_grid_offset, TERRAIN_IMPASSABLE) &&
+        !map_terrain_is(target_grid_offset, TERRAIN_BEACH)) {
+        // A beach is walkable even when it sits over water (a sandbank), so it is not impassable.
         f->direction = DIR_FIGURE_REROUTE;
+    }
+}
+
+#define BEACH_SLOWDOWN_PERCENT 30 // walkers move slower on the soft sand
+static void apply_beach_slowdown(figure *f, int terrain, int *num_ticks)
+{
+    if ((terrain & TERRAIN_BEACH) && !(terrain & (TERRAIN_HIGHWAY | TERRAIN_ROAD)) && *num_ticks > 0) {
+        f->beach_slowdown_accumulator += *num_ticks * BEACH_SLOWDOWN_PERCENT;
+        int lost = f->beach_slowdown_accumulator / 100;
+        f->beach_slowdown_accumulator %= 100;
+        if (lost > *num_ticks) {
+            lost = *num_ticks;
+        }
+        *num_ticks -= lost;
     }
 }
 
@@ -296,6 +312,7 @@ static void walk_ticks(figure *f, int num_ticks, int roaming_enabled)
     if (terrain & TERRAIN_HIGHWAY) {
         num_ticks *= 2;
     }
+    apply_beach_slowdown(f, terrain, &num_ticks);
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;
@@ -473,6 +490,7 @@ void figure_movement_follow_ticks(figure *f, int num_ticks)
     if (map_terrain_is(map_grid_offset(leader->x, leader->y), TERRAIN_HIGHWAY)) {
         num_ticks *= 2;
     }
+    apply_beach_slowdown(f, map_terrain_get(map_grid_offset(f->x, f->y)), &num_ticks);
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;
@@ -513,6 +531,7 @@ void figure_movement_follow_ticks_with_percentage(figure *f, int num_ticks, int 
     if (map_terrain_is(map_grid_offset(leader->x, leader->y), TERRAIN_HIGHWAY)) {
         num_ticks *= 2;
     }
+    apply_beach_slowdown(f, map_terrain_get(map_grid_offset(f->x, f->y)), &num_ticks);
 
     while (num_ticks > 0) {
         num_ticks--;
@@ -552,6 +571,7 @@ void figure_movement_roam_ticks(figure *f, int num_ticks)
         }
     }
     // no destination: walk to end of tile and pick a direction
+    apply_beach_slowdown(f, map_terrain_get(map_grid_offset(f->x, f->y)), &num_ticks);
     while (num_ticks > 0) {
         num_ticks--;
         f->progress_on_tile++;

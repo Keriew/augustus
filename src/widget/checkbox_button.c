@@ -101,8 +101,8 @@ void checkbox_button_draw(const checkbox_button *button)
         image_draw(button->image_before, cursor_x, img_y, image_color, SCALE_NONE);
         cursor_x += img_before_w;
     }
-
-    int text_y = button->y + (button->height - font_definition_for(font)->line_height) / 2;
+    int line_height = font_definition_for(font)->line_height;
+    int text_y = button->y + (button->height / 2 - line_height / 2);
     int max_text_width = content_width - img_before_w - img_after_w;
     if (max_text_width < 0) {
         max_text_width = 0;

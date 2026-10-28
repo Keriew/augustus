@@ -36,6 +36,8 @@ void window_building_draw_native_crops(building_info_context *c);
 void window_building_draw_native_decoration(building_info_context *c);
 void window_building_draw_native_monument(building_info_context *c);
 void window_building_draw_native_watchtower(building_info_context *c);
+void window_building_draw_native_well(building_info_context *c);
+void window_building_draw_native_palisade(building_info_context *c);
 
 
 void window_building_draw_highway(building_info_context *c);

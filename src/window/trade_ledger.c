@@ -3,6 +3,7 @@
 #include "assets/assets.h"
 #include "city/finance.h"
 #include "city/resource.h"
+#include "core/image.h"
 #include "core/image_group.h"
 #include "core/lang.h"
 #include "core/string.h"
@@ -56,6 +57,7 @@
     (2 * DATE_PICKER_BUTTON_WIDTH + LEDGER_TRADE_YEAR_TEXT_WIDTH + 2 * LEDGER_TRADE_YEAR_CONTROL_SPACING)
 #define LEDGER_TRADE_YEAR_CONTROL_X (LEDGER_TABLE_X + LEDGER_TABLE_WIDTH - LEDGER_TRADE_YEAR_CONTROL_WIDTH)
 #define LEDGER_TRADE_YEAR_CONTROL_Y 436
+#define LEDGER_TRADE_RESOURCE_ICON_SPACE 40
 
 typedef enum {
     LEDGER_HEADER_IMPORTED = 0,
@@ -92,18 +94,20 @@ static int active_sort_direction = LEDGER_SORT_NONE;
 static void button_close(int param1, int param2);
 static void placeholder_content_draw(tab_view *view, tab *active_tab);
 static void hide_irrelevant_checkbox_clicked(checkbox_button *btn);
+static void hide_tooltips_checkbox_clicked(checkbox_button *btn);
 static void refresh_irrelevant_resources(void);
 static void setup_resource_header_button(void);
 static void setup_header_buttons(void);
 static void setup_trade_year_control(void);
 static void refresh_selected_year(void);
-static void update_header_button_fonts(void);
+static void update_header_button_appearance(void);
 static void resource_header_button_click(complex_button *button);
 static void ledger_header_button_click(cycling_button *button);
 static void draw_trade_status_column(resource_type resource, int row_y, int row_height);
 static void update_trade_status_button_focus(const mouse *m);
 static void on_resource_row_click(const grid_box_item *item);
 static void handle_tooltip(tooltip_context *c);
+static void resource_cell_tooltip(const grid_box_item *item, tooltip_context *c);
 
 static tab_view ledger_tabs;
 static int tabs_initialized = 0;
@@ -112,60 +116,71 @@ static resource_list displayed_resources;
 static grid_box_type resource_table;
 static date_picker trade_year_picker;
 static int selected_year_index = 0;
+static int inherited_trade_year = 0;
 static int hide_irrelevant = 1; //default to hide
+static int hide_tooltips = 0;
 static complex_button trade_status_buttons[LEDGER_TRADE_STATUS_BUTTON_MAX] = { 0 };
 static uint8_t trade_status_tooltips[LEDGER_TRADE_STATUS_BUTTON_MAX][LEDGER_TRADE_STATUS_TOOLTIP_MAX] = { 0 };
 static int trade_status_button_count = 0;
 
 static const lang_fragment hide_irrelevant_sequence[] = {
-    {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_HIDE_IRRELEVANT_RESOURCES},
+    { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_HIDE_IRRELEVANT_RESOURCES },
+};
+
+static const lang_fragment hide_tooltips_sequence[] = {
+    { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_HIDE_TOOLTIPS },
 };
 
 static const lang_fragment resource_header_sequence[] = {
-    {.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_PARAMETER_TYPE_RESOURCE},
+    { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_PARAMETER_TYPE_RESOURCE },
 };
 
 static const lang_fragment tab_text_trade[] = {
-    {.type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Trade"},
+    { .type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Trade" },
 };
 
 static const lang_fragment tab_text_production[] = {
-    {.type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Production"},
+    { .type = LANG_FRAG_TEXT, .text = (const uint8_t *) "Production" },
 };
 
 static image_button image_buttons[] = {
-    {744, 554, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1},
+    { 744, 554, 24, 24, IB_NORMAL, GROUP_CONTEXT_ICONS, 4, button_close, button_none, 0, 0, 1 },
 };
 
 static checkbox_button hide_irrelevant_checkbox = {
-    .x = 12,
-    .y = 436,
+    .x = 34,
+    .y = 550,
     .width = 250,
     .height = 20,
     .left_click_handler = hide_irrelevant_checkbox_clicked,
-    .font = FONT_NORMAL_BLACK,
-    .sequence = {.fragments = (lang_fragment *) hide_irrelevant_sequence, .count = 1 },
+    .font = FONT_NORMAL_GREEN,
+    .sequence = { .fragments = (lang_fragment *) hide_irrelevant_sequence, .count = 1 },
+};
+
+static checkbox_button hide_tooltips_checkbox = {
+    .x = 34,
+    .y = 574,
+    .width = 250,
+    .height = 20,
+    .left_click_handler = hide_tooltips_checkbox_clicked,
+    .font = FONT_NORMAL_GREEN,
+    .sequence = { .fragments = (lang_fragment *) hide_tooltips_sequence, .count = 1 },
 };
 
 static complex_button resource_header_button = {
     .x = 20,
-    .y = LEDGER_HEADER_STARTING_Y - 4,
+    .y = LEDGER_HEADER_STARTING_Y - 6,
     .height = LEDGER_HEADER_BUTTON_HEIGHT,
     .style = COMPLEX_BUTTON_STYLE_RAW,
     .left_click_handler = resource_header_button_click,
     .font = FONT_NORMAL_BLACK,
-    .sequence = {.fragments = (lang_fragment *) resource_header_sequence, .count = 1 },
+    .sequence = { .fragments = (lang_fragment *) resource_header_sequence, .count = 1 },
 };
 
 static cycling_button header_buttons[LEDGER_HEADER_BUTTON_COUNT] = { 0 };
 
 static const lang_fragment header_button_sequences[LEDGER_HEADER_BUTTON_COUNT][1] = {
-    {{.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_BTN_IMPORTED}},
-    {{.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_BTN_PRODUCED}},
-    {{.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_BTN_CONSUMED}},
-    {{.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_BTN_EXPORTED}},
-    {{.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_BTN_STOCK}},
-    {{.type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_BTN_BALANCE}},
+    [LEDGER_HEADER_BALANCE] = { { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_BTN_BALANCE } },
 };
 
 static const int header_button_tooltips[LEDGER_HEADER_BUTTON_COUNT] = {
@@ -282,6 +297,12 @@ static void hide_irrelevant_checkbox_clicked(checkbox_button *btn)
     window_invalidate();
 }
 
+static void hide_tooltips_checkbox_clicked(checkbox_button *btn)
+{
+    hide_tooltips = btn->is_checked;
+    window_invalidate();
+}
+
 static void refresh_irrelevant_resources(void)
 {
     displayed_resources.size = 0;
@@ -313,16 +334,25 @@ static void setup_resource_header_button(void)
 
 static void setup_header_buttons(void)
 {
+    const asset_id icons[] = {
+        [LEDGER_HEADER_IMPORTED] = ASSET_UI_IMPORT_RED_ALPHA_LEFT,
+        [LEDGER_HEADER_PRODUCED] = ASSET_UI_PRODUCED,
+        [LEDGER_HEADER_CONSUMED] = ASSET_UI_CONSUMED_BROKEN_ALPHA,
+        [LEDGER_HEADER_EXPORTED] = ASSET_UI_EXPORT_ALPHA_RIGHT,
+        [LEDGER_HEADER_STOCK] = ASSET_UI_STOCK,
+    };
     const int button_y = LEDGER_HEADER_STARTING_Y - 4;
     const int down_arrow = assets_lookup_image_id(ASSET_UI_FONT_BROWN_DOWN_ARROW);
     const int up_arrow = assets_lookup_image_id(ASSET_UI_FONT_BROWN_UP_ARROW);
 
     for (int i = 0; i < LEDGER_HEADER_BUTTON_COUNT; i++) {
+        int icon = i == LEDGER_HEADER_BALANCE
+            ? resource_get_data(RESOURCE_DENARII)->image.icon : assets_lookup_image_id(icons[i]);
         cycling_button *button = &header_buttons[i];
         button->x = header_button_x_positions[i];
-        button->y = button_y;
+        button->y = i < LEDGER_HEADER_BALANCE ? button_y - 6 : button_y - 2;
         button->width = header_button_widths[i];
-        button->height = LEDGER_HEADER_BUTTON_HEIGHT;
+        button->height = i < LEDGER_HEADER_BALANCE ? LEDGER_HEADER_BUTTON_HEIGHT + 4 : LEDGER_HEADER_BUTTON_HEIGHT;
         button->style = CYCLING_BUTTON_STYLE_RAW;
         button->state_count = 3;
         button->state_index = 0;
@@ -331,15 +361,15 @@ static void setup_header_buttons(void)
 
         for (int state = 0; state < button->state_count; state++) {
             button->states[state].sequence.fragments = (lang_fragment *) header_button_sequences[i];
-            button->states[state].sequence.count = 1;
-            button->states[state].image_before = 0;
+            button->states[state].sequence.count = i == LEDGER_HEADER_BALANCE ? 1 : 0;
+            button->states[state].image_before = icon;
             button->states[state].image_after = 0;
             button->states[state].font = FONT_NORMAL_BLACK;
             button->states[state].tooltip_c.translation_key = header_button_tooltips[i];
         }
 
-        button->states[1].image_after = down_arrow;
-        button->states[2].image_after = up_arrow;
+        button->states[LEDGER_SORT_DESCENDING].image_after = down_arrow;
+        button->states[LEDGER_SORT_ASCENDING].image_after = up_arrow;
     }
 }
 
@@ -350,11 +380,12 @@ static void setup_trade_year_control(void)
         LEDGER_TRADE_YEAR_CONTROL_SPACING, LEDGER_TRADE_YEAR_MAX, 0);
 }
 
-static void update_header_button_fonts(void)
+static void update_header_button_appearance(void)
 {
     resource_header_button.font = resource_header_button.is_hovered ? FONT_NORMAL_RED : FONT_NORMAL_BLACK;
 
     for (int i = 0; i < LEDGER_HEADER_BUTTON_COUNT; i++) {
+        header_buttons[i].state_index = i == active_sort_header ? active_sort_direction : LEDGER_SORT_NONE;
         font_t font = header_buttons[i].is_hovered ? FONT_NORMAL_RED : FONT_NORMAL_BLACK;
         for (int state = 0; state < header_buttons[i].state_count; state++) {
             header_buttons[i].states[state].font = font;
@@ -465,11 +496,16 @@ static void update_trade_status_button_focus(const mouse *m)
 
 static void trade_ledger_init(void)
 {
-    selected_year_index = 0;
+    if (!selected_year_index) {
+        selected_year_index = inherited_trade_year;
+    }
 
     setup_resource_header_button();
     setup_header_buttons();
     setup_trade_year_control();
+    if (inherited_trade_year) {
+        trade_year_picker.selected_year_offset = inherited_trade_year;
+    }
     resource_table = (grid_box_type) {
             .x = LEDGER_TABLE_X,
             .y = 80,
@@ -482,17 +518,17 @@ static void trade_ledger_init(void)
             .draw_inner_panel = 1,
             .extend_to_hidden_scrollbar = 1,
             .on_click = on_resource_row_click,
+            .handle_tooltip = resource_cell_tooltip,
             .draw_item = draw_resource_row,
     };
     // get resource list for the scenario
     city_resource_determine_available(1);
     resources = city_resource_get_available();
     hide_irrelevant_checkbox.is_checked = hide_irrelevant;
-
-    refresh_irrelevant_resources();
-    refresh_displayed_rows();
+    hide_tooltips_checkbox.is_checked = hide_tooltips;
 
     grid_box_init(&resource_table, displayed_row_count);
+    refresh_selected_year();
 }
 
 static void draw_background(void)
@@ -530,6 +566,10 @@ static void draw_foreground(void)
     image_buttons_draw(0, 0, image_buttons, 1);
     tab_view_draw(&ledger_tabs);
 
+    graphics_in_dialog_with_size(PANEL_W, PANEL_H);
+    checkbox_button_draw(&hide_irrelevant_checkbox);
+    checkbox_button_draw(&hide_tooltips_checkbox);
+
     graphics_reset_dialog();
 }
 
@@ -544,6 +584,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
         return;
     }
     if (checkbox_button_handle_mouse(&hide_irrelevant_checkbox, m_dialog)) {
+        return;
+    }
+    if (checkbox_button_handle_mouse(&hide_tooltips_checkbox, m_dialog)) {
         return;
     }
     if (input_go_back_requested(m, h)) {
@@ -582,9 +625,6 @@ static int handle_trade_tab_mouse(const mouse *m, void *user_data)
         return 1;
     }
     update_trade_status_button_focus(m);
-    if (checkbox_button_handle_mouse(&hide_irrelevant_checkbox, m)) {
-        return 1;
-    }
     return handle_resource_table_mouse(m, &resource_table);
 }
 
@@ -649,9 +689,15 @@ static void draw_resource_row(const grid_box_item *item)
 
     inner_panel_draw_colored(item->x, item->y, item->width, item->height, COLOR_MASK_NONE);
     button_border_draw(item->x, item->y, item->width, item->height, is_focused);
+    // center the resource image
+    const image *res_img = image_get(resource_img_id);
+    int img_w = res_img->original.width;
+    int img_h = res_img->original.height;
+    int img_x = item->x + (LEDGER_TRADE_RESOURCE_ICON_SPACE / 2 - img_w / 2);
+    int img_y = item->y + (item->height / 2 - img_h / 2);
+    image_draw(resource_img_id, img_x, img_y, COLOR_MASK_NONE, SCALE_NONE);
 
-    image_draw(resource_img_id, item->x + 5, item->y + 5, COLOR_MASK_NONE, SCALE_NONE);
-    text_draw(name, item->x + 40, item->y + 10, FONT_NORMAL_GREEN, brown_correction);
+    text_draw(name, item->x + LEDGER_TRADE_RESOURCE_ICON_SPACE, item->y + 10, FONT_NORMAL_GREEN, brown_correction);
 
     text_draw_number_centered_colored(imported, header_button_x_positions[LEDGER_HEADER_IMPORTED],
         number_y, header_button_widths[LEDGER_HEADER_IMPORTED], FONT_NORMAL_GREEN, brown_correction);
@@ -663,7 +709,7 @@ static void draw_resource_row(const grid_box_item *item)
         number_y, header_button_widths[LEDGER_HEADER_EXPORTED], FONT_NORMAL_GREEN, brown_correction);
     text_draw_number_centered_colored(stock, header_button_x_positions[LEDGER_HEADER_STOCK], number_y,
         header_button_widths[LEDGER_HEADER_STOCK], FONT_NORMAL_GREEN, brown_correction);
-    text_draw_number_centered_colored(balance, header_button_x_positions[LEDGER_HEADER_BALANCE],
+    text_draw_number_centered_colored_force_sign(balance, header_button_x_positions[LEDGER_HEADER_BALANCE],
         number_y, header_button_widths[LEDGER_HEADER_BALANCE], bal_font, bal_color);
 
     draw_trade_status_column(current_resource, item->y, item->height);
@@ -674,20 +720,69 @@ static void trade_draw_content(tab_view *view, tab *active_tab)
     // start with resource overview, second function for by city view
     (void) view;
     (void) active_tab;
-    // int active = view->state.active_tab;
 
     // header row
-    update_header_button_fonts();
+    update_header_button_appearance();
     complex_button_draw(&resource_header_button);
     cycling_button_draw_array(header_buttons, LEDGER_HEADER_BUTTON_COUNT);
 
     trade_status_button_count = 0;
     grid_box_request_refresh(&resource_table);
     grid_box_draw(&resource_table);
-    checkbox_button_draw(&hide_irrelevant_checkbox);
     trade_year_picker.selected_year_offset = selected_year_index;
     widget_date_picker_draw(&trade_year_picker);
 
+}
+
+static void resource_cell_tooltip(const grid_box_item *item, tooltip_context *c)
+{
+    if (item->index >= (unsigned int) displayed_row_count) {
+        return;
+    }
+    const int actions[LEDGER_HEADER_BUTTON_COUNT] = {
+        TR_UI_LEDGER_CELL_IMPORTED, TR_UI_LEDGER_CELL_PRODUCED, TR_UI_LEDGER_CELL_CONSUMED,
+        TR_UI_LEDGER_CELL_EXPORTED, TR_UI_LEDGER_CELL_STORED, TR_UI_LEDGER_CELL_BALANCE,
+    };
+    int mouse_x = item->x + item->mouse.x;
+    for (int column = 0; column < LEDGER_HEADER_BUTTON_COUNT; column++) {
+        if (mouse_x < header_button_x_positions[column] ||
+            mouse_x >= header_button_x_positions[column] + header_button_widths[column]) {
+            continue;
+        }
+        const ledger_resource_row *row = &displayed_rows[item->index];
+        int value = row->values[column];
+        int unit = column == LEDGER_HEADER_BALANCE ? TR_UI_LEDGER_CELL_DENARII_FROM
+            : value == 1 ? TR_UI_LEDGER_CELL_CART_OF : TR_UI_LEDGER_CELL_CARTS_OF;
+        lang_fragment fragments[] = {
+            { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = TR_UI_LEDGER_CELL_PROVINCE_HAS },
+            { .type = LANG_FRAG_SPACE, .space_width = 1 },
+            { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = actions[column] },
+            { .type = LANG_FRAG_SPACE, .space_width = 1 },
+            { .type = LANG_FRAG_NUMBER, .number = value },
+            { .type = LANG_FRAG_SPACE, .space_width = 1 },
+            { .type = LANG_FRAG_LABEL, .text_group = CUSTOM_TRANSLATION, .text_id = unit },
+            { .type = LANG_FRAG_SPACE, .space_width = 1 },
+            { .type = LANG_FRAG_TEXT, .text = resource_get_data(row->resource)->text },
+        };
+        lang_sequence sequence = { .fragments = fragments, .count = sizeof(fragments) / sizeof(fragments[0]) };
+        static uint8_t text[512];
+        lang_seq_concatenate(&sequence, text, sizeof(text));
+        c->precomposed_text = text;
+        c->type = TOOLTIP_BUTTON;
+        return;
+    }
+}
+
+static int handle_resource_table_tooltip(const mouse *m, void *user_data)
+{
+    // Input can be handled by another control before the grid's focus is cleared.
+    const grid_box_item *item = &resource_table.focused_item;
+    if (!item->is_focused || m->x < item->x || m->x >= item->x + item->width ||
+        m->y < item->y || m->y >= item->y + item->height) {
+        return 0;
+    }
+    grid_box_handle_tooltip(&resource_table, user_data);
+    return 1;
 }
 
 static void handle_tooltip(tooltip_context *c)
@@ -695,7 +790,7 @@ static void handle_tooltip(tooltip_context *c)
     if (tab_view_get_active_tab(&ledger_tabs) != 0) {
         return;
     }
-    if (complex_button_handle_tooltip_array(trade_status_buttons, c, trade_status_button_count)) {
+    if (!hide_tooltips && complex_button_handle_tooltip_array(trade_status_buttons, c, trade_status_button_count)) {
         return;
     }
     if (complex_button_handle_tooltip(&resource_header_button, c)) {
@@ -704,7 +799,15 @@ static void handle_tooltip(tooltip_context *c)
     if (widget_date_picker_handle_tooltip(&trade_year_picker, c)) {
         return;
     }
-    cycling_button_handle_tooltip_array(header_buttons, c, LEDGER_HEADER_BUTTON_COUNT);
+    if (cycling_button_handle_tooltip_array(header_buttons, c, LEDGER_HEADER_BUTTON_COUNT)) {
+        return;
+    }
+    if (hide_tooltips) {
+        return;
+    }
+    mouse m = { .x = c->mouse_x, .y = c->mouse_y };
+    const mouse *m_dialog = mouse_in_dialog_with_size(&m, PANEL_W, PANEL_H);
+    tab_view_handle_content_mouse(&ledger_tabs, m_dialog, PANEL_W, PANEL_H, handle_resource_table_tooltip, c);
 }
 
 static void resource_header_button_click(complex_button *button)
@@ -756,6 +859,12 @@ static void ledger_header_button_click(cycling_button *button)
     grid_box_update_total_items(&resource_table, displayed_row_count);
 
     grid_box_request_refresh(&resource_table);
+    window_invalidate();
+}
+
+void window_trade_ledger_set_trade_year(int year)
+{
+    selected_year_index = year;
     window_invalidate();
 }
 

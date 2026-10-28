@@ -2844,6 +2844,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
             if (trade_year_picker.changed) {
                 data.sidebar.trade_year = trade_year_picker.selected_year_offset;
                 window_empire_sidebar_sort_set_trade_year(data.sidebar.trade_year);
+                window_trade_ledger_set_trade_year(data.sidebar.trade_year); // update ledger year
                 window_request_refresh();
             }
             return;
@@ -2987,7 +2988,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
                 window_city_show();
             }
         }
-        if (h->escape_pressed) { // handle escape
+        if (h->close_pressed) {
             window_city_show();
         }
     }

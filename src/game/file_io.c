@@ -116,6 +116,8 @@ typedef struct {
     buffer *end_marker;
     buffer *model_data;
     buffer *production_rates;
+    buffer *sprite_grid;
+    buffer *sprite_backup_grid;
 } scenario_state;
 
 static struct {
@@ -427,6 +429,10 @@ static void init_scenario_data(scenario_version_t version)
     if (version > SCENARIO_LAST_NO_HOUSE_MODELS) {
         state->scenario_texts = create_scenario_piece(PIECE_SIZE_DYNAMIC, 1);
     }
+    if (version > SCENARIO_LAST_NO_BRIDGE_SPRITES) {
+        state->sprite_grid = create_scenario_piece(GRID_SIZE_BUF_U8, 1);
+        state->sprite_backup_grid = create_scenario_piece(GRID_SIZE_BUF_U8, 1);
+    }
     state->end_marker = create_scenario_piece(4, 0);
 }
 
@@ -633,7 +639,7 @@ static void init_savegame_data(savegame_version_t version)
     }
     state->trade_prices = create_savegame_piece(version_data.piece_sizes.trade_prices, 0);
     state->figure_names = create_savegame_piece(84, 0);
-    state->culture_coverage = create_savegame_piece(60, 0);
+    state->culture_coverage = create_savegame_piece(version > SAVE_GAME_LAST_NO_RAW_RELIGION_COVERAGE ? 80 : 60, 0);
     state->scenario = create_savegame_piece(version_data.piece_sizes.scenario, 0);
     if (version_data.features.requests) {
         state->requests = create_savegame_piece(PIECE_SIZE_DYNAMIC, 0);
@@ -837,6 +843,12 @@ static void scenario_load_from_state(scenario_state *file, scenario_version_t ve
     }
     building_monument_reset_stages();
 
+    if (version > SCENARIO_LAST_NO_BRIDGE_SPRITES) {
+        map_sprite_load_state(file->sprite_grid, file->sprite_backup_grid);
+    } else {
+        map_sprite_clear();
+    }
+
     buffer_skip(file->end_marker, 4);
 }
 
@@ -866,6 +878,7 @@ static void scenario_save_to_state(scenario_state *file)
     empire_save_custom_map(file->empire_map);
     model_save_model_data(file->model_data);
     production_rates_save(file->production_rates);
+    map_sprite_save_state(file->sprite_grid, file->sprite_backup_grid);
     buffer_skip(file->end_marker, 4);
 }
 
@@ -976,7 +989,7 @@ static void savegame_load_from_state(savegame_state *state, savegame_version_t v
     empire_city_load_state(state->empire_cities, version);
     trade_prices_load_state(state->trade_prices);
     figure_name_load_state(state->figure_names);
-    city_culture_load_state(state->culture_coverage);
+    city_culture_load_state(state->culture_coverage, version);
 
     scenario_criteria_load_state(state->max_game_year);
     scenario_earthquake_load_state(state->earthquake);

@@ -193,6 +193,16 @@ void assets_init(int force_reload, color_t **main_images, int *main_image_widths
     data.asset_lookup[ASSET_UI_SCROLLBAR_MINI_THUMB_04] = assets_get_image_id("UI", "Scrollbar_Thumb_04");
     data.asset_lookup[ASSET_UI_SCROLLBAR_MINI_THUMB_LINES] = assets_get_image_id("UI", "Scrollbar_Thumb_Lines");
     data.asset_lookup[ASSET_UI_HOURGLASS_ICON] = assets_get_image_id("UI", "hourglass_icon");
+    data.asset_lookup[ASSET_UI_CONSUMED] = assets_get_image_id("UI", "consumed");
+    data.asset_lookup[ASSET_UI_CONSUMED_ALPHA] = assets_get_image_id("UI", "consumed_alpha");
+    data.asset_lookup[ASSET_UI_CONSUMED_BROKEN] = assets_get_image_id("UI", "consumed_broken");
+    data.asset_lookup[ASSET_UI_CONSUMED_BROKEN_ALPHA] = assets_get_image_id("UI", "consumed_broken_alpha");
+    data.asset_lookup[ASSET_UI_EXPORT_ALPHA_RIGHT] = assets_get_image_id("UI", "export_alpha_right");
+    data.asset_lookup[ASSET_UI_EXPORT_RIGHT] = assets_get_image_id("UI", "export_right");
+    data.asset_lookup[ASSET_UI_IMPORT_RED_ALPHA_LEFT] = assets_get_image_id("UI", "import_red_alpha_left");
+    data.asset_lookup[ASSET_UI_IMPORT_RED_LEFT] = assets_get_image_id("UI", "import_red_left");
+    data.asset_lookup[ASSET_UI_PRODUCED] = assets_get_image_id("UI", "produced");
+    data.asset_lookup[ASSET_UI_STOCK] = assets_get_image_id("UI", "stock");
     data.asset_lookup[ASSET_AESTHETIC_BUILDING_WILLOW_TREE] = assets_get_image_id("Aesthetics", "ornamental willow");
     // font assets - keep last
     data.font_lookup[ASSET_FONT_SQ_BRACKET_LEFT] = assets_get_image_id("UI", "leftbracket_white_l");

@@ -41,6 +41,12 @@ int game_file_load_saved_game(const char *filename);
  */
 int game_file_write_saved_game(const char *filename);
 
+/** Creates a timestamped quicksave in the savegame directory. Returns true on success. */
+int game_file_quicksave(void);
+
+/** Loads the most recently modified quicksave, or any save if none exist. Returns a FILE_LOAD_* result. */
+int game_file_quickload(void);
+
 int game_file_make_yearly_autosave(void);
 
 /**
