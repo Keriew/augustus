@@ -790,7 +790,9 @@ static void draw_water_graph(int x, int y, float scale, int grid_offset)
 
     building *b = building_get(map_building_at(grid_offset));
 
-    if (show_building_water(b) && !is_inhabited_building(grid_offset)) {
+    // Only redraw water buildings. Check for house type
+    // show_building_water can return a house(vacant lot) with no inhabitants
+    if (b->type != BUILDING_HOUSE_VACANT_LOT && show_building_water(b) && !is_inhabited_building(grid_offset)) {
         if (redraw_water_building(b, x, y, scale, grid_offset)) {
             return;
         }
