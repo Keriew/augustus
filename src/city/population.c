@@ -7,6 +7,8 @@
 #include "core/config.h"
 #include "core/random.h"
 
+#include <string.h>
+
 static const int BIRTHS_PER_AGE_DECENNIUM[10] = {
     0, 3, 16, 9, 2, 0, 0, 0, 0, 0
 };
@@ -24,6 +26,10 @@ static const int DEATHS_PER_HEALTH_PER_AGE_DECENNIUM[11][10] = {
     {0, 0, 0, 0, 0, 0, 4, 5, 10, 20},
     {0, 0, 0, 0, 0, 0, 0, 2, 5, 10}
 };
+
+static struct {
+    int undo_people_at_age[100];
+} data;
 
 int city_population(void)
 {
@@ -98,7 +104,15 @@ static void add_to_census(int num_people)
     }
 }
 
-static void remove_from_census(int num_people)
+static void add_to_census_undo(void)
+{
+    for (int age = 0; age <= 100; age++) {
+        city_data.population.at_age[age] += data.undo_people_at_age[age];
+        data.undo_people_at_age[age] = 0;
+    }
+}
+
+static void remove_from_census(int num_people, int count_to_undo)
 {
     int index = 0;
     int empty_buckets = 0;
@@ -109,6 +123,9 @@ static void remove_from_census(int num_people)
             empty_buckets++;
         } else {
             city_data.population.at_age[age]--;
+            if (count_to_undo) {
+                data.undo_people_at_age[age]++;
+            }
             num_people--;
             empty_buckets = 0;
         }
@@ -121,6 +138,9 @@ static void remove_from_census(int num_people)
             empty_buckets++;
         } else {
             city_data.population.at_age[age]--;
+            if (count_to_undo) {
+                data.undo_people_at_age[age]++;
+            }
             num_people--;
             empty_buckets = 0;
         }
@@ -183,35 +203,39 @@ void city_population_add(int num_people)
 void city_population_remove(int num_people)
 {
     city_data.population.last_change = -num_people;
-    remove_from_census(num_people);
+    remove_from_census(num_people, 0);
     recalculate_population();
 }
 
-void city_population_add_homeless(int num_people)
+void city_population_add_homeless(int num_people, int is_undo)
 {
     city_data.population.lost_homeless -= num_people;
-    add_to_census(num_people);
+    if (is_undo) {
+        add_to_census_undo();
+    } else {
+        add_to_census(num_people);
+    }
     recalculate_population();
 }
 
-void city_population_remove_homeless(int num_people)
+void city_population_remove_homeless(int num_people, int is_clear_land)
 {
     city_data.population.lost_homeless += num_people;
-    remove_from_census(num_people);
+    remove_from_census(num_people, is_clear_land);
     recalculate_population();
 }
 
 void city_population_remove_home_removed(int num_people)
 {
     city_data.population.lost_removal += num_people;
-    remove_from_census(num_people);
+    remove_from_census(num_people, 0);
     recalculate_population();
 }
 
 void city_population_remove_for_troop_request(int num_people)
 {
     int removed = house_population_remove_from_city(num_people);
-    remove_from_census(removed);
+    remove_from_census(removed, 0);
     city_data.population.lost_troop_request += num_people;
     recalculate_population();
 }
@@ -431,7 +455,7 @@ void city_population_check_consistency(void)
 {
     int people_in_houses = calculate_people_per_house_type();
     if (people_in_houses < city_data.population.population) {
-        remove_from_census(city_data.population.population - people_in_houses);
+        remove_from_census(city_data.population.population - people_in_houses, 0);
     }
 }
 
@@ -481,4 +505,9 @@ int city_population_percentage_in_villas_palaces(void)
     }
 
     return calc_percentage(city_data.population.people_in_villas_palaces, city_data.population.population);
+}
+
+void city_population_reset_undo(void)
+{
+    memset(data.undo_people_at_age, 0, sizeof(data.undo_people_at_age));
 }
