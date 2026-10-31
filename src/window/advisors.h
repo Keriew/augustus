@@ -6,6 +6,7 @@
 #include "input/mouse.h"
 
 typedef struct {
+    int text_group;
     int text_id;
     int translation_key;
     const uint8_t *precomposed_text;

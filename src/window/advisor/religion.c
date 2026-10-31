@@ -53,31 +53,31 @@ static void draw_god_row(god_type god, int y_offset, building_type altar, buildi
     // god name
     lang_text_draw(59, 11 + god, 24, y_offset + 2, FONT_NORMAL_WHITE);
     // responsibility
-    lang_text_draw(59, 16 + god, 104, y_offset + 3, FONT_SMALL_PLAIN);
+    //lang_text_draw(59, 16 + god, 104, y_offset + 3, FONT_SMALL_PLAIN);
     // temple/oracle counts
-    text_draw_number_centered(building_count_total(altar), 190, y_offset + 2, 50, FONT_NORMAL_WHITE);
-    text_draw_number_centered(building_count_active(small_temple), 250, y_offset + 2, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_total(altar), 104, y_offset + 2, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_active(small_temple), 164, y_offset + 2, 50, FONT_NORMAL_WHITE);
     if (building_count_active(grand_temple)) {
         text_draw_number_centered(building_count_active(large_temple) + building_count_active(grand_temple),
-            310, y_offset + 2, 50, FONT_NORMAL_GREEN);
+            224, y_offset + 2, 50, FONT_NORMAL_GREEN);
     } else {
-        text_draw_number_centered(building_count_active(large_temple), 310, y_offset + 2, 50, FONT_NORMAL_WHITE);
+        text_draw_number_centered(building_count_active(large_temple), 224, y_offset + 2, 50, FONT_NORMAL_WHITE);
     }
     // months since last festival
-    text_draw_number_centered(city_god_months_since_festival(god), 365, y_offset + 2, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(city_god_months_since_festival(god), 279, y_offset + 2, 50, FONT_NORMAL_WHITE);
     // people coverage
     int coverage = city_culture_coverage_religion_raw(god);
-    text_draw_number_centered(coverage, 430, y_offset + 2, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(coverage, 344, y_offset + 2, 50, FONT_NORMAL_WHITE);
     // god happiness
-    int width = lang_text_draw(59, 32 + city_god_happiness(god) / 10, 500, y_offset + 2, FONT_NORMAL_WHITE);
+    int width = lang_text_draw(59, 32 + city_god_happiness(god) / 10, 414, y_offset + 2, FONT_NORMAL_WHITE);
     int bolts = city_god_wrath_bolts(god);
     for (int i = 0; i < bolts / 10; i++) {
-        image_draw(image_group(GROUP_GOD_BOLT), 10 * i + width + 500, y_offset - 2, COLOR_MASK_NONE, SCALE_NONE);
+        image_draw(image_group(GROUP_GOD_BOLT), 10 * i + width + 414, y_offset - 2, COLOR_MASK_NONE, SCALE_NONE);
     }
     int happy_bolts = city_god_happy_bolts(god);
     for (int i = 0; i < happy_bolts; i++) {
         image_draw(assets_get_image_id("UI", "Happy God Icon"),
-            10 * i + width + 500, y_offset - 2, COLOR_MASK_NONE, SCALE_NONE);
+            10 * i + width + 414, y_offset - 2, COLOR_MASK_NONE, SCALE_NONE);
     }
 }
 
@@ -86,13 +86,13 @@ static void draw_oracle_row(void)
     int oracle_count = building_count_active(BUILDING_ORACLE) + building_count_active(BUILDING_SMALL_MAUSOLEUM);
     int large_oracle_count = building_count_active(BUILDING_NYMPHAEUM) +
         building_count_active(BUILDING_PANTHEON) + building_count_active(BUILDING_LARGE_MAUSOLEUM);
-    lang_text_draw(59, 8, 24, 168, FONT_NORMAL_WHITE);
-    text_draw_number_centered(building_count_total(BUILDING_LARARIUM), 190, 168, 50, FONT_NORMAL_WHITE);
-    text_draw_number_centered(oracle_count, 250, 168, 50, FONT_NORMAL_WHITE);
+    lang_text_draw(8, 33, 24, 168, FONT_NORMAL_WHITE);
+    text_draw_number_centered(building_count_total(BUILDING_LARARIUM), 104, 168, 50, FONT_NORMAL_WHITE);
+    text_draw_number_centered(oracle_count, 164, 168, 50, FONT_NORMAL_WHITE);
     if (building_count_active(BUILDING_PANTHEON)) {
-        text_draw_number_centered(large_oracle_count, 310, 168, 50, FONT_NORMAL_GREEN);
+        text_draw_number_centered(large_oracle_count, 224, 168, 50, FONT_NORMAL_GREEN);
     } else {
-        text_draw_number_centered(large_oracle_count, 310, 168, 50, FONT_NORMAL_WHITE);
+        text_draw_number_centered(large_oracle_count, 224, 168, 50, FONT_NORMAL_WHITE);
     }
 }
 
@@ -142,16 +142,16 @@ static int draw_background(void)
 
     lang_text_draw(59, 0, 60, 12, FONT_LARGE_BLACK); // Religion
 
-    text_draw_centered(translation_for(TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER), 165, 46, 100, FONT_SMALL_PLAIN, 0); // Altars
-    lang_text_draw_centered(59, 5, 256, 32, 100, FONT_SMALL_PLAIN); // Temples
-    lang_text_draw_centered(59, 1, 226, 46, 100, FONT_SMALL_PLAIN); // Small
-    lang_text_draw_centered(59, 2, 285, 46, 100, FONT_SMALL_PLAIN); // large
-    lang_text_draw_centered(59, 6, 340, 18, 100, FONT_SMALL_PLAIN); // Months
-    lang_text_draw_centered(59, 9, 340, 32, 100, FONT_SMALL_PLAIN); // since
-    lang_text_draw_centered(59, 7, 340, 46, 100, FONT_SMALL_PLAIN); // Festival
-    text_draw_centered(translation_for(TR_ADVISOR_RELIGION_PEOPLE), 405, 32, 100, FONT_SMALL_PLAIN, 0); // people
-    text_draw_centered(translation_for(TR_ADVISOR_RELIGION_COVERED), 405, 46, 100, FONT_SMALL_PLAIN, 0); // covered
-    lang_text_draw_centered(59, 3, 490, 46, 100, FONT_SMALL_PLAIN); // The gods are
+    text_draw_centered(translation_for(TR_WINDOW_ADVISOR_RELIGION_ALTARS_HEADER), 79, 46, 100, FONT_SMALL_PLAIN, 0); // Altars
+    lang_text_draw_centered(59, 5, 170, 32, 100, FONT_SMALL_PLAIN); // Temples
+    lang_text_draw_centered(59, 1, 140, 46, 100, FONT_SMALL_PLAIN); // Small
+    lang_text_draw_centered(59, 2, 199, 46, 100, FONT_SMALL_PLAIN); // large
+    lang_text_draw_centered(59, 6, 254, 18, 100, FONT_SMALL_PLAIN); // Months
+    lang_text_draw_centered(59, 9, 254, 32, 100, FONT_SMALL_PLAIN); // since
+    lang_text_draw_centered(59, 7, 254, 46, 100, FONT_SMALL_PLAIN); // Festival
+    text_draw_centered(translation_for(TR_ADVISOR_RELIGION_PEOPLE), 319, 32, 100, FONT_SMALL_PLAIN, 0); // people
+    text_draw_centered(translation_for(TR_ADVISOR_RELIGION_COVERED), 319, 46, 100, FONT_SMALL_PLAIN, 0); // covered
+    lang_text_draw_centered(59, 3, 404, 46, 100, FONT_SMALL_PLAIN); // The gods are
 
     inner_panel_draw(16, 60, 38, 8);
 
@@ -209,10 +209,19 @@ static void button_epithets(const generic_button *button)
 
 static void get_tooltip_text(advisor_tooltip_result *r)
 {
+    const mouse *m_dialog = mouse_in_dialog(mouse_get());
     if (focus_button_id == 1) {
         r->text_id = 112;
     } else if (focus_button_id == 2) {
         r->translation_key = TR_WINDOW_ADVISOR_EPITHETS_TOOLTIP;
+    }
+    for (god_type god = 0; god < GOD_ALL; god++) {
+        int text_width = lang_text_get_width(59, 11 + god, FONT_NORMAL_WHITE);
+        if (m_dialog->x >= 24 && m_dialog->x <= 24 + text_width &&
+            m_dialog->y >= 66 + god * 20 + 2 && m_dialog->y <= 66 + god * 20 + 8) {
+            r->text_group = 59;
+            r->text_id = 16 + god;
+        }
     }
 }
 
