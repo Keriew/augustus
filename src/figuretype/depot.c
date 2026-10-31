@@ -193,14 +193,12 @@ static void try_reroute_order_dst(figure *f, building *b)
         return;
     }
     unsigned int new_dst_id = b->data.depot.current_order.dst_storage_id;
-    // If standing at destination and destination didn't change, skip reroute
-    if (f->action_state == FIGURE_ACTION_242_DEPOT_CART_PUSHER_AT_DESTINATION &&
-        (new_dst_id == f->destination_building_id || new_dst_id == 0)) {
-        return;
-    }
+
     building *new_dst = building_get(new_dst_id);
     if (is_storage_valid(new_dst, f->resource_id)) {
-        set_destination(f, new_dst_id, FIGURE_ACTION_241_DEPOT_CART_PUSHER_HEADING_TO_DESTINATION);
+        if(new_dst_id != f->destination_building_id) {
+            set_destination(f, new_dst_id, FIGURE_ACTION_241_DEPOT_CART_PUSHER_HEADING_TO_DESTINATION);
+        }
     } else {
         f->action_state = FIGURE_ACTION_244_DEPOT_CART_PUSHER_CANCEL_ORDER;
     }
