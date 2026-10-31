@@ -195,3 +195,20 @@ int string_compare(const uint8_t *a, const uint8_t *b)
     }
     return tolower(*a) - tolower(*b);
 }
+
+
+static int remaining_space(const uint8_t *start, const uint8_t *pos, size_t size)
+{
+    return (int) (size - (size_t) (pos - start));
+}
+
+int string_concat(const uint8_t *a, const uint8_t *b, uint8_t *dst, size_t dst_size)
+{
+    if (!dst || dst_size == 0) {
+        return 0;
+    }
+    uint8_t *ptr = dst;
+    ptr = string_copy(a, ptr, remaining_space(dst, ptr, dst_size));
+    ptr = string_copy(b, ptr, remaining_space(dst, ptr, dst_size));
+    return (int) (ptr - dst);
+}
