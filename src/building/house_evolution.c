@@ -594,8 +594,16 @@ void building_house_process_evolve_and_consume_goods(void)
             if (!b->has_plague) {
                 has_expanded |= evolve_callback[b->type - BUILDING_HOUSE_VACANT_LOT](b, demands);
             }
-            // 1x1 houses only consume half of the goods
-            if (game_time_day() == 0 || (game_time_day() == 7 && b->house_size > 1)) {
+
+            // calculate if this house will consume this day
+            int random = random_byte();
+            if (b->house_size == 1 && game_time_day() % 8 && random % 4 // ie every 32 days average
+            || b->house_size == 2 && game_time_day() % 8
+            || b->house_size == 3 && game_time_day() % 4
+            || b->house_size == 3 && game_time_day() % 16 && game_time_month() % 2 // 3x3 consumes 4.5 times a month not 4
+            || b->house_size == 4 && game_time_day() % 2
+            ) {
+            {
                 consume_resources(b);
             }
             b->last_update = last_update;
