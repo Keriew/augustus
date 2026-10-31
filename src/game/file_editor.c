@@ -139,8 +139,6 @@ static void prepare_map_for_editing(void)
     map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
-    map_tiles_update_all_empty_land();
-    map_tiles_update_all_meadow();
     map_tiles_update_all_rubble();
     map_tiles_update_all_roads();
     map_tiles_update_all_highways();
@@ -154,6 +152,10 @@ static void prepare_map_for_editing(void)
     // sets map_building_at so natives skips those tiles.
     map_bridge_recalculate_buildings_from_sprites();
     map_natives_init_editor();
+    // Update tiles with empty land or meadow last: map_tiles_update_all_empty_land clears all tiles
+    // with TERRAIN_BUILDING which don't have a building on them yet
+    map_tiles_update_all_empty_land();
+    map_tiles_update_all_meadow();
     map_routing_update_all();
 
     scenario_editor_set_as_saved();

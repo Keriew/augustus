@@ -3,12 +3,14 @@
 #include "assets/assets.h"
 #include "building/building.h"
 #include "building/clone.h"
+#include "building/properties.h"
 #include "building/roadblock.h"
 #include "city/constants.h"
 #include "city/finance.h"
 #include "core/dir.h"
 #include "core/image.h"
 #include "graphics/button.h"
+#include "map/grid.h"
 #include "widget/complex_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
@@ -321,6 +323,12 @@ void window_building_draw_rubble(building_info_context *c)
     building *b = building_get(c->rubble_building_id);
     building_type og_type = b->data.rubble.og_type;
     building_type type = og_type == BUILDING_NONE ? b->type : og_type;
+
+    // If the building is not on this location then this builing is not the destroyed building.
+    // The actual destroyed building data is then already lost.
+    if (!building_occupies_grid(b, c->grid_offset)) {
+        type = BUILDING_NONE;
+    }
 
     if (building_can_repair_type(type) || building_can_repair_type(og_type)) {
         init_repair_building_button(c);

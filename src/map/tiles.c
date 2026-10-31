@@ -4,6 +4,7 @@
 #include "building/building.h"
 #include "building/connectable.h"
 #include "building/image.h"
+#include "building/properties.h"
 #include "city/map.h"
 #include "city/view.h"
 #include "core/config.h"
@@ -1009,6 +1010,18 @@ static void clear_empty_land_image(int x, int y, int grid_offset)
         map_image_set(grid_offset, 0);
         map_property_set_multi_tile_size(grid_offset, 1);
         map_property_mark_draw_tile(grid_offset);
+    } else if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
+        building * b = building_get(map_building_at(grid_offset));
+
+        // Fix terrain when there isn't actually a building on it
+        if (b->type != BUILDING_SHIP_BRIDGE && b->type != BUILDING_LOW_BRIDGE && !building_occupies_grid(b, grid_offset)) {
+            map_terrain_remove(grid_offset,TERRAIN_CLEARABLE);
+            map_building_set(grid_offset, 0);
+            map_image_set(grid_offset, 0);
+            map_property_set_multi_tile_size(grid_offset, 1);
+            map_property_mark_draw_tile(grid_offset);
+        }
+
     }
 }
 
