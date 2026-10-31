@@ -218,7 +218,7 @@ static void get_tooltip_text(advisor_tooltip_result *r)
     for (god_type god = 0; god < GOD_ALL; god++) {
         int text_width = lang_text_get_width(59, 11 + god, FONT_NORMAL_WHITE);
         if (m_dialog->x >= 24 && m_dialog->x <= 24 + text_width &&
-            m_dialog->y >= 66 + god * 20 + 2 && m_dialog->y <= 66 + god * 20 + 8) {
+            m_dialog->y >= 66 + god * 20 + 2 && m_dialog->y <= 66 + god * 20 + 10) {
             r->text_group = 59;
             r->text_id = 16 + god;
         }
