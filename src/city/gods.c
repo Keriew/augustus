@@ -123,7 +123,7 @@ static void perform_small_curse(god_type god)
             city_message_post(1, MESSAGE_VENUS_IS_UPSET, 0, 0);
             city_data.sentiment.blessing_festival_boost -= 15;
             city_health_change(-10);
-            city_sentiment_update();
+            city_sentiment_update(0);
             break;
         default:
             break;
@@ -173,7 +173,7 @@ static int perform_large_curse(god_type god)
                 city_health_change(-20);
             }
             city_data.religion.venus_curse_active = 1;
-            city_sentiment_update();
+            city_sentiment_update(0);
             break;
         default:
             break;
