@@ -30,6 +30,7 @@
 #include "sound/music.h"
 #include "sound/speech.h"
 #include "translation/translation.h"
+#include "widget/complex_button.h"
 #include "window/hotkey_config.h"
 #include "window/main_menu.h"
 #include "window/plain_message_dialog.h"
@@ -548,18 +549,24 @@ static numerical_range_widget ranges[] = {
 
 //  Bottom buttons & page tabs
 
-static void button_hotkeys(const generic_button *button);
-static void button_reset_defaults(const generic_button *button);
-static void button_close(const generic_button *button);
+static void button_hotkeys(complex_button *button);
+static void button_reset_defaults(complex_button *button);
+static void button_close(complex_button *button);
 static void button_page(const generic_button *button);
 
-static generic_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
-    {  20, 436,  120, 30, button_hotkeys, 0, 0, TR_BUTTON_CONFIGURE_HOTKEYS },
-    { 170, 436, 150, 30, button_reset_defaults, 0, 0, TR_BUTTON_RESET_DEFAULTS },
-    { 330, 436,  90, 30, button_close, 0, 0, TR_BUTTON_CANCEL },
-    { 430, 436,  90, 30, button_close, 0, 1, TR_BUTTON_OK },
-    { 530, 436,  90, 30, button_close, 0, 2, TR_OPTION_MENU_APPLY }
+static complex_button bottom_buttons[NUM_BOTTOM_BUTTONS] = {
+    { .x = 20, .y = 436, .width = 120, .height = 30,
+        .left_click_handler = button_hotkeys, .parameters = {0, TR_BUTTON_CONFIGURE_HOTKEYS} },
+    { .x = 170, .y = 436, .width = 150, .height = 30,
+        .left_click_handler = button_reset_defaults, .parameters = {0, TR_BUTTON_RESET_DEFAULTS} },
+    { .x = 330, .y = 436, .width = 90, .height = 30,
+        .left_click_handler = button_close, .parameters = {0, TR_BUTTON_CANCEL} },
+    { .x = 430, .y = 436, .width = 90, .height = 30,
+        .left_click_handler = button_close, .parameters = {1, TR_BUTTON_OK} },
+    { .x = 530, .y = 436, .width = 90, .height = 30,
+        .left_click_handler = button_close, .parameters = {2, TR_OPTION_MENU_APPLY} }
 };
+static lang_fragment bottom_button_labels[NUM_BOTTOM_BUTTONS];
 
 static generic_button page_buttons[] = {
     { 0, 48, 0, 30, button_page, 0, 0 },
@@ -613,7 +620,6 @@ static void list_box_tooltip(const list_box_item *item, tooltip_context *c);
 static struct {
     unsigned int page;
     unsigned int page_focus_button;
-    unsigned int bottom_focus_button;
     unsigned int focus_button;
     int show_background_image;
     int has_changes;
@@ -1575,9 +1581,10 @@ static void op_measure_select(const config_widget *w, int avail_text_w, int *out
 
 static void op_draw_bg_select(const config_widget *w, int x, int y, int avail_text_w)
 {
-    text_draw(translation_for(w->description), x, y + 6 + w->y_offset, FONT_NORMAL_BLACK, 0);
     const generic_button *btn = &select_buttons[w->subtype];
-    text_draw_centered(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
+    text_draw_ellipsized(translation_for(w->description), x, y + 6 + w->y_offset,
+        btn->x - x - 8, FONT_NORMAL_BLACK, 0);
+    text_draw_centered_ellipsized(w->get_display_text(), btn->x + 8, y + btn->y + 6 + w->y_offset,
                        btn->width - 16, FONT_NORMAL_BLACK, 0);
 }
 
@@ -1967,14 +1974,6 @@ static void draw_background(void)
             ops_by_type[w->type].draw_bg(w, span.x, y, span.text_w);
         }
     }
-    //  bottom buttons text
-    for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
-        int disabled = i == NUM_BOTTOM_BUTTONS - 1 && !data.has_changes;
-        text_draw_centered(translation_for(bottom_buttons[i].parameter2),
-            bottom_buttons[i].x, bottom_buttons[i].y + 9, bottom_buttons[i].width,
-            disabled ? FONT_NORMAL_PLAIN : FONT_NORMAL_BLACK,
-            disabled ? COLOR_FONT_LIGHT_GRAY : 0);
-    }
 
     graphics_reset_dialog();
 }
@@ -2006,11 +2005,8 @@ static void draw_foreground(void)
         }
     }
 
-    //  bottom buttons borders
-    for (size_t i = 0; i < sizeof(bottom_buttons) / sizeof(*bottom_buttons); i++) {
-        button_border_draw(bottom_buttons[i].x, bottom_buttons[i].y, bottom_buttons[i].width, bottom_buttons[i].height,
-                           data.bottom_focus_button == i + 1);
-    }
+    bottom_buttons[NUM_BOTTOM_BUTTONS - 1].is_disabled = !data.has_changes;
+    complex_button_draw_array(bottom_buttons, NUM_BOTTOM_BUTTONS);
 
     //  scrollbar (if needed)
     if (data.layout.has_scrollbar) {
@@ -2077,12 +2073,12 @@ static int apply_changed_configs(void)
     return 1;
 }
 
-static void button_hotkeys(const generic_button *button)
+static void button_hotkeys(complex_button *button)
 {
     window_hotkey_config_show(0);
 }
 
-static void button_reset_defaults(const generic_button *button)
+static void button_reset_defaults(complex_button *button)
 {
     for (int i = 0; i < CONFIG_MAX_ENTRIES; i++) {
         data.config_values[i].new_value = config_get_default_value(i);
@@ -2095,9 +2091,9 @@ static void button_reset_defaults(const generic_button *button)
     window_invalidate();
 }
 
-static void button_close(const generic_button *button)
+static void button_close(complex_button *button)
 {
-    int save = button->parameter1;
+    int save = button->parameters[0];
     if (!save) {
         cancel_values();
         window_go_back();
@@ -2127,19 +2123,22 @@ static void handle_input(const mouse *m, const hotkeys *h)
     unsigned prev_focus = data.focus_button;
     data.focus_button = 0;
 
+    bottom_buttons[NUM_BOTTOM_BUTTONS - 1].is_disabled = !data.has_changes;
+    if (complex_button_handle_mouse_array(bottom_buttons, md, NUM_BOTTOM_BUTTONS)) {
+        return;
+    }
+
     //  categories first (so clicks don't fall through)
 
     if (page_is_category(data.page)) {
         category_page_properties page_properties = current_category_properties();
         if (list_box_handle_input(page_properties.lb, md, 1)) {
             data.page_focus_button = 0;
-            data.bottom_focus_button = 0;
             return;
         }
     }
     if (scrollbar_handle_mouse(&scrollbar, md, 1)) {
         data.page_focus_button = 0;
-        data.bottom_focus_button = 0;
         window_request_refresh();
         return;
     }
@@ -2174,9 +2173,8 @@ static void handle_input(const mouse *m, const hotkeys *h)
         }
     }
 
-    //  bottom and page buttons
+    //  page buttons
 
-    handled |= generic_buttons_handle_mouse(md, 0, 0, bottom_buttons, data.has_changes ? NUM_BOTTOM_BUTTONS : NUM_BOTTOM_BUTTONS - 1, &data.bottom_focus_button);
     handled |= generic_buttons_handle_mouse(md, 0, 0, page_buttons, CONFIG_PAGES, &data.page_focus_button);
 
     if (!handled && (m->right.went_up || h->close_pressed)) {
@@ -2191,6 +2189,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
 
 static void get_tooltip(tooltip_context *c)
 {
+    if (complex_button_handle_tooltip_array(bottom_buttons, c, NUM_BOTTOM_BUTTONS)) {
+        return;
+    }
     if (page_is_category(data.page)) {
         category_page_properties desc = current_category_properties();
         list_box_handle_tooltip(desc.lb, c);
@@ -2251,6 +2252,14 @@ static void set_page(unsigned int page)
 static void init(unsigned int page, unsigned int category, int show_background_image)
 {
     memset(&data, 0, sizeof(data));
+    for (int i = 0; i < NUM_BOTTOM_BUTTONS; i++) {
+        complex_button *button = &bottom_buttons[i];
+        complex_button_init_style(button, COMPLEX_BUTTON_STYLE_DEFAULT);
+        button->is_hovered = button->is_clicked = button->is_active = 0;
+        memset(&button->tooltip_c, 0, sizeof(button->tooltip_c));
+        lang_seq_frag_label(&bottom_button_labels[i], CUSTOM_TRANSLATION, button->parameters[1]);
+        lang_seq_init(&button->sequence, &bottom_button_labels[i], 1);
+    }
     data.page = page;
     if (page == CONFIG_PAGE_UI_CHANGES) {
         if (category >= CATEGORY_UI_COUNT) {
