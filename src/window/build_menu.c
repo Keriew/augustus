@@ -361,21 +361,33 @@ static int button_index_to_submenu_item(int index)
     return item;
 }
 
-static int handle_input_build_menu_index(const hotkeys *h)
+static int handle_hotkeys(const hotkeys *h)
 {
-    if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && h->build_menu_index_num &&
-        h->build_menu_index_num <= (int) data.num_items) {
-        button_menu_item(button_index_to_submenu_item(h->build_menu_index_num - 1));
-        return h->build_menu_index_num;
+    if (h->build_menu_index_num) {
+        if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && h->build_menu_index_num <= (int) data.num_items) {
+            button_menu_item(button_index_to_submenu_item(h->build_menu_index_num - 1));
+        }
+        return 1;
+    }
+    if (h->build_menu) {
+        if (building_menu_count_items(h->build_menu) > 0) {
+            window_build_menu_show(h->build_menu);
+        }
+        return 1;
+    }
+    if (h->building) {
+        window_build_menu_hide();
+        window_city_set_construction_type(h->building, 0);
+        return 1;
     }
     return 0;
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (handle_build_submenu(m) ||
-        widget_sidebar_city_handle_mouse_build_menu(m) ||
-        handle_input_build_menu_index(h)) {
+    if (handle_hotkeys(h) ||
+        handle_build_submenu(m) ||
+        widget_sidebar_city_handle_mouse_build_menu(m)) {
         return;
     }
     if (input_go_back_requested(m, h) || click_outside_menu(m, get_sidebar_x_offset())) {

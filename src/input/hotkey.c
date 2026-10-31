@@ -1,5 +1,6 @@
 #include "hotkey.h"
 
+#include "building/menu.h"
 #include "building/type.h"
 #include "city/constants.h"
 #include "empire/editor.h"
@@ -516,6 +517,42 @@ static void set_definition_for_action(hotkey_action action, hotkey_definition *d
             break;
         case HOTKEY_CLOSE:
             def->action = &data.hotkey_state.close_pressed;
+            break;
+        case HOTKEY_BUILD_MENU_WATER:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_WATER;
+            break;
+        case HOTKEY_BUILD_MENU_HEALTH:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_HEALTH;
+            break;
+        case HOTKEY_BUILD_MENU_TEMPLES:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_TEMPLES;
+            break;
+        case HOTKEY_BUILD_MENU_EDUCATION:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_EDUCATION;
+            break;
+        case HOTKEY_BUILD_MENU_ENTERTAINMENT:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_ENTERTAINMENT;
+            break;
+        case HOTKEY_BUILD_MENU_ADMINISTRATION:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_ADMINISTRATION;
+            break;
+        case HOTKEY_BUILD_MENU_ENGINEERING:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_ENGINEERING;
+            break;
+        case HOTKEY_BUILD_MENU_SECURITY:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_SECURITY;
+            break;
+        case HOTKEY_BUILD_MENU_INDUSTRY:
+            def->action = &data.hotkey_state.build_menu;
+            def->value = BUILD_MENU_INDUSTRY;
             break;
         default:
             def->action = 0;
