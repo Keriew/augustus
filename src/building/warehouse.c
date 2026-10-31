@@ -165,7 +165,7 @@ static building *building_warehouse_find_space(building *warehouse, int resource
 void building_warehouse_recount_resources(building *main)
 {
     //helper to reflect the resources in the main warehouse, like granary does
-    if (!main || main->type != BUILDING_WAREHOUSE) {
+    if (!main || main->state != BUILDING_STATE_IN_USE || main->type != BUILDING_WAREHOUSE) {
         return;
     }
 
@@ -197,7 +197,7 @@ void building_warehouse_recount_resources(building *main)
 
 int building_warehouse_try_add_resource(building *b, int resource, int quantity, int respect_settings)
 {
-    if (!b || b->id <= 0 || quantity <= 0 || !resource) {
+    if (!b || b->id <= 0 || b->state != BUILDING_STATE_IN_USE || quantity <= 0 || !resource) {
         return 0;
     }
     signed short max_acceptable = respect_settings ?
@@ -253,7 +253,7 @@ int building_warehouses_add_resource(int resource, int amount, int respect_setti
 
 int building_warehouse_try_remove_resource(building *warehouse, int resource, int desired_amount)
 {
-    if (desired_amount <= 0 || !resource) {
+    if (!warehouse || warehouse->id <= 0 || warehouse->state != BUILDING_STATE_IN_USE || desired_amount <= 0 || !resource) {
         return 0;
     }
     if (warehouse->has_plague) {

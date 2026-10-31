@@ -119,7 +119,7 @@ int building_granary_remove_export(building *granary, int resource, int amount, 
 
 int building_granary_try_add_resource(building *granary, int resource, int amount, int is_produced, int respect_settings)
 {
-    if (granary->id <= 0 || !resource_is_food(resource) || granary->type != BUILDING_GRANARY
+    if (!granary || granary->id <= 0 || granary->state != BUILDING_STATE_IN_USE || !resource_is_food(resource) || granary->type != BUILDING_GRANARY
     || ((building_storage_get_state(granary, resource, 1) == BUILDING_STORAGE_STATE_NOT_ACCEPTING) && respect_settings)) {
         return 0;
     }
@@ -165,7 +165,7 @@ int building_granaries_add_resource(int resource, int amount, int respect_settin
 
 int building_granary_try_remove_resource(building *granary, int resource, int desired_amount)
 {
-    if (desired_amount <= 0 || granary->has_plague) {
+    if (!granary || granary->id <= 0 || granary->state != BUILDING_STATE_IN_USE || desired_amount <= 0 || granary->has_plague) {
         return 0;
     }
     int removed;
