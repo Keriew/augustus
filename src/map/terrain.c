@@ -10,6 +10,7 @@
 #include "map/ring.h"
 #include "map/routing.h"
 #include "map/sprite.h"
+#include "map/tiles.h"
 
 #include <string.h>
 
@@ -92,6 +93,22 @@ int map_terrain_get_from_buffer_32(buffer *buf, int grid_offset)
 void map_terrain_set(int grid_offset, int terrain)
 {
     terrain_grid.items[grid_offset] = terrain;
+}
+
+void map_terrain_set_with_tile_update(int grid_offset, int terrain)
+{
+    map_terrain_set(grid_offset, terrain);
+
+    if (terrain & TERRAIN_TREE) {
+        int x = map_grid_offset_to_x(grid_offset);
+        int y = map_grid_offset_to_y(grid_offset);
+        map_tiles_update_region_trees(x, y, x, y);
+    }
+    if (terrain & TERRAIN_SHRUB) {
+        int x = map_grid_offset_to_x(grid_offset);
+        int y = map_grid_offset_to_y(grid_offset);
+        map_tiles_update_region_shrub(x, y, x, y);
+    }
 }
 
 void map_terrain_add(int grid_offset, int terrain)

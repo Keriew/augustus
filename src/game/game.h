@@ -6,6 +6,7 @@ int game_pre_init(void);
 int game_init(void);
 
 int game_init_editor(void);
+int game_init_editor_generated(int size, int generator_algorithm);
 
 int game_reload_language(void);
 

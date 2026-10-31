@@ -11,6 +11,7 @@ void game_file_editor_clear_data(void);
  * @param size Size of the map to create
  */
 void game_file_editor_create_scenario(int size);
+void game_file_editor_create_scenario_generated(int size, int generator_algorithm);
 
 /**
  * Load scenario from disk and init it for using in the editor
