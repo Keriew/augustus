@@ -227,7 +227,8 @@ static struct {
     const char *editor_custom_messages;
     const char *editor_custom_events;
     const char *editor_model_data;
-    const char *community_image;
+    const char *editor_content;
+    const char *content_image;
 } paths = {
     "",
     "config/",
@@ -241,7 +242,8 @@ static struct {
     "editor/messages/",
     "editor/events/",
     "editor/model/",
-    "community/image"
+    "editor/content/",
+    "editor/content/image/"
 };
 
 static void set_assets_directory(void)
@@ -578,8 +580,11 @@ const char *platform_file_manager_get_directory_for_location(int location, const
         case PATH_LOCATION_EDITOR_MODEL_DATA:
             cursor = snprintf(full_path, FILE_NAME_MAX, "%s%s%s", user_directory, slash, paths.editor_model_data);
             break;
-        case PATH_LOCATION_COMMUNITY_IMAGE:
-            cursor = snprintf(full_path, FILE_NAME_MAX, "%s%s%s", user_directory, slash, paths.community_image);
+        case PATH_LOCATION_EDITOR_CONTENT:
+            cursor = snprintf(full_path, FILE_NAME_MAX, "%s%s%s", user_directory, slash, paths.editor_content);
+            break;
+        case PATH_LOCATION_CONTENT_IMAGE:
+            cursor = snprintf(full_path, FILE_NAME_MAX, "%s%s%s", user_directory, slash, paths.content_image);
             break;
     }
 
@@ -744,7 +749,7 @@ int platform_file_manager_create_directory(const char *name, const char *locatio
             if (result == 0) {
                 return 0;
             } else if (!overwrite) {
-                overwrite_last = 1;                
+                overwrite_last = 1;
             }
         }
 #else
