@@ -1922,12 +1922,16 @@ static void draw_background(void)
 {
     check_for_changes();
 
+    // The city view underneath already draws the weather, clipped to the map
+    unsigned int weather_updates = weather_update_count();
     if (data.show_background_image) {
         image_draw_fullscreen_background(image_group(GROUP_INTERMEZZO_BACKGROUND) + 5);
     } else {
         window_draw_underlying_window();
     }
-    update_weather();
+    if (weather_update_count() == weather_updates) {
+        update_weather();
+    }
     graphics_in_dialog();
 
     outer_panel_draw(0, 0, 40, 30);
