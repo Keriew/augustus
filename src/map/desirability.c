@@ -192,7 +192,12 @@ static void update_terrain(void)
             } else if (terrain & TERRAIN_BEACH) {
                 add_to_terrain(x, y, 1, 1, 1, 1, 2); // small +1 desirability boost, range 2
             } else if (terrain & TERRAIN_AQUEDUCT) {
-                add_to_terrain(x, y, 1, -2, 1, 1, 2);
+                const model_building *model = model_get_building(BUILDING_AQUEDUCT);
+                add_to_terrain(x, y, 1,
+                    model->desirability_value,
+                    model->desirability_step,
+                    model->desirability_step_size,
+                    model->desirability_range);
             }
         }
     }
