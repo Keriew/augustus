@@ -872,32 +872,119 @@ void window_building_draw_work_camp(building_info_context *c)
 {
     window_building_play_sound(c, "wavs/tower4.wav");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
-    inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    window_building_draw_employment(c, 140);
-    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 116, c->width_blocks - 2, 6);
+    window_building_draw_employment(c, 120);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 124);
     text_draw_centered(translation_for(TR_BUILDING_WORK_CAMP),
         c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
     if (!c->has_road_access) {
-        window_building_draw_description_at(c, 76, 69, 25);
-    } else
-        text_draw_multiline(translation_for(TR_BUILDING_WORK_CAMP_DESC),
-            c->x_offset + 32, c->y_offset + 76, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
+        window_building_draw_description(c, 69, 25);
+        return;
+    }
+
+    // Building description
+    text_draw_multiline(translation_for(TR_BUILDING_WORK_CAMP_DESC),
+        c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
+
+    // Worker status
+    building *b = building_get(c->building_id);
+    figure *f = figure_get(b->figure_id);
+
+    int x = c->x_offset + 70;
+    int y = c->y_offset + 175;
+
+    if (b->figure_id && f && f->state == FIGURE_STATE_ALIVE && f->building_id == c->building_id) {
+        switch (f->action_state) {
+            default:
+                text_draw(translation_for(TR_BUILDING_WORK_CAMP_STATUS_WAITING), x, y, FONT_NORMAL_BROWN, 0);
+                break;
+
+            case FIGURE_ACTION_204_WORK_CAMP_WORKER_GETTING_RESOURCES:
+            case FIGURE_ACTION_251_WORK_CAMP_WORKER_GETTING_FOR_HIGHWAY_STATION:
+                text_draw(translation_for(TR_BUILDING_WORK_CAMP_STATUS_GETTING_RESOURCES), x, y, FONT_NORMAL_BROWN, 0);
+                break;
+
+            case FIGURE_ACTION_205_WORK_CAMP_WORKER_GOING_TO_MONUMENT:
+            case FIGURE_ACTION_252_WORK_CAMP_WORKER_GOING_TO_HIGHWAY_STATION:
+            {
+                // Draw resource
+                const image *img = image_get(resource_get_data(f->collecting_item_id)->image.icon);
+                int base_height = (22 - img->original.height) / 2;
+                image_draw(resource_get_data(f->collecting_item_id)->image.icon,
+                    x - img->original.width - 10, y - 6 + base_height, COLOR_MASK_NONE, SCALE_NONE);
+
+                // Draw status
+                int width = text_draw(translation_for(TR_BUILDING_WORK_CAMP_STATUS_DELIVERING_RESOURCES),
+                    x, y, FONT_NORMAL_BROWN, 0);
+
+                // Draw destination monument name
+                building *dst = building_get(f->destination_building_id);
+                if (dst && dst->state) {
+                    text_draw(lang_get_string(28, dst->type), x + width, y, FONT_NORMAL_BROWN, 0);
+                }
+                break;
+            }
+        }
+    } else if (b->num_workers) {
+        text_draw(translation_for(TR_BUILDING_WORK_CAMP_STATUS_WAITING), x, y, FONT_NORMAL_BROWN, 0);
+    }
 }
 
 void window_building_draw_architect_guild(building_info_context *c)
 {
     window_building_play_sound(c, ASSETS_DIRECTORY "/Sounds/Engineer.ogg");
     outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
-    inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    window_building_draw_employment(c, 140);
-    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 116, c->width_blocks - 2, 6);
+    window_building_draw_employment(c, 120);
+    window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 124);
     text_draw_centered(translation_for(TR_BUILDING_ARCHITECT_GUILD),
         c->x_offset, c->y_offset + 12, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK, 0);
     if (!c->has_road_access) {
-        window_building_draw_description_at(c, 76, 69, 25);
-    } else
-        text_draw_multiline(translation_for(TR_BUILDING_ARCHITECT_GUILD_DESC),
-            c->x_offset + 32, c->y_offset + 76, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
+        window_building_draw_description(c, 69, 25);
+        return;
+    }
+
+    // Building description
+    text_draw_multiline(translation_for(TR_BUILDING_ARCHITECT_GUILD_DESC),
+        c->x_offset + 32, c->y_offset + 56, BLOCK_SIZE * (c->width_blocks - 4), 0, FONT_NORMAL_BLACK, 0);
+
+    // Architect status
+    building *b = building_get(c->building_id);
+    figure *f = figure_get(b->figure_id);
+
+    int x = c->x_offset + 70;
+    int y = c->y_offset + 175;
+
+    if (b->figure_id && f && f->state == FIGURE_STATE_ALIVE && f->building_id == c->building_id) {
+
+        const uint8_t *status = translation_for(TR_BUILDING_ARCHITECT_GUILD_STATUS_WAITING);
+        building *dst = NULL;
+
+        switch (f->action_state) {
+            default:
+                break;
+
+            case FIGURE_ACTION_207_WORK_CAMP_ARCHITECT_GOING_TO_MONUMENT:
+                status = translation_for(TR_BUILDING_ARCHITECT_GUILD_STATUS_GOING_TO_WORK);
+                dst = building_get(f->destination_building_id);
+                break;
+
+            case FIGURE_ACTION_208_WORK_CAMP_ARCHITECT_WORKING_ON_MONUMENT:
+                status = translation_for(TR_BUILDING_ARCHITECT_GUILD_STATUS_WORKING);
+                dst = building_get(f->destination_building_id);
+                break;
+        }
+
+        int width = text_draw(status, x, y, FONT_NORMAL_BROWN, 0);
+
+        if (dst && dst->state) {
+            text_draw(lang_get_string(28, dst->type), x + width, y, FONT_NORMAL_BROWN, 0);
+        }
+
+    } else if (b->num_workers) {
+        text_draw(translation_for(TR_BUILDING_ARCHITECT_GUILD_STATUS_WAITING),
+            x, y, FONT_NORMAL_BROWN, 0);
+    }
 }
 
 void window_building_draw_tavern(building_info_context *c)
