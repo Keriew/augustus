@@ -43,6 +43,7 @@ typedef struct {
     int mothball_toggle;
     int storage_order;
     int delete_empire_object;
+    // only set while the build menu is open: 1-based item index from the number row
     int build_menu_index_num;
     int empire_tool;
     int pick_empire_tool;

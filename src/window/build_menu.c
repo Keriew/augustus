@@ -242,13 +242,13 @@ static void draw_menu_buttons(void)
         int type = building_menu_type(data.selected_submenu, item_index);
 
         int menu_index = 0;
-        if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && i < 10) {
+        if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && i < 12) {
             menu_index = i + 1;
         }
 
         if (is_auto_cycle_button(type)) {
             if (menu_index > 0) {
-                text_draw_build_menu_with_index(translation_for(TR_AUTO_CYCLE_TEMPLES), menu_index % 10,
+                text_draw_build_menu_with_index(translation_for(TR_AUTO_CYCLE_TEMPLES), menu_index,
                 item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
                 MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
             } else {
@@ -286,7 +286,7 @@ static void draw_menu_buttons(void)
         }
 
         if (menu_index > 0) {
-            text_draw_build_menu_with_index(menu_name, menu_index % 10, item_x_align + MENU_TEXT_X_OFFSET,
+            text_draw_build_menu_with_index(menu_name, menu_index, item_x_align + MENU_TEXT_X_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i, MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
         } else {
             text_draw_centered(menu_name, item_x_align + text_offset, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
