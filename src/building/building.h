@@ -257,6 +257,8 @@ int building_can_repair(building *b);
 
 int building_repair_cost_at(int grid_offset);
 
+int building_occupies_grid(building *b, int grid_offset);
+
 void building_clear_related_data(building *b);
 
 void building_delete(building *b);

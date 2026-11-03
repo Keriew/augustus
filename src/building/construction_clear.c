@@ -242,17 +242,22 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
                             map_building_set_rubble_grid_building_id(grid_offset, 0, 1); // remove rubble marker
                             building *rubble_building = building_get(rubble_id);
 
-                            if (rubble_building->state == BUILDING_STATE_RUBBLE ||
-                                rubble_building->type == BUILDING_BURNING_RUIN) {
-                                int ruins_left = map_building_ruins_left(rubble_id);
-                                if (!ruins_left) { //dont remove buildings until their last rubble is gone
+                            // Make sure that rubble_building is on this location.
+                            // Some destroyed buildings used to be deleted right away.
+                            // This can give rubble_building a completly different building.
+                            if (building_occupies_grid(rubble_building, grid_offset)) {
+                                if (rubble_building->state == BUILDING_STATE_RUBBLE ||
+                                    rubble_building->type == BUILDING_BURNING_RUIN) {
+                                    int ruins_left = map_building_ruins_left(rubble_id);
+                                    if (!ruins_left) { //dont remove buildings until their last rubble is gone
+                                        rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
+                                    }
+                                } else if (rubble_building->state == BUILDING_STATE_UNUSED) {
+                                    // intentional fallthrough - unused buildings are corrupt if they exist on the grid.
+                                    // dont change state, just remove reference on the grid - addressed after if {} block
+                                } else {
                                     rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
                                 }
-                            } else if (rubble_building->state == BUILDING_STATE_UNUSED) {
-                                // intentional fallthrough - unused buildings are corrupt if they exist on the grid.
-                                // dont change state, just remove reference on the grid - addressed after if {} block
-                            } else {
-                                rubble_building->state = BUILDING_STATE_DELETED_BY_GAME;
                             }
                         }
                     }
