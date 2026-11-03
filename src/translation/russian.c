@@ -2397,6 +2397,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_BEACH, "Пляж"},
     {TR_TERRAIN_BEACH, "Пляж"},
     {TR_TERRAIN_BEACH_DESC, "Пляж с мелким песком. Радует глаз и привлекает любителей неспешных прогулок вдоль берега. Он также служит богатым источником песка и глины для города."},
+    {TR_CHEAT_FILL_MARKETS, "Все рынки заполнены едой и товарами"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
