@@ -8,6 +8,8 @@
 
 int building_get_barracks_for_weapon(int x, int y, int resource, int road_network_id, map_point *dst);
 
+int building_barracks_free_weapon_slots(int road_network_id);
+
 void building_barracks_add_weapon(building *barracks);
 
 int building_barracks_create_soldier(building *barracks, int x, int y);

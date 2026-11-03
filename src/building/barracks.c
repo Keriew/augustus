@@ -74,6 +74,25 @@ int building_get_barracks_for_weapon(int x, int y, int resource, int road_networ
     return 0;
 }
 
+int building_barracks_free_weapon_slots(int road_network_id)
+{
+    if (city_resource_is_stockpiled(RESOURCE_WEAPONS)) {
+        return 0;
+    }
+    int slots = 0;
+    for (building *b = building_first_of_type(BUILDING_BARRACKS); b; b = b->next_of_type) {
+        if (is_valid_destination(b, road_network_id)) {
+            slots += MAX_WEAPONS_BARRACKS - b->resources[RESOURCE_WEAPONS];
+        }
+    }
+    building *monument = building_first_of_type(BUILDING_GRAND_TEMPLE_MARS);
+    if (monument && monument->monument.phase == MONUMENT_FINISHED &&
+        is_valid_destination(monument, road_network_id)) {
+        slots += MAX_WEAPONS_BARRACKS - monument->resources[RESOURCE_WEAPONS];
+    }
+    return slots;
+}
+
 void building_barracks_add_weapon(building *barracks)
 {
     if (barracks->id > 0) {
