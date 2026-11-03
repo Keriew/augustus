@@ -1,9 +1,12 @@
 #ifndef WINDOW_CITY_H
 #define WINDOW_CITY_H
 
+#include "building/type.h"
 #include "graphics/weather.h"
 
 int window_city_military_is_cursor_in_menu(void);
+
+void window_city_set_construction_type(building_type type, int rotation);
 
 void window_city_draw_all(void);
 void window_city_draw_panels(void);

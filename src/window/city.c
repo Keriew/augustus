@@ -47,6 +47,7 @@
 #include "widget/sidebar/extra.h"
 #include "widget/sidebar/military.h"
 #include "window/advisors.h"
+#include "window/build_menu.h"
 #include "window/building_info.h"
 #include "window/empire.h"
 #include "window/file_dialog.h"
@@ -728,7 +729,7 @@ static void toggle_pause(void)
     city_warning_clear_all();
 }
 
-static void set_construction_building_type(building_type type, int rotation)
+void window_city_set_construction_type(building_type type, int rotation)
 {
     if (scenario_allowed_building(type) && building_menu_is_enabled(type)) {
         building_construction_cancel();
@@ -837,7 +838,7 @@ static void handle_hotkeys(const hotkeys *h)
         building_rotation_rotate_backward();
     }
     if (h->building) {
-        set_construction_building_type(h->building, 0);
+        window_city_set_construction_type(h->building, 0);
     }
     if (h->undo) {
         game_undo_perform();
@@ -871,7 +872,7 @@ static void handle_hotkeys(const hotkeys *h)
         building_type type = building_clone_type_from_grid_offset(widget_city_current_grid_offset());
         int rotation = building_clone_rotation_from_grid_offset(widget_city_current_grid_offset());
         if (type) {
-            set_construction_building_type(type, rotation);
+            window_city_set_construction_type(type, rotation);
         }
 
     }
@@ -896,6 +897,9 @@ static void handle_hotkeys(const hotkeys *h)
     }
     if (h->show_messages) {
         window_message_list_show();
+    }
+    if (h->build_menu && !building_construction_in_progress() && building_menu_count_items(h->build_menu) > 0) {
+        window_build_menu_show(h->build_menu);
     }
 }
 
