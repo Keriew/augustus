@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<locales version="1">
+    <locale id="pt-BR" aliases="pt-br|pt_BR|portuguese" default-for="pt"/>
+</locales>

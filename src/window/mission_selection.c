@@ -43,7 +43,7 @@ static struct {
         const char *intro_video;
         int total_scenarios;
         int background_image_id;
-        const uint8_t *title;
+        int first_scenario;
         const campaign_scenario **scenarios;
     } mission;
 } data;
@@ -52,7 +52,7 @@ static void clear_loaded_mission(void)
 {
     free(data.mission.scenarios);
     data.mission.scenarios = 0;
-    data.mission.title = 0;
+    data.mission.first_scenario = -1;
     data.mission.background_image_id = 0;
     data.mission.total_scenarios = 0;
     data.choice = 0;
@@ -61,7 +61,7 @@ static void clear_loaded_mission(void)
 static void load_scenarios(void)
 {
     const campaign_mission_info *mission = game_campaign_get_current_mission(scenario_campaign_mission());
-    data.mission.title = mission->title;
+    data.mission.first_scenario = mission->first_scenario;
     data.mission.total_scenarios = mission->total_scenarios;
     data.mission.intro_video = mission->intro_video;
     if (mission->background_image.path) {
@@ -121,16 +121,20 @@ static void draw_background(void)
         image_draw(image_group(GROUP_EMPIRE_MAP), 0, 0, COLOR_MASK_NONE, 2.5f);
     }
     graphics_reset_clip_rectangle();
-    if (data.mission.title) {
-        text_draw(data.mission.title, 20, 410, FONT_LARGE_BLACK, 0);
+    const uint8_t *title = game_campaign_display_mission_title(data.mission.first_scenario);
+    if (title) {
+        // Leave space for the mission buttons, which start at x = 530.
+        text_draw_ellipsized(title, 20, 410, 500, FONT_LARGE_BLACK, 0);
     }
     if (data.choice) {
         const campaign_scenario *camp_scenario = data.mission.scenarios[data.choice - 1];
-        if (camp_scenario->name) {
-            text_draw_multiline(camp_scenario->name, 20, 440, 560, 0, FONT_NORMAL_BLACK, 0);
+        const uint8_t *name = game_campaign_display_scenario_name(camp_scenario->id);
+        const uint8_t *description = game_campaign_display_scenario_description(camp_scenario->id);
+        if (name) {
+            text_draw_ellipsized(name, 20, 440, 560, FONT_NORMAL_BLACK, 0);
         }
-        if (camp_scenario->description) {
-            text_draw_multiline(camp_scenario->description, 20, 456, 560, 0, FONT_NORMAL_BLACK, 0);
+        if (description) {
+            text_draw_multiline(description, 20, 456, 560, 0, FONT_NORMAL_BLACK, 0);
         }
     } else {
         lang_text_draw_multiline(144, 0, 20, 440, 560, FONT_NORMAL_BLACK);
