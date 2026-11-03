@@ -12,6 +12,10 @@
 
 #define BUILDING_OUTSKIRTS_DESIRABILITY_MALUS -15
 
+// Ticks of cooldown before new advanced sentiment logic will be applied
+// for the house building. Each tick is equal to 8 days (half of month).
+#define ADVANCED_SENTIMENT_COOLDOWN_TICKS 36
+
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
     ORDER_CONDITION_ALWAYS,
@@ -187,11 +191,12 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_close_to_water;
-    unsigned char storage_id; //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
+    unsigned char storage_id;  //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
     union {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
+    uint8_t cooldown_advanced_sentiment;
     unsigned char has_problem;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;

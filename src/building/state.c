@@ -201,6 +201,13 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->is_close_to_water);
     buffer_write_u8(buf, b->storage_id);
     buffer_write_i8(buf, b->sentiment.house_happiness); // which union field we use does not matter
+
+    if (building_is_house(b->type)) {
+        buffer_write_u8(buf, b->cooldown_advanced_sentiment);
+    } else {
+        buffer_skip(buf, sizeof(b->cooldown_advanced_sentiment));
+    }
+
     buffer_write_u8(buf, b->has_problem);
 
     // expanded building data
@@ -555,6 +562,13 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->is_close_to_water = buffer_read_u8(buf);
     b->storage_id = buffer_read_u8(buf);
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
+    if (save_version >= SAVE_GAME_LAST_ADVANCED_SENTIMENT) {
+        if (building_is_house(b->type)) {
+            b->cooldown_advanced_sentiment = buffer_read_u8(buf);
+        } else {
+            buffer_skip(buf, sizeof(b->cooldown_advanced_sentiment));
+        }
+    }
     b->has_problem = buffer_read_u8(buf);
 
     // Wharves produce fish and don't need any progress
