@@ -18,7 +18,7 @@ enum {
 };
 
 /**
- * Sets the base path for Julius
+ * Sets the base path for Augustus
  * @param path The path to be set as the base
  * @return true if the base path was correctly set, false otherwise
  */

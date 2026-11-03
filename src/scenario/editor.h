@@ -6,7 +6,8 @@
 void scenario_editor_create(int map_size);
 
 int scenario_editor_is_saved(void);
-void scenario_editor_set_as_saved(void);
+int scenario_editor_has_been_saved_once(void);
+void scenario_editor_set_as_saved(int manually);
 void scenario_editor_set_as_unsaved(void);
 
 void scenario_editor_set_native_images(int image_alt_hut, int image_native_decoration,

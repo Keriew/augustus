@@ -1,6 +1,7 @@
 #include "user_path.h"
 
 #include "core/file.h"
+#include "core/string.h"
 #include "platform/file_manager.h"
 #include "platform/prefs.h"
 #include "platform/platform.h"
@@ -40,8 +41,64 @@ void platform_user_path_create_subdirectories(void)
         }
         const char *new_directory = platform_file_manager_get_directory_for_location(i, 0);
         if (*new_directory) {
-            platform_file_manager_create_directory(new_directory, pref_user_dir(), 0);
+            if (!(platform_file_manager_create_directory(new_directory, pref_user_dir(), 0))) {
+                continue; // don't copy again if the path already exists
+            }
+            if (i == PATH_LOCATION_EDITOR_CONTENT) {
+                // copy the community folder into editor/contents on creation
+                char *paths[] = {
+                    "audio",
+                    "image",
+                    "video",
+                    0
+                };
+                for (int j = 0; paths[j]; j++) {
+                    char source[FILE_NAME_MAX];
+                    char destination[FILE_NAME_MAX];
+                    snprintf(source, FILE_NAME_MAX, "%s/%s",
+                        platform_file_manager_get_directory_for_location(PATH_LOCATION_COMMUNITY, 0), paths[j]);
+                    snprintf(destination, FILE_NAME_MAX, "%s/%s",
+                        platform_file_manager_get_directory_for_location(PATH_LOCATION_EDITOR_CONTENT, 0), paths[j]);
+                    if (!source[0] || !destination[0]) {
+                        continue;
+                    }
+                    platform_file_manager_copy_directory(source, destination, 0);
+                }
+            }
         }
+    }
+}
+
+void plaform_user_path_wrap_scenarios_in_dirs(void)
+{
+    const dir_listing *listing = dir_find_files_with_extension_at_location(PATH_LOCATION_SCENARIO, "map");
+    listing = dir_append_files_with_extension("mapx");
+    if (!listing) {
+        return;
+    }
+    for (int i = 0; i < listing->num_files; i++) {
+        char foldername[FILE_NAME_MAX];
+        string_copy((const uint8_t *)listing->files[i].name, (uint8_t *)foldername, FILE_NAME_MAX);
+        file_remove_extension(foldername);
+        char new_directory[FILE_NAME_MAX];
+        snprintf(new_directory, FILE_NAME_MAX, "%s/%s",
+            platform_file_manager_get_directory_for_location(PATH_LOCATION_SCENARIO, 0), foldername);
+        if (!(platform_file_manager_create_directory(new_directory, pref_user_dir(), 0))) {
+            continue; // if creating directory fails continue with next
+        }
+
+        char filename[FILE_NAME_MAX];
+        char new_filename[FILE_NAME_MAX];
+        snprintf(filename, FILE_NAME_MAX, "%s/%s",
+            platform_file_manager_get_directory_for_location(PATH_LOCATION_SCENARIO, 0), listing->files[i].name);
+        snprintf(new_filename, FILE_NAME_MAX, "%s/%s", new_directory, listing->files[i].name);
+
+        if (!(platform_file_manager_copy_file(filename, new_filename))) {
+            continue; // if copying file fails continue with next
+        }
+
+        // after copy remove file
+        platform_file_manager_remove_file(filename);
     }
 }
 
@@ -83,8 +140,7 @@ void platform_user_path_copy_files(const char *original_user_path, int overwrite
                 listing = dir_append_files_with_extension("svx");
                 break;
             case PATH_LOCATION_SCENARIO:
-                listing = dir_find_files_with_extension(original_directory, "map");
-                listing = dir_append_files_with_extension("mapx");
+                has_subdirectories = 1;
                 break;
             case PATH_LOCATION_CAMPAIGN:
                 listing = dir_find_files_with_extension(original_directory, "campaign");
@@ -95,11 +151,13 @@ void platform_user_path_copy_files(const char *original_user_path, int overwrite
                 listing = dir_append_files_with_extension("bmp");
                 break;
             case PATH_LOCATION_COMMUNITY:
+            case PATH_LOCATION_EDITOR_CONTENT:
                 has_subdirectories = 1;
                 break;
             case PATH_LOCATION_EDITOR_CUSTOM_EMPIRES:
             case PATH_LOCATION_EDITOR_CUSTOM_MESSAGES:
             case PATH_LOCATION_EDITOR_CUSTOM_EVENTS:
+            case PATH_LOCATION_EDITOR_MODEL_DATA:
                 listing = dir_find_files_with_extension(original_directory, "xml");
                 break;
             default:
