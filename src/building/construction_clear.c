@@ -93,6 +93,10 @@ unsigned int building_construction_clear_select(int x_start, int y_start, int x_
                 continue;
             } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) { // keep the "bridge is free" bug from C3
                 continue;
+            } else if (map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
+                continue;
+            } else if (map_terrain_is(grid_offset, TERRAIN_BEACH)) {
+                continue;
             } else if (map_terrain_is(grid_offset, TERRAIN_AQUEDUCT)) {
                 items_placed++;
             } else if (map_terrain_is(grid_offset, TERRAIN_HIGHWAY)) {
@@ -133,6 +137,12 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
             if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP)) {
                 continue;
             }
+            if (map_terrain_is(grid_offset, TERRAIN_MARSHLAND)) {
+                continue;
+            }
+            if (map_terrain_is(grid_offset, TERRAIN_BEACH)) {
+                continue;
+            }
 
             if (map_terrain_is(grid_offset, TERRAIN_BUILDING) && is_shared_building_at(grid_offset)) {
 
@@ -168,7 +178,7 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
                     }
                 }
                 if (b->house_size && b->house_population) {
-                    figure *homeless = figure_create_homeless(b, b->house_population);
+                    figure *homeless = figure_create_homeless(b, b->house_population, 1);
                     b->house_population = 0;
                     b->figure_id = homeless->id;
                 }

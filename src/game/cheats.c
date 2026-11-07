@@ -2,6 +2,7 @@
 
 #include "building/construction.h"
 #include "building/destruction.h"
+#include "building/market.h"
 #include "building/menu.h"
 #include "building/monument.h"
 #include "building/type.h"
@@ -57,6 +58,7 @@ static void game_cheat_disable_invasions(uint8_t *);
 static void game_cheat_change_weather(uint8_t *);
 static void game_cheat_destroy_building(uint8_t *);
 static void game_cheat_change_monument_resources(uint8_t *args);
+static void game_cheat_fill_markets(uint8_t *args);
 
 static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_add_money,
@@ -79,7 +81,8 @@ static void (*const execute_command[])(uint8_t *args) = {
     game_cheat_disable_invasions,
     game_cheat_change_weather,
     game_cheat_destroy_building,
-    game_cheat_change_monument_resources
+    game_cheat_change_monument_resources,
+    game_cheat_fill_markets
 };
 
 static const char *commands[] = {
@@ -103,7 +106,8 @@ static const char *commands[] = {
     "leavemealone",
     "weather",                  // syntax: weather <weather_type> <intensity>
     "destroy",                  // syntax: destroy <building_id> <destruction_type>
-    "arbeitszeitbetrug"         // syntax: arbeitszeitbetrug <building_type> <stage> <resource> <amount>
+    "arbeitszeitbetrug",        // syntax: arbeitszeitbetrug <building_type> <stage> <resource> <amount>
+    "fattestladies"
 };
 
 #define NUMBER_OF_COMMANDS sizeof (commands) / sizeof (commands[0])
@@ -114,6 +118,7 @@ static struct {
     int extra_legions_unlocked;
     int disabled_legions_consumption;
     int disabled_invasions;
+    int filled_markets;
 } data;
 
 static int parse_word(uint8_t *string, uint8_t *word)
@@ -410,6 +415,23 @@ static void game_cheat_change_monument_resources(uint8_t *args)
 
     building_monument_stage_resource_set(monument, stage, resource, amount);
     show_warning(TR_CHEAT_CHANGED_MONUMENT_RESOURCES);
+}
+
+static void game_cheat_fill_markets(uint8_t *args)
+{
+    building_market_fill_markets();
+    data.filled_markets = 1;
+    show_warning(TR_CHEAT_FILL_MARKETS);
+}
+
+int game_cheat_filled_markets(void)
+{
+    return data.filled_markets;
+}
+
+void game_cheat_reset_markets_filled(void)
+{
+    data.filled_markets = 0;
 }
 
 void game_cheat_parse_command(uint8_t *command)

@@ -329,6 +329,11 @@ static void set_param_value(int value)
             return;
         case 3:
             data.action->parameter3 = value;
+            if (data.action->type == ACTION_TYPE_CUSTOM_VARIABLE_CITY_PROPERTY &&
+                data.action->parameter2 == CITY_PROPERTY_QUOTA_FILL) {
+                int resource_id = window_editor_select_city_trade_route_decode_resource_id(data.action->parameter4);
+                data.action->parameter4 = window_editor_select_city_trade_route_encode_route_resource(value, resource_id);
+            }
             return;
         case 4:
             data.action->parameter4 = value;

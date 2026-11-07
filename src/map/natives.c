@@ -327,7 +327,8 @@ void map_natives_init_editor(void)
                 // (variant kept on the building too for save round-trip).
                 int crop_offset = image_id - image_crops;
                 if (image_aux_is_loaded()) {
-                    map_image_set(grid_offset, image_group_aux(GROUP_BUILDING_FARM_CROPS) + crop_offset);
+                    map_image_set(grid_offset, image_group_aux(GROUP_BUILDING_FARM_CROPS) +
+                        building_image_get_native_crop_offset(crop_offset / 5));
                 } else {
                     map_image_set(grid_offset, image_group(GROUP_EDITOR_BUILDING_CROPS));
                 }

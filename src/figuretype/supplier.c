@@ -21,6 +21,7 @@
 #include "map/data.h"
 #include "map/road_access.h"
 #include "map/road_network.h"
+#include "scenario/property.h"
 
 int figure_supplier_max_stocked_mess_hall_adjusted(void)
 {
@@ -54,50 +55,72 @@ int figure_supplier_create_delivery_boy(int leader_id, int first_figure_id, int 
 
 static int take_food_from_granary(figure *f, int market_id, int granary_id)
 {
-    resource_type resource = f->collecting_item_id;
-
-    if (!resource_is_food(resource)) {
-        return 0;
-    }
     building *granary = building_get(granary_id);
     building *market = building_get(market_id);
-
-    int market_units = market->resources[resource];
-    int max_units = 0;
-    int granary_loads_stored = building_granary_count_available_resource(granary, resource, 1);
-    int granary_loads_take = 0;
-
-    if (market->type == BUILDING_MESS_HALL) {
-        max_units = figure_supplier_max_stocked_mess_hall_adjusted() - market_units;
-    } else if (market->type == BUILDING_CARAVANSERAI) {
-        max_units = MAX_FOOD_STOCKED_CARAVANSERAI - market_units;
-    } else {
-        max_units = MAX_FOOD_STOCKED_MARKET - market_units;
-    }
-    if (granary_loads_stored > (max_units / RESOURCE_ONE_LOAD)) {
-        granary_loads_take = (max_units / RESOURCE_ONE_LOAD);
-    } else {
-        granary_loads_take = granary_loads_stored;
-    }
-    if (!granary_loads_take) {
+    if (market->type == BUILDING_MARKET && scenario_property_rome_supplies_wheat()) {
         return 0;
     }
-    int amount_taken = building_granary_try_remove_resource(granary, resource, granary_loads_take);
-    city_finance_trade_ledger_add_consumed(resource, amount_taken);
 
-    // create delivery boys
-    int type = FIGURE_DELIVERY_BOY;
+    int total_loads = 0;
+    int max_units = 0;
+    if (market->type == BUILDING_MESS_HALL) {
+        max_units = figure_supplier_max_stocked_mess_hall_adjusted();
+    } else if (market->type == BUILDING_CARAVANSERAI) {
+        max_units = MAX_FOOD_STOCKED_CARAVANSERAI;
+    } else {
+        max_units = MAX_FOOD_STOCKED_MARKET;
+    }
+    int max_loads = max_units / RESOURCE_ONE_LOAD;
+
+    int boy_figure_type = FIGURE_DELIVERY_BOY;
     if (f->type == FIGURE_MESS_HALL_SUPPLIER) {
-        type = FIGURE_MESS_HALL_COLLECTOR;
+        boy_figure_type = FIGURE_MESS_HALL_COLLECTOR;
     } else if (f->type == FIGURE_CARAVANSERAI_SUPPLIER) {
-        type = FIGURE_CARAVANSERAI_COLLECTOR;
+        boy_figure_type = FIGURE_CARAVANSERAI_COLLECTOR;
     }
-    int leader_id = f->id;
     int previous_boy = f->id;
-    for (int i = 0; i < amount_taken; i++) {
-        previous_boy = figure_supplier_create_delivery_boy(previous_boy, leader_id, type);
+
+    for (resource_type r = RESOURCE_MIN_FOOD; r < RESOURCE_MAX_FOOD && total_loads < max_loads; r++) {
+        int needed =             
+            building_distribution_resource_is_handled(r, market->type) &&
+            building_distribution_is_good_accepted(market, r);
+        if (!needed) {
+            continue;
+        }
+
+        int loads_remaining = max_loads - total_loads;
+        int market_capacity = max_units - market->resources[r];
+        int loads_to_take = market_capacity / RESOURCE_ONE_LOAD;
+        int available = building_granary_count_available_resource(granary, r, 1);
+        if (loads_to_take > available) {
+            loads_to_take = available;
+        }
+        if (loads_to_take > loads_remaining) {
+            loads_to_take = loads_remaining;
+        }
+        if (loads_to_take <= 0) {
+            continue;
+        }
+
+        int amount_taken = building_granary_try_remove_resource(granary, r, loads_to_take);
+        if (amount_taken <= 0) {
+            continue;
+        }
+        city_finance_trade_ledger_add_consumed(r, amount_taken);
+        total_loads += amount_taken;
+
+        // create delivery boys
+        for (int i = 0; i < amount_taken; i++) {
+            previous_boy = figure_supplier_create_delivery_boy(previous_boy, f->id, boy_figure_type);
+            figure_get(previous_boy)->collecting_item_id = r;
+        }
     }
-    return 1;
+
+    if (total_loads > 0) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 // Venus Grand Temple wine

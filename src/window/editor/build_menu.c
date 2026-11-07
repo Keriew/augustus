@@ -64,7 +64,7 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     TR_EDITOR_RUBBLE, -1},
     {23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, -1},
     {TR_EDITOR_TOOL_EARTHQUAKE_POINT, TR_EDITOR_TOOL_EARTHQUAKE_CUSTOM, TR_EDITOR_TOOL_EARTHQUAKE_REMOVE, -1},
-    {TR_EDITOR_TOOL_WATER, TR_EDITOR_TOOL_SHALLOW, -1},
+    {TR_EDITOR_TOOL_WATER, TR_EDITOR_TOOL_SHALLOW, TR_EDITOR_TOOL_MARSHLAND, -1},
     {TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_WHEAT,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_VEGETABLES,
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_FRUIT,
@@ -73,6 +73,7 @@ static const int MENU_TYPES[MENU_NUM_ITEMS][MAX_ITEMS_PER_MENU] = {
     TR_EDITOR_SCENARIO_BUILDING_NATIVE_FIELD_PIG, -1},
     {TR_EDITOR_SCENARIO_BUILDING_LOW_BRIDGE,
     TR_EDITOR_SCENARIO_BUILDING_SHIP_BRIDGE, -1},
+    {TR_EDITOR_TOOL_LAND, TR_EDITOR_TOOL_BEACH, -1},
 };
 
 static struct {
@@ -245,6 +246,13 @@ static void button_menu_item(const generic_button *button)
             switch (index) {
                 case 0: editor_tool_set_type(TOOL_WATER); break;
                 case 1: editor_tool_set_type(TOOL_SHALLOW); break;
+                case 2: editor_tool_set_type(TOOL_MARSHLAND); break;
+            }
+            break;
+        case MENU_LAND:
+            switch (index) {
+                case 0: editor_tool_set_type(TOOL_GRASS); break;
+                case 1: editor_tool_set_type(TOOL_BEACH); break;
             }
             break;
     }
