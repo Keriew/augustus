@@ -336,7 +336,7 @@ void city_resource_calculate_warehouse_stocks(void)
     }
 }
 
-static int resource_available_by_events(resource_type r)
+int city_resource_available_by_events(resource_type r)
 {
     // iterate through all events and their actions
     for (unsigned int i = 0; i < scenario_events_get_count(); i++) {
@@ -378,14 +378,15 @@ void city_resource_determine_available(int storable_only)
         if (!resource_is_storable(r)) {
             continue;
         }
-        if (empire_can_produce_resource(r) || empire_can_import_resource(r) || resource_available_by_events(r)) {
+        if (empire_can_produce_resource(r) || empire_can_import_resource(r) || city_resource_available_by_events(r) ||
+            (game_cheat_filled_markets() && resource_is_inventory(r))) {
             available.resource_list.items[available.resource_list.size++] = r;
             potential.resource_list.items[potential.resource_list.size++] = r;
             if (resource_is_food(r)) {
                 available.food_list.items[available.food_list.size++] = r;
                 potential.food_list.items[potential.food_list.size++] = r;
             }
-        } else if (empire_can_produce_resource_potentially(r) || empire_can_import_resource_potentially(r) || resource_available_by_events(r)) {
+        } else if (empire_can_produce_resource_potentially(r) || empire_can_import_resource_potentially(r) || city_resource_available_by_events(r)) {
             potential.resource_list.items[potential.resource_list.size++] = r;
             if (resource_is_food(r)) {
                 potential.food_list.items[potential.food_list.size++] = r;
@@ -397,14 +398,15 @@ void city_resource_determine_available(int storable_only)
             if (resource_is_storable(r)) {
                 continue;
             }
-            if (empire_can_produce_resource(r) || empire_can_import_resource(r) || resource_available_by_events(r)) {
+            if (empire_can_produce_resource(r) || empire_can_import_resource(r) || city_resource_available_by_events(r) ||
+                (game_cheat_filled_markets() && resource_is_inventory(r))) {
                 available.resource_list.items[available.resource_list.size++] = r;
                 potential.resource_list.items[potential.resource_list.size++] = r;
                 if (resource_is_food(r)) {
                     available.food_list.items[available.food_list.size++] = r;
                     potential.food_list.items[potential.food_list.size++] = r;
                 }
-            } else if (empire_can_produce_resource_potentially(r) || empire_can_import_resource_potentially(r) || resource_available_by_events(r)) {
+            } else if (empire_can_produce_resource_potentially(r) || empire_can_import_resource_potentially(r) || city_resource_available_by_events(r)) {
                 potential.resource_list.items[potential.resource_list.size++] = r;
                 if (resource_is_food(r)) {
                     potential.food_list.items[potential.food_list.size++] = r;

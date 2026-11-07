@@ -119,6 +119,9 @@ static void advance_earthquake_to_tile(int x, int y)
     map_tiles_clear_highway(grid_offset, 0);
     map_terrain_set(grid_offset, 0);
     map_tiles_set_earthquake(x, y);
+    // marshland and beaches on land are destroyed too: clear their overlay and fix the neighbours' edges
+    map_tiles_update_region_marshland(x - 1, y - 1, x + 1, y + 1);
+    map_tiles_update_region_beach(x - 1, y - 1, x + 1, y + 1);
     map_tiles_update_all_empty_land();
     map_tiles_update_all_gardens();
     map_tiles_update_all_roads();

@@ -82,4 +82,6 @@ void city_resource_calculate_food_stocks_and_supply_wheat(void);
 
 void city_resource_consume_food(void);
 
+int city_resource_available_by_events(resource_type r);
+
 #endif // CITY_RESOURCE_H

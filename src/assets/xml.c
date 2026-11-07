@@ -51,6 +51,19 @@ static void set_asset_image_base_path(const char *name)
     snprintf(data.base_path, FILE_NAME_MAX, "%s/%s", ASSETS_IMAGE_PATH, name);
 }
 
+// source="aux" picks the auxiliary main file (c3.555 in editor mode). We add an
+// "aux:" prefix to the group so the layer code knows where to look.
+static const char *get_group_attribute(char *buffer, size_t size)
+{
+    const char *group = xml_parser_get_attribute_string("group");
+    const char *source = xml_parser_get_attribute_string("source");
+    if (source && group && strcmp(source, "aux") == 0) {
+        snprintf(buffer, size, "aux:%s", group);
+        return buffer;
+    }
+    return group;
+}
+
 static int xml_start_assetlist_element(void)
 {
     data.current_group = group_get_new();
@@ -81,7 +94,8 @@ static int xml_start_image_element(void)
     const char *path = xml_parser_get_attribute_string("src");
     img->img.width = xml_parser_get_attribute_int("width");
     img->img.height = xml_parser_get_attribute_int("height");
-    const char *group = xml_parser_get_attribute_string("group");
+    char group_buffer[32];
+    const char *group = get_group_attribute(group_buffer, sizeof(group_buffer));
     const char *image_id = xml_parser_get_attribute_string("image");
     img->img.is_isometric = xml_parser_get_attribute_bool("isometric");
     if (img->img.is_isometric) {
@@ -108,7 +122,8 @@ static int xml_start_layer_element(void)
     static const char *mask_values[2] = { "grayscale", "alpha" };
 
     const char *path = xml_parser_get_attribute_string("src");
-    const char *group = xml_parser_get_attribute_string("group");
+    char group_buffer[32];
+    const char *group = get_group_attribute(group_buffer, sizeof(group_buffer));
     const char *image_id = xml_parser_get_attribute_string("image");
     int src_x = xml_parser_get_attribute_int("src_x");
     int src_y = xml_parser_get_attribute_int("src_y");
@@ -163,7 +178,8 @@ static int xml_start_frame_element(void)
     }
 
     const char *path = xml_parser_get_attribute_string("src");
-    const char *group = xml_parser_get_attribute_string("group");
+    char group_buffer[32];
+    const char *group = get_group_attribute(group_buffer, sizeof(group_buffer));
     const char *image_id = xml_parser_get_attribute_string("image");
     int src_x = xml_parser_get_attribute_int("src_x");
     int src_y = xml_parser_get_attribute_int("src_y");

@@ -60,6 +60,7 @@ figure *figure_create(figure_type type, int x, int y, direction_type dir)
     f->cross_country_y = 15 * y;
     f->progress_on_tile = 15;
     f->progress_to_next_tick = 0;
+    f->beach_slowdown_accumulator = 0;
     f->dont_draw_elevated = 0;
     f->disallow_diagonal = 0;
     f->resource_id = RESOURCE_NONE;

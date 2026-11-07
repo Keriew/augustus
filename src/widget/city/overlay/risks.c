@@ -130,9 +130,12 @@ static int show_building_problems(const building *b)
 static int show_building_native(const building *b)
 {
     return b->type == BUILDING_NATIVE_HUT || b->type == BUILDING_NATIVE_HUT_ALT ||
+        b->type == BUILDING_NATIVE_HUT_ALT_2 || b->type == BUILDING_NATIVE_LARGE_HUT_ALT ||
+        b->type == BUILDING_NATIVE_LARGE_HUT_ALT_2 ||
         b->type == BUILDING_NATIVE_MEETING || b->type == BUILDING_MISSION_POST || b->type == BUILDING_NATIVE_CROPS ||
         b->type == BUILDING_NATIVE_DECORATION || b->type == BUILDING_NATIVE_MONUMENT ||
-        b->type == BUILDING_NATIVE_WATCHTOWER;
+        b->type == BUILDING_NATIVE_WATCHTOWER || b->type == BUILDING_NATIVE_WELL ||
+        b->type == BUILDING_NATIVE_PALISADE;
 }
 
 static int show_building_enemy(const building *b)

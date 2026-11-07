@@ -2347,7 +2347,7 @@ static translation_string all_strings[] = {
     {TR_UI_LEDGER_TT_EXPORTED, "Nach exportiert sortieren"},
     {TR_UI_LEDGER_BTN_STOCK, "Lager"},
     {TR_UI_LEDGER_TT_STOCK, "Nach Lagerbestand sortieren"},
-    {TR_UI_LEDGER_BTN_BALANCE, "Dn Balance"},
+    {TR_UI_LEDGER_BTN_BALANCE, "Balance"},
     {TR_UI_LEDGER_TT_BALANCE, "Nach Denarii Balance sortieren"},
     {TR_UI_LEDGER_DISABLED_1, "Dieses Feature ist noch nicht vefügbar"},
     {TR_UI_LEDGER_DISABLED_2, "Ihre Schreiber arbeiten hart daran dieses Feature so errichten. Sie benötigen jedoch mehr Zeit."},

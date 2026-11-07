@@ -712,7 +712,7 @@ void building_update_state(void)
         }
 
         // patch the phantom bridge entry in the buildings array after a bridge deletion
-        if ((b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_SHIP_BRIDGE) 
+        if ((b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_SHIP_BRIDGE)
             && (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED)
             && (map_building_at(b->grid_offset) != b->id)) {
                 b->state = BUILDING_STATE_UNUSED;
@@ -931,6 +931,31 @@ int building_is_mars_temple(building_type type)
 int building_is_venus_temple(building_type type)
 {
     return (type == BUILDING_SMALL_TEMPLE_VENUS || type == BUILDING_LARGE_TEMPLE_VENUS);
+}
+
+int building_is_small_temple(building_type type)
+{
+    return type >= BUILDING_SMALL_TEMPLE_CERES && type <= BUILDING_SMALL_TEMPLE_VENUS;
+}
+
+int building_is_large_temple(building_type type)
+{
+    return type >= BUILDING_LARGE_TEMPLE_CERES && type <= BUILDING_LARGE_TEMPLE_VENUS;
+}
+
+int building_is_grand_temple(building_type type)
+{
+    return (type >= BUILDING_GRAND_TEMPLE_CERES && type <= BUILDING_GRAND_TEMPLE_VENUS) || type == BUILDING_PANTHEON;
+}
+
+int building_is_decorative_tree(building_type type)
+{
+    return (type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) || type == BUILDING_WILLOW_TREE;
+}
+
+int building_is_decorative_path(building_type type)
+{
+    return (type >= BUILDING_PINE_PATH && type <= BUILDING_DATE_PATH) || type == BUILDING_GARDEN_PATH;
 }
 
 // All buildings capable of collecting and storing goods as a market

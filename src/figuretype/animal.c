@@ -271,7 +271,7 @@ void figure_wolf_action(figure *f)
 static int terrain_blocked_for_animals(int grid_offset)
 {
     return map_terrain_is(grid_offset, TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER |
-        TERRAIN_BUILDING | TERRAIN_SHRUB );
+        TERRAIN_BUILDING | TERRAIN_SHRUB | TERRAIN_MARSHLAND);
 }
 
 void figure_animal_try_nudge_at(int building_center_tile_grid_offset, int animal_tile_offset, int building_size)

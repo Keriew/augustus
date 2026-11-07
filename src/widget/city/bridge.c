@@ -1,5 +1,6 @@
 #include "bridge.h"
 
+#include "core/image.h"
 #include "graphics/image.h"
 #include "map/bridge.h"
 #include "map/property.h"
@@ -26,7 +27,11 @@ void city_draw_bridge(int x, int y, float scale, int grid_offset)
 
 void city_draw_bridge_tile(int x, int y, float scale, int bridge_sprite_id, color_t color_mask)
 {
-    int image_id = image_group(GROUP_BUILDING_BRIDGE);
+    // In editor mode c3.555 group 164 isn't in the main atlas; use the aux atlas
+    // (c3.555 loaded alongside c3map.555) so bridges render with the proper sprites.
+    int image_id = image_aux_is_loaded() ?
+        image_group_aux(GROUP_BUILDING_BRIDGE) :
+        image_group(GROUP_BUILDING_BRIDGE);
     switch (bridge_sprite_id) {
         case 1:
             image_draw(image_id + 5, x, y - 20, color_mask, scale);

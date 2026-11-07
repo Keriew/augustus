@@ -60,6 +60,7 @@ static hotkey_widget hotkey_widgets[] = {
     {HOTKEY_LOAD_FILE, TR_HOTKEY_LOAD_FILE},
     {HOTKEY_SAVE_FILE, TR_HOTKEY_SAVE_FILE},
     {HOTKEY_NEXT_TRACK, TR_HOTKEY_NEXT_TRACK},
+    {HOTKEY_CLOSE, TR_HOTKEY_CLOSE},
     {HOTKEY_HEADER, TR_HOTKEY_HEADER_CITY},
     {HOTKEY_INCREASE_GAME_SPEED, TR_HOTKEY_INCREASE_GAME_SPEED},
     {HOTKEY_DECREASE_GAME_SPEED, TR_HOTKEY_DECREASE_GAME_SPEED},
@@ -175,7 +176,9 @@ static hotkey_widget hotkey_widgets[] = {
     {HOTKEY_EDITOR_EMPIRE_TOOL_LAND_POINT, TR_EMPIRE_TOOL_LAND_ROUTE},
     {HOTKEY_EDITOR_EMPIRE_TOOL_SEA_POINT, TR_EMPIRE_TOOL_SEA_ROUTE},
     {HOTKEY_EDITOR_EMPIRE_TOOL_SELECTION, TR_EMPIRE_TOOL_SELECT},
-    {HOTKEY_EDITOR_EMPIRE_PICK_TOOL, TR_EMPIRE_TOOL_PICK}
+    {HOTKEY_EDITOR_EMPIRE_PICK_TOOL, TR_EMPIRE_TOOL_PICK },
+    {HOTKEY_SAVE_QUICKSAVE, TR_HOTKEY_SAVE_QUICKSAVE},
+    {HOTKEY_SAVE_QUICKLOAD, TR_HOTKEY_SAVE_QUICKLOAD},
 };
 
 #define NUM_WIDGETS sizeof(hotkey_widgets) / sizeof(hotkey_widget)
@@ -358,7 +361,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
         hotkey_buttons, NUM_VISIBLE_OPTIONS * 2, &data.focus_button);
     handled |= generic_buttons_handle_mouse(m_dialog, 0, 0,
         bottom_buttons, NUM_BOTTOM_BUTTONS, &data.bottom_focus_button);
-    if (!handled && (m->right.went_up || h->escape_pressed)) {
+    if (!handled && (m->right.went_up || h->close_pressed)) {
         window_go_back();
     }
 }

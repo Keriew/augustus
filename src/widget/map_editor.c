@@ -25,6 +25,7 @@
 #include "map/image_context.h"
 #include "map/point.h"
 #include "map/property.h"
+#include "map/sprite.h"
 #include "map/terrain.h"
 #include "map/tiles.h"
 #include "scenario/custom_variable.h"
@@ -34,6 +35,7 @@
 #include "sound/city.h"
 #include "sound/effect.h"
 #include "translation/translation.h"
+#include "widget/city/bridge.h"
 #include "widget/city/figure.h"
 #include "widget/map_editor_tool.h"
 #include "window/editor/empire.h"
@@ -147,6 +149,15 @@ static void draw_footprint(int x, int y, int grid_offset)
     }
     image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
 
+    int marsh_image = map_marsh_image_at(grid_offset);
+    if (marsh_image > 0) {
+        image_draw_isometric_footprint_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
+    }
+    int beach_image = map_beach_image_at(grid_offset);
+    if (beach_image > 0) {
+        image_draw_isometric_footprint_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
+    }
+
     if (config_get(CONFIG_UI_SHOW_GRID) && draw_context.scale <= 2.0f) {
         //grid is drawn by the renderer directly at zoom > 200%
         static int grid_id = 0;
@@ -179,6 +190,10 @@ static void draw_top(int x, int y, int grid_offset)
     if (!map_property_is_draw_tile(grid_offset)) {
         return;
     }
+    if (map_sprite_bridge_at(grid_offset)) {
+        city_draw_bridge(x, y, draw_context.scale, grid_offset);
+        return;
+    }
     int map_x = map_grid_offset_to_x(grid_offset);
     int map_y = map_grid_offset_to_y(grid_offset);
     int image_id = map_image_at(grid_offset);
@@ -191,7 +206,18 @@ static void draw_top(int x, int y, int grid_offset)
         color_t faded_outskirts = COLOR_MASK_OUTSKIRTS_FADE(distance_to_non_outskirts);
         color_mask = color_mask ? COLOR_MIX_COLORS(faded_outskirts, color_mask) : faded_outskirts;
     }
-    image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    int marsh_image = map_marsh_image_at(grid_offset);
+    int beach_image = map_beach_image_at(grid_offset);
+    if (!marsh_image && !beach_image) {
+        // a marsh or beach overlay covers the whole tile, so the bushes of the ground top must not show through
+        image_draw_isometric_top_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    }
+    if (marsh_image > 0) {
+        image_draw_isometric_top_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
+    }
+    if (beach_image > 0) {
+        image_draw_isometric_top_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
+    }
 }
 
 static void draw_flags(int x, int y, int grid_offset)
@@ -518,7 +544,7 @@ void widget_map_editor_handle_input(const mouse *m, const hotkeys *h)
         return;
     }
 
-    if (h->escape_pressed) {
+    if (h->close_pressed) {
         if (editor_tool_is_active()) {
             editor_tool_deactivate();
         } else {

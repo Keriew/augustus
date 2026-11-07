@@ -31,4 +31,8 @@ int game_cheat_disabled_invasions(void);
 void game_cheat_show_custom_events(uint8_t *args);
 
 void game_cheat_show_editor(uint8_t *args);
+
+int game_cheat_filled_markets(void);
+void game_cheat_reset_markets_filled(void);
+
 #endif // GAME_CHEATS_H

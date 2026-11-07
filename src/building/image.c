@@ -57,6 +57,15 @@ int building_image_get_base_farm_crop(building_type type)
     }
 }
 
+int building_image_get_native_crop_offset(int variant)
+{
+    if (variant < 0 || variant > 5) {
+        variant = 0;
+    }
+    // Each crop has 5 growth stages: the editor shows the fully grown one so the crops can be told apart
+    return variant * 5 + 4;
+}
+
 int building_image_get_garden_gate_image(int grid_offset)
 {
     building_type b_type = map_building_type_at(grid_offset);
@@ -75,6 +84,18 @@ int building_image_get_garden_gate_image(int grid_offset)
             return assets_get_image_id("Aesthetics", "D Hedge Gate") + building_connectable_get_hedge_gate_offset(grid_offset);
         default:
             return 0;
+    }
+}
+
+int building_image_get_native_hut_alt_2_base(int climate)
+{
+    switch (climate) {
+        case CLIMATE_NORTHERN:
+            return assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Northern_01");
+        case CLIMATE_DESERT:
+            return assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Southern_01");
+        default:
+            return assets_get_image_id("Terrain_Maps", "Hellenised_Hut_Central_01");
     }
 }
 
@@ -604,8 +625,46 @@ int building_image_get(const building *b)
                 default:
                     return assets_get_image_id("Terrain_Maps", "Native_Hut_Central_01") + (random_byte() & 1);
             }
+        case BUILDING_NATIVE_HUT_ALT_2:
+            return building_image_get_native_hut_alt_2_base(scenario_property_climate()) + (random_byte() % 3);
         case BUILDING_NATIVE_MEETING:
             return image_group(GROUP_BUILDING_NATIVE) + 2;
+        case BUILDING_NATIVE_LARGE_HUT_ALT:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Terrain_Maps", "Native_Meeting_Hut_Northern_01");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Terrain_Maps", "Native_Meeting_Hut_Southern_01");
+                default:
+                    return assets_get_image_id("Terrain_Maps", "Native_Meeting_Hut_Central_01");
+            }
+        case BUILDING_NATIVE_LARGE_HUT_ALT_2:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Terrain_Maps", "Hellenised_Meeting_Hut_Northern_01");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Terrain_Maps", "Hellenised_Meeting_Hut_Southern_01");
+                default:
+                    return assets_get_image_id("Terrain_Maps", "Hellenised_Meeting_Hut_Central_01");
+            }
+        case BUILDING_NATIVE_WELL:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Terrain_Maps", "Native_Well_Northern");
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Terrain_Maps", "Native_Well_Southern");
+                default:
+                    return assets_get_image_id("Terrain_Maps", "Native_Well_Central");
+            }
+        case BUILDING_NATIVE_PALISADE:
+            switch (scenario_property_climate()) {
+                case CLIMATE_NORTHERN:
+                    return assets_get_image_id("Military", "Pal Wall N 01") + building_connectable_get_palisade_offset(b->grid_offset);
+                case CLIMATE_DESERT:
+                    return assets_get_image_id("Military", "Pal Wall S 01") + building_connectable_get_palisade_offset(b->grid_offset);
+                default:
+                    return assets_get_image_id("Military", "Pal Wall C 01") + building_connectable_get_palisade_offset(b->grid_offset);
+            }
         case BUILDING_NATIVE_CROPS:
             return image_group(GROUP_BUILDING_FARM_CROPS);
         case BUILDING_GRAND_TEMPLE_CERES:

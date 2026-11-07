@@ -3,6 +3,7 @@
 #include "building/destruction.h"
 #include "building/dock.h"
 #include "building/granary.h"
+#include "building/industry.h"
 #include "building/menu.h"
 #include "building/monument.h"
 #include "building/properties.h"
@@ -401,7 +402,51 @@ int scenario_action_type_building_force_collapse_execute(scenario_action_t *acti
         if ((b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_MOTHBALLED) || b->is_deleted) {
             continue;
         }
-        if (destroy_all || b->type == type || (type == BUILDING_MENU_FORT && building_is_fort(b->type))) {
+
+        int correct_type = 0;
+        switch (type) {
+            case BUILDING_MENU_FARMS:
+                correct_type = building_is_farm(b->type);
+                break;
+            case BUILDING_MENU_RAW_MATERIALS:
+                correct_type = building_is_raw_resource_producer(b->type);
+                break;
+            case BUILDING_MENU_WORKSHOPS:
+                correct_type = building_is_workshop(b->type);
+                break;
+            case BUILDING_MENU_SMALL_TEMPLES:
+                correct_type = building_is_small_temple(b->type);
+                break;
+            case BUILDING_MENU_LARGE_TEMPLES:
+                correct_type = building_is_large_temple(b->type);
+                break;
+            case BUILDING_MENU_GRAND_TEMPLES:
+                correct_type = building_is_grand_temple(b->type);
+                break;
+            case BUILDING_MENU_TREES:
+                correct_type = building_is_decorative_tree(b->type);
+                break;
+            case BUILDING_MENU_PATHS:
+                correct_type = building_is_decorative_path(b->type);
+                break;
+            case BUILDING_MENU_PARKS:
+                correct_type = b->type == BUILDING_GARDENS || b->type == BUILDING_GRAND_GARDEN ||
+                (b->type >= BUILDING_SMALL_STATUE && b->type <= BUILDING_LARGE_STATUE) ||
+                b->type == BUILDING_GODDESS_STATUE || b->type == BUILDING_SENATOR_STATUE ||
+                b->type == BUILDING_LEGION_STATUE || b->type == BUILDING_GLADIATOR_STATUE ||
+                b->type == BUILDING_SMALL_POND || b->type == BUILDING_LARGE_POND;
+                break;
+            case BUILDING_MENU_FORT:
+                correct_type = building_is_fort(b->type);
+                break;
+            case BUILDING_ANY:
+                correct_type = 1;
+                break;
+            default:
+                correct_type = b->type == type;
+                break;
+        }
+        if (destroy_all || correct_type) {
             building_destroy_by_collapse(b);
         }
     }

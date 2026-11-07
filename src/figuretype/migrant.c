@@ -45,14 +45,14 @@ void figure_create_emigrant(building *house, int num_people)
     f->migrant_num_people = num_people;
 }
 
-figure *figure_create_homeless(building *house, int num_people)
+figure *figure_create_homeless(building *house, int num_people, int is_clear_land)
 {
     figure *f = figure_create(FIGURE_HOMELESS, house->x, house->y, DIR_0_TOP);
     f->building_id = house->id;
     f->action_state = FIGURE_ACTION_7_HOMELESS_CREATED;
     f->wait_ticks = 0;
     f->migrant_num_people = num_people;
-    city_population_remove_homeless(num_people);
+    city_population_remove_homeless(num_people, is_clear_land);
     return f;
 }
 
@@ -321,7 +321,7 @@ void figure_homeless_action(figure *f)
                     int is_empty = b->house_population == 0;
                     b->house_population += f->migrant_num_people;
                     b->house_population_room = max_people - b->house_population;
-                    city_population_add_homeless(f->migrant_num_people);
+                    city_population_add_homeless(f->migrant_num_people, 0);
                     if (is_empty) {
                         building_house_change_to(b, BUILDING_HOUSE_SMALL_TENT);
                     }
