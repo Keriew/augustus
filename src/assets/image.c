@@ -61,6 +61,10 @@ static image_reference_type get_image_reference_type(const asset_image *img)
     if (l->invert != INVERT_NONE || l->rotate != ROTATE_NONE || l->part != PART_BOTH || l->mask != LAYER_MASK_NONE) {
         return IMAGE_ORIGINAL;
     }
+    // references don't work with aux images, so we always copy them
+    if (l->calculated_image_id & IMAGE_AUX_FLAG) {
+        return IMAGE_ORIGINAL;
+    }
     int reference = img->img.width == l->width && img->img.height == l->height && l->x_offset == 0 && l->y_offset == 0 ?
         IMAGE_FULL_REFERENCE : IMAGE_TRANSLATED_REFERENCE;
     return reference == IMAGE_TRANSLATED_REFERENCE && image_get(l->calculated_image_id)->is_isometric ?

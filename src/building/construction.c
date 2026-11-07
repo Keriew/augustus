@@ -1414,12 +1414,12 @@ int building_construction_can_place_on_terrain(int x, int y, int *warning_id)
             return 0;
         }
     } else if (data.required_terrain.water) {
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 3, TERRAIN_WATER)) {
+        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 3, TERRAIN_WATER | TERRAIN_BEACH)) {
             set_warning(warning_id, WARNING_WATER_NEEDED);
             return 0;
         }
     } else if (data.required_terrain.distant_water) {
-        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 9, TERRAIN_WATER)) {
+        if (!map_terrain_exists_tile_in_radius_with_type(x, y, 2, 9, TERRAIN_WATER | TERRAIN_BEACH)) {
             set_warning(warning_id, WARNING_WATER_NEEDED_FOR_BUILDING);
             return 0;
         }

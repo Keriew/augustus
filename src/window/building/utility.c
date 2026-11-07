@@ -446,7 +446,7 @@ void window_building_draw_mission_post(building_info_context *c)
         window_building_draw_description(c, 134, 1);
     }
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    window_building_draw_employment_without_house_cover(c, 140);
+    window_building_draw_employment(c, 140);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
 }
 
@@ -504,6 +504,25 @@ void window_building_draw_native_watchtower(building_info_context *c)
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WATCHTOWER, c->x_offset,
         c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
     window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WATCHTOWER_DESC);
+}
+
+void window_building_draw_native_well(building_info_context *c)
+{
+    c->help_id = 0;
+    window_building_play_sound(c, "wavs/well.wav");
+    outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WELL,
+        c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_WELL_DESC);
+}
+
+void window_building_draw_native_palisade(building_info_context *c)
+{
+    c->help_id = 0;
+    outer_panel_draw(c->x_offset, c->y_offset, c->width_blocks, c->height_blocks);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_SCENARIO_BUILDING_NATIVE_PALISADE,
+        c->x_offset, c->y_offset + 10, BLOCK_SIZE * c->width_blocks, FONT_LARGE_BLACK);
+    window_building_draw_description_at(c, 96, CUSTOM_TRANSLATION, TR_BUILDING_NATIVE_PALISADE_DESC);
 }
 
 void window_building_draw_highway(building_info_context *c)

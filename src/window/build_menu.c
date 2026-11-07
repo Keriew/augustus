@@ -209,34 +209,25 @@ static int produced_resource_icon(building_type type)
     return -1;
 }
 
-static void draw_resource_icon_scaled(int image_id, int x, int y, int max_size)
+static void draw_resource_icon_scaled(int image_id, int x, int y)
 {
     const image *img = image_get(image_id);
-    if (!img) {
+    if (!img || img->original.width <= 0 || img->original.height <= 0) {
         return;
     }
+
     int scale_percent;
-    if (img->height < 20) {
+    if (img->original.height < 20) {
         scale_percent = 100;
     } else {
-        scale_percent = (20.0f / img->height) * 100.0f;
+        scale_percent = (20.0f / img->original.height) * 100.0f;
     }
-    switch (image_id) {
-        case 1192://meat
-            y = y + 4;
-            break;
-        case 1195://iron
-            y = y + 2;
-            break;
-        case 11658://gold
-            y = y + 3;
-            break;
-        case 1203://fish
-            y = y + 4;
-            break;
-    }
+    float scale = 100.0f / scale_percent;
+    float img_x = x + (MENU_RESOURCE_ICON_SIZE - img->original.width / scale) / 2.0f;
+    float img_y = y + (MENU_ITEM_HEIGHT - img->original.height / scale) / 2.0f;
 
-    image_draw_scaled_centered(image_id, x, y, COLOR_MASK_NONE, scale_percent);
+    // use regular draw instead of centered one to ensure scale is applied correctly
+    image_draw(image_id, img_x * scale, img_y * scale, COLOR_MASK_NONE, scale);
 }
 
 static void draw_menu_buttons(void)
@@ -278,9 +269,8 @@ static void draw_menu_buttons(void)
         if (resource_icon >= 0 && config_get(CONFIG_UI_CV_BUILD_MENU_ICONS)) {
             draw_resource_icon_scaled(resource_icon, item_x_align + MENU_TEXT_X_OFFSET + 2 +
                 (building_monument_type_is_monument(type) + building_rotation_type_has_rotations(type)) * MENU_ICON_WIDTH,
-                data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i + 2, MENU_RESOURCE_ICON_SIZE);
+                data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i);
             text_offset += MENU_RESOURCE_ICON_SIZE + 4; // Shift text right to make room for icon + padding
-
         }
 
         const uint8_t *menu_name = lang_get_string(28, type);

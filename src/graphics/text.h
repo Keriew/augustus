@@ -53,6 +53,7 @@ void text_draw_number_centered_postfix(
     int value, const char *postfix, int x_offset, int y_offset, int box_width, font_t font);
 void text_draw_number_centered_colored(
     int value, int x_offset, int y_offset, int box_width, font_t font, color_t color);
+void text_draw_number_centered_colored_force_sign(int value, int x_offset, int y_offset, int box_width, font_t font, color_t color);
 void text_draw_number_float_centered(float value, int decimal_places, int x_offset, int y_offset, int box_width, font_t font);
 void text_draw_number_float_centered_prefix(
     float value, int decimal_places, char prefix, int x_offset, int y_offset, int box_width, font_t font);

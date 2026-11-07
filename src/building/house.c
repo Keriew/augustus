@@ -627,7 +627,7 @@ void building_house_restore_population_after_undo(building *house)
         figure *homeless = figure_get(house->figure_id);
         if (homeless->building_id == house->id) {
             house->house_population = homeless->migrant_num_people;
-            city_population_add_homeless(homeless->migrant_num_people);
+            city_population_add_homeless(homeless->migrant_num_people, 1);
             figure_delete(homeless);
         }
     }

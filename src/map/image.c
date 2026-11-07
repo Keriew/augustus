@@ -14,6 +14,65 @@
 static grid_u32 images;
 static grid_u32 images_backup;
 
+// Marshland and Beach are drawn as an OVERLAY on top of the native terrain tile (which keeps its own image),
+// so their image ids are stored in separate grids rather than overwriting the terrain image. 0 = no
+// overlay on the tile. These grids are derived from the TERRAIN_MARSHLAND and TERRAIN_BEACH flags and recomputed
+// on load/rotation/climate change, so they are not part of the save format.
+static grid_u32 marsh_images;
+static grid_u32 marsh_images_backup;
+static grid_u32 beach_images;
+static grid_u32 beach_images_backup;
+
+unsigned int map_marsh_image_at(int grid_offset)
+{
+    return marsh_images.items[grid_offset];
+}
+
+void map_marsh_image_set(int grid_offset, int image_id)
+{
+    marsh_images.items[grid_offset] = image_id;
+}
+
+void map_marsh_image_backup(void)
+{
+    map_grid_copy_u32(marsh_images.items, marsh_images_backup.items);
+}
+
+void map_marsh_image_restore(void)
+{
+    map_grid_copy_u32(marsh_images_backup.items, marsh_images.items);
+}
+
+void map_marsh_image_clear(void)
+{
+    map_grid_clear_u32(marsh_images.items);
+}
+
+unsigned int map_beach_image_at(int grid_offset)
+{
+    return beach_images.items[grid_offset];
+}
+
+void map_beach_image_set(int grid_offset, int image_id)
+{
+    beach_images.items[grid_offset] = image_id;
+}
+
+void map_beach_image_backup(void)
+{
+    map_grid_copy_u32(beach_images.items, beach_images_backup.items);
+}
+
+void map_beach_image_restore(void)
+{
+    map_grid_copy_u32(beach_images_backup.items, beach_images.items);
+}
+
+void map_beach_image_clear(void)
+{
+    map_grid_clear_u32(beach_images.items);
+}
+
 unsigned int map_image_at(int grid_offset)
 {
     return images.items[grid_offset];

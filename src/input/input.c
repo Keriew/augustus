@@ -5,5 +5,5 @@
 
 int input_go_back_requested(const mouse *m, const hotkeys *h)
 {
-    return m->right.went_up || (m->is_touch && m->left.double_click) || h->escape_pressed;
+    return m->right.went_up || (m->is_touch && m->left.double_click) || h->close_pressed;
 }

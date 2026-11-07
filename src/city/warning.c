@@ -107,6 +107,10 @@ static const uint8_t *get_text_for_warning(warning_type type)
             return translation_for(TR_WARNING_NO_MILITARY_ON_OUTSKIRTS);
         case WARNING_ENEMIES_PREVENT_BRIDGE_DESTRUCTION:
             return translation_for(TR_WARNING_ENEMIES_PREVENT_BRIDGE_DESTRUCTION);
+        case WARNING_QUICKSAVE_SUCCESS:
+            return translation_for(TR_CITY_WARNING_QUICKSAVE_SUCCESS);
+        case WARNING_QUICKLOAD_SUCCESS:
+            return translation_for(TR_CITY_WARNING_QUICKLOAD_SUCCESS);
         default:
             return lang_get_string(19, type - 2);
     }

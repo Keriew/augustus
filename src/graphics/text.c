@@ -32,7 +32,7 @@ static struct {
 static struct {
     const uint8_t string[ELLIPSIS_LENGTH];
     int width[FONT_TYPES_MAX];
-} ellipsis = { {'.', '.', '.', 0} };
+} ellipsis = { { '.', '.', '.', 0 } };
 
 static int get_ellipsis_width(font_t font)
 {
@@ -678,6 +678,18 @@ void text_draw_number_centered_colored(
     text_draw_centered(str, x_offset, y_offset, box_width, font, color);
 }
 
+void text_draw_number_centered_colored_force_sign(
+    int value, int x_offset, int y_offset, int box_width, font_t font, color_t color)
+{
+    uint8_t str[NUMBER_BUFFER_LENGTH];
+    if (value > 0) {
+        number_to_string(str, value, '+', "");
+    } else {
+        number_to_string(str, value, 0, "");
+    }
+    text_draw_centered(str, x_offset, y_offset, box_width, font, color);
+}
+
 int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_width,
     int centered, font_t font, color_t color)
 {
@@ -789,7 +801,7 @@ int text_draw_vertically_centered(const uint8_t *str,
     }
     int added_lines = text_measure_multiline(str, box_width, font, 0) - 1;
 
-    int adjusted_y_offset = (int)(y_offset - (added_lines / 2.0) * (line_height + 5));
+    int adjusted_y_offset = (int) (y_offset - (added_lines / 2.0) * (line_height + 5));
 
     return text_draw_multiline(str, x_offset, adjusted_y_offset, box_width, 0, font, color);
 }

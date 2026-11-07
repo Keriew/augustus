@@ -276,14 +276,18 @@ int building_is_house(building_type type);
 int building_get_house_group(building_type type);
 
 int building_is_ceres_temple(building_type type);
-
 int building_is_neptune_temple(building_type type);
-
 int building_is_mercury_temple(building_type type);
-
 int building_is_mars_temple(building_type type);
-
 int building_is_venus_temple(building_type type);
+
+int building_is_small_temple(building_type type);
+int building_is_large_temple(building_type type);
+int building_is_grand_temple(building_type type);
+
+int building_is_decorative_tree(building_type type);
+
+int building_is_decorative_path(building_type type);
 
 int building_has_supplier_inventory(building_type type);
 

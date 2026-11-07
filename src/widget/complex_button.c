@@ -603,6 +603,10 @@ static void draw_default_style(const complex_button *button, font_t base_font, c
     draw_button_contents(button, base_font, font_primary, font_secondary);
 
     // Border
+    if (button->flush_with_background) {
+        // Background helpers may reset clipping; flush borders must stay within their bounds.
+        graphics_set_clip_rectangle(button->x, button->y, button->width, button->height);
+    }
     if (button->draw_border) {
         if (button->style != COMPLEX_BUTTON_STYLE_SUNKEN) {
             if (button->flush_with_background) {
