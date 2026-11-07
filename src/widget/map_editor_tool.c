@@ -85,7 +85,7 @@ static void draw_building(const map_tile *tile, int x_view, int y_view, building
             if (idx < 0 || idx > 5) idx = 0;
             // Use aux atlas (c3.555 game crops) when available for proper variant preview.
             if (image_aux_is_loaded()) {
-                image_id = image_group_aux(GROUP_BUILDING_FARM_CROPS) + idx * 5;
+                image_id = image_group_aux(GROUP_BUILDING_FARM_CROPS) + building_image_get_native_crop_offset(idx);
             } else {
                 image_id = image_group(GROUP_EDITOR_BUILDING_CROPS);
             }
@@ -360,6 +360,8 @@ void map_editor_tool_draw(const map_tile *tile)
 
         case TOOL_GRASS:
         case TOOL_MEADOW:
+        case TOOL_MARSHLAND:
+        case TOOL_BEACH:
         case TOOL_ROCKS:
         case TOOL_SHALLOW:
         case TOOL_SHRUB:

@@ -87,6 +87,8 @@ void game_file_editor_clear_data(void)
 static void clear_map_data(void)
 {
     map_image_clear();
+    map_marsh_image_clear();
+    map_beach_image_clear();
     map_building_clear();
     building_clear_all();
     map_terrain_clear();
@@ -133,6 +135,8 @@ static void prepare_map_for_editing(void)
 
     map_tiles_update_all_elevation_editor();
     map_tiles_update_all_water();
+    map_tiles_update_all_marshland();
+    map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
     map_tiles_update_all_empty_land();
@@ -252,12 +256,9 @@ int game_file_editor_write_scenario(const char *scenario_file)
         if (b->state != BUILDING_STATE_IN_USE && b->state != BUILDING_STATE_CREATED) {
             continue;
         }
-        int variant = b->subtype.orientation;
-        if (variant < 0 || variant > 5) {
-            variant = 0;
-        }
         if (aux_crops_base) {
-            map_image_set(b->grid_offset, aux_crops_base + variant * 5);
+            map_image_set(b->grid_offset,
+                aux_crops_base + building_image_get_native_crop_offset(b->subtype.orientation));
         } else {
             map_image_set(b->grid_offset, editor_crops_base);
         }

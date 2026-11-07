@@ -5,6 +5,8 @@
 
 int building_image_get_base_farm_crop(building_type type);
 
+int building_image_get_native_crop_offset(int variant);
+
 int building_image_get_garden_gate_image(int grid_offset);
 
 int building_image_get_native_hut_alt_2_base(int climate);

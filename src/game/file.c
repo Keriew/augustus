@@ -36,6 +36,7 @@
 #include "figuretype/water.h"
 #include "game/animation.h"
 #include "game/campaign.h"
+#include "game/cheats.h"
 #include "game/difficulty.h"
 #include "game/file_io.h"
 #include "game/settings.h"
@@ -129,6 +130,8 @@ static void clear_scenario_data(void)
 
     // clear grids
     map_image_clear();
+    map_marsh_image_clear();
+    map_beach_image_clear();
     map_building_clear();
     map_terrain_clear();
     map_aqueduct_clear();
@@ -153,6 +156,8 @@ static void initialize_scenario_data(const uint8_t *scenario_name)
     // initialize grids
     map_tiles_update_all_elevation();
     map_tiles_update_all_water();
+    map_tiles_update_all_marshland();
+    map_tiles_update_all_beach();
     map_tiles_update_all_earthquake();
     map_tiles_update_all_rocks();
     map_tiles_add_entry_exit_flags();
@@ -283,6 +288,8 @@ static void initialize_saved_game(void)
 
     map_image_context_init();
     map_image_clear();
+    map_marsh_image_clear();
+    map_beach_image_clear();
     map_image_update_all();
 
     scenario_map_init();
@@ -318,6 +325,8 @@ static void initialize_saved_game(void)
     map_natives_check_land(0);
 
     city_message_clear_scroll();
+
+    game_cheat_reset_markets_filled();
 
     setting_set_default_game_speed();
 

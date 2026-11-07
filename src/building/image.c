@@ -57,6 +57,15 @@ int building_image_get_base_farm_crop(building_type type)
     }
 }
 
+int building_image_get_native_crop_offset(int variant)
+{
+    if (variant < 0 || variant > 5) {
+        variant = 0;
+    }
+    // Each crop has 5 growth stages: the editor shows the fully grown one so the crops can be told apart
+    return variant * 5 + 4;
+}
+
 int building_image_get_garden_gate_image(int grid_offset)
 {
     building_type b_type = map_building_type_at(grid_offset);

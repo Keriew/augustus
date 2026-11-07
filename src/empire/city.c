@@ -819,7 +819,7 @@ int empire_city_get_icon_image_id(empire_city_icon_type type)
         case EMPIRE_CITY_ICON_TOWER:
             return assets_lookup_image_id(ASSET_UI_EMP_ICON_OLD_WATCHTOWER); // old_watchtower
         case EMPIRE_CITY_ICON_BUTTON:
-            return editor_is_active() ? image_group_aux(GROUP_SELECT_MISSION_BUTTON) :
+            return image_aux_is_loaded() ? image_group_aux(GROUP_SELECT_MISSION_BUTTON) :
                 image_group(GROUP_SELECT_MISSION_BUTTON); // button
         default:
             return -1;

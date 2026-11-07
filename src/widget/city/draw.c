@@ -230,7 +230,7 @@ static int is_building_hovered(building *b, int grid_offset)
     return (b->id == draw_context.hovered_building_id || main_part_id == draw_context.hovered_building_id);
 }
 
-static void draw_flattened_building_footprint(const building *b, int x, int y, color_t color_mask)
+static void draw_flattened_building_footprint(const building *b, int x, int y, int grid_offset, color_t color_mask)
 {
     int image_base = image_group(GROUP_TERRAIN_OVERLAY);
     if (b->house_size) {
@@ -238,6 +238,35 @@ static void draw_flattened_building_footprint(const building *b, int x, int y, c
     }
     if (building_type_is_bridge(b->type)) {
         return;
+    }
+
+    // Fix flattened footprint for merged vacant lots
+    if (b->type == BUILDING_HOUSE_VACANT_LOT && !b->house_population) {
+        int x_leftmost, y_leftmost, draw_offset;
+        switch (city_view_orientation()) {
+            case DIR_0_TOP:
+                x_leftmost = 0;
+                y_leftmost = b->size - 1;
+                break;
+            case DIR_2_RIGHT:
+                x_leftmost = y_leftmost = 0;
+                break;
+            case DIR_4_BOTTOM:
+                x_leftmost = b->size - 1;
+                y_leftmost = 0;
+                break;
+            case DIR_6_LEFT:
+                x_leftmost = y_leftmost = b->size - 1;
+                break;
+            default:
+                return;
+        }
+
+        draw_offset = map_grid_offset(b->x + x_leftmost, b->y + y_leftmost);
+
+        if (draw_offset != grid_offset) {
+            return;
+        }
     }
 
     int y_size = b->size * 2 - 1;
@@ -415,11 +444,20 @@ static void draw_footprint(int x, int y, int grid_offset)
             image_draw_isometric_footprint_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
         } else {
             if (!building_is_farm(b->type) || is_drawable_farm_corner(grid_offset)) {
-                draw_flattened_building_footprint(b, x, y, color_mask);
+                draw_flattened_building_footprint(b, x, y, grid_offset, color_mask);
             }
         }
     } else {
         image_draw_isometric_footprint_from_draw_tile(image_id, x, y, color_mask, draw_context.scale);
+    }
+
+    int marsh_image = map_marsh_image_at(grid_offset);
+    if (marsh_image > 0) {
+        image_draw_isometric_footprint_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
+    }
+    int beach_image = map_beach_image_at(grid_offset);
+    if (beach_image > 0) {
+        image_draw_isometric_footprint_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
     }
 
     // Grid is drawn by the renderer directly at zoom > 200%
@@ -753,11 +791,20 @@ static void draw_top(int x, int y, int grid_offset)
     }
 
     color_t color_mask = city_draw_get_color_mask(grid_offset, 1);
+    int marsh_image = map_marsh_image_at(grid_offset);
+    int beach_image = map_beach_image_at(grid_offset);
 
     if (map_building_at(grid_offset)) {
         draw_building_top(x, y, grid_offset, color_mask);
-    } else {
+    } else if (!marsh_image && !beach_image) {
+        // a marsh or beach overlay covers the whole tile, so the bushes of the ground top must not show through
         image_draw_isometric_top_from_draw_tile(map_image_at(grid_offset), x, y, color_mask, draw_context.scale);
+    }
+    if (marsh_image > 0) {
+        image_draw_isometric_top_from_draw_tile(marsh_image, x, y, color_mask, draw_context.scale);
+    }
+    if (beach_image > 0) {
+        image_draw_isometric_top_from_draw_tile(beach_image, x, y, color_mask, draw_context.scale);
     }
 }
 
