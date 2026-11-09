@@ -1004,6 +1004,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Be om bekräftelse när en fil skrivs över"},
     {TR_CONFIG_DRAW_CLOUD_SHADOWS, "Visa skuggor från moln"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Icke-militära grindar förinställda att att tillåta strövande medborgare"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Avancerad skatte- och lönesentimentbidragslogik"},
     {TR_FIGURE_INFO_DEPOT_DELIVER, "Levererar"},
     {TR_FIGURE_INFO_DEPOT_FROM, "Från "},
     {TR_FIGURE_INFO_DEPOT_RECALL, "Återkalla"},

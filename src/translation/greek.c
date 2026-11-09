@@ -113,6 +113,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Ζητήστε επιβεβαίωση όταν αντικαθιστάτε ένα αρχείο"},
 	{TR_HOTKEY_TITLE, "Ρύθμιση πλήκτρων συντομεύσεων του Augustus"},
 	{TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Οι μη στρατιωτικές πύλες επιτρέπουν από προεπιλογή όλους τους περιπατητές"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Προηγμένη λογική εισφοράς φόρου και μισθολογικού κλίματος"},
     {TR_HOTKEY_LABEL, "Πλήκτρα συντόμευσης"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Εναλλακτικά"},
     {TR_HOTKEY_HEADER_ARROWS, "Πλήκτρα βέλους"},
