@@ -2397,7 +2397,10 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_BEACH, "Beach"},
     {TR_TERRAIN_BEACH, "Beach"},
     {TR_TERRAIN_BEACH_DESC, "A beach of fine sand. Pleasing to the eye and favoured by strollers, who dawdle along it, it yields sand and clay in plenty for the city."},
-    {TR_CHEAT_FILL_MARKETS, "Filled all markets with food and goods"}
+    {TR_CHEAT_FILL_MARKETS, "Filled all markets with food and goods"},
+    {TR_PARAMETER_TERRAIN_SHALLOW_WATER, "Shallow water"},
+    {TR_PARAMETER_TERRAIN_MARSHLAND, "Marshland"},
+    {TR_PARAMETER_TERRAIN_BEACH, "Beach"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

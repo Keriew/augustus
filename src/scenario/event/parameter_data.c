@@ -815,12 +815,15 @@ static special_attribute_mapping_t special_attribute_mappings_climate[] =
 
 static special_attribute_mapping_t special_attribute_mappings_terrain[] =
 {
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,    .key = TR_PARAMETER_TERRAIN_WATER },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,     .key = TR_PARAMETER_TERRAIN_ROCK },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,   .key = TR_PARAMETER_TERRAIN_MEADOW },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,     .key = TR_PARAMETER_TERRAIN_TREE },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,    .key = TR_PARAMETER_TERRAIN_SHRUB },
-    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rubble",           .value = TERRAIN_RUBBLE,   .key = TR_PARAMETER_TERRAIN_RUBBLE },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Water",            .value = TERRAIN_WATER,         .key = TR_PARAMETER_TERRAIN_WATER },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rock",             .value = TERRAIN_ROCK,          .key = TR_PARAMETER_TERRAIN_ROCK },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Fertile Ground",   .value = TERRAIN_MEADOW,        .key = TR_PARAMETER_TERRAIN_MEADOW },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Tree",             .value = TERRAIN_TREE,          .key = TR_PARAMETER_TERRAIN_TREE },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shrub",            .value = TERRAIN_SHRUB,         .key = TR_PARAMETER_TERRAIN_SHRUB },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Rubble",           .value = TERRAIN_RUBBLE,        .key = TR_PARAMETER_TERRAIN_RUBBLE },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Shallows",         .value = TERRAIN_SHALLOW_WATER, .key = TR_PARAMETER_TERRAIN_SHALLOW_WATER },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Marshland",        .value = TERRAIN_MARSHLAND,     .key = TR_PARAMETER_TERRAIN_MARSHLAND },
+    {.type = PARAMETER_TYPE_TERRAIN,            .text = "Beach",            .value = TERRAIN_BEACH,         .key = TR_PARAMETER_TERRAIN_BEACH },
 };
 
 special_attribute_mapping_t special_attribute_mappings_data_type[] =
