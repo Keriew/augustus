@@ -38,6 +38,20 @@ static const int CHAR_TO_FONT_IMAGE_DEFAULT[] = {
     0x00, 0x66, 0x5F, 0x5E, 0x60, 0x60, 0x5D, 0x00, 0x86, 0x63, 0x62, 0x64, 0x61, 0x19, 0x00, 0x19,
 };
 
+static const uint8_t FONT_ASSET_LAYOUT_BRAZILIAN_PORTUGUESE_OVERRIDES[256] = {
+    // The Brazilian CD-ROM assets relocate four Portuguese glyphs.
+    // Values are one-based font image IDs, matching CHAR_TO_FONT_IMAGE_DEFAULT.
+    [0xc3] = 105, // capital A with tilde
+    [0xc7] = 108, // capital C with connected cedilla
+    [0xd5] = 123, // capital O with tilde
+    [0xf5] = 93,  // o with tilde
+};
+
+static const uint8_t *const FONT_ASSET_LAYOUT_OVERRIDES[FONT_ASSET_LAYOUT_MAX] = {
+    [FONT_ASSET_LAYOUT_DEFAULT] = 0,
+    [FONT_ASSET_LAYOUT_BRAZILIAN_PORTUGUESE] = FONT_ASSET_LAYOUT_BRAZILIAN_PORTUGUESE_OVERRIDES,
+};
+
 static const int CHAR_TO_FONT_IMAGE_EASTERN[] = {
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x01, 0x01, 0x00, 0x01, 0x01, 0x01, 0x00, 0x00, 0x20, 0x44, 0x6E, 0x00, 0x25, 0x00, 0x00, 0x00,
@@ -251,6 +265,7 @@ static struct {
     const int *font_mapping;
     const font_definition *font_definitions;
     int multibyte;
+    font_asset_layout asset_layout;
 } data;
 
 static int image_y_offset_none(uint8_t c, int image_height, int line_height)
@@ -504,6 +519,7 @@ static int image_y_offset_japanese(uint8_t c, int image_height, int line_height)
 
 void font_set_encoding(encoding_type encoding)
 {
+    data.asset_layout = FONT_ASSET_LAYOUT_DEFAULT;
     data.multibyte = MULTIBYTE_NONE;
     if (encoding == ENCODING_EASTERN_EUROPE) {
         data.font_mapping = CHAR_TO_FONT_IMAGE_EASTERN;
@@ -537,6 +553,11 @@ void font_set_encoding(encoding_type encoding)
         data.font_mapping = CHAR_TO_FONT_IMAGE_DEFAULT;
         data.font_definitions = DEFINITIONS_DEFAULT;
     }
+}
+
+void font_set_asset_layout(font_asset_layout layout)
+{
+    data.asset_layout = layout >= 0 && layout < FONT_ASSET_LAYOUT_MAX ? layout : FONT_ASSET_LAYOUT_DEFAULT;
 }
 
 const font_definition *font_definition_for(font_t font)
@@ -619,9 +640,14 @@ int font_letter_id(const font_definition *def, const uint8_t *str, int *num_byte
         }
     } else {
         *num_bytes = 1;
-        if (!data.font_mapping[*str]) {
+        int image_id = data.font_mapping[*str];
+        const uint8_t *overrides = FONT_ASSET_LAYOUT_OVERRIDES[data.asset_layout];
+        if (overrides && overrides[*str]) {
+            image_id = overrides[*str];
+        }
+        if (!image_id) {
             return -1;
         }
-        return data.font_mapping[*str] + def->image_offset - 1;
+        return image_id + def->image_offset - 1;
     }
 }
