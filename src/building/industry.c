@@ -20,6 +20,7 @@
 #define MAX_PROGRESS_VENUS_GT 400
 #define DENARII_MINTED_PER_PRODUCTION 100
 #define DENARII_COST_PER_GOLD 600
+#define GOLD_MINTED_PER_MONTH_BY_CITY_MINT (400.0/12.0)
 #define MAX_STORAGE 16
 #define INFINITE 10000
 
@@ -60,7 +61,8 @@ int building_get_efficiency(const building *b)
     if (b->data.industry.age_months == 0 || !resource) {
         return -1;
     }
-    int production_for_resource = resource_production_per_month(resource);
+    int production_for_resource = (b->type == BUILDING_CITY_MINT && b->output_resource_id == RESOURCE_GOLD) ?
+        (int)GOLD_MINTED_PER_MONTH_BY_CITY_MINT : resource_production_per_month(resource);
 
     int percentage = calc_percentage_efficiency(b->data.industry.average_production_per_month, production_for_resource);
     if (b->type == BUILDING_WHARF) {
@@ -71,7 +73,13 @@ int building_get_efficiency(const building *b)
 
 int building_industry_get_max_progress(const building *b)
 {
-    int monthly_production = resource_production_per_month(b->output_resource_id); // for mint minting gold is influenced by gold rate and minting coins by denarii rate (intuitive isn't it?)
+    if (b->type == BUILDING_CITY_MINT && b->output_resource_id == RESOURCE_GOLD) {
+        double gold_production = GOLD_MINTED_PER_MONTH_BY_CITY_MINT;
+        double progress_per_month = GAME_TIME_DAYS_PER_MONTH * 2 * model_get_building(b->type)->laborers;
+        return (int)(progress_per_month / gold_production * 100.0);
+    }
+
+    int monthly_production = resource_production_per_month(b->output_resource_id);
     return calc_percentage(GAME_TIME_DAYS_PER_MONTH * 2 * model_get_building(b->type)->laborers, monthly_production);
 }
 
