@@ -83,6 +83,24 @@ static struct {
         int dy;
         int type;
     } weather_config;
+
+    // City weather saved while the config window shows its previews,
+    // restored once the window is closed
+    unsigned int update_count;
+
+    struct {
+        int saved;
+        int active;
+        int intensity;
+        int type;
+        int overlay_alpha;
+        int overlay_target;
+        int current_particle_count;
+        int last_active;
+        int last_intensity;
+        weather_type last_type;
+        weather_type displayed_type;
+    } city_weather;
 } data = {
     .wind_speed = 1,
     .overlay_target = 0,
@@ -304,13 +322,18 @@ static void render_weather_overlay(void)
         apply_alpha(data.overlay_color, alpha));
 }
 
+static int particles_move(weather_type type)
+{
+    return window_city_is_window_cityview() || window_city_simulated_weather(type) || window_is(WINDOW_CONFIG);
+}
+
 static void draw_snow(void)
 {
     if (!data.elements || data.current_particle_count == 0) {
         return;
     }
 
-    if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_SNOW)) {
+    if (particles_move(WEATHER_SNOW)) {
         update_wind();
     }
 
@@ -321,7 +344,7 @@ static void draw_snow(void)
     }
 
     for (int i = 0; i < count; ++i) {
-        if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_SNOW)) {
+        if (particles_move(WEATHER_SNOW)) {
             // Slow, bounded horizontal sway around the flake's spawn column.
             // target_drift oscillates in ±10px over ~5 seconds, with a per-flake
             // phase offset so flakes don't sway in unison. We apply the delta
@@ -372,7 +395,7 @@ static void draw_sandstorm(void)
     }
 
     for (int i = 0; i < count; ++i) {
-        if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_SAND)) {
+        if (particles_move(WEATHER_SAND)) {
             int wave = ((data.elements[i].y + data.elements[i].offset) % 10) - 5;
             data.elements[i].x += data.elements[i].speed + (wave / 10);
         }
@@ -398,7 +421,7 @@ static void draw_rain(void)
         return;
     }
 
-    if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_RAIN)) {
+    if (particles_move(WEATHER_RAIN)) {
         update_wind();
     }
 
@@ -433,7 +456,7 @@ static void draw_rain(void)
             data.elements[i].y + data.elements[i].length,
             COLOR_WEATHER_DROPS);
 
-        if (window_city_is_window_cityview() || window_city_simulated_weather(WEATHER_RAIN)) {
+        if (particles_move(WEATHER_RAIN)) {
             data.elements[i].x += dx;
 
             int dy = base_speed + data.elements[i].speed
@@ -471,8 +494,61 @@ static void stop_wind_sound(void)
     data.is_wind_playing = 0;
 }
 
+static void save_city_weather(void)
+{
+    data.city_weather.saved = 1;
+    data.city_weather.active = data.weather_config.active;
+    data.city_weather.intensity = data.weather_config.intensity;
+    data.city_weather.type = data.weather_config.type;
+    data.city_weather.overlay_alpha = data.overlay_alpha;
+    data.city_weather.overlay_target = data.overlay_target;
+    data.city_weather.current_particle_count = data.current_particle_count;
+    data.city_weather.last_active = data.last_active;
+    data.city_weather.last_intensity = data.last_intensity;
+    data.city_weather.last_type = data.last_type;
+    data.city_weather.displayed_type = data.displayed_type;
+}
+
+static int is_showing_city_weather(void)
+{
+    return data.weather_config.active == data.city_weather.active &&
+        data.weather_config.intensity == data.city_weather.intensity &&
+        data.weather_config.type == data.city_weather.type &&
+        data.displayed_type == data.city_weather.displayed_type;
+}
+
+static void restore_city_weather(void)
+{
+    data.weather_config.active = data.city_weather.active;
+    data.weather_config.intensity = data.city_weather.intensity;
+    data.weather_config.type = data.city_weather.type;
+    data.overlay_alpha = data.city_weather.overlay_alpha;
+    data.overlay_target = data.city_weather.overlay_target;
+    data.current_particle_count = data.city_weather.current_particle_count;
+    data.last_active = data.city_weather.last_active;
+    data.last_intensity = data.city_weather.last_intensity;
+    data.last_type = data.city_weather.last_type;
+    data.displayed_type = data.city_weather.displayed_type;
+    // Particles may belong to a preview of another type, so recreate them
+    data.last_elements_count = 0;
+}
+
+unsigned int weather_update_count(void)
+{
+    return data.update_count;
+}
+
 void update_weather(void)
 {
+    data.update_count++;
+    if (window_is(WINDOW_CONFIG)) {
+        if (!data.city_weather.saved) {
+            save_city_weather();
+        }
+    } else if (data.city_weather.saved) {
+        restore_city_weather();
+        data.city_weather.saved = 0;
+    }
     render_weather_overlay();
     update_current_particle_count();
     if (window_is(WINDOW_CONFIG)) { //preview weather in config menu
@@ -494,10 +570,9 @@ void update_weather(void)
             data.weather_config.type = WEATHER_SAND;
             data.weather_config.active = 1;
             set_weather(1, 3000, WEATHER_SAND);
-        } else {
-            data.weather_config.type = WEATHER_NONE;
-            data.weather_config.active = 0;
-            weather_stop();
+        } else if (!is_showing_city_weather()) {
+            // No preview selected: keep showing the city's own weather
+            restore_city_weather();
         }
     }
 
@@ -581,6 +656,7 @@ void set_weather(int active, int intensity, weather_type type)
 void weather_reset(void)
 {
     weather_stop();
+    data.city_weather.saved = 0;
     sound_device_stop_type(SOUND_TYPE_EFFECTS);
     data.is_sound_playing = 0;
     data.is_wind_playing = 0;
