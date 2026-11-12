@@ -24,5 +24,6 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
 
 void migrate_altar_rotations(void);
 void migrate_fort_rotations(void);
+void migrate_cart_depot_building_id_to_storage_id(void);
 
 #endif // BUILDING_BUILDING_STATE_H

@@ -12,7 +12,7 @@ void window_building_draw_depot(building_info_context *c);
 void window_building_draw_depot_foreground(building_info_context *c);
 void window_building_draw_depot_select_resource(building_info_context *c);
 void window_building_draw_depot_select_resource_foreground(building_info_context *c);
-void window_building_draw_depot_select_source_destination(building_info_context *c);
+void window_building_draw_depot_select_source_destination_foreground(building_info_context *c);
 void window_building_draw_depot_order_source_destination_background(building_info_context *c, int is_select_destination);
 const uint8_t *window_building_depot_get_tooltip_source_destination(int *translation, int *group_id);
 int window_building_handle_mouse_depot(const mouse *m, building_info_context *c);
