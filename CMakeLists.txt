@@ -463,6 +463,8 @@ set(FIGURETYPE_FILES
 set(GAME_FILES
     ${PROJECT_SOURCE_DIR}/src/game/campaign/campaign.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/file.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/localization.c
+    ${PROJECT_SOURCE_DIR}/src/game/campaign/localization_file.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/mission.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/original.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/player_data.c
@@ -542,6 +544,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_media.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages_localization.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_messages.c
     ${PROJECT_SOURCE_DIR}/src/scenario/custom_variable.c
     ${PROJECT_SOURCE_DIR}/src/scenario/demand_change.c

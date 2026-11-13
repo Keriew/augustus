@@ -7,6 +7,7 @@
 #include "core/log.h"
 #include "core/string.h"
 #include "game/campaign.h"
+#include "game/campaign/localization.h"
 #include "game/settings.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
@@ -27,6 +28,8 @@
 #include "window/mission_list.h"
 #include "window/mission_selection.h"
 #include "window/plain_message_dialog.h"
+
+#include <stdlib.h>
 
 #define PLAYER_NAME_LENGTH 32
 #define CAMPAIGN_LIST_Y_POSITION 96
@@ -49,6 +52,8 @@ static generic_button bottom_buttons[] = {
 
 static struct {
     const dir_listing *campaign_list;
+    uint8_t **localized_names;
+    int localized_names_count;
     uint8_t player_name[PLAYER_NAME_LENGTH];
     unsigned int available_buttons;
     unsigned int bottom_button_focus_id;
@@ -77,6 +82,47 @@ static void calculate_input_box_width(void)
     player_name_input.width_blocks = (624 - player_name_input.x) / BLOCK_SIZE;
 }
 
+static void clear_campaign_names(void)
+{
+    for (int i = 0; i < data.localized_names_count; i++) {
+        free(data.localized_names[i]);
+    }
+    free(data.localized_names);
+    data.localized_names = 0;
+    data.localized_names_count = 0;
+}
+
+static void load_campaign_names(void)
+{
+    clear_campaign_names();
+    int count = data.campaign_list->num_files;
+    if (!count) {
+        return;
+    }
+    data.localized_names = calloc((size_t) count, sizeof(uint8_t *));
+    if (!data.localized_names) {
+        return;
+    }
+    data.localized_names_count = count;
+    for (int i = 0; i < count; i++) {
+        data.localized_names[i] = campaign_localization_preview_name(data.campaign_list->files[i].name);
+    }
+}
+
+static const uint8_t *campaign_item_name(unsigned int index, uint8_t *fallback)
+{
+    if (index == ORIGINAL_CAMPAIGN_ID) {
+        return lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ORIGINAL_CAMPAIGN_NAME);
+    }
+    unsigned int entry = index - 1;
+    if (entry < (unsigned int) data.localized_names_count && data.localized_names[entry]) {
+        return data.localized_names[entry];
+    }
+    encoding_from_utf8(data.campaign_list->files[entry].name, fallback, FILE_NAME_MAX);
+    file_remove_extension((char *) fallback);
+    return fallback;
+}
+
 static void init(void)
 {
     game_campaign_clear();
@@ -92,6 +138,8 @@ static void init(void)
     }
     data.campaign_list = dir_find_all_subdirectories_at_location(PATH_LOCATION_CAMPAIGN);
     data.campaign_list = dir_append_files_with_extension("campaign");
+    // Reopening the picker rebuilds names in the current language.
+    load_campaign_names();
     calculate_input_box_width();
     input_box_start(&player_name_input);
     rich_text_set_fonts(FONT_NORMAL_BLACK, FONT_NORMAL_BLACK, FONT_NORMAL_BLACK, 5);
@@ -112,17 +160,19 @@ static void draw_background(void)
         data.available_buttons = 1;
     } else {
         int y_offset = 40;
-        text_draw_centered_ellipsized(info->name, 362, CAMPAIGN_LIST_Y_POSITION, 246, FONT_NORMAL_BLACK, 0);
+        text_draw_centered_ellipsized(game_campaign_display_name(), 362, CAMPAIGN_LIST_Y_POSITION,
+            246, FONT_NORMAL_BLACK, 0);
         if (info->author) {
             int width = lang_text_draw(CUSTOM_TRANSLATION, TR_WINDOW_CAMPAIGN_AUTHOR,
                 362, CAMPAIGN_LIST_Y_POSITION + 20, FONT_NORMAL_BLACK);
             text_draw(info->author, 362 + width, CAMPAIGN_LIST_Y_POSITION + 20, FONT_NORMAL_BLACK, 0);
             y_offset += 20;
         }
-        if (info->description) {
-            int box_width = rich_text_init(info->description, 362, CAMPAIGN_LIST_Y_POSITION + y_offset,
+        const uint8_t *description = game_campaign_display_description();
+        if (description) {
+            int box_width = rich_text_init(description, 362, CAMPAIGN_LIST_Y_POSITION + y_offset,
                 230 / BLOCK_SIZE, (300 - y_offset) / BLOCK_SIZE, 1);
-            rich_text_draw(info->description, 362, CAMPAIGN_LIST_Y_POSITION + y_offset,
+            rich_text_draw(description, 362, CAMPAIGN_LIST_Y_POSITION + y_offset,
                 box_width * BLOCK_SIZE - 1, (320 - y_offset) / BLOCK_SIZE, 0);
             rich_text_update();
             rich_text_draw_scrollbar();
@@ -159,16 +209,10 @@ static void draw_background(void)
 
 static void draw_campaign_item(const list_box_item *item)
 {
-    uint8_t file[FILE_NAME_MAX];
-    if (item->index == ORIGINAL_CAMPAIGN_ID) {
-        string_copy(lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ORIGINAL_CAMPAIGN_NAME), file, FILE_NAME_MAX);
-    } else {
-        encoding_from_utf8(data.campaign_list->files[item->index - 1].name, file, FILE_NAME_MAX);
-        file_remove_extension((char *) file);
-    }
+    uint8_t fallback[FILE_NAME_MAX];
+    const uint8_t *name = campaign_item_name(item->index, fallback);
     font_t font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-    text_ellipsize(file, font, item->width);
-    text_draw(file, item->x, item->y, font, 0);
+    text_draw_ellipsized(name, item->x, item->y, item->width, font, 0);
     if (item->is_focused) {
         button_border_draw(item->x - 4, item->y - 4, item->width + 6, item->height + 4, 1);
     }
@@ -213,6 +257,7 @@ static void handle_input(const mouse *m, const hotkeys *h)
 static void button_back(const generic_button *button)
 {
     input_box_stop(&player_name_input);
+    clear_campaign_names();
     game_campaign_clear();
     window_main_menu_show(0);
 }
@@ -252,6 +297,7 @@ static void button_start_mission(const generic_button *button)
     scenario_save_campaign_player_name();
     setting_set_personal_savings_for_mission(0, 0);
     input_box_stop(&player_name_input);
+    clear_campaign_names();
     window_mission_selection_show();
 }
 
@@ -268,21 +314,17 @@ static void button_mission_list(const generic_button *button)
     scenario_save_campaign_player_name();
     setting_set_personal_savings_for_mission(0, 0);
     input_box_stop(&player_name_input);
+    clear_campaign_names();
     window_mission_list_show();
 }
 
 static void campaign_name_tooltip(const list_box_item *item, tooltip_context *c)
 {
-    static uint8_t file[FILE_NAME_MAX];
-    if (item->index == ORIGINAL_CAMPAIGN_ID) {
-        string_copy(lang_get_string(CUSTOM_TRANSLATION, TR_WINDOW_ORIGINAL_CAMPAIGN_NAME), file, FILE_NAME_MAX);
-    } else {
-        encoding_from_utf8(data.campaign_list->files[item->index - 1].name, file, FILE_NAME_MAX);
-        file_remove_extension((char *) file);
-    }
+    static uint8_t fallback[FILE_NAME_MAX];
+    const uint8_t *name = campaign_item_name(item->index, fallback);
     font_t font = item->is_selected ? FONT_NORMAL_WHITE : FONT_NORMAL_GREEN;
-    if (text_get_width(file, font) > item->width) {
-        c->precomposed_text = file;
+    if (text_get_width(name, font) > item->width) {
+        c->precomposed_text = name;
         c->type = TOOLTIP_BUTTON;
     }
 }
