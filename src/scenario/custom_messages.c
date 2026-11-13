@@ -11,6 +11,8 @@
 
 static const char *AUDIO_FILE_PATHS[] = {
     CAMPAIGNS_DIRECTORY "/audio",
+    "audio", // placeholder for scenarios local audio folder
+    "editor/content/audio",
     "community/audio",
     "mp3",
     "wavs",
@@ -19,6 +21,8 @@ static const char *AUDIO_FILE_PATHS[] = {
 
 static const char *VIDEO_FILE_PATHS[] = {
     CAMPAIGNS_DIRECTORY "/video",
+    "video", // placeholder for scenarios local audio folder
+    "editor/content/video",
     "community/video",
     "smk",
     "mpg",
@@ -245,7 +249,9 @@ static const char *search_for_file(const uint8_t *filename, const char *paths[])
     for (int i = 0; i <= encoding_system_uses_decomposed(); i++) {
         encoding_to_utf8(filename, filename_utf8, FILE_NAME_MAX, i);
         for (int j = 0; paths[j]; j++) {
-            const char *path = check_for_file_in_dir(filename_utf8, paths[j]);
+            char scenario_dir_path[FILE_NAME_MAX];
+            snprintf(scenario_dir_path, FILE_NAME_MAX, "%s/%s", dir_get_scenario_dir(), paths[j]);
+            const char *path = check_for_file_in_dir(filename_utf8, j == 1 ? scenario_dir_path : paths[j]);
             if (path) {
                 return path;
             }

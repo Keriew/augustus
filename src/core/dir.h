@@ -30,8 +30,9 @@ enum {
     PATH_LOCATION_EDITOR_CUSTOM_MESSAGES = 9,
     PATH_LOCATION_EDITOR_CUSTOM_EVENTS = 10,
     PATH_LOCATION_EDITOR_MODEL_DATA = 11,
-    PATH_LOCATION_COMMUNITY_IMAGE = 12,
-    PATH_LOCATION_MAX = 13
+    PATH_LOCATION_EDITOR_CONTENT = 12,
+    PATH_LOCATION_CONTENT_IMAGE = 13,
+    PATH_LOCATION_MAX = 14
 };
 
 /**
@@ -110,5 +111,30 @@ const char *dir_get_file_at_location(const char *filepath, int location);
  * @return Filename with location appended
  */
 const char *dir_append_location(const char *filename, int location);
+
+/**
+ * Gets the first file in a directory with a specific extension (should be used when there should only be one file in the dir)
+ * @param dir The directory to search on, or null if base directory
+ * @param extension Extension of the file to find
+ * @return The filename of the found file, or NULL if none was found
+ */
+const char *dir_get_first_file_with_extension(const char *dir, const char *extension);
+
+/**
+ * Gets the first file at the requested location ID with a specific extension (should be used when there should only be one file in the dir)
+ * @param location The location ID where the file should reside
+ * @param extension Extension of the file to find
+ * @return The filename of the found file, or NULL if none was found
+ */
+const char *dir_get_first_file_with_extension_at_location(int location, const char *extension);
+
+#ifndef BUILDING_ASSET_PACKER
+/**
+ * Gets the directory for the current scenario (where the map file and sometimes assets are in)
+ * @return The full path to the directory
+ * Do only use when a scenario or savegame is currently loaded for sure
+ */
+const char *dir_get_scenario_dir(void);
+#endif
 
 #endif // CORE_DIR_H

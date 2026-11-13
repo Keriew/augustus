@@ -39,4 +39,13 @@ int io_read_file_part_into_buffer(const char *filepath, int localizable, void *b
  */
 int io_write_buffer_to_file(const char *filepath, const void *buffer, size_t size);
 
+/**
+ * Gets the size of a file.
+ *
+ * @param filepath File to inspect
+ * @param localizable Whether the file may be localized
+ * @return File size in bytes, or -1 if the file cannot be opened or inspected
+ */
+long io_get_file_size(const char *filepath, int localizable);
+
 #endif // CORE_IO_H

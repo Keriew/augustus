@@ -18,6 +18,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "platform/file_manager.h"
 #include "sound/music.h"
 #include "widget/minimap.h"
 #include "window/mission_briefing.h"
@@ -66,14 +67,13 @@ static struct {
     char selected_scenario_filename[FILE_NAME_MAX];
     uint8_t selected_scenario_display[FILE_NAME_MAX];
     saved_game_info info;
-    
+
     const dir_listing *scenarios;
 } data;
 
 static void init(void)
 {
-    data.scenarios = dir_find_files_with_extension_at_location(PATH_LOCATION_SCENARIO, "map");
-    data.scenarios = dir_append_files_with_extension("mapx");
+    data.scenarios = dir_find_all_subdirectories_at_location(PATH_LOCATION_SCENARIO);
     data.focus_toggle_button = 0;
     data.show_minimap = 0;
     data.selected_scenario_display[0] = 0;
@@ -272,13 +272,34 @@ static void button_back(int param1, int param2)
     window_go_back();
 }
 
+static const char *find_scenario_file(char *foldername)
+{
+    const char *filename;
+    char map_foldername[FILE_NAME_MAX];
+    snprintf(map_foldername, FILE_NAME_MAX, "%s/%s",
+        platform_file_manager_get_directory_for_location(PATH_LOCATION_SCENARIO, 0), foldername);
+    filename = dir_get_first_file_with_extension(map_foldername, "map");
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(map_foldername, "mapx");
+    }
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(map_foldername, "sav");
+    }
+    if (!filename || !*filename) {
+        filename = dir_get_first_file_with_extension(map_foldername, "svx");
+    }
+    return filename;
+}
+
 static void select_scenario(unsigned int index, int is_double_click)
 {
     if (strcmp(data.selected_scenario_filename, data.scenarios->files[index].name) != 0) {
         snprintf(data.selected_scenario_filename, FILE_NAME_MAX, "%s", data.scenarios->files[index].name);
-        const char *filename = dir_get_file_at_location(data.selected_scenario_filename, PATH_LOCATION_SCENARIO);
+        const char *filename = find_scenario_file(data.selected_scenario_filename);
         if (filename) {
             game_file_io_read_scenario_info(filename, &data.info);
+            /* We don't need to call a seperate load function for save games because game_file_io_read_scenario_info
+               automatically switches to it when failing to load as a scenario */
         }
         encoding_from_utf8(data.selected_scenario_filename, data.selected_scenario_display, FILE_NAME_MAX);
         file_remove_extension((char *) data.selected_scenario_display);
