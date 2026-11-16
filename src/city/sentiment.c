@@ -1,6 +1,5 @@
 #include "sentiment.h"
 
-#include "building/building.h"
 #include "building/properties.h"
 #include "city/constants.h"
 #include "city/data_private.h"

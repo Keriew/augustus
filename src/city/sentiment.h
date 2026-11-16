@@ -1,7 +1,7 @@
 #ifndef CITY_SENTIMENT_H
 #define CITY_SENTIMENT_H
 
-struct building;
+#include "building/building.h"
 
 int city_sentiment(void);
 

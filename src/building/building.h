@@ -191,12 +191,11 @@ typedef struct building {
     signed char desirability;
     unsigned char is_deleted;
     unsigned char is_close_to_water;
-    unsigned char storage_id;  //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
+    unsigned char storage_id; //player-visible ID of the storage building, e.g. Granary 7, Warehouse 33
     union {
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
-    uint8_t cooldown_advanced_sentiment;
     unsigned char has_problem;
     unsigned char house_tavern_wine_access;
     unsigned char house_tavern_food_access;
@@ -215,6 +214,7 @@ typedef struct building {
     unsigned char fumigation_frame;
     unsigned char fumigation_direction;
     unsigned char has_latrines_access;
+    uint8_t cooldown_advanced_sentiment;
     short resources[RESOURCE_MAX];
     unsigned char accepted_goods[RESOURCE_MAX];
 } building;
