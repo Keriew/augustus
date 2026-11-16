@@ -480,15 +480,31 @@ static int get_tooltip_desirability(tooltip_context *c, int grid_offset)
     // Clamp
     desirability = calc_bound(desirability, -100, 100);
 
-    const uint8_t *text;
-    if (desirability < 0) {
-        text = lang_get_string(66, 91);
-    } else if (desirability == 0) {
-        text = lang_get_string(66, 92);
+    int key;
+    if (desirability < -15) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_0; // Nobody
+    } else if (desirability < -4) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_1; // Tents
+    } else if (desirability < 5) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_2; // Shacks
+    } else if (desirability < 13) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_3; // Hovels
+    } else if (desirability < 21) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_4; // Casas
+    } else if (desirability < 33) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_5; // Insulae
+    } else if (desirability < 49) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_6; // Top-tier Insulae
+    } else if (desirability < 59) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_7; // Villas               
+    } else if (desirability < 69) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_8; // Top-tier Villas
+    } else if (desirability < 81) {
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_9; // Palaces
     } else {
-        text = lang_get_string(66, 93);
+        key = TR_TOOLTIP_OVERLAY_DESIRABILITY_10; // Top-tier Palaces
     }
-    c->precomposed_text = prefix_value_to_tooltip_text(desirability, text);
+    c->precomposed_text = prefix_value_to_tooltip_text(desirability, translation_for(key));
     return 1;
 }
 
