@@ -562,7 +562,7 @@ void building_state_load_from_buffer(buffer *buf, building *b, int building_buf_
     b->is_close_to_water = buffer_read_u8(buf);
     b->storage_id = buffer_read_u8(buf);
     b->sentiment.house_happiness = buffer_read_i8(buf); // which union field we use does not matter
-    if (save_version >= SAVE_GAME_LAST_ADVANCED_SENTIMENT) {
+    if (save_version > SAVE_GAME_LAST_NO_ADVANCED_SENTIMENT) {
         if (building_is_house(b->type)) {
             b->cooldown_advanced_sentiment = buffer_read_u8(buf);
         } else {
