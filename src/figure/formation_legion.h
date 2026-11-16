@@ -19,6 +19,12 @@ void formation_legion_restore_layout(formation *m);
 
 void formation_legion_move_to(formation *m, const map_tile *tile);
 
+int formation_legion_can_return_to_position(const formation *m);
+
+void formation_legion_return_to_position(formation *m);
+
+void formation_legion_return_to_position_all(void);
+
 void formation_legion_return_home(formation *m);
 
 void formation_legion_return_home_all(void);

@@ -27,9 +27,12 @@
 
 static void button_go_to_legion(const generic_button *button);
 static void button_return_to_fort(const generic_button *button);
+static void button_return_all_or_call_all(const generic_button *button);
 static void button_empire_service(const generic_button *button);
 static void button_return_all_to_fort(const generic_button *button);
 static void on_scroll(void);
+static unsigned int get_num_legions_not_at_fort(void);
+static unsigned int get_num_legions_with_saved_position(void);
 
 static scrollbar_type scrollbar = { 592, 70, 272, 576, MAX_VISIBLE_LEGIONS, on_scroll };
 
@@ -55,12 +58,13 @@ static generic_button fort_buttons[] = {
 };
 
 static generic_button additional_buttons[] = {
-    {443, 27, 70, 40, button_return_all_to_fort}
+    {443, 27, 70, 40, button_return_all_or_call_all}
 };
 
 static unsigned int focus_button_id;
 static unsigned int focus_additional_button_id;
 static unsigned int num_legions;
+static unsigned int focus_button_legion_id;
 
 static void init(void)
 {
@@ -77,8 +81,14 @@ static int draw_background(void)
     lang_text_draw_centered(138, 36, 224, 50, 150, FONT_SMALL_PLAIN); // Morale
     lang_text_draw_centered(51, 1, 370, 35, 60, FONT_SMALL_PLAIN);    // Go to
     lang_text_draw_centered(51, 2, 370, 50, 60, FONT_SMALL_PLAIN);    // legion
-    lang_text_draw_centered(51, 3, 444, 35, 70, FONT_SMALL_PLAIN);    // Return
-    lang_text_draw_centered(51, 4, 444, 50, 70, FONT_SMALL_PLAIN);    // to fort
+    if (get_num_legions_not_at_fort() > 0) {
+        text_draw_centered(translation_for(TR_RETURN_ALL_TO_FORT), 443, 35, 70, FONT_SMALL_PLAIN, 0);
+    } else if (get_num_legions_with_saved_position() > 0) {
+        text_draw_multiline(translation_for(TR_CALL_ALL_LEGIONS), 443, 30, 70, 1, FONT_SMALL_PLAIN, 0);
+    } else {
+        lang_text_draw_centered(51, 3, 444, 35, 70, FONT_SMALL_PLAIN);    // Return
+        lang_text_draw_centered(51, 4, 444, 50, 70, FONT_SMALL_PLAIN);    // to fort
+    }
     lang_text_draw_centered(51, 5, 524, 35, 70, FONT_SMALL_PLAIN);    // Empire
     lang_text_draw_centered(51, 6, 524, 50, 70, FONT_SMALL_PLAIN);    // service
 
@@ -181,7 +191,10 @@ static int draw_background(void)
         image_draw(image_id, 387, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
 
         button_border_draw(464, 83 + 44 * i, 30, 30, 0);
-        if (m->is_at_fort || m->in_distant_battle) {
+        if (m->is_at_fort) {
+            image_draw(image_id + (formation_legion_can_return_to_position(m) ? 1 : 2), 467, 86 + 44 * i,
+                COLOR_MASK_NONE, SCALE_NONE);
+        } else if (m->in_distant_battle) {
             image_draw(image_id + 2, 467, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
         } else {
             image_draw(image_id + 1, 467, 86 + 44 * i, COLOR_MASK_NONE, SCALE_NONE);
@@ -210,6 +223,17 @@ static unsigned int get_num_legions_not_at_fort(void)
     return num_legions_not_at_fort;
 }
 
+static unsigned int get_num_legions_with_saved_position(void)
+{
+    unsigned int count = 0;
+    for (unsigned int i = 0; i < num_legions; i++) {
+        if (formation_legion_can_return_to_position(formation_get(formation_for_legion(i + 1)))) {
+            count++;
+        }
+    }
+    return count;
+}
+
 static void draw_foreground(void)
 {
     scrollbar_draw(&scrollbar);
@@ -220,8 +244,7 @@ static void draw_foreground(void)
         button_border_draw(544, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 3);
     }
 
-    int num_legions_not_at_fort = get_num_legions_not_at_fort();
-    if (num_legions_not_at_fort > 0) {
+    if (get_num_legions_not_at_fort() > 0 || get_num_legions_with_saved_position() > 0) {
         button_border_draw(443, 27, 70, 40, focus_additional_button_id == 1);
     }
 }
@@ -238,11 +261,11 @@ static int handle_mouse(const mouse *m)
         buttons = MAX_BUTTONS;
     }
     int result = generic_buttons_handle_mouse(m, 0, 0, fort_buttons, buttons, &focus_button_id);
-    if (result == 0) {
-        int num_legions_not_at_fort = get_num_legions_not_at_fort();
-        if (num_legions_not_at_fort > 0) {
-            result = generic_buttons_handle_mouse(m, 0, 0, additional_buttons, 1, &focus_additional_button_id);
-        }
+    focus_button_legion_id = focus_button_id ? (focus_button_id + 2) / 3 + scrollbar.scroll_position : 0;
+    if (result == 0 && (get_num_legions_not_at_fort() > 0 || get_num_legions_with_saved_position() > 0)) {
+        result = generic_buttons_handle_mouse(m, 0, 0, additional_buttons, 1, &focus_additional_button_id);
+    } else if (result != 0) {
+        focus_additional_button_id = 0;
     }
     return result;
 }
@@ -267,7 +290,14 @@ static void return_legion_to_fort(int legion_id)
 static void button_return_to_fort(const generic_button *button)
 {
     int legion_id = button->parameter1;
-    return_legion_to_fort(legion_id + scrollbar.scroll_position);
+    int formation_id = formation_for_legion(legion_id + scrollbar.scroll_position);
+    formation *m = formation_get(formation_id);
+    if (m->is_at_fort) {
+        formation_legion_return_to_position(m);
+        window_invalidate();
+    } else {
+        return_legion_to_fort(legion_id + scrollbar.scroll_position);
+    }
 }
 
 static void button_empire_service(const generic_button *button)
@@ -279,14 +309,16 @@ static void button_empire_service(const generic_button *button)
     window_invalidate();
 }
 
-static void button_return_all_to_fort(const generic_button *button)
+static void button_return_all_or_call_all(const generic_button *button)
 {
-    unsigned int num_legions_not_at_fort = get_num_legions_not_at_fort();
-    if (num_legions_not_at_fort > 0) {
+    if (get_num_legions_not_at_fort() > 0) {
         for (unsigned int i = 0; i < num_legions; i++) {
             return_legion_to_fort(i + 1);
         }
+    } else {
+    formation_legion_return_to_position_all();
     }
+    window_invalidate();
 }
 
 static void on_scroll(void)
@@ -296,8 +328,18 @@ static void on_scroll(void)
 
 static void get_tooltip_text(advisor_tooltip_result *r)
 {
-    if (focus_additional_button_id) {
-        r->translation_key = TR_RETURN_ALL_TO_FORT;
+    if (focus_button_legion_id && focus_button_id % 3 == 2) {
+        const formation *m = formation_get(formation_for_legion(focus_button_legion_id));
+        if (m->is_at_fort) {
+            if (formation_legion_can_return_to_position(m)) {
+                r->translation_key = TR_RETURN_TO_POSITION;
+            }
+        } else {
+            r->translation_key = TR_RETURN_TO_FORT;
+        }
+    } else if (focus_additional_button_id == 1) {
+        r->translation_key = get_num_legions_not_at_fort() > 0 ?
+            TR_RETURN_ALL_TO_FORT : TR_CALL_ALL_LEGIONS;
     }
 }
 
