@@ -251,6 +251,7 @@ building *building_create(building_type type, int x, int y)
 
     // subtype
     if (building_is_house(type)) {
+        b->cooldown_advanced_sentiment = type < BUILDING_HOUSE_SMALL_VILLA ? ADVANCED_SENTIMENT_COOLDOWN_TICKS : 0;
         b->subtype.house_level = type - BUILDING_HOUSE_VACANT_LOT;
     }
 

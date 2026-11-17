@@ -77,6 +77,7 @@ static const char *ini_keys[] = {
     [CONFIG_GP_CH_YEARLY_AUTOSAVE] = "gameplay_change_yearly_autosave",
     [CONFIG_GP_CH_AUTO_KILL_ANIMALS] = "gameplay_change_auto_kill_animals",
     [CONFIG_GP_CH_GATES_DEFAULT_TO_PASS_ALL_WALKERS] = "gameplay_change_nonmilitary_gates_allow_walkers",
+    [CONFIG_GP_CH_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION] = "gameplay_change_advanced_tax_wage_sentiment_contribution",
     [CONFIG_GP_CH_MAX_AUTOSAVE_SLOTS] = "gameplay_change_max_autosave_slots",
     [CONFIG_UI_SHOW_SPEEDRUN_INFO] = "ui_show_speedrun_info",
     [CONFIG_UI_SHOW_DESIRABILITY_RANGE] = "ui_show_desirability_range",
