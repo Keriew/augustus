@@ -17,6 +17,7 @@
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "platform/file_manager.h"
 #include "scenario/custom_messages.h"
 #include "scenario/criteria.h"
 #include "scenario/event/controller.h"
