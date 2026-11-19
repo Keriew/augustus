@@ -163,6 +163,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE_TOOLTIP, "Показывает запрос подтверждения перед заменой существующего файла."},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Невоенные ворота по умолчанию пропускают всех пешеходов"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS_TOOLTIP, "При постройке через дороги, Садовые стены и изгороди становятся Садовыми воротами и работают как дорожный блок. Если они служат только украшением, можно по умолчанию разрешить проход всем ходокам."},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Расширенная логика влияния налогов и жалований на настроение жителей"},
     {TR_HOTKEY_TITLE, "Настройки горячих клавиш Augustus"},
     {TR_HOTKEY_LABEL, "Основная"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Альтернативная"},

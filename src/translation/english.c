@@ -163,6 +163,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE_TOOLTIP, "Shows a confirmation dialog before replacing an existing file."},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Non-military gates default to allowing all walkers"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS_TOOLTIP, "When built over roads, Garden Walls or Hedges become Garden Gates, acting as a roadblock. In case of only decorative purposes, they can be set to allow all walkers by default."},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Advanced tax and wage sentiment contribution logic"},
     {TR_HOTKEY_TITLE, "Augustus hotkey configuration"},
     {TR_HOTKEY_LABEL, "Hotkey"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Alternative"},
@@ -554,6 +555,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_10, "Residents are extremely pleased with you."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_11, "Residents love you."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_12, "Residents idolize you as a god."},
+    {TR_BUILDING_WINDOW_HOUSE_HAPPINESS, "Happiness:"},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_HIGH_TAXES, "Residents are upset about high taxation."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_LOW_WAGES, "Residents are upset about low wages."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_UNEMPLOYMENT, "Residents are upset about the lack of jobs."},
@@ -2485,7 +2487,10 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_BEACH, "Beach"},
     {TR_TERRAIN_BEACH, "Beach"},
     {TR_TERRAIN_BEACH_DESC, "A beach of fine sand. Pleasing to the eye and favoured by strollers, who dawdle along it, it yields sand and clay in plenty for the city."},
-    {TR_CHEAT_FILL_MARKETS, "Filled all markets with food and goods"}
+    {TR_CHEAT_FILL_MARKETS, "Filled all markets with food and goods"},
+    {TR_PARAMETER_TERRAIN_SHALLOW_WATER, "Shallow water"},
+    {TR_PARAMETER_TERRAIN_MARSHLAND, "Marshland"},
+    {TR_PARAMETER_TERRAIN_BEACH, "Beach"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
