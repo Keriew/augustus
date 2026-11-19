@@ -2402,7 +2402,18 @@ static translation_string all_strings[] = {
     {TR_CHEAT_FILL_MARKETS, "Filled all markets with food and goods"},
     {TR_PARAMETER_TERRAIN_SHALLOW_WATER, "Shallow water"},
     {TR_PARAMETER_TERRAIN_MARSHLAND, "Marshland"},
-    {TR_PARAMETER_TERRAIN_BEACH, "Beach"}
+    {TR_PARAMETER_TERRAIN_BEACH, "Beach"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_0, "No one wants to live in this area"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_1, "This area is suitable only to the homeless immigrants"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_2, "This area may be suitable to the poorest housing dwellers"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_3, "This area is decent for low-rank plebeians"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_4, "This area is proper for basic conditions of Roman urban life"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_5, "This area is desirable for elevated plebeians"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_6, "This area is attractive for the richest plebeians"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_7, "This lovely area is the minimum acceptable for patricians"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_8, "This ravishing area is well-regarded by patricians"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_9, "This magnificent area is appreciated by the high-end patricians"},
+    {TR_TOOLTIP_OVERLAY_DESIRABILITY_10, "This truly splendid area is whithout equal for the wealthiest patricians"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
