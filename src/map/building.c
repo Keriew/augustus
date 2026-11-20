@@ -77,12 +77,8 @@ void map_building_set_rubble_grid_building_id(int grid_offset, unsigned int buil
 
 int map_building_ruins_left(unsigned int building_id)
 {
-    // doesnt work for hippodromes and forts - forts shouldnt turn to rubble, hippodromes are not repairable
     building *b = building_get(building_id);
     int ruins_count = 0;
-    if (b->type == BUILDING_HIPPODROME || building_is_fort(b->type)) {
-        return 0;
-    }
     int size = b->data.rubble.og_size ? b->data.rubble.og_size : b->size;
     int slice_offset = b->data.rubble.og_grid_offset ? b->data.rubble.og_grid_offset : b->grid_offset;
     grid_slice *slice = map_grid_get_grid_slice_square(slice_offset, size);
