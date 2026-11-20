@@ -65,9 +65,8 @@ void building_storage_reset_building_ids(void)
         storage->building_id = 0;
     }
 
-    static const building_type types[] = { BUILDING_GRANARY, BUILDING_WAREHOUSE };
-
-    for (int i = 0; i < 2; i++) {
+    static const building_type types[] = { BUILDING_GRANARY, BUILDING_WAREHOUSE, BUILDING_BURNING_RUIN };
+    for (int i = 0; i < sizeof(types) / sizeof(types[0]); i++) {
         building_type type = types[i];
         for (building *b = building_first_of_type(type); b; b = b->next_of_type) {
             if (b->state == BUILDING_STATE_UNUSED) {
