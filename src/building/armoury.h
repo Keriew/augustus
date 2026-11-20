@@ -5,4 +5,6 @@
 
 int building_armoury_is_needed(building *b);
 
+int building_armoury_barracks_have_room(building *armoury);
+
 #endif // BUILDING_ARMOURY_H
