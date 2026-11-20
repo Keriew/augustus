@@ -580,18 +580,27 @@ void window_building_draw_legion_info_foreground(building_info_context *c)
     lang_text_draw_multiline(138, text_id, c->x_offset + 24, c->y_offset + 292,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_GREEN);
 
-    if (!m->is_at_fort && !m->in_distant_battle) {
+    if (!m->in_distant_battle &&
+        (!m->is_at_fort || formation_legion_can_return_to_position(m))) {
         int button_x = c->x_offset + 44;
         int button_y = c->y_offset + 2 + BLOCK_SIZE * c->height_blocks - 47;
 
-        // First button
         button_border_draw(button_x, button_y, 185, 32, data.return_button_id == 1);
-        lang_text_draw_centered(138, 58, button_x, button_y + 10, 185, FONT_NORMAL_BLACK);
+        if (m->is_at_fort) {
+            text_draw_centered(translation_for(TR_RETURN_TO_POSITION), button_x, button_y + 10,
+                185, FONT_NORMAL_BLACK, 0);
+        } else {
+            lang_text_draw_centered(138, 58, button_x, button_y + 10, 185, FONT_NORMAL_BLACK);
+        }
 
-        // Second button  
         button_border_draw(button_x + 189, button_y, 185, 32, data.return_button_id == 2);
-        lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUTTON_INFO_RETURN_ALL_LEGIONS,
-            button_x + 189, button_y + 10, 185, FONT_NORMAL_BLACK);
+        if (m->is_at_fort) {
+            text_draw_centered(translation_for(TR_CALL_ALL_LEGIONS), button_x + 189, button_y + 10,
+                185, FONT_NORMAL_BLACK, 0);
+        } else {
+            lang_text_draw_centered(CUSTOM_TRANSLATION, TR_BUTTON_INFO_RETURN_ALL_LEGIONS,
+                button_x + 189, button_y + 10, 185, FONT_NORMAL_BLACK);
+        }
     }
 }
 
@@ -662,7 +671,10 @@ void window_building_barracks_get_tooltip_priority(int *translation)
 static void button_return_to_fort(const generic_button *button)
 {
     formation *m = formation_get(data.context_for_callback->formation_id);
-    if (!m->in_distant_battle && m->is_at_fort != 1) {
+    if (m->is_at_fort) {
+        formation_legion_return_to_position(m);
+        window_city_show();
+    } else if (!m->in_distant_battle) {
         formation_legion_return_home(m);
         window_city_show();
     }
@@ -670,7 +682,12 @@ static void button_return_to_fort(const generic_button *button)
 
 static void button_all_legions_return_to_fort(const generic_button *button)
 {
-    formation_legion_return_home_all();
+    formation *m = formation_get(data.context_for_callback->formation_id);
+    if (m->is_at_fort) {
+        formation_legion_return_to_position_all();
+    } else {
+        formation_legion_return_home_all();
+    }
     window_city_show();
 }
 
