@@ -19,6 +19,8 @@ static struct {
     time_t last_seed;
 } data;
 
+static int stdlib_use_fixed_seed = 0;
+
 void random_init(void)
 {
     memset(&data, 0, sizeof(data));
@@ -97,6 +99,9 @@ void random_save_state(buffer *buf)
 }
 
 int random_from_stdlib(void) {
+    if (stdlib_use_fixed_seed) {
+        return rand();
+    }
     time_t t;
     t = time(&t);
     if (data.last_seed != t) {
@@ -104,6 +109,19 @@ int random_from_stdlib(void) {
         data.last_seed = t;
     }
     return rand();
+}
+
+void random_set_stdlib_seed(unsigned int seed)
+{
+    stdlib_use_fixed_seed = 1;
+    srand(seed);
+    data.last_seed = 0;
+}
+
+void random_clear_stdlib_seed(void)
+{
+    stdlib_use_fixed_seed = 0;
+    data.last_seed = 0;
 }
 
 int random_between_from_stdlib(int min, int max)
@@ -114,6 +132,17 @@ int random_between_from_stdlib(int min, int max)
         rnd = random_from_stdlib() % diff;
     }
     return min + rnd;
+}
+
+unsigned int generate_seed_value(void)
+{
+    unsigned int high = (unsigned int) random_from_stdlib();
+    unsigned int low = (unsigned int) random_from_stdlib();
+    unsigned int seed = (high << 16) ^ low ^ (unsigned int) time(NULL);
+
+    // Keep bit 31 clear so signed interpretation can never appear negative.
+    seed &= 0x7fffffffu;
+    return seed ? seed : 1;
 }
 
 double random_fractional_from_stdlib(void)

@@ -70,7 +70,13 @@ void random_load_state(buffer *buf);
 
 int random_from_stdlib(void);
 
+void random_set_stdlib_seed(unsigned int seed);
+
+void random_clear_stdlib_seed(void);
+
 int random_between_from_stdlib(int min, int max);
+
+unsigned int generate_seed_value(void);
 
 double random_fractional_from_stdlib(void);
 
