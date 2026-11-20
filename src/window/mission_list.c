@@ -59,7 +59,7 @@ typedef struct {
             int id;
             const char *path;
         } background_image;
-        const uint8_t *title;
+        int first_scenario;
         int total_scenarios;
     } mission;
     const campaign_scenario *scenario;
@@ -76,7 +76,6 @@ static struct {
     int savegame_info_status;
     int campaign_finished;
     struct {
-        const uint8_t *name;
         int x;
         int y;
         int width;
@@ -173,7 +172,7 @@ static void generate_list(void)
             data.items[item].mission.background_image.id = mission_info->background_image.id;
         }
         data.items[item].rank = rank;
-        data.items[item].mission.title = mission_info->title;
+        data.items[item].mission.first_scenario = mission_info->first_scenario;
         data.items[item].mission.id = mission_id;
         mission_id++;
 
@@ -284,7 +283,7 @@ static void draw_background(void)
 
     graphics_in_dialog();
     outer_panel_draw(0, 0, 40, 30);
-    text_draw_centered_ellipsized(game_campaign_get_info()->name, 32, 14, 554, FONT_LARGE_BLACK, 0);
+    text_draw_centered_ellipsized(game_campaign_display_name(), 32, 14, 554, FONT_LARGE_BLACK, 0);
 
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_WINDOW_MISSION_LIST_CAMPAIGN_NOT_FINISHED - data.campaign_finished,
@@ -294,21 +293,22 @@ static void draw_background(void)
         draw_scenario_map();
         int y_offset = data.savegame_info_status == 1 && data.info.map_size <= 136 ? data.info.map_size * 2 : 272;
         y_offset += MISSION_LIST_Y_POSITION + 10;
-        text_draw_centered_ellipsized(data.selected_item->scenario->name, SELECTED_ITEM_INFO_X_OFFSET, y_offset,
+        const uint8_t *name = game_campaign_display_scenario_name(data.selected_item->scenario->id);
+        const uint8_t *description = game_campaign_display_scenario_description(data.selected_item->scenario->id);
+        text_draw_centered_ellipsized(name, SELECTED_ITEM_INFO_X_OFFSET, y_offset,
             SELECTED_ITEM_INFO_WIDTH, FONT_LARGE_BLACK, 0);
-        data.title.name = data.selected_item->scenario->name;
         data.title.x = SELECTED_ITEM_INFO_X_OFFSET;
         data.title.y = y_offset;
         data.title.width = SELECTED_ITEM_INFO_WIDTH;
         data.title.height = font_definition_for(FONT_LARGE_BLACK)->line_height;
         data.title.is_hovered = 0;
-        data.title.is_ellipsized = text_get_width(data.title.name, FONT_LARGE_BLACK) > data.title.width - 10;
+        data.title.is_ellipsized = text_get_width(name, FONT_LARGE_BLACK) > data.title.width - 10;
         if (data.selected_item->type == ITEM_TYPE_MISSION) {
             draw_rank(y_offset + 34);
             y_offset += 20;
         }
-        if (data.selected_item->scenario->description) {
-            text_draw_multiline(data.selected_item->scenario->description, SELECTED_ITEM_INFO_X_OFFSET, y_offset + 34,
+        if (description) {
+            text_draw_multiline(description, SELECTED_ITEM_INFO_X_OFFSET, y_offset + 34,
                 SELECTED_ITEM_INFO_WIDTH, 1, FONT_NORMAL_BLACK, 0);
         }
         data.ok_button_type = BUTTON_TYPE_BEGIN_SCENARIO;
@@ -317,7 +317,8 @@ static void draw_background(void)
         int y_offset = draw_mission_selection_map() + MISSION_LIST_Y_POSITION + 10;
 
         // Mission title
-        text_draw_centered(data.selected_item->mission.title, SELECTED_ITEM_INFO_X_OFFSET, y_offset,
+        text_draw_centered_ellipsized(game_campaign_display_mission_title(data.selected_item->mission.first_scenario),
+            SELECTED_ITEM_INFO_X_OFFSET, y_offset,
             SELECTED_ITEM_INFO_WIDTH, FONT_LARGE_BLACK, 0);
 
         // Rank
@@ -363,7 +364,7 @@ static void draw_item(const list_box_item *item)
 
     if (item_to_draw->type == ITEM_TYPE_SCENARIO) {
         int width = text_draw(string_from_ascii("-"), item->x, item->y + 2, font, 0);
-        string_copy(item_to_draw->scenario->name, text, 50);
+        string_copy(game_campaign_display_scenario_name(item_to_draw->scenario->id), text, 50);
         text_ellipsize(text, font, item->width - width);
         text_draw(text, item->x + width, item->y + 2, font, 0);
     } else {
@@ -371,7 +372,8 @@ static void draw_item(const list_box_item *item)
         cursor = string_copy(string_from_ascii(" "), cursor, 80 - (int) (cursor - text));
         cursor += string_from_int(cursor, item_to_draw->mission.id, 0);
         cursor = string_copy(string_from_ascii(" - "), cursor, 80 - (int) (cursor - text));
-        cursor = string_copy(item_to_draw->mission.title, cursor, 80 - (int) (cursor - text));
+        cursor = string_copy(game_campaign_display_mission_title(item_to_draw->mission.first_scenario),
+            cursor, 80 - (int) (cursor - text));
 
         text_draw_ellipsized(text, item->x, item->y, item->width, font, 0);
     }
@@ -477,24 +479,21 @@ static void item_tooltip(const list_box_item *item, tooltip_context *c)
 
     if (item_to_draw->type == ITEM_TYPE_SCENARIO) {
         int width = text_get_width(string_from_ascii("-"), font);
-        if (text_get_width(item_to_draw->scenario->name, font) + width > item->width) {
-            c->precomposed_text = item_to_draw->scenario->name;
+        const uint8_t *name = game_campaign_display_scenario_name(item_to_draw->scenario->id);
+        if (text_get_width(name, font) + width > item->width) {
+            c->precomposed_text = name;
             c->type = TOOLTIP_BUTTON;
         }
         return;
     }
 
     static uint8_t text[300];
-    static unsigned int last_selection;
-
-    if (last_selection != item->index + 1) {
-        uint8_t *cursor = string_copy(lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_MISSION), text, 300);
-        cursor = string_copy(string_from_ascii(" "), cursor, 300 - (int) (cursor - text));
-        cursor += string_from_int(cursor, item_to_draw->mission.id, 0);
-        cursor = string_copy(string_from_ascii(" - "), cursor, 300 - (int) (cursor - text));
-        cursor = string_copy(item_to_draw->mission.title, cursor, 300 - (int) (cursor - text));
-        last_selection = item->index + 1;
-    }
+    uint8_t *cursor = string_copy(lang_get_string(CUSTOM_TRANSLATION, TR_SAVE_DIALOG_MISSION), text, 300);
+    cursor = string_copy(string_from_ascii(" "), cursor, 300 - (int) (cursor - text));
+    cursor += string_from_int(cursor, item_to_draw->mission.id, 0);
+    cursor = string_copy(string_from_ascii(" - "), cursor, 300 - (int) (cursor - text));
+    string_copy(game_campaign_display_mission_title(item_to_draw->mission.first_scenario),
+        cursor, 300 - (int) (cursor - text));
 
     if (text_get_width(text, font) > item->width) {
         c->precomposed_text = text;
@@ -504,8 +503,8 @@ static void item_tooltip(const list_box_item *item, tooltip_context *c)
 
 static void handle_tooltip(tooltip_context *c)
 {
-    if (data.title.is_hovered && data.title.is_ellipsized) {
-        c->precomposed_text = data.title.name;
+    if (data.title.is_hovered && data.title.is_ellipsized && data.selected_item->scenario) {
+        c->precomposed_text = game_campaign_display_scenario_name(data.selected_item->scenario->id);
         c->type = TOOLTIP_BUTTON;
         return;
     }
