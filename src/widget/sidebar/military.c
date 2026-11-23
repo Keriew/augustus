@@ -95,7 +95,7 @@ static void button_close_military_sidebar(int param1, int param2);
 static void button_cycle_legion(int cycle_forward, int param2);
 static void button_select_formation_layout(const generic_button *button);
 static void button_go_to_legion(const generic_button *button);
-static void button_return_to_fort(const generic_button *button);
+static void button_deploy_or_recall_legion(const generic_button *button);
 static void button_empire_service(const generic_button *button);
 
 static image_button buttons_title_close[] = {
@@ -132,7 +132,7 @@ static generic_button buttons_formation_layout[LAYOUTS_PER_LEGION - 2][LAYOUTS_P
 
 static generic_button buttons_bottom[] = {
     {16, 0, 30, 30, button_go_to_legion},
-    {66, 0, 30, 30, button_return_to_fort},
+    {66, 0, 30, 30, button_deploy_or_recall_legion},
     {116, 0, 30, 30, button_empire_service},
 };
 
@@ -359,7 +359,10 @@ static void draw_military_info_buttons(int x_offset, int y_offset)
 
     // Return to fort button
     ++btn;
-    image_draw(formation_options_image + 1 + m->is_at_fort, x_offset + btn->x + 3, y_offset + 260,
+    int return_button_image = m->is_at_fort ?
+        (formation_legion_can_return_to_position(m) ? 1 : 2) :
+        (m->in_distant_battle ? 2 : 1);
+    image_draw(formation_options_image + return_button_image, x_offset + btn->x + 3, y_offset + 260,
         COLOR_MASK_NONE, SCALE_NONE);
 
     // Empire service button
@@ -533,6 +536,13 @@ int widget_sidebar_military_get_tooltip_text(tooltip_context *c)
         return get_layout_text_id(layout);
     }
     if (data.bottom_buttons_focus_id) {
+        if (data.bottom_buttons_focus_id == 2) {
+            const formation *m = formation_get(data.active_legion.formation_id);
+            if (m->is_at_fort) {
+                c->text_group = CUSTOM_TRANSLATION;
+                return TR_RETURN_TO_POSITION;
+            }
+        }
         c->extra_text_type = TOOLTIP_EXTRA_TEXT_JOINED_BY_SPACE;
         c->num_extra_texts = 1;
         c->text_group = 51;
@@ -666,10 +676,12 @@ static void button_go_to_legion(const generic_button *button)
     city_view_go_to_grid_offset(map_grid_offset(m->x_home, m->y_home));
 }
 
-static void button_return_to_fort(const generic_button *button)
+static void button_deploy_or_recall_legion(const generic_button *button)
 {
     formation *m = formation_get(data.active_legion.formation_id);
-    if (!m->in_distant_battle) {
+    if (m->is_at_fort) {
+        formation_legion_return_to_position(m);
+    } else if (!m->in_distant_battle) {
         formation_legion_return_home(m);
     }
 }
