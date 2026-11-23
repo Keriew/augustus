@@ -81,10 +81,8 @@ static int draw_background(void)
     lang_text_draw_centered(138, 36, 224, 50, 150, FONT_SMALL_PLAIN); // Morale
     lang_text_draw_centered(51, 1, 370, 35, 60, FONT_SMALL_PLAIN);    // Go to
     lang_text_draw_centered(51, 2, 370, 50, 60, FONT_SMALL_PLAIN);    // legion
-    if (get_num_legions_not_at_fort() > 0) {
-        text_draw_centered(translation_for(TR_RETURN_ALL_TO_FORT), 443, 35, 70, FONT_SMALL_PLAIN, 0);
-    } else if (get_num_legions_with_saved_position() > 0) {
-        text_draw_multiline(translation_for(TR_CALL_ALL_LEGIONS), 443, 30, 70, 1, FONT_SMALL_PLAIN, 0);
+    if (get_num_legions_with_saved_position() > 0 && get_num_legions_not_at_fort() <= 0) {
+        text_draw_multiline(translation_for(TR_CALL_ALL_LEGIONS), 444, 35, 70, 1, FONT_SMALL_PLAIN, 0);
     } else {
         lang_text_draw_centered(51, 3, 444, 35, 70, FONT_SMALL_PLAIN);    // Return
         lang_text_draw_centered(51, 4, 444, 50, 70, FONT_SMALL_PLAIN);    // to fort
