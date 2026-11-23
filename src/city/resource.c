@@ -5,6 +5,7 @@
 #include "building/count.h"
 #include "building/granary.h"
 #include "building/industry.h"
+#include "building/menu.h"
 #include "building/monument.h"
 #include "building/properties.h"
 #include "building/warehouse.h"
@@ -160,6 +161,10 @@ const resource_list *city_resource_get_potential_foods(void)
 
 int city_resource_is_potential(resource_type r)
 {
+    if (!resource_is_storable(r)) {
+        return empire_can_produce_resource_potentially(r);
+    }
+
     const resource_list *list = city_resource_get_potential();
     for (unsigned int i = 0; i < list->size; i++) {
         if (list->items[i] == r) {
@@ -427,6 +432,7 @@ void city_resource_determine_available(int storable_only)
             }
         }
     }
+    building_menu_update();
 }
 
 resource_type city_resource_ceres_temple_food(void)
