@@ -62,6 +62,38 @@ you are missing it, you can [download the update here](https://github.com/bvscha
 
 See [Running Julius](https://github.com/bvschaik/julius/wiki/Running-Julius) for further instructions and startup options.
 
+### Steam (Windows)
+
+The Steam release ships the Sierra launcher, so `Caesar 3 → Play` opens a small launcher window
+instead of the game. Augustus works with the Steam files, it only has to live next to them:
+
+1. Install Caesar 3 from Steam.
+2. In your Steam library, right-click **Caesar 3 → Properties → Installed Files → Browse** to open
+   the install folder (`...\steamapps\common\Caesar 3\`).
+3. Download the Windows build from the [latest release](https://github.com/Keriew/augustus/releases/latest) -
+   both the 32-bit and the 64-bit build should work - and extract the whole archive into the **`C3`**
+   subfolder, next to `c3.exe` and the `.555` files (not the parent folder).
+4. Run `augustus.exe` from there; if it asks for the Caesar 3 folder on first start, pick the same
+   `C3` folder.
+
+To keep launching through Steam (playtime and overlay included), point the bundled launcher at
+Augustus instead of `c3.exe`:
+
+5. Open `SierraLauncher.ini` in the parent `Caesar 3` folder and change
+
+    ```ini
+    Game1Exe=c3.exe
+    ```
+
+    to
+
+    ```ini
+    Game1Exe=augustus.exe
+    ```
+
+`Play` then opens the Sierra launcher, whose **Launch** button starts Augustus. `c3.exe` is left
+untouched, so vanilla Caesar 3 still runs straight from `C3\c3.exe`.
+
 ## Manual
 
 Augustus changes are explained in detail in the comprehensive manual. Below you can find the links to the manual in a few language versions.
