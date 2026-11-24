@@ -96,6 +96,11 @@ static int should_change_destination(const figure *f, unsigned int building_id, 
                 return 1;
             }
             break;
+        case FIGURE_ACTION_23_CARTPUSHER_DELIVERING_TO_WORKSHOP:
+            if(!building_is_workshop(current_destination->type)) {
+                return 1;
+            }
+            break;
         case FIGURE_ACTION_51_WAREHOUSEMAN_DELIVERING_RESOURCE:
             if (current_destination->type != BUILDING_WAREHOUSE &&
                 current_destination->type != BUILDING_WAREHOUSE_SPACE &&
