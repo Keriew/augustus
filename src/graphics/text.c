@@ -808,11 +808,14 @@ int text_draw_vertically_centered(const uint8_t *str,
 
 void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color)
 {
+    // Number row keys that select the 1st to 12th menu item
+    static const char index_keys[] = "1234567890-=";
+
     uint8_t strx[NUMBER_BUFFER_LENGTH];
     uint8_t *current = string_copy(str, strx, NUMBER_BUFFER_LENGTH - 5);
 
     *current++ = '(';
-    current += string_from_int(current, index, 0);
+    *current++ = index_keys[(index - 1) % (sizeof(index_keys) - 1)];
     *current++ = ')';
     *current = 0;
 

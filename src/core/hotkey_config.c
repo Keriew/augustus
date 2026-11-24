@@ -148,7 +148,16 @@ static const char *ini_keys[] = {
     "editor_empire_pick_tool",
     "game_quicksave",
     "game_quickload",
-    "close"
+    "close",
+    "build_menu_water",
+    "build_menu_health",
+    "build_menu_temples",
+    "build_menu_education",
+    "build_menu_entertainment",
+    "build_menu_administration",
+    "build_menu_engineering",
+    "build_menu_security",
+    "build_menu_industry"
 };
 
 static struct {

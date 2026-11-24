@@ -242,13 +242,13 @@ static void draw_menu_buttons(void)
         int type = building_menu_type(data.selected_submenu, item_index);
 
         int menu_index = 0;
-        if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && i < 10) {
+        if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && i < 12) {
             menu_index = i + 1;
         }
 
         if (is_auto_cycle_button(type)) {
             if (menu_index > 0) {
-                text_draw_build_menu_with_index(translation_for(TR_AUTO_CYCLE_TEMPLES), menu_index % 10,
+                text_draw_build_menu_with_index(translation_for(TR_AUTO_CYCLE_TEMPLES), menu_index,
                 item_x_align + MENU_TEXT_X_OFFSET, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
                 MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
             } else {
@@ -286,7 +286,7 @@ static void draw_menu_buttons(void)
         }
 
         if (menu_index > 0) {
-            text_draw_build_menu_with_index(menu_name, menu_index % 10, item_x_align + MENU_TEXT_X_OFFSET,
+            text_draw_build_menu_with_index(menu_name, menu_index, item_x_align + MENU_TEXT_X_OFFSET,
                 data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i, MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
         } else {
             text_draw_centered(menu_name, item_x_align + text_offset, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
@@ -361,21 +361,33 @@ static int button_index_to_submenu_item(int index)
     return item;
 }
 
-static int handle_input_build_menu_index(const hotkeys *h)
+static int handle_hotkeys(const hotkeys *h)
 {
-    if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && h->build_menu_index_num &&
-        h->build_menu_index_num <= (int) data.num_items) {
-        button_menu_item(button_index_to_submenu_item(h->build_menu_index_num - 1));
-        return h->build_menu_index_num;
+    if (h->build_menu_index_num) {
+        if (config_get(CONFIG_UI_ENABLE_BUILD_MENU_SHORTCUTS) && h->build_menu_index_num <= (int) data.num_items) {
+            button_menu_item(button_index_to_submenu_item(h->build_menu_index_num - 1));
+        }
+        return 1;
+    }
+    if (h->build_menu) {
+        if (building_menu_count_items(h->build_menu) > 0) {
+            window_build_menu_show(h->build_menu);
+        }
+        return 1;
+    }
+    if (h->building) {
+        window_build_menu_hide();
+        window_city_set_construction_type(h->building, 0);
+        return 1;
     }
     return 0;
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
-    if (handle_build_submenu(m) ||
-        widget_sidebar_city_handle_mouse_build_menu(m) ||
-        handle_input_build_menu_index(h)) {
+    if (handle_hotkeys(h) ||
+        handle_build_submenu(m) ||
+        widget_sidebar_city_handle_mouse_build_menu(m)) {
         return;
     }
     if (input_go_back_requested(m, h) || click_outside_menu(m, get_sidebar_x_offset())) {

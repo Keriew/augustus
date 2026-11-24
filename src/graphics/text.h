@@ -73,5 +73,9 @@ int text_draw_vertically_centered(const uint8_t *str,
  */
 int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *largest_width);
 
+/**
+ * Draws a build menu item name followed by the key that selects it
+ * @param index 1-based item position: 1-9 and 0 for 1-10, then - and = for 11 and 12
+ */
 void text_draw_build_menu_with_index(const uint8_t *str, int index, int x_offset, int y_offset, int box_width, font_t font, color_t color);
 #endif // GRAPHICS_TEXT_H
