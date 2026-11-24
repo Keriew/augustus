@@ -728,7 +728,7 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_ADVISOR_HOUSING_GRAPH_BUTTON, "Afficher les graphiques de population"},
     {TR_TOOLTIP_ADVISOR_POPULATION_HOUSING_BUTTON, "Consulter le rapport sur le logement"},
     {TR_RETURN_TO_FORT, "Retour au fort"},
-    {TR_RETURN_TO_POSITION, "Redéployer vers position"},
+    {TR_RETURN_TO_POSITION, "Redéployer position"},
     {TR_CALL_ALL_LEGIONS, "Déployer Légions"},
     {TR_BUILDING_MONUMENT_CONSTRUCTION_ARCHITECT_NEEDED, "Tous les matériaux requis pour cette phase ont été livrés. Un architecte de la guilde des architectes est attendu pour superviser la construction."},
     {TR_RETURN_ALL_TO_FORT, "Tous rentrer"},
