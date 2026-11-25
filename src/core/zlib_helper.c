@@ -182,7 +182,7 @@ static double estimated_ratio(const char *path)
     return ratio;
 }
 
-long long estimate_zip_size(char (*files)[FILE_NAME_MAX], size_t count, const char *extra_file)
+long long estimate_zip_size(char (*files)[FILE_NAME_MAX], size_t count, const char *extra_file, long long int *size_list)
 {
     long long total = ZIP_END_RECORD_SIZE;
 
@@ -201,6 +201,7 @@ long long estimate_zip_size(char (*files)[FILE_NAME_MAX], size_t count, const ch
 
         total += ZIP_LOCAL_HEADER_SIZE + name_length + compressed;
         total += ZIP_CENTRAL_HEADER_SIZE + name_length;
+        size_list[i] = ZIP_LOCAL_HEADER_SIZE + ZIP_CENTRAL_HEADER_SIZE + 2 * name_length + compressed;
     }
 
     return total;

@@ -2406,6 +2406,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_BEACH, "Beach"},
     {TR_TERRAIN_BEACH, "Beach"},
     {TR_TERRAIN_BEACH_DESC, "A beach of fine sand. Pleasing to the eye and favoured by strollers, who dawdle along it, it yields sand and clay in plenty for the city."},
+    {TR_EDITOR_PACKAGE_MAP_FILES, "Files"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

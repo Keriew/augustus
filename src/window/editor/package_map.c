@@ -42,6 +42,9 @@ static struct {
     int file_idx;
     char zip_path[FILE_NAME_MAX];
     long long int final_size;
+    int is_first_draw;
+    long long int *file_sizes;
+    long long int processed_files_size;
 } data;
 
 const char *image_paths[] = {
@@ -215,6 +218,8 @@ static void export_stop(void)
     data.zip_size = 0;
     data.file_idx = 0;
     data.final_size = 0;
+    free(data.file_sizes);
+    data.file_sizes = NULL;
 }
 
 static void close_window(void)
@@ -232,6 +237,8 @@ static void export_start(void)
         close_window();
     }
     zip_package_map_add_file(data.scenario_file, MZ_DEFAULT_LEVEL);
+    data.processed_files_size = data.file_sizes[data.file_count];
+    data.is_first_draw = 1;
 }
 
 static void init(void)
@@ -245,18 +252,25 @@ static void init(void)
         close_window();
     }
     find_files();
-    data.zip_size = estimate_zip_size(data.files, data.file_count, data.scenario_file);
+
+    data.file_sizes = calloc(data.file_count + 1, sizeof(*data.file_sizes));
+    if (!data.file_sizes) {
+        log_error("Out of memory, can not package map!", 0, 0);
+        close_window();
+        return;
+    }
+    data.zip_size = estimate_zip_size(data.files, data.file_count, data.scenario_file, data.file_sizes);
 }
 
 static void get_magnitude(long long int size, float *magnitude, char *extension)
 {
-    if (data.zip_size > 1073741823) {
+    if (size > 1073741823) {
         *magnitude = 1073741824.0;
         snprintf(extension, 3, "GB");
-    } else if (data.zip_size > 1048575) {
+    } else if (size > 1048575) {
         *magnitude = 1048576.0;
         snprintf(extension, 3, "MB");
-    } else if (data.zip_size > 1023) {
+    } else if (size > 1023) {
         *magnitude = 1024.0;
         snprintf(extension, 3, "kB");
     }
@@ -270,8 +284,33 @@ static void draw_foreground(void)
 
     lang_text_draw_centered(CUSTOM_TRANSLATION, TR_EDITOR_PACKAGE_MAP, 0, 24, WINDOW_WIDTH * BLOCK_SIZE, FONT_LARGE_BLACK);
     if (data.exporting == EXPORTING_IN_PROGRESS && data.file_idx < data.file_count) {
-        zip_package_map_add_file(data.files[data.file_idx], MZ_DEFAULT_LEVEL);
-        data.file_idx++;
+        // X/Y Files
+        uint8_t files_message[128];
+        // adding one to file_idx and file_count since the scenario file is already exported and not counted in file_count
+        snprintf((char *)files_message, 128, "%i/%i %s", data.file_idx + 1, data.file_count + 1, translation_for(TR_EDITOR_PACKAGE_MAP_FILES));
+        text_draw(files_message, 24, 64, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+
+        // X/Y MB
+        uint8_t size_message[128];
+        float magnitude = 1.0;
+        char extension[3] = "B";
+        float magnitude_total = 1.0;
+        char extension_total[3] = "B";
+
+        get_magnitude(data.processed_files_size, &magnitude, extension);
+        get_magnitude(data.zip_size, &magnitude_total, extension_total);
+        snprintf((char *)size_message, 128, "%.2f%s / %.2f%s", data.processed_files_size / magnitude, extension,
+            data.zip_size / magnitude_total, extension_total);
+        text_draw(size_message, 24, 128, FONT_NORMAL_BLACK, COLOR_MASK_NONE);
+
+        // add one file to the zip
+        if (!data.is_first_draw) {
+            // draw once before adding a potentially big file so the game doesn't seem to hang
+            zip_package_map_add_file(data.files[data.file_idx], MZ_DEFAULT_LEVEL);
+            data.processed_files_size += data.file_sizes[data.file_idx];
+            data.file_idx++;
+        }
+        data.is_first_draw = 0;
     } else if (data.exporting == EXPORTING_IN_PROGRESS && data.file_idx >= data.file_count) {
         if (!zip_package_map_finalize()) {
             close_window();

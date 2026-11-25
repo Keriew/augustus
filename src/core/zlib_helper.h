@@ -37,7 +37,8 @@ int zip_package_map_finalize(void);
  * @param files The file list to check it's compressed size
  * @param count The length of the file list
  * @param extra_file The path to the extra file
+ * @param size_list A list where the size of each file is stored, MUST be allocated
  */
-long long estimate_zip_size(char (*files)[FILE_NAME_MAX], size_t count, const char *extra_file);
+long long estimate_zip_size(char (*files)[FILE_NAME_MAX], size_t count, const char *extra_file, long long int *size_list);
 
 #endif // CORE_ZLIB_HELPER_H
