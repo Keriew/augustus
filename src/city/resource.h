@@ -39,6 +39,8 @@ const resource_list *city_resource_get_potential(void);
 
 const resource_list *city_resource_get_potential_foods(void);
 
+int city_resource_is_potential(resource_type r);
+
 int city_resource_multiple_wine_available(void);
 
 int city_resource_food_types_eaten(void);
@@ -81,5 +83,7 @@ resource_type city_resource_ceres_temple_food(void);
 void city_resource_calculate_food_stocks_and_supply_wheat(void);
 
 void city_resource_consume_food(void);
+
+int city_resource_available_by_events(resource_type r);
 
 #endif // CITY_RESOURCE_H

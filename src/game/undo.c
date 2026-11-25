@@ -13,6 +13,7 @@
 #include "building/storage.h"
 #include "city/buildings.h"
 #include "city/finance.h"
+#include "city/population.h"
 #include "core/calc.h"
 #include "core/image.h"
 #include "figure/roamer_preview.h"
@@ -119,6 +120,7 @@ static void clear_buildings(void)
     data.num_buildings = 0;
     memset(data.buildings, 0, MAX_UNDO_BUILDINGS * sizeof(building));
     data.type_changes.num = 0;
+    city_population_reset_undo();
 }
 
 void game_undo_record_building_type(building *b)

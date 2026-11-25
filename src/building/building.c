@@ -251,6 +251,7 @@ building *building_create(building_type type, int x, int y)
 
     // subtype
     if (building_is_house(type)) {
+        b->cooldown_advanced_sentiment = type < BUILDING_HOUSE_SMALL_VILLA ? ADVANCED_SENTIMENT_COOLDOWN_TICKS : 0;
         b->subtype.house_level = type - BUILDING_HOUSE_VACANT_LOT;
     }
 
@@ -712,7 +713,7 @@ void building_update_state(void)
         }
 
         // patch the phantom bridge entry in the buildings array after a bridge deletion
-        if ((b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_SHIP_BRIDGE) 
+        if ((b->type == BUILDING_LOW_BRIDGE || b->type == BUILDING_SHIP_BRIDGE)
             && (b->state == BUILDING_STATE_IN_USE || b->state == BUILDING_STATE_MOTHBALLED)
             && (map_building_at(b->grid_offset) != b->id)) {
                 b->state = BUILDING_STATE_UNUSED;
@@ -750,6 +751,10 @@ void building_update_state(void)
                 map_building_set_rubble_grid_building_id(b->grid_offset, 0, b->size);
             }
             // building_delete(b); // keep the rubbled building as a reference for reconstruction
+            if (b->type == BUILDING_BURNING_RUIN && b->grid_offset != b->data.rubble.og_grid_offset) {
+                // but still delete extra ruin buildings that destroy_on_fire created
+                building_delete(b);
+            }
 
             // monuments clear
             if (building_monument_is_limited(b->type) || building_monument_is_unfinished_monument(b)) {
@@ -931,6 +936,31 @@ int building_is_mars_temple(building_type type)
 int building_is_venus_temple(building_type type)
 {
     return (type == BUILDING_SMALL_TEMPLE_VENUS || type == BUILDING_LARGE_TEMPLE_VENUS);
+}
+
+int building_is_small_temple(building_type type)
+{
+    return type >= BUILDING_SMALL_TEMPLE_CERES && type <= BUILDING_SMALL_TEMPLE_VENUS;
+}
+
+int building_is_large_temple(building_type type)
+{
+    return type >= BUILDING_LARGE_TEMPLE_CERES && type <= BUILDING_LARGE_TEMPLE_VENUS;
+}
+
+int building_is_grand_temple(building_type type)
+{
+    return (type >= BUILDING_GRAND_TEMPLE_CERES && type <= BUILDING_GRAND_TEMPLE_VENUS) || type == BUILDING_PANTHEON;
+}
+
+int building_is_decorative_tree(building_type type)
+{
+    return (type >= BUILDING_PINE_TREE && type <= BUILDING_DATE_TREE) || type == BUILDING_WILLOW_TREE;
+}
+
+int building_is_decorative_path(building_type type)
+{
+    return (type >= BUILDING_PINE_PATH && type <= BUILDING_DATE_PATH) || type == BUILDING_GARDEN_PATH;
 }
 
 // All buildings capable of collecting and storing goods as a market

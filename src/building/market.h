@@ -13,4 +13,10 @@ resource_type building_market_fetch_inventory(building *market, resource_storage
 
 int building_market_get_storage_destination(building *market);
 
+/**
+ * Fills all markets with 2000 goods and food of each type
+ * Used for cheats
+ */
+void building_market_fill_markets(void);
+
 #endif // BUILDING_MARKET_H

@@ -446,7 +446,7 @@ void window_building_draw_mission_post(building_info_context *c)
         window_building_draw_description(c, 134, 1);
     }
     inner_panel_draw(c->x_offset + 16, c->y_offset + 136, c->width_blocks - 2, 4);
-    window_building_draw_employment_without_house_cover(c, 140);
+    window_building_draw_employment(c, 140);
     window_building_draw_risks(c, c->x_offset + c->width_blocks * BLOCK_SIZE - 76, c->y_offset + 144);
 }
 

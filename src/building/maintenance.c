@@ -255,7 +255,7 @@ void building_maintenance_check_rome_access(void)
                 b->house_unreachable_ticks++;
                 if (b->house_unreachable_ticks > 4) {
                     if (b->house_population) {
-                        figure_create_homeless(b, b->house_population);
+                        figure_create_homeless(b, b->house_population, 0);
                         b->house_population = 0;
                         b->house_unreachable_ticks = 0;
                     }

@@ -95,11 +95,23 @@ int building_market_get_storage_destination(building *market)
 {
     resource_storage_info info[RESOURCE_MAX] = { 0 };
     if (!building_market_get_needed_inventory(market, info) ||
-        !building_distribution_get_resource_storages_for_building(info, market, 
+        !building_distribution_get_resource_storages_for_building(info, market,
             config_get(CONFIG_GP_CH_MARKET_RANGE) ? MARKET_MAX_DISTANCE : map_data.width)) {
         return 0;
     }
     int fetch_inventory = building_market_fetch_inventory(market, info);
     market->data.market.fetch_inventory_id = fetch_inventory;
     return info[fetch_inventory].building_id;
+}
+
+void building_market_fill_markets(void)
+{
+    for (building *market = building_first_of_type(BUILDING_MARKET); market; market = market->next_of_type) {
+        for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+            if (!resource_is_inventory(r)) {
+                continue;
+            }
+            market->resources[r] = 2000;
+        }
+    }
 }

@@ -178,7 +178,7 @@ static unsigned int clear_land_confirmed(int x_start, int y_start, int x_end, in
                     }
                 }
                 if (b->house_size && b->house_population) {
-                    figure *homeless = figure_create_homeless(b, b->house_population);
+                    figure *homeless = figure_create_homeless(b, b->house_population, 1);
                     b->house_population = 0;
                     b->figure_id = homeless->id;
                 }

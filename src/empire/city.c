@@ -171,9 +171,11 @@ int empire_can_produce_resource_locally(int resource)
     }
     // Gold can also be produced via City Mint
     if (resource == RESOURCE_GOLD) {
-        return !building_monument_requires_resource(BUILDING_CITY_MINT, RESOURCE_GOLD) &&
-            scenario_allowed_building(BUILDING_CITY_MINT) &&
-            building_monument_has_required_resources_to_build(BUILDING_CITY_MINT);
+        return city_buildings_has_city_mint() ||
+            // Avoid recursive feasibility checks if Mint ever requires gold.
+            (!building_monument_requires_resource(BUILDING_CITY_MINT, RESOURCE_GOLD) &&
+            scenario_allowed_building(BUILDING_CITY_MINT) && scenario_allowed_building(BUILDING_SENATE) &&
+            building_monument_has_required_resources_to_build(BUILDING_CITY_MINT));
     }
     return 0;
 }

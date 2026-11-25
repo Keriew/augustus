@@ -14,6 +14,7 @@
 #include "city/message.h"
 #include "city/military.h"
 #include "city/mission.h"
+#include "city/resource.h"
 #include "city/victory.h"
 #include "city/view.h"
 #include "core/config.h"
@@ -36,6 +37,7 @@
 #include "figuretype/water.h"
 #include "game/animation.h"
 #include "game/campaign.h"
+#include "game/cheats.h"
 #include "game/difficulty.h"
 #include "game/file_io.h"
 #include "game/settings.h"
@@ -303,7 +305,7 @@ static void initialize_saved_game(void)
     map_routing_update_land();
     building_maintenance_check_rome_access();
     building_granaries_calculate_stocks();
-    building_menu_update();
+    city_resource_determine_available(1);
     city_message_init_problem_areas();
 
     sound_city_init();
@@ -324,6 +326,8 @@ static void initialize_saved_game(void)
     map_natives_check_land(0);
 
     city_message_clear_scroll();
+
+    game_cheat_reset_markets_filled();
 
     setting_set_default_game_speed();
 

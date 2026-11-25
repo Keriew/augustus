@@ -118,6 +118,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DRAW_WEATHER, "Смена погоды"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Запрос при перезаписи файла"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Невоенные ворота по умолчанию пропускают всех пешеходов"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Расширенная логика влияния налогов & жалований на настроение жителей"},
     {TR_HOTKEY_TITLE, "Настройки горячих клавиш Augustus"},
     {TR_HOTKEY_LABEL, "Основная"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Альтернативная"},
@@ -2397,6 +2398,7 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_BEACH, "Пляж"},
     {TR_TERRAIN_BEACH, "Пляж"},
     {TR_TERRAIN_BEACH_DESC, "Пляж с мелким песком. Радует глаз и привлекает любителей неспешных прогулок вдоль берега. Он также служит богатым источником песка и глины для города."},
+    {TR_CHEAT_FILL_MARKETS, "Все рынки заполнены едой и товарами"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

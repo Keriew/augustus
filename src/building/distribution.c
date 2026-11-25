@@ -6,6 +6,7 @@
 #include "city/resource.h"
 #include "core/calc.h"
 #include "empire/city.h"
+#include "game/cheats.h"
 
 #include <string.h>
 
@@ -81,7 +82,8 @@ int building_distribution_resource_is_handled(resource_type resource, building_t
     if (type == BUILDING_DOCK) { // before 'potentially' checks to avoid docks not accepting future resources
         return 1;
     }
-    if (!empire_can_produce_resource_potentially(resource) && !empire_can_import_resource_potentially(resource)) {
+    if (!empire_can_produce_resource_potentially(resource) && !empire_can_import_resource_potentially(resource) &&
+        !game_cheat_filled_markets() && !city_resource_available_by_events(resource)) {
         return 0;
     }
     if (!resource_is_inventory(resource)) {

@@ -25,8 +25,9 @@ void city_population_add(int num_people);
 /**
  * Add people returning after becoming homeless.
  * @param num_people Number of people to add
+ * @param is_undo whether the homeless get added by undoing house deletion
  */
-void city_population_add_homeless(int num_people);
+void city_population_add_homeless(int num_people, int is_undo);
 
 /**
  * Remove people from the city.
@@ -34,7 +35,7 @@ void city_population_add_homeless(int num_people);
  */
 void city_population_remove(int num_people);
 
-void city_population_remove_homeless(int num_people);
+void city_population_remove_homeless(int num_people, int is_clear_land);
 
 void city_population_remove_home_removed(int num_people);
 
@@ -87,5 +88,10 @@ int city_population_percentage_in_tents_shacks(void);
 int city_population_percentage_in_villas_palaces(void);
 
 int city_population_count_at_level(int level);
+
+/**
+ * Resets the people that should be restored when undoing house deletion
+ */
+void city_population_reset_undo(void);
 
 #endif // CITY_POPULATION_H

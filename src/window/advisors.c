@@ -284,6 +284,7 @@ static void get_tooltip(tooltip_context *c)
         return;
     }
     advisor_tooltip_result result = {
+        .text_group = 0,
         .text_id = 0,
         .translation_key = 0,
         .precomposed_text = 0
@@ -292,6 +293,9 @@ static void get_tooltip(tooltip_context *c)
         current_advisor_window->get_tooltip_text(&result);
     }
     if (result.text_id) {
+        if (result.text_group) {
+            c->text_group = result.text_group;
+        }
         c->text_id = result.text_id;
         c->type = TOOLTIP_BUTTON;
     } else if (result.translation_key) {
