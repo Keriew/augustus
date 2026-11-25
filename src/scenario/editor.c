@@ -29,6 +29,7 @@ static const struct {
 };
 
 static int is_saved;
+static int has_been_saved_once;  // tracks if map was ever saved
 
 static void init_point(map_point *point)
 {
@@ -41,9 +42,17 @@ int scenario_editor_is_saved(void)
     return is_saved;
 }
 
-void scenario_editor_set_as_saved(void)
+int scenario_editor_has_been_saved_once(void)
+{
+    return has_been_saved_once;
+}
+
+void scenario_editor_set_as_saved(int manually)
 {
     is_saved = 1;
+    if (manually) {
+        has_been_saved_once = 1;
+    }
 }
 
 void scenario_editor_set_as_unsaved(void)
@@ -118,6 +127,8 @@ void scenario_editor_create(int map_size)
 
     scenario.random_events.max_wages = 45;
     scenario.random_events.min_wages = 5;
+
+    has_been_saved_once = 0;
 }
 
 void scenario_editor_set_native_images(int image_alt_hut, int image_native_decoration,

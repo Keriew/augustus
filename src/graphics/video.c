@@ -129,7 +129,14 @@ static int load_av1(const char *filename)
     if (!data.easyav1) {
         const char *path;
         const char *community_location = platform_file_manager_get_directory_for_location(PATH_LOCATION_COMMUNITY, 0);
-        if (strncmp(community_location, av1_filename, strlen(community_location)) == 0) {
+        const char *content_location = platform_file_manager_get_directory_for_location(PATH_LOCATION_EDITOR_CONTENT, 0);
+        const char *scenario_dir = dir_get_scenario_dir();
+
+        if (strncmp(scenario_dir, av1_filename, strlen(scenario_dir)) == 0) {
+            path = filename;
+        } else if (strncmp(content_location, av1_filename, strlen(content_location)) == 0) {
+            path = filename;
+        } else if (strncmp(community_location, av1_filename, strlen(community_location)) == 0) {
             path = filename;
         } else {
             path = dir_get_file(av1_filename, MAY_BE_LOCALIZED);
@@ -195,7 +202,14 @@ static int load_mpg(const char *filename)
     if (!data.plm) {
         const char *path;
         const char *community_location = platform_file_manager_get_directory_for_location(PATH_LOCATION_COMMUNITY, 0);
-        if (strncmp(community_location, mpg_filename, strlen(community_location)) == 0) {
+        const char *content_location = platform_file_manager_get_directory_for_location(PATH_LOCATION_EDITOR_CONTENT, 0);
+        const char *scenario_dir = dir_get_scenario_dir();
+
+        if (strncmp(scenario_dir, mpg_filename, strlen(scenario_dir)) == 0) {
+            path = filename;
+        } else if (strncmp(content_location, mpg_filename, strlen(content_location)) == 0) {
+            path = filename;
+        } else if (strncmp(community_location, mpg_filename, strlen(community_location)) == 0) {
             path = filename;
         } else {
             path = dir_get_file(mpg_filename, MAY_BE_LOCALIZED);
