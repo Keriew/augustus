@@ -527,6 +527,35 @@ int map_road_get_granary_inner_road_tiles_count(building *b)
     return count;
 }
 
+static int road_has_permission(int edge_grid_offset, roadblock_permission perm) {
+    building *b = building_get(map_building_at(edge_grid_offset));
+    return !building_type_is_roadblock(b->type) || building_roadblock_get_permission(perm, b);
+}
+
+static int map_road_get_granary_permitted_edge_road_tiles_count(building *b, roadblock_permission perm) {
+    int count = 0;
+    int cx = b->x + 1;
+    int cy = b->y + 1;
+
+    static const int edge_checks[4][2] = {
+        { 0,  2},
+        { 2,  0},
+        {-2,  0},
+        { 0, -2}
+    };
+
+    for (int i = 0; i < 4; ++i) {
+        int ex = cx + edge_checks[i][0];
+        int ey = cy + edge_checks[i][1];
+        int edge_grid_offset = map_grid_offset(ex, ey);
+
+        if (map_terrain_is(edge_grid_offset, TERRAIN_ROAD) && road_has_permission(edge_grid_offset, perm)) {
+            count++;
+        }
+    }
+    return count;
+}
+
 static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permission perm)
 {
     int is_road = terrain_is_road_like(grid_offset);
@@ -540,13 +569,14 @@ static int get_adjacent_road_tile_for_roaming(int grid_offset, roadblock_permiss
             }
         }
         if (b->type == BUILDING_GRANARY) {
-            if (map_routing_citizen_is_road(grid_offset)) {
-                if (map_road_get_granary_inner_road_tiles_count(b) >= 3) {
-                    is_road = 1; //edges of the granary that connect to another road become roads
-                    //not including passable terrain helps deal with roaming inside the granary
-                } else {
-                    is_road = 0; // dont roam into dead-end granaries
+            if (map_road_get_granary_permitted_edge_road_tiles_count(b, perm) > 1) {
+                int center_grid_offset = map_grid_offset(b->x + 1, b->y + 1);
+                int edge_grid_offset = 2 * grid_offset - center_grid_offset;
+                if (!road_has_permission(edge_grid_offset, perm)) {
+                    no_permissions = 1;
                 }
+            } else {
+                is_road = 0;
             }
         } else if (b->type == BUILDING_WAREHOUSE) {
             if (map_routing_citizen_is_passable_terrain(grid_offset) || map_routing_citizen_is_road(grid_offset)) {
