@@ -32,20 +32,20 @@ static int export_message(custom_message_t *message)
     xml_exporter_new_element("message");
     xml_exporter_add_attribute_encoded_text("uid", message->linked_uid->text);
 
-    if (custom_messages_get_title(message)) {
+    if (custom_messages_get_source_title(message)) {
         xml_exporter_new_element("title");
-        xml_exporter_add_element_encoded_text(custom_messages_get_title(message));
+        xml_exporter_add_element_encoded_text(custom_messages_get_source_title(message));
         xml_exporter_close_element();
     }
 
-    if (custom_messages_get_subtitle(message)) {
+    if (custom_messages_get_source_subtitle(message)) {
         xml_exporter_new_element("subtitle");
-        xml_exporter_add_element_encoded_text(custom_messages_get_subtitle(message));
+        xml_exporter_add_element_encoded_text(custom_messages_get_source_subtitle(message));
         xml_exporter_close_element();
     }
 
     xml_exporter_new_element("text");
-    xml_exporter_add_element_encoded_text(custom_messages_get_text(message));
+    xml_exporter_add_element_encoded_text(custom_messages_get_source_text(message));
     xml_exporter_close_element();
 
     for (int i = 0; i < CUSTOM_MEDIA_MAX; i++) {
