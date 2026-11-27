@@ -46,7 +46,7 @@ If you are unsure about anything regarding the savegame versioning, please ask o
 **********************************************************************************************************************/
 
 typedef enum {
-    SAVE_GAME_CURRENT_VERSION = 0xc2,
+    SAVE_GAME_CURRENT_VERSION = 0xc3,
 
     SAVE_GAME_LAST_ORIGINAL_LIMITS_VERSION = 0x66,
     SAVE_GAME_LAST_SMALLER_IMAGE_ID_VERSION = 0x76,
@@ -120,11 +120,12 @@ typedef enum {
     SAVE_GAME_LAST_NO_RAW_RELIGION_COVERAGE = 0xbe,
     SAVE_GAME_LAST_NO_MORE_NATIVE_BUILDINGS = 0xbf,
     SAVE_GAME_LAST_NO_ADDITIONAL_TERRAIN_PARAMETER_ENTRIES = 0xc0,
-    SAVE_GAME_LAST_NO_ADVANCED_SENTIMENT = 0xc1
+    SAVE_GAME_LAST_NO_ADVANCED_SENTIMENT = 0xc1,
+    SAVE_GAME_LAST_NO_QUARRY_COLLAPSE = 0xc2
 } savegame_version_t;
 
 typedef enum {
-    SCENARIO_CURRENT_VERSION = 30,
+    SCENARIO_CURRENT_VERSION = 31,
 
     SCENARIO_VERSION_NONE = 0,
     SCENARIO_LAST_UNVERSIONED = 1,
@@ -155,7 +156,8 @@ typedef enum {
     SCENARIO_LAST_NO_OUTSKIRTS = 26,
     SCENARIO_LAST_NO_MORE_NATIVE_BUILDINGS = 27,
     SCENARIO_LAST_NO_BRIDGE_SPRITES = 28,
-    SCENARIO_LAST_NO_ADDITIONAL_TERRAIN_PARAMETER_ENTRIES = 29
+    SCENARIO_LAST_NO_ADDITIONAL_TERRAIN_PARAMETER_ENTRIES = 29,
+    SCENARIO_LAST_NO_QUARRY_COLLAPSE = 30
 } scenario_version_t;
 
 typedef enum {

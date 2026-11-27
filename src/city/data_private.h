@@ -28,6 +28,7 @@ extern struct city_data_t {
         int32_t num_striking_industries;
         uint16_t months_since_last_destroyed_iron_mine;
         uint16_t months_since_last_flooded_clay_pit;
+        uint16_t months_since_last_destroyed_quarry;
     } building;
     struct {
         int16_t animals;
