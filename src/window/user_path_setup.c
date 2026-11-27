@@ -118,9 +118,11 @@ static void draw_background(void)
     graphics_in_dialog_with_size(640, 144);
 
     outer_panel_draw(0, 0, 40, 9);
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_USER_DIRECTORIES_WINDOW_TITLE, 0, 20, 640, FONT_LARGE_BLACK);
+    text_draw_centered_ellipsized(translation_for(TR_USER_DIRECTORIES_WINDOW_TITLE),
+        16, 20, 608, FONT_LARGE_BLACK, 0);
 
-    lang_text_draw(CUSTOM_TRANSLATION, TR_USER_DIRECTORIES_WINDOW_USER_PATH, 16, 64, FONT_NORMAL_BLACK);
+    lang_text_draw_ellipsized(CUSTOM_TRANSLATION, TR_USER_DIRECTORIES_WINDOW_USER_PATH,
+        16, 64, path_button.x - 32, FONT_NORMAL_BLACK);
 
     text_draw_ellipsized(get_path_text(), path_button.x + 10, path_button.y + 9, path_button.width - 20,
         FONT_NORMAL_BLACK, 0);
