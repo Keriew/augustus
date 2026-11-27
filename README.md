@@ -73,6 +73,8 @@ Augustus changes are explained in detail in the comprehensive manual. Below you 
 |French   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_fr_4_0.pdf)|
 |Polish   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_polish_3.0.pdf)|
 |Russian   |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_russian_3.0.pdf)|
+|Spanish  |[Download](https://github.com/Keriew/augustus/raw/master/res/translated_manuals/augustus_manual_es_4_0.pdf)|
+
 
 ## Bugs
 
