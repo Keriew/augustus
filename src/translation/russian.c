@@ -555,6 +555,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_10, "Жители крайне довольны вами."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_11, "Жители обожают вас."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_12, "Жители почитают вас за бога."},
+    {TR_BUILDING_WINDOW_HOUSE_HAPPINESS, "Настроение:"},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_HIGH_TAXES, "Жители недовольны высоким налогам."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_LOW_WAGES, "Жители недовольны низким зарплатам."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_UNEMPLOYMENT, "Жители недовольны безработицей."},
@@ -772,6 +773,9 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_REQUESTS_UNSTOCK, "Перестать хранить"},
     {TR_TOOLTIP_ADVISOR_HOUSING_GRAPH_BUTTON, "Перейти к графикам населения"},
     {TR_TOOLTIP_ADVISOR_POPULATION_HOUSING_BUTTON, "Посетить советника по жилью"},
+    {TR_RETURN_TO_FORT, "Вернуться в форт"},
+    {TR_RETURN_TO_POSITION, "Вернуться на позицию"},
+    {TR_CALL_ALL_LEGIONS, "Призвать легионы"},
     {TR_BUILDING_MONUMENT_CONSTRUCTION_ARCHITECT_NEEDED, "Этот монумент имеет все необходимые строительные материалы для текущего этапа. Рабочие ожидают прибытия опытного архитектора, который будет руководить его возведением."},
     {TR_RETURN_ALL_TO_FORT, "Вернуть всех"},
     {TR_TOOLTIP_ADVISOR_ENTERTAINMENT_GAMES_BUTTON, "Информация об играх"},
@@ -2487,6 +2491,9 @@ static translation_string all_strings[] = {
     {TR_TERRAIN_BEACH, "Пляж"},
     {TR_TERRAIN_BEACH_DESC, "Пляж с мелким песком. Радует глаз и привлекает любителей неспешных прогулок вдоль берега. Он также служит богатым источником песка и глины для города."},
     {TR_CHEAT_FILL_MARKETS, "Все рынки заполнены едой и товарами"},
+    {TR_PARAMETER_TERRAIN_SHALLOW_WATER, "Мелководье"},
+    {TR_PARAMETER_TERRAIN_MARSHLAND, "Болото"},
+    {TR_PARAMETER_TERRAIN_BEACH, "Пляж"},
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)
