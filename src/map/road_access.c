@@ -510,29 +510,12 @@ static int terrain_is_road_like(int grid_offset)
     return map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_ACCESS_RAMP) ? 1 : 0;
 }
 
-int map_road_get_granary_inner_road_tiles_count(building *b)
-{
-    int count = 0;
-    int base_x = b->x;
-    int base_y = b->y;
-
-    for (int y_offset = 0; y_offset < 3; y_offset++) {
-        for (int x_offset = 0; x_offset < 3; x_offset++) {
-            int tile_offset = map_grid_offset(base_x + x_offset, base_y + y_offset);
-            if (map_terrain_is(tile_offset, TERRAIN_ROAD)) {
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
-static int road_has_permission(int edge_grid_offset, roadblock_permission perm) {
+int road_has_permission(int edge_grid_offset, roadblock_permission perm) {
     building *b = building_get(map_building_at(edge_grid_offset));
     return !building_type_is_roadblock(b->type) || building_roadblock_get_permission(perm, b);
 }
 
-static int map_road_get_granary_permitted_edge_road_tiles_count(building *b, roadblock_permission perm) {
+int map_road_get_granary_permitted_edge_road_tiles_count(building *b, roadblock_permission perm) {
     int count = 0;
     int cx = b->x + 1;
     int cy = b->y + 1;

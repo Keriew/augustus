@@ -14,7 +14,9 @@ int map_has_road_access_hippodrome_rotation(int x, int y, map_point *road, int r
 
 int map_has_road_access_warehouse(int x, int y, map_point *road);
 
-int map_road_get_granary_inner_road_tiles_count(building *b);
+int road_has_permission(int edge_grid_offset, roadblock_permission perm);
+
+int map_road_get_granary_permitted_edge_road_tiles_count(building *b, roadblock_permission perm);
 
 void map_update_granary_internal_roads(const building *b);
 

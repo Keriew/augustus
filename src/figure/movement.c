@@ -257,8 +257,15 @@ static void advance_route_tile(figure *f, int roaming_enabled)
     } else if (map_terrain_is(target_grid_offset, TERRAIN_ROAD | TERRAIN_HIGHWAY | TERRAIN_ACCESS_RAMP)) {
         if (roaming_enabled && map_terrain_is(target_grid_offset, TERRAIN_BUILDING)) {
             if (b->type == BUILDING_GRANARY) {
-                if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
+                int permission = get_permission_for_figure_type(f);
+                if (map_road_get_granary_permitted_edge_road_tiles_count(b, permission) < 2) {
                     f->direction = DIR_FIGURE_REROUTE; // do not roam into dead-end granaries
+                } else {
+                    int center_grid_offset = map_grid_offset(b->x + 1, b->y + 1);
+                    int edge_grid_offset = 2 * target_grid_offset - center_grid_offset;
+                    if (!road_has_permission(edge_grid_offset, permission)) {
+                        f->direction = DIR_FIGURE_REROUTE;
+                    }
                 }
             }
             if (building_type_is_roadblock(b->type)) {
@@ -394,8 +401,14 @@ static int is_valid_road_for_roaming(int grid_offset, int permission)
             if (b->type == BUILDING_GRANARY) { // granary has road and non-road tiles
                 if (!map_terrain_is(grid_offset, TERRAIN_ROAD)) {
                     valid = 0; // do not roam outside of granary cross
-                } else if (map_road_get_granary_inner_road_tiles_count(b) < 3) {
+                } else if (map_road_get_granary_permitted_edge_road_tiles_count(b, permission) < 2) {
                     valid = 0; // do not roam into dead-end granaries
+                } else {
+                    int center_grid_offset = map_grid_offset(b->x + 1, b->y + 1);
+                    int edge_grid_offset = 2 * grid_offset - center_grid_offset;
+                    if (!road_has_permission(edge_grid_offset, permission)) {
+                        valid = 0; // do not roam without permission
+                    }
                 }
             }
         }
