@@ -164,6 +164,34 @@ void formation_legion_move_to(formation *m, const map_tile *tile)
     }
 }
 
+int formation_legion_can_return_to_position(const formation *m)
+{
+    return m->in_use && m->is_legion && !m->in_distant_battle && !m->cursed_by_mars &&
+        m->is_at_fort && m->num_figures > 0 &&
+        (m->standard_x != m->x || m->standard_y != m->y) &&
+        map_grid_is_valid_offset(map_grid_offset(m->standard_x, m->standard_y));
+}
+
+void formation_legion_return_to_position(formation *m)
+{
+    if (!formation_legion_can_return_to_position(m)) {
+        return;
+    }
+    map_tile tile = {
+        .x = m->standard_x,
+        .y = m->standard_y,
+        .grid_offset = map_grid_offset(m->standard_x, m->standard_y)
+    };
+    formation_legion_move_to(m, &tile);
+}
+
+void formation_legion_return_to_position_all(void)
+{
+    for (int i = 1; i < formation_count(); i++) {
+        formation_legion_return_to_position(formation_get(i));
+    }
+}
+
 void formation_legion_return_home(formation *m)
 {
     map_routing_calculate_distances(m->x_home, m->y_home);

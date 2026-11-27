@@ -118,6 +118,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_DRAW_WEATHER, "Enable dynamic weather"},
     {TR_CONFIG_ASK_CONFIRMATION_ON_FILE_OVERWRITE, "Ask for confirmation when overwriting a file"},
     {TR_CONFIG_GATES_DEFAULT_TO_PASS_ALL_WALKERS, "Non-military gates default to allowing all walkers"},
+    {TR_CONFIG_ADVANCED_TAX_WAGE_SENTIMENT_CONTRIBUTION, "Advanced tax and wage sentiment contribution logic"},
     {TR_HOTKEY_TITLE, "Augustus hotkey configuration"},
     {TR_HOTKEY_LABEL, "Hotkey"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Alternative"},
@@ -510,6 +511,7 @@ static translation_string all_strings[] = {
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_10, "Residents are extremely pleased with you."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_11, "Residents love you."},
     {TR_BUILDING_WINDOW_HOUSE_SENTIMENT_12, "Residents idolize you as a god."},
+    {TR_BUILDING_WINDOW_HOUSE_HAPPINESS, "Happiness:"},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_HIGH_TAXES, "Residents are upset about high taxation."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_LOW_WAGES, "Residents are upset about low wages."},
     {TR_BUILDING_WINDOW_HOUSE_UPSET_UNEMPLOYMENT, "Residents are upset about the lack of jobs."},
@@ -727,6 +729,9 @@ static translation_string all_strings[] = {
     {TR_SIDEBAR_EXTRA_REQUESTS_UNSTOCK, "Stop storing"},
     {TR_TOOLTIP_ADVISOR_HOUSING_GRAPH_BUTTON, "Go to population graphs"},
     {TR_TOOLTIP_ADVISOR_POPULATION_HOUSING_BUTTON, "Visit your Housing Advisor"},
+    {TR_RETURN_TO_FORT, "Return to fort"},
+    {TR_RETURN_TO_POSITION, "Return to position"},
+    {TR_CALL_ALL_LEGIONS, "Call all legions"},
     {TR_BUILDING_MONUMENT_CONSTRUCTION_ARCHITECT_NEEDED, "This monument has all the materials needed for this phase. Workers await a skilled architect from an architects' guild to oversee further construction."},
     {TR_RETURN_ALL_TO_FORT, "Return all"},
     {TR_TOOLTIP_ADVISOR_ENTERTAINMENT_GAMES_BUTTON, "Games information"},
@@ -2399,7 +2404,10 @@ static translation_string all_strings[] = {
     {TR_EDITOR_TOOL_BEACH, "Beach"},
     {TR_TERRAIN_BEACH, "Beach"},
     {TR_TERRAIN_BEACH_DESC, "A beach of fine sand. Pleasing to the eye and favoured by strollers, who dawdle along it, it yields sand and clay in plenty for the city."},
-    {TR_CHEAT_FILL_MARKETS, "Filled all markets with food and goods"}
+    {TR_CHEAT_FILL_MARKETS, "Filled all markets with food and goods"},
+    {TR_PARAMETER_TERRAIN_SHALLOW_WATER, "Shallow water"},
+    {TR_PARAMETER_TERRAIN_MARSHLAND, "Marshland"},
+    {TR_PARAMETER_TERRAIN_BEACH, "Beach"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

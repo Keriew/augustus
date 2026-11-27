@@ -12,6 +12,10 @@
 
 #define BUILDING_OUTSKIRTS_DESIRABILITY_MALUS -15
 
+// Ticks of cooldown before new advanced sentiment logic will be applied
+// for the house building. Each tick is equal to 8 days (half of month).
+#define ADVANCED_SENTIMENT_COOLDOWN_TICKS 36
+
 typedef enum order_condition_type {
     ORDER_CONDITION_NEVER = 0,
     ORDER_CONDITION_ALWAYS,
@@ -210,6 +214,7 @@ typedef struct building {
     unsigned char fumigation_frame;
     unsigned char fumigation_direction;
     unsigned char has_latrines_access;
+    uint8_t cooldown_advanced_sentiment;
     short resources[RESOURCE_MAX];
     unsigned char accepted_goods[RESOURCE_MAX];
 } building;
