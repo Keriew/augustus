@@ -1557,6 +1557,7 @@ static void set_elevation_image(int x, int y, int grid_offset)
         } else {
             map_property_set_multi_tile_xy(grid_offset, 0, 0, 1);
             map_terrain_add(grid_offset, TERRAIN_ELEVATION);
+            map_terrain_remove(grid_offset, TERRAIN_ROAD); // terrain could be a road when using the editor
             map_image_set(grid_offset, image_group(GROUP_TERRAIN_ELEVATION) + img->group_offset + img->item_offset);
         }
     }

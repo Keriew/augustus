@@ -813,12 +813,14 @@ int building_monument_requires_resource(building_type type, int resource)
 int building_monument_has_required_resources_to_build(building_type type)
 {
     int phases = building_monument_phases(type);
-    for (int phase = 1; phase < phases; phase++) {
-        for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
-            if (building_monument_resources_needed_for_monument_type(type, r, phase) > 0 &&
-                !empire_can_produce_resource_potentially(r) && !empire_can_import_resource_potentially(r)) {
-                return 0;
-            }
+    for (resource_type r = RESOURCE_MIN; r < RESOURCE_MAX; r++) {
+        int amount_needed = 0;
+        for (int phase = 1; phase < phases; phase++) {
+            amount_needed += building_monument_resources_needed_for_monument_type(type, r, phase);
+        }
+        if (amount_needed > 0 && !city_resource_is_potential(r) &&
+            city_resource_get_total_amount(r, 0) < amount_needed) {
+            return 0;
         }
     }
     return 1;

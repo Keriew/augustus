@@ -243,7 +243,7 @@ static void add_terrain(const void *tile_data, int dx, int dy)
             }
             terrain = map_terrain_get(grid_offset);
         }
-        if (!(terrain & (TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP))) {
+        if (!(terrain & (TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP | TERRAIN_ROAD))) {
             map_property_clear_multi_tile_xy(grid_offset);
         }
     }

@@ -14,6 +14,7 @@
 #include "city/message.h"
 #include "city/military.h"
 #include "city/mission.h"
+#include "city/resource.h"
 #include "city/victory.h"
 #include "city/view.h"
 #include "core/config.h"
@@ -304,7 +305,7 @@ static void initialize_saved_game(void)
     map_routing_update_land();
     building_maintenance_check_rome_access();
     building_granaries_calculate_stocks();
-    building_menu_update();
+    city_resource_determine_available(1);
     city_message_init_problem_areas();
 
     sound_city_init();

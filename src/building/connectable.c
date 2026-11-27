@@ -56,7 +56,7 @@ static const int MAX_CONNECTABLE_BUILDINGS = sizeof(connectable_buildings) / siz
 // 1 = match
 // 2 = don't care
 
-// For rotation 
+// For rotation
 // -1 any, otherwise shown value
 
 static const  building_image_context building_images_hedges[18] = {
