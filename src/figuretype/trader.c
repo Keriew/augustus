@@ -507,7 +507,7 @@ void figure_trade_caravan_action(figure *f)
             break;
         case FIGURE_ACTION_102_TRADE_CARAVAN_TRADING:
             f->wait_ticks++;
-            if (f->wait_ticks > 10) {
+            if (f->wait_ticks >= 10) { // 50/10=5 cartloads per day caravan load/unload rate
                 f->wait_ticks = 0;
                 int move_on = 0;
                 int storage_id = building_get(f->destination_building_id)->storage_id;
@@ -543,7 +543,7 @@ void figure_trade_caravan_action(figure *f)
                     go_to_next_storage(f);
                 }
             }
-            f->image_offset = 0;
+            f->image_offset = 0; // stop moving animation
             break;
         case FIGURE_ACTION_103_TRADE_CARAVAN_LEAVING:
             figure_movement_move_ticks_with_percentage(f, 1, move_speed);
@@ -562,8 +562,6 @@ void figure_trade_caravan_action(figure *f)
             break;
     }
     int dir = figure_image_normalize_direction(f->direction < 8 ? f->direction : f->previous_tile_direction);
-
-
     f->image_id = trader_image_id() + dir + 8 * f->image_offset;
 }
 
@@ -579,7 +577,6 @@ void figure_trade_caravan_donkey_action(figure *f)
         f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS_HIGHWAY;
     }
 
-    figure_image_increase_offset(f, 12);
     f->cart_image_id = 0;
 
     figure *leader = figure_get(f->leading_figure_id);
@@ -593,8 +590,21 @@ void figure_trade_caravan_donkey_action(figure *f)
         } else if (leader->type != FIGURE_TRADE_CARAVAN && leader->type != FIGURE_TRADE_CARAVAN_DONKEY) {
             f->state = FIGURE_STATE_DEAD;
         } else {
-            figure_movement_follow_ticks_with_percentage(f, 1, move_speed);
+            figure_movement_follow_ticks_with_percentage(f, 1, move_speed + 5); // +5 Speed up the followers a little if they've fallen behind
         }
+    }
+
+    // Identify the actual caravan, even if it's the second or third donkey in the chain
+    figure *caravan = leader;
+    while (caravan && caravan->type == FIGURE_TRADE_CARAVAN_DONKEY && caravan->leading_figure_id > 0) {
+        caravan = figure_get(caravan->leading_figure_id);
+    }
+
+     // All the donkeys in the chain stop animations when the caravan is trading
+    if (caravan && caravan->type == FIGURE_TRADE_CARAVAN && caravan->action_state == FIGURE_ACTION_102_TRADE_CARAVAN_TRADING) {
+        f->image_offset = 0;
+    } else {
+        figure_image_increase_offset(f, 12);
     }
 
     if (leader->is_ghost && !leader->height_adjusted_ticks) {
