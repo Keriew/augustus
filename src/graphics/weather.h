@@ -11,6 +11,7 @@ typedef enum {
 void weather_reset(void);
 void set_weather(int active, int intensity, weather_type type);
 void update_weather(void);
+unsigned int weather_update_count(void);
 void city_weather_update(int month);
 
 #endif // GRAPHICS_WEATHER_H
