@@ -84,4 +84,15 @@ int string_from_float(uint8_t *dst, float value, int decimal_places, int force_p
  */
 int string_compare(const uint8_t *a, const uint8_t *b);
 
+/**
+ * Concatenates two strings
+ * @param a First string
+ * @param b Second string, appended directly after a
+ * @param dst Output string. Null-terminated and truncated if the result does not fit
+ * @param dst_size Size of dst in bytes, including the null terminator. To fit the whole result it must be at
+ *        least length of a + length of b + 1. If 0 or less, nothing is written
+ * @return Total number of characters written to dst, not counting the terminator
+ */
+int string_concat(const uint8_t *a, const uint8_t *b, uint8_t *dst, size_t dst_size);
+
 #endif // CORE_STRING_H

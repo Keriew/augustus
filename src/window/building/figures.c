@@ -6,6 +6,7 @@
 #include "building/lighthouse.h"
 #include "building/monument.h"
 #include "building/properties.h"
+#include "building/storage.h"
 #include "city/buildings.h"
 #include "city/trade_policy.h"
 #include "city/view.h"
@@ -587,8 +588,8 @@ static void draw_depot_cartpusher(building_info_context *c, figure *f)
         text_draw_number(f->loads_sold_or_carrying, 'x', "", c->x_offset + 118, c->y_offset + 139, FONT_NORMAL_BROWN, COLOR_MASK_NONE);
     }
 
-    building *source = building_get(depot->data.depot.current_order.src_storage_id);
-    building *destination = building_get(depot->data.depot.current_order.dst_storage_id);
+    building *source = building_get(building_storage_get_building_id(depot->data.depot.current_order.src_storage_id));
+    building *destination = building_get(building_storage_get_building_id(depot->data.depot.current_order.dst_storage_id));
 
     button_border_draw(c->x_offset + 90, c->y_offset + 160, 100, 22, data.depot_focus_button_id == 1 ||
         is_depot_cartpusher_recalled(f));
